@@ -1,18 +1,347 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import {
+  pgTable,
+  varchar,
+  text,
+  timestamp,
+  integer,
+  decimal,
+  boolean,
+  jsonb,
+  index,
+  date,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// ============================================================================
+// AUTH TABLES (Required for Replit Auth - from javascript_log_in_with_replit blueprint)
+// ============================================================================
+
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// ============================================================================
+// CORE TABLES
+// ============================================================================
+
+// Categories (hierarchical structure)
+export const categories = pgTable("categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  color: varchar("color", { length: 7 }), // hex color for UI
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
+  parent: one(categories, {
+    fields: [categories.parentId],
+    references: [categories.id],
+    relationName: "subcategories",
+  }),
+  subcategories: many(categories, { relationName: "subcategories" }),
+  courses: many(courses),
+}));
+
+export const insertCategorySchema = createInsertSchema(categories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type Category = typeof categories.$inferSelect;
+
+// Instructors
+export const instructors = pgTable("instructors", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  firstName: varchar("first_name", { length: 255 }).notNull(),
+  lastName: varchar("last_name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }),
+  specialization: text("specialization"),
+  bio: text("bio"),
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const instructorsRelations = relations(instructors, ({ many }) => ({
+  courses: many(courses),
+  rates: many(instructorRates),
+}));
+
+export const insertInstructorSchema = createInsertSchema(instructors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertInstructor = z.infer<typeof insertInstructorSchema>;
+export type Instructor = typeof instructors.$inferSelect;
+
+// Instructor Rates (per course type or category)
+export const instructorRates = pgTable("instructor_rates", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  instructorId: integer("instructor_id").notNull().references(() => instructors.id, { onDelete: "cascade" }),
+  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
+  rateType: varchar("rate_type", { length: 50 }).notNull(), // 'hourly', 'per_lesson', 'fixed'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const instructorRatesRelations = relations(instructorRates, ({ one }) => ({
+  instructor: one(instructors, {
+    fields: [instructorRates.instructorId],
+    references: [instructors.id],
+  }),
+  category: one(categories, {
+    fields: [instructorRates.categoryId],
+    references: [categories.id],
+  }),
+}));
+
+export const insertInstructorRateSchema = createInsertSchema(instructorRates).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertInstructorRate = z.infer<typeof insertInstructorRateSchema>;
+export type InstructorRate = typeof instructorRates.$inferSelect;
+
+// Courses
+export const courses = pgTable("courses", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  schedule: text("schedule"), // JSON or text describing schedule
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const coursesRelations = relations(courses, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [courses.categoryId],
+    references: [categories.id],
+  }),
+  instructor: one(instructors, {
+    fields: [courses.instructorId],
+    references: [instructors.id],
+  }),
+  enrollments: many(enrollments),
+}));
+
+export const insertCourseSchema = createInsertSchema(courses).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCourse = z.infer<typeof insertCourseSchema>;
+export type Course = typeof courses.$inferSelect;
+
+// Members (iscritti)
+export const members = pgTable("members", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  firstName: varchar("first_name", { length: 255 }).notNull(),
+  lastName: varchar("last_name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }),
+  dateOfBirth: date("date_of_birth"),
+  address: text("address"),
+  notes: text("notes"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const membersRelations = relations(members, ({ many }) => ({
+  enrollments: many(enrollments),
+  memberships: many(memberships),
+  medicalCertificates: many(medicalCertificates),
+  payments: many(payments),
+  accessLogs: many(accessLogs),
+}));
+
+export const insertMemberSchema = createInsertSchema(members).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMember = z.infer<typeof insertMemberSchema>;
+export type Member = typeof members.$inferSelect;
+
+// Enrollments (iscrizioni ai corsi)
+export const enrollments = pgTable("enrollments", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  courseId: integer("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
+  status: varchar("status", { length: 50 }).notNull().default("active"), // 'active', 'waitlist', 'completed', 'cancelled'
+  enrollmentDate: timestamp("enrollment_date").defaultNow(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
+  member: one(members, {
+    fields: [enrollments.memberId],
+    references: [members.id],
+  }),
+  course: one(courses, {
+    fields: [enrollments.courseId],
+    references: [courses.id],
+  }),
+}));
+
+export const insertEnrollmentSchema = createInsertSchema(enrollments).omit({
+  id: true,
+  enrollmentDate: true,
+  createdAt: true,
+});
+export type InsertEnrollment = z.infer<typeof insertEnrollmentSchema>;
+export type Enrollment = typeof enrollments.$inferSelect;
+
+// Memberships (tessere associative)
+export const memberships = pgTable("memberships", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  membershipNumber: varchar("membership_number", { length: 100 }).notNull().unique(),
+  barcode: varchar("barcode", { length: 100 }).notNull().unique(),
+  issueDate: date("issue_date").notNull(),
+  expiryDate: date("expiry_date").notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("active"), // 'active', 'expired', 'suspended'
+  type: varchar("type", { length: 100 }), // 'annual', 'monthly', etc.
+  fee: decimal("fee", { precision: 10, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const membershipsRelations = relations(memberships, ({ one }) => ({
+  member: one(members, {
+    fields: [memberships.memberId],
+    references: [members.id],
+  }),
+}));
+
+export const insertMembershipSchema = createInsertSchema(memberships).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMembership = z.infer<typeof insertMembershipSchema>;
+export type Membership = typeof memberships.$inferSelect;
+
+// Medical Certificates
+export const medicalCertificates = pgTable("medical_certificates", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  issueDate: date("issue_date").notNull(),
+  expiryDate: date("expiry_date").notNull(),
+  doctorName: varchar("doctor_name", { length: 255 }),
+  notes: text("notes"),
+  status: varchar("status", { length: 50 }).notNull().default("valid"), // 'valid', 'expired', 'pending'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const medicalCertificatesRelations = relations(medicalCertificates, ({ one }) => ({
+  member: one(members, {
+    fields: [medicalCertificates.memberId],
+    references: [members.id],
+  }),
+}));
+
+export const insertMedicalCertificateSchema = createInsertSchema(medicalCertificates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMedicalCertificate = z.infer<typeof insertMedicalCertificateSchema>;
+export type MedicalCertificate = typeof medicalCertificates.$inferSelect;
+
+// Access Logs (controllo accessi con barcode)
+export const accessLogs = pgTable("access_logs", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  memberId: integer("member_id").references(() => members.id, { onDelete: "set null" }),
+  barcode: varchar("barcode", { length: 100 }).notNull(),
+  accessTime: timestamp("access_time").defaultNow().notNull(),
+  accessType: varchar("access_type", { length: 50 }).notNull().default("entry"), // 'entry', 'exit'
+  membershipStatus: varchar("membership_status", { length: 50 }), // status at time of access
+  notes: text("notes"),
+});
+
+export const accessLogsRelations = relations(accessLogs, ({ one }) => ({
+  member: one(members, {
+    fields: [accessLogs.memberId],
+    references: [members.id],
+  }),
+}));
+
+export const insertAccessLogSchema = createInsertSchema(accessLogs).omit({
+  id: true,
+  accessTime: true,
+});
+export type InsertAccessLog = z.infer<typeof insertAccessLogSchema>;
+export type AccessLog = typeof accessLogs.$inferSelect;
+
+// Payments
+export const payments = pgTable("payments", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  memberId: integer("member_id").references(() => members.id, { onDelete: "set null" }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  type: varchar("type", { length: 100 }).notNull(), // 'course', 'membership', 'other'
+  description: text("description"),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // 'pending', 'paid', 'overdue', 'cancelled'
+  dueDate: date("due_date"),
+  paidDate: date("paid_date"),
+  paymentMethod: varchar("payment_method", { length: 100 }), // 'cash', 'card', 'stripe', 'bank_transfer'
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  member: one(members, {
+    fields: [payments.memberId],
+    references: [members.id],
+  }),
+}));
+
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
