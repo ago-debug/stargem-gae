@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import multer from "multer";
 import Papa from "papaparse";
+import { readSpreadsheet } from "./google-sheets";
 import { 
   insertMemberSchema,
   insertCategorySchema,
@@ -779,6 +780,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Failed to import data" });
+    }
+  });
+
+  // ==== Google Sheets Import Route ====
+  app.post("/api/import/google-sheets", isAuthenticated, async (req, res) => {
+    try {
+      const { spreadsheetId, range, type } = req.body;
+      
+      if (!spreadsheetId || !range) {
+        return res.status(400).json({ message: "SpreadsheetId e range sono obbligatori" });
+      }
+
+      if (!type || !['members', 'courses', 'instructors'].includes(type)) {
+        return res.status(400).json({ message: "Tipo di import non valido" });
+      }
+
+      // Read data from Google Sheets
+      const rows = await readSpreadsheet(spreadsheetId, range);
+      
+      if (!rows || rows.length === 0) {
+        return res.status(400).json({ message: "Nessun dato trovato nel range specificato" });
+      }
+
+      // First row is headers
+      const headers = rows[0];
+      const dataRows = rows.slice(1);
+
+      let imported = 0;
+      let skipped = 0;
+      const errors: any[] = [];
+
+      // Process each row
+      for (let i = 0; i < dataRows.length; i++) {
+        const row = dataRows[i];
+        // Convert array to object using headers
+        const rowData: any = {};
+        headers.forEach((header: string, index: number) => {
+          rowData[header.trim()] = row[index];
+        });
+
+        try {
+          if (type === 'members') {
+            const memberData = {
+              firstName: rowData['Nome'] || rowData['First Name'] || rowData['firstName'],
+              lastName: rowData['Cognome'] || rowData['Last Name'] || rowData['lastName'],
+              email: rowData['Email'] || rowData['email'] || null,
+              phone: rowData['Telefono'] || rowData['Phone'] || rowData['phone'] || null,
+              dateOfBirth: rowData['Data di Nascita'] || rowData['Date of Birth'] || rowData['dateOfBirth'] || null,
+              address: rowData['Indirizzo'] || rowData['Address'] || rowData['address'] || null,
+              city: rowData['Città'] || rowData['City'] || rowData['city'] || null,
+              zipCode: rowData['CAP'] || rowData['Zip Code'] || rowData['zipCode'] || null,
+              taxCode: rowData['Codice Fiscale'] || rowData['Tax Code'] || rowData['taxCode'] || null,
+              notes: rowData['Note'] || rowData['Notes'] || rowData['notes'] || null,
+              active: true,
+            };
+
+            if (!memberData.firstName || !memberData.lastName) {
+              throw new Error("Nome e Cognome sono obbligatori");
+            }
+
+            await storage.createMember(memberData);
+            imported++;
+          } else if (type === 'courses') {
+            const courseData = {
+              name: rowData['Nome Corso'] || rowData['Course Name'] || rowData['name'],
+              description: rowData['Descrizione'] || rowData['Description'] || rowData['description'] || null,
+              price: rowData['Prezzo'] || rowData['Price'] || rowData['price'] || null,
+              maxCapacity: rowData['Capienza Massima'] || rowData['Max Capacity'] || rowData['maxCapacity'] ? parseInt(rowData['Capienza Massima'] || rowData['Max Capacity'] || rowData['maxCapacity']) : null,
+              schedule: rowData['Orario'] || rowData['Schedule'] || rowData['schedule'] || null,
+              categoryId: null,
+              instructorId: null,
+              active: true,
+            };
+
+            if (!courseData.name) {
+              throw new Error("Nome corso è obbligatorio");
+            }
+
+            await storage.createCourse(courseData);
+            imported++;
+          } else if (type === 'instructors') {
+            const instructorData = {
+              firstName: rowData['Nome'] || rowData['First Name'] || rowData['firstName'],
+              lastName: rowData['Cognome'] || rowData['Last Name'] || rowData['lastName'],
+              email: rowData['Email'] || rowData['email'] || null,
+              phone: rowData['Telefono'] || rowData['Phone'] || rowData['phone'] || null,
+              specialization: rowData['Specializzazione'] || rowData['Specialization'] || rowData['specialization'] || null,
+              hourlyRate: rowData['Tariffa Oraria'] || rowData['Hourly Rate'] || rowData['hourlyRate'] || null,
+              bio: null,
+              active: true,
+            };
+
+            if (!instructorData.firstName || !instructorData.lastName) {
+              throw new Error("Nome e Cognome sono obbligatori");
+            }
+
+            await storage.createInstructor(instructorData);
+            imported++;
+          }
+        } catch (error: any) {
+          skipped++;
+          errors.push({
+            row: i + 2, // +2 because header is row 1 and array is 0-indexed
+            message: error.message || "Errore sconosciuto",
+          });
+        }
+      }
+
+      res.json({
+        imported,
+        skipped,
+        errors: errors.slice(0, 50),
+      });
+    } catch (error: any) {
+      console.error("Google Sheets import error:", error);
+      res.status(500).json({ message: error.message || "Errore nell'importazione da Google Sheets" });
     }
   });
 

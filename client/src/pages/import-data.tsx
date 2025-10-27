@@ -4,16 +4,22 @@ import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download } from "lucide-react";
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download, Sheet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ImportData() {
   const { toast } = useToast();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importType, setImportType] = useState<string>("");
   const [importResult, setImportResult] = useState<any>(null);
+  
+  // Google Sheets state
+  const [spreadsheetId, setSpreadsheetId] = useState<string>("");
+  const [sheetRange, setSheetRange] = useState<string>("");
 
   const importMutation = useMutation({
     mutationFn: async ({ file, type }: { file: File; type: string }) => {
@@ -48,6 +54,26 @@ export default function ImportData() {
     },
   });
 
+  const googleSheetsImportMutation = useMutation({
+    mutationFn: async ({ spreadsheetId, range, type }: { spreadsheetId: string; range: string; type: string }) => {
+      return await apiRequest("POST", "/api/import/google-sheets", { spreadsheetId, range, type });
+    },
+    onSuccess: (data: any) => {
+      setImportResult(data);
+      toast({ 
+        title: "Importazione completata",
+        description: `${data.imported} record importati con successo da Google Sheets`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Errore", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
@@ -68,10 +94,23 @@ export default function ImportData() {
     importMutation.mutate({ file: selectedFile, type: importType });
   };
 
+  const handleGoogleSheetsImport = () => {
+    if (!spreadsheetId || !sheetRange || !importType) {
+      toast({ 
+        title: "Errore", 
+        description: "Completa tutti i campi richiesti", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    googleSheetsImportMutation.mutate({ spreadsheetId, range: sheetRange, type: importType });
+  };
+
   const downloadTemplate = (type: string) => {
     const templates: Record<string, string> = {
-      members: "Nome,Cognome,Email,Telefono,Data Nascita,Indirizzo,Note\nMario,Rossi,mario.rossi@email.com,3331234567,1990-01-15,Via Roma 1,\n",
-      courses: "Nome,Descrizione,Categoria,Insegnante,Prezzo,Posti Max,Data Inizio,Data Fine,Orario\nYoga Base,Corso di yoga per principianti,Yoga,Giovanni Bianchi,50.00,20,2024-01-10,2024-06-30,Lun-Mer 18:00-19:30\n",
+      members: "Nome,Cognome,Email,Telefono,Data di Nascita,Indirizzo,Città,CAP,Codice Fiscale,Note\nMario,Rossi,mario.rossi@email.com,3331234567,1990-01-15,Via Roma 1,Milano,20100,RSSMRA90A15F205X,\n",
+      courses: "Nome Corso,Descrizione,Prezzo,Capienza Massima,Orario\nYoga Base,Corso di yoga per principianti,50.00,20,Lun-Mer 18:00-19:30\n",
       instructors: "Nome,Cognome,Email,Telefono,Specializzazione,Tariffa Oraria\nGiovanni,Bianchi,g.bianchi@email.com,3339876543,Yoga,35.00\n",
     };
 
@@ -92,15 +131,15 @@ export default function ImportData() {
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2">Importa Dati</h1>
         <p className="text-muted-foreground">
-          Importa dati da file CSV o Excel per migrare da Google Sheets
+          Importa dati da file CSV/Excel o direttamente da Google Sheets
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Import Type Cards */}
         <Card 
           className={`cursor-pointer hover-elevate active-elevate-2 ${importType === 'members' ? 'border-primary' : ''}`}
           onClick={() => setImportType('members')}
+          data-testid="card-import-members"
         >
           <CardHeader>
             <CardTitle className="text-lg">Iscritti</CardTitle>
@@ -128,6 +167,7 @@ export default function ImportData() {
         <Card 
           className={`cursor-pointer hover-elevate active-elevate-2 ${importType === 'courses' ? 'border-primary' : ''}`}
           onClick={() => setImportType('courses')}
+          data-testid="card-import-courses"
         >
           <CardHeader>
             <CardTitle className="text-lg">Corsi</CardTitle>
@@ -155,6 +195,7 @@ export default function ImportData() {
         <Card 
           className={`cursor-pointer hover-elevate active-elevate-2 ${importType === 'instructors' ? 'border-primary' : ''}`}
           onClick={() => setImportType('instructors')}
+          data-testid="card-import-instructors"
         >
           <CardHeader>
             <CardTitle className="text-lg">Insegnanti</CardTitle>
@@ -180,73 +221,159 @@ export default function ImportData() {
         </Card>
       </div>
 
-      {/* Upload Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Carica File</CardTitle>
-          <CardDescription>
-            Seleziona un file CSV o Excel da importare. Assicurati che le colonne corrispondano al template.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="importType">Tipo di Importazione</Label>
-            <Select value={importType} onValueChange={setImportType}>
-              <SelectTrigger data-testid="select-import-type">
-                <SelectValue placeholder="Seleziona tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="members">Iscritti</SelectItem>
-                <SelectItem value="courses">Corsi</SelectItem>
-                <SelectItem value="instructors">Insegnanti</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      <Tabs defaultValue="file" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="file" data-testid="tab-file-import">
+            <Upload className="w-4 h-4 mr-2" />
+            Carica File
+          </TabsTrigger>
+          <TabsTrigger value="sheets" data-testid="tab-sheets-import">
+            <Sheet className="w-4 h-4 mr-2" />
+            Google Sheets
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="space-y-2">
-            <Label htmlFor="file">File CSV/Excel</Label>
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
-              <input
-                id="file"
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={handleFileChange}
-                className="hidden"
-                data-testid="input-file"
-              />
-              <label htmlFor="file" className="cursor-pointer">
-                <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                {selectedFile ? (
-                  <div>
-                    <p className="text-sm font-medium">{selectedFile.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {(selectedFile.size / 1024).toFixed(2)} KB
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-sm font-medium">Clicca per selezionare un file</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Oppure trascina il file qui
-                    </p>
-                  </div>
-                )}
-              </label>
-            </div>
-          </div>
+        <TabsContent value="file">
+          <Card>
+            <CardHeader>
+              <CardTitle>Carica File CSV/Excel</CardTitle>
+              <CardDescription>
+                Seleziona un file CSV o Excel da importare. Assicurati che le colonne corrispondano al template.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="importType">Tipo di Importazione</Label>
+                <Select value={importType} onValueChange={setImportType}>
+                  <SelectTrigger data-testid="select-import-type">
+                    <SelectValue placeholder="Seleziona tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="members">Iscritti</SelectItem>
+                    <SelectItem value="courses">Corsi</SelectItem>
+                    <SelectItem value="instructors">Insegnanti</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <Button 
-            onClick={handleImport}
-            disabled={!selectedFile || !importType || importMutation.isPending}
-            className="w-full"
-            data-testid="button-import"
-          >
-            {importMutation.isPending ? "Importazione in corso..." : "Importa Dati"}
-          </Button>
-        </CardContent>
-      </Card>
+              <div className="space-y-2">
+                <Label htmlFor="file">File CSV/Excel</Label>
+                <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                  <input
+                    id="file"
+                    type="file"
+                    accept=".csv,.xlsx,.xls"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    data-testid="input-file"
+                  />
+                  <label htmlFor="file" className="cursor-pointer">
+                    <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    {selectedFile ? (
+                      <div>
+                        <p className="text-sm font-medium">{selectedFile.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {(selectedFile.size / 1024).toFixed(2)} KB
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm font-medium">Clicca per selezionare un file</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Oppure trascina il file qui
+                        </p>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              </div>
 
-      {/* Import Results */}
+              <Button 
+                onClick={handleImport}
+                disabled={!selectedFile || !importType || importMutation.isPending}
+                className="w-full"
+                data-testid="button-import-file"
+              >
+                {importMutation.isPending ? "Importazione in corso..." : "Importa Dati"}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sheets">
+          <Card>
+            <CardHeader>
+              <CardTitle>Importa da Google Sheets</CardTitle>
+              <CardDescription>
+                Collegati direttamente a un foglio di Google Sheets per importare i dati
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="sheetsImportType">Tipo di Importazione</Label>
+                <Select value={importType} onValueChange={setImportType}>
+                  <SelectTrigger data-testid="select-sheets-import-type">
+                    <SelectValue placeholder="Seleziona tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="members">Iscritti</SelectItem>
+                    <SelectItem value="courses">Corsi</SelectItem>
+                    <SelectItem value="instructors">Insegnanti</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="spreadsheetId">ID Foglio Google</Label>
+                <Input
+                  id="spreadsheetId"
+                  placeholder="1A2B3C4D5E6F7G8H9I0J..."
+                  value={spreadsheetId}
+                  onChange={(e) => setSpreadsheetId(e.target.value)}
+                  data-testid="input-spreadsheet-id"
+                />
+                <p className="text-xs text-muted-foreground">
+                  L'ID si trova nell'URL del foglio: docs.google.com/spreadsheets/d/<strong>ID_FOGLIO</strong>/edit
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sheetRange">Range</Label>
+                <Input
+                  id="sheetRange"
+                  placeholder="Foglio1!A1:Z100"
+                  value={sheetRange}
+                  onChange={(e) => setSheetRange(e.target.value)}
+                  data-testid="input-sheet-range"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Esempio: "Foglio1!A1:Z100" o "Iscritti!A:Z" per tutte le righe
+                </p>
+              </div>
+
+              <Button 
+                onClick={handleGoogleSheetsImport}
+                disabled={!spreadsheetId || !sheetRange || !importType || googleSheetsImportMutation.isPending}
+                className="w-full"
+                data-testid="button-import-sheets"
+              >
+                {googleSheetsImportMutation.isPending ? "Importazione in corso..." : "Importa da Google Sheets"}
+              </Button>
+
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium mb-2">Come trovare l'ID del foglio:</h4>
+                <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+                  <li>Apri il tuo foglio Google Sheets</li>
+                  <li>Guarda l'URL nella barra degli indirizzi</li>
+                  <li>Copia la parte tra /d/ e /edit</li>
+                  <li>Incolla qui l'ID copiato</li>
+                </ol>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
       {importResult && (
         <Card>
           <CardHeader>
@@ -294,19 +421,34 @@ export default function ImportData() {
         </Card>
       )}
 
-      {/* Instructions */}
       <Card>
         <CardHeader>
           <CardTitle>Istruzioni</CardTitle>
         </CardHeader>
         <CardContent>
-          <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
-            <li>Scarica il template CSV appropriato cliccando su "Template"</li>
-            <li>Esporta i tuoi dati da Google Sheets come file CSV o Excel</li>
-            <li>Copia i dati dal tuo file al template scaricato, rispettando le colonne</li>
-            <li>Seleziona il tipo di importazione e carica il file</li>
-            <li>Verifica i risultati dell'importazione e correggi eventuali errori</li>
-          </ol>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium mb-2">Importazione da File:</h4>
+              <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                <li>Scarica il template CSV appropriato cliccando su "Template"</li>
+                <li>Esporta i tuoi dati da Google Sheets come file CSV o Excel</li>
+                <li>Copia i dati dal tuo file al template scaricato, rispettando le colonne</li>
+                <li>Seleziona il tipo di importazione e carica il file</li>
+                <li>Verifica i risultati dell'importazione e correggi eventuali errori</li>
+              </ol>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-2">Importazione da Google Sheets:</h4>
+              <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                <li>Assicurati che il foglio Google sia condiviso con il tuo account</li>
+                <li>Copia l'ID del foglio dall'URL</li>
+                <li>Specifica il range dei dati (es. "Foglio1!A1:Z100")</li>
+                <li>La prima riga deve contenere le intestazioni delle colonne</li>
+                <li>Clicca su "Importa da Google Sheets" per avviare il processo</li>
+              </ol>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
