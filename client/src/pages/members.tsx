@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, GraduationCap } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member, InsertMember } from "@shared/schema";
 
@@ -23,6 +23,8 @@ export default function Members() {
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [showParentFields, setShowParentFields] = useState(false);
   const [hasMedicalCert, setHasMedicalCert] = useState(false);
+  const [isEnrollmentDialogOpen, setIsEnrollmentDialogOpen] = useState(false);
+  const [selectedMemberForEnrollment, setSelectedMemberForEnrollment] = useState<Member | null>(null);
 
   const { data: members, isLoading } = useQuery<Member[]>({
     queryKey: ["/api/members"],
@@ -293,6 +295,18 @@ export default function Members() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setSelectedMemberForEnrollment(member);
+                                setIsEnrollmentDialogOpen(true);
+                              }}
+                              data-testid={`button-enroll-member-${member.id}`}
+                              title="Gestisci Iscrizioni"
+                            >
+                              <GraduationCap className="w-4 h-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -696,6 +710,264 @@ export default function Members() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Enrollment Management Dialog */}
+      <EnrollmentDialog 
+        member={selectedMemberForEnrollment}
+        open={isEnrollmentDialogOpen}
+        onOpenChange={setIsEnrollmentDialogOpen}
+      />
     </div>
+  );
+}
+
+// Enrollment Management Component
+function EnrollmentDialog({ 
+  member, 
+  open, 
+  onOpenChange 
+}: { 
+  member: Member | null; 
+  open: boolean; 
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { toast } = useToast();
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [includeMembership, setIncludeMembership] = useState(true);
+  const [courseFee, setCourseFee] = useState("");
+  const [membershipFee, setMembershipFee] = useState("30.00");
+
+  const { data: courses } = useQuery<any[]>({
+    queryKey: ["/api/courses"],
+  });
+
+  const { data: enrollments } = useQuery<any[]>({
+    queryKey: ["/api/enrollments"],
+  });
+
+  const createEnrollmentMutation = useMutation({
+    mutationFn: async (data: { memberId: number; courseId: number }) => {
+      const result = await apiRequest("POST", "/api/enrollments", data);
+      return result;
+    },
+    onSuccess: async (enrollment: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      
+      // Create course payment
+      if (courseFee && parseFloat(courseFee) > 0) {
+        const course = courses?.find(c => c.id === enrollment.courseId);
+        await apiRequest("POST", "/api/payments", {
+          memberId: enrollment.memberId,
+          enrollmentId: enrollment.id,
+          amount: courseFee,
+          type: "course",
+          description: `Quota corso: ${course?.name || ""}`,
+          status: "pending",
+          dueDate: new Date().toISOString().split('T')[0],
+        });
+      }
+      
+      // Create membership payment
+      if (includeMembership && membershipFee && parseFloat(membershipFee) > 0) {
+        await apiRequest("POST", "/api/payments", {
+          memberId: enrollment.memberId,
+          enrollmentId: enrollment.id,
+          amount: membershipFee,
+          type: "membership",
+          description: "Tesseramento annuale",
+          status: "pending",
+          dueDate: new Date().toISOString().split('T')[0],
+        });
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
+      toast({ title: "Iscrizione creata con successo" });
+      setSelectedCourseId("");
+      setCourseFee("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteEnrollmentMutation = useMutation({
+    mutationFn: async (enrollmentId: number) => {
+      await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
+      toast({ title: "Iscrizione eliminata" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleEnroll = () => {
+    if (!member || !selectedCourseId) return;
+    
+    createEnrollmentMutation.mutate({
+      memberId: member.id,
+      courseId: parseInt(selectedCourseId),
+    });
+  };
+
+  useEffect(() => {
+    if (selectedCourseId) {
+      const course = courses?.find(c => c.id === parseInt(selectedCourseId));
+      if (course?.price) {
+        setCourseFee(course.price);
+      }
+    }
+  }, [selectedCourseId, courses]);
+
+  const memberEnrollments = enrollments?.filter(e => e.memberId === member?.id) || [];
+  const availableCourses = courses?.filter(c => 
+    c.active && !memberEnrollments.some(e => e.courseId === c.id)
+  ) || [];
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            Gestione Iscrizioni - {member?.firstName} {member?.lastName}
+          </DialogTitle>
+          <DialogDescription>
+            Iscriviti a corsi e gestisci le quote di pagamento
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Current Enrollments */}
+          <div>
+            <h3 className="font-medium mb-3">Iscrizioni Attuali</h3>
+            {memberEnrollments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nessuna iscrizione attiva</p>
+            ) : (
+              <div className="space-y-2">
+                {memberEnrollments.map((enrollment) => {
+                  const course = courses?.find(c => c.id === enrollment.courseId);
+                  return (
+                    <div
+                      key={enrollment.id}
+                      className="flex items-center justify-between p-3 border rounded-md"
+                      data-testid={`enrollment-${enrollment.id}`}
+                    >
+                      <div>
+                        <div className="font-medium">{course?.name || "Corso sconosciuto"}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Iscritto il {new Date(enrollment.enrollmentDate).toLocaleDateString('it-IT')}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm("Vuoi eliminare questa iscrizione?")) {
+                            deleteEnrollmentMutation.mutate(enrollment.id);
+                          }
+                        }}
+                        data-testid={`button-delete-enrollment-${enrollment.id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* New Enrollment Form */}
+          <div>
+            <h3 className="font-medium mb-3">Nuova Iscrizione</h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="course">Corso *</Label>
+                <select
+                  id="course"
+                  value={selectedCourseId}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  data-testid="select-enrollment-course"
+                >
+                  <option value="">Seleziona un corso</option>
+                  {availableCourses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name} {course.price ? `- €${course.price}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="courseFee">Quota Corso (€) *</Label>
+                  <Input
+                    id="courseFee"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={courseFee}
+                    onChange={(e) => setCourseFee(e.target.value)}
+                    data-testid="input-course-fee"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="membershipFee">Quota Tesseramento (€)</Label>
+                  <Input
+                    id="membershipFee"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={membershipFee}
+                    onChange={(e) => setMembershipFee(e.target.value)}
+                    disabled={!includeMembership}
+                    data-testid="input-membership-fee"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="includeMembership"
+                  checked={includeMembership}
+                  onCheckedChange={(checked) => setIncludeMembership(checked as boolean)}
+                  data-testid="checkbox-include-membership"
+                />
+                <Label htmlFor="includeMembership" className="cursor-pointer">
+                  Includi quota tesseramento
+                </Label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            data-testid="button-cancel-enrollment"
+          >
+            Chiudi
+          </Button>
+          <Button
+            onClick={handleEnroll}
+            disabled={!selectedCourseId || !courseFee || createEnrollmentMutation.isPending}
+            data-testid="button-submit-enrollment"
+          >
+            Iscriviti al Corso
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
