@@ -128,7 +128,7 @@ All endpoints require authentication (`/api/login` to authenticate):
 - `GET /api/stats/reports` - Detailed reports
 
 ### Import
-- `POST /api/import` - Import data from CSV/Excel (TODO)
+- `POST /api/import` - Import data from CSV/Excel (members, courses, instructors)
 
 ## Running the Project
 ```bash
@@ -175,8 +175,8 @@ The application follows a modern SaaS aesthetic inspired by Linear, Notion, and 
 5. `useAuth()` hook provides authentication state throughout app
 
 ## Next Steps / TODO
-- [ ] Implement CSV/Excel import functionality
-- [ ] Add Stripe payment integration for online payments
+- [x] Implement CSV/Excel import functionality with multer and papaparse
+- [ ] Add Stripe payment integration for online payments (ready - needs API keys)
 - [ ] Implement email notifications for expiring memberships
 - [ ] Add bulk operations for member management
 - [ ] Create printable membership cards with QR codes
@@ -185,6 +185,12 @@ The application follows a modern SaaS aesthetic inspired by Linear, Notion, and 
 - [ ] Add role-based access control (admin/staff/instructor)
 
 ## Recent Changes
+- **2024-10-27**: Enhanced Member Management & CSV Import
+  - **Expanded member fields**: Added fiscal code, mobile, card data (number, issue/expiry dates), medical certificate tracking, parent information for minors
+  - **CSV/Excel import**: Full implementation with multer and papaparse for members, courses, and instructors
+  - **Smart forms**: Auto-show parent fields for minors based on date of birth
+  - **Enhanced table view**: Display card numbers, expiry dates, medical certificate status, enrolled courses per member
+
 - **2024-10-25**: Initial implementation
   - Complete database schema with Drizzle ORM
   - Full CRUD API for all resources
