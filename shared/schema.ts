@@ -175,9 +175,36 @@ export const members = pgTable("members", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }),
-  phone: varchar("phone", { length: 50 }),
+  fiscalCode: varchar("fiscal_code", { length: 16 }), // Codice fiscale
   dateOfBirth: date("date_of_birth"),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }), // Telefono fisso
+  mobile: varchar("mobile", { length: 50 }), // Cellulare
+  
+  // Dati tessera
+  cardNumber: varchar("card_number", { length: 100 }), // Numero tessera
+  cardIssueDate: date("card_issue_date"), // Data rilascio tessera
+  cardExpiryDate: date("card_expiry_date"), // Scadenza tessera
+  
+  // Certificato medico
+  hasMedicalCertificate: boolean("has_medical_certificate").default(false), // Flag certificato medico
+  medicalCertificateExpiry: date("medical_certificate_expiry"), // Scadenza certificato medico
+  
+  // Dati genitori (per minorenni)
+  motherFirstName: varchar("mother_first_name", { length: 255 }), // Nome madre
+  motherLastName: varchar("mother_last_name", { length: 255 }), // Cognome madre
+  motherFiscalCode: varchar("mother_fiscal_code", { length: 16 }), // Codice fiscale madre
+  motherEmail: varchar("mother_email", { length: 255 }), // Email madre
+  motherPhone: varchar("mother_phone", { length: 50 }), // Telefono madre
+  motherMobile: varchar("mother_mobile", { length: 50 }), // Cellulare madre
+  
+  fatherFirstName: varchar("father_first_name", { length: 255 }), // Nome padre
+  fatherLastName: varchar("father_last_name", { length: 255 }), // Cognome padre
+  fatherFiscalCode: varchar("father_fiscal_code", { length: 16 }), // Codice fiscale padre
+  fatherEmail: varchar("father_email", { length: 255 }), // Email padre
+  fatherPhone: varchar("father_phone", { length: 50 }), // Telefono padre
+  fatherMobile: varchar("father_mobile", { length: 50 }), // Cellulare padre
+  
   address: text("address"),
   notes: text("notes"),
   active: boolean("active").default(true),
