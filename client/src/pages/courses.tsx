@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Course, InsertCourse, Category, Instructor } from "@shared/schema";
+import type { Course, InsertCourse, Category, Instructor, Studio } from "@shared/schema";
 
 export default function Courses() {
   const { toast } = useToast();
@@ -31,6 +31,10 @@ export default function Courses() {
 
   const { data: instructors } = useQuery<Instructor[]>({
     queryKey: ["/api/instructors"],
+  });
+
+  const { data: studios } = useQuery<Studio[]>({
+    queryKey: ["/api/studios"],
   });
 
   const createMutation = useMutation({
@@ -80,10 +84,14 @@ export default function Courses() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data: InsertCourse = {
+      sku: formData.get("sku") as string || null,
       name: formData.get("name") as string,
       description: formData.get("description") as string || null,
       categoryId: formData.get("categoryId") ? parseInt(formData.get("categoryId") as string) : null,
+      studioId: formData.get("studioId") ? parseInt(formData.get("studioId") as string) : null,
       instructorId: formData.get("instructorId") ? parseInt(formData.get("instructorId") as string) : null,
+      secondaryInstructor1Id: formData.get("secondaryInstructor1Id") ? parseInt(formData.get("secondaryInstructor1Id") as string) : null,
+      secondaryInstructor2Id: formData.get("secondaryInstructor2Id") ? parseInt(formData.get("secondaryInstructor2Id") as string) : null,
       price: formData.get("price") ? formData.get("price") as string : null,
       maxCapacity: formData.get("maxCapacity") ? parseInt(formData.get("maxCapacity") as string) : null,
       schedule: formData.get("schedule") as string || null,
@@ -231,15 +239,28 @@ export default function Courses() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome Corso *</Label>
-              <Input
-                id="name"
-                name="name"
-                defaultValue={editingCourse?.name}
-                required
-                data-testid="input-name"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome Corso *</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  defaultValue={editingCourse?.name}
+                  required
+                  data-testid="input-name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sku">SKU</Label>
+                <Input
+                  id="sku"
+                  name="sku"
+                  placeholder="es: 2526-NEMBRI-LUN-15"
+                  defaultValue={editingCourse?.sku || ""}
+                  data-testid="input-sku"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -271,19 +292,74 @@ export default function Courses() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="instructorId">Insegnante</Label>
-                <Select name="instructorId" defaultValue={editingCourse?.instructorId?.toString()}>
-                  <SelectTrigger data-testid="select-instructor">
-                    <SelectValue placeholder="Seleziona insegnante" />
+                <Label htmlFor="studioId">Studio/Sala</Label>
+                <Select name="studioId" defaultValue={editingCourse?.studioId?.toString()}>
+                  <SelectTrigger data-testid="select-studio">
+                    <SelectValue placeholder="Seleziona studio" />
                   </SelectTrigger>
                   <SelectContent>
-                    {instructors?.map((instructor) => (
-                      <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                        {instructor.firstName} {instructor.lastName}
+                    {studios?.map((studio) => (
+                      <SelectItem key={studio.id} value={studio.id.toString()}>
+                        {studio.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Insegnanti</Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
+                  <Select name="instructorId" defaultValue={editingCourse?.instructorId?.toString()}>
+                    <SelectTrigger data-testid="select-instructor">
+                      <SelectValue placeholder="Seleziona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {instructors?.map((instructor) => (
+                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                          {instructor.firstName} {instructor.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
+                  <Select name="secondaryInstructor1Id" defaultValue={editingCourse?.secondaryInstructor1Id?.toString()}>
+                    <SelectTrigger data-testid="select-secondary-instructor-1">
+                      <SelectValue placeholder="Seleziona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Nessuno</SelectItem>
+                      {instructors?.map((instructor) => (
+                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                          {instructor.firstName} {instructor.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2</Label>
+                  <Select name="secondaryInstructor2Id" defaultValue={editingCourse?.secondaryInstructor2Id?.toString()}>
+                    <SelectTrigger data-testid="select-secondary-instructor-2">
+                      <SelectValue placeholder="Seleziona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Nessuno</SelectItem>
+                      {instructors?.map((instructor) => (
+                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                          {instructor.firstName} {instructor.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
