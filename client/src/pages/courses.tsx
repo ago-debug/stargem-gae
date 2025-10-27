@@ -328,13 +328,12 @@ export default function Courses() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
+                  <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1 (opzionale)</Label>
                   <Select name="secondaryInstructor1Id" defaultValue={editingCourse?.secondaryInstructor1Id?.toString()}>
                     <SelectTrigger data-testid="select-secondary-instructor-1">
-                      <SelectValue placeholder="Seleziona" />
+                      <SelectValue placeholder="Nessuno" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nessuno</SelectItem>
                       {instructors?.map((instructor) => (
                         <SelectItem key={instructor.id} value={instructor.id.toString()}>
                           {instructor.firstName} {instructor.lastName}
@@ -345,13 +344,12 @@ export default function Courses() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2</Label>
+                  <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2 (opzionale)</Label>
                   <Select name="secondaryInstructor2Id" defaultValue={editingCourse?.secondaryInstructor2Id?.toString()}>
                     <SelectTrigger data-testid="select-secondary-instructor-2">
-                      <SelectValue placeholder="Seleziona" />
+                      <SelectValue placeholder="Nessuno" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nessuno</SelectItem>
                       {instructors?.map((instructor) => (
                         <SelectItem key={instructor.id} value={instructor.id.toString()}>
                           {instructor.firstName} {instructor.lastName}
