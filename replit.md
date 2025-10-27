@@ -9,7 +9,8 @@ Comprehensive web-based course management system to replace Google Sheets setup.
 - ✅ Instructor management with hourly rates
 - ✅ Membership cards with barcode access control
 - ✅ Medical certificate tracking
-- ✅ Payment processing (Stripe integration ready)
+- ✅ Manual payment processing with enrollment tracking
+- ✅ Complete enrollment-to-payment workflow (course fee + membership fee)
 - ✅ Attendance logging via barcode scanning
 - ✅ Reporting and statistics dashboard
 - ✅ Data import from CSV/Excel (Google Sheets migration)
@@ -104,6 +105,12 @@ All endpoints require authentication (`/api/login` to authenticate):
 - `PATCH /api/courses/:id` - Update course
 - `DELETE /api/courses/:id` - Delete course
 
+### Enrollments
+- `GET /api/enrollments` - List all enrollments
+- `POST /api/enrollments` - Create enrollment (updates course currentEnrollment)
+- `PATCH /api/enrollments/:id` - Update enrollment status
+- `DELETE /api/enrollments/:id` - Delete enrollment (decrements course currentEnrollment)
+
 ### Memberships
 - `GET /api/memberships` - List all memberships
 - `POST /api/memberships` - Create membership
@@ -114,7 +121,7 @@ All endpoints require authentication (`/api/login` to authenticate):
 
 ### Payments
 - `GET /api/payments` - List all payments
-- `POST /api/payments` - Create payment
+- `POST /api/payments` - Create payment (optionally linked to enrollment via enrollmentId)
 - `PATCH /api/payments/:id` - Update payment status
 
 ### Access Control
@@ -155,10 +162,6 @@ Required secrets (managed by Replit):
 - `REPL_ID` - Replit app identifier
 - `REPLIT_DOMAINS` - Comma-separated domains
 
-Optional (for Stripe integration):
-- `STRIPE_SECRET_KEY` - Stripe API secret key
-- `VITE_STRIPE_PUBLIC_KEY` - Stripe publishable key (frontend)
-
 ## Design System
 The application follows a modern SaaS aesthetic inspired by Linear, Notion, and Stripe Dashboard:
 - **Font**: Inter (Google Fonts)
@@ -176,15 +179,27 @@ The application follows a modern SaaS aesthetic inspired by Linear, Notion, and 
 
 ## Next Steps / TODO
 - [x] Implement CSV/Excel import functionality with multer and papaparse
-- [ ] Add Stripe payment integration for online payments (ready - needs API keys)
+- [x] Manual payment registration with enrollment tracking
+- [x] Complete enrollment-to-payment workflow
 - [ ] Implement email notifications for expiring memberships
 - [ ] Add bulk operations for member management
 - [ ] Create printable membership cards with QR codes
 - [ ] Add calendar view for course schedules
 - [ ] Implement advanced reporting with charts
 - [ ] Add role-based access control (admin/staff/instructor)
+- [ ] Google Sheets integration with custom column mapping for data migration
 
 ## Recent Changes
+- **2024-10-27**: Complete Enrollment & Payment System
+  - **Manual payment registration only**: Removed Stripe integration, focusing on manual payment tracking
+  - **Enhanced database schema**: Added `enrollmentId` field to payments table for linking payments to specific enrollments
+  - **Full CRUD API for enrollments**: GET, POST, PATCH, DELETE endpoints with automatic course enrollment counter updates
+  - **Enrollment-to-payment workflow**: 
+    - From members page: Create enrollments with automatic payment generation (course quota + optional membership fee)
+    - From payments page: Manually create payments linked to existing enrollments via conditional enrollment selector
+  - **Smart form state management**: Proper reset of selectedMemberId/selectedType on form close and after successful creation
+  - **Complete tracking**: Every enrollment can have associated payments with status tracking (pending, paid, overdue)
+
 - **2024-10-27**: Enhanced Member Management & CSV Import
   - **Expanded member fields**: Added fiscal code, mobile, card data (number, issue/expiry dates), medical certificate tracking, parent information for minors
   - **CSV/Excel import**: Full implementation with multer and papaparse for members, courses, and instructors
@@ -204,4 +219,6 @@ The application follows a modern SaaS aesthetic inspired by Linear, Notion, and 
 - The system uses PostgreSQL with automatic barcode validation for access control
 - All dates are stored in the database, with expiry tracking for memberships and medical certificates
 - The dashboard shows real-time alerts for expiring items
-- Import functionality placeholder is ready for CSV parsing implementation
+- Import functionality is fully implemented with CSV/Excel support
+- Payments are tracked manually with optional linkage to enrollments for complete financial tracking
+- Enrollment workflow generates both enrollment records and associated payment records automatically
