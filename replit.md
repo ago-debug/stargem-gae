@@ -76,9 +76,10 @@ Complete PostgreSQL schema with the following tables:
 - `members` - Student/member records with categoryId for client categorization
 - `client_categories` - **Hierarchical client categories** (parent/child relationships)
 - `categories` - Hierarchical course categories
+- `studios` - **Studio/room management** (name, floor, operatingDays, openTime, closeTime, capacity, equipment)
 - `instructors` - Instructor profiles and specializations
 - `instructor_rates` - Hourly rates per course type
-- `courses` - Course catalog with scheduling
+- `courses` - Course catalog with scheduling, **SKU**, **studioId**, and **3 instructors** (primary + 2 secondary)
 - `enrollments` - Student enrollments in courses
 - `memberships` - Membership cards with barcodes
 - `medical_certificates` - Medical certificate tracking
@@ -111,6 +112,12 @@ All endpoints require authentication (`/api/login` to authenticate):
 - `POST /api/instructors` - Create instructor
 - `PATCH /api/instructors/:id` - Update instructor
 - `DELETE /api/instructors/:id` - Delete instructor
+
+### Studios
+- `GET /api/studios` - List all studios/rooms
+- `POST /api/studios` - Create studio
+- `PATCH /api/studios/:id` - Update studio
+- `DELETE /api/studios/:id` - Delete studio
 
 ### Courses
 - `GET /api/courses` - List all courses
@@ -203,6 +210,22 @@ The application follows a modern SaaS aesthetic inspired by Linear, Notion, and 
 - [ ] Google Sheets integration with custom column mapping for data migration
 
 ## Recent Changes
+- **2024-10-27**: Studios Management & Course Extensions
+  - **Studios/Sale module**: Complete CRUD implementation for studio/room management
+    - New database table `studios` with fields: name, floor, operatingDays, openTime, closeTime, capacity, equipment
+    - Full API endpoints at `/api/studios` (GET, POST, PATCH, DELETE)
+    - New frontend page at `/studios` with react-hook-form integration for creating and managing studios
+  - **Course schema extensions**: Added support for SKU and multiple instructors
+    - New `sku` field in courses table for unique course identifiers (nullable varchar)
+    - New `studioId` field linking courses to specific studios/rooms
+    - New `secondaryInstructor1Id` and `secondaryInstructor2Id` fields for supporting 3 instructors per course (1 primary + 2 secondary)
+  - **Enhanced course form**: Updated courses form to collect all new fields
+    - SKU input field with placeholder format "2526-NEMBRI-LUN-15"
+    - Studio selector dropdown with all available studios
+    - Three instructor selectors (Principale, Secondario 1, Secondario 2) with optional secondary instructors
+  - **Routing fix**: Changed sidebar navigation from `<a href>` to Wouter's `<Link>` component to eliminate 404 errors and full page reloads
+  - **Database migration**: Successfully pushed schema changes to production database with new course fields
+
 - **2024-10-27**: Client Categorization & Enhanced Enrollment UI
   - **Terminology update**: Changed "Iscritti" to "Clienti/Anagrafiche" throughout the application
   - **Hierarchical client categories**: New database table `client_categories` with parent/child support for unlimited nesting
