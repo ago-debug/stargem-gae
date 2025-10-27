@@ -365,11 +365,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/memberships", isAuthenticated, async (req, res) => {
     try {
-      const validatedData = insertMembershipSchema.parse(req.body);
+      let validatedData = insertMembershipSchema.parse(req.body);
+      
+      // Generate membership number automatically if not provided
+      if (!validatedData.membershipNumber) {
+        const existingMemberships = await storage.getMemberships();
+        const currentYear = "2526";
+        const existingNumbers = existingMemberships
+          .map(m => m.membershipNumber)
+          .filter(num => num.startsWith(currentYear))
+          .map(num => parseInt(num.substring(4)) || 0);
+        
+        const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
+        validatedData.membershipNumber = `${currentYear}${nextNumber.toString().padStart(6, '0')}`;
+      }
+      
+      // Generate barcode if not provided (same as membership number)
+      if (!validatedData.barcode) {
+        validatedData.barcode = validatedData.membershipNumber;
+      }
+      
       const membership = await storage.createMembership(validatedData);
       res.status(201).json(membership);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create membership" });
+    }
+  });
+
+  app.patch("/api/memberships/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const membership = await storage.updateMembership(id, req.body);
+      res.json(membership);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update membership" });
+    }
+  });
+
+  app.delete("/api/memberships/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteMembership(id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to delete membership" });
     }
   });
 
@@ -390,6 +429,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(certificate);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create medical certificate" });
+    }
+  });
+
+  app.patch("/api/medical-certificates/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const certificate = await storage.updateMedicalCertificate(id, req.body);
+      res.json(certificate);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update medical certificate" });
+    }
+  });
+
+  app.delete("/api/medical-certificates/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteMedicalCertificate(id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to delete medical certificate" });
     }
   });
 

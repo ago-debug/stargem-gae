@@ -349,6 +349,7 @@ export const memberships = pgTable("memberships", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   membershipNumber: varchar("membership_number", { length: 100 }).notNull().unique(),
+  previousMembershipNumber: varchar("previous_membership_number", { length: 100 }),
   barcode: varchar("barcode", { length: 100 }).notNull().unique(),
   issueDate: date("issue_date").notNull(),
   expiryDate: date("expiry_date").notNull(),
@@ -370,6 +371,9 @@ export const insertMembershipSchema = createInsertSchema(memberships).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  membershipNumber: z.string().optional(),
+  barcode: z.string().optional(),
 });
 export type InsertMembership = z.infer<typeof insertMembershipSchema>;
 export type Membership = typeof memberships.$inferSelect;
