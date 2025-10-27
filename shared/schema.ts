@@ -224,6 +224,9 @@ export const insertMemberSchema = createInsertSchema(members).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  active: z.boolean().optional(),
+  hasMedicalCertificate: z.boolean().optional(),
 });
 export type InsertMember = z.infer<typeof insertMemberSchema>;
 export type Member = typeof members.$inferSelect;
