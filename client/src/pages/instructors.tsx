@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -182,19 +183,23 @@ export default function Instructors() {
                           <span className="text-sm text-muted-foreground">Nessun corso</span>
                         ) : assignedCourses.length <= 2 ? (
                           assignedCourses.map((course) => (
-                            <Badge key={course.id} variant="outline" className="text-xs">
-                              {course.name}
-                            </Badge>
+                            <Link key={course.id} href="/courses">
+                              <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-course-${course.id}`}>
+                                {course.name}
+                              </Badge>
+                            </Link>
                           ))
                         ) : (
                           <>
                             {assignedCourses.slice(0, 2).map((course) => (
-                              <Badge key={course.id} variant="outline" className="text-xs">
-                                {course.name}
-                              </Badge>
+                              <Link key={course.id} href="/courses">
+                                <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-course-${course.id}`}>
+                                  {course.name}
+                                </Badge>
+                              </Link>
                             ))}
                             <Badge variant="secondary" className="text-xs">
-                              +{assignedCourses.length - 2}
+                              +{assignedCourses.length - 2} altri
                             </Badge>
                           </>
                         )}
