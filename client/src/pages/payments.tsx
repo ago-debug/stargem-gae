@@ -19,6 +19,8 @@ export default function Payments() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("");
 
   const { data: payments, isLoading } = useQuery<Payment[]>({
     queryKey: ["/api/payments"],
@@ -28,6 +30,14 @@ export default function Payments() {
     queryKey: ["/api/members"],
   });
 
+  const { data: enrollments } = useQuery<any[]>({
+    queryKey: ["/api/enrollments"],
+  });
+
+  const { data: courses } = useQuery<any[]>({
+    queryKey: ["/api/courses"],
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data: InsertPayment) => {
       await apiRequest("POST", "/api/payments", data);
@@ -35,6 +45,8 @@ export default function Payments() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
       toast({ title: "Pagamento registrato con successo" });
+      setSelectedMemberId("");
+      setSelectedType("");
       setIsFormOpen(false);
     },
     onError: (error: Error) => {
@@ -60,6 +72,7 @@ export default function Payments() {
     const formData = new FormData(e.currentTarget);
     const data: InsertPayment = {
       memberId: formData.get("memberId") ? parseInt(formData.get("memberId") as string) : null,
+      enrollmentId: formData.get("enrollmentId") ? parseInt(formData.get("enrollmentId") as string) : null,
       amount: formData.get("amount") as string,
       type: formData.get("type") as string,
       description: formData.get("description") as string || null,
@@ -220,7 +233,13 @@ export default function Payments() {
         </CardContent>
       </Card>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={(open) => {
+        setIsFormOpen(open);
+        if (!open) {
+          setSelectedMemberId("");
+          setSelectedType("");
+        }
+      }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Nuovo Pagamento</DialogTitle>
@@ -229,7 +248,11 @@ export default function Payments() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="memberId">Iscritto (opzionale)</Label>
-              <Select name="memberId">
+              <Select 
+                name="memberId" 
+                value={selectedMemberId}
+                onValueChange={setSelectedMemberId}
+              >
                 <SelectTrigger data-testid="select-member">
                   <SelectValue placeholder="Seleziona iscritto" />
                 </SelectTrigger>
@@ -246,7 +269,12 @@ export default function Payments() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="type">Tipo *</Label>
-                <Select name="type" required>
+                <Select 
+                  name="type" 
+                  required
+                  value={selectedType}
+                  onValueChange={setSelectedType}
+                >
                   <SelectTrigger data-testid="select-type">
                     <SelectValue placeholder="Seleziona tipo" />
                   </SelectTrigger>
@@ -271,6 +299,34 @@ export default function Payments() {
                 />
               </div>
             </div>
+
+            {/* Enrollment selection - shown only for course/membership payments with member selected */}
+            {selectedMemberId && (selectedType === 'course' || selectedType === 'membership') && (
+              <div className="space-y-2">
+                <Label htmlFor="enrollmentId">Iscrizione Collegata (opzionale)</Label>
+                <Select name="enrollmentId">
+                  <SelectTrigger data-testid="select-enrollment">
+                    <SelectValue placeholder="Seleziona iscrizione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {enrollments
+                      ?.filter(e => e.memberId === parseInt(selectedMemberId))
+                      .map((enrollment) => {
+                        const course = courses?.find(c => c.id === enrollment.courseId);
+                        return (
+                          <SelectItem key={enrollment.id} value={enrollment.id.toString()}>
+                            {course?.name || "Corso sconosciuto"} - Iscrizione del{' '}
+                            {new Date(enrollment.enrollmentDate).toLocaleDateString('it-IT')}
+                          </SelectItem>
+                        );
+                      })}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Collega questo pagamento a un'iscrizione specifica per un migliore tracking
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="description">Descrizione</Label>
