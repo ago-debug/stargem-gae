@@ -208,6 +208,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==== Enrollments Routes ====
+  app.get("/api/enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const enrollments = await storage.getEnrollments();
+      res.json(enrollments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch enrollments" });
+    }
+  });
+
+  app.post("/api/enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertEnrollmentSchema.parse(req.body);
+      const enrollment = await storage.createEnrollment(validatedData);
+      
+      // Update course current enrollment count
+      const course = await storage.getCourse(enrollment.courseId);
+      if (course) {
+        await storage.updateCourse(course.id, {
+          currentEnrollment: (course.currentEnrollment || 0) + 1,
+        });
+      }
+      
+      res.status(201).json(enrollment);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create enrollment" });
+    }
+  });
+
+  app.patch("/api/enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const enrollment = await storage.updateEnrollment(id, req.body);
+      res.json(enrollment);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update enrollment" });
+    }
+  });
+
+  app.delete("/api/enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const enrollment = await storage.getEnrollment(id);
+      
+      if (enrollment) {
+        // Update course current enrollment count
+        const course = await storage.getCourse(enrollment.courseId);
+        if (course && course.currentEnrollment && course.currentEnrollment > 0) {
+          await storage.updateCourse(course.id, {
+            currentEnrollment: course.currentEnrollment - 1,
+          });
+        }
+      }
+      
+      await storage.deleteEnrollment(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete enrollment" });
+    }
+  });
+
   // ==== Memberships Routes ====
   app.get("/api/memberships", isAuthenticated, async (req, res) => {
     try {
