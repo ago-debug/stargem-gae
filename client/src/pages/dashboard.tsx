@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "wouter";
+import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -23,6 +24,14 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+      <div className="flex flex-col items-center gap-4 mb-6">
+        <img 
+          src={logoStudioGem} 
+          alt="Studio Gem Logo" 
+          className="h-16 md:h-20"
+          data-testid="logo-dashboard"
+        />
+      </div>
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Panoramica del sistema di gestione corsi</p>
