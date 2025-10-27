@@ -1,271 +1,33 @@
 # Sistema Gestione Corsi - Course Management System
 
 ## Overview
-Comprehensive web-based course management system to replace Google Sheets setup. Built with React, Express, PostgreSQL, and Drizzle ORM.
+This project is a comprehensive web-based course management system designed to replace manual processes, specifically migrating from Google Sheets. It aims to streamline operations for student enrollment, course scheduling, instructor management, payment processing, and access control. The system provides robust categorization for clients and courses, detailed studio management, and extensive reporting capabilities. The business vision is to offer a complete solution for educational or fitness institutions to efficiently manage their daily operations, enhancing user experience and data integrity.
 
-## Features
-- ✅ Student enrollment and member management
-- ✅ **Client categorization** with hierarchical parent/child categories
-- ✅ Course management with categories/subcategories and **unique SKU**
-- ✅ **Studio/sala management** with capacity, equipment, and availability tracking
-- ✅ Instructor management with hourly rates and **support for 3 instructors per course**
-- ✅ Membership cards with barcode access control
-- ✅ Medical certificate tracking
-- ✅ Manual payment processing with enrollment tracking
-- ✅ Complete enrollment-to-payment workflow (course fee + membership fee)
-- ✅ **Enhanced enrollment UI** with prominent enrollment button and payment tracking
-- ✅ Attendance logging via barcode scanning
-- ✅ Reporting and statistics dashboard
-- ✅ Data import from CSV/Excel (Google Sheets migration)
-- 🚧 **Cross-linked records** - clickable links between related data (in progress)
-- 🚧 **Studio rental management** - view course schedules and availability by time slots
+## User Preferences
+I prefer iterative development with clear communication at each stage. Please ask before making any major architectural changes or introducing new dependencies. I appreciate detailed explanations of complex solutions, but keep the language straightforward. Ensure all new features are accompanied by relevant tests. Do not make changes to the `design_guidelines.md` file.
 
-## Tech Stack
-- **Frontend**: React 18, Wouter (routing), TanStack Query, shadcn/ui, Tailwind CSS
-- **Backend**: Express.js, TypeScript
-- **Database**: PostgreSQL (Neon) with Drizzle ORM
+## System Architecture
+The system employs a client-server architecture. The frontend is built with **React 18**, utilizing **Wouter** for routing, **TanStack Query** for data fetching and caching, and **shadcn/ui** with **Tailwind CSS** for a modern, responsive UI/UX inspired by platforms like Linear and Notion. The design system features the Inter font, neutral gray color schemes with subtle accents, and full dark mode support.
+
+The backend is developed with **Express.js** and **TypeScript**, providing a robust API layer. **PostgreSQL** (hosted on Neon) serves as the primary database, managed by **Drizzle ORM** for type-safe schema definition and query building. Authentication is handled via **Replit Auth** (OpenID Connect).
+
+Key features and architectural decisions include:
+- **Client Categorization**: Hierarchical parent/child categories for members.
+- **Course Management**: Courses include unique SKUs, scheduling details (day, time, recurrence), studio assignment, and support for three instructors (primary, two secondary).
+- **Studio Management**: Dedicated module for managing studios/rooms with capacity, equipment, operating days, and hours.
+- **Enrollment & Payments**: Comprehensive workflow supporting manual payment processing, automatic generation of payment records upon enrollment, and linking payments to specific enrollments.
+- **Membership & Access Control**: Membership cards with barcode support for attendance logging and access validation.
+- **Data Import**: Functionality to import data from CSV/Excel for members, courses, and instructors to facilitate migration.
+- **Structured Scheduling**: Structured dropdown selectors for defining studio operating hours and course schedules (day of week, start/end times, recurrence type).
+
+## External Dependencies
+- **Database**: PostgreSQL (Neon)
+- **ORM**: Drizzle ORM
 - **Authentication**: Replit Auth (OpenID Connect)
-- **Styling**: Tailwind CSS with custom design system
+- **Frontend UI Library**: shadcn/ui (built on Radix UI)
+- **Styling Framework**: Tailwind CSS
 - **Icons**: Lucide React
-
-## Project Structure
-```
-├── client/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── ui/          # shadcn/ui components
-│   │   │   └── app-sidebar.tsx
-│   │   ├── hooks/
-│   │   │   └── useAuth.ts
-│   │   ├── lib/
-│   │   │   ├── queryClient.ts
-│   │   │   └── authUtils.ts
-│   │   ├── pages/
-│   │   │   ├── landing.tsx      # Public landing page
-│   │   │   ├── dashboard.tsx    # Main dashboard
-│   │   │   ├── members.tsx      # Member management
-│   │   │   ├── client-categories.tsx # Client categorization
-│   │   │   ├── courses.tsx      # Course management
-│   │   │   ├── categories.tsx   # Category hierarchy
-│   │   │   ├── instructors.tsx  # Instructor management
-│   │   │   ├── memberships.tsx  # Membership cards & certificates
-│   │   │   ├── payments.tsx     # Payment tracking
-│   │   │   ├── access-control.tsx # Barcode scanner
-│   │   │   ├── reports.tsx      # Statistics & reports
-│   │   │   └── import-data.tsx  # CSV/Excel import
-│   │   ├── App.tsx
-│   │   └── index.css
-│   └── index.html
-├── server/
-│   ├── db.ts              # Database connection
-│   ├── storage.ts         # Data access layer (CRUD operations)
-│   ├── routes.ts          # API endpoints
-│   ├── replitAuth.ts      # Authentication setup
-│   ├── index.ts           # Server entry point
-│   └── vite.ts            # Vite dev server integration
-├── shared/
-│   └── schema.ts          # Drizzle schema & types
-└── design_guidelines.md   # UI/UX design system
-
-```
-
-## Database Schema
-Complete PostgreSQL schema with the following tables:
-- `users` - Authenticated users (Replit Auth)
-- `sessions` - User sessions (Replit Auth)
-- `members` - Student/member records with categoryId for client categorization
-- `client_categories` - **Hierarchical client categories** (parent/child relationships)
-- `categories` - Hierarchical course categories
-- `studios` - **Studio/room management** (name, floor, operatingDays, openTime, closeTime, capacity, equipment)
-- `instructors` - Instructor profiles and specializations
-- `instructor_rates` - Hourly rates per course type
-- `courses` - Course catalog with scheduling, **SKU**, **studioId**, and **3 instructors** (primary + 2 secondary)
-- `enrollments` - Student enrollments in courses
-- `memberships` - Membership cards with barcodes
-- `medical_certificates` - Medical certificate tracking
-- `payments` - Payment records and transactions
-- `access_logs` - Barcode access control logs
-
-## API Endpoints
-All endpoints require authentication (`/api/login` to authenticate):
-
-### Members
-- `GET /api/members` - List all members
-- `POST /api/members` - Create new member
-- `PATCH /api/members/:id` - Update member
-- `DELETE /api/members/:id` - Delete member
-
-### Client Categories
-- `GET /api/client-categories` - List all client categories
-- `POST /api/client-categories` - Create client category
-- `PATCH /api/client-categories/:id` - Update client category
-- `DELETE /api/client-categories/:id` - Delete client category
-
-### Categories
-- `GET /api/categories` - List all categories
-- `POST /api/categories` - Create category
-- `PATCH /api/categories/:id` - Update category
-- `DELETE /api/categories/:id` - Delete category
-
-### Instructors
-- `GET /api/instructors` - List all instructors
-- `POST /api/instructors` - Create instructor
-- `PATCH /api/instructors/:id` - Update instructor
-- `DELETE /api/instructors/:id` - Delete instructor
-
-### Studios
-- `GET /api/studios` - List all studios/rooms
-- `POST /api/studios` - Create studio
-- `PATCH /api/studios/:id` - Update studio
-- `DELETE /api/studios/:id` - Delete studio
-
-### Courses
-- `GET /api/courses` - List all courses
-- `POST /api/courses` - Create course
-- `PATCH /api/courses/:id` - Update course
-- `DELETE /api/courses/:id` - Delete course
-
-### Enrollments
-- `GET /api/enrollments` - List all enrollments
-- `POST /api/enrollments` - Create enrollment (updates course currentEnrollment)
-- `PATCH /api/enrollments/:id` - Update enrollment status
-- `DELETE /api/enrollments/:id` - Delete enrollment (decrements course currentEnrollment)
-
-### Memberships
-- `GET /api/memberships` - List all memberships
-- `POST /api/memberships` - Create membership
-
-### Medical Certificates
-- `GET /api/medical-certificates` - List all certificates
-- `POST /api/medical-certificates` - Create certificate
-
-### Payments
-- `GET /api/payments` - List all payments
-- `POST /api/payments` - Create payment (optionally linked to enrollment via enrollmentId)
-- `PATCH /api/payments/:id` - Update payment status
-
-### Access Control
-- `GET /api/access-logs` - List access logs
-- `POST /api/access-logs` - Log barcode scan (validates membership)
-
-### Statistics
-- `GET /api/stats/dashboard` - Dashboard overview stats
-- `GET /api/stats/alerts` - Expiry alerts
-- `GET /api/stats/recent-activity` - Recent enrollments/payments
-- `GET /api/stats/reports` - Detailed reports
-
-### Import
-- `POST /api/import` - Import data from CSV/Excel (members, courses, instructors)
-
-## Running the Project
-```bash
-npm run dev
-```
-Server runs on port 5000 (both backend and frontend).
-
-## Database Management
-```bash
-# Push schema changes to database
-npm run db:push
-
-# Generate migrations (if needed)
-npm run db:generate
-
-# Open Drizzle Studio to view/edit data
-npm run db:studio
-```
-
-## Environment Variables
-Required secrets (managed by Replit):
-- `DATABASE_URL` - PostgreSQL connection string
-- `SESSION_SECRET` - Session encryption key
-- `REPL_ID` - Replit app identifier
-- `REPLIT_DOMAINS` - Comma-separated domains
-
-## Design System
-The application follows a modern SaaS aesthetic inspired by Linear, Notion, and Stripe Dashboard:
-- **Font**: Inter (Google Fonts)
-- **Color Scheme**: Neutral grays with subtle primary accent
-- **Components**: shadcn/ui library with Radix UI primitives
-- **Dark Mode**: Full dark mode support via Tailwind CSS
-- **Spacing**: Consistent 4px/8px grid system
-
-## Authentication Flow
-1. User navigates to app (shows landing page if not authenticated)
-2. Click "Accedi alla Piattaforma" → redirects to `/api/login`
-3. Replit Auth handles OAuth flow (Google, GitHub, Email)
-4. On success, redirects to dashboard at `/`
-5. `useAuth()` hook provides authentication state throughout app
-
-## Next Steps / TODO
-- [x] Implement CSV/Excel import functionality with multer and papaparse
-- [x] Manual payment registration with enrollment tracking
-- [x] Complete enrollment-to-payment workflow
-- [ ] Implement email notifications for expiring memberships
-- [ ] Add bulk operations for member management
-- [ ] Create printable membership cards with QR codes
-- [ ] Add calendar view for course schedules
-- [ ] Implement advanced reporting with charts
-- [ ] Add role-based access control (admin/staff/instructor)
-- [ ] Google Sheets integration with custom column mapping for data migration
-
-## Recent Changes
-- **2024-10-27**: Studios Management & Course Extensions
-  - **Studios/Sale module**: Complete CRUD implementation for studio/room management
-    - New database table `studios` with fields: name, floor, operatingDays, openTime, closeTime, capacity, equipment
-    - Full API endpoints at `/api/studios` (GET, POST, PATCH, DELETE)
-    - New frontend page at `/studios` with react-hook-form integration for creating and managing studios
-  - **Course schema extensions**: Added support for SKU and multiple instructors
-    - New `sku` field in courses table for unique course identifiers (nullable varchar)
-    - New `studioId` field linking courses to specific studios/rooms
-    - New `secondaryInstructor1Id` and `secondaryInstructor2Id` fields for supporting 3 instructors per course (1 primary + 2 secondary)
-  - **Enhanced course form**: Updated courses form to collect all new fields
-    - SKU input field with placeholder format "2526-NEMBRI-LUN-15"
-    - Studio selector dropdown with all available studios
-    - Three instructor selectors (Principale, Secondario 1, Secondario 2) with optional secondary instructors
-  - **Routing fix**: Changed sidebar navigation from `<a href>` to Wouter's `<Link>` component to eliminate 404 errors and full page reloads
-  - **Database migration**: Successfully pushed schema changes to production database with new course fields
-
-- **2024-10-27**: Client Categorization & Enhanced Enrollment UI
-  - **Terminology update**: Changed "Iscritti" to "Clienti/Anagrafiche" throughout the application
-  - **Hierarchical client categories**: New database table `client_categories` with parent/child support for unlimited nesting
-  - **Client category management**: Full CRUD API endpoints at `/api/client-categories`
-  - **Client categorization UI**: New page at `/client-categories` with hierarchical tree visualization
-  - **Category selector in member form**: Controlled Select component with indented hierarchical display and hidden input for proper form submission
-  - **Enhanced member table UI**:
-    - New "Corsi Attivi" column displaying active course enrollments with badges (max 2 shown + overflow count)
-    - Enrollment button changed from icon-only to prominent button with icon + "Iscrizioni" text
-  - **Expanded enrollment dialog**: Now shows complete payment information for each enrollment with status badges (Pagato/In sospeso/Scaduto) and payment breakdown
-
-- **2024-10-27**: Complete Enrollment & Payment System
-  - **Manual payment registration only**: Removed Stripe integration, focusing on manual payment tracking
-  - **Enhanced database schema**: Added `enrollmentId` field to payments table for linking payments to specific enrollments
-  - **Full CRUD API for enrollments**: GET, POST, PATCH, DELETE endpoints with automatic course enrollment counter updates
-  - **Enrollment-to-payment workflow**: 
-    - From members page: Create enrollments with automatic payment generation (course quota + optional membership fee)
-    - From payments page: Manually create payments linked to existing enrollments via conditional enrollment selector
-  - **Smart form state management**: Proper reset of selectedMemberId/selectedType on form close and after successful creation
-  - **Complete tracking**: Every enrollment can have associated payments with status tracking (pending, paid, overdue)
-
-- **2024-10-27**: Enhanced Member Management & CSV Import
-  - **Expanded member fields**: Added fiscal code, mobile, card data (number, issue/expiry dates), medical certificate tracking, parent information for minors
-  - **CSV/Excel import**: Full implementation with multer and papaparse for members, courses, and instructors
-  - **Smart forms**: Auto-show parent fields for minors based on date of birth
-  - **Enhanced table view**: Display card numbers, expiry dates, medical certificate status, enrolled courses per member
-
-- **2024-10-25**: Initial implementation
-  - Complete database schema with Drizzle ORM
-  - Full CRUD API for all resources
-  - React frontend with 10 pages (landing, dashboard, members, courses, categories, instructors, memberships, payments, access control, reports, import)
-  - Replit Auth integration
-  - Sidebar navigation with wouter routing
-  - shadcn/ui component library
-  - Responsive design with Tailwind CSS
-
-## Notes
-- The system uses PostgreSQL with automatic barcode validation for access control
-- All dates are stored in the database, with expiry tracking for memberships and medical certificates
-- The dashboard shows real-time alerts for expiring items
-- Import functionality is fully implemented with CSV/Excel support
-- Payments are tracked manually with optional linkage to enrollments for complete financial tracking
-- Enrollment workflow generates both enrollment records and associated payment records automatically
+- **Data Fetching/Caching**: TanStack Query
+- **Routing**: Wouter
+- **CSV/Excel Parsing**: papaparse
+- **File Uploads**: multer

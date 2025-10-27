@@ -15,11 +15,38 @@ import { Plus, Search, Edit, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Course, InsertCourse, Category, Instructor, Studio } from "@shared/schema";
 
+const WEEKDAYS = [
+  { id: "LUN", label: "Lunedì" },
+  { id: "MAR", label: "Martedì" },
+  { id: "MER", label: "Mercoledì" },
+  { id: "GIO", label: "Giovedì" },
+  { id: "VEN", label: "Venerdì" },
+  { id: "SAB", label: "Sabato" },
+  { id: "DOM", label: "Domenica" },
+];
+
+const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
+  const hour = Math.floor(i / 2);
+  const minute = (i % 2) * 30;
+  return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+});
+
+const RECURRENCE_TYPES = [
+  { id: "weekly", label: "Settimanale" },
+  { id: "biweekly", label: "Bisettimanale" },
+  { id: "monthly", label: "Mensile" },
+  { id: "custom", label: "Personalizzato" },
+];
+
 export default function Courses() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<string>("");
+  const [selectedStartTime, setSelectedStartTime] = useState<string>("");
+  const [selectedEndTime, setSelectedEndTime] = useState<string>("");
+  const [selectedRecurrence, setSelectedRecurrence] = useState<string>("");
 
   const { data: courses, isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -94,10 +121,10 @@ export default function Courses() {
       secondaryInstructor2Id: formData.get("secondaryInstructor2Id") ? parseInt(formData.get("secondaryInstructor2Id") as string) : null,
       price: formData.get("price") ? formData.get("price") as string : null,
       maxCapacity: formData.get("maxCapacity") ? parseInt(formData.get("maxCapacity") as string) : null,
-      dayOfWeek: formData.get("dayOfWeek") as string || null,
-      startTime: formData.get("startTime") as string || null,
-      endTime: formData.get("endTime") as string || null,
-      recurrenceType: formData.get("recurrenceType") as string || null,
+      dayOfWeek: selectedDayOfWeek || null,
+      startTime: selectedStartTime || null,
+      endTime: selectedEndTime || null,
+      recurrenceType: selectedRecurrence || null,
       schedule: formData.get("schedule") as string || null,
       startDate: formData.get("startDate") as string || null,
       endDate: formData.get("endDate") as string || null,
@@ -109,6 +136,24 @@ export default function Courses() {
     } else {
       createMutation.mutate(data);
     }
+  };
+
+  const openEditDialog = (course: Course) => {
+    setEditingCourse(course);
+    setSelectedDayOfWeek(course.dayOfWeek || "");
+    setSelectedStartTime(course.startTime || "");
+    setSelectedEndTime(course.endTime || "");
+    setSelectedRecurrence(course.recurrenceType || "");
+    setIsFormOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsFormOpen(false);
+    setEditingCourse(null);
+    setSelectedDayOfWeek("");
+    setSelectedStartTime("");
+    setSelectedEndTime("");
+    setSelectedRecurrence("");
   };
 
   const filteredCourses = courses?.filter((course) =>
@@ -124,7 +169,7 @@ export default function Courses() {
         </div>
         <Button 
           onClick={() => {
-            setEditingCourse(null);
+            closeDialog();
             setIsFormOpen(true);
           }}
           data-testid="button-add-course"
@@ -204,10 +249,7 @@ export default function Courses() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => {
-                            setEditingCourse(course);
-                            setIsFormOpen(true);
-                          }}
+                          onClick={() => openEditDialog(course)}
                           data-testid={`button-edit-course-${course.id}`}
                         >
                           <Edit className="w-4 h-4" />
@@ -234,7 +276,9 @@ export default function Courses() {
         </CardContent>
       </Card>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={(open) => {
+        if (!open) closeDialog();
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCourse ? "Modifica Corso" : "Nuovo Corso"}</DialogTitle>
@@ -416,13 +460,79 @@ export default function Courses() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dayOfWeek">Giorno Settimana</Label>
+                <Select value={selectedDayOfWeek} onValueChange={setSelectedDayOfWeek}>
+                  <SelectTrigger data-testid="select-dayOfWeek">
+                    <SelectValue placeholder="Seleziona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WEEKDAYS.map((day) => (
+                      <SelectItem key={day.id} value={day.id}>
+                        {day.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="startTime">Ora Inizio</Label>
+                <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
+                  <SelectTrigger data-testid="select-startTime">
+                    <SelectValue placeholder="--:--" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIME_SLOTS.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="endTime">Ora Fine</Label>
+                <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
+                  <SelectTrigger data-testid="select-endTime">
+                    <SelectValue placeholder="--:--" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIME_SLOTS.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="recurrenceType">Ricorrenza</Label>
+                <Select value={selectedRecurrence} onValueChange={setSelectedRecurrence}>
+                  <SelectTrigger data-testid="select-recurrenceType">
+                    <SelectValue placeholder="Seleziona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RECURRENCE_TYPES.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="schedule">Orario/Calendario</Label>
+              <Label htmlFor="schedule">Note Orario (opzionale)</Label>
               <Textarea
                 id="schedule"
                 name="schedule"
                 defaultValue={editingCourse?.schedule || ""}
-                placeholder="Es: Lunedì e Mercoledì 18:00-19:30"
+                placeholder="Note aggiuntive sull'orario"
                 rows={2}
                 data-testid="input-schedule"
               />
@@ -432,7 +542,7 @@ export default function Courses() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsFormOpen(false)}
+                onClick={closeDialog}
                 data-testid="button-cancel"
               >
                 Annulla

@@ -35,10 +35,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const WEEKDAYS = [
+  { id: "LUN", label: "Lunedì" },
+  { id: "MAR", label: "Martedì" },
+  { id: "MER", label: "Mercoledì" },
+  { id: "GIO", label: "Giovedì" },
+  { id: "VEN", label: "Venerdì" },
+  { id: "SAB", label: "Sabato" },
+  { id: "DOM", label: "Domenica" },
+];
+
+const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => {
+  const hour = i.toString().padStart(2, "0");
+  return `${hour}:00`;
+});
 
 export default function Studios() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingStudio, setEditingStudio] = useState<Studio | null>(null);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [openTime, setOpenTime] = useState<string>("09:00");
+  const [closeTime, setCloseTime] = useState<string>("21:00");
   const { toast } = useToast();
 
   const { data: studios = [], isLoading } = useQuery<Studio[]>({
@@ -98,15 +118,47 @@ export default function Studios() {
   });
 
   const onSubmit = (data: InsertStudio) => {
+    // Build operating hours and days from state
+    const operatingHours = JSON.stringify({ start: openTime, end: closeTime });
+    const operatingDays = JSON.stringify(selectedDays);
+    
+    const submitData = {
+      ...data,
+      operatingHours,
+      operatingDays,
+    };
+    
     if (editingStudio) {
-      updateMutation.mutate({ id: editingStudio.id, data });
+      updateMutation.mutate({ id: editingStudio.id, data: submitData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(submitData);
     }
   };
 
   const openEditDialog = (studio: Studio) => {
     setEditingStudio(studio);
+    
+    // Parse existing data
+    const existingDays = parseOperatingDays(studio.operatingDays);
+    setSelectedDays(existingDays);
+    
+    // Parse existing hours if in JSON format
+    let existingOpenTime = "09:00";
+    let existingCloseTime = "21:00";
+    if (studio.operatingHours) {
+      try {
+        const hours = JSON.parse(studio.operatingHours);
+        if (hours.start && hours.end) {
+          existingOpenTime = hours.start;
+          existingCloseTime = hours.end;
+        }
+      } catch {
+        // Keep defaults
+      }
+    }
+    setOpenTime(existingOpenTime);
+    setCloseTime(existingCloseTime);
+    
     form.reset({
       name: studio.name,
       floor: studio.floor || "",
@@ -122,6 +174,9 @@ export default function Studios() {
   const closeDialog = () => {
     setIsCreateOpen(false);
     setEditingStudio(null);
+    setSelectedDays([]);
+    setOpenTime("09:00");
+    setCloseTime("21:00");
     form.reset();
   };
 
@@ -212,44 +267,66 @@ export default function Studios() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="operatingDays"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Giorni Operativi</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            value={field.value ?? ""}
-                            placeholder='es: ["LUN","MAR","MER"]'
-                            data-testid="input-studio-operating-days"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="operatingHours"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Orari Operativi</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          value={field.value ?? ""}
-                          placeholder='es: {"monday":{"start":"09:00","end":"21:00"}}'
-                          data-testid="textarea-studio-operating-hours"
+                <div className="space-y-3">
+                  <FormLabel>Giorni Operativi</FormLabel>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {WEEKDAYS.map((day) => (
+                      <div key={day.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`day-${day.id}`}
+                          checked={selectedDays.includes(day.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedDays([...selectedDays, day.id]);
+                            } else {
+                              setSelectedDays(selectedDays.filter((d) => d !== day.id));
+                            }
+                          }}
+                          data-testid={`checkbox-day-${day.id}`}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <label htmlFor={`day-${day.id}`} className="text-sm cursor-pointer">
+                          {day.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <FormLabel>Orario Apertura</FormLabel>
+                    <Select value={openTime} onValueChange={setOpenTime}>
+                      <SelectTrigger data-testid="select-open-time">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIME_SLOTS.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <FormLabel>Orario Chiusura</FormLabel>
+                    <Select value={closeTime} onValueChange={setCloseTime}>
+                      <SelectTrigger data-testid="select-close-time">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIME_SLOTS.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
                 <FormField
                   control={form.control}
