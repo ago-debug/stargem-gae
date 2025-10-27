@@ -786,7 +786,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Google Sheets Import Route ====
   app.post("/api/import/google-sheets", isAuthenticated, async (req, res) => {
     try {
-      const { spreadsheetId, range, type } = req.body;
+      let { spreadsheetId, range, type } = req.body;
       
       if (!spreadsheetId || !range) {
         return res.status(400).json({ message: "SpreadsheetId e range sono obbligatori" });
@@ -795,6 +795,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!type || !['members', 'courses', 'instructors'].includes(type)) {
         return res.status(400).json({ message: "Tipo di import non valido" });
       }
+
+      // Clean up spreadsheetId and range - remove quotes if present
+      spreadsheetId = spreadsheetId.trim().replace(/^["']|["']$/g, '');
+      range = range.trim().replace(/^["']|["']$/g, '');
 
       // Read data from Google Sheets
       const rows = await readSpreadsheet(spreadsheetId, range);
