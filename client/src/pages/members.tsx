@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,11 @@ import type { Member, InsertMember } from "@shared/schema";
 
 export default function Members() {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const initialSearch = urlParams.get('search') || "";
+  
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [showParentFields, setShowParentFields] = useState(false);
@@ -306,7 +310,7 @@ export default function Members() {
                           {memberCourses.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {memberCourses.slice(0, 2).map((course) => (
-                                <Link key={course.id} href="/courses">
+                                <Link key={course.id} href={`/courses?search=${encodeURIComponent(course.name)}`}>
                                   <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-course-${course.id}`}>
                                     {course.name}
                                   </Badge>
