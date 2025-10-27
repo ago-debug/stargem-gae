@@ -301,9 +301,9 @@ export default function Payments() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="cash">Contanti</SelectItem>
-                    <SelectItem value="card">Carta</SelectItem>
-                    <SelectItem value="stripe">Stripe</SelectItem>
+                    <SelectItem value="card">Carta/POS</SelectItem>
                     <SelectItem value="bank_transfer">Bonifico</SelectItem>
+                    <SelectItem value="other">Altro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
