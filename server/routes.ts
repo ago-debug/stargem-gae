@@ -373,7 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const currentYear = "2526";
         const existingNumbers = existingMemberships
           .map(m => m.membershipNumber)
-          .filter(num => num.startsWith(currentYear))
+          .filter(num => num && typeof num === 'string' && num.startsWith(currentYear))
           .map(num => parseInt(num.substring(4)) || 0);
         
         const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
