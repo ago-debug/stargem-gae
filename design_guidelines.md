@@ -3,7 +3,7 @@
 ## Design Approach
 
 **Selected Approach**: Design System + Modern SaaS Admin
-- Primary inspiration: Linear, Notion, Stripe Dashboard
+- Primary inspiration: Linear, Notion
 - Focus on information density with breathing room
 - Clean, professional aesthetic prioritizing functionality
 - Emphasis on data clarity and workflow efficiency
@@ -196,7 +196,7 @@
 **Payment Dashboard**:
 - Summary cards: Totale Incassato, In Attesa, Scaduti
 - Filterable payment table
-- Integration with Stripe: payment status sync
+- Manual payment processing and tracking
 - Generate invoice/receipt actions
 
 **Payment Form**:
