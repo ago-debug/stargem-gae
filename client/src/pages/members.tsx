@@ -176,11 +176,15 @@ export default function Members() {
     `${member.firstName} ${member.lastName} ${member.email || ""} ${member.fiscalCode || ""}`.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const getMemberEnrollments = (memberId: number) => {
-    return enrollments?.filter(e => e.memberId === memberId).map(e => {
-      const course = courses?.find(c => c.id === e.courseId);
-      return course ? { id: course.id, name: course.name } : null;
-    }).filter(Boolean) || [];
+  const getMemberEnrollments = (memberId: number): Array<{ id: number; name: string }> => {
+    if (!enrollments || !courses) return [];
+    return enrollments
+      .filter(e => e.memberId === memberId)
+      .map(e => {
+        const course = courses.find(c => c.id === e.courseId);
+        return course ? { id: course.id, name: course.name } : null;
+      })
+      .filter((c): c is { id: number; name: string } => c !== null);
   };
 
   return (

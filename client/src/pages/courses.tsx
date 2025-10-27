@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +64,25 @@ export default function Courses() {
   const { data: studios } = useQuery<Studio[]>({
     queryKey: ["/api/studios"],
   });
+
+  const { data: enrollments } = useQuery<any[]>({
+    queryKey: ["/api/enrollments"],
+  });
+
+  const { data: members } = useQuery<any[]>({
+    queryKey: ["/api/members"],
+  });
+
+  const getCourseEnrollments = (courseId: number): Array<{ id: number; firstName: string; lastName: string }> => {
+    if (!enrollments || !members) return [];
+    return enrollments
+      .filter(e => e.courseId === courseId && e.status === 'active')
+      .map(e => {
+        const member = members.find(m => m.id === e.memberId);
+        return member ? { id: member.id, firstName: member.firstName, lastName: member.lastName } : null;
+      })
+      .filter((m): m is { id: number; firstName: string; lastName: string } => m !== null);
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertCourse) => {
@@ -215,13 +235,16 @@ export default function Courses() {
                   <TableHead>Insegnante</TableHead>
                   <TableHead>Prezzo</TableHead>
                   <TableHead>Posti</TableHead>
+                  <TableHead>Iscritti</TableHead>
                   <TableHead>Periodo</TableHead>
                   <TableHead>Stato</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCourses.map((course) => (
+                {filteredCourses.map((course) => {
+                  const courseEnrollments = getCourseEnrollments(course.id);
+                  return (
                   <TableRow key={course.id} data-testid={`course-row-${course.id}`}>
                     <TableCell className="font-medium">{course.name}</TableCell>
                     <TableCell>
@@ -234,6 +257,26 @@ export default function Courses() {
                     </TableCell>
                     <TableCell>€{course.price || "0.00"}</TableCell>
                     <TableCell>{course.currentEnrollment}/{course.maxCapacity || "∞"}</TableCell>
+                    <TableCell>
+                      {courseEnrollments.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {courseEnrollments.slice(0, 2).map((member) => (
+                            <Link key={member.id} href="/members">
+                              <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-member-${member.id}`}>
+                                {member.firstName} {member.lastName}
+                              </Badge>
+                            </Link>
+                          ))}
+                          {courseEnrollments.length > 2 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{courseEnrollments.length - 2} altri
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Nessun iscritto</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm">
                       {course.startDate && course.endDate 
                         ? `${new Date(course.startDate).toLocaleDateString('it-IT')} - ${new Date(course.endDate).toLocaleDateString('it-IT')}`
@@ -269,7 +312,8 @@ export default function Courses() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                );
+                })}
               </TableBody>
             </Table>
           )}
