@@ -197,7 +197,12 @@ export const courses = pgTable("courses", {
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: integer("max_capacity"),
   currentEnrollment: integer("current_enrollment").default(0),
-  schedule: text("schedule"), // JSON: {day: "LUN", startTime: "15:00", endTime: "16:30", repeat: "weekly"}
+  // Campi orario strutturati (nuovo sistema con dropdown)
+  dayOfWeek: varchar("day_of_week", { length: 20 }), // lunedì, martedì, mercoledì, giovedì, venerdì, sabato, domenica
+  startTime: varchar("start_time", { length: 10 }), // formato HH:MM (es: "15:00")
+  endTime: varchar("end_time", { length: 10 }), // formato HH:MM (es: "16:30")
+  recurrenceType: varchar("recurrence_type", { length: 20 }), // settimanale, bisettimanale, mensile, personalizzata
+  schedule: text("schedule"), // JSON: {day: "LUN", startTime: "15:00", endTime: "16:30", repeat: "weekly"} - legacy
   startDate: date("start_date"),
   endDate: date("end_date"),
   active: boolean("active").default(true),
