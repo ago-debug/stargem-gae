@@ -427,6 +427,24 @@ export const insertAccessLogSchema = createInsertSchema(accessLogs).omit({
 export type InsertAccessLog = z.infer<typeof insertAccessLogSchema>;
 export type AccessLog = typeof accessLogs.$inferSelect;
 
+// Payment Methods (Tipi di Pagamento)
+export const paymentMethods = pgTable("payment_methods", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 100 }).notNull().unique(), // Contanti, Carta di Credito, Bonifico, POS, etc.
+  description: text("description"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPaymentMethod = z.infer<typeof insertPaymentMethodSchema>;
+export type PaymentMethod = typeof paymentMethods.$inferSelect;
+
 // Payments
 export const payments = pgTable("payments", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -438,7 +456,8 @@ export const payments = pgTable("payments", {
   status: varchar("status", { length: 50 }).notNull().default("pending"), // 'pending', 'paid', 'overdue', 'cancelled'
   dueDate: date("due_date"),
   paidDate: date("paid_date"),
-  paymentMethod: varchar("payment_method", { length: 100 }), // 'cash', 'card', 'bank_transfer', 'other'
+  paymentMethodId: integer("payment_method_id").references(() => paymentMethods.id, { onDelete: "set null" }), // Riferimento a tabella payment_methods
+  paymentMethod: varchar("payment_method", { length: 100 }), // Legacy - mantenuto per compatibilità
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -452,6 +471,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   enrollment: one(enrollments, {
     fields: [payments.enrollmentId],
     references: [enrollments.id],
+  }),
+  paymentMethodInfo: one(paymentMethods, {
+    fields: [payments.paymentMethodId],
+    references: [paymentMethods.id],
   }),
 }));
 

@@ -10,6 +10,7 @@ import {
   courses,
   memberships,
   medicalCertificates,
+  paymentMethods,
   payments,
   enrollments,
   accessLogs,
@@ -31,6 +32,8 @@ import {
   type InsertMembership,
   type MedicalCertificate,
   type InsertMedicalCertificate,
+  type PaymentMethod,
+  type InsertPaymentMethod,
   type Payment,
   type InsertPayment,
   type Enrollment,
@@ -100,6 +103,13 @@ export interface IStorage {
   createMedicalCertificate(cert: InsertMedicalCertificate): Promise<MedicalCertificate>;
   updateMedicalCertificate(id: number, cert: Partial<InsertMedicalCertificate>): Promise<MedicalCertificate>;
   deleteMedicalCertificate(id: number): Promise<void>;
+
+  // Payment Methods
+  getPaymentMethods(): Promise<PaymentMethod[]>;
+  getPaymentMethod(id: number): Promise<PaymentMethod | undefined>;
+  createPaymentMethod(method: InsertPaymentMethod): Promise<PaymentMethod>;
+  updatePaymentMethod(id: number, method: Partial<InsertPaymentMethod>): Promise<PaymentMethod>;
+  deletePaymentMethod(id: number): Promise<void>;
 
   // Payments
   getPayments(): Promise<Payment[]>;
@@ -441,6 +451,34 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(members.id, cert.memberId));
     }
+  }
+
+  // ==== Payment Methods ====
+  async getPaymentMethods(): Promise<PaymentMethod[]> {
+    return await db.select().from(paymentMethods).orderBy(paymentMethods.name);
+  }
+
+  async getPaymentMethod(id: number): Promise<PaymentMethod | undefined> {
+    const [method] = await db.select().from(paymentMethods).where(eq(paymentMethods.id, id));
+    return method;
+  }
+
+  async createPaymentMethod(method: InsertPaymentMethod): Promise<PaymentMethod> {
+    const [newMethod] = await db.insert(paymentMethods).values(method).returning();
+    return newMethod;
+  }
+
+  async updatePaymentMethod(id: number, method: Partial<InsertPaymentMethod>): Promise<PaymentMethod> {
+    const [updated] = await db
+      .update(paymentMethods)
+      .set({ ...method, updatedAt: new Date() })
+      .where(eq(paymentMethods.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePaymentMethod(id: number): Promise<void> {
+    await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
   }
 
   // ==== Payments ====
