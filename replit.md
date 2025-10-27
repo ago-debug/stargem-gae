@@ -6,8 +6,9 @@ Comprehensive web-based course management system to replace Google Sheets setup.
 ## Features
 - ✅ Student enrollment and member management
 - ✅ **Client categorization** with hierarchical parent/child categories
-- ✅ Course management with categories/subcategories
-- ✅ Instructor management with hourly rates
+- ✅ Course management with categories/subcategories and **unique SKU**
+- ✅ **Studio/sala management** with capacity, equipment, and availability tracking
+- ✅ Instructor management with hourly rates and **support for 3 instructors per course**
 - ✅ Membership cards with barcode access control
 - ✅ Medical certificate tracking
 - ✅ Manual payment processing with enrollment tracking
@@ -16,6 +17,8 @@ Comprehensive web-based course management system to replace Google Sheets setup.
 - ✅ Attendance logging via barcode scanning
 - ✅ Reporting and statistics dashboard
 - ✅ Data import from CSV/Excel (Google Sheets migration)
+- 🚧 **Cross-linked records** - clickable links between related data (in progress)
+- 🚧 **Studio rental management** - view course schedules and availability by time slots
 
 ## Tech Stack
 - **Frontend**: React 18, Wouter (routing), TanStack Query, shadcn/ui, Tailwind CSS

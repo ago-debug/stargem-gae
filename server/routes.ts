@@ -9,6 +9,7 @@ import {
   insertCategorySchema,
   insertClientCategorySchema,
   insertInstructorSchema,
+  insertStudioSchema,
   insertCourseSchema,
   insertMembershipSchema,
   insertMedicalCertificateSchema,
@@ -206,6 +207,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete instructor" });
+    }
+  });
+
+  // ==== Studios Routes ====
+  app.get("/api/studios", isAuthenticated, async (req, res) => {
+    try {
+      const studios = await storage.getStudios();
+      res.json(studios);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch studios" });
+    }
+  });
+
+  app.post("/api/studios", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertStudioSchema.parse(req.body);
+      const studio = await storage.createStudio(validatedData);
+      res.status(201).json(studio);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create studio" });
+    }
+  });
+
+  app.patch("/api/studios/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const studio = await storage.updateStudio(id, req.body);
+      res.json(studio);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update studio" });
+    }
+  });
+
+  app.delete("/api/studios/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteStudio(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete studio" });
     }
   });
 

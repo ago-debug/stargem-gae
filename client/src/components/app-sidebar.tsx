@@ -11,8 +11,9 @@ import {
   BarChart3,
   Upload,
   LogOut,
+  Building2,
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import {
   Sidebar,
   SidebarContent,
@@ -58,6 +59,11 @@ const menuItems = [
     title: "Insegnanti",
     url: "/insegnanti",
     icon: Briefcase,
+  },
+  {
+    title: "Studios/Sale",
+    url: "/studios",
+    icon: Building2,
   },
   {
     title: "Tessere & Certificati",
@@ -112,10 +118,10 @@ export function AppSidebar() {
                       isActive={isActive}
                       data-testid={`nav-${item.url.slice(1) || 'dashboard'}`}
                     >
-                      <a href={item.url}>
+                      <Link href={item.url}>
                         <item.icon className="w-4 h-4" />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

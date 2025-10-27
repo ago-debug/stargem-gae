@@ -14,6 +14,7 @@ import Courses from "@/pages/courses";
 import Categories from "@/pages/categories";
 import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
+import Studios from "@/pages/studios";
 import Memberships from "@/pages/memberships";
 import Payments from "@/pages/payments";
 import AccessControl from "@/pages/access-control";
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/categorie" component={Categories} />
       <Route path="/categorie-clienti" component={ClientCategories} />
       <Route path="/insegnanti" component={Instructors} />
+      <Route path="/studios" component={Studios} />
       <Route path="/tessere" component={Memberships} />
       <Route path="/pagamenti" component={Payments} />
       <Route path="/accessi" component={AccessControl} />
