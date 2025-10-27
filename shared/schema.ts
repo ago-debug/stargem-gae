@@ -160,17 +160,44 @@ export const insertInstructorRateSchema = createInsertSchema(instructorRates).om
 export type InsertInstructorRate = z.infer<typeof insertInstructorRateSchema>;
 export type InstructorRate = typeof instructorRates.$inferSelect;
 
+// Studios (sale/studi)
+export const studios = pgTable("studios", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  floor: varchar("floor", { length: 50 }), // Piano
+  operatingHours: text("operating_hours"), // JSON: {"monday": {"start": "09:00", "end": "21:00"}, ...}
+  operatingDays: text("operating_days"), // JSON: ["monday", "tuesday", ...]
+  capacity: integer("capacity"), // Capienza
+  equipment: text("equipment"), // Attrezzature (lista separata da virgole o JSON)
+  notes: text("notes"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertStudioSchema = createInsertSchema(studios).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertStudio = z.infer<typeof insertStudioSchema>;
+export type Studio = typeof studios.$inferSelect;
+
 // Courses
 export const courses = pgTable("courses", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }), // SKU univoco (es: 2526-NEMBRI-LUN-15) - unique constraint da aggiungere dopo
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }), // Studio/sala
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante primario
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante secondario 1
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante secondario 2
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: integer("max_capacity"),
   currentEnrollment: integer("current_enrollment").default(0),
-  schedule: text("schedule"), // JSON or text describing schedule
+  schedule: text("schedule"), // JSON: {day: "LUN", startTime: "15:00", endTime: "16:30", repeat: "weekly"}
   startDate: date("start_date"),
   endDate: date("end_date"),
   active: boolean("active").default(true),
@@ -183,11 +210,27 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
     fields: [courses.categoryId],
     references: [categories.id],
   }),
+  studio: one(studios, {
+    fields: [courses.studioId],
+    references: [studios.id],
+  }),
   instructor: one(instructors, {
     fields: [courses.instructorId],
     references: [instructors.id],
   }),
+  secondaryInstructor1: one(instructors, {
+    fields: [courses.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [courses.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
   enrollments: many(enrollments),
+}));
+
+export const studiosRelations = relations(studios, ({ many }) => ({
+  courses: many(courses),
 }));
 
 export const insertCourseSchema = createInsertSchema(courses).omit({

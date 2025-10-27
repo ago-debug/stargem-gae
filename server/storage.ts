@@ -6,6 +6,7 @@ import {
   categories,
   clientCategories,
   instructors,
+  studios,
   courses,
   memberships,
   medicalCertificates,
@@ -22,6 +23,8 @@ import {
   type InsertClientCategory,
   type Instructor,
   type InsertInstructor,
+  type Studio,
+  type InsertStudio,
   type Course,
   type InsertCourse,
   type Membership,
@@ -68,6 +71,13 @@ export interface IStorage {
   createInstructor(instructor: InsertInstructor): Promise<Instructor>;
   updateInstructor(id: number, instructor: Partial<InsertInstructor>): Promise<Instructor>;
   deleteInstructor(id: number): Promise<void>;
+
+  // Studios
+  getStudios(): Promise<Studio[]>;
+  getStudio(id: number): Promise<Studio | undefined>;
+  createStudio(studio: InsertStudio): Promise<Studio>;
+  updateStudio(id: number, studio: Partial<InsertStudio>): Promise<Studio>;
+  deleteStudio(id: number): Promise<void>;
 
   // Courses
   getCourses(): Promise<Course[]>;
@@ -144,6 +154,17 @@ export class DatabaseStorage implements IStorage {
 
   async createMember(member: InsertMember): Promise<Member> {
     const [newMember] = await db.insert(members).values(member).returning();
+    
+    // Sync membership if card data exists
+    if (newMember.cardNumber) {
+      await this.syncMembershipFromMember(newMember);
+    }
+    
+    // Sync medical certificate if data exists
+    if (newMember.hasMedicalCertificate) {
+      await this.syncMedicalCertificateFromMember(newMember);
+    }
+    
     return newMember;
   }
 
@@ -153,6 +174,17 @@ export class DatabaseStorage implements IStorage {
       .set({ ...member, updatedAt: new Date() })
       .where(eq(members.id, id))
       .returning();
+    
+    // Sync membership if card data exists or was updated
+    if (member.cardNumber !== undefined || member.cardIssueDate !== undefined || member.cardExpiryDate !== undefined) {
+      await this.syncMembershipFromMember(updated);
+    }
+    
+    // Sync medical certificate if data exists or was updated
+    if (member.hasMedicalCertificate !== undefined || member.medicalCertificateExpiry !== undefined) {
+      await this.syncMedicalCertificateFromMember(updated);
+    }
+    
     return updated;
   }
 
@@ -244,6 +276,37 @@ export class DatabaseStorage implements IStorage {
     await db.delete(instructors).where(eq(instructors.id, id));
   }
 
+  // ==== Studios ====
+  async getStudios(): Promise<Studio[]> {
+    return db.select().from(studios).orderBy(studios.name);
+  }
+
+  async getStudio(id: number): Promise<Studio | undefined> {
+    const [studio] = await db.select().from(studios).where(eq(studios.id, id));
+    return studio;
+  }
+
+  async createStudio(studioData: InsertStudio): Promise<Studio> {
+    const [studio] = await db
+      .insert(studios)
+      .values(studioData)
+      .returning();
+    return studio;
+  }
+
+  async updateStudio(id: number, studioData: Partial<InsertStudio>): Promise<Studio> {
+    const [studio] = await db
+      .update(studios)
+      .set(studioData)
+      .where(eq(studios.id, id))
+      .returning();
+    return studio;
+  }
+
+  async deleteStudio(id: number): Promise<void> {
+    await db.delete(studios).where(eq(studios.id, id));
+  }
+
   // ==== Courses ====
   async getCourses(): Promise<Course[]> {
     return await db.select().from(courses).orderBy(desc(courses.createdAt));
@@ -289,6 +352,10 @@ export class DatabaseStorage implements IStorage {
 
   async createMembership(membership: InsertMembership): Promise<Membership> {
     const [newMembership] = await db.insert(memberships).values(membership).returning();
+    
+    // Sync member data
+    await this.syncMemberFromMembership(newMembership);
+    
     return newMembership;
   }
 
@@ -298,11 +365,31 @@ export class DatabaseStorage implements IStorage {
       .set({ ...membership, updatedAt: new Date() })
       .where(eq(memberships.id, id))
       .returning();
+    
+    // Sync member data
+    await this.syncMemberFromMembership(updated);
+    
     return updated;
   }
 
   async deleteMembership(id: number): Promise<void> {
+    // Get membership to find memberId before deleting
+    const [membership] = await db.select().from(memberships).where(eq(memberships.id, id));
+    
     await db.delete(memberships).where(eq(memberships.id, id));
+    
+    // Clear member card data
+    if (membership) {
+      await db
+        .update(members)
+        .set({
+          cardNumber: null,
+          cardIssueDate: null,
+          cardExpiryDate: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(members.id, membership.memberId));
+    }
   }
 
   // ==== Medical Certificates ====
@@ -317,6 +404,10 @@ export class DatabaseStorage implements IStorage {
 
   async createMedicalCertificate(cert: InsertMedicalCertificate): Promise<MedicalCertificate> {
     const [newCert] = await db.insert(medicalCertificates).values(cert).returning();
+    
+    // Sync member data
+    await this.syncMemberFromMedicalCertificate(newCert);
+    
     return newCert;
   }
 
@@ -326,11 +417,30 @@ export class DatabaseStorage implements IStorage {
       .set({ ...cert, updatedAt: new Date() })
       .where(eq(medicalCertificates.id, id))
       .returning();
+    
+    // Sync member data
+    await this.syncMemberFromMedicalCertificate(updated);
+    
     return updated;
   }
 
   async deleteMedicalCertificate(id: number): Promise<void> {
+    // Get certificate to find memberId before deleting
+    const [cert] = await db.select().from(medicalCertificates).where(eq(medicalCertificates.id, id));
+    
     await db.delete(medicalCertificates).where(eq(medicalCertificates.id, id));
+    
+    // Clear member certificate data
+    if (cert) {
+      await db
+        .update(members)
+        .set({
+          hasMedicalCertificate: false,
+          medicalCertificateExpiry: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(members.id, cert.memberId));
+    }
   }
 
   // ==== Payments ====
@@ -397,6 +507,114 @@ export class DatabaseStorage implements IStorage {
   async createAccessLog(log: InsertAccessLog): Promise<AccessLog> {
     const [newLog] = await db.insert(accessLogs).values(log).returning();
     return newLog;
+  }
+
+  // ==== Synchronization Helpers ====
+  private async syncMembershipFromMember(member: Member): Promise<void> {
+    if (!member.cardNumber) {
+      // If no card number, delete existing membership if any
+      await db.delete(memberships).where(eq(memberships.memberId, member.id));
+      return;
+    }
+
+    // Check if membership already exists for this member
+    const [existing] = await db
+      .select()
+      .from(memberships)
+      .where(eq(memberships.memberId, member.id));
+
+    const membershipData = {
+      memberId: member.id,
+      membershipNumber: member.cardNumber,
+      barcode: member.cardNumber, // Use same as card number
+      issueDate: member.cardIssueDate || new Date().toISOString().split('T')[0],
+      expiryDate: member.cardExpiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      status: member.cardExpiryDate && new Date(member.cardExpiryDate) < new Date() ? 'expired' : 'active',
+      type: 'annual',
+    };
+
+    if (existing) {
+      // Update existing membership
+      await db
+        .update(memberships)
+        .set({ ...membershipData, updatedAt: new Date() })
+        .where(eq(memberships.id, existing.id));
+    } else {
+      // Create new membership
+      await db.insert(memberships).values(membershipData);
+    }
+  }
+
+  private async syncMedicalCertificateFromMember(member: Member): Promise<void> {
+    if (!member.hasMedicalCertificate) {
+      // If no medical certificate, delete existing if any
+      await db.delete(medicalCertificates).where(eq(medicalCertificates.memberId, member.id));
+      return;
+    }
+
+    // Check if medical certificate already exists for this member
+    const [existing] = await db
+      .select()
+      .from(medicalCertificates)
+      .where(eq(medicalCertificates.memberId, member.id));
+
+    const certData = {
+      memberId: member.id,
+      issueDate: new Date().toISOString().split('T')[0],
+      expiryDate: member.medicalCertificateExpiry || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      status: member.medicalCertificateExpiry && new Date(member.medicalCertificateExpiry) < new Date() ? 'expired' : 'valid',
+    };
+
+    if (existing) {
+      // Update existing certificate
+      await db
+        .update(medicalCertificates)
+        .set({ ...certData, updatedAt: new Date() })
+        .where(eq(medicalCertificates.id, existing.id));
+    } else {
+      // Create new certificate
+      await db.insert(medicalCertificates).values(certData);
+    }
+  }
+
+  private async syncMemberFromMembership(membership: Membership): Promise<void> {
+    // If membership has no number or is inactive, clear member card data
+    if (!membership.membershipNumber || membership.status === 'suspended') {
+      await db
+        .update(members)
+        .set({
+          cardNumber: null,
+          cardIssueDate: null,
+          cardExpiryDate: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(members.id, membership.memberId));
+    } else {
+      // Update member with card data from membership
+      await db
+        .update(members)
+        .set({
+          cardNumber: membership.membershipNumber,
+          cardIssueDate: membership.issueDate,
+          cardExpiryDate: membership.expiryDate,
+          updatedAt: new Date(),
+        })
+        .where(eq(members.id, membership.memberId));
+    }
+  }
+
+  private async syncMemberFromMedicalCertificate(cert: MedicalCertificate): Promise<void> {
+    // If certificate is expired or invalid, clear member certificate flag
+    const isValid = cert.status === 'valid' && cert.expiryDate && new Date(cert.expiryDate) >= new Date();
+    
+    await db
+      .update(members)
+      .set({
+        hasMedicalCertificate: isValid,
+        medicalCertificateExpiry: isValid ? cert.expiryDate : null,
+        updatedAt: new Date(),
+      })
+      .where(eq(members.id, cert.memberId));
   }
 }
 
