@@ -189,7 +189,7 @@ export default function Payments() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Iscritto</TableHead>
+                  <TableHead>Cliente</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Descrizione</TableHead>
                   <TableHead>Importo</TableHead>
@@ -247,7 +247,7 @@ export default function Payments() {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="memberId">Iscritto (opzionale)</Label>
+              <Label htmlFor="memberId">Cliente (opzionale)</Label>
               <Select 
                 name="memberId" 
                 value={selectedMemberId}

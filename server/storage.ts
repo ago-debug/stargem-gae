@@ -4,6 +4,7 @@ import {
   users,
   members,
   categories,
+  clientCategories,
   instructors,
   courses,
   memberships,
@@ -17,6 +18,8 @@ import {
   type InsertMember,
   type Category,
   type InsertCategory,
+  type ClientCategory,
+  type InsertClientCategory,
   type Instructor,
   type InsertInstructor,
   type Course,
@@ -51,6 +54,13 @@ export interface IStorage {
   createCategory(category: InsertCategory): Promise<Category>;
   updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category>;
   deleteCategory(id: number): Promise<void>;
+
+  // Client Categories
+  getClientCategories(): Promise<ClientCategory[]>;
+  getClientCategory(id: number): Promise<ClientCategory | undefined>;
+  createClientCategory(category: InsertClientCategory): Promise<ClientCategory>;
+  updateClientCategory(id: number, category: Partial<InsertClientCategory>): Promise<ClientCategory>;
+  deleteClientCategory(id: number): Promise<void>;
 
   // Instructors
   getInstructors(): Promise<Instructor[]>;
@@ -176,6 +186,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCategory(id: number): Promise<void> {
     await db.delete(categories).where(eq(categories.id, id));
+  }
+
+  // ==== Client Categories ====
+  async getClientCategories(): Promise<ClientCategory[]> {
+    return await db.select().from(clientCategories).orderBy(clientCategories.name);
+  }
+
+  async getClientCategory(id: number): Promise<ClientCategory | undefined> {
+    const [category] = await db.select().from(clientCategories).where(eq(clientCategories.id, id));
+    return category;
+  }
+
+  async createClientCategory(category: InsertClientCategory): Promise<ClientCategory> {
+    const [newCategory] = await db.insert(clientCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updateClientCategory(id: number, category: Partial<InsertClientCategory>): Promise<ClientCategory> {
+    const [updated] = await db
+      .update(clientCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(clientCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteClientCategory(id: number): Promise<void> {
+    await db.delete(clientCategories).where(eq(clientCategories.id, id));
   }
 
   // ==== Instructors ====

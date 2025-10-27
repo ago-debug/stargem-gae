@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Users, GraduationCap } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +26,7 @@ export default function Members() {
   const [hasMedicalCert, setHasMedicalCert] = useState(false);
   const [isEnrollmentDialogOpen, setIsEnrollmentDialogOpen] = useState(false);
   const [selectedMemberForEnrollment, setSelectedMemberForEnrollment] = useState<Member | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("none");
 
   const { data: members, isLoading } = useQuery<Member[]>({
     queryKey: ["/api/members"],
@@ -38,13 +40,17 @@ export default function Members() {
     queryKey: ["/api/courses"],
   });
 
+  const { data: clientCategories } = useQuery<any[]>({
+    queryKey: ["/api/client-categories"],
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data: InsertMember) => {
       await apiRequest("POST", "/api/members", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      toast({ title: "Iscritto creato con successo" });
+      toast({ title: "Cliente creato con successo" });
       setIsFormOpen(false);
       resetForm();
     },
@@ -59,7 +65,7 @@ export default function Members() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      toast({ title: "Iscritto aggiornato con successo" });
+      toast({ title: "Cliente aggiornato con successo" });
       setIsFormOpen(false);
       resetForm();
     },
@@ -74,7 +80,7 @@ export default function Members() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      toast({ title: "Iscritto eliminato con successo" });
+      toast({ title: "Cliente eliminato con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -85,6 +91,7 @@ export default function Members() {
     setEditingMember(null);
     setShowParentFields(false);
     setHasMedicalCert(false);
+    setSelectedCategoryId("none");
   };
 
   useEffect(() => {
@@ -122,6 +129,7 @@ export default function Members() {
       firstName: formData.get("firstName") as string,
       lastName: formData.get("lastName") as string,
       fiscalCode: formData.get("fiscalCode") as string || null,
+      categoryId: (formData.get("categoryId") && formData.get("categoryId") !== "none") ? parseInt(formData.get("categoryId") as string) : null,
       dateOfBirth: formData.get("dateOfBirth") as string || null,
       email: formData.get("email") as string || null,
       phone: formData.get("phone") as string || null,
@@ -178,7 +186,7 @@ export default function Members() {
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Iscritti</h1>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Clienti/Anagrafiche</h1>
           <p className="text-muted-foreground">Anagrafica completa degli iscritti</p>
         </div>
         <Button 
@@ -189,7 +197,7 @@ export default function Members() {
           data-testid="button-add-member"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Nuovo Iscritto
+          Nuovo Cliente
         </Button>
       </div>
 
@@ -239,6 +247,7 @@ export default function Members() {
                     <TableHead>Tessera</TableHead>
                     <TableHead>Cert. Medico</TableHead>
                     <TableHead>Stato</TableHead>
+                    <TableHead>Corsi Attivi</TableHead>
                     <TableHead className="text-right">Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -248,14 +257,7 @@ export default function Members() {
                     return (
                       <TableRow key={member.id} data-testid={`member-row-${member.id}`}>
                         <TableCell className="font-medium">
-                          <div>
-                            <div>{member.firstName} {member.lastName}</div>
-                            {memberCourses.length > 0 && (
-                              <div className="text-xs text-muted-foreground mt-1">
-                                Corsi: {memberCourses.join(", ")}
-                              </div>
-                            )}
-                          </div>
+                          {member.firstName} {member.lastName}
                         </TableCell>
                         <TableCell className="font-mono text-sm">{member.fiscalCode || "-"}</TableCell>
                         <TableCell>{member.email || "-"}</TableCell>
@@ -293,25 +295,44 @@ export default function Members() {
                             {member.active ? "Attivo" : "Inattivo"}
                           </Badge>
                         </TableCell>
+                        <TableCell>
+                          {memberCourses.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {memberCourses.slice(0, 2).map((course, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  {course}
+                                </Badge>
+                              ))}
+                              {memberCourses.length > 2 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{memberCourses.length - 2}
+                                </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Nessun corso</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              variant="outline"
+                              size="sm"
                               onClick={() => {
                                 setSelectedMemberForEnrollment(member);
                                 setIsEnrollmentDialogOpen(true);
                               }}
                               data-testid={`button-enroll-member-${member.id}`}
-                              title="Gestisci Iscrizioni"
                             >
-                              <GraduationCap className="w-4 h-4" />
+                              <GraduationCap className="w-4 h-4 mr-2" />
+                              Iscrizioni
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => {
                                 setEditingMember(member);
+                                setSelectedCategoryId(member.categoryId?.toString() || "none");
                                 setIsFormOpen(true);
                               }}
                               data-testid={`button-edit-member-${member.id}`}
@@ -349,7 +370,7 @@ export default function Members() {
       }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingMember ? "Modifica Iscritto" : "Nuovo Iscritto"}</DialogTitle>
+            <DialogTitle>{editingMember ? "Modifica Cliente" : "Nuovo Cliente"}</DialogTitle>
             <DialogDescription>
               Inserisci i dati anagrafici completi dell'iscritto
             </DialogDescription>
@@ -379,6 +400,34 @@ export default function Members() {
                     data-testid="input-lastname"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="categoryId">Categoria Cliente (opzionale)</Label>
+                <input type="hidden" name="categoryId" value={selectedCategoryId === "none" ? "" : selectedCategoryId} />
+                <Select 
+                  value={selectedCategoryId}
+                  onValueChange={setSelectedCategoryId}
+                >
+                  <SelectTrigger data-testid="select-category">
+                    <SelectValue placeholder="Seleziona categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nessuna categoria</SelectItem>
+                    {(() => {
+                      const renderCategories = (parentId: number | null = null, level: number = 0): any[] => {
+                        const categories = clientCategories?.filter(cat => cat.parentId === parentId) || [];
+                        return categories.flatMap((cat) => [
+                          <SelectItem key={cat.id} value={cat.id.toString()}>
+                            {'\u00A0'.repeat(level * 4)}{cat.name}
+                          </SelectItem>,
+                          ...renderCategories(cat.id, level + 1)
+                        ]);
+                      };
+                      return renderCategories();
+                    })()}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -704,7 +753,7 @@ export default function Members() {
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-member"
               >
-                {editingMember ? "Salva Modifiche" : "Crea Iscritto"}
+                {editingMember ? "Salva Modifiche" : "Crea Cliente"}
               </Button>
             </DialogFooter>
           </form>
@@ -743,6 +792,10 @@ function EnrollmentDialog({
 
   const { data: enrollments } = useQuery<any[]>({
     queryKey: ["/api/enrollments"],
+  });
+
+  const { data: payments } = useQuery<any[]>({
+    queryKey: ["/api/payments"],
   });
 
   const createEnrollmentMutation = useMutation({
@@ -848,33 +901,93 @@ function EnrollmentDialog({
             {memberEnrollments.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nessuna iscrizione attiva</p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {memberEnrollments.map((enrollment) => {
                   const course = courses?.find(c => c.id === enrollment.courseId);
+                  const enrollmentPayments = payments?.filter(p => p.enrollmentId === enrollment.id) || [];
+                  const totalPaid = enrollmentPayments
+                    .filter(p => p.status === "paid")
+                    .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                  const totalDue = enrollmentPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                  const isPaid = totalPaid >= totalDue && totalDue > 0;
+                  
                   return (
                     <div
                       key={enrollment.id}
-                      className="flex items-center justify-between p-3 border rounded-md"
+                      className="border rounded-md overflow-hidden"
                       data-testid={`enrollment-${enrollment.id}`}
                     >
-                      <div>
-                        <div className="font-medium">{course?.name || "Corso sconosciuto"}</div>
-                        <div className="text-sm text-muted-foreground">
-                          Iscritto il {new Date(enrollment.enrollmentDate).toLocaleDateString('it-IT')}
+                      <div className="flex items-center justify-between p-3 bg-muted/30">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium">{course?.name || "Corso sconosciuto"}</div>
+                            {isPaid ? (
+                              <Badge variant="default" className="text-xs">Pagato</Badge>
+                            ) : enrollmentPayments.some(p => p.status === "overdue") ? (
+                              <Badge variant="destructive" className="text-xs">Scaduto</Badge>
+                            ) : (
+                              <Badge variant="secondary" className="text-xs">In sospeso</Badge>
+                            )}
+                          </div>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            Iscritto il {new Date(enrollment.enrollmentDate).toLocaleDateString('it-IT')}
+                            {enrollmentPayments.length > 0 && (
+                              <span className="ml-3">
+                                Pagato: €{totalPaid.toFixed(2)} / €{totalDue.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm("Vuoi eliminare questa iscrizione?")) {
+                              deleteEnrollmentMutation.mutate(enrollment.id);
+                            }
+                          }}
+                          data-testid={`button-delete-enrollment-${enrollment.id}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          if (confirm("Vuoi eliminare questa iscrizione?")) {
-                            deleteEnrollmentMutation.mutate(enrollment.id);
-                          }
-                        }}
-                        data-testid={`button-delete-enrollment-${enrollment.id}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      
+                      {enrollmentPayments.length > 0 && (
+                        <div className="p-3 pt-2 space-y-2">
+                          <div className="text-xs font-medium text-muted-foreground mb-2">Pagamenti:</div>
+                          {enrollmentPayments.map((payment) => (
+                            <div
+                              key={payment.id}
+                              className="flex items-center justify-between text-sm p-2 rounded bg-background"
+                              data-testid={`payment-${payment.id}`}
+                            >
+                              <div className="flex-1">
+                                <div className="font-medium">{payment.description}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Scadenza: {new Date(payment.dueDate).toLocaleDateString('it-IT')}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="text-right">
+                                  <div className="font-medium">€{parseFloat(payment.amount).toFixed(2)}</div>
+                                </div>
+                                <Badge 
+                                  variant={
+                                    payment.status === "paid" ? "default" : 
+                                    payment.status === "overdue" ? "destructive" : 
+                                    "secondary"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {payment.status === "paid" ? "Pagato" : 
+                                   payment.status === "overdue" ? "Scaduto" : 
+                                   "In sospeso"}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 })}

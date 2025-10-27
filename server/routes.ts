@@ -7,6 +7,7 @@ import Papa from "papaparse";
 import { 
   insertMemberSchema,
   insertCategorySchema,
+  insertClientCategorySchema,
   insertInstructorSchema,
   insertCourseSchema,
   insertMembershipSchema,
@@ -125,6 +126,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
+  // ==== Client Categories Routes ====
+  app.get("/api/client-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getClientCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch client categories" });
+    }
+  });
+
+  app.post("/api/client-categories", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertClientCategorySchema.parse(req.body);
+      const category = await storage.createClientCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create client category" });
+    }
+  });
+
+  app.patch("/api/client-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateClientCategory(id, req.body);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update client category" });
+    }
+  });
+
+  app.delete("/api/client-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteClientCategory(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete client category" });
     }
   });
 

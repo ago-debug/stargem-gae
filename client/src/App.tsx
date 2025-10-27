@@ -12,6 +12,7 @@ import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
 import Courses from "@/pages/courses";
 import Categories from "@/pages/categories";
+import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
 import Memberships from "@/pages/memberships";
 import Payments from "@/pages/payments";
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/iscritti" component={Members} />
       <Route path="/corsi" component={Courses} />
       <Route path="/categorie" component={Categories} />
+      <Route path="/categorie-clienti" component={ClientCategories} />
       <Route path="/insegnanti" component={Instructors} />
       <Route path="/tessere" component={Memberships} />
       <Route path="/pagamenti" component={Payments} />
