@@ -75,6 +75,35 @@ export const insertCategorySchema = createInsertSchema(categories).omit({
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Category = typeof categories.$inferSelect;
 
+// Client Categories (hierarchical structure for client classification)
+export const clientCategories = pgTable("client_categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  color: varchar("color", { length: 7 }), // hex color for UI
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const clientCategoriesRelations = relations(clientCategories, ({ one, many }) => ({
+  parent: one(clientCategories, {
+    fields: [clientCategories.parentId],
+    references: [clientCategories.id],
+    relationName: "subcategories",
+  }),
+  subcategories: many(clientCategories, { relationName: "subcategories" }),
+  members: many(members),
+}));
+
+export const insertClientCategorySchema = createInsertSchema(clientCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertClientCategory = z.infer<typeof insertClientCategorySchema>;
+export type ClientCategory = typeof clientCategories.$inferSelect;
+
 // Instructors
 export const instructors = pgTable("instructors", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -180,6 +209,7 @@ export const members = pgTable("members", {
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }), // Telefono fisso
   mobile: varchar("mobile", { length: 50 }), // Cellulare
+  categoryId: integer("category_id").references(() => clientCategories.id, { onDelete: "set null" }), // Categoria cliente
   
   // Dati tessera
   cardNumber: varchar("card_number", { length: 100 }), // Numero tessera
@@ -212,7 +242,11 @@ export const members = pgTable("members", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const membersRelations = relations(members, ({ many }) => ({
+export const membersRelations = relations(members, ({ one, many }) => ({
+  category: one(clientCategories, {
+    fields: [members.categoryId],
+    references: [clientCategories.id],
+  }),
   enrollments: many(enrollments),
   memberships: many(memberships),
   medicalCertificates: many(medicalCertificates),

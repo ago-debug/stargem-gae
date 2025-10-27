@@ -176,7 +176,7 @@ export default function Memberships() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Iscritto</TableHead>
+                      <TableHead>Cliente</TableHead>
                       <TableHead>N. Tessera</TableHead>
                       <TableHead>Barcode</TableHead>
                       <TableHead>Tipo</TableHead>
@@ -258,7 +258,7 @@ export default function Memberships() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Iscritto</TableHead>
+                      <TableHead>Cliente</TableHead>
                       <TableHead>Medico</TableHead>
                       <TableHead>Data Rilascio</TableHead>
                       <TableHead>Scadenza</TableHead>
@@ -316,7 +316,7 @@ export default function Memberships() {
           </DialogHeader>
           <form onSubmit={handleMembershipSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="memberId">Iscritto *</Label>
+              <Label htmlFor="memberId">Cliente *</Label>
               <Select name="memberId" required>
                 <SelectTrigger data-testid="select-member">
                   <SelectValue placeholder="Seleziona iscritto" />

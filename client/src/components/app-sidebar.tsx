@@ -3,6 +3,7 @@ import {
   Users,
   Calendar,
   FolderTree,
+  Tags,
   Briefcase,
   CreditCard,
   IdCard,
@@ -34,7 +35,7 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Iscritti",
+    title: "Clienti/Anagrafiche",
     url: "/iscritti",
     icon: Users,
   },
@@ -47,6 +48,11 @@ const menuItems = [
     title: "Categorie",
     url: "/categorie",
     icon: FolderTree,
+  },
+  {
+    title: "Categorie Clienti",
+    url: "/categorie-clienti",
+    icon: Tags,
   },
   {
     title: "Insegnanti",
