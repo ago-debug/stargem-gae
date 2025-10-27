@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Briefcase } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Instructor, InsertInstructor } from "@shared/schema";
+import type { Instructor, InsertInstructor, Course } from "@shared/schema";
 
 export default function Instructors() {
   const { toast } = useToast();
@@ -23,6 +23,20 @@ export default function Instructors() {
   const { data: instructors, isLoading } = useQuery<Instructor[]>({
     queryKey: ["/api/instructors"],
   });
+
+  const { data: courses } = useQuery<Course[]>({
+    queryKey: ["/api/courses"],
+  });
+
+  const getInstructorCourses = (instructorId: number) => {
+    if (!courses) return [];
+    return courses.filter(
+      course => 
+        course.instructorId === instructorId ||
+        course.secondaryInstructor1Id === instructorId ||
+        course.secondaryInstructor2Id === instructorId
+    );
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertInstructor) => {
@@ -145,6 +159,7 @@ export default function Instructors() {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Specializzazione</TableHead>
+                  <TableHead>Corsi Assegnati</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Telefono</TableHead>
                   <TableHead>Tariffa Oraria</TableHead>
@@ -153,12 +168,38 @@ export default function Instructors() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredInstructors.map((instructor) => (
+                {filteredInstructors.map((instructor) => {
+                  const assignedCourses = getInstructorCourses(instructor.id);
+                  return (
                   <TableRow key={instructor.id} data-testid={`instructor-row-${instructor.id}`}>
                     <TableCell className="font-medium">
                       {instructor.firstName} {instructor.lastName}
                     </TableCell>
                     <TableCell>{instructor.specialization || "-"}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {assignedCourses.length === 0 ? (
+                          <span className="text-sm text-muted-foreground">Nessun corso</span>
+                        ) : assignedCourses.length <= 2 ? (
+                          assignedCourses.map((course) => (
+                            <Badge key={course.id} variant="outline" className="text-xs">
+                              {course.name}
+                            </Badge>
+                          ))
+                        ) : (
+                          <>
+                            {assignedCourses.slice(0, 2).map((course) => (
+                              <Badge key={course.id} variant="outline" className="text-xs">
+                                {course.name}
+                              </Badge>
+                            ))}
+                            <Badge variant="secondary" className="text-xs">
+                              +{assignedCourses.length - 2}
+                            </Badge>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{instructor.email || "-"}</TableCell>
                     <TableCell>{instructor.phone || "-"}</TableCell>
                     <TableCell>
@@ -197,7 +238,8 @@ export default function Instructors() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           )}
