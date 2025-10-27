@@ -62,8 +62,8 @@ export default function Members() {
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: InsertMember }) => {
+  const updateMutation = useMutation<void, Error, { id: number; data: Partial<InsertMember> }>({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertMember> }) => {
       await apiRequest("PATCH", `/api/members/${id}`, data);
     },
     onSuccess: () => {
