@@ -273,7 +273,6 @@ export default function ClientCategories() {
                   <SelectValue placeholder="Nessuna (categoria principale)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nessuna (categoria principale)</SelectItem>
                   {categories
                     ?.filter(cat => cat.id !== editingCategory?.id && !cat.parentId)
                     .map((cat) => (
