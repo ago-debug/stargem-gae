@@ -84,11 +84,14 @@ export default function Studios() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/studios"] });
       toast({ title: "Studio creato con successo" });
-      setIsCreateOpen(false);
-      form.reset();
+      closeDialog();
     },
-    onError: () => {
-      toast({ title: "Errore nella creazione dello studio", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ 
+        title: "Errore nella creazione dello studio", 
+        description: error.message,
+        variant: "destructive" 
+      });
     },
   });
 
@@ -98,11 +101,14 @@ export default function Studios() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/studios"] });
       toast({ title: "Studio aggiornato con successo" });
-      setEditingStudio(null);
-      form.reset();
+      closeDialog();
     },
-    onError: () => {
-      toast({ title: "Errore nell'aggiornamento dello studio", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ 
+        title: "Errore nell'aggiornamento dello studio",
+        description: error.message, 
+        variant: "destructive" 
+      });
     },
   });
 
