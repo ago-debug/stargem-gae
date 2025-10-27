@@ -20,6 +20,8 @@ import Payments from "@/pages/payments";
 import AccessControl from "@/pages/access-control";
 import Reports from "@/pages/reports";
 import ImportData from "@/pages/import-data";
+import UtentiPermessi from "@/pages/utenti-permessi";
+import ResetStagione from "@/pages/reset-stagione";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -47,6 +49,8 @@ function Router() {
       <Route path="/accessi" component={AccessControl} />
       <Route path="/report" component={Reports} />
       <Route path="/importa" component={ImportData} />
+      <Route path="/utenti-permessi" component={UtentiPermessi} />
+      <Route path="/reset-stagione" component={ResetStagione} />
       <Route component={NotFound} />
     </Switch>
   );

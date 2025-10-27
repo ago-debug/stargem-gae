@@ -15,6 +15,7 @@ import {
   Wallet,
   Settings,
   UserCog,
+  RotateCcw,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -78,11 +79,6 @@ const mainMenuItems = [
     url: "/report",
     icon: BarChart3,
   },
-  {
-    title: "Importa Dati",
-    url: "/importa",
-    icon: Upload,
-  },
 ];
 
 const commonTablesItems = [
@@ -101,10 +97,23 @@ const commonTablesItems = [
     url: "/tipi-pagamento",
     icon: Wallet,
   },
+];
+
+const adminUtilsItems = [
+  {
+    title: "Importazione Dati",
+    url: "/importa",
+    icon: Upload,
+  },
   {
     title: "Utenti e Permessi",
     url: "/utenti-permessi",
     icon: UserCog,
+  },
+  {
+    title: "Reset Stagione",
+    url: "/reset-stagione",
+    icon: RotateCcw,
   },
 ];
 
@@ -151,6 +160,31 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {commonTablesItems.map((item) => {
+                const isActive = location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      data-testid={`nav-${item.url.slice(1)}`}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Admin - Utils</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminUtilsItems.map((item) => {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
