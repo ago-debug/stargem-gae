@@ -347,7 +347,7 @@ export default function ImportData() {
                   data-testid="input-sheet-range"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Esempio: "Foglio1!A1:Z100" o "Iscritti!A:Z" per tutte le righe
+                  Esempio: Foglio1!A1:Z100 o Iscritti!A:Z per tutte le righe
                 </p>
               </div>
 
