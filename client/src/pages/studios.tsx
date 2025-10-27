@@ -80,7 +80,7 @@ export default function Studios() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertStudio) => apiRequest("/api/studios", "POST", data),
+    mutationFn: (data: InsertStudio) => apiRequest("POST", "/api/studios", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/studios"] });
       toast({ title: "Studio creato con successo" });
@@ -97,7 +97,7 @@ export default function Studios() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertStudio> }) =>
-      apiRequest(`/api/studios/${id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/studios/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/studios"] });
       toast({ title: "Studio aggiornato con successo" });
@@ -113,7 +113,7 @@ export default function Studios() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/studios/${id}`, "DELETE"),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/studios/${id}`, undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/studios"] });
       toast({ title: "Studio eliminato con successo" });
