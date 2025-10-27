@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import multer from "multer";
+import Papa from "papaparse";
 import { 
   insertMemberSchema,
   insertCategorySchema,
@@ -13,6 +15,9 @@ import {
   insertEnrollmentSchema,
   insertAccessLogSchema,
 } from "@shared/schema";
+
+// Configure multer for file uploads
+const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -370,6 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentYear = today.getFullYear();
       const monthlyRevenue = payments
         .filter(p => {
+          if (!p.createdAt) return false;
           const createdDate = new Date(p.createdAt);
           return p.status === "paid" && 
                  createdDate.getMonth() === currentMonth && 
@@ -489,17 +495,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ==== Import Route (placeholder) ====
-  app.post("/api/import", isAuthenticated, async (req, res) => {
+  // ==== Import Route ====
+  app.post("/api/import", isAuthenticated, upload.single('file'), async (req, res) => {
     try {
-      // TODO: Implement CSV/Excel import functionality
-      res.json({
-        imported: 0,
-        skipped: 0,
-        errors: [],
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const { type } = req.body;
+      if (!type || !['members', 'courses', 'instructors'].includes(type)) {
+        return res.status(400).json({ message: "Invalid import type" });
+      }
+
+      const fileContent = req.file.buffer.toString('utf-8');
+      const parseResult = Papa.parse(fileContent, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (header: string) => header.trim(),
       });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to import data" });
+
+      let imported = 0;
+      let skipped = 0;
+      const errors: any[] = [];
+
+      // Process each row based on type
+      for (let i = 0; i < parseResult.data.length; i++) {
+        const row: any = parseResult.data[i];
+        try {
+          if (type === 'members') {
+            const memberData = {
+              firstName: row['Nome'] || row['First Name'] || row['firstName'],
+              lastName: row['Cognome'] || row['Last Name'] || row['lastName'],
+              email: row['Email'] || row['email'] || null,
+              phone: row['Telefono'] || row['Phone'] || row['phone'] || null,
+              dateOfBirth: row['Data Nascita'] || row['Date of Birth'] || row['dateOfBirth'] || null,
+              address: row['Indirizzo'] || row['Address'] || row['address'] || null,
+              notes: row['Note'] || row['Notes'] || row['notes'] || null,
+              active: true,
+            };
+
+            if (!memberData.firstName || !memberData.lastName) {
+              throw new Error("Nome e Cognome sono obbligatori");
+            }
+
+            await storage.createMember(memberData);
+            imported++;
+          } else if (type === 'courses') {
+            const courseData = {
+              name: row['Nome'] || row['Name'] || row['name'],
+              description: row['Descrizione'] || row['Description'] || row['description'] || null,
+              price: row['Prezzo'] || row['Price'] || row['price'] || null,
+              maxCapacity: row['Posti Max'] || row['Max Capacity'] || row['maxCapacity'] ? parseInt(row['Posti Max'] || row['Max Capacity'] || row['maxCapacity']) : null,
+              startDate: row['Data Inizio'] || row['Start Date'] || row['startDate'] || null,
+              endDate: row['Data Fine'] || row['End Date'] || row['endDate'] || null,
+              schedule: row['Orario'] || row['Schedule'] || row['schedule'] || null,
+              categoryId: null,
+              instructorId: null,
+              active: true,
+            };
+
+            if (!courseData.name) {
+              throw new Error("Nome corso è obbligatorio");
+            }
+
+            await storage.createCourse(courseData);
+            imported++;
+          } else if (type === 'instructors') {
+            const instructorData = {
+              firstName: row['Nome'] || row['First Name'] || row['firstName'],
+              lastName: row['Cognome'] || row['Last Name'] || row['lastName'],
+              email: row['Email'] || row['email'] || null,
+              phone: row['Telefono'] || row['Phone'] || row['phone'] || null,
+              specialization: row['Specializzazione'] || row['Specialization'] || row['specialization'] || null,
+              hourlyRate: row['Tariffa Oraria'] || row['Hourly Rate'] || row['hourlyRate'] || null,
+              bio: null,
+              active: true,
+            };
+
+            if (!instructorData.firstName || !instructorData.lastName) {
+              throw new Error("Nome e Cognome sono obbligatori");
+            }
+
+            await storage.createInstructor(instructorData);
+            imported++;
+          }
+        } catch (error: any) {
+          skipped++;
+          errors.push({
+            row: i + 2, // +2 because header is row 1 and array is 0-indexed
+            message: error.message || "Errore sconosciuto",
+          });
+        }
+      }
+
+      res.json({
+        imported,
+        skipped,
+        errors: errors.slice(0, 50), // Limit errors to first 50
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to import data" });
     }
   });
 
