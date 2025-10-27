@@ -22,6 +22,7 @@ import Reports from "@/pages/reports";
 import ImportData from "@/pages/import-data";
 import UtentiPermessi from "@/pages/utenti-permessi";
 import ResetStagione from "@/pages/reset-stagione";
+import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -82,6 +83,12 @@ function AppContent() {
           <div className="flex flex-col flex-1 overflow-hidden">
             <header className="flex items-center justify-between h-14 px-4 border-b border-border bg-background flex-shrink-0">
               <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <img 
+                src={logoStudioGem} 
+                alt="Studio Gem Logo" 
+                className="h-8"
+                data-testid="logo-header"
+              />
             </header>
             <main className="flex-1 overflow-auto bg-background">
               <Router />
