@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,11 @@ const RECURRENCE_TYPES = [
 
 export default function Courses() {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const initialSearch = urlParams.get('search') || "";
+  
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<string>("");
@@ -261,7 +265,7 @@ export default function Courses() {
                       {courseEnrollments.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {courseEnrollments.slice(0, 2).map((member) => (
-                            <Link key={member.id} href="/members">
+                            <Link key={member.id} href={`/members?search=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`}>
                               <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-member-${member.id}`}>
                                 {member.firstName} {member.lastName}
                               </Badge>
