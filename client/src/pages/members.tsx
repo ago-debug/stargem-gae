@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users, GraduationCap } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member, InsertMember } from "@shared/schema";
 
@@ -28,6 +28,8 @@ export default function Members() {
   const [isEnrollmentDialogOpen, setIsEnrollmentDialogOpen] = useState(false);
   const [selectedMemberForEnrollment, setSelectedMemberForEnrollment] = useState<Member | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("none");
+  const [isMembershipDialogOpen, setIsMembershipDialogOpen] = useState(false);
+  const [selectedMemberForMembership, setSelectedMemberForMembership] = useState<Member | null>(null);
 
   const { data: members, isLoading } = useQuery<Member[]>({
     queryKey: ["/api/members"],
@@ -333,6 +335,18 @@ export default function Members() {
                             >
                               <GraduationCap className="w-4 h-4 mr-2" />
                               Iscrizioni
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedMemberForMembership(member);
+                                setIsMembershipDialogOpen(true);
+                              }}
+                              data-testid={`button-manage-membership-${member.id}`}
+                            >
+                              <CreditCard className="w-4 h-4 mr-2" />
+                              Tessere
                             </Button>
                             <Button
                               variant="ghost"
@@ -773,6 +787,13 @@ export default function Members() {
         open={isEnrollmentDialogOpen}
         onOpenChange={setIsEnrollmentDialogOpen}
       />
+
+      {/* Membership Management Dialog */}
+      <MembershipManagementDialog
+        member={selectedMemberForMembership}
+        open={isMembershipDialogOpen}
+        onOpenChange={setIsMembershipDialogOpen}
+      />
     </div>
   );
 }
@@ -1091,3 +1112,560 @@ function EnrollmentDialog({
     </Dialog>
   );
 }
+
+// Membership and Medical Certificates Management Component
+function MembershipManagementDialog({ 
+  member, 
+  open, 
+  onOpenChange 
+}: { 
+  member: Member | null; 
+  open: boolean; 
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { toast } = useToast();
+  const [isAddingMembership, setIsAddingMembership] = useState(false);
+  const [editingMembership, setEditingMembership] = useState<any | null>(null);
+  const [isAddingCertificate, setIsAddingCertificate] = useState(false);
+  const [editingCertificate, setEditingCertificate] = useState<any | null>(null);
+
+  const { data: memberships } = useQuery<any[]>({
+    queryKey: ["/api/memberships"],
+    enabled: !!member,
+  });
+
+  const { data: certificates } = useQuery<any[]>({
+    queryKey: ["/api/medical-certificates"],
+    enabled: !!member,
+  });
+
+  const memberMemberships = memberships?.filter(m => m.memberId === member?.id) || [];
+  const memberCertificates = certificates?.filter(c => c.memberId === member?.id) || [];
+
+  const createMembershipMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("POST", "/api/memberships", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/memberships"] });
+      toast({ title: "Tessera creata con successo" });
+      setIsAddingMembership(false);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateMembershipMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      await apiRequest("PATCH", `/api/memberships/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/memberships"] });
+      toast({ title: "Tessera aggiornata" });
+      setEditingMembership(null);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteMembershipMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/memberships/${id}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/memberships"] });
+      toast({ title: "Tessera eliminata" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const createCertificateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("POST", "/api/medical-certificates", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/medical-certificates"] });
+      toast({ title: "Certificato creato con successo" });
+      setIsAddingCertificate(false);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateCertificateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      await apiRequest("PATCH", `/api/medical-certificates/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/medical-certificates"] });
+      toast({ title: "Certificato aggiornato" });
+      setEditingCertificate(null);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteCertificateMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/medical-certificates/${id}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/medical-certificates"] });
+      toast({ title: "Certificato eliminato" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleSubmitMembership = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!member) return;
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      memberId: member.id,
+      previousMembershipNumber: formData.get("previousMembershipNumber") as string || null,
+      issueDate: formData.get("issueDate") as string,
+      expiryDate: formData.get("expiryDate") as string,
+      status: formData.get("status") as string || "active",
+      type: formData.get("type") as string || null,
+      fee: formData.get("fee") ? formData.get("fee") as string : null,
+    };
+
+    if (editingMembership) {
+      updateMembershipMutation.mutate({ id: editingMembership.id, data });
+    } else {
+      createMembershipMutation.mutate(data);
+    }
+  };
+
+  const handleSubmitCertificate = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!member) return;
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      memberId: member.id,
+      issueDate: formData.get("issueDate") as string,
+      expiryDate: formData.get("expiryDate") as string,
+      doctorName: formData.get("doctorName") as string || null,
+      notes: formData.get("notes") as string || null,
+      status: formData.get("status") as string || "valid",
+    };
+
+    if (editingCertificate) {
+      updateCertificateMutation.mutate({ id: editingCertificate.id, data });
+    } else {
+      createCertificateMutation.mutate(data);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            Gestione Tessere e Certificati - {member?.firstName} {member?.lastName}
+          </DialogTitle>
+          <DialogDescription>
+            Gestisci tessere associative e certificati medici
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* TESSERE SECTION */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                <h3 className="font-semibold">Tessere Associative</h3>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsAddingMembership(true)}
+                data-testid="button-add-membership"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nuova Tessera
+              </Button>
+            </div>
+
+            {memberMemberships.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 border rounded-md text-center">
+                Nessuna tessera registrata
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {memberMemberships.map((membership) => (
+                  <div
+                    key={membership.id}
+                    className="border rounded-md p-3"
+                    data-testid={`membership-${membership.id}`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-medium">{membership.membershipNumber}</span>
+                          <Badge variant={
+                            membership.status === "active" ? "default" :
+                            membership.status === "expired" ? "destructive" :
+                            "secondary"
+                          } className="text-xs">
+                            {membership.status === "active" ? "Attiva" :
+                             membership.status === "expired" ? "Scaduta" :
+                             "Sospesa"}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Validità: {new Date(membership.issueDate).toLocaleDateString('it-IT')} - {new Date(membership.expiryDate).toLocaleDateString('it-IT')}
+                        </div>
+                        {membership.previousMembershipNumber && (
+                          <div className="text-xs text-muted-foreground">
+                            Tessera precedente: {membership.previousMembershipNumber}
+                          </div>
+                        )}
+                        {membership.fee && (
+                          <div className="text-sm">
+                            Quota: €{parseFloat(membership.fee).toFixed(2)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEditingMembership(membership)}
+                          data-testid={`button-edit-membership-${membership.id}`}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm("Sei sicuro di voler eliminare questa tessera?")) {
+                              deleteMembershipMutation.mutate(membership.id);
+                            }
+                          }}
+                          data-testid={`button-delete-membership-${membership.id}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Membership Form */}
+            {(isAddingMembership || editingMembership) && (
+              <form onSubmit={handleSubmitMembership} className="mt-4 border rounded-md p-4 bg-muted/30 space-y-4">
+                <h4 className="font-medium">{editingMembership ? "Modifica Tessera" : "Nuova Tessera"}</h4>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="previousMembershipNumber">Tessera Precedente (opzionale)</Label>
+                    <Input
+                      id="previousMembershipNumber"
+                      name="previousMembershipNumber"
+                      defaultValue={editingMembership?.previousMembershipNumber || ""}
+                      placeholder="es: 2526000123"
+                      data-testid="input-previous-membership-number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fee">Quota (€)</Label>
+                    <Input
+                      id="fee"
+                      name="fee"
+                      type="number"
+                      step="0.01"
+                      defaultValue={editingMembership?.fee || "30.00"}
+                      data-testid="input-membership-fee"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="issueDate">Data Rilascio *</Label>
+                    <Input
+                      id="issueDate"
+                      name="issueDate"
+                      type="date"
+                      required
+                      defaultValue={editingMembership?.issueDate || new Date().toISOString().split('T')[0]}
+                      data-testid="input-membership-issue-date"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="expiryDate">Data Scadenza *</Label>
+                    <Input
+                      id="expiryDate"
+                      name="expiryDate"
+                      type="date"
+                      required
+                      defaultValue={editingMembership?.expiryDate || ""}
+                      data-testid="input-membership-expiry-date"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Stato</Label>
+                    <Select name="status" defaultValue={editingMembership?.status || "active"}>
+                      <SelectTrigger data-testid="select-membership-status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Attiva</SelectItem>
+                        <SelectItem value="expired">Scaduta</SelectItem>
+                        <SelectItem value="suspended">Sospesa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Tipo</Label>
+                    <Select name="type" defaultValue={editingMembership?.type || "annual"}>
+                      <SelectTrigger data-testid="select-membership-type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="annual">Annuale</SelectItem>
+                        <SelectItem value="monthly">Mensile</SelectItem>
+                        <SelectItem value="seasonal">Stagionale</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsAddingMembership(false);
+                      setEditingMembership(null);
+                    }}
+                    data-testid="button-cancel-membership"
+                  >
+                    Annulla
+                  </Button>
+                  <Button 
+                    type="submit"
+                    disabled={createMembershipMutation.isPending || updateMembershipMutation.isPending}
+                    data-testid="button-submit-membership"
+                  >
+                    {editingMembership ? "Salva Modifiche" : "Crea Tessera"}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* CERTIFICATI MEDICI SECTION */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                <h3 className="font-semibold">Certificati Medici</h3>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsAddingCertificate(true)}
+                data-testid="button-add-certificate"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nuovo Certificato
+              </Button>
+            </div>
+
+            {memberCertificates.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 border rounded-md text-center">
+                Nessun certificato registrato
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {memberCertificates.map((cert) => (
+                  <div
+                    key={cert.id}
+                    className="border rounded-md p-3"
+                    data-testid={`certificate-${cert.id}`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Certificato Medico</span>
+                          <Badge variant={
+                            cert.status === "valid" ? "default" :
+                            cert.status === "expired" ? "destructive" :
+                            "secondary"
+                          } className="text-xs">
+                            {cert.status === "valid" ? "Valido" :
+                             cert.status === "expired" ? "Scaduto" :
+                             "In attesa"}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Validità: {new Date(cert.issueDate).toLocaleDateString('it-IT')} - {new Date(cert.expiryDate).toLocaleDateString('it-IT')}
+                        </div>
+                        {cert.doctorName && (
+                          <div className="text-sm">
+                            Medico: {cert.doctorName}
+                          </div>
+                        )}
+                        {cert.notes && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Note: {cert.notes}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEditingCertificate(cert)}
+                          data-testid={`button-edit-certificate-${cert.id}`}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm("Sei sicuro di voler eliminare questo certificato?")) {
+                              deleteCertificateMutation.mutate(cert.id);
+                            }
+                          }}
+                          data-testid={`button-delete-certificate-${cert.id}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Certificate Form */}
+            {(isAddingCertificate || editingCertificate) && (
+              <form onSubmit={handleSubmitCertificate} className="mt-4 border rounded-md p-4 bg-muted/30 space-y-4">
+                <h4 className="font-medium">{editingCertificate ? "Modifica Certificato" : "Nuovo Certificato"}</h4>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cert-issueDate">Data Rilascio *</Label>
+                    <Input
+                      id="cert-issueDate"
+                      name="issueDate"
+                      type="date"
+                      required
+                      defaultValue={editingCertificate?.issueDate || new Date().toISOString().split('T')[0]}
+                      data-testid="input-certificate-issue-date"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cert-expiryDate">Data Scadenza *</Label>
+                    <Input
+                      id="cert-expiryDate"
+                      name="expiryDate"
+                      type="date"
+                      required
+                      defaultValue={editingCertificate?.expiryDate || ""}
+                      data-testid="input-certificate-expiry-date"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="doctorName">Nome Medico</Label>
+                    <Input
+                      id="doctorName"
+                      name="doctorName"
+                      defaultValue={editingCertificate?.doctorName || ""}
+                      placeholder="Dr. Mario Rossi"
+                      data-testid="input-doctor-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cert-status">Stato</Label>
+                    <Select name="status" defaultValue={editingCertificate?.status || "valid"}>
+                      <SelectTrigger data-testid="select-certificate-status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="valid">Valido</SelectItem>
+                        <SelectItem value="expired">Scaduto</SelectItem>
+                        <SelectItem value="pending">In attesa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cert-notes">Note</Label>
+                  <Textarea
+                    id="cert-notes"
+                    name="notes"
+                    rows={2}
+                    defaultValue={editingCertificate?.notes || ""}
+                    placeholder="Note aggiuntive..."
+                    data-testid="input-certificate-notes"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsAddingCertificate(false);
+                      setEditingCertificate(null);
+                    }}
+                    data-testid="button-cancel-certificate"
+                  >
+                    Annulla
+                  </Button>
+                  <Button 
+                    type="submit"
+                    disabled={createCertificateMutation.isPending || updateCertificateMutation.isPending}
+                    data-testid="button-submit-certificate"
+                  >
+                    {editingCertificate ? "Salva Modifiche" : "Crea Certificato"}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            data-testid="button-close-membership-dialog"
+          >
+            Chiudi
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export { MembershipManagementDialog };
