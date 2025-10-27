@@ -5,12 +5,14 @@ Comprehensive web-based course management system to replace Google Sheets setup.
 
 ## Features
 - ✅ Student enrollment and member management
+- ✅ **Client categorization** with hierarchical parent/child categories
 - ✅ Course management with categories/subcategories
 - ✅ Instructor management with hourly rates
 - ✅ Membership cards with barcode access control
 - ✅ Medical certificate tracking
 - ✅ Manual payment processing with enrollment tracking
 - ✅ Complete enrollment-to-payment workflow (course fee + membership fee)
+- ✅ **Enhanced enrollment UI** with prominent enrollment button and payment tracking
 - ✅ Attendance logging via barcode scanning
 - ✅ Reporting and statistics dashboard
 - ✅ Data import from CSV/Excel (Google Sheets migration)
@@ -39,6 +41,7 @@ Comprehensive web-based course management system to replace Google Sheets setup.
 │   │   │   ├── landing.tsx      # Public landing page
 │   │   │   ├── dashboard.tsx    # Main dashboard
 │   │   │   ├── members.tsx      # Member management
+│   │   │   ├── client-categories.tsx # Client categorization
 │   │   │   ├── courses.tsx      # Course management
 │   │   │   ├── categories.tsx   # Category hierarchy
 │   │   │   ├── instructors.tsx  # Instructor management
@@ -67,7 +70,8 @@ Comprehensive web-based course management system to replace Google Sheets setup.
 Complete PostgreSQL schema with the following tables:
 - `users` - Authenticated users (Replit Auth)
 - `sessions` - User sessions (Replit Auth)
-- `members` - Student/member records
+- `members` - Student/member records with categoryId for client categorization
+- `client_categories` - **Hierarchical client categories** (parent/child relationships)
 - `categories` - Hierarchical course categories
 - `instructors` - Instructor profiles and specializations
 - `instructor_rates` - Hourly rates per course type
@@ -86,6 +90,12 @@ All endpoints require authentication (`/api/login` to authenticate):
 - `POST /api/members` - Create new member
 - `PATCH /api/members/:id` - Update member
 - `DELETE /api/members/:id` - Delete member
+
+### Client Categories
+- `GET /api/client-categories` - List all client categories
+- `POST /api/client-categories` - Create client category
+- `PATCH /api/client-categories/:id` - Update client category
+- `DELETE /api/client-categories/:id` - Delete client category
 
 ### Categories
 - `GET /api/categories` - List all categories
@@ -190,6 +200,17 @@ The application follows a modern SaaS aesthetic inspired by Linear, Notion, and 
 - [ ] Google Sheets integration with custom column mapping for data migration
 
 ## Recent Changes
+- **2024-10-27**: Client Categorization & Enhanced Enrollment UI
+  - **Terminology update**: Changed "Iscritti" to "Clienti/Anagrafiche" throughout the application
+  - **Hierarchical client categories**: New database table `client_categories` with parent/child support for unlimited nesting
+  - **Client category management**: Full CRUD API endpoints at `/api/client-categories`
+  - **Client categorization UI**: New page at `/client-categories` with hierarchical tree visualization
+  - **Category selector in member form**: Controlled Select component with indented hierarchical display and hidden input for proper form submission
+  - **Enhanced member table UI**:
+    - New "Corsi Attivi" column displaying active course enrollments with badges (max 2 shown + overflow count)
+    - Enrollment button changed from icon-only to prominent button with icon + "Iscrizioni" text
+  - **Expanded enrollment dialog**: Now shows complete payment information for each enrollment with status badges (Pagato/In sospeso/Scaduto) and payment breakdown
+
 - **2024-10-27**: Complete Enrollment & Payment System
   - **Manual payment registration only**: Removed Stripe integration, focusing on manual payment tracking
   - **Enhanced database schema**: Added `enrollmentId` field to payments table for linking payments to specific enrollments
