@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,7 +179,7 @@ export default function Members() {
   const getMemberEnrollments = (memberId: number) => {
     return enrollments?.filter(e => e.memberId === memberId).map(e => {
       const course = courses?.find(c => c.id === e.courseId);
-      return course?.name;
+      return course ? { id: course.id, name: course.name } : null;
     }).filter(Boolean) || [];
   };
 
@@ -298,14 +299,16 @@ export default function Members() {
                         <TableCell>
                           {memberCourses.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
-                              {memberCourses.slice(0, 2).map((course, idx) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  {course}
-                                </Badge>
+                              {memberCourses.slice(0, 2).map((course) => (
+                                <Link key={course.id} href="/courses">
+                                  <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-course-${course.id}`}>
+                                    {course.name}
+                                  </Badge>
+                                </Link>
                               ))}
                               {memberCourses.length > 2 && (
                                 <Badge variant="secondary" className="text-xs">
-                                  +{memberCourses.length - 2}
+                                  +{memberCourses.length - 2} altri
                                 </Badge>
                               )}
                             </div>
