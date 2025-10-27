@@ -12,6 +12,9 @@ import {
   Upload,
   LogOut,
   Building2,
+  Wallet,
+  Settings,
+  UserCog,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -29,7 +32,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
-const menuItems = [
+const mainMenuItems = [
   {
     title: "Dashboard",
     url: "/",
@@ -44,16 +47,6 @@ const menuItems = [
     title: "Corsi",
     url: "/corsi",
     icon: Calendar,
-  },
-  {
-    title: "Categorie",
-    url: "/categorie",
-    icon: FolderTree,
-  },
-  {
-    title: "Categorie Clienti",
-    url: "/categorie-clienti",
-    icon: Tags,
   },
   {
     title: "Insegnanti",
@@ -92,6 +85,29 @@ const menuItems = [
   },
 ];
 
+const commonTablesItems = [
+  {
+    title: "Categorie Corsi",
+    url: "/categorie",
+    icon: FolderTree,
+  },
+  {
+    title: "Categorie Clienti",
+    url: "/categorie-clienti",
+    icon: Tags,
+  },
+  {
+    title: "Tipi di Pagamento",
+    url: "/tipi-pagamento",
+    icon: Wallet,
+  },
+  {
+    title: "Utenti e Permessi",
+    url: "/utenti-permessi",
+    icon: UserCog,
+  },
+];
+
 export function AppSidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
@@ -109,7 +125,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu Principale</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => {
+              {mainMenuItems.map((item) => {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -117,6 +133,31 @@ export function AppSidebar() {
                       asChild 
                       isActive={isActive}
                       data-testid={`nav-${item.url.slice(1) || 'dashboard'}`}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Tabelle Comuni</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {commonTablesItems.map((item) => {
+                const isActive = location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      data-testid={`nav-${item.url.slice(1)}`}
                     >
                       <Link href={item.url}>
                         <item.icon className="w-4 h-4" />

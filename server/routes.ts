@@ -13,6 +13,7 @@ import {
   insertCourseSchema,
   insertMembershipSchema,
   insertMedicalCertificateSchema,
+  insertPaymentMethodSchema,
   insertPaymentSchema,
   insertEnrollmentSchema,
   insertAccessLogSchema,
@@ -388,6 +389,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(certificate);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create medical certificate" });
+    }
+  });
+
+  // ==== Payment Methods Routes ====
+  app.get("/api/payment-methods", isAuthenticated, async (req, res) => {
+    try {
+      const methods = await storage.getPaymentMethods();
+      res.json(methods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch payment methods" });
+    }
+  });
+
+  app.post("/api/payment-methods", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertPaymentMethodSchema.parse(req.body);
+      const method = await storage.createPaymentMethod(validatedData);
+      res.status(201).json(method);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create payment method" });
+    }
+  });
+
+  app.patch("/api/payment-methods/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const method = await storage.updatePaymentMethod(id, req.body);
+      res.json(method);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update payment method" });
+    }
+  });
+
+  app.delete("/api/payment-methods/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePaymentMethod(id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to delete payment method" });
     }
   });
 
