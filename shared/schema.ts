@@ -242,7 +242,7 @@ export const enrollments = pgTable("enrollments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
+export const enrollmentsRelations = relations(enrollments, ({ one, many }) => ({
   member: one(members, {
     fields: [enrollments.memberId],
     references: [members.id],
@@ -251,6 +251,7 @@ export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
     fields: [enrollments.courseId],
     references: [courses.id],
   }),
+  payments: many(payments),
 }));
 
 export const insertEnrollmentSchema = createInsertSchema(enrollments).omit({
@@ -348,14 +349,14 @@ export type AccessLog = typeof accessLogs.$inferSelect;
 export const payments = pgTable("payments", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   memberId: integer("member_id").references(() => members.id, { onDelete: "set null" }),
+  enrollmentId: integer("enrollment_id").references(() => enrollments.id, { onDelete: "cascade" }),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   type: varchar("type", { length: 100 }).notNull(), // 'course', 'membership', 'other'
   description: text("description"),
   status: varchar("status", { length: 50 }).notNull().default("pending"), // 'pending', 'paid', 'overdue', 'cancelled'
   dueDate: date("due_date"),
   paidDate: date("paid_date"),
-  paymentMethod: varchar("payment_method", { length: 100 }), // 'cash', 'card', 'stripe', 'bank_transfer'
-  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  paymentMethod: varchar("payment_method", { length: 100 }), // 'cash', 'card', 'bank_transfer', 'other'
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -365,6 +366,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   member: one(members, {
     fields: [payments.memberId],
     references: [members.id],
+  }),
+  enrollment: one(enrollments, {
+    fields: [payments.enrollmentId],
+    references: [enrollments.id],
   }),
 }));
 
