@@ -3,13 +3,27 @@
  */
 
 const MONTHS = ['A', 'B', 'C', 'D', 'E', 'H', 'L', 'M', 'P', 'R', 'S', 'T'];
-const CONTROL_CODE_ODD = '1-0-5-7-9-13-15-17-19-21-1-0-5-7-9-13-15-17-19-21-1-0-5-7-9'.split('-');
-const CONTROL_CODE_EVEN = '0-1-2-3-4-5-6-7-8-9-0-1-2-3-4-5-6-7-8-9-0-1-2-3-4-5'.split('-');
+
+const ODD_VALUES: Record<string, number> = {
+  '0': 1, '1': 0, '2': 5, '3': 7, '4': 9, '5': 13, '6': 15, '7': 17, '8': 19, '9': 21,
+  'A': 1, 'B': 0, 'C': 5, 'D': 7, 'E': 9, 'F': 13, 'G': 15, 'H': 17, 'I': 19, 'J': 21,
+  'K': 2, 'L': 4, 'M': 18, 'N': 20, 'O': 11, 'P': 3, 'Q': 6, 'R': 8, 'S': 12, 'T': 14,
+  'U': 16, 'V': 10, 'W': 22, 'X': 25, 'Y': 24, 'Z': 23
+};
+
+const EVEN_VALUES: Record<string, number> = {
+  '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+  'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7, 'I': 8, 'J': 9,
+  'K': 10, 'L': 11, 'M': 12, 'N': 13, 'O': 14, 'P': 15, 'Q': 16, 'R': 17, 'S': 18, 'T': 19,
+  'U': 20, 'V': 21, 'W': 22, 'X': 23, 'Y': 24, 'Z': 25
+};
+
+const CONTROL_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 interface FiscalCodeData {
-  dateOfBirth: string; // formato YYYY-MM-DD
+  dateOfBirth: string;
   gender: 'M' | 'F';
-  placeOfBirth?: string; // codice catastale
+  placeOfBirth?: string;
 }
 
 /**
@@ -20,7 +34,6 @@ export function validateFiscalCodeFormat(fiscalCode: string): boolean {
   
   const normalized = fiscalCode.toUpperCase().trim();
   
-  // Formato: 6 lettere + 2 cifre + lettera + 2 cifre + lettera + 3 cifre + lettera
   const pattern = /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/;
   
   return pattern.test(normalized);
@@ -38,23 +51,13 @@ function calculateControlChar(fiscalCode: string): string {
     const isOdd = i % 2 === 0;
     
     if (isOdd) {
-      // Posizione dispari (1, 3, 5, ...)
-      if (char >= '0' && char <= '9') {
-        sum += parseInt(CONTROL_CODE_ODD[parseInt(char)]);
-      } else {
-        sum += parseInt(CONTROL_CODE_ODD[char.charCodeAt(0) - 'A'.charCodeAt(0) + 10]);
-      }
+      sum += ODD_VALUES[char] || 0;
     } else {
-      // Posizione pari (2, 4, 6, ...)
-      if (char >= '0' && char <= '9') {
-        sum += parseInt(char);
-      } else {
-        sum += char.charCodeAt(0) - 'A'.charCodeAt(0);
-      }
+      sum += EVEN_VALUES[char] || 0;
     }
   }
   
-  return String.fromCharCode('A'.charCodeAt(0) + (sum % 26));
+  return CONTROL_CHARS[sum % 26];
 }
 
 /**
@@ -78,26 +81,22 @@ export function parseFiscalCode(fiscalCode: string): FiscalCodeData | null {
   const normalized = fiscalCode.toUpperCase().trim();
   
   try {
-    // Estrai anno (posizioni 6-7)
     let year = parseInt(normalized.substring(6, 8));
     const currentYear = new Date().getFullYear();
     const currentCentury = Math.floor(currentYear / 100) * 100;
     const lastTwoDigits = currentYear % 100;
     
-    // Determina il secolo
     if (year > lastTwoDigits) {
-      year += currentCentury - 100; // secolo precedente
+      year += currentCentury - 100;
     } else {
-      year += currentCentury; // secolo attuale
+      year += currentCentury;
     }
     
-    // Estrai mese (posizione 8)
     const monthChar = normalized[8];
     const monthIndex = MONTHS.indexOf(monthChar);
     if (monthIndex === -1) return null;
     const month = monthIndex + 1;
     
-    // Estrai giorno e sesso (posizioni 9-10)
     let day = parseInt(normalized.substring(9, 11));
     let gender: 'M' | 'F' = 'M';
     
@@ -106,10 +105,8 @@ export function parseFiscalCode(fiscalCode: string): FiscalCodeData | null {
       day -= 40;
     }
     
-    // Formatta la data in YYYY-MM-DD
     const dateOfBirth = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
     
-    // Codice catastale (posizioni 11-14)
     const placeCode = normalized.substring(11, 15);
     
     return {
@@ -125,7 +122,6 @@ export function parseFiscalCode(fiscalCode: string): FiscalCodeData | null {
 
 /**
  * Dizionario dei comuni italiani più comuni (codice catastale -> nome)
- * Questo è un subset ridotto - in produzione usare un database completo
  */
 const COMMON_CITIES: Record<string, string> = {
   'A001': 'Abano Terme',
