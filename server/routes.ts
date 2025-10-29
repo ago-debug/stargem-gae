@@ -18,6 +18,7 @@ import {
   insertPaymentSchema,
   insertEnrollmentSchema,
   insertAccessLogSchema,
+  insertAttendanceSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads
@@ -959,6 +960,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Google Sheets import error:", error);
       res.status(500).json({ message: error.message || "Errore nell'importazione da Google Sheets" });
+    }
+  });
+
+  // ==== Attendances Routes ====
+  app.get("/api/attendances", isAuthenticated, async (req, res) => {
+    try {
+      const attendances = await storage.getAttendances();
+      res.json(attendances);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch attendances" });
+    }
+  });
+
+  app.get("/api/attendances/member/:memberId", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = parseInt(req.params.memberId);
+      const attendances = await storage.getAttendancesByMember(memberId);
+      res.json(attendances);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch member attendances" });
+    }
+  });
+
+  app.post("/api/attendances", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertAttendanceSchema.parse(req.body);
+      const attendance = await storage.createAttendance(validatedData);
+      res.status(201).json(attendance);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create attendance" });
+    }
+  });
+
+  app.delete("/api/attendances/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAttendance(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete attendance" });
     }
   });
 

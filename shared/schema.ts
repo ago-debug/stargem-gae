@@ -491,3 +491,39 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
 });
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
+
+// Attendances (Presenze)
+export const attendances = pgTable("attendances", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  courseId: integer("course_id").references(() => courses.id, { onDelete: "set null" }),
+  enrollmentId: integer("enrollment_id").references(() => enrollments.id, { onDelete: "set null" }),
+  attendanceDate: timestamp("attendance_date").notNull().defaultNow(),
+  type: varchar("type", { length: 50 }).notNull().default("manual"), // 'manual', 'barcode', 'auto'
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const attendancesRelations = relations(attendances, ({ one }) => ({
+  member: one(members, {
+    fields: [attendances.memberId],
+    references: [members.id],
+  }),
+  course: one(courses, {
+    fields: [attendances.courseId],
+    references: [courses.id],
+  }),
+  enrollment: one(enrollments, {
+    fields: [attendances.enrollmentId],
+    references: [enrollments.id],
+  }),
+}));
+
+export const insertAttendanceSchema = createInsertSchema(attendances).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
+export type Attendance = typeof attendances.$inferSelect;
