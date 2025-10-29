@@ -1057,7 +1057,7 @@ export default function Members() {
                           <SelectValue placeholder="Nessun corso specifico" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Nessun corso</SelectItem>
+                          <SelectItem value="none">Nessun corso</SelectItem>
                           {enrollments
                             ?.filter(e => e.memberId === editingMember.id)
                             .map(enrollment => {
@@ -1080,15 +1080,21 @@ export default function Members() {
                           return;
                         }
                         
-                        const enrollment = selectedCourseForAttendance ? 
+                        const enrollment = (selectedCourseForAttendance && selectedCourseForAttendance !== "none") ? 
                           enrollments?.find(e => e.id === parseInt(selectedCourseForAttendance)) : undefined;
                         
-                        addAttendanceMutation.mutate({
+                        const attendanceData: any = {
                           memberId: editingMember.id,
-                          courseId: enrollment?.courseId,
-                          enrollmentId: enrollment?.id,
                           attendanceDate: `${attendanceDate}T${attendanceTime}:00`,
-                        });
+                        };
+                        
+                        // Only include courseId and enrollmentId if a valid enrollment is selected
+                        if (enrollment) {
+                          attendanceData.courseId = enrollment.courseId;
+                          attendanceData.enrollmentId = enrollment.id;
+                        }
+                        
+                        addAttendanceMutation.mutate(attendanceData);
                         setAttendanceDate("");
                         setAttendanceTime("");
                         setSelectedCourseForAttendance("");
