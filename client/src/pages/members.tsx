@@ -37,6 +37,7 @@ export default function Members() {
   const [selectedMemberForMembership, setSelectedMemberForMembership] = useState<Member | null>(null);
   const [fiscalCodeError, setFiscalCodeError] = useState<string>("");
   const [autoFilledData, setAutoFilledData] = useState({ dateOfBirth: "", gender: "", placeOfBirth: "" });
+  const [selectedCourseToAdd, setSelectedCourseToAdd] = useState<string>("");
   
   const dateOfBirthRef = useRef<HTMLInputElement>(null);
   const genderRef = useRef<HTMLSelectElement>(null);
@@ -95,6 +96,33 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       toast({ title: "Cliente eliminato con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const addEnrollmentMutation = useMutation({
+    mutationFn: async (data: { memberId: number; courseId: number }) => {
+      await apiRequest("POST", "/api/enrollments", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      toast({ title: "Corso aggiunto con successo" });
+      setSelectedCourseToAdd("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const removeEnrollmentMutation = useMutation({
+    mutationFn: async (enrollmentId: number) => {
+      await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      toast({ title: "Iscrizione rimossa con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -836,6 +864,114 @@ export default function Members() {
                         />
                       </div>
                     </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Corsi Iscritti - Solo per membri esistenti */}
+            {editingMember && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Corsi Iscritti</h3>
+                    <Badge variant="secondary" data-testid="badge-enrolled-courses-count">
+                      {enrollments?.filter(e => e.memberId === editingMember.id).length || 0} corsi
+                    </Badge>
+                  </div>
+
+                  {/* Lista corsi iscritti */}
+                  <div className="space-y-2">
+                    {enrollments?.filter(e => e.memberId === editingMember.id).length === 0 ? (
+                      <p className="text-sm text-muted-foreground" data-testid="text-no-enrollments">
+                        Nessun corso iscritto
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {enrollments
+                          ?.filter(e => e.memberId === editingMember.id)
+                          .map((enrollment) => {
+                            const course = courses?.find(c => c.id === enrollment.courseId);
+                            if (!course) return null;
+                            return (
+                              <div
+                                key={enrollment.id}
+                                className="flex items-center justify-between p-3 border rounded-md hover-elevate"
+                                data-testid={`enrollment-item-${enrollment.id}`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <p className="font-medium" data-testid={`enrollment-course-name-${enrollment.id}`}>
+                                      {course.name}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {course.sku}
+                                    </p>
+                                  </div>
+                                </div>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    if (confirm(`Rimuovere l'iscrizione al corso "${course.name}"?`)) {
+                                      removeEnrollmentMutation.mutate(enrollment.id);
+                                    }
+                                  }}
+                                  disabled={removeEnrollmentMutation.isPending}
+                                  data-testid={`button-remove-enrollment-${enrollment.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Aggiungi nuovo corso */}
+                  <div className="flex gap-2">
+                    <Select
+                      value={selectedCourseToAdd}
+                      onValueChange={setSelectedCourseToAdd}
+                    >
+                      <SelectTrigger className="flex-1" data-testid="select-add-course">
+                        <SelectValue placeholder="Seleziona un corso da aggiungere" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {courses
+                          ?.filter(c => 
+                            c.active && 
+                            !enrollments?.some(e => 
+                              e.memberId === editingMember.id && e.courseId === c.id
+                            )
+                          )
+                          .map(course => (
+                            <SelectItem key={course.id} value={course.id.toString()}>
+                              {course.name} ({course.sku})
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (selectedCourseToAdd && editingMember) {
+                          addEnrollmentMutation.mutate({
+                            memberId: editingMember.id,
+                            courseId: parseInt(selectedCourseToAdd)
+                          });
+                        }
+                      }}
+                      disabled={!selectedCourseToAdd || addEnrollmentMutation.isPending}
+                      data-testid="button-add-course-to-member"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Aggiungi
+                    </Button>
                   </div>
                 </div>
               </>
