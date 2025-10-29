@@ -11,6 +11,7 @@ import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
 import Courses from "@/pages/courses";
+import CourseEnrollments from "@/pages/course-enrollments";
 import Categories from "@/pages/categories";
 import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/iscritti" component={Members} />
       <Route path="/corsi" component={Courses} />
+      <Route path="/iscritti-corsi" component={CourseEnrollments} />
       <Route path="/categorie" component={Categories} />
       <Route path="/categorie-clienti" component={ClientCategories} />
       <Route path="/insegnanti" component={Instructors} />
