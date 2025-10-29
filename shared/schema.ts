@@ -524,6 +524,13 @@ export const insertAttendanceSchema = createInsertSchema(attendances).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  attendanceDate: z.string().or(z.date()).transform((val) => {
+    if (typeof val === 'string') {
+      return new Date(val);
+    }
+    return val;
+  }),
 });
 export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
 export type Attendance = typeof attendances.$inferSelect;
