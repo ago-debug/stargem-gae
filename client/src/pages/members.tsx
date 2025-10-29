@@ -35,6 +35,12 @@ export default function Members() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("none");
   const [isMembershipDialogOpen, setIsMembershipDialogOpen] = useState(false);
   const [selectedMemberForMembership, setSelectedMemberForMembership] = useState<Member | null>(null);
+  const [fiscalCodeError, setFiscalCodeError] = useState<string>("");
+  const [autoFilledData, setAutoFilledData] = useState({ dateOfBirth: "", gender: "", placeOfBirth: "" });
+  
+  const dateOfBirthRef = useRef<HTMLInputElement>(null);
+  const genderRef = useRef<HTMLSelectElement>(null);
+  const placeOfBirthRef = useRef<HTMLInputElement>(null);
 
   const { data: members, isLoading } = useQuery<Member[]>({
     queryKey: ["/api/members"],
@@ -100,6 +106,8 @@ export default function Members() {
     setShowParentFields(false);
     setHasMedicalCert(false);
     setSelectedCategoryId("none");
+    setFiscalCodeError("");
+    setAutoFilledData({ dateOfBirth: "", gender: "", placeOfBirth: "" });
   };
 
   useEffect(() => {
@@ -130,6 +138,55 @@ export default function Members() {
     }
   };
 
+  const handleFiscalCodeChange = (value: string) => {
+    const normalized = value.toUpperCase().trim();
+    
+    if (!normalized) {
+      setFiscalCodeError("");
+      setAutoFilledData({ dateOfBirth: "", gender: "", placeOfBirth: "" });
+      return;
+    }
+    
+    if (normalized.length === 16) {
+      if (!validateFiscalCode(normalized)) {
+        setFiscalCodeError("Codice fiscale non valido");
+        return;
+      }
+      
+      const parsed = parseFiscalCode(normalized);
+      if (parsed) {
+        setFiscalCodeError("");
+        setAutoFilledData({
+          dateOfBirth: parsed.dateOfBirth,
+          gender: parsed.gender,
+          placeOfBirth: getPlaceName(parsed.placeOfBirth || "") || parsed.placeOfBirth || ""
+        });
+        
+        // Auto-compila i campi
+        if (dateOfBirthRef.current && !dateOfBirthRef.current.value) {
+          dateOfBirthRef.current.value = parsed.dateOfBirth;
+          handleDateOfBirthChange(parsed.dateOfBirth);
+        }
+        if (genderRef.current && !genderRef.current.value) {
+          genderRef.current.value = parsed.gender;
+        }
+        if (placeOfBirthRef.current && !placeOfBirthRef.current.value) {
+          placeOfBirthRef.current.value = getPlaceName(parsed.placeOfBirth || "") || parsed.placeOfBirth || "";
+        }
+        
+        toast({
+          title: "Dati estratti dal CF",
+          description: `Data: ${new Date(parsed.dateOfBirth).toLocaleDateString('it-IT')}, Sesso: ${parsed.gender === 'M' ? 'Maschio' : 'Femmina'}`,
+        });
+      } else {
+        setFiscalCodeError("Impossibile estrarre i dati dal codice fiscale");
+      }
+    } else if (normalized.length < 16) {
+      setFiscalCodeError("");
+      setAutoFilledData({ dateOfBirth: "", gender: "", placeOfBirth: "" });
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -139,6 +196,8 @@ export default function Members() {
       fiscalCode: formData.get("fiscalCode") as string || null,
       categoryId: (formData.get("categoryId") && formData.get("categoryId") !== "none") ? parseInt(formData.get("categoryId") as string) : null,
       dateOfBirth: formData.get("dateOfBirth") as string || null,
+      placeOfBirth: formData.get("placeOfBirth") as string || null,
+      gender: formData.get("gender") as string || null,
       email: formData.get("email") as string || null,
       phone: formData.get("phone") as string || null,
       mobile: formData.get("mobile") as string || null,
@@ -456,27 +515,58 @@ export default function Members() {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fiscalCode">Codice Fiscale</Label>
-                  <Input
-                    id="fiscalCode"
-                    name="fiscalCode"
-                    defaultValue={editingMember?.fiscalCode || ""}
-                    maxLength={16}
-                    className="uppercase font-mono"
-                    data-testid="input-fiscalCode"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="fiscalCode">Codice Fiscale</Label>
+                <Input
+                  id="fiscalCode"
+                  name="fiscalCode"
+                  defaultValue={editingMember?.fiscalCode || ""}
+                  maxLength={16}
+                  className={`uppercase font-mono ${fiscalCodeError ? 'border-destructive' : ''}`}
+                  onChange={(e) => handleFiscalCodeChange(e.target.value)}
+                  data-testid="input-fiscalCode"
+                />
+                {fiscalCodeError && (
+                  <p className="text-xs text-destructive">{fiscalCodeError}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="dateOfBirth">Data di Nascita</Label>
                   <Input
+                    ref={dateOfBirthRef}
                     id="dateOfBirth"
                     name="dateOfBirth"
                     type="date"
                     defaultValue={editingMember?.dateOfBirth || ""}
                     onChange={(e) => handleDateOfBirthChange(e.target.value)}
                     data-testid="input-dateOfBirth"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gender">Sesso</Label>
+                  <select
+                    ref={genderRef as any}
+                    id="gender"
+                    name="gender"
+                    defaultValue={editingMember?.gender || ""}
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    data-testid="select-gender"
+                  >
+                    <option value="">Seleziona</option>
+                    <option value="M">Maschio</option>
+                    <option value="F">Femmina</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="placeOfBirth">Luogo di Nascita</Label>
+                  <Input
+                    ref={placeOfBirthRef}
+                    id="placeOfBirth"
+                    name="placeOfBirth"
+                    defaultValue={editingMember?.placeOfBirth || ""}
+                    data-testid="input-placeOfBirth"
                   />
                 </div>
               </div>
