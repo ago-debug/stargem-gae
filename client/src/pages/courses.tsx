@@ -11,10 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Course, InsertCourse, Category, Instructor, Studio } from "@shared/schema";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
+import type { Course, InsertCourse, Category, Instructor, Studio, Attendance } from "@shared/schema";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -52,6 +55,7 @@ export default function Courses() {
   const [selectedStartTime, setSelectedStartTime] = useState<string>("");
   const [selectedEndTime, setSelectedEndTime] = useState<string>("");
   const [selectedRecurrence, setSelectedRecurrence] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("details");
 
   const { data: courses, isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -77,6 +81,10 @@ export default function Courses() {
     queryKey: ["/api/members"],
   });
 
+  const { data: attendances } = useQuery<Attendance[]>({
+    queryKey: ["/api/attendances"],
+  });
+
   const getCourseEnrollments = (courseId: number): Array<{ id: number; firstName: string; lastName: string }> => {
     if (!enrollments || !members) return [];
     return enrollments
@@ -86,6 +94,21 @@ export default function Courses() {
         return member ? { id: member.id, firstName: member.firstName, lastName: member.lastName } : null;
       })
       .filter((m): m is { id: number; firstName: string; lastName: string } => m !== null);
+  };
+
+  const getCourseAttendances = (courseId: number) => {
+    if (!attendances || !members) return [];
+    return attendances
+      .filter(a => a.courseId === courseId)
+      .map(a => {
+        const member = members.find(m => m.id === a.memberId);
+        return {
+          ...a,
+          memberName: member ? `${member.firstName} ${member.lastName}` : "Sconosciuto",
+        };
+      })
+      .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
+      .slice(0, 20); // Ultime 20 presenze
   };
 
   const createMutation = useMutation({
@@ -327,96 +350,297 @@ export default function Courses() {
       <Dialog open={isFormOpen} onOpenChange={(open) => {
         if (!open) closeDialog();
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCourse ? "Modifica Corso" : "Nuovo Corso"}</DialogTitle>
             <DialogDescription>
-              Inserisci i dettagli del corso
+              {editingCourse ? "Gestisci i dettagli del corso, visualizza iscritti e presenze" : "Inserisci i dettagli del corso"}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome Corso *</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  defaultValue={editingCourse?.name}
-                  required
-                  data-testid="input-name"
-                />
-              </div>
+          
+          {editingCourse ? (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="details" data-testid="tab-details">Dettagli</TabsTrigger>
+                <TabsTrigger value="enrollments" data-testid="tab-enrollments">
+                  <Users className="w-4 h-4 mr-1" />
+                  Iscritti ({getCourseEnrollments(editingCourse.id).length})
+                </TabsTrigger>
+                <TabsTrigger value="attendances" data-testid="tab-attendances">
+                  <Calendar className="w-4 h-4 mr-1" />
+                  Presenze ({getCourseAttendances(editingCourse.id).length})
+                </TabsTrigger>
+              </TabsList>
 
-              <div className="space-y-2">
-                <Label htmlFor="sku">SKU</Label>
-                <Input
-                  id="sku"
-                  name="sku"
-                  placeholder="es: 2526-NEMBRI-LUN-15"
-                  defaultValue={editingCourse?.sku || ""}
-                  data-testid="input-sku"
-                />
-              </div>
-            </div>
+              <TabsContent value="details" className="space-y-4">
+                <p className="text-sm text-muted-foreground">Modifica dei dettagli del corso in arrivo</p>
+              </TabsContent>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrizione</Label>
-              <Textarea
-                id="description"
-                name="description"
-                defaultValue={editingCourse?.description || ""}
-                rows={3}
-                data-testid="input-description"
-              />
-            </div>
+              <TabsContent value="enrollments" className="space-y-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium">
+                      Membri Iscritti ({getCourseEnrollments(editingCourse.id).length})
+                    </h3>
+                  </div>
+                  
+                  {getCourseEnrollments(editingCourse.id).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Nessun membro iscritto a questo corso</p>
+                  ) : (
+                    <div className="border rounded-lg">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Nome</TableHead>
+                            <TableHead>Cognome</TableHead>
+                            <TableHead className="text-right">Azioni</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {getCourseEnrollments(editingCourse.id).map((member) => (
+                            <TableRow key={member.id}>
+                              <TableCell>{member.firstName}</TableCell>
+                              <TableCell>{member.lastName}</TableCell>
+                              <TableCell className="text-right">
+                                <Link href={`/members?search=${member.lastName}`}>
+                                  <Button variant="ghost" size="sm" data-testid={`button-view-member-${member.id}`}>
+                                    Visualizza
+                                  </Button>
+                                </Link>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="categoryId">Categoria</Label>
-                <Select name="categoryId" defaultValue={editingCourse?.categoryId?.toString()}>
-                  <SelectTrigger data-testid="select-category">
-                    <SelectValue placeholder="Seleziona categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories?.map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="studioId">Studio/Sala</Label>
-                <Select name="studioId" defaultValue={editingCourse?.studioId?.toString()}>
-                  <SelectTrigger data-testid="select-studio">
-                    <SelectValue placeholder="Seleziona studio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {studios?.map((studio) => (
-                      <SelectItem key={studio.id} value={studio.id.toString()}>
-                        {studio.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Insegnanti</Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <TabsContent value="attendances" className="space-y-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium">
+                      Ultime 20 Presenze
+                    </h3>
+                    <Badge variant="secondary">
+                      Totale: {getCourseAttendances(editingCourse.id).length}
+                    </Badge>
+                  </div>
+                  
+                  {getCourseAttendances(editingCourse.id).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Nessuna presenza registrata per questo corso</p>
+                  ) : (
+                    <div className="border rounded-lg">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Membro</TableHead>
+                            <TableHead>Data e Ora</TableHead>
+                            <TableHead>Tipo</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {getCourseAttendances(editingCourse.id).map((attendance: any) => (
+                            <TableRow key={attendance.id}>
+                              <TableCell className="font-medium">{attendance.memberName}</TableCell>
+                              <TableCell>
+                                {format(new Date(attendance.attendanceDate), "dd/MM/yyyy HH:mm", { locale: it })}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline">
+                                  {attendance.type === 'manual' ? 'Manuale' : 
+                                   attendance.type === 'barcode' ? 'Badge' : 'Auto'}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
-                  <Select name="instructorId" defaultValue={editingCourse?.instructorId?.toString()}>
-                    <SelectTrigger data-testid="select-instructor">
+                  <Label htmlFor="name">Nome Corso *</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    required
+                    data-testid="input-name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sku">SKU</Label>
+                  <Input
+                    id="sku"
+                    name="sku"
+                    placeholder="es: 2526-NEMBRI-LUN-15"
+                    data-testid="input-sku"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Descrizione</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  rows={3}
+                  data-testid="input-description"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="categoryId">Categoria</Label>
+                  <Select name="categoryId">
+                    <SelectTrigger data-testid="select-category">
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories?.map((category) => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="studioId">Studio/Sala</Label>
+                  <Select name="studioId">
+                    <SelectTrigger data-testid="select-studio">
+                      <SelectValue placeholder="Seleziona studio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {studios?.map((studio) => (
+                        <SelectItem key={studio.id} value={studio.id.toString()}>
+                          {studio.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Insegnanti</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
+                    <Select name="instructorId">
+                      <SelectTrigger data-testid="select-instructor">
+                        <SelectValue placeholder="Seleziona" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {instructors?.map((instructor) => (
+                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                            {instructor.firstName} {instructor.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1 (opzionale)</Label>
+                    <Select name="secondaryInstructor1Id">
+                      <SelectTrigger data-testid="select-secondary-instructor-1">
+                        <SelectValue placeholder="Nessuno" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {instructors?.map((instructor) => (
+                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                            {instructor.firstName} {instructor.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2 (opzionale)</Label>
+                    <Select name="secondaryInstructor2Id">
+                      <SelectTrigger data-testid="select-secondary-instructor-2">
+                        <SelectValue placeholder="Nessuno" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {instructors?.map((instructor) => (
+                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                            {instructor.firstName} {instructor.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Prezzo (€)</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    data-testid="input-price"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="maxCapacity">Posti Disponibili</Label>
+                  <Input
+                    id="maxCapacity"
+                    name="maxCapacity"
+                    type="number"
+                    min="1"
+                    data-testid="input-maxCapacity"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Data Inizio</Label>
+                  <Input
+                    id="startDate"
+                    name="startDate"
+                    type="date"
+                    data-testid="input-startDate"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">Data Fine</Label>
+                  <Input
+                    id="endDate"
+                    name="endDate"
+                    type="date"
+                    data-testid="input-endDate"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dayOfWeek">Giorno Settimana</Label>
+                  <Select value={selectedDayOfWeek} onValueChange={setSelectedDayOfWeek}>
+                    <SelectTrigger data-testid="select-dayOfWeek">
                       <SelectValue placeholder="Seleziona" />
                     </SelectTrigger>
                     <SelectContent>
-                      {instructors?.map((instructor) => (
-                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                          {instructor.firstName} {instructor.lastName}
+                      {WEEKDAYS.map((day) => (
+                        <SelectItem key={day.id} value={day.id}>
+                          {day.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -424,15 +648,15 @@ export default function Courses() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1 (opzionale)</Label>
-                  <Select name="secondaryInstructor1Id" defaultValue={editingCourse?.secondaryInstructor1Id?.toString()}>
-                    <SelectTrigger data-testid="select-secondary-instructor-1">
-                      <SelectValue placeholder="Nessuno" />
+                  <Label htmlFor="startTime">Ora Inizio</Label>
+                  <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
+                    <SelectTrigger data-testid="select-startTime">
+                      <SelectValue placeholder="--:--" />
                     </SelectTrigger>
                     <SelectContent>
-                      {instructors?.map((instructor) => (
-                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                          {instructor.firstName} {instructor.lastName}
+                      {TIME_SLOTS.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -440,170 +664,68 @@ export default function Courses() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2 (opzionale)</Label>
-                  <Select name="secondaryInstructor2Id" defaultValue={editingCourse?.secondaryInstructor2Id?.toString()}>
-                    <SelectTrigger data-testid="select-secondary-instructor-2">
-                      <SelectValue placeholder="Nessuno" />
+                  <Label htmlFor="endTime">Ora Fine</Label>
+                  <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
+                    <SelectTrigger data-testid="select-endTime">
+                      <SelectValue placeholder="--:--" />
                     </SelectTrigger>
                     <SelectContent>
-                      {instructors?.map((instructor) => (
-                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                          {instructor.firstName} {instructor.lastName}
+                      {TIME_SLOTS.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="recurrenceType">Ricorrenza</Label>
+                  <Select value={selectedRecurrence} onValueChange={setSelectedRecurrence}>
+                    <SelectTrigger data-testid="select-recurrenceType">
+                      <SelectValue placeholder="Seleziona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RECURRENCE_TYPES.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price">Prezzo (€)</Label>
-                <Input
-                  id="price"
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  defaultValue={editingCourse?.price || ""}
-                  data-testid="input-price"
+                <Label htmlFor="schedule">Note Orario (opzionale)</Label>
+                <Textarea
+                  id="schedule"
+                  name="schedule"
+                  placeholder="Note aggiuntive sull'orario"
+                  rows={2}
+                  data-testid="input-schedule"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="maxCapacity">Posti Disponibili</Label>
-                <Input
-                  id="maxCapacity"
-                  name="maxCapacity"
-                  type="number"
-                  min="1"
-                  defaultValue={editingCourse?.maxCapacity || ""}
-                  data-testid="input-maxCapacity"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Data Inizio</Label>
-                <Input
-                  id="startDate"
-                  name="startDate"
-                  type="date"
-                  defaultValue={editingCourse?.startDate || ""}
-                  data-testid="input-startDate"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="endDate">Data Fine</Label>
-                <Input
-                  id="endDate"
-                  name="endDate"
-                  type="date"
-                  defaultValue={editingCourse?.endDate || ""}
-                  data-testid="input-endDate"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="dayOfWeek">Giorno Settimana</Label>
-                <Select value={selectedDayOfWeek} onValueChange={setSelectedDayOfWeek}>
-                  <SelectTrigger data-testid="select-dayOfWeek">
-                    <SelectValue placeholder="Seleziona" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {WEEKDAYS.map((day) => (
-                      <SelectItem key={day.id} value={day.id}>
-                        {day.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="startTime">Ora Inizio</Label>
-                <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
-                  <SelectTrigger data-testid="select-startTime">
-                    <SelectValue placeholder="--:--" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIME_SLOTS.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="endTime">Ora Fine</Label>
-                <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
-                  <SelectTrigger data-testid="select-endTime">
-                    <SelectValue placeholder="--:--" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIME_SLOTS.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="recurrenceType">Ricorrenza</Label>
-                <Select value={selectedRecurrence} onValueChange={setSelectedRecurrence}>
-                  <SelectTrigger data-testid="select-recurrenceType">
-                    <SelectValue placeholder="Seleziona" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RECURRENCE_TYPES.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="schedule">Note Orario (opzionale)</Label>
-              <Textarea
-                id="schedule"
-                name="schedule"
-                defaultValue={editingCourse?.schedule || ""}
-                placeholder="Note aggiuntive sull'orario"
-                rows={2}
-                data-testid="input-schedule"
-              />
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={closeDialog}
-                data-testid="button-cancel"
-              >
-                Annulla
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createMutation.isPending || updateMutation.isPending}
-                data-testid="button-submit-course"
-              >
-                {editingCourse ? "Salva Modifiche" : "Crea Corso"}
-              </Button>
-            </DialogFooter>
-          </form>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeDialog}
+                  data-testid="button-cancel"
+                >
+                  Annulla
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createMutation.isPending}
+                  data-testid="button-submit-course"
+                >
+                  Crea Corso
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>
