@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Member, InsertMember } from "@shared/schema";
+import type { Member, InsertMember, Attendance } from "@shared/schema";
 
 export default function Members() {
   const { toast } = useToast();
@@ -38,6 +38,9 @@ export default function Members() {
   const [fiscalCodeError, setFiscalCodeError] = useState<string>("");
   const [autoFilledData, setAutoFilledData] = useState({ dateOfBirth: "", gender: "", placeOfBirth: "" });
   const [selectedCourseToAdd, setSelectedCourseToAdd] = useState<string>("");
+  const [attendanceDate, setAttendanceDate] = useState<string>("");
+  const [attendanceTime, setAttendanceTime] = useState<string>("");
+  const [selectedCourseForAttendance, setSelectedCourseForAttendance] = useState<string>("");
   
   const dateOfBirthRef = useRef<HTMLInputElement>(null);
   const genderRef = useRef<HTMLSelectElement>(null);
@@ -57,6 +60,10 @@ export default function Members() {
 
   const { data: clientCategories } = useQuery<any[]>({
     queryKey: ["/api/client-categories"],
+  });
+
+  const { data: attendances } = useQuery<Attendance[]>({
+    queryKey: ["/api/attendances"],
   });
 
   const createMutation = useMutation({
@@ -123,6 +130,32 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
       toast({ title: "Iscrizione rimossa con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const addAttendanceMutation = useMutation({
+    mutationFn: async (data: { memberId: number; courseId?: number; enrollmentId?: number; attendanceDate: string; notes?: string }) => {
+      await apiRequest("POST", "/api/attendances", { ...data, type: "manual" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/attendances"] });
+      toast({ title: "Presenza registrata con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteAttendanceMutation = useMutation({
+    mutationFn: async (attendanceId: number) => {
+      await apiRequest("DELETE", `/api/attendances/${attendanceId}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/attendances"] });
+      toast({ title: "Presenza eliminata con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -972,6 +1005,164 @@ export default function Members() {
                       <Plus className="h-4 w-4 mr-1" />
                       Aggiungi
                     </Button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Presenze - Solo per membri esistenti */}
+            {editingMember && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Presenze</h3>
+                    <Badge variant="secondary" data-testid="badge-attendances-count">
+                      {attendances?.filter(a => a.memberId === editingMember.id).length || 0} presenze
+                    </Badge>
+                  </div>
+
+                  {/* Form per registrare nuova presenza */}
+                  <div className="space-y-3 p-4 border rounded-md bg-muted/50">
+                    <h4 className="font-medium">Registra Nuova Presenza</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="attendanceDate">Data</Label>
+                        <Input
+                          id="attendanceDate"
+                          type="date"
+                          value={attendanceDate}
+                          onChange={(e) => setAttendanceDate(e.target.value)}
+                          data-testid="input-attendance-date"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="attendanceTime">Ora</Label>
+                        <Input
+                          id="attendanceTime"
+                          type="time"
+                          value={attendanceTime}
+                          onChange={(e) => setAttendanceTime(e.target.value)}
+                          data-testid="input-attendance-time"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="courseForAttendance">Corso (opzionale)</Label>
+                      <Select
+                        value={selectedCourseForAttendance}
+                        onValueChange={setSelectedCourseForAttendance}
+                      >
+                        <SelectTrigger data-testid="select-attendance-course">
+                          <SelectValue placeholder="Nessun corso specifico" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Nessun corso</SelectItem>
+                          {enrollments
+                            ?.filter(e => e.memberId === editingMember.id)
+                            .map(enrollment => {
+                              const course = courses?.find(c => c.id === enrollment.courseId);
+                              return course ? (
+                                <SelectItem key={course.id} value={enrollment.id.toString()}>
+                                  {course.name}
+                                </SelectItem>
+                              ) : null;
+                            })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        if (!attendanceDate || !attendanceTime) {
+                          toast({ title: "Errore", description: "Inserisci data e ora", variant: "destructive" });
+                          return;
+                        }
+                        
+                        const enrollment = selectedCourseForAttendance ? 
+                          enrollments?.find(e => e.id === parseInt(selectedCourseForAttendance)) : undefined;
+                        
+                        addAttendanceMutation.mutate({
+                          memberId: editingMember.id,
+                          courseId: enrollment?.courseId,
+                          enrollmentId: enrollment?.id,
+                          attendanceDate: `${attendanceDate}T${attendanceTime}:00`,
+                        });
+                        setAttendanceDate("");
+                        setAttendanceTime("");
+                        setSelectedCourseForAttendance("");
+                      }}
+                      disabled={!attendanceDate || !attendanceTime || addAttendanceMutation.isPending}
+                      data-testid="button-add-attendance"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Registra Presenza
+                    </Button>
+                  </div>
+
+                  {/* Lista presenze recenti */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">Ultime 10 Presenze</h4>
+                    {attendances?.filter(a => a.memberId === editingMember.id).length === 0 ? (
+                      <p className="text-sm text-muted-foreground" data-testid="text-no-attendances">
+                        Nessuna presenza registrata
+                      </p>
+                    ) : (
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {attendances
+                          ?.filter(a => a.memberId === editingMember.id)
+                          .slice(0, 10)
+                          .map((attendance) => {
+                            const course = attendance.courseId ? courses?.find(c => c.id === attendance.courseId) : null;
+                            const attendanceDateTime = new Date(attendance.attendanceDate);
+                            return (
+                              <div
+                                key={attendance.id}
+                                className="flex items-center justify-between p-3 border rounded-md text-sm hover-elevate"
+                                data-testid={`attendance-item-${attendance.id}`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <FileText className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <p className="font-medium">
+                                      {attendanceDateTime.toLocaleDateString('it-IT', { 
+                                        day: '2-digit', 
+                                        month: '2-digit', 
+                                        year: 'numeric' 
+                                      })}
+                                      {' '}
+                                      {attendanceDateTime.toLocaleTimeString('it-IT', { 
+                                        hour: '2-digit', 
+                                        minute: '2-digit' 
+                                      })}
+                                    </p>
+                                    {course && (
+                                      <p className="text-xs text-muted-foreground">
+                                        {course.name}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    if (confirm("Eliminare questa presenza?")) {
+                                      deleteAttendanceMutation.mutate(attendance.id);
+                                    }
+                                  }}
+                                  disabled={deleteAttendanceMutation.isPending}
+                                  data-testid={`button-delete-attendance-${attendance.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
                   </div>
                 </div>
               </>

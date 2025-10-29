@@ -14,6 +14,7 @@ import {
   payments,
   enrollments,
   accessLogs,
+  attendances,
   type User,
   type UpsertUser,
   type Member,
@@ -40,6 +41,8 @@ import {
   type InsertEnrollment,
   type AccessLog,
   type InsertAccessLog,
+  type Attendance,
+  type InsertAttendance,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -128,6 +131,13 @@ export interface IStorage {
   // Access Logs
   getAccessLogs(limit?: number): Promise<AccessLog[]>;
   createAccessLog(log: InsertAccessLog): Promise<AccessLog>;
+
+  // Attendances
+  getAttendances(): Promise<Attendance[]>;
+  getAttendance(id: number): Promise<Attendance | undefined>;
+  getAttendancesByMember(memberId: number): Promise<Attendance[]>;
+  createAttendance(attendance: InsertAttendance): Promise<Attendance>;
+  deleteAttendance(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -653,6 +663,33 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(members.id, cert.memberId));
+  }
+
+  // ==== Attendances ====
+  async getAttendances(): Promise<Attendance[]> {
+    return await db.select().from(attendances).orderBy(desc(attendances.attendanceDate));
+  }
+
+  async getAttendance(id: number): Promise<Attendance | undefined> {
+    const [attendance] = await db.select().from(attendances).where(eq(attendances.id, id));
+    return attendance;
+  }
+
+  async getAttendancesByMember(memberId: number): Promise<Attendance[]> {
+    return await db
+      .select()
+      .from(attendances)
+      .where(eq(attendances.memberId, memberId))
+      .orderBy(desc(attendances.attendanceDate));
+  }
+
+  async createAttendance(attendanceData: InsertAttendance): Promise<Attendance> {
+    const [attendance] = await db.insert(attendances).values(attendanceData).returning();
+    return attendance;
+  }
+
+  async deleteAttendance(id: number): Promise<void> {
+    await db.delete(attendances).where(eq(attendances.id, id));
   }
 }
 
