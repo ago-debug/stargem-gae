@@ -16,6 +16,7 @@ import {
   Settings,
   UserCog,
   RotateCcw,
+  GraduationCap,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -48,6 +49,11 @@ const mainMenuItems = [
     title: "Corsi",
     url: "/corsi",
     icon: Calendar,
+  },
+  {
+    title: "Iscritti per Corso",
+    url: "/iscritti-corsi",
+    icon: GraduationCap,
   },
   {
     title: "Insegnanti",
