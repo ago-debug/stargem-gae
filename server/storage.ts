@@ -684,6 +684,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAttendance(attendanceData: InsertAttendance): Promise<Attendance> {
+    // Validate that if enrollmentId is provided, it belongs to the member
+    if (attendanceData.enrollmentId) {
+      const enrollment = await this.getEnrollment(attendanceData.enrollmentId);
+      if (!enrollment) {
+        throw new Error("Enrollment not found");
+      }
+      if (enrollment.memberId !== attendanceData.memberId) {
+        throw new Error("Enrollment does not belong to this member");
+      }
+      // Verify that courseId matches the enrollment if provided
+      if (attendanceData.courseId && attendanceData.courseId !== enrollment.courseId) {
+        throw new Error("Course ID does not match the enrollment's course");
+      }
+      // Set courseId from enrollment if not provided
+      if (!attendanceData.courseId) {
+        attendanceData = { ...attendanceData, courseId: enrollment.courseId };
+      }
+    }
+    
     const [attendance] = await db.insert(attendances).values(attendanceData).returning();
     return attendance;
   }
