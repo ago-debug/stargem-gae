@@ -23,6 +23,7 @@ import Reports from "@/pages/reports";
 import ImportData from "@/pages/import-data";
 import UtentiPermessi from "@/pages/utenti-permessi";
 import ResetStagione from "@/pages/reset-stagione";
+import MemberDashboard from "@/pages/member-dashboard";
 import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
 
 function Router() {
@@ -54,6 +55,7 @@ function Router() {
       <Route path="/importa" component={ImportData} />
       <Route path="/utenti-permessi" component={UtentiPermessi} />
       <Route path="/reset-stagione" component={ResetStagione} />
+      <Route path="/membro/:id" component={MemberDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
