@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Link, useSearch } from "wouter";
+import { Link, useSearch, useLocation } from "wouter";
 import { validateFiscalCode, parseFiscalCode, getPlaceName } from "@/lib/fiscalCodeUtils";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import type { Member, InsertMember, Attendance } from "@shared/schema";
 
 export default function Members() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const initialSearch = urlParams.get('search') || "";
@@ -476,11 +477,8 @@ export default function Members() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => {
-                                setEditingMember(member);
-                                setSelectedCategoryId(member.categoryId?.toString() || "none");
-                                setIsFormOpen(true);
-                              }}
+                              onClick={() => setLocation(`/?memberId=${member.id}`)}
+                              title="Apri in Anagrafica"
                               data-testid={`button-edit-member-${member.id}`}
                             >
                               <Edit className="w-4 h-4" />
