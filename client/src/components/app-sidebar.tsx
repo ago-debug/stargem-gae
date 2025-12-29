@@ -36,12 +36,17 @@ import { useAuth } from "@/hooks/useAuth";
 
 const mainMenuItems = [
   {
-    title: "Dashboard",
+    title: "Anagrafica",
     url: "/",
+    icon: Users,
+  },
+  {
+    title: "Dashboard Statistiche",
+    url: "/dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: "Clienti/Anagrafiche",
+    title: "Clienti/Lista",
     url: "/iscritti",
     icon: Users,
   },
