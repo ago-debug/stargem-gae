@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { validateFiscalCode, parseFiscalCode } from "@/lib/fiscalCodeUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,12 +63,25 @@ const MEMBER_TYPES = [
 export default function AnagraficaHome() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const memberIdFromUrl = urlParams.get('memberId');
+  
   const [activeTab, setActiveTab] = useState("anagrafica");
   const [formData, setFormData] = useState<MemberFormData>({
     paeseNazione: "Italia",
   });
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(
+    memberIdFromUrl ? parseInt(memberIdFromUrl) : null
+  );
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Sync selectedMemberId with URL parameter changes
+  useEffect(() => {
+    if (memberIdFromUrl) {
+      setSelectedMemberId(parseInt(memberIdFromUrl));
+    }
+  }, [memberIdFromUrl]);
 
   const { data: members } = useQuery<Member[]>({
     queryKey: ["/api/members"],
@@ -142,6 +156,30 @@ export default function AnagraficaHome() {
   const handleNew = () => {
     setSelectedMemberId(null);
     setFormData({ paeseNazione: "Italia" });
+    // Clear URL param when creating new member
+    setLocation("/");
+  };
+
+  const handleFiscalCodeChange = (value: string) => {
+    const upperValue = value.toUpperCase();
+    setFormData(prev => ({ ...prev, fiscalCode: upperValue }));
+    
+    // Auto-fill data from fiscal code when complete
+    if (upperValue.length === 16) {
+      if (validateFiscalCode(upperValue)) {
+        const parsed = parseFiscalCode(upperValue);
+        if (parsed) {
+          setFormData(prev => ({
+            ...prev,
+            fiscalCode: upperValue,
+            dateOfBirth: parsed.dateOfBirth || prev.dateOfBirth,
+            gender: parsed.gender || prev.gender,
+            placeOfBirth: parsed.placeOfBirth || prev.placeOfBirth,
+          }));
+          toast({ title: "Codice fiscale valido", description: "Dati estratti automaticamente" });
+        }
+      }
+    }
   };
 
   const getCardStatus = () => {
@@ -402,8 +440,19 @@ export default function AnagraficaHome() {
                   </div>
                 </div>
 
-                {/* Row 4: Email, Telefono, Indirizzo, Chat */}
+                {/* Row 4: Codice Fiscale, Email, Telefono, Cellulare */}
                 <div className="grid grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <Label>Codice Fiscale</Label>
+                    <Input 
+                      placeholder="RSSMRA90A15F205X"
+                      value={formData.fiscalCode || ""}
+                      onChange={(e) => handleFiscalCodeChange(e.target.value)}
+                      maxLength={16}
+                      className="font-mono uppercase"
+                      data-testid="input-fiscal-code"
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label>Email</Label>
                     <Input 
@@ -415,7 +464,7 @@ export default function AnagraficaHome() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Telefono *</Label>
+                    <Label>Telefono</Label>
                     <Input 
                       placeholder="+39 123 456 7890"
                       value={formData.phone || ""}
@@ -424,9 +473,22 @@ export default function AnagraficaHome() {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label>Cellulare</Label>
+                    <Input 
+                      placeholder="+39 333 1234567"
+                      value={formData.mobile || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
+                      data-testid="input-mobile"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 5: Indirizzo, Chat */}
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="space-y-2 col-span-2">
                     <Label>Indirizzo</Label>
                     <Input 
-                      placeholder="Via, n. civico"
+                      placeholder="Via, n. civico, Città, CAP"
                       value={formData.address || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                       data-testid="input-address"
@@ -441,6 +503,7 @@ export default function AnagraficaHome() {
                       data-testid="input-chat"
                     />
                   </div>
+                  <div className="space-y-2"></div>
                 </div>
 
                 {/* Row 5: Rilascio Tessera, Numero Tessera, Scadenza Tessera, Stato Tessera */}
