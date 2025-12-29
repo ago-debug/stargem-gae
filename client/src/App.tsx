@@ -24,6 +24,7 @@ import ImportData from "@/pages/import-data";
 import UtentiPermessi from "@/pages/utenti-permessi";
 import ResetStagione from "@/pages/reset-stagione";
 import MemberDashboard from "@/pages/member-dashboard";
+import AnagraficaHome from "@/pages/anagrafica-home";
 import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
 
 function Router() {
@@ -40,7 +41,8 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={AnagraficaHome} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/iscritti" component={Members} />
       <Route path="/corsi" component={Courses} />
       <Route path="/iscritti-corsi" component={CourseEnrollments} />
