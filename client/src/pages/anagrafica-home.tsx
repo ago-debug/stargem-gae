@@ -170,6 +170,29 @@ export default function AnagraficaHome() {
   const handleAutocompleteSelect = (member: Member) => {
     setSelectedMemberId(member.id);
     setLocation(`/?memberId=${member.id}`);
+    // Popola immediatamente tutti i campi del form
+    setFormData({
+      firstName: member.firstName,
+      lastName: member.lastName,
+      fiscalCode: member.fiscalCode || "",
+      dateOfBirth: member.dateOfBirth || "",
+      placeOfBirth: member.placeOfBirth || "",
+      gender: member.gender || "",
+      email: member.email || "",
+      phone: member.phone || "",
+      mobile: member.mobile || "",
+      address: member.address || "",
+      cardNumber: member.cardNumber || "",
+      cardIssueDate: member.cardIssueDate || "",
+      cardExpiryDate: member.cardExpiryDate || "",
+      notes: member.notes || "",
+      categoryId: member.categoryId || undefined,
+      subscriptionTypeId: member.subscriptionTypeId || undefined,
+      hasMedicalCertificate: member.hasMedicalCertificate || false,
+      medicalCertificateExpiry: member.medicalCertificateExpiry || "",
+      active: member.active !== false,
+      paeseNazione: "Italia",
+    });
   };
 
   const handleFiscalCodeChange = (value: string) => {
