@@ -39,9 +39,10 @@ async function importMembersFromGoogleSheets() {
   const colFiscalCode = findColumn(["codice_fiscale", "codice fiscale", "fiscal code", "cf", "codicefiscale"]);
   const colFirstName = findColumn(["nome"], true);
   const colLastName = findColumn(["cognome"], true);
-  const colEmail = findColumn(["email", "e-mail", "mail"]);
-  const colPhone = findColumn(["telefono", "phone", "tel"]);
-  const colMobile = findColumn(["cellulare", "mobile", "cell"]);
+  const colEmail = findColumn(["e-mail"], true);
+  const colEmail2 = findColumn(["e-mail 2"]);
+  const colPhone = findColumn(["telefono"], true);
+  const colMobile = findColumn(["cellulare"], true);
   const colDateOfBirth = findColumn(["data di nascita", "data nascita", "date of birth", "birth date", "nascita"]);
   const colPlaceOfBirth = findColumn(["città nasc.", "citta nasc", "luogo nascita", "luogo di nascita", "place of birth"]);
   const colGender = findColumn(["sesso"], true);
@@ -50,6 +51,18 @@ async function importMembersFromGoogleSheets() {
   const colProvince = findColumn(["provincia"], true);
   const colPostalCode = findColumn(["cap"], true);
   const colCardNumber = findColumn(["codice id anagrafica", "tessera", "card", "numero tessera", "card number"]);
+
+  const formatPhone = (phone: string): string => {
+    if (!phone) return "";
+    let cleaned = phone.replace(/\s+/g, "").replace(/[^\d+]/g, "");
+    if (cleaned.startsWith("00")) {
+      cleaned = "+" + cleaned.substring(2);
+    }
+    if (!cleaned.startsWith("+") && cleaned.length >= 9) {
+      cleaned = "+39" + cleaned;
+    }
+    return cleaned;
+  };
 
   console.log("\nColumn mapping:");
   console.log(`  FiscalCode: ${colFiscalCode}, FirstName: ${colFirstName}, LastName: ${colLastName}`);
@@ -115,9 +128,9 @@ async function importMembersFromGoogleSheets() {
         firstName: firstName || "Sconosciuto",
         lastName: lastName || "Sconosciuto",
         fiscalCode: fiscalCode || undefined,
-        email: getValue(colEmail) || undefined,
-        phone: getValue(colPhone) || undefined,
-        mobile: getValue(colMobile) || undefined,
+        email: getValue(colEmail) || getValue(colEmail2) || undefined,
+        phone: formatPhone(getValue(colPhone)) || undefined,
+        mobile: formatPhone(getValue(colMobile)) || undefined,
         dateOfBirth: parseDate(getValue(colDateOfBirth)),
         placeOfBirth: getValue(colPlaceOfBirth) || undefined,
         gender,
