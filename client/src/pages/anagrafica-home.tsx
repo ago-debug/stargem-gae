@@ -431,6 +431,7 @@ export default function AnagraficaHome() {
                     <Label>Data di Nascita</Label>
                     <Input 
                       type="date"
+                      className="max-w-[150px]"
                       value={formData.dateOfBirth || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
                       data-testid="input-birthdate"
@@ -469,6 +470,7 @@ export default function AnagraficaHome() {
                     <Label>Data Iscrizione</Label>
                     <Input 
                       type="date"
+                      className="max-w-[150px]"
                       value={formData.dataIscrizione || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, dataIscrizione: e.target.value }))}
                       data-testid="input-registration-date"
@@ -482,6 +484,7 @@ export default function AnagraficaHome() {
                     <Label>Prima Iscrizione</Label>
                     <Input 
                       type="date"
+                      className="max-w-[150px]"
                       value={formData.primaIscrizione || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, primaIscrizione: e.target.value }))}
                       data-testid="input-first-registration"
@@ -535,6 +538,7 @@ export default function AnagraficaHome() {
                     <Label>Data Fine Iscrizione</Label>
                     <Input 
                       type="date"
+                      className="max-w-[150px]"
                       value={formData.dataFineIscrizione || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, dataFineIscrizione: e.target.value }))}
                       data-testid="input-membership-end"
@@ -672,6 +676,7 @@ export default function AnagraficaHome() {
                     <Label>Rilascio Tessera</Label>
                     <Input 
                       type="date"
+                      className="max-w-[150px]"
                       value={formData.cardIssueDate || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, cardIssueDate: e.target.value }))}
                       data-testid="input-card-issue"
@@ -690,6 +695,7 @@ export default function AnagraficaHome() {
                     <Label>Scadenza Tessera</Label>
                     <Input 
                       type="date"
+                      className="max-w-[150px]"
                       value={formData.cardExpiryDate || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, cardExpiryDate: e.target.value }))}
                       data-testid="input-card-expiry"
