@@ -18,7 +18,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   User, CreditCard, Gift, IdCard, FileText, Trophy, Users,
   Dumbbell, BookOpen, Sun, Plus, Settings, Download, Upload, Save,
-  Search, MessageCircle
+  Search, MessageCircle, RotateCcw
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member } from "@shared/schema";
@@ -631,8 +631,16 @@ export default function AnagraficaHome() {
                   />
                 </div>
 
-                {/* Tasto Salva */}
+                {/* Tasti azione */}
                 <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={handleNew}
+                    data-testid="button-clear-form"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Pulisci
+                  </Button>
                   <Button
                     variant="outline"
                     onClick={handleNew}
