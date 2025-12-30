@@ -66,8 +66,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/members", isAuthenticated, async (req, res) => {
     try {
-      const validatedData = insertMemberSchema.parse(req.body);
-      const member = await storage.createMember(validatedData);
+      const normalizeEmpty = (val: any): any => {
+        if (val === "" || val === undefined) return null;
+        if (typeof val === "string" && val.trim() === "") return null;
+        return val;
+      };
+      const normalizedData: any = {};
+      for (const [key, value] of Object.entries(req.body)) {
+        normalizedData[key] = normalizeEmpty(value);
+      }
+      if (!normalizedData.firstName) normalizedData.firstName = "Sconosciuto";
+      if (!normalizedData.lastName) normalizedData.lastName = "Sconosciuto";
+      const member = await storage.createMember(normalizedData);
       res.status(201).json(member);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create member" });
@@ -77,7 +87,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/members/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const member = await storage.updateMember(id, req.body);
+      const normalizeEmpty = (val: any): any => {
+        if (val === "" || val === undefined) return null;
+        if (typeof val === "string" && val.trim() === "") return null;
+        return val;
+      };
+      const normalizedData: any = {};
+      for (const [key, value] of Object.entries(req.body)) {
+        normalizedData[key] = normalizeEmpty(value);
+      }
+      const member = await storage.updateMember(id, normalizedData);
       res.json(member);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to update member" });

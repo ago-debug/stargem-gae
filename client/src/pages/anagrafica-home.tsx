@@ -152,12 +152,45 @@ export default function AnagraficaHome() {
   });
 
   const handleSave = () => {
-    if (!formData.firstName || !formData.lastName) {
-      toast({ title: "Errore", description: "Cognome e Nome sono obbligatori", variant: "destructive" });
-      return;
+    const warnings: string[] = [];
+    if (!formData.firstName?.trim()) warnings.push("Nome");
+    if (!formData.lastName?.trim()) warnings.push("Cognome");
+    
+    if (warnings.length > 0) {
+      toast({ 
+        title: "Attenzione", 
+        description: `Campi mancanti: ${warnings.join(", ")}. I dati saranno salvati comunque.`,
+        variant: "default" 
+      });
     }
+
+    const normalizeEmpty = (val: string | undefined): string | undefined => {
+      if (!val || val.trim() === "") return undefined;
+      return val.trim();
+    };
+
     const dataToSave: MemberFormData = {
-      ...formData,
+      firstName: normalizeEmpty(formData.firstName) || "Sconosciuto",
+      lastName: normalizeEmpty(formData.lastName) || "Sconosciuto",
+      fiscalCode: normalizeEmpty(formData.fiscalCode),
+      dateOfBirth: normalizeEmpty(formData.dateOfBirth),
+      placeOfBirth: normalizeEmpty(formData.placeOfBirth),
+      gender: normalizeEmpty(formData.gender),
+      email: normalizeEmpty(formData.email),
+      phone: normalizeEmpty(formData.phone),
+      mobile: normalizeEmpty(formData.mobile),
+      streetAddress: normalizeEmpty(formData.streetAddress),
+      city: normalizeEmpty(formData.city),
+      province: normalizeEmpty(formData.province),
+      postalCode: normalizeEmpty(formData.postalCode),
+      country: normalizeEmpty(formData.country) || "Italia",
+      cardNumber: normalizeEmpty(formData.cardNumber),
+      cardIssueDate: normalizeEmpty(formData.cardIssueDate),
+      cardExpiryDate: normalizeEmpty(formData.cardExpiryDate),
+      medicalCertificateExpiry: normalizeEmpty(formData.medicalCertificateExpiry),
+      notes: normalizeEmpty(formData.notes),
+      categoryId: formData.categoryId,
+      subscriptionTypeId: formData.subscriptionTypeId,
       active: formData.active !== false,
       hasMedicalCertificate: formData.hasMedicalCertificate === true,
     };
