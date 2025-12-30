@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { MemberSearch } from "@/components/ui/member-search";
+import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
@@ -162,6 +163,11 @@ export default function AnagraficaHome() {
   };
 
   const handleMemberSelect = (member: Member) => {
+    setSelectedMemberId(member.id);
+    setLocation(`/?memberId=${member.id}`);
+  };
+
+  const handleAutocompleteSelect = (member: Member) => {
     setSelectedMemberId(member.id);
     setLocation(`/?memberId=${member.id}`);
   };
@@ -327,19 +333,25 @@ export default function AnagraficaHome() {
                   </div>
                   <div className="space-y-2">
                     <Label>Cognome *</Label>
-                    <Input 
-                      placeholder="Cognome"
+                    <AutocompleteInput
                       value={formData.lastName || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                      onChange={(v) => setFormData(prev => ({ ...prev, lastName: v }))}
+                      onMemberSelect={handleAutocompleteSelect}
+                      members={members || []}
+                      field="lastName"
+                      placeholder="Cognome"
                       data-testid="input-lastname"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Nome *</Label>
-                    <Input 
-                      placeholder="Nome"
+                    <AutocompleteInput
                       value={formData.firstName || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                      onChange={(v) => setFormData(prev => ({ ...prev, firstName: v }))}
+                      onMemberSelect={handleAutocompleteSelect}
+                      members={members || []}
+                      field="firstName"
+                      placeholder="Nome"
                       data-testid="input-firstname"
                     />
                   </div>
@@ -471,40 +483,50 @@ export default function AnagraficaHome() {
                 <div className="grid grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Codice Fiscale</Label>
-                    <Input 
-                      placeholder="RSSMRA90A15F205X"
+                    <AutocompleteInput
                       value={formData.fiscalCode || ""}
-                      onChange={(e) => handleFiscalCodeChange(e.target.value)}
-                      maxLength={16}
+                      onChange={handleFiscalCodeChange}
+                      onMemberSelect={handleAutocompleteSelect}
+                      members={members || []}
+                      field="fiscalCode"
+                      placeholder="RSSMRA90A15F205X"
                       className="font-mono uppercase"
                       data-testid="input-fiscal-code"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Email</Label>
-                    <Input 
-                      type="email"
-                      placeholder="email@esempio.it"
+                    <AutocompleteInput
                       value={formData.email || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      onChange={(v) => setFormData(prev => ({ ...prev, email: v }))}
+                      onMemberSelect={handleAutocompleteSelect}
+                      members={members || []}
+                      field="email"
+                      placeholder="email@esempio.it"
                       data-testid="input-email"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Telefono</Label>
-                    <Input 
-                      placeholder="+39 123 456 7890"
+                    <AutocompleteInput
                       value={formData.phone || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      onChange={(v) => setFormData(prev => ({ ...prev, phone: v }))}
+                      onMemberSelect={handleAutocompleteSelect}
+                      members={members || []}
+                      field="phone"
+                      placeholder="+39 123 456 7890"
                       data-testid="input-phone"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Cellulare</Label>
-                    <Input 
-                      placeholder="+39 333 1234567"
+                    <AutocompleteInput
                       value={formData.mobile || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
+                      onChange={(v) => setFormData(prev => ({ ...prev, mobile: v }))}
+                      onMemberSelect={handleAutocompleteSelect}
+                      members={members || []}
+                      field="mobile"
+                      placeholder="+39 333 1234567"
                       data-testid="input-mobile"
                     />
                   </div>
