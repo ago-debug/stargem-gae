@@ -9,6 +9,7 @@ import {
   insertMemberSchema,
   insertCategorySchema,
   insertClientCategorySchema,
+  insertSubscriptionTypeSchema,
   insertInstructorSchema,
   insertStudioSchema,
   insertCourseSchema,
@@ -170,6 +171,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete client category" });
+    }
+  });
+
+  // ==== Subscription Types Routes ====
+  app.get("/api/subscription-types", isAuthenticated, async (req, res) => {
+    try {
+      const types = await storage.getSubscriptionTypes();
+      res.json(types);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subscription types" });
+    }
+  });
+
+  app.post("/api/subscription-types", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertSubscriptionTypeSchema.parse(req.body);
+      const subscriptionType = await storage.createSubscriptionType(validatedData);
+      res.status(201).json(subscriptionType);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create subscription type" });
+    }
+  });
+
+  app.patch("/api/subscription-types/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const subscriptionType = await storage.updateSubscriptionType(id, req.body);
+      res.json(subscriptionType);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update subscription type" });
+    }
+  });
+
+  app.delete("/api/subscription-types/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSubscriptionType(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete subscription type" });
     }
   });
 

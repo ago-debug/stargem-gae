@@ -5,6 +5,7 @@ import {
   members,
   categories,
   clientCategories,
+  subscriptionTypes,
   instructors,
   studios,
   courses,
@@ -23,6 +24,8 @@ import {
   type InsertCategory,
   type ClientCategory,
   type InsertClientCategory,
+  type SubscriptionType,
+  type InsertSubscriptionType,
   type Instructor,
   type InsertInstructor,
   type Studio,
@@ -70,6 +73,13 @@ export interface IStorage {
   createClientCategory(category: InsertClientCategory): Promise<ClientCategory>;
   updateClientCategory(id: number, category: Partial<InsertClientCategory>): Promise<ClientCategory>;
   deleteClientCategory(id: number): Promise<void>;
+
+  // Subscription Types
+  getSubscriptionTypes(): Promise<SubscriptionType[]>;
+  getSubscriptionType(id: number): Promise<SubscriptionType | undefined>;
+  createSubscriptionType(subscriptionType: InsertSubscriptionType): Promise<SubscriptionType>;
+  updateSubscriptionType(id: number, subscriptionType: Partial<InsertSubscriptionType>): Promise<SubscriptionType>;
+  deleteSubscriptionType(id: number): Promise<void>;
 
   // Instructors
   getInstructors(): Promise<Instructor[]>;
@@ -266,6 +276,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteClientCategory(id: number): Promise<void> {
     await db.delete(clientCategories).where(eq(clientCategories.id, id));
+  }
+
+  // ==== Subscription Types ====
+  async getSubscriptionTypes(): Promise<SubscriptionType[]> {
+    return await db.select().from(subscriptionTypes).orderBy(subscriptionTypes.name);
+  }
+
+  async getSubscriptionType(id: number): Promise<SubscriptionType | undefined> {
+    const [subscriptionType] = await db.select().from(subscriptionTypes).where(eq(subscriptionTypes.id, id));
+    return subscriptionType;
+  }
+
+  async createSubscriptionType(subscriptionType: InsertSubscriptionType): Promise<SubscriptionType> {
+    const [newSubscriptionType] = await db.insert(subscriptionTypes).values(subscriptionType).returning();
+    return newSubscriptionType;
+  }
+
+  async updateSubscriptionType(id: number, data: Partial<InsertSubscriptionType>): Promise<SubscriptionType> {
+    const [updated] = await db
+      .update(subscriptionTypes)
+      .set(data)
+      .where(eq(subscriptionTypes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSubscriptionType(id: number): Promise<void> {
+    await db.delete(subscriptionTypes).where(eq(subscriptionTypes.id, id));
   }
 
   // ==== Instructors ====

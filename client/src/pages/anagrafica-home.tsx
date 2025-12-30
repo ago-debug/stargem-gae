@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
@@ -36,13 +37,13 @@ interface MemberFormData {
   cardExpiryDate?: string;
   notes?: string;
   categoryId?: number;
+  subscriptionTypeId?: number;
   hasMedicalCertificate?: boolean;
   medicalCertificateExpiry?: string;
   active?: boolean;
   // Additional UI-only fields for display (not persisted)
   dataIscrizione?: string;
   primaIscrizione?: string;
-  tipoIscrizione?: string;
   dataFineIscrizione?: string;
   paeseNazione?: string;
   chat?: string;
@@ -53,12 +54,6 @@ const GENDER_OPTIONS = [
   { id: "F", label: "Femmina" },
 ];
 
-const MEMBER_TYPES = [
-  { id: "standard", label: "Standard" },
-  { id: "premium", label: "Premium" },
-  { id: "vip", label: "VIP" },
-  { id: "trial", label: "Prova" },
-];
 
 export default function AnagraficaHome() {
   const { toast } = useToast();
@@ -87,8 +82,12 @@ export default function AnagraficaHome() {
     queryKey: ["/api/members"],
   });
 
-  const { data: clientCategories } = useQuery<any[]>({
+  const { data: clientCategories, isLoading: loadingCategories } = useQuery<any[]>({
     queryKey: ["/api/client-categories"],
+  });
+
+  const { data: subscriptionTypes, isLoading: loadingSubscriptionTypes } = useQuery<any[]>({
+    queryKey: ["/api/subscription-types"],
   });
 
   const selectedMember = members?.find(m => m.id === selectedMemberId);
@@ -111,6 +110,7 @@ export default function AnagraficaHome() {
         cardExpiryDate: selectedMember.cardExpiryDate || "",
         notes: selectedMember.notes || "",
         categoryId: selectedMember.categoryId || undefined,
+        subscriptionTypeId: selectedMember.subscriptionTypeId || undefined,
         hasMedicalCertificate: selectedMember.hasMedicalCertificate || false,
         medicalCertificateExpiry: selectedMember.medicalCertificateExpiry || "",
         active: selectedMember.active !== false,
@@ -121,7 +121,7 @@ export default function AnagraficaHome() {
 
   const saveMutation = useMutation({
     mutationFn: async (data: MemberFormData) => {
-      const { dataIscrizione, primaIscrizione, tipoIscrizione, dataFineIscrizione, paeseNazione, chat, ...apiData } = data;
+      const { dataIscrizione, primaIscrizione, dataFineIscrizione, paeseNazione, chat, ...apiData } = data;
       if (selectedMemberId) {
         return await apiRequest("PATCH", `/api/members/${selectedMemberId}`, apiData);
       } else {
@@ -399,35 +399,47 @@ export default function AnagraficaHome() {
                   </div>
                   <div className="space-y-2">
                     <Label>Tipo Iscrizione</Label>
-                    <Select 
-                      value={formData.tipoIscrizione || ""} 
-                      onValueChange={(v) => setFormData(prev => ({ ...prev, tipoIscrizione: v }))}
-                    >
-                      <SelectTrigger data-testid="select-member-type">
-                        <SelectValue placeholder="Seleziona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {MEMBER_TYPES.map(type => (
-                          <SelectItem key={type.id} value={type.id}>{type.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      options={subscriptionTypes || []}
+                      value={formData.subscriptionTypeId || null}
+                      onChange={(v) => setFormData(prev => ({ ...prev, subscriptionTypeId: v || undefined }))}
+                      placeholder="Cerca tipo (min 3 car.)..."
+                      minSearchLength={3}
+                      isLoading={loadingSubscriptionTypes}
+                      allowCreate={true}
+                      onCreateNew={async (name) => {
+                        try {
+                          await apiRequest("POST", "/api/subscription-types", { name });
+                          queryClient.invalidateQueries({ queryKey: ["/api/subscription-types"] });
+                          toast({ title: "Tipo iscrizione creato" });
+                        } catch (error) {
+                          toast({ title: "Errore nella creazione", variant: "destructive" });
+                        }
+                      }}
+                      data-testid="select-subscription-type"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Tipologia Socio</Label>
-                    <Select 
-                      value={formData.categoryId?.toString() || ""} 
-                      onValueChange={(v) => setFormData(prev => ({ ...prev, categoryId: v ? parseInt(v) : undefined }))}
-                    >
-                      <SelectTrigger data-testid="select-category">
-                        <SelectValue placeholder="Seleziona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clientCategories?.map(cat => (
-                          <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      options={clientCategories || []}
+                      value={formData.categoryId || null}
+                      onChange={(v) => setFormData(prev => ({ ...prev, categoryId: v || undefined }))}
+                      placeholder="Cerca tipologia (min 3 car.)..."
+                      minSearchLength={3}
+                      isLoading={loadingCategories}
+                      allowCreate={true}
+                      onCreateNew={async (name) => {
+                        try {
+                          await apiRequest("POST", "/api/client-categories", { name });
+                          queryClient.invalidateQueries({ queryKey: ["/api/client-categories"] });
+                          toast({ title: "Tipologia socio creata" });
+                        } catch (error) {
+                          toast({ title: "Errore nella creazione", variant: "destructive" });
+                        }
+                      }}
+                      data-testid="select-category"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Data Fine Iscrizione</Label>
