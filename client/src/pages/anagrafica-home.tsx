@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { validateFiscalCode, parseFiscalCode } from "@/lib/fiscalCodeUtils";
@@ -19,7 +19,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   User, CreditCard, Gift, IdCard, FileText, Trophy, Users,
   Dumbbell, BookOpen, Sun, Plus, Settings, Download, Upload, Save,
-  Search, MessageCircle, RotateCcw
+  Search, MessageCircle, RotateCcw, ChevronUp
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member } from "@shared/schema";
@@ -78,6 +78,8 @@ export default function AnagraficaHome() {
     memberIdFromUrl ? parseInt(memberIdFromUrl) : null
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Sync selectedMemberId with URL parameter changes
   useEffect(() => {
@@ -85,6 +87,23 @@ export default function AnagraficaHome() {
       setSelectedMemberId(parseInt(memberIdFromUrl));
     }
   }, [memberIdFromUrl]);
+
+  // Back to top scroll tracking
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+    
+    const handleScroll = () => {
+      setShowBackToTop(content.scrollTop > 300);
+    };
+    
+    content.addEventListener("scroll", handleScroll);
+    return () => content.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const { data: members } = useQuery<Member[]>({
     queryKey: ["/api/members"],
@@ -378,7 +397,7 @@ export default function AnagraficaHome() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-4">
+      <div ref={contentRef} className="flex-1 overflow-auto p-4 relative">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsContent value="anagrafica" className="mt-0">
             <Card>
@@ -755,6 +774,18 @@ export default function AnagraficaHome() {
             </TabsContent>
           ))}
         </Tabs>
+
+        {/* Back to Top Button - Mobile only */}
+        {showBackToTop && (
+          <Button
+            size="icon"
+            className="fixed bottom-6 right-6 z-50 rounded-full shadow-lg lg:hidden"
+            onClick={scrollToTop}
+            data-testid="button-back-to-top"
+          >
+            <ChevronUp className="w-5 h-5" />
+          </Button>
+        )}
       </div>
     </div>
   );
