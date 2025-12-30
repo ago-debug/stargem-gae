@@ -1,5 +1,6 @@
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { ilike } from "drizzle-orm";
 import {
   users,
   members,
@@ -16,6 +17,9 @@ import {
   enrollments,
   accessLogs,
   attendances,
+  countries,
+  provinces,
+  cities,
   type User,
   type UpsertUser,
   type Member,
@@ -46,6 +50,12 @@ import {
   type InsertAccessLog,
   type Attendance,
   type InsertAttendance,
+  type Country,
+  type InsertCountry,
+  type Province,
+  type InsertProvince,
+  type City,
+  type InsertCity,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -148,6 +158,15 @@ export interface IStorage {
   getAttendancesByMember(memberId: number): Promise<Attendance[]>;
   createAttendance(attendance: InsertAttendance): Promise<Attendance>;
   deleteAttendance(id: number): Promise<void>;
+
+  // Locations (Countries, Provinces, Cities)
+  getCountries(): Promise<Country[]>;
+  createCountry(country: InsertCountry): Promise<Country>;
+  getProvinces(countryId?: number): Promise<Province[]>;
+  createProvince(province: InsertProvince): Promise<Province>;
+  searchCities(search: string, limit?: number): Promise<(City & { province?: Province })[]>;
+  getCitiesByProvince(provinceId: number): Promise<City[]>;
+  createCity(city: InsertCity): Promise<City>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -747,6 +766,71 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAttendance(id: number): Promise<void> {
     await db.delete(attendances).where(eq(attendances.id, id));
+  }
+
+  // ==== Locations (Countries, Provinces, Cities) ====
+  async getCountries(): Promise<Country[]> {
+    return await db.select().from(countries).orderBy(countries.name);
+  }
+
+  async createCountry(country: InsertCountry): Promise<Country> {
+    const [newCountry] = await db.insert(countries).values(country).returning();
+    return newCountry;
+  }
+
+  async getProvinces(countryId?: number): Promise<Province[]> {
+    if (countryId) {
+      return await db.select().from(provinces).where(eq(provinces.countryId, countryId)).orderBy(provinces.name);
+    }
+    return await db.select().from(provinces).orderBy(provinces.name);
+  }
+
+  async createProvince(province: InsertProvince): Promise<Province> {
+    const [newProvince] = await db.insert(provinces).values(province).returning();
+    return newProvince;
+  }
+
+  async searchCities(search: string, limit: number = 20): Promise<(City & { province?: Province })[]> {
+    const results = await db
+      .select({
+        id: cities.id,
+        name: cities.name,
+        provinceId: cities.provinceId,
+        postalCode: cities.postalCode,
+        istatCode: cities.istatCode,
+        provinceName: provinces.name,
+        provinceCode: provinces.code,
+        region: provinces.region,
+      })
+      .from(cities)
+      .leftJoin(provinces, eq(cities.provinceId, provinces.id))
+      .where(ilike(cities.name, `%${search}%`))
+      .orderBy(cities.name)
+      .limit(limit);
+
+    return results.map(r => ({
+      id: r.id,
+      name: r.name,
+      provinceId: r.provinceId,
+      postalCode: r.postalCode,
+      istatCode: r.istatCode,
+      province: r.provinceId ? {
+        id: r.provinceId,
+        code: r.provinceCode || "",
+        name: r.provinceName || "",
+        region: r.region,
+        countryId: null,
+      } : undefined,
+    }));
+  }
+
+  async getCitiesByProvince(provinceId: number): Promise<City[]> {
+    return await db.select().from(cities).where(eq(cities.provinceId, provinceId)).orderBy(cities.name);
+  }
+
+  async createCity(city: InsertCity): Promise<City> {
+    const [newCity] = await db.insert(cities).values(city).returning();
+    return newCity;
   }
 }
 
