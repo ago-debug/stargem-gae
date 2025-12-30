@@ -1044,6 +1044,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==== Location Routes (Countries, Provinces, Cities) ====
+  app.get("/api/locations/countries", isAuthenticated, async (req, res) => {
+    try {
+      const countries = await storage.getCountries();
+      res.json(countries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch countries" });
+    }
+  });
+
+  app.get("/api/locations/provinces", isAuthenticated, async (req, res) => {
+    try {
+      const countryId = req.query.countryId ? parseInt(req.query.countryId as string) : undefined;
+      const provinces = await storage.getProvinces(countryId);
+      res.json(provinces);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch provinces" });
+    }
+  });
+
+  app.get("/api/locations/cities/search", isAuthenticated, async (req, res) => {
+    try {
+      const search = req.query.q as string;
+      if (!search || search.length < 3) {
+        return res.json([]);
+      }
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const cities = await storage.searchCities(search, limit);
+      res.json(cities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search cities" });
+    }
+  });
+
+  app.get("/api/locations/cities/province/:provinceId", isAuthenticated, async (req, res) => {
+    try {
+      const provinceId = parseInt(req.params.provinceId);
+      const cities = await storage.getCitiesByProvince(provinceId);
+      res.json(cities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch cities" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
