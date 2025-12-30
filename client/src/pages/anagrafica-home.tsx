@@ -33,7 +33,13 @@ interface MemberFormData {
   email?: string;
   phone?: string;
   mobile?: string;
-  address?: string;
+  // Indirizzo suddiviso
+  streetAddress?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+  country?: string;
+  // Card data
   cardNumber?: string;
   cardIssueDate?: string;
   cardExpiryDate?: string;
@@ -47,7 +53,6 @@ interface MemberFormData {
   dataIscrizione?: string;
   primaIscrizione?: string;
   dataFineIscrizione?: string;
-  paeseNazione?: string;
   chat?: string;
 }
 
@@ -66,7 +71,7 @@ export default function AnagraficaHome() {
   
   const [activeTab, setActiveTab] = useState("anagrafica");
   const [formData, setFormData] = useState<MemberFormData>({
-    paeseNazione: "Italia",
+    country: "Italia",
   });
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(
     memberIdFromUrl ? parseInt(memberIdFromUrl) : null
@@ -106,7 +111,11 @@ export default function AnagraficaHome() {
         email: selectedMember.email || "",
         phone: selectedMember.phone || "",
         mobile: selectedMember.mobile || "",
-        address: selectedMember.address || "",
+        streetAddress: selectedMember.streetAddress || "",
+        city: selectedMember.city || "",
+        province: selectedMember.province || "",
+        postalCode: selectedMember.postalCode || "",
+        country: selectedMember.country || "Italia",
         cardNumber: selectedMember.cardNumber || "",
         cardIssueDate: selectedMember.cardIssueDate || "",
         cardExpiryDate: selectedMember.cardExpiryDate || "",
@@ -116,14 +125,13 @@ export default function AnagraficaHome() {
         hasMedicalCertificate: selectedMember.hasMedicalCertificate || false,
         medicalCertificateExpiry: selectedMember.medicalCertificateExpiry || "",
         active: selectedMember.active !== false,
-        paeseNazione: "Italia",
       });
     }
   }, [selectedMember]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: MemberFormData) => {
-      const { dataIscrizione, primaIscrizione, dataFineIscrizione, paeseNazione, chat, ...apiData } = data;
+      const { dataIscrizione, primaIscrizione, dataFineIscrizione, chat, ...apiData } = data;
       if (selectedMemberId) {
         return await apiRequest("PATCH", `/api/members/${selectedMemberId}`, apiData);
       } else {
@@ -157,7 +165,7 @@ export default function AnagraficaHome() {
 
   const handleNew = () => {
     setSelectedMemberId(null);
-    setFormData({ paeseNazione: "Italia" });
+    setFormData({ country: "Italia" });
     // Clear URL param when creating new member
     setLocation("/");
   };
@@ -181,7 +189,11 @@ export default function AnagraficaHome() {
       email: member.email || "",
       phone: member.phone || "",
       mobile: member.mobile || "",
-      address: member.address || "",
+      streetAddress: member.streetAddress || "",
+      city: member.city || "",
+      province: member.province || "",
+      postalCode: member.postalCode || "",
+      country: member.country || "Italia",
       cardNumber: member.cardNumber || "",
       cardIssueDate: member.cardIssueDate || "",
       cardExpiryDate: member.cardExpiryDate || "",
@@ -191,7 +203,6 @@ export default function AnagraficaHome() {
       hasMedicalCertificate: member.hasMedicalCertificate || false,
       medicalCertificateExpiry: member.medicalCertificateExpiry || "",
       active: member.active !== false,
-      paeseNazione: "Italia",
     });
   };
 
@@ -555,17 +566,59 @@ export default function AnagraficaHome() {
                   </div>
                 </div>
 
-                {/* Row 5: Indirizzo, Chat */}
-                <div className="grid grid-cols-4 gap-4">
+                {/* Row 5: Indirizzo suddiviso */}
+                <div className="grid grid-cols-6 gap-4">
                   <div className="space-y-2 col-span-2">
-                    <Label>Indirizzo</Label>
+                    <Label>Via/Piazza</Label>
                     <Input 
-                      placeholder="Via, n. civico, Città, CAP"
-                      value={formData.address || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                      data-testid="input-address"
+                      placeholder="Via Roma, 123"
+                      value={formData.streetAddress || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, streetAddress: e.target.value }))}
+                      data-testid="input-street-address"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label>Città</Label>
+                    <Input 
+                      placeholder="Milano"
+                      value={formData.city || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                      data-testid="input-city"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Prov.</Label>
+                    <Input 
+                      placeholder="MI"
+                      maxLength={2}
+                      value={formData.province || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, province: e.target.value.toUpperCase() }))}
+                      data-testid="input-province"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>CAP</Label>
+                    <Input 
+                      placeholder="20100"
+                      maxLength={5}
+                      value={formData.postalCode || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
+                      data-testid="input-postal-code"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Stato</Label>
+                    <Input 
+                      placeholder="Italia"
+                      value={formData.country || "Italia"}
+                      onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
+                      data-testid="input-country"
+                    />
+                  </div>
+                </div>
+
+                {/* Row Chat */}
+                <div className="grid grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Chat</Label>
                     <Input 
@@ -575,7 +628,6 @@ export default function AnagraficaHome() {
                       data-testid="input-chat"
                     />
                   </div>
-                  <div className="space-y-2"></div>
                 </div>
 
                 {/* Row 5: Rilascio Tessera, Numero Tessera, Scadenza Tessera, Stato Tessera */}
