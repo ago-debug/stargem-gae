@@ -19,6 +19,7 @@ Key features and architectural decisions include:
 - **Membership & Access Control**: Membership cards with barcode support for attendance logging and access validation.
 - **Data Import**: Functionality to import data from CSV/Excel for members, courses, and instructors to facilitate migration.
 - **Structured Scheduling**: Structured dropdown selectors for defining studio operating hours and course schedules (day of week, start/end times, recurrence type).
+- **Location Autocomplete**: City search with auto-fill for province and postal code. Database includes 112 Italian cities with all 107 provinces. Minimum 3 characters required for search.
 
 ## External Dependencies
 - **Database**: PostgreSQL (Neon)
