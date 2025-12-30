@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { MemberSearch } from "@/components/ui/member-search";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
@@ -160,6 +161,11 @@ export default function AnagraficaHome() {
     setLocation("/");
   };
 
+  const handleMemberSelect = (member: Member) => {
+    setSelectedMemberId(member.id);
+    setLocation(`/?memberId=${member.id}`);
+  };
+
   const handleFiscalCodeChange = (value: string) => {
     const upperValue = value.toUpperCase();
     setFormData(prev => ({ ...prev, fiscalCode: upperValue }));
@@ -214,9 +220,18 @@ export default function AnagraficaHome() {
       <div className="border-b bg-background sticky top-0 z-10">
         <div className="p-4 space-y-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-2xl font-semibold" data-testid="text-page-title">Sistema di Gestione Anagrafica</h1>
-              <p className="text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
+            <div className="space-y-2">
+              <div>
+                <h1 className="text-2xl font-semibold" data-testid="text-page-title">Sistema di Gestione Anagrafica</h1>
+                <p className="text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
+              </div>
+              {members && members.length > 0 && (
+                <MemberSearch 
+                  members={members} 
+                  onSelect={handleMemberSelect}
+                  placeholder="Cerca socio per nome, cognome, CF, email, telefono..."
+                />
+              )}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Button 
