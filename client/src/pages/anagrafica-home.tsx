@@ -293,36 +293,38 @@ export default function AnagraficaHome() {
       {/* Header */}
       <div className="border-b bg-background sticky top-0 z-10">
         <div className="p-4 space-y-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="space-y-2">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2 min-w-0">
               <div>
-                <h1 className="text-2xl font-semibold" data-testid="text-page-title">Sistema di Gestione Anagrafica</h1>
-                <p className="text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
+                <h1 className="text-xl sm:text-2xl font-semibold" data-testid="text-page-title">Sistema di Gestione Anagrafica</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
               </div>
               {members && members.length > 0 && (
                 <MemberSearch 
                   members={members} 
                   onSelect={handleMemberSelect}
-                  placeholder="Cerca socio per nome, cognome, CF, email, telefono..."
+                  placeholder="Cerca socio..."
                 />
               )}
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap justify-start lg:justify-end">
               <Button 
                 variant="outline" 
                 size="sm"
                 data-testid="button-configure-gsheets"
+                className="hidden sm:inline-flex"
               >
-                <Settings className="w-4 h-4 mr-2" />
-                Configura GSheets
+                <Settings className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">GSheets</span>
               </Button>
               <Button 
                 variant="default" 
                 size="sm"
                 data-testid="button-export-gsheets"
+                className="hidden sm:inline-flex"
               >
-                <Upload className="w-4 h-4 mr-2" />
-                Esporta su GSheets
+                <Upload className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Esporta</span>
               </Button>
               <Button 
                 variant="outline" 
@@ -330,8 +332,8 @@ export default function AnagraficaHome() {
                 onClick={() => setLocation("/importa")}
                 data-testid="button-import-gsheets"
               >
-                <Download className="w-4 h-4 mr-2" />
-                Importa da GSheets
+                <Download className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Importa</span>
               </Button>
               <Button 
                 variant="outline" 
@@ -340,35 +342,37 @@ export default function AnagraficaHome() {
                 disabled={saveMutation.isPending}
                 data-testid="button-save-local"
               >
-                <Save className="w-4 h-4 mr-2" />
-                Salva Locale
+                <Save className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Salva</span>
               </Button>
               <Button 
                 size="sm"
                 onClick={handleNew}
                 data-testid="button-new-member"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuovo
+                <Plus className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Nuovo</span>
               </Button>
             </div>
           </div>
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="h-auto flex-wrap gap-1 bg-transparent p-0">
-              {tabs.map(tab => (
-                <TabsTrigger 
-                  key={tab.id} 
-                  value={tab.id}
-                  className="data-[state=active]:bg-muted"
-                  data-testid={`tab-${tab.id}`}
-                >
-                  <tab.icon className="w-4 h-4 mr-2" />
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="overflow-x-auto -mx-4 px-4 pb-1">
+              <TabsList className="h-auto gap-1 bg-transparent p-0 inline-flex min-w-max">
+                {tabs.map(tab => (
+                  <TabsTrigger 
+                    key={tab.id} 
+                    value={tab.id}
+                    className="data-[state=active]:bg-muted whitespace-nowrap text-xs sm:text-sm"
+                    data-testid={`tab-${tab.id}`}
+                  >
+                    <tab.icon className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </Tabs>
         </div>
       </div>
