@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
@@ -65,6 +66,7 @@ function Router() {
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+  const isMobile = useIsMobile();
 
   // Custom sidebar width
   const style = {
@@ -83,7 +85,7 @@ function AppContent() {
 
   return (
     <>
-      <SidebarProvider style={style as React.CSSProperties}>
+      <SidebarProvider style={style as React.CSSProperties} defaultOpen={!isMobile}>
         <div className="flex h-screen w-full">
           <AppSidebar />
           <div className="flex flex-col flex-1 overflow-hidden">

@@ -474,15 +474,6 @@ export default function AnagraficaHome() {
                       data-testid="input-registration-date"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Paese/Nazione</Label>
-                    <Input 
-                      placeholder="Italia"
-                      value={formData.paeseNazione || "Italia"}
-                      onChange={(e) => setFormData(prev => ({ ...prev, paeseNazione: e.target.value }))}
-                      data-testid="input-country"
-                    />
-                  </div>
                 </div>
 
                 {/* Row 3: Prima Iscrizione, Tipo Iscrizione, Tipologia Socio, Data Fine */}
