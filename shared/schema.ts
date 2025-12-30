@@ -302,7 +302,14 @@ export const members = pgTable("members", {
   fatherPhone: varchar("father_phone", { length: 50 }), // Telefono padre
   fatherMobile: varchar("father_mobile", { length: 50 }), // Cellulare padre
   
-  address: text("address"),
+  // Indirizzo suddiviso
+  streetAddress: varchar("street_address", { length: 255 }), // Via/Piazza e numero civico
+  city: varchar("city", { length: 100 }), // Città
+  province: varchar("province", { length: 2 }), // Provincia (sigla 2 lettere)
+  postalCode: varchar("postal_code", { length: 10 }), // CAP
+  country: varchar("country", { length: 100 }).default("Italia"), // Stato/Nazione
+  
+  address: text("address"), // Mantenuto per retrocompatibilità
   notes: text("notes"),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
