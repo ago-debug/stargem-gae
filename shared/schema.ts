@@ -43,6 +43,63 @@ export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
 // ============================================================================
+// LOCATION TABLES (Countries, Provinces, Cities with CAP)
+// ============================================================================
+
+// Countries (Stati)
+export const countries = pgTable("countries", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  code: varchar("code", { length: 3 }).notNull().unique(), // ISO 3166-1 alpha-2/3 code (IT, DE, FR)
+  name: varchar("name", { length: 100 }).notNull(),
+  isDefault: boolean("is_default").default(false),
+});
+
+export const insertCountrySchema = createInsertSchema(countries).omit({ id: true });
+export type InsertCountry = z.infer<typeof insertCountrySchema>;
+export type Country = typeof countries.$inferSelect;
+
+// Provinces (Province italiane)
+export const provinces = pgTable("provinces", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  code: varchar("code", { length: 2 }).notNull(), // Sigla provincia (MI, RM, TO)
+  name: varchar("name", { length: 100 }).notNull(),
+  region: varchar("region", { length: 100 }), // Regione
+  countryId: integer("country_id").references(() => countries.id, { onDelete: "cascade" }),
+});
+
+export const provincesRelations = relations(provinces, ({ one, many }) => ({
+  country: one(countries, {
+    fields: [provinces.countryId],
+    references: [countries.id],
+  }),
+  cities: many(cities),
+}));
+
+export const insertProvinceSchema = createInsertSchema(provinces).omit({ id: true });
+export type InsertProvince = z.infer<typeof insertProvinceSchema>;
+export type Province = typeof provinces.$inferSelect;
+
+// Cities (Comuni italiani con CAP)
+export const cities = pgTable("cities", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 100 }).notNull(),
+  provinceId: integer("province_id").references(() => provinces.id, { onDelete: "cascade" }),
+  postalCode: varchar("postal_code", { length: 10 }), // CAP principale
+  istatCode: varchar("istat_code", { length: 10 }), // Codice ISTAT
+});
+
+export const citiesRelations = relations(cities, ({ one }) => ({
+  province: one(provinces, {
+    fields: [cities.provinceId],
+    references: [provinces.id],
+  }),
+}));
+
+export const insertCitySchema = createInsertSchema(cities).omit({ id: true });
+export type InsertCity = z.infer<typeof insertCitySchema>;
+export type City = typeof cities.$inferSelect;
+
+// ============================================================================
 // CORE TABLES
 // ============================================================================
 
