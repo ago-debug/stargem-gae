@@ -607,6 +607,26 @@ export default function AnagraficaHome() {
                     data-testid="input-notes"
                   />
                 </div>
+
+                {/* Tasto Salva */}
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={handleNew}
+                    data-testid="button-new-form"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nuovo
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={saveMutation.isPending}
+                    data-testid="button-save-form"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {selectedMemberId ? "Aggiorna" : "Salva"}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
