@@ -104,6 +104,22 @@ export const insertClientCategorySchema = createInsertSchema(clientCategories).o
 export type InsertClientCategory = z.infer<typeof insertClientCategorySchema>;
 export type ClientCategory = typeof clientCategories.$inferSelect;
 
+// Subscription Types (Tipo Iscrizione)
+export const subscriptionTypes = pgTable("subscription_types", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSubscriptionTypeSchema = createInsertSchema(subscriptionTypes).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertSubscriptionType = z.infer<typeof insertSubscriptionTypeSchema>;
+export type SubscriptionType = typeof subscriptionTypes.$inferSelect;
+
 // Instructors
 export const instructors = pgTable("instructors", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -259,7 +275,8 @@ export const members = pgTable("members", {
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }), // Telefono fisso
   mobile: varchar("mobile", { length: 50 }), // Cellulare
-  categoryId: integer("category_id").references(() => clientCategories.id, { onDelete: "set null" }), // Categoria cliente
+  categoryId: integer("category_id").references(() => clientCategories.id, { onDelete: "set null" }), // Categoria cliente (Tipologia Socio)
+  subscriptionTypeId: integer("subscription_type_id").references(() => subscriptionTypes.id, { onDelete: "set null" }), // Tipo Iscrizione
   
   // Dati tessera
   cardNumber: varchar("card_number", { length: 100 }), // Numero tessera
