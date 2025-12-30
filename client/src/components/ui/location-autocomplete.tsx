@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MapPin, Loader2 } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
 interface CityResult {
   id: number;
@@ -59,14 +60,13 @@ export function LocationAutocomplete({
     debounceTimer.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/locations/cities/search?q=${encodeURIComponent(search)}&limit=15`);
-        if (response.ok) {
-          const data = await response.json();
-          setCities(data);
-          setOpen(data.length > 0);
-        }
+        const response = await apiRequest("GET", `/api/locations/cities/search?q=${encodeURIComponent(search)}&limit=15`);
+        const data = await response.json();
+        setCities(data);
+        setOpen(data.length > 0);
       } catch (error) {
         console.error("Error searching cities:", error);
+        setCities([]);
       } finally {
         setIsLoading(false);
       }
