@@ -32,3 +32,6 @@ Key features and architectural decisions include:
 - **Routing**: Wouter
 - **CSV/Excel Parsing**: papaparse
 - **File Uploads**: multer
+
+## Pending Integrations
+- **Twilio (SMS/WhatsApp)**: User wants to integrate Twilio for sending SMS and WhatsApp messages to members. Requires secrets: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER. Configuration pending.
