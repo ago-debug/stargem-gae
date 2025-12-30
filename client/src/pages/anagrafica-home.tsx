@@ -390,7 +390,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Row 1: ID, Cognome, Nome, Data Nascita */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>ID Membro</Label>
                     <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export default function AnagraficaHome() {
                 </div>
 
                 {/* Row 2: Luogo Nascita, Sesso, Data Iscrizione, Paese */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Luogo di Nascita</Label>
                     <Input 
@@ -486,7 +486,7 @@ export default function AnagraficaHome() {
                 </div>
 
                 {/* Row 3: Prima Iscrizione, Tipo Iscrizione, Tipologia Socio, Data Fine */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Prima Iscrizione</Label>
                     <Input 
@@ -552,7 +552,7 @@ export default function AnagraficaHome() {
                 </div>
 
                 {/* Row 4: Codice Fiscale, Email, Telefono, Cellulare */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Codice Fiscale</Label>
                     <AutocompleteInput
@@ -605,8 +605,8 @@ export default function AnagraficaHome() {
                 </div>
 
                 {/* Row 5: Indirizzo suddiviso */}
-                <div className="grid grid-cols-6 gap-4">
-                  <div className="space-y-2 col-span-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  <div className="space-y-2 sm:col-span-2">
                     <Label>Via/Piazza</Label>
                     <Input 
                       placeholder="Via Roma, 123"
@@ -663,7 +663,7 @@ export default function AnagraficaHome() {
                 </div>
 
                 {/* Row Chat */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Chat</Label>
                     <Input 
@@ -676,7 +676,7 @@ export default function AnagraficaHome() {
                 </div>
 
                 {/* Row 5: Rilascio Tessera, Numero Tessera, Scadenza Tessera, Stato Tessera */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Rilascio Tessera</Label>
                     <Input 
