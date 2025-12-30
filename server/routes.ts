@@ -94,6 +94,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==== Google Sheets Import Route ====
+  app.post("/api/members/import-google-sheets", isAuthenticated, async (req, res) => {
+    try {
+      const { spreadsheetId, range = "A1:Z501", limit = 500 } = req.body;
+      
+      if (!spreadsheetId) {
+        return res.status(400).json({ message: "spreadsheetId is required" });
+      }
+
+      const rows = await readSpreadsheet(spreadsheetId, range);
+      
+      if (rows.length < 2) {
+        return res.status(400).json({ message: "No data found in spreadsheet" });
+      }
+
+      const headers = rows[0].map((h: string) => h?.toLowerCase().trim() || "");
+      const dataRows = rows.slice(1, Math.min(rows.length, limit + 1));
+      
+      const headerMap: Record<string, number> = {};
+      headers.forEach((h: string, i: number) => {
+        headerMap[h] = i;
+      });
+
+      const findColumn = (possibleNames: string[]): number => {
+        for (const name of possibleNames) {
+          const idx = headers.findIndex((h: string) => h.includes(name.toLowerCase()));
+          if (idx !== -1) return idx;
+        }
+        return -1;
+      };
+
+      const colFiscalCode = findColumn(["codice fiscale", "fiscal code", "cf", "codicefiscale"]);
+      const colFirstName = findColumn(["nome", "first name", "firstname"]);
+      const colLastName = findColumn(["cognome", "last name", "lastname", "surname"]);
+      const colEmail = findColumn(["email", "e-mail", "mail"]);
+      const colPhone = findColumn(["telefono", "phone", "tel"]);
+      const colMobile = findColumn(["cellulare", "mobile", "cell"]);
+      const colDateOfBirth = findColumn(["data nascita", "data di nascita", "date of birth", "birth date", "nascita"]);
+      const colPlaceOfBirth = findColumn(["luogo nascita", "luogo di nascita", "place of birth", "birth place"]);
+      const colGender = findColumn(["sesso", "gender", "genere"]);
+      const colStreet = findColumn(["indirizzo", "via", "street", "address"]);
+      const colCity = findColumn(["città", "citta", "city", "comune"]);
+      const colProvince = findColumn(["provincia", "province", "prov"]);
+      const colPostalCode = findColumn(["cap", "postal code", "zip"]);
+      const colCardNumber = findColumn(["tessera", "card", "numero tessera", "card number"]);
+
+      const existingMembers = await storage.getMembers();
+      const existingByFiscalCode = new Map<string, number>();
+      existingMembers.forEach(m => {
+        if (m.fiscalCode) {
+          existingByFiscalCode.set(m.fiscalCode.toUpperCase(), m.id);
+        }
+      });
+
+      let imported = 0;
+      let updated = 0;
+      let skipped = 0;
+      const errors: string[] = [];
+
+      for (let i = 0; i < dataRows.length; i++) {
+        const row = dataRows[i];
+        try {
+          const getValue = (colIdx: number): string => {
+            if (colIdx < 0 || colIdx >= row.length) return "";
+            return (row[colIdx] || "").toString().trim();
+          };
+
+          const fiscalCode = getValue(colFiscalCode).toUpperCase();
+          const firstName = getValue(colFirstName);
+          const lastName = getValue(colLastName);
+
+          if (!firstName && !lastName) {
+            skipped++;
+            continue;
+          }
+
+          const parseDate = (val: string): string | undefined => {
+            if (!val) return undefined;
+            const parts = val.split(/[\/\-\.]/);
+            if (parts.length === 3) {
+              let [a, b, c] = parts;
+              if (a.length === 4) return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`;
+              if (c.length === 4) return `${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+              if (c.length === 2) {
+                const year = parseInt(c) > 50 ? `19${c}` : `20${c}`;
+                return `${year}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+              }
+            }
+            return undefined;
+          };
+
+          const genderRaw = getValue(colGender).toUpperCase();
+          const gender = genderRaw === "M" || genderRaw === "MASCHIO" || genderRaw === "MALE" ? "M" 
+                       : genderRaw === "F" || genderRaw === "FEMMINA" || genderRaw === "FEMALE" ? "F" 
+                       : undefined;
+
+          const memberData = {
+            firstName: firstName || "Sconosciuto",
+            lastName: lastName || "Sconosciuto",
+            fiscalCode: fiscalCode || undefined,
+            email: getValue(colEmail) || undefined,
+            phone: getValue(colPhone) || undefined,
+            mobile: getValue(colMobile) || undefined,
+            dateOfBirth: parseDate(getValue(colDateOfBirth)),
+            placeOfBirth: getValue(colPlaceOfBirth) || undefined,
+            gender,
+            streetAddress: getValue(colStreet) || undefined,
+            city: getValue(colCity) || undefined,
+            province: getValue(colProvince).toUpperCase().substring(0, 2) || undefined,
+            postalCode: getValue(colPostalCode) || undefined,
+            cardNumber: getValue(colCardNumber) || undefined,
+            active: true,
+          };
+
+          if (fiscalCode && existingByFiscalCode.has(fiscalCode)) {
+            const existingId = existingByFiscalCode.get(fiscalCode)!;
+            await storage.updateMember(existingId, memberData);
+            updated++;
+          } else {
+            const newMember = await storage.createMember(memberData);
+            if (fiscalCode) {
+              existingByFiscalCode.set(fiscalCode, newMember.id);
+            }
+            imported++;
+          }
+        } catch (err: any) {
+          errors.push(`Row ${i + 2}: ${err.message}`);
+          skipped++;
+        }
+      }
+
+      res.json({
+        success: true,
+        imported,
+        updated,
+        skipped,
+        total: dataRows.length,
+        errors: errors.slice(0, 10),
+      });
+    } catch (error: any) {
+      console.error("Google Sheets import error:", error);
+      res.status(500).json({ message: error.message || "Failed to import from Google Sheets" });
+    }
+  });
+
   // ==== Categories Routes ====
   app.get("/api/categories", isAuthenticated, async (req, res) => {
     try {
