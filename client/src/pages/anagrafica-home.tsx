@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { MemberSearch } from "@/components/ui/member-search";
 import { AutocompleteInput } from "@/components/ui/autocomplete-input";
+import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
@@ -579,11 +580,18 @@ export default function AnagraficaHome() {
                   </div>
                   <div className="space-y-2">
                     <Label>Città</Label>
-                    <Input 
-                      placeholder="Milano"
+                    <LocationAutocomplete
                       value={formData.city || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                      data-testid="input-city"
+                      onChange={(v) => setFormData(prev => ({ ...prev, city: v }))}
+                      onCitySelect={(city) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          city: city.name,
+                          province: city.province?.code || prev.province || "",
+                          postalCode: city.postalCode || prev.postalCode || "",
+                        }));
+                      }}
+                      placeholder="Cerca città..."
                     />
                   </div>
                   <div className="space-y-2">
