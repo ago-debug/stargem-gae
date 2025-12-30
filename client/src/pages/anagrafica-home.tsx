@@ -657,18 +657,6 @@ export default function AnagraficaHome() {
                   </div>
                 </div>
 
-                {/* Row Chat */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label>Chat</Label>
-                    <Input 
-                      placeholder="ID Chat"
-                      value={formData.chat || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, chat: e.target.value }))}
-                      data-testid="input-chat"
-                    />
-                  </div>
-                </div>
 
                 {/* Row 5: Rilascio Tessera, Numero Tessera, Scadenza Tessera, Stato Tessera */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
