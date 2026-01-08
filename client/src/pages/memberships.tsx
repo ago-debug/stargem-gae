@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, IdCard, FileText } from "lucide-react";
+import { Plus, Search, Edit, Trash2, IdCard, FileText, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Membership, InsertMembership, MedicalCertificate, InsertMedicalCertificate, Member } from "@shared/schema";
 
@@ -125,6 +125,10 @@ export default function Memberships() {
           <TabsTrigger value="memberships" data-testid="tab-memberships">
             <IdCard className="w-4 h-4 mr-2" />
             Tessere Associative
+          </TabsTrigger>
+          <TabsTrigger value="entity-cards" data-testid="tab-entity-cards">
+            <Building2 className="w-4 h-4 mr-2" />
+            Tessere Ente
           </TabsTrigger>
           <TabsTrigger value="certificates" data-testid="tab-certificates">
             <FileText className="w-4 h-4 mr-2" />
@@ -302,6 +306,103 @@ export default function Memberships() {
                   </TableBody>
                 </Table>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="entity-cards" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Cerca tessera ente..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                  data-testid="input-search-entity-cards"
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {!members ? (
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              ) : (() => {
+                const membersWithEntityCard = members.filter(m => 
+                  m.entityCardNumber || m.entityCardType
+                ).filter(m => {
+                  if (!searchQuery) return true;
+                  const searchLower = searchQuery.toLowerCase();
+                  return (
+                    m.firstName?.toLowerCase().includes(searchLower) ||
+                    m.lastName?.toLowerCase().includes(searchLower) ||
+                    m.entityCardNumber?.toLowerCase().includes(searchLower) ||
+                    m.entityCardType?.toLowerCase().includes(searchLower)
+                  );
+                });
+
+                if (membersWithEntityCard.length === 0) {
+                  return (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium mb-2">Nessuna tessera ente trovata</p>
+                      <p className="text-sm">Le tessere ente vengono gestite nella scheda Anagrafica del socio</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead>Tipo Ente</TableHead>
+                        <TableHead>Numero Tessera</TableHead>
+                        <TableHead>Data Rilascio</TableHead>
+                        <TableHead>Scadenza</TableHead>
+                        <TableHead>Stato</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {membersWithEntityCard.map((member) => {
+                        const expiryInfo = member.entityCardExpiryDate 
+                          ? getExpiryStatus(member.entityCardExpiryDate) 
+                          : { status: "unknown", label: "N/D", variant: "secondary" as const };
+                        return (
+                          <TableRow key={member.id} data-testid={`entity-card-row-${member.id}`}>
+                            <TableCell className="font-medium">
+                              {member.firstName} {member.lastName}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{member.entityCardType || "-"}</Badge>
+                            </TableCell>
+                            <TableCell className="font-mono text-xs">{member.entityCardNumber || "-"}</TableCell>
+                            <TableCell>
+                              {member.entityCardIssueDate 
+                                ? new Date(member.entityCardIssueDate).toLocaleDateString('it-IT') 
+                                : "-"}
+                            </TableCell>
+                            <TableCell>
+                              {member.entityCardExpiryDate 
+                                ? new Date(member.entityCardExpiryDate).toLocaleDateString('it-IT') 
+                                : "-"}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={expiryInfo.variant}>
+                                {expiryInfo.label}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                );
+              })()}
             </CardContent>
           </Card>
         </TabsContent>
