@@ -80,6 +80,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       if (!normalizedData.firstName) normalizedData.firstName = "Sconosciuto";
       if (!normalizedData.lastName) normalizedData.lastName = "Sconosciuto";
+      
+      // Check for duplicate fiscal code
+      if (normalizedData.fiscalCode) {
+        const existingMember = await storage.getMemberByFiscalCode(normalizedData.fiscalCode);
+        if (existingMember) {
+          return res.status(409).json({ 
+            message: `Codice fiscale già presente nel sistema`,
+            conflictWith: {
+              id: existingMember.id,
+              firstName: existingMember.firstName,
+              lastName: existingMember.lastName,
+              fiscalCode: existingMember.fiscalCode
+            }
+          });
+        }
+      }
+      
       const member = await storage.createMember(normalizedData);
       res.status(201).json(member);
     } catch (error: any) {
@@ -99,6 +116,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const [key, value] of Object.entries(req.body)) {
         normalizedData[key] = normalizeEmpty(value);
       }
+      
+      // Check for duplicate fiscal code (excluding current member)
+      if (normalizedData.fiscalCode) {
+        const existingMember = await storage.getMemberByFiscalCode(normalizedData.fiscalCode);
+        if (existingMember && existingMember.id !== id) {
+          return res.status(409).json({ 
+            message: `Codice fiscale già presente nel sistema`,
+            conflictWith: {
+              id: existingMember.id,
+              firstName: existingMember.firstName,
+              lastName: existingMember.lastName,
+              fiscalCode: existingMember.fiscalCode
+            }
+          });
+        }
+      }
+      
       const member = await storage.updateMember(id, normalizedData);
       res.json(member);
     } catch (error: any) {

@@ -75,6 +75,7 @@ export interface IStorage {
   // Members
   getMembers(): Promise<Member[]>;
   getMember(id: number): Promise<Member | undefined>;
+  getMemberByFiscalCode(fiscalCode: string): Promise<Member | undefined>;
   createMember(member: InsertMember): Promise<Member>;
   updateMember(id: number, member: Partial<InsertMember>): Promise<Member>;
   deleteMember(id: number): Promise<void>;
@@ -228,6 +229,12 @@ export class DatabaseStorage implements IStorage {
 
   async getMember(id: number): Promise<Member | undefined> {
     const [member] = await db.select().from(members).where(eq(members.id, id));
+    return member;
+  }
+
+  async getMemberByFiscalCode(fiscalCode: string): Promise<Member | undefined> {
+    if (!fiscalCode) return undefined;
+    const [member] = await db.select().from(members).where(eq(members.fiscalCode, fiscalCode.toUpperCase()));
     return member;
   }
 
