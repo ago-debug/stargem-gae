@@ -340,6 +340,12 @@ export const members = pgTable("members", {
   cardIssueDate: date("card_issue_date"), // Data rilascio tessera
   cardExpiryDate: date("card_expiry_date"), // Scadenza tessera
   
+  // Tessera ente (CSEN, ACSI, AICS, etc.)
+  entityCardType: varchar("entity_card_type", { length: 50 }), // Tipo ente (CSEN, ACSI, AICS, etc.)
+  entityCardNumber: varchar("entity_card_number", { length: 100 }), // Numero tessera ente
+  entityCardIssueDate: date("entity_card_issue_date"), // Data rilascio tessera ente
+  entityCardExpiryDate: date("entity_card_expiry_date"), // Scadenza tessera ente
+  
   // Certificato medico
   hasMedicalCertificate: boolean("has_medical_certificate").default(false), // Flag certificato medico
   medicalCertificateExpiry: date("medical_certificate_expiry"), // Scadenza certificato medico

@@ -19,7 +19,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   User, CreditCard, Gift, IdCard, FileText, Trophy, Users,
   Dumbbell, BookOpen, Sun, Plus, Settings, Download, Upload, Save,
-  Search, MessageCircle, RotateCcw, ChevronUp
+  Search, MessageCircle, RotateCcw, ChevronUp, Building2
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member } from "@shared/schema";
@@ -44,6 +44,11 @@ interface MemberFormData {
   cardNumber?: string;
   cardIssueDate?: string;
   cardExpiryDate?: string;
+  // Entity card data (tessera ente)
+  entityCardType?: string;
+  entityCardNumber?: string;
+  entityCardIssueDate?: string;
+  entityCardExpiryDate?: string;
   notes?: string;
   categoryId?: number;
   subscriptionTypeId?: number;
@@ -139,6 +144,10 @@ export default function AnagraficaHome() {
         cardNumber: selectedMember.cardNumber || "",
         cardIssueDate: selectedMember.cardIssueDate || "",
         cardExpiryDate: selectedMember.cardExpiryDate || "",
+        entityCardType: selectedMember.entityCardType || "",
+        entityCardNumber: selectedMember.entityCardNumber || "",
+        entityCardIssueDate: selectedMember.entityCardIssueDate || "",
+        entityCardExpiryDate: selectedMember.entityCardExpiryDate || "",
         notes: selectedMember.notes || "",
         categoryId: selectedMember.categoryId || undefined,
         subscriptionTypeId: selectedMember.subscriptionTypeId || undefined,
@@ -206,6 +215,10 @@ export default function AnagraficaHome() {
       cardNumber: normalizeEmpty(formData.cardNumber),
       cardIssueDate: normalizeEmpty(formData.cardIssueDate),
       cardExpiryDate: normalizeEmpty(formData.cardExpiryDate),
+      entityCardType: normalizeEmpty(formData.entityCardType),
+      entityCardNumber: normalizeEmpty(formData.entityCardNumber),
+      entityCardIssueDate: normalizeEmpty(formData.entityCardIssueDate),
+      entityCardExpiryDate: normalizeEmpty(formData.entityCardExpiryDate),
       medicalCertificateExpiry: normalizeEmpty(formData.medicalCertificateExpiry),
       notes: normalizeEmpty(formData.notes),
       categoryId: formData.categoryId,
@@ -250,6 +263,10 @@ export default function AnagraficaHome() {
       cardNumber: member.cardNumber || "",
       cardIssueDate: member.cardIssueDate || "",
       cardExpiryDate: member.cardExpiryDate || "",
+      entityCardType: member.entityCardType || "",
+      entityCardNumber: member.entityCardNumber || "",
+      entityCardIssueDate: member.entityCardIssueDate || "",
+      entityCardExpiryDate: member.entityCardExpiryDate || "",
       notes: member.notes || "",
       categoryId: member.categoryId || undefined,
       subscriptionTypeId: member.subscriptionTypeId || undefined,
@@ -757,8 +774,143 @@ export default function AnagraficaHome() {
             </Card>
           </TabsContent>
 
+          {/* Tessere Tab */}
+          <TabsContent value="tessere" className="mt-0">
+            <div className="space-y-6">
+              {/* Tessera Socio */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <IdCard className="w-5 h-5" />
+                    Tessera Socio
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="cardNumber">Numero Tessera</Label>
+                      <Input
+                        id="cardNumber"
+                        value={formData.cardNumber || ""}
+                        onChange={(e) => setFormData(prev => ({ ...prev, cardNumber: e.target.value }))}
+                        placeholder="2526XXXXXXX"
+                        data-testid="input-card-number"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cardIssueDate">Data Rilascio</Label>
+                      <Input
+                        id="cardIssueDate"
+                        type="date"
+                        value={formData.cardIssueDate || ""}
+                        onChange={(e) => setFormData(prev => ({ ...prev, cardIssueDate: e.target.value }))}
+                        data-testid="input-card-issue-date"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cardExpiryDate">Data Scadenza</Label>
+                      <Input
+                        id="cardExpiryDate"
+                        type="date"
+                        value={formData.cardExpiryDate || ""}
+                        onChange={(e) => setFormData(prev => ({ ...prev, cardExpiryDate: e.target.value }))}
+                        data-testid="input-card-expiry-date"
+                      />
+                    </div>
+                  </div>
+                  {cardStatus && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Stato:</span>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${cardStatus.color}`} data-testid="text-card-status">
+                        {cardStatus.label}
+                      </span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Tessera Ente */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Building2 className="w-5 h-5" />
+                    Tessera Ente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="entityCardType">Tipo Ente</Label>
+                      <Select
+                        value={formData.entityCardType || ""}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, entityCardType: value }))}
+                      >
+                        <SelectTrigger data-testid="select-entity-card-type">
+                          <SelectValue placeholder="Seleziona ente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CSEN">CSEN</SelectItem>
+                          <SelectItem value="ACSI">ACSI</SelectItem>
+                          <SelectItem value="AICS">AICS</SelectItem>
+                          <SelectItem value="UISP">UISP</SelectItem>
+                          <SelectItem value="CSI">CSI</SelectItem>
+                          <SelectItem value="ENDAS">ENDAS</SelectItem>
+                          <SelectItem value="ASI">ASI</SelectItem>
+                          <SelectItem value="MSP">MSP</SelectItem>
+                          <SelectItem value="ALTRO">Altro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="entityCardNumber">Numero Tessera Ente</Label>
+                      <Input
+                        id="entityCardNumber"
+                        value={formData.entityCardNumber || ""}
+                        onChange={(e) => setFormData(prev => ({ ...prev, entityCardNumber: e.target.value }))}
+                        placeholder="Numero tessera"
+                        data-testid="input-entity-card-number"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="entityCardIssueDate">Data Rilascio</Label>
+                      <Input
+                        id="entityCardIssueDate"
+                        type="date"
+                        value={formData.entityCardIssueDate || ""}
+                        onChange={(e) => setFormData(prev => ({ ...prev, entityCardIssueDate: e.target.value }))}
+                        data-testid="input-entity-card-issue-date"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="entityCardExpiryDate">Data Scadenza</Label>
+                      <Input
+                        id="entityCardExpiryDate"
+                        type="date"
+                        value={formData.entityCardExpiryDate || ""}
+                        onChange={(e) => setFormData(prev => ({ ...prev, entityCardExpiryDate: e.target.value }))}
+                        data-testid="input-entity-card-expiry-date"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2">
+                <Button
+                  onClick={handleSave}
+                  disabled={saveMutation.isPending}
+                  data-testid="button-save-tessere"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {selectedMemberId ? "Salva Modifiche" : "Salva"}
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
           {/* Other tabs - placeholder content */}
-          {tabs.filter(t => t.id !== "anagrafica").map(tab => (
+          {tabs.filter(t => t.id !== "anagrafica" && t.id !== "tessere").map(tab => (
             <TabsContent key={tab.id} value={tab.id} className="mt-0">
               <Card>
                 <CardHeader>
