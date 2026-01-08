@@ -440,15 +440,21 @@ export default function Courses() {
     queryKey: ["/api/attendances"],
   });
 
-  const getCourseEnrollments = (courseId: number): Array<{ id: number; firstName: string; lastName: string }> => {
+  const getCourseEnrollments = (courseId: number): Array<{ id: number; firstName: string; lastName: string; gender: string | null }> => {
     if (!enrollments || !members) return [];
     return enrollments
       .filter(e => e.courseId === courseId && e.status === 'active')
       .map(e => {
         const member = members.find(m => m.id === e.memberId);
-        return member ? { id: member.id, firstName: member.firstName, lastName: member.lastName } : null;
+        return member ? { id: member.id, firstName: member.firstName, lastName: member.lastName, gender: member.gender } : null;
       })
-      .filter((m): m is { id: number; firstName: string; lastName: string } => m !== null);
+      .filter((m): m is { id: number; firstName: string; lastName: string; gender: string | null } => m !== null);
+  };
+
+  const getGenderCounts = (courseEnrollments: Array<{ gender: string | null }>) => {
+    const female = courseEnrollments.filter(e => e.gender === 'F').length;
+    const male = courseEnrollments.filter(e => e.gender === 'M').length;
+    return { female, male };
   };
 
   const getCourseAttendances = (courseId: number) => {
@@ -612,11 +618,14 @@ export default function Courses() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome Corso</TableHead>
+                  <TableHead>Corso</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead>Insegnante</TableHead>
                   <TableHead>Prezzo</TableHead>
                   <TableHead>Posti</TableHead>
+                  <TableHead>Disponibilità</TableHead>
+                  <TableHead>Donne</TableHead>
+                  <TableHead>Uomini</TableHead>
                   <TableHead>Iscritti</TableHead>
                   <TableHead>Periodo</TableHead>
                   <TableHead>Stato</TableHead>
@@ -626,9 +635,16 @@ export default function Courses() {
               <TableBody>
                 {filteredCourses.map((course) => {
                   const courseEnrollments = getCourseEnrollments(course.id);
+                  const genderCounts = getGenderCounts(courseEnrollments);
+                  const availableSpots = course.maxCapacity ? course.maxCapacity - (course.currentEnrollment || 0) : null;
                   return (
                   <TableRow key={course.id} data-testid={`course-row-${course.id}`}>
-                    <TableCell className="font-medium">{course.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex flex-col">
+                        {course.sku && <span className="text-xs text-muted-foreground">{course.sku}</span>}
+                        <span>{course.name}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       {categories?.find(c => c.id === course.categoryId)?.name || "-"}
                     </TableCell>
@@ -638,7 +654,18 @@ export default function Courses() {
                         : "-"}
                     </TableCell>
                     <TableCell>€{course.price || "0.00"}</TableCell>
-                    <TableCell>{course.currentEnrollment}/{course.maxCapacity || "∞"}</TableCell>
+                    <TableCell>{course.currentEnrollment || 0}/{course.maxCapacity || "∞"}</TableCell>
+                    <TableCell>
+                      {availableSpots !== null ? (
+                        <Badge variant={availableSpots > 0 ? "outline" : "destructive"}>
+                          {availableSpots > 0 ? availableSpots : "Esaurito"}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">∞</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">{genderCounts.female}</TableCell>
+                    <TableCell className="text-center">{genderCounts.male}</TableCell>
                     <TableCell>
                       {courseEnrollments.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
