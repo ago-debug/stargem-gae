@@ -320,6 +320,66 @@ export const insertCourseSchema = createInsertSchema(courses).omit({
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
 export type Course = typeof courses.$inferSelect;
 
+// ============================================================================
+// WORKSHOPS (identical structure to courses)
+// ============================================================================
+export const workshops = pgTable("workshops", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const workshopsRelations = relations(workshops, ({ one }) => ({
+  category: one(categories, {
+    fields: [workshops.categoryId],
+    references: [categories.id],
+  }),
+  studio: one(studios, {
+    fields: [workshops.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [workshops.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [workshops.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [workshops.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertWorkshopSchema = createInsertSchema(workshops).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertWorkshop = z.infer<typeof insertWorkshopSchema>;
+export type Workshop = typeof workshops.$inferSelect;
+
 // Members (iscritti)
 export const members = pgTable("members", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
