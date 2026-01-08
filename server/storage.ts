@@ -16,6 +16,8 @@ import {
   paymentMethods,
   payments,
   enrollments,
+  workshopEnrollments,
+  workshopAttendances,
   accessLogs,
   attendances,
   countries,
@@ -49,6 +51,10 @@ import {
   type InsertPayment,
   type Enrollment,
   type InsertEnrollment,
+  type WorkshopEnrollment,
+  type InsertWorkshopEnrollment,
+  type WorkshopAttendance,
+  type InsertWorkshopAttendance,
   type AccessLog,
   type InsertAccessLog,
   type Attendance,
@@ -168,6 +174,19 @@ export interface IStorage {
   getAttendancesByMember(memberId: number): Promise<Attendance[]>;
   createAttendance(attendance: InsertAttendance): Promise<Attendance>;
   deleteAttendance(id: number): Promise<void>;
+
+  // Workshop Enrollments
+  getWorkshopEnrollments(): Promise<WorkshopEnrollment[]>;
+  getWorkshopEnrollment(id: number): Promise<WorkshopEnrollment | undefined>;
+  createWorkshopEnrollment(enrollment: InsertWorkshopEnrollment): Promise<WorkshopEnrollment>;
+  updateWorkshopEnrollment(id: number, enrollment: Partial<InsertWorkshopEnrollment>): Promise<WorkshopEnrollment>;
+  deleteWorkshopEnrollment(id: number): Promise<void>;
+
+  // Workshop Attendances
+  getWorkshopAttendances(): Promise<WorkshopAttendance[]>;
+  getWorkshopAttendance(id: number): Promise<WorkshopAttendance | undefined>;
+  createWorkshopAttendance(attendance: InsertWorkshopAttendance): Promise<WorkshopAttendance>;
+  deleteWorkshopAttendance(id: number): Promise<void>;
 
   // Locations (Countries, Provinces, Cities)
   getCountries(): Promise<Country[]>;
@@ -804,6 +823,53 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAttendance(id: number): Promise<void> {
     await db.delete(attendances).where(eq(attendances.id, id));
+  }
+
+  // ==== Workshop Enrollments ====
+  async getWorkshopEnrollments(): Promise<WorkshopEnrollment[]> {
+    return await db.select().from(workshopEnrollments).orderBy(desc(workshopEnrollments.enrollmentDate));
+  }
+
+  async getWorkshopEnrollment(id: number): Promise<WorkshopEnrollment | undefined> {
+    const [enrollment] = await db.select().from(workshopEnrollments).where(eq(workshopEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createWorkshopEnrollment(enrollment: InsertWorkshopEnrollment): Promise<WorkshopEnrollment> {
+    const [newEnrollment] = await db.insert(workshopEnrollments).values(enrollment).returning();
+    return newEnrollment;
+  }
+
+  async updateWorkshopEnrollment(id: number, enrollment: Partial<InsertWorkshopEnrollment>): Promise<WorkshopEnrollment> {
+    const [updated] = await db
+      .update(workshopEnrollments)
+      .set(enrollment)
+      .where(eq(workshopEnrollments.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteWorkshopEnrollment(id: number): Promise<void> {
+    await db.delete(workshopEnrollments).where(eq(workshopEnrollments.id, id));
+  }
+
+  // ==== Workshop Attendances ====
+  async getWorkshopAttendances(): Promise<WorkshopAttendance[]> {
+    return await db.select().from(workshopAttendances).orderBy(desc(workshopAttendances.attendanceDate));
+  }
+
+  async getWorkshopAttendance(id: number): Promise<WorkshopAttendance | undefined> {
+    const [attendance] = await db.select().from(workshopAttendances).where(eq(workshopAttendances.id, id));
+    return attendance;
+  }
+
+  async createWorkshopAttendance(attendance: InsertWorkshopAttendance): Promise<WorkshopAttendance> {
+    const [newAttendance] = await db.insert(workshopAttendances).values(attendance).returning();
+    return newAttendance;
+  }
+
+  async deleteWorkshopAttendance(id: number): Promise<void> {
+    await db.delete(workshopAttendances).where(eq(workshopAttendances.id, id));
   }
 
   // ==== Locations (Countries, Provinces, Cities) ====
