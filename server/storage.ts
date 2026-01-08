@@ -10,6 +10,7 @@ import {
   instructors,
   studios,
   courses,
+  workshops,
   memberships,
   medicalCertificates,
   paymentMethods,
@@ -36,6 +37,8 @@ import {
   type InsertStudio,
   type Course,
   type InsertCourse,
+  type Workshop,
+  type InsertWorkshop,
   type Membership,
   type InsertMembership,
   type MedicalCertificate,
@@ -111,6 +114,13 @@ export interface IStorage {
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course>;
   deleteCourse(id: number): Promise<void>;
+
+  // Workshops
+  getWorkshops(): Promise<Workshop[]>;
+  getWorkshop(id: number): Promise<Workshop | undefined>;
+  createWorkshop(workshop: InsertWorkshop): Promise<Workshop>;
+  updateWorkshop(id: number, workshop: Partial<InsertWorkshop>): Promise<Workshop>;
+  deleteWorkshop(id: number): Promise<void>;
 
   // Memberships
   getMemberships(): Promise<Membership[]>;
@@ -410,6 +420,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCourse(id: number): Promise<void> {
     await db.delete(courses).where(eq(courses.id, id));
+  }
+
+  // ==== Workshops ====
+  async getWorkshops(): Promise<Workshop[]> {
+    return await db.select().from(workshops).orderBy(desc(workshops.createdAt));
+  }
+
+  async getWorkshop(id: number): Promise<Workshop | undefined> {
+    const [workshop] = await db.select().from(workshops).where(eq(workshops.id, id));
+    return workshop;
+  }
+
+  async createWorkshop(workshop: InsertWorkshop): Promise<Workshop> {
+    const [newWorkshop] = await db.insert(workshops).values(workshop).returning();
+    return newWorkshop;
+  }
+
+  async updateWorkshop(id: number, workshop: Partial<InsertWorkshop>): Promise<Workshop> {
+    const [updated] = await db
+      .update(workshops)
+      .set({ ...workshop, updatedAt: new Date() })
+      .where(eq(workshops.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteWorkshop(id: number): Promise<void> {
+    await db.delete(workshops).where(eq(workshops.id, id));
   }
 
   // ==== Memberships ====
