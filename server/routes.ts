@@ -13,6 +13,7 @@ import {
   insertInstructorSchema,
   insertStudioSchema,
   insertCourseSchema,
+  insertWorkshopSchema,
   insertMembershipSchema,
   insertMedicalCertificateSchema,
   insertPaymentMethodSchema,
@@ -495,6 +496,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete course" });
+    }
+  });
+
+  // ==== Workshops Routes ====
+  app.get("/api/workshops", isAuthenticated, async (req, res) => {
+    try {
+      const workshops = await storage.getWorkshops();
+      res.json(workshops);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch workshops" });
+    }
+  });
+
+  app.post("/api/workshops", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertWorkshopSchema.parse(req.body);
+      const workshop = await storage.createWorkshop(validatedData);
+      res.status(201).json(workshop);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create workshop" });
+    }
+  });
+
+  app.patch("/api/workshops/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const workshop = await storage.updateWorkshop(id, req.body);
+      res.json(workshop);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update workshop" });
+    }
+  });
+
+  app.delete("/api/workshops/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteWorkshop(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete workshop" });
     }
   });
 
