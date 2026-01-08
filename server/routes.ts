@@ -872,20 +872,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/access-logs", isAuthenticated, async (req, res) => {
     try {
-      const { barcode, accessType } = req.body;
+      const { barcode, accessType, notes: clientNotes, memberId: clientMemberId } = req.body;
       
-      // Check if membership exists and is valid
-      const membership = await storage.getMembershipByBarcode(barcode);
+      const isManualEntry = barcode?.startsWith('MANUAL-');
+      
+      // For manual entries, use memberId directly; for barcode entries, look up membership
+      let membership = null;
+      if (!isManualEntry && barcode) {
+        membership = await storage.getMembershipByBarcode(barcode);
+      }
+      
+      // If we have a memberId (manual or from barcode lookup), find the member's active membership
+      const effectiveMemberId = clientMemberId || (membership?.memberId);
+      if (!membership && effectiveMemberId) {
+        const memberMemberships = await storage.getMembershipsByMemberId(effectiveMemberId);
+        membership = memberMemberships.find(m => m.status === 'active') || memberMemberships[0];
+      }
       
       let logData: any = {
-        barcode,
+        barcode: barcode || `MANUAL-${clientMemberId}`,
         accessType: accessType || "entry",
         membershipStatus: null,
-        notes: null,
-        memberId: null,
+        notes: clientNotes || null,
+        memberId: effectiveMemberId || null,
       };
 
-      if (membership) {
+      if (isManualEntry && effectiveMemberId) {
+        // Manual entry with known member
+        if (membership) {
+          const today = new Date();
+          const expiry = new Date(membership.expiryDate);
+          if (membership.status === "active" && expiry > today) {
+            logData.membershipStatus = "active";
+          } else if (expiry < today) {
+            logData.membershipStatus = "expired";
+          } else {
+            logData.membershipStatus = membership.status;
+          }
+        } else {
+          logData.membershipStatus = "manual";
+        }
+      } else if (membership) {
         logData.memberId = membership.memberId;
         const today = new Date();
         const expiry = new Date(membership.expiryDate);
@@ -894,21 +921,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           logData.membershipStatus = "active";
         } else if (expiry < today) {
           logData.membershipStatus = "expired";
-          logData.notes = "Membership expired";
+          if (!clientNotes) logData.notes = "Tessera scaduta";
         } else {
           logData.membershipStatus = membership.status;
         }
+      } else if (clientMemberId) {
+        logData.membershipStatus = "manual";
       } else {
         logData.membershipStatus = "invalid";
-        logData.notes = "Barcode not found";
+        if (!clientNotes) logData.notes = "Barcode non trovato";
       }
 
       const log = await storage.createAccessLog(logData);
       
       // Return additional info for UI feedback
       let memberName = "Unknown";
-      if (membership) {
-        const member = await storage.getMember(membership.memberId);
+      const memberIdToCheck = logData.memberId || clientMemberId;
+      if (memberIdToCheck) {
+        const member = await storage.getMember(memberIdToCheck);
         if (member) {
           memberName = `${member.firstName} ${member.lastName}`;
         }
@@ -916,9 +946,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json({
         ...log,
-        valid: logData.membershipStatus === "active",
+        valid: logData.membershipStatus === "active" || logData.membershipStatus === "manual",
         memberName,
-        reason: logData.notes,
+        reason: clientNotes || logData.notes,
       });
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create access log" });
