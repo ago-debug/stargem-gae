@@ -493,6 +493,65 @@ export const insertEnrollmentSchema = createInsertSchema(enrollments).omit({
 export type InsertEnrollment = z.infer<typeof insertEnrollmentSchema>;
 export type Enrollment = typeof enrollments.$inferSelect;
 
+// Workshop Enrollments (iscrizioni ai workshop)
+export const workshopEnrollments = pgTable("workshop_enrollments", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  workshopId: integer("workshop_id").notNull().references(() => workshops.id, { onDelete: "cascade" }),
+  status: varchar("status", { length: 50 }).notNull().default("active"),
+  enrollmentDate: timestamp("enrollment_date").defaultNow(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const workshopEnrollmentsRelations = relations(workshopEnrollments, ({ one }) => ({
+  member: one(members, {
+    fields: [workshopEnrollments.memberId],
+    references: [members.id],
+  }),
+  workshop: one(workshops, {
+    fields: [workshopEnrollments.workshopId],
+    references: [workshops.id],
+  }),
+}));
+
+export const insertWorkshopEnrollmentSchema = createInsertSchema(workshopEnrollments).omit({
+  id: true,
+  enrollmentDate: true,
+  createdAt: true,
+});
+export type InsertWorkshopEnrollment = z.infer<typeof insertWorkshopEnrollmentSchema>;
+export type WorkshopEnrollment = typeof workshopEnrollments.$inferSelect;
+
+// Workshop Attendances (presenze ai workshop)
+export const workshopAttendances = pgTable("workshop_attendances", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  workshopId: integer("workshop_id").notNull().references(() => workshops.id, { onDelete: "cascade" }),
+  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  attendanceDate: timestamp("attendance_date").notNull(),
+  type: varchar("type", { length: 20 }).default("manual"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const workshopAttendancesRelations = relations(workshopAttendances, ({ one }) => ({
+  workshop: one(workshops, {
+    fields: [workshopAttendances.workshopId],
+    references: [workshops.id],
+  }),
+  member: one(members, {
+    fields: [workshopAttendances.memberId],
+    references: [members.id],
+  }),
+}));
+
+export const insertWorkshopAttendanceSchema = createInsertSchema(workshopAttendances).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertWorkshopAttendance = z.infer<typeof insertWorkshopAttendanceSchema>;
+export type WorkshopAttendance = typeof workshopAttendances.$inferSelect;
+
 // Memberships (tessere associative)
 export const memberships = pgTable("memberships", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),

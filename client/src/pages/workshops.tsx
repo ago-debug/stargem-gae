@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useSearch } from "wouter";
+import { Link, useSearch } from "wouter";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Workshop, InsertWorkshop, Category, Instructor, Studio } from "@shared/schema";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import type { Workshop, InsertWorkshop, Category, Instructor, Studio, Member } from "@shared/schema";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -39,6 +44,375 @@ const RECURRENCE_TYPES = [
   { id: "custom", label: "Personalizzato" },
 ];
 
+interface WorkshopEnrollment {
+  id: number;
+  workshopId: number;
+  memberId: number;
+  startDate: string;
+  endDate?: string | null;
+  status: string;
+}
+
+interface WorkshopAttendance {
+  id: number;
+  workshopId: number;
+  memberId: number;
+  attendanceDate: string;
+  type: string;
+}
+
+interface EnrollmentsTabProps {
+  workshopId: number;
+}
+
+function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
+  const { toast } = useToast();
+  const [isAddingEnrollment, setIsAddingEnrollment] = useState(false);
+
+  const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
+    queryKey: ["/api/workshop-enrollments"],
+  });
+
+  const { data: members } = useQuery<Member[]>({
+    queryKey: ["/api/members"],
+  });
+
+  const createEnrollmentMutation = useMutation({
+    mutationFn: async (data: { memberId: number; workshopId: number }) => {
+      await apiRequest("POST", "/api/workshop-enrollments", {
+        memberId: data.memberId,
+        workshopId: data.workshopId,
+        startDate: new Date().toISOString().split('T')[0],
+        status: 'active',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+      toast({ title: "Iscrizione aggiunta con successo" });
+      setIsAddingEnrollment(false);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteEnrollmentMutation = useMutation({
+    mutationFn: async (enrollmentId: number) => {
+      await apiRequest("DELETE", `/api/workshop-enrollments/${enrollmentId}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+      toast({ title: "Iscrizione rimossa con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const workshopEnrollments = enrollments
+    ?.filter(e => e.workshopId === workshopId && e.status === 'active')
+    .map(e => {
+      const member = members?.find(m => m.id === e.memberId);
+      return {
+        enrollmentId: e.id,
+        memberId: e.memberId,
+        member: member || null,
+      };
+    })
+    .filter(e => e.member !== null) || [];
+
+  const availableMembers = members?.filter(m => 
+    !workshopEnrollments.some(e => e.memberId === m.id)
+  ) || [];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">
+          Partecipanti Iscritti ({workshopEnrollments.length})
+        </h3>
+        <Popover open={isAddingEnrollment} onOpenChange={setIsAddingEnrollment}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" data-testid="button-add-workshop-enrollment">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Aggiungi Partecipante
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0" align="end">
+            <Command>
+              <CommandInput placeholder="Cerca membro..." />
+              <CommandList>
+                <CommandEmpty>Nessun membro trovato</CommandEmpty>
+                <CommandGroup>
+                  {availableMembers.map(member => (
+                    <CommandItem
+                      key={member.id}
+                      value={`${member.firstName} ${member.lastName}`}
+                      onSelect={() => {
+                        createEnrollmentMutation.mutate({ memberId: member.id, workshopId });
+                      }}
+                      data-testid={`option-workshop-member-${member.id}`}
+                    >
+                      {member.firstName} {member.lastName}
+                      {member.email && <span className="text-xs text-muted-foreground ml-2">({member.email})</span>}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+      
+      {workshopEnrollments.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-8">Nessun partecipante iscritto a questo workshop</p>
+      ) : (
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Cognome</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead className="text-right">Azioni</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {workshopEnrollments.map((enrollment: any) => (
+                <TableRow key={enrollment.enrollmentId}>
+                  <TableCell className="font-medium">{enrollment.member.firstName}</TableCell>
+                  <TableCell>{enrollment.member.lastName}</TableCell>
+                  <TableCell>{enrollment.member.email || '-'}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link href={`/iscritti?search=${enrollment.member.lastName}`}>
+                        <Button variant="ghost" size="sm" data-testid={`button-view-workshop-member-${enrollment.memberId}`}>
+                          Visualizza
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          if (confirm("Sei sicuro di voler rimuovere questa iscrizione?")) {
+                            deleteEnrollmentMutation.mutate(enrollment.enrollmentId);
+                          }
+                        }}
+                        data-testid={`button-remove-workshop-enrollment-${enrollment.enrollmentId}`}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface AttendancesTabProps {
+  workshopId: number;
+}
+
+function AttendancesTab({ workshopId }: AttendancesTabProps) {
+  const { toast } = useToast();
+  const [isAddingAttendance, setIsAddingAttendance] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const { data: attendances } = useQuery<WorkshopAttendance[]>({
+    queryKey: ["/api/workshop-attendances"],
+  });
+
+  const { data: members } = useQuery<Member[]>({
+    queryKey: ["/api/members"],
+  });
+
+  const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
+    queryKey: ["/api/workshop-enrollments"],
+  });
+
+  const createAttendanceMutation = useMutation({
+    mutationFn: async (data: { memberId: number; workshopId: number; attendanceDate: string }) => {
+      await apiRequest("POST", "/api/workshop-attendances", {
+        memberId: data.memberId,
+        workshopId: data.workshopId,
+        attendanceDate: new Date(data.attendanceDate).toISOString(),
+        type: 'manual',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workshop-attendances"] });
+      toast({ title: "Presenza registrata con successo" });
+      setIsAddingAttendance(false);
+      setSelectedMemberId(null);
+      setAttendanceDate(new Date().toISOString().split('T')[0]);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteAttendanceMutation = useMutation({
+    mutationFn: async (attendanceId: number) => {
+      await apiRequest("DELETE", `/api/workshop-attendances/${attendanceId}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workshop-attendances"] });
+      toast({ title: "Presenza eliminata con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const workshopAttendances = attendances
+    ?.filter(a => a.workshopId === workshopId)
+    .map(a => {
+      const member = members?.find(m => m.id === a.memberId);
+      return {
+        ...a,
+        memberName: member ? `${member.firstName} ${member.lastName}` : "Sconosciuto",
+      };
+    })
+    .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
+    .slice(0, 50) || [];
+
+  const enrolledMembers = enrollments
+    ?.filter(e => e.workshopId === workshopId && e.status === 'active')
+    .map(e => members?.find(m => m.id === e.memberId))
+    .filter((m): m is Member => m !== undefined) || [];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">
+          Presenze Registrate
+        </h3>
+        <Dialog open={isAddingAttendance} onOpenChange={setIsAddingAttendance}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsAddingAttendance(true)}
+            data-testid="button-add-workshop-attendance"
+          >
+            <CalendarPlus className="w-4 h-4 mr-2" />
+            Registra Presenza
+          </Button>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Registra Presenza</DialogTitle>
+              <DialogDescription>Seleziona il partecipante e la data della presenza</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="member">Partecipante *</Label>
+                <Select value={selectedMemberId?.toString() || ""} onValueChange={(v) => setSelectedMemberId(parseInt(v))}>
+                  <SelectTrigger data-testid="select-workshop-attendance-member">
+                    <SelectValue placeholder="Seleziona partecipante" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {enrolledMembers.map(member => (
+                      <SelectItem key={member.id} value={member.id.toString()}>
+                        {member.firstName} {member.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="attendanceDate">Data e Ora *</Label>
+                <Input
+                  id="attendanceDate"
+                  type="datetime-local"
+                  value={attendanceDate}
+                  onChange={(e) => setAttendanceDate(e.target.value)}
+                  data-testid="input-workshop-attendance-date"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddingAttendance(false)} data-testid="button-cancel-workshop-attendance">
+                Annulla
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!selectedMemberId) {
+                    toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
+                    return;
+                  }
+                  createAttendanceMutation.mutate({
+                    memberId: selectedMemberId,
+                    workshopId,
+                    attendanceDate,
+                  });
+                }}
+                disabled={!selectedMemberId || createAttendanceMutation.isPending}
+                data-testid="button-submit-workshop-attendance"
+              >
+                Registra
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+      
+      {workshopAttendances.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-8">Nessuna presenza registrata per questo workshop</p>
+      ) : (
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Partecipante</TableHead>
+                <TableHead>Data e Ora</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="text-right">Azioni</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {workshopAttendances.map((attendance: any) => (
+                <TableRow key={attendance.id}>
+                  <TableCell className="font-medium">{attendance.memberName}</TableCell>
+                  <TableCell>
+                    {format(new Date(attendance.attendanceDate), "dd/MM/yyyy HH:mm", { locale: it })}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {attendance.type === 'manual' ? 'Manuale' : 
+                       attendance.type === 'barcode' ? 'Badge' : 'Auto'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (confirm("Sei sicuro di voler eliminare questa presenza?")) {
+                          deleteAttendanceMutation.mutate(attendance.id);
+                        }
+                      }}
+                      data-testid={`button-delete-workshop-attendance-${attendance.id}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Workshops() {
   const { toast } = useToast();
   const searchString = useSearch();
@@ -52,6 +426,7 @@ export default function Workshops() {
   const [selectedStartTime, setSelectedStartTime] = useState<string>("");
   const [selectedEndTime, setSelectedEndTime] = useState<string>("");
   const [selectedRecurrence, setSelectedRecurrence] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("details");
 
   const { data: workshops, isLoading } = useQuery<Workshop[]>({
     queryKey: ["/api/workshops"],
@@ -68,6 +443,44 @@ export default function Workshops() {
   const { data: studios } = useQuery<Studio[]>({
     queryKey: ["/api/studios"],
   });
+
+  const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
+    queryKey: ["/api/workshop-enrollments"],
+  });
+
+  const { data: members } = useQuery<Member[]>({
+    queryKey: ["/api/members"],
+  });
+
+  const { data: attendances } = useQuery<WorkshopAttendance[]>({
+    queryKey: ["/api/workshop-attendances"],
+  });
+
+  const getWorkshopEnrollments = (workshopId: number): Array<{ id: number; firstName: string; lastName: string }> => {
+    if (!enrollments || !members) return [];
+    return enrollments
+      .filter(e => e.workshopId === workshopId && e.status === 'active')
+      .map(e => {
+        const member = members.find(m => m.id === e.memberId);
+        return member ? { id: member.id, firstName: member.firstName, lastName: member.lastName } : null;
+      })
+      .filter((m): m is { id: number; firstName: string; lastName: string } => m !== null);
+  };
+
+  const getWorkshopAttendances = (workshopId: number) => {
+    if (!attendances || !members) return [];
+    return attendances
+      .filter(a => a.workshopId === workshopId)
+      .map(a => {
+        const member = members.find(m => m.id === a.memberId);
+        return {
+          ...a,
+          memberName: member ? `${member.firstName} ${member.lastName}` : "Sconosciuto",
+        };
+      })
+      .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
+      .slice(0, 20);
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertWorkshop) => {
@@ -149,6 +562,7 @@ export default function Workshops() {
     setSelectedStartTime(workshop.startTime || "");
     setSelectedEndTime(workshop.endTime || "");
     setSelectedRecurrence(workshop.recurrenceType || "");
+    setActiveTab("details");
     setIsFormOpen(true);
   };
 
@@ -159,6 +573,7 @@ export default function Workshops() {
     setSelectedStartTime("");
     setSelectedEndTime("");
     setSelectedRecurrence("");
+    setActiveTab("details");
   };
 
   const filteredWorkshops = workshops?.filter((workshop) =>
@@ -220,13 +635,16 @@ export default function Workshops() {
                   <TableHead>Insegnante</TableHead>
                   <TableHead>Prezzo</TableHead>
                   <TableHead>Posti</TableHead>
+                  <TableHead>Iscritti</TableHead>
                   <TableHead>Periodo</TableHead>
                   <TableHead>Stato</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredWorkshops.map((workshop) => (
+                {filteredWorkshops.map((workshop) => {
+                  const workshopEnrollments = getWorkshopEnrollments(workshop.id);
+                  return (
                   <TableRow key={workshop.id} data-testid={`workshop-row-${workshop.id}`}>
                     <TableCell className="font-medium">{workshop.name}</TableCell>
                     <TableCell>
@@ -239,6 +657,26 @@ export default function Workshops() {
                     </TableCell>
                     <TableCell>€{workshop.price || "0.00"}</TableCell>
                     <TableCell>{workshop.currentEnrollment}/{workshop.maxCapacity || "∞"}</TableCell>
+                    <TableCell>
+                      {workshopEnrollments.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {workshopEnrollments.slice(0, 2).map((member) => (
+                            <Link key={member.id} href={`/members?search=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`}>
+                              <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-workshop-member-${member.id}`}>
+                                {member.firstName} {member.lastName}
+                              </Badge>
+                            </Link>
+                          ))}
+                          {workshopEnrollments.length > 2 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{workshopEnrollments.length - 2} altri
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Nessun iscritto</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm">
                       {workshop.startDate && workshop.endDate 
                         ? `${new Date(workshop.startDate).toLocaleDateString('it-IT')} - ${new Date(workshop.endDate).toLocaleDateString('it-IT')}`
@@ -274,7 +712,8 @@ export default function Workshops() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                );
+                })}
               </TableBody>
             </Table>
           )}
@@ -288,93 +727,484 @@ export default function Workshops() {
           <DialogHeader>
             <DialogTitle>{editingWorkshop ? "Modifica Workshop" : "Nuovo Workshop"}</DialogTitle>
             <DialogDescription>
-              {editingWorkshop ? "Modifica i dettagli del workshop" : "Inserisci i dettagli del workshop"}
+              {editingWorkshop ? "Gestisci i dettagli del workshop, visualizza iscritti e presenze" : "Inserisci i dettagli del workshop"}
             </DialogDescription>
           </DialogHeader>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome Workshop *</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  required
-                  defaultValue={editingWorkshop?.name || ""}
-                  data-testid="input-name"
-                />
-              </div>
+          {editingWorkshop ? (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="details" data-testid="tab-workshop-details">Dettagli</TabsTrigger>
+                <TabsTrigger value="enrollments" data-testid="tab-workshop-enrollments">
+                  <Users className="w-4 h-4 mr-1" />
+                  Iscritti ({getWorkshopEnrollments(editingWorkshop.id).length})
+                </TabsTrigger>
+                <TabsTrigger value="attendances" data-testid="tab-workshop-attendances">
+                  <Calendar className="w-4 h-4 mr-1" />
+                  Presenze ({getWorkshopAttendances(editingWorkshop.id).length})
+                </TabsTrigger>
+              </TabsList>
 
-              <div className="space-y-2">
-                <Label htmlFor="sku">SKU</Label>
-                <Input
-                  id="sku"
-                  name="sku"
-                  placeholder="es: WS-2526-YOGA"
-                  defaultValue={editingWorkshop?.sku || ""}
-                  data-testid="input-sku"
-                />
-              </div>
-            </div>
+              <TabsContent value="details" className="space-y-4">
+                <form onSubmit={handleSubmit} id="edit-workshop-form" className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome Workshop *</Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        required
+                        defaultValue={editingWorkshop.name}
+                        data-testid="input-name"
+                      />
+                    </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrizione</Label>
-              <Textarea
-                id="description"
-                name="description"
-                rows={3}
-                defaultValue={editingWorkshop?.description || ""}
-                data-testid="input-description"
-              />
-            </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="sku">SKU</Label>
+                      <Input
+                        id="sku"
+                        name="sku"
+                        placeholder="es: WS-2526-YOGA"
+                        defaultValue={editingWorkshop.sku || ""}
+                        data-testid="input-sku"
+                      />
+                    </div>
+                  </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="categoryId">Categoria</Label>
-                <Select name="categoryId" defaultValue={editingWorkshop?.categoryId?.toString()}>
-                  <SelectTrigger data-testid="select-category">
-                    <SelectValue placeholder="Seleziona categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories?.map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Descrizione</Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      rows={3}
+                      defaultValue={editingWorkshop.description || ""}
+                      data-testid="input-description"
+                    />
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="studioId">Studio/Sala</Label>
-                <Select name="studioId" defaultValue={editingWorkshop?.studioId?.toString()}>
-                  <SelectTrigger data-testid="select-studio">
-                    <SelectValue placeholder="Seleziona studio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {studios?.map((studio) => (
-                      <SelectItem key={studio.id} value={studio.id.toString()}>
-                        {studio.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="categoryId">Categoria</Label>
+                      <Select name="categoryId" defaultValue={editingWorkshop.categoryId?.toString()}>
+                        <SelectTrigger data-testid="select-category">
+                          <SelectValue placeholder="Seleziona categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories?.map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-            <div className="space-y-2">
-              <Label>Insegnanti</Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="studioId">Studio/Sala</Label>
+                      <Select name="studioId" defaultValue={editingWorkshop.studioId?.toString()}>
+                        <SelectTrigger data-testid="select-studio">
+                          <SelectValue placeholder="Seleziona studio" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {studios?.map((studio) => (
+                            <SelectItem key={studio.id} value={studio.id.toString()}>
+                              {studio.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Insegnanti</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
+                        <Select name="instructorId" defaultValue={editingWorkshop.instructorId?.toString()}>
+                          <SelectTrigger data-testid="select-instructor">
+                            <SelectValue placeholder="Seleziona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {instructors?.map((instructor) => (
+                              <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                                {instructor.firstName} {instructor.lastName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
+                        <Select name="secondaryInstructor1Id" defaultValue={editingWorkshop.secondaryInstructor1Id?.toString()}>
+                          <SelectTrigger data-testid="select-secondary-instructor-1">
+                            <SelectValue placeholder="Nessuno" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {instructors?.map((instructor) => (
+                              <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                                {instructor.firstName} {instructor.lastName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2</Label>
+                        <Select name="secondaryInstructor2Id" defaultValue={editingWorkshop.secondaryInstructor2Id?.toString()}>
+                          <SelectTrigger data-testid="select-secondary-instructor-2">
+                            <SelectValue placeholder="Nessuno" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {instructors?.map((instructor) => (
+                              <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                                {instructor.firstName} {instructor.lastName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="price">Prezzo (€)</Label>
+                      <Input
+                        id="price"
+                        name="price"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        defaultValue={editingWorkshop.price || ""}
+                        data-testid="input-price"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="maxCapacity">Posti Disponibili</Label>
+                      <Input
+                        id="maxCapacity"
+                        name="maxCapacity"
+                        type="number"
+                        min="1"
+                        defaultValue={editingWorkshop.maxCapacity || ""}
+                        data-testid="input-maxCapacity"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="startDate">Data Inizio</Label>
+                      <Input
+                        id="startDate"
+                        name="startDate"
+                        type="date"
+                        defaultValue={editingWorkshop.startDate || ""}
+                        data-testid="input-startDate"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="endDate">Data Fine</Label>
+                      <Input
+                        id="endDate"
+                        name="endDate"
+                        type="date"
+                        defaultValue={editingWorkshop.endDate || ""}
+                        data-testid="input-endDate"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="dayOfWeek">Giorno Settimana</Label>
+                      <Select value={selectedDayOfWeek} onValueChange={setSelectedDayOfWeek}>
+                        <SelectTrigger data-testid="select-dayOfWeek">
+                          <SelectValue placeholder="Seleziona" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {WEEKDAYS.map((day) => (
+                            <SelectItem key={day.id} value={day.id}>
+                              {day.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="startTime">Ora Inizio</Label>
+                      <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
+                        <SelectTrigger data-testid="select-startTime">
+                          <SelectValue placeholder="--:--" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIME_SLOTS.map((time) => (
+                            <SelectItem key={time} value={time}>
+                              {time}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="endTime">Ora Fine</Label>
+                      <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
+                        <SelectTrigger data-testid="select-endTime">
+                          <SelectValue placeholder="--:--" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIME_SLOTS.map((time) => (
+                            <SelectItem key={time} value={time}>
+                              {time}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="recurrenceType">Ricorrenza</Label>
+                      <Select value={selectedRecurrence} onValueChange={setSelectedRecurrence}>
+                        <SelectTrigger data-testid="select-recurrenceType">
+                          <SelectValue placeholder="Seleziona" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {RECURRENCE_TYPES.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="schedule">Note Orario (opzionale)</Label>
+                    <Textarea
+                      id="schedule"
+                      name="schedule"
+                      placeholder="Note aggiuntive sull'orario"
+                      rows={2}
+                      defaultValue={editingWorkshop.schedule || ""}
+                      data-testid="input-schedule"
+                    />
+                  </div>
+
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={closeDialog}
+                      data-testid="button-cancel"
+                    >
+                      Annulla
+                    </Button>
+                    <Button 
+                      type="submit"
+                      disabled={updateMutation.isPending}
+                      data-testid="button-submit-workshop"
+                    >
+                      Salva Modifiche
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="enrollments" className="space-y-4">
+                <EnrollmentsTab workshopId={editingWorkshop.id} />
+              </TabsContent>
+
+              <TabsContent value="attendances" className="space-y-4">
+                <AttendancesTab workshopId={editingWorkshop.id} />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
-                  <Select name="instructorId" defaultValue={editingWorkshop?.instructorId?.toString()}>
-                    <SelectTrigger data-testid="select-instructor">
+                  <Label htmlFor="name">Nome Workshop *</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    required
+                    data-testid="input-name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sku">SKU</Label>
+                  <Input
+                    id="sku"
+                    name="sku"
+                    placeholder="es: WS-2526-YOGA"
+                    data-testid="input-sku"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Descrizione</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  rows={3}
+                  data-testid="input-description"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="categoryId">Categoria</Label>
+                  <Select name="categoryId">
+                    <SelectTrigger data-testid="select-category">
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories?.map((category) => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="studioId">Studio/Sala</Label>
+                  <Select name="studioId">
+                    <SelectTrigger data-testid="select-studio">
+                      <SelectValue placeholder="Seleziona studio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {studios?.map((studio) => (
+                        <SelectItem key={studio.id} value={studio.id.toString()}>
+                          {studio.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Insegnanti</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
+                    <Select name="instructorId">
+                      <SelectTrigger data-testid="select-instructor">
+                        <SelectValue placeholder="Seleziona" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {instructors?.map((instructor) => (
+                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                            {instructor.firstName} {instructor.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1 (opzionale)</Label>
+                    <Select name="secondaryInstructor1Id">
+                      <SelectTrigger data-testid="select-secondary-instructor-1">
+                        <SelectValue placeholder="Nessuno" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {instructors?.map((instructor) => (
+                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                            {instructor.firstName} {instructor.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2 (opzionale)</Label>
+                    <Select name="secondaryInstructor2Id">
+                      <SelectTrigger data-testid="select-secondary-instructor-2">
+                        <SelectValue placeholder="Nessuno" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {instructors?.map((instructor) => (
+                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                            {instructor.firstName} {instructor.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Prezzo (€)</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    data-testid="input-price"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="maxCapacity">Posti Disponibili</Label>
+                  <Input
+                    id="maxCapacity"
+                    name="maxCapacity"
+                    type="number"
+                    min="1"
+                    data-testid="input-maxCapacity"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Data Inizio</Label>
+                  <Input
+                    id="startDate"
+                    name="startDate"
+                    type="date"
+                    data-testid="input-startDate"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">Data Fine</Label>
+                  <Input
+                    id="endDate"
+                    name="endDate"
+                    type="date"
+                    data-testid="input-endDate"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dayOfWeek">Giorno Settimana</Label>
+                  <Select value={selectedDayOfWeek} onValueChange={setSelectedDayOfWeek}>
+                    <SelectTrigger data-testid="select-dayOfWeek">
                       <SelectValue placeholder="Seleziona" />
                     </SelectTrigger>
                     <SelectContent>
-                      {instructors?.map((instructor) => (
-                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                          {instructor.firstName} {instructor.lastName}
+                      {WEEKDAYS.map((day) => (
+                        <SelectItem key={day.id} value={day.id}>
+                          {day.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -382,15 +1212,15 @@ export default function Workshops() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
-                  <Select name="secondaryInstructor1Id" defaultValue={editingWorkshop?.secondaryInstructor1Id?.toString()}>
-                    <SelectTrigger data-testid="select-secondary-instructor-1">
-                      <SelectValue placeholder="Nessuno" />
+                  <Label htmlFor="startTime">Ora Inizio</Label>
+                  <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
+                    <SelectTrigger data-testid="select-startTime">
+                      <SelectValue placeholder="--:--" />
                     </SelectTrigger>
                     <SelectContent>
-                      {instructors?.map((instructor) => (
-                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                          {instructor.firstName} {instructor.lastName}
+                      {TIME_SLOTS.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -398,153 +1228,68 @@ export default function Workshops() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2</Label>
-                  <Select name="secondaryInstructor2Id" defaultValue={editingWorkshop?.secondaryInstructor2Id?.toString()}>
-                    <SelectTrigger data-testid="select-secondary-instructor-2">
-                      <SelectValue placeholder="Nessuno" />
+                  <Label htmlFor="endTime">Ora Fine</Label>
+                  <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
+                    <SelectTrigger data-testid="select-endTime">
+                      <SelectValue placeholder="--:--" />
                     </SelectTrigger>
                     <SelectContent>
-                      {instructors?.map((instructor) => (
-                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                          {instructor.firstName} {instructor.lastName}
+                      {TIME_SLOTS.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="recurrenceType">Ricorrenza</Label>
+                  <Select value={selectedRecurrence} onValueChange={setSelectedRecurrence}>
+                    <SelectTrigger data-testid="select-recurrenceType">
+                      <SelectValue placeholder="Seleziona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RECURRENCE_TYPES.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price">Prezzo (€)</Label>
-                <Input
-                  id="price"
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  defaultValue={editingWorkshop?.price || ""}
-                  data-testid="input-price"
+                <Label htmlFor="schedule">Note Orario (opzionale)</Label>
+                <Textarea
+                  id="schedule"
+                  name="schedule"
+                  placeholder="Note aggiuntive sull'orario"
+                  rows={2}
+                  data-testid="input-schedule"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="maxCapacity">Posti Disponibili</Label>
-                <Input
-                  id="maxCapacity"
-                  name="maxCapacity"
-                  type="number"
-                  min="1"
-                  defaultValue={editingWorkshop?.maxCapacity || ""}
-                  data-testid="input-maxCapacity"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Data Inizio</Label>
-                <Input
-                  id="startDate"
-                  name="startDate"
-                  type="date"
-                  defaultValue={editingWorkshop?.startDate || ""}
-                  data-testid="input-startDate"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="endDate">Data Fine</Label>
-                <Input
-                  id="endDate"
-                  name="endDate"
-                  type="date"
-                  defaultValue={editingWorkshop?.endDate || ""}
-                  data-testid="input-endDate"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="dayOfWeek">Giorno Settimana</Label>
-                <Select value={selectedDayOfWeek} onValueChange={setSelectedDayOfWeek}>
-                  <SelectTrigger data-testid="select-dayOfWeek">
-                    <SelectValue placeholder="Seleziona" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {WEEKDAYS.map((day) => (
-                      <SelectItem key={day.id} value={day.id}>
-                        {day.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="startTime">Ora Inizio</Label>
-                <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
-                  <SelectTrigger data-testid="select-startTime">
-                    <SelectValue placeholder="--:--" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIME_SLOTS.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="endTime">Ora Fine</Label>
-                <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
-                  <SelectTrigger data-testid="select-endTime">
-                    <SelectValue placeholder="--:--" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIME_SLOTS.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="recurrence">Ricorrenza</Label>
-                <Select value={selectedRecurrence} onValueChange={setSelectedRecurrence}>
-                  <SelectTrigger data-testid="select-recurrence">
-                    <SelectValue placeholder="Seleziona" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RECURRENCE_TYPES.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={closeDialog} data-testid="button-cancel">
-                Annulla
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createMutation.isPending || updateMutation.isPending}
-                data-testid="button-submit"
-              >
-                {editingWorkshop ? "Salva Modifiche" : "Crea Workshop"}
-              </Button>
-            </DialogFooter>
-          </form>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeDialog}
+                  data-testid="button-cancel"
+                >
+                  Annulla
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createMutation.isPending}
+                  data-testid="button-submit-workshop"
+                >
+                  Crea Workshop
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>

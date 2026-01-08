@@ -19,6 +19,8 @@ import {
   insertPaymentMethodSchema,
   insertPaymentSchema,
   insertEnrollmentSchema,
+  insertWorkshopEnrollmentSchema,
+  insertWorkshopAttendanceSchema,
   insertAccessLogSchema,
   insertAttendanceSchema,
 } from "@shared/schema";
@@ -536,6 +538,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete workshop" });
+    }
+  });
+
+  // ==== Workshop Enrollments Routes ====
+  app.get("/api/workshop-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const enrollments = await storage.getWorkshopEnrollments();
+      res.json(enrollments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch workshop enrollments" });
+    }
+  });
+
+  app.post("/api/workshop-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertWorkshopEnrollmentSchema.parse(req.body);
+      const enrollment = await storage.createWorkshopEnrollment(validatedData);
+      
+      const workshop = await storage.getWorkshop(enrollment.workshopId);
+      if (workshop) {
+        await storage.updateWorkshop(workshop.id, {
+          currentEnrollment: (workshop.currentEnrollment || 0) + 1,
+        });
+      }
+      
+      res.status(201).json(enrollment);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create workshop enrollment" });
+    }
+  });
+
+  app.patch("/api/workshop-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const enrollment = await storage.updateWorkshopEnrollment(id, req.body);
+      res.json(enrollment);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update workshop enrollment" });
+    }
+  });
+
+  app.delete("/api/workshop-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const enrollment = await storage.getWorkshopEnrollment(id);
+      
+      if (enrollment) {
+        const workshop = await storage.getWorkshop(enrollment.workshopId);
+        if (workshop && workshop.currentEnrollment && workshop.currentEnrollment > 0) {
+          await storage.updateWorkshop(workshop.id, {
+            currentEnrollment: workshop.currentEnrollment - 1,
+          });
+        }
+      }
+      
+      await storage.deleteWorkshopEnrollment(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete workshop enrollment" });
+    }
+  });
+
+  // ==== Workshop Attendances Routes ====
+  app.get("/api/workshop-attendances", isAuthenticated, async (req, res) => {
+    try {
+      const attendances = await storage.getWorkshopAttendances();
+      res.json(attendances);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch workshop attendances" });
+    }
+  });
+
+  app.post("/api/workshop-attendances", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertWorkshopAttendanceSchema.parse(req.body);
+      const attendance = await storage.createWorkshopAttendance(validatedData);
+      res.status(201).json(attendance);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create workshop attendance" });
+    }
+  });
+
+  app.delete("/api/workshop-attendances/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteWorkshopAttendance(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete workshop attendance" });
     }
   });
 
