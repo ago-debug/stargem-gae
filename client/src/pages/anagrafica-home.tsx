@@ -174,8 +174,17 @@ export default function AnagraficaHome() {
         setSelectedMemberId(data.id);
       }
     },
-    onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    onError: (error: any) => {
+      // Check if error contains conflict information
+      if (error.conflictWith) {
+        toast({ 
+          title: "Codice Fiscale Duplicato", 
+          description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.firstName} ${error.conflictWith.lastName}`,
+          variant: "destructive" 
+        });
+      } else {
+        toast({ title: "Errore", description: error.message, variant: "destructive" });
+      }
     },
   });
 
