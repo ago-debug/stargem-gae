@@ -132,6 +132,7 @@ export interface IStorage {
   getMemberships(): Promise<Membership[]>;
   getMembership(id: number): Promise<Membership | undefined>;
   getMembershipByBarcode(barcode: string): Promise<Membership | undefined>;
+  getMembershipsByMemberId(memberId: number): Promise<Membership[]>;
   createMembership(membership: InsertMembership): Promise<Membership>;
   updateMembership(id: number, membership: Partial<InsertMembership>): Promise<Membership>;
   deleteMembership(id: number): Promise<void>;
@@ -482,6 +483,10 @@ export class DatabaseStorage implements IStorage {
   async getMembershipByBarcode(barcode: string): Promise<Membership | undefined> {
     const [membership] = await db.select().from(memberships).where(eq(memberships.barcode, barcode));
     return membership;
+  }
+
+  async getMembershipsByMemberId(memberId: number): Promise<Membership[]> {
+    return await db.select().from(memberships).where(eq(memberships.memberId, memberId)).orderBy(desc(memberships.expiryDate));
   }
 
   async createMembership(membership: InsertMembership): Promise<Membership> {
