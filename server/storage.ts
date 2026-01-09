@@ -137,7 +137,7 @@ export interface IStorage {
 
   // Memberships
   getMemberships(): Promise<Membership[]>;
-  getMembershipsWithMembers(): Promise<(Membership & { memberFirstName?: string; memberLastName?: string })[]>;
+  getMembershipsWithMembers(): Promise<(Membership & { memberFirstName?: string; memberLastName?: string; memberFiscalCode?: string })[]>;
   getMembership(id: number): Promise<Membership | undefined>;
   getMembershipByBarcode(barcode: string): Promise<Membership | undefined>;
   getMembershipsByMemberId(memberId: number): Promise<Membership[]>;
@@ -147,7 +147,7 @@ export interface IStorage {
 
   // Medical Certificates
   getMedicalCertificates(): Promise<MedicalCertificate[]>;
-  getMedicalCertificatesWithMembers(): Promise<(MedicalCertificate & { memberFirstName?: string; memberLastName?: string })[]>;
+  getMedicalCertificatesWithMembers(): Promise<(MedicalCertificate & { memberFirstName?: string; memberLastName?: string; memberFiscalCode?: string })[]>;
   getMedicalCertificatesByMemberId(memberId: number): Promise<MedicalCertificate[]>;
   getMedicalCertificate(id: number): Promise<MedicalCertificate | undefined>;
   createMedicalCertificate(cert: InsertMedicalCertificate): Promise<MedicalCertificate>;
@@ -606,7 +606,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(memberships).orderBy(desc(memberships.expiryDate));
   }
 
-  async getMembershipsWithMembers(): Promise<(Membership & { memberFirstName?: string; memberLastName?: string })[]> {
+  async getMembershipsWithMembers(): Promise<(Membership & { memberFirstName?: string; memberLastName?: string; memberFiscalCode?: string })[]> {
     const result = await db
       .select({
         id: memberships.id,
@@ -623,6 +623,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: memberships.updatedAt,
         memberFirstName: members.firstName,
         memberLastName: members.lastName,
+        memberFiscalCode: members.fiscalCode,
       })
       .from(memberships)
       .leftJoin(members, eq(memberships.memberId, members.id))
@@ -691,7 +692,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(medicalCertificates).orderBy(desc(medicalCertificates.expiryDate));
   }
 
-  async getMedicalCertificatesWithMembers(): Promise<(MedicalCertificate & { memberFirstName?: string; memberLastName?: string })[]> {
+  async getMedicalCertificatesWithMembers(): Promise<(MedicalCertificate & { memberFirstName?: string; memberLastName?: string; memberFiscalCode?: string })[]> {
     const result = await db
       .select({
         id: medicalCertificates.id,
@@ -705,6 +706,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: medicalCertificates.updatedAt,
         memberFirstName: members.firstName,
         memberLastName: members.lastName,
+        memberFiscalCode: members.fiscalCode,
       })
       .from(medicalCertificates)
       .leftJoin(members, eq(medicalCertificates.memberId, members.id))
