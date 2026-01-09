@@ -81,6 +81,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!normalizedData.firstName) normalizedData.firstName = "Sconosciuto";
       if (!normalizedData.lastName) normalizedData.lastName = "Sconosciuto";
       
+      // Normalize fiscal code to uppercase
+      if (normalizedData.fiscalCode) {
+        normalizedData.fiscalCode = normalizedData.fiscalCode.toUpperCase().trim();
+      }
+      
       // Check for duplicate fiscal code
       if (normalizedData.fiscalCode) {
         const existingMember = await storage.getMemberByFiscalCode(normalizedData.fiscalCode);
@@ -115,6 +120,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const normalizedData: any = {};
       for (const [key, value] of Object.entries(req.body)) {
         normalizedData[key] = normalizeEmpty(value);
+      }
+      
+      // Normalize fiscal code to uppercase
+      if (normalizedData.fiscalCode) {
+        normalizedData.fiscalCode = normalizedData.fiscalCode.toUpperCase().trim();
       }
       
       // Check for duplicate fiscal code (excluding current member)
