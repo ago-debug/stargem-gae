@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import type { Member } from "@shared/schema";
 
@@ -6,25 +6,28 @@ interface AutocompleteInputProps {
   value: string;
   onChange: (value: string) => void;
   onMemberSelect?: (member: Member) => void;
-  members: Member[];
+  members?: Member[];
   field: "firstName" | "lastName" | "fiscalCode" | "phone" | "mobile" | "email";
   placeholder?: string;
   className?: string;
   "data-testid"?: string;
+  useServerSearch?: boolean;
 }
 
 export function AutocompleteInput({
   value,
   onChange,
   onMemberSelect,
-  members,
+  members = [],
   field,
   placeholder,
   className,
   "data-testid": testId,
+  useServerSearch = false,
 }: AutocompleteInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [debouncedValue, setDebouncedValue] = useState(value);
+  const [serverResults, setServerResults] = useState<Member[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Debounce search to avoid filtering on every keystroke
@@ -35,19 +38,44 @@ export function AutocompleteInput({
     return () => clearTimeout(timer);
   }, [value]);
 
-  const filteredMembers = useMemo(() => {
-    if (debouncedValue.length < 3) return [];
-    const searchTerm = debouncedValue.toLowerCase();
-    const results: Member[] = [];
-    for (const member of members) {
-      if (results.length >= 8) break;
-      const fieldValue = member[field];
-      if (fieldValue && fieldValue.toLowerCase().includes(searchTerm)) {
-        results.push(member);
-      }
+  // Server-side search
+  useEffect(() => {
+    if (!useServerSearch || debouncedValue.length < 3) {
+      setServerResults([]);
+      return;
     }
-    return results;
-  }, [debouncedValue, members, field]);
+    
+    const searchServer = async () => {
+      try {
+        const params = new URLSearchParams({ page: "1", pageSize: "8", search: debouncedValue });
+        const res = await fetch(`/api/members?${params}`, { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setServerResults(data.members || []);
+        }
+      } catch (e) {
+        console.error("Autocomplete search error:", e);
+      }
+    };
+    
+    searchServer();
+  }, [debouncedValue, useServerSearch]);
+
+  const filteredMembers = useServerSearch 
+    ? serverResults
+    : (() => {
+        if (debouncedValue.length < 3) return [];
+        const searchTerm = debouncedValue.toLowerCase();
+        const results: Member[] = [];
+        for (const member of members) {
+          if (results.length >= 8) break;
+          const fieldValue = member[field];
+          if (fieldValue && fieldValue.toLowerCase().includes(searchTerm)) {
+            results.push(member);
+          }
+        }
+        return results;
+      })();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

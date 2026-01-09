@@ -362,13 +362,11 @@ export default function AnagraficaHome() {
                 <h1 className="text-xl sm:text-2xl font-semibold" data-testid="text-page-title">Sistema di Gestione Anagrafica</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
               </div>
-              {members && members.length > 0 && (
-                <MemberSearch 
-                  members={members} 
-                  onSelect={handleMemberSelect}
-                  placeholder="Cerca socio..."
-                />
-              )}
+              <MemberSearch 
+                onSelect={handleMemberSelect}
+                placeholder="Cerca socio..."
+                useServerSearch={true}
+              />
             </div>
             <div className="flex items-center gap-2 flex-wrap justify-start lg:justify-end">
               <Button 
@@ -483,7 +481,7 @@ export default function AnagraficaHome() {
                       value={formData.lastName || ""}
                       onChange={(v) => setFormData(prev => ({ ...prev, lastName: v }))}
                       onMemberSelect={handleAutocompleteSelect}
-                      members={members || []}
+                      useServerSearch={true}
                       field="lastName"
                       placeholder="Cognome"
                       data-testid="input-lastname"
@@ -495,7 +493,7 @@ export default function AnagraficaHome() {
                       value={formData.firstName || ""}
                       onChange={(v) => setFormData(prev => ({ ...prev, firstName: v }))}
                       onMemberSelect={handleAutocompleteSelect}
-                      members={members || []}
+                      useServerSearch={true}
                       field="firstName"
                       placeholder="Nome"
                       data-testid="input-firstname"
@@ -624,7 +622,7 @@ export default function AnagraficaHome() {
                       value={formData.fiscalCode || ""}
                       onChange={handleFiscalCodeChange}
                       onMemberSelect={handleAutocompleteSelect}
-                      members={members || []}
+                      useServerSearch={true}
                       field="fiscalCode"
                       placeholder="RSSMRA90A15F205X"
                       className="font-mono uppercase"
@@ -637,7 +635,7 @@ export default function AnagraficaHome() {
                       value={formData.email || ""}
                       onChange={(v) => setFormData(prev => ({ ...prev, email: v }))}
                       onMemberSelect={handleAutocompleteSelect}
-                      members={members || []}
+                      useServerSearch={true}
                       field="email"
                       placeholder="email@esempio.it"
                       data-testid="input-email"
@@ -649,7 +647,7 @@ export default function AnagraficaHome() {
                       value={formData.phone || ""}
                       onChange={(v) => setFormData(prev => ({ ...prev, phone: v }))}
                       onMemberSelect={handleAutocompleteSelect}
-                      members={members || []}
+                      useServerSearch={true}
                       field="phone"
                       placeholder="+39 123 456 7890"
                       data-testid="input-phone"
@@ -661,7 +659,7 @@ export default function AnagraficaHome() {
                       value={formData.mobile || ""}
                       onChange={(v) => setFormData(prev => ({ ...prev, mobile: v }))}
                       onMemberSelect={handleAutocompleteSelect}
-                      members={members || []}
+                      useServerSearch={true}
                       field="mobile"
                       placeholder="+39 333 1234567"
                       data-testid="input-mobile"

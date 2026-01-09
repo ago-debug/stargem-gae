@@ -1,38 +1,80 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Search, User } from "lucide-react";
+import { Search, User, Loader2 } from "lucide-react";
 import type { Member } from "@shared/schema";
 
 interface MemberSearchProps {
-  members: Member[];
+  members?: Member[];
   onSelect: (member: Member) => void;
   placeholder?: string;
+  useServerSearch?: boolean;
 }
 
-export function MemberSearch({ members, onSelect, placeholder = "Cerca socio (min 3 caratteri)..." }: MemberSearchProps) {
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
+export function MemberSearch({ members = [], onSelect, placeholder = "Cerca socio (min 3 caratteri)...", useServerSearch = false }: MemberSearchProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [serverResults, setServerResults] = useState<Member[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const debouncedQuery = useDebounce(query, 300);
 
-  const filteredMembers = query.length >= 3
-    ? members.filter(member => {
-        const searchLower = query.toLowerCase();
-        const searchableFields = [
-          member.firstName,
-          member.lastName,
-          member.fiscalCode,
-          member.email,
-          member.phone,
-          member.mobile,
-          member.cardNumber,
-          member.address,
-          member.placeOfBirth,
-        ];
-        return searchableFields.some(field => 
-          field?.toLowerCase().includes(searchLower)
-        );
-      }).slice(0, 10)
-    : [];
+  // Server-side search effect
+  useEffect(() => {
+    if (!useServerSearch || debouncedQuery.length < 3) {
+      setServerResults([]);
+      return;
+    }
+    
+    const searchServer = async () => {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams({ page: "1", pageSize: "10", search: debouncedQuery });
+        const res = await fetch(`/api/members?${params}`, { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setServerResults(data.members || []);
+        }
+      } catch (e) {
+        console.error("Search error:", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    searchServer();
+  }, [debouncedQuery, useServerSearch]);
+
+  const filteredMembers = useServerSearch 
+    ? serverResults 
+    : (query.length >= 3
+      ? members.filter(member => {
+          const searchLower = query.toLowerCase();
+          const searchableFields = [
+            member.firstName,
+            member.lastName,
+            member.fiscalCode,
+            member.email,
+            member.phone,
+            member.mobile,
+            member.cardNumber,
+            (member as any).address,
+            member.placeOfBirth,
+          ];
+          return searchableFields.some(field => 
+            field?.toLowerCase().includes(searchLower)
+          );
+        }).slice(0, 10)
+      : []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
