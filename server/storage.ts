@@ -171,7 +171,7 @@ export interface IStorage {
   deletePayment(id: number): Promise<void>;
 
   // Enrollments
-  getEnrollments(): Promise<(Enrollment & { memberFirstName?: string; memberLastName?: string; memberEmail?: string; memberFiscalCode?: string })[]>;
+  getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null })[]>;
   getEnrollmentsByMember(memberId: number): Promise<Enrollment[]>;
   getEnrollment(id: number): Promise<Enrollment | undefined>;
   createEnrollment(enrollment: InsertEnrollment): Promise<Enrollment>;
@@ -190,7 +190,7 @@ export interface IStorage {
   deleteAttendance(id: number): Promise<void>;
 
   // Workshop Enrollments
-  getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string; memberLastName?: string; memberEmail?: string; memberFiscalCode?: string })[]>;
+  getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null })[]>;
   getWorkshopEnrollmentsByMember(memberId: number): Promise<WorkshopEnrollment[]>;
   getWorkshopEnrollment(id: number): Promise<WorkshopEnrollment | undefined>;
   createWorkshopEnrollment(enrollment: InsertWorkshopEnrollment): Promise<WorkshopEnrollment>;
@@ -850,7 +850,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Enrollments ====
-  async getEnrollments(): Promise<(Enrollment & { memberFirstName?: string; memberLastName?: string; memberEmail?: string; memberFiscalCode?: string })[]> {
+  async getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null })[]> {
     const result = await db
       .select({
         id: enrollments.id,
@@ -1064,17 +1064,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Workshop Enrollments ====
-  async getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string; memberLastName?: string; memberEmail?: string; memberFiscalCode?: string })[]> {
+  async getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null })[]> {
     const result = await db
       .select({
         id: workshopEnrollments.id,
         workshopId: workshopEnrollments.workshopId,
         memberId: workshopEnrollments.memberId,
         enrollmentDate: workshopEnrollments.enrollmentDate,
-        startDate: workshopEnrollments.startDate,
-        endDate: workshopEnrollments.endDate,
         status: workshopEnrollments.status,
         notes: workshopEnrollments.notes,
+        createdAt: workshopEnrollments.createdAt,
         memberFirstName: members.firstName,
         memberLastName: members.lastName,
         memberEmail: members.email,
