@@ -52,6 +52,9 @@ export default function Members() {
   const [attendanceDate, setAttendanceDate] = useState<string>("");
   const [attendanceTime, setAttendanceTime] = useState<string>("");
   const [selectedCourseForAttendance, setSelectedCourseForAttendance] = useState<string>("");
+  const [memberEnrollments, setMemberEnrollments] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [attendances, setAttendances] = useState<any[]>([]);
   
   const dateOfBirthRef = useRef<HTMLInputElement>(null);
   const genderRef = useRef<HTMLSelectElement>(null);
@@ -443,11 +446,25 @@ export default function Members() {
                             className="font-bold hover:underline cursor-pointer"
                             onClick={async () => {
                               try {
-                                const res = await fetch(`/api/members/${member.id}`, { credentials: "include" });
-                                if (res.ok) {
-                                  const fullMember = await res.json();
+                                const [memberRes, enrollmentsRes, coursesRes, attendancesRes] = await Promise.all([
+                                  fetch(`/api/members/${member.id}`, { credentials: "include" }),
+                                  fetch(`/api/enrollments?memberId=${member.id}`, { credentials: "include" }),
+                                  fetch(`/api/courses`, { credentials: "include" }),
+                                  fetch(`/api/attendances?memberId=${member.id}`, { credentials: "include" }),
+                                ]);
+                                if (memberRes.ok) {
+                                  const fullMember = await memberRes.json();
                                   setEditingMember(fullMember);
                                   setHasMedicalCert(fullMember.hasMedicalCertificate || false);
+                                  if (enrollmentsRes.ok) {
+                                    setMemberEnrollments(await enrollmentsRes.json());
+                                  }
+                                  if (coursesRes.ok) {
+                                    setCourses(await coursesRes.json());
+                                  }
+                                  if (attendancesRes.ok) {
+                                    setAttendances(await attendancesRes.json());
+                                  }
                                   setIsFormOpen(true);
                                 }
                               } catch (e) {
@@ -963,20 +980,19 @@ export default function Members() {
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold">Corsi Iscritti</h3>
                     <Badge variant="secondary" data-testid="badge-enrolled-courses-count">
-                      {enrollments?.filter(e => e.memberId === editingMember.id).length || 0} corsi
+                      {memberEnrollments.length || 0} corsi
                     </Badge>
                   </div>
 
                   {/* Lista corsi iscritti */}
                   <div className="space-y-2">
-                    {enrollments?.filter(e => e.memberId === editingMember.id).length === 0 ? (
+                    {memberEnrollments.length === 0 ? (
                       <p className="text-sm text-muted-foreground" data-testid="text-no-enrollments">
                         Nessun corso iscritto
                       </p>
                     ) : (
                       <div className="space-y-2">
-                        {enrollments
-                          ?.filter(e => e.memberId === editingMember.id)
+                        {memberEnrollments
                           .map((enrollment) => {
                             const course = courses?.find(c => c.id === enrollment.courseId);
                             if (!course) return null;
@@ -1031,9 +1047,7 @@ export default function Members() {
                         {courses
                           ?.filter(c => 
                             c.active && 
-                            !enrollments?.some(e => 
-                              e.memberId === editingMember.id && e.courseId === c.id
-                            )
+                            !memberEnrollments.some(e => e.courseId === c.id)
                           )
                           .map(course => (
                             <SelectItem key={course.id} value={course.id.toString()}>
@@ -1071,7 +1085,7 @@ export default function Members() {
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold">Presenze</h3>
                     <Badge variant="secondary" data-testid="badge-attendances-count">
-                      {attendances?.filter(a => a.memberId === editingMember.id).length || 0} presenze
+                      {attendances.length || 0} presenze
                     </Badge>
                   </div>
 
@@ -1111,8 +1125,7 @@ export default function Members() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">Nessun corso</SelectItem>
-                          {enrollments
-                            ?.filter(e => e.memberId === editingMember.id)
+                          {memberEnrollments
                             .map(enrollment => {
                               const course = courses?.find(c => c.id === enrollment.courseId);
                               return course ? (
@@ -1134,7 +1147,7 @@ export default function Members() {
                         }
                         
                         const enrollment = (selectedCourseForAttendance && selectedCourseForAttendance !== "none") ? 
-                          enrollments?.find(e => e.id === parseInt(selectedCourseForAttendance)) : undefined;
+                          memberEnrollments.find(e => e.id === parseInt(selectedCourseForAttendance)) : undefined;
                         
                         const attendanceData: any = {
                           memberId: editingMember.id,
@@ -1163,14 +1176,13 @@ export default function Members() {
                   {/* Lista presenze recenti */}
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium text-muted-foreground">Ultime 10 Presenze</h4>
-                    {attendances?.filter(a => a.memberId === editingMember.id).length === 0 ? (
+                    {attendances.length === 0 ? (
                       <p className="text-sm text-muted-foreground" data-testid="text-no-attendances">
                         Nessuna presenza registrata
                       </p>
                     ) : (
                       <div className="space-y-2 max-h-64 overflow-y-auto">
                         {attendances
-                          ?.filter(a => a.memberId === editingMember.id)
                           .slice(0, 10)
                           .map((attendance) => {
                             const course = attendance.courseId ? courses?.find(c => c.id === attendance.courseId) : null;
