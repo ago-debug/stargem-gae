@@ -693,7 +693,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Enrollments Routes ====
   app.get("/api/enrollments", isAuthenticated, async (req, res) => {
     try {
-      const enrollments = await storage.getEnrollments();
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
+      const enrollments = memberId 
+        ? await storage.getEnrollmentsByMember(memberId)
+        : await storage.getEnrollments();
       res.json(enrollments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch enrollments" });
