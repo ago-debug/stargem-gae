@@ -684,11 +684,11 @@ export class DatabaseStorage implements IStorage {
       .select({
         id: medicalCertificates.id,
         memberId: medicalCertificates.memberId,
-        type: medicalCertificates.type,
         issueDate: medicalCertificates.issueDate,
         expiryDate: medicalCertificates.expiryDate,
-        issuingDoctor: medicalCertificates.issuingDoctor,
+        doctorName: medicalCertificates.doctorName,
         notes: medicalCertificates.notes,
+        status: medicalCertificates.status,
         createdAt: medicalCertificates.createdAt,
         updatedAt: medicalCertificates.updatedAt,
         memberFirstName: members.firstName,
