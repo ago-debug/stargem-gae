@@ -51,15 +51,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pageSize = parseInt(req.query.pageSize as string) || 50;
       const search = req.query.search as string || "";
       
-      // If no pagination params provided, return paginated by default
-      if (req.query.page || req.query.search) {
-        const result = await storage.getMembersPaginated(page, pageSize, search);
-        res.json(result);
-      } else {
-        // For backward compatibility, return all members if no params
-        const members = await storage.getMembers();
-        res.json(members);
-      }
+      // Always use paginated query for performance
+      const result = await storage.getMembersPaginated(page, pageSize, search);
+      res.json(result);
     } catch (error) {
       console.error("Error fetching members:", error);
       res.status(500).json({ message: "Failed to fetch members" });

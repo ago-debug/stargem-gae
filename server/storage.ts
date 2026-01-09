@@ -74,7 +74,7 @@ export interface IStorage {
 
   // Members
   getMembers(): Promise<Member[]>;
-  getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: Member[]; total: number }>;
+  getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }>;
   getMember(id: number): Promise<Member | undefined>;
   getMemberByFiscalCode(fiscalCode: string): Promise<Member | undefined>;
   getDuplicateFiscalCodes(): Promise<{ fiscalCode: string; members: { id: number; firstName: string; lastName: string; }[] }[]>;
@@ -229,34 +229,75 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(members).orderBy(desc(members.createdAt));
   }
 
-  async getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: Member[]; total: number }> {
+  async getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }> {
     const offset = (page - 1) * pageSize;
     
-    let query = db.select().from(members);
-    let countQuery = db.select({ count: sql<number>`count(*)` }).from(members);
+    // Subquery for active course count per member
+    const activeCourseCountSubquery = sql<number>`(
+      SELECT COUNT(*)::int FROM ${enrollments} 
+      WHERE ${enrollments.memberId} = ${members.id} 
+      AND ${enrollments.status} = 'active'
+    )`.as('activeCourseCount');
     
+    let searchCondition = sql`1=1`;
     if (search && search.trim().length >= 2) {
       const searchTerm = `%${search.trim().toLowerCase()}%`;
-      const searchCondition = sql`(
+      searchCondition = sql`(
         LOWER(${members.firstName}) LIKE ${searchTerm} OR 
         LOWER(${members.lastName}) LIKE ${searchTerm} OR 
         LOWER(${members.email}) LIKE ${searchTerm} OR 
         LOWER(${members.fiscalCode}) LIKE ${searchTerm} OR
         LOWER(${members.cardNumber}) LIKE ${searchTerm}
       )`;
-      query = query.where(searchCondition) as any;
-      countQuery = countQuery.where(searchCondition) as any;
     }
     
-    const [countResult] = await countQuery;
+    // Count query
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(members)
+      .where(searchCondition);
     const total = Number(countResult?.count || 0);
     
-    const membersList = await query
+    // Main query with course count
+    const membersList = await db
+      .select({
+        id: members.id,
+        firstName: members.firstName,
+        lastName: members.lastName,
+        email: members.email,
+        phone: members.phone,
+        mobile: members.mobile,
+        fiscalCode: members.fiscalCode,
+        dateOfBirth: members.dateOfBirth,
+        gender: members.gender,
+        placeOfBirth: members.placeOfBirth,
+        street: members.street,
+        city: members.city,
+        province: members.province,
+        postalCode: members.postalCode,
+        country: members.country,
+        notes: members.notes,
+        parentFirstName: members.parentFirstName,
+        parentLastName: members.parentLastName,
+        parentFiscalCode: members.parentFiscalCode,
+        parentPhone: members.parentPhone,
+        parentEmail: members.parentEmail,
+        hasMedicalCertificate: members.hasMedicalCertificate,
+        medicalCertificateExpiry: members.medicalCertificateExpiry,
+        cardNumber: members.cardNumber,
+        cardExpiryDate: members.cardExpiryDate,
+        active: members.active,
+        createdAt: members.createdAt,
+        categoryId: members.categoryId,
+        activeCourseCount: activeCourseCountSubquery,
+      })
+      .from(members)
+      .where(searchCondition)
       .orderBy(members.lastName, members.firstName)
       .limit(pageSize)
       .offset(offset);
     
-    return { members: membersList, total };
+    return { members: membersList as (Member & { activeCourseCount: number })[], total };
   }
 
   async getMember(id: number): Promise<Member | undefined> {

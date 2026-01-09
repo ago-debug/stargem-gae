@@ -83,21 +83,6 @@ export default function Members() {
   const totalMembers = membersData?.total || 0;
   const totalPages = Math.ceil(totalMembers / PAGE_SIZE);
 
-  const { data: enrollments } = useQuery<any[]>({
-    queryKey: ["/api/enrollments"],
-  });
-
-  const { data: courses } = useQuery<any[]>({
-    queryKey: ["/api/courses"],
-  });
-
-  const { data: clientCategories } = useQuery<any[]>({
-    queryKey: ["/api/client-categories"],
-  });
-
-  const { data: attendances } = useQuery<Attendance[]>({
-    queryKey: ["/api/attendances"],
-  });
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertMember) => {
@@ -351,16 +336,6 @@ export default function Members() {
     }
   };
 
-  const getMemberEnrollments = (memberId: number): Array<{ id: number; name: string }> => {
-    if (!enrollments || !courses) return [];
-    return enrollments
-      .filter(e => e.memberId === memberId)
-      .map(e => {
-        const course = courses.find(c => c.id === e.courseId);
-        return course ? { id: course.id, name: course.name } : null;
-      })
-      .filter((c): c is { id: number; name: string } => c !== null);
-  };
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
@@ -458,9 +433,7 @@ export default function Members() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.map((member) => {
-                    const memberCourses = getMemberEnrollments(member.id);
-                    return (
+                  {members.map((member) => (
                       <TableRow key={member.id} data-testid={`member-row-${member.id}`}>
                         <TableCell>
                           <span 
@@ -508,21 +481,10 @@ export default function Members() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {memberCourses.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {memberCourses.slice(0, 2).map((course) => (
-                                <Link key={course.id} href={`/courses?search=${encodeURIComponent(course.name)}`}>
-                                  <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-course-${course.id}`}>
-                                    {course.name}
-                                  </Badge>
-                                </Link>
-                              ))}
-                              {memberCourses.length > 2 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  +{memberCourses.length - 2} altri
-                                </Badge>
-                              )}
-                            </div>
+                          {(member as any).activeCourseCount > 0 ? (
+                            <Badge variant="outline" className="text-xs">
+                              {(member as any).activeCourseCount} {(member as any).activeCourseCount === 1 ? "corso" : "corsi"}
+                            </Badge>
                           ) : (
                             <span className="text-xs text-muted-foreground">Nessun corso</span>
                           )}
@@ -577,8 +539,7 @@ export default function Members() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
+                  ))}
                 </TableBody>
               </Table>
             </div>
