@@ -70,9 +70,10 @@ export default function AccessControl() {
     queryKey: ["/api/access-logs"],
   });
 
-  const { data: members } = useQuery<Member[]>({
+  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
   });
+  const members = membersData?.members || [];
 
   const { data: enrollments } = useQuery<Enrollment[]>({
     queryKey: ["/api/enrollments"],

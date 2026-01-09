@@ -73,9 +73,10 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
     queryKey: ["/api/workshop-enrollments"],
   });
 
-  const { data: members } = useQuery<Member[]>({
+  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
   });
+  const members = membersData?.members || [];
 
   const createEnrollmentMutation = useMutation({
     mutationFn: async (data: { memberId: number; workshopId: number }) => {
@@ -230,9 +231,10 @@ function AttendancesTab({ workshopId }: AttendancesTabProps) {
     queryKey: ["/api/workshop-attendances"],
   });
 
-  const { data: members } = useQuery<Member[]>({
+  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
   });
+  const members = membersData?.members || [];
 
   const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
     queryKey: ["/api/workshop-enrollments"],
@@ -448,9 +450,10 @@ export default function Workshops() {
     queryKey: ["/api/workshop-enrollments"],
   });
 
-  const { data: members } = useQuery<Member[]>({
+  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
   });
+  const members = membersData?.members || [];
 
   const { data: attendances } = useQuery<WorkshopAttendance[]>({
     queryKey: ["/api/workshop-attendances"],
