@@ -39,6 +39,10 @@ export default function Memberships() {
   });
   const members = membersData?.members || [];
 
+  const { data: entityCardMembers, isLoading: entityCardsLoading } = useQuery<Member[]>({
+    queryKey: ["/api/members/entity-cards"],
+  });
+
   const createMembershipMutation = useMutation({
     mutationFn: async (data: InsertMembership) => {
       await apiRequest("POST", "/api/memberships", data);
@@ -187,9 +191,8 @@ export default function Memberships() {
                 const filteredMemberships = memberships.filter((membership: any) => {
                   if (!membershipSearch || membershipSearch.length < 3) return true;
                   const searchLower = membershipSearch.toLowerCase();
-                  const memberName = getMemberName(membership).toLowerCase();
-                  const member = members?.find(m => m.id === membership.memberId);
-                  const fiscalCode = member?.fiscalCode?.toLowerCase() || "";
+                  const memberName = `${membership.memberFirstName || ""} ${membership.memberLastName || ""}`.toLowerCase();
+                  const fiscalCode = membership.memberFiscalCode?.toLowerCase() || "";
                   return memberName.includes(searchLower) || fiscalCode.includes(searchLower);
                 });
 
@@ -302,9 +305,8 @@ export default function Memberships() {
                 const filteredCertificates = certificates.filter((cert: any) => {
                   if (!certificateSearch || certificateSearch.length < 3) return true;
                   const searchLower = certificateSearch.toLowerCase();
-                  const memberName = getMemberName(cert).toLowerCase();
-                  const member = members?.find(m => m.id === cert.memberId);
-                  const fiscalCode = member?.fiscalCode?.toLowerCase() || "";
+                  const memberName = `${cert.memberFirstName || ""} ${cert.memberLastName || ""}`.toLowerCase();
+                  const fiscalCode = cert.memberFiscalCode?.toLowerCase() || "";
                   return memberName.includes(searchLower) || fiscalCode.includes(searchLower);
                 });
 
@@ -386,16 +388,15 @@ export default function Memberships() {
               </div>
             </CardHeader>
             <CardContent>
-              {!membersData ? (
+              {entityCardsLoading ? (
                 <div className="space-y-3">
                   {[...Array(5)].map((_, i) => (
                     <Skeleton key={i} className="h-16 w-full" />
                   ))}
                 </div>
               ) : (() => {
-                const membersWithEntityCard = members.filter(m => 
-                  m.entityCardNumber || m.entityCardType
-                ).filter(m => {
+                const allEntityCardMembers = entityCardMembers || [];
+                const filteredEntityCards = allEntityCardMembers.filter(m => {
                   if (!entityCardSearch || entityCardSearch.length < 3) return true;
                   const searchLower = entityCardSearch.toLowerCase();
                   return (
@@ -405,7 +406,7 @@ export default function Memberships() {
                   );
                 });
 
-                if (membersWithEntityCard.length === 0) {
+                if (filteredEntityCards.length === 0) {
                   return (
                     <div className="text-center py-12 text-muted-foreground">
                       <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -428,7 +429,7 @@ export default function Memberships() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {membersWithEntityCard.map((member) => {
+                      {filteredEntityCards.map((member) => {
                         const expiryInfo = member.entityCardExpiryDate 
                           ? getExpiryStatus(member.entityCardExpiryDate) 
                           : { status: "unknown", label: "N/D", variant: "secondary" as const };
