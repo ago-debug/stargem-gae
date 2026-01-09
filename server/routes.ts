@@ -54,6 +54,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/members/duplicates", isAuthenticated, async (req, res) => {
+    try {
+      const duplicates = await storage.getDuplicateFiscalCodes();
+      res.json(duplicates);
+    } catch (error) {
+      console.error("Error fetching duplicates:", error);
+      res.status(500).json({ message: "Failed to fetch duplicate fiscal codes" });
+    }
+  });
+
   app.get("/api/members/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);

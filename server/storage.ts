@@ -76,6 +76,7 @@ export interface IStorage {
   getMembers(): Promise<Member[]>;
   getMember(id: number): Promise<Member | undefined>;
   getMemberByFiscalCode(fiscalCode: string): Promise<Member | undefined>;
+  getDuplicateFiscalCodes(): Promise<{ fiscalCode: string; members: { id: number; firstName: string; lastName: string; }[] }[]>;
   createMember(member: InsertMember): Promise<Member>;
   updateMember(id: number, member: Partial<InsertMember>): Promise<Member>;
   deleteMember(id: number): Promise<void>;
@@ -239,6 +240,24 @@ export class DatabaseStorage implements IStorage {
       sql`UPPER(${members.fiscalCode}) = ${fiscalCode.toUpperCase()}`
     );
     return member;
+  }
+
+  async getDuplicateFiscalCodes(): Promise<{ fiscalCode: string; members: { id: number; firstName: string; lastName: string; }[] }[]> {
+    // Find all fiscal codes that appear more than once
+    const duplicates = await db.execute(sql`
+      SELECT UPPER(fiscal_code) as fiscal_code, 
+             json_agg(json_build_object('id', id, 'firstName', first_name, 'lastName', last_name)) as members
+      FROM members 
+      WHERE fiscal_code IS NOT NULL AND fiscal_code != ''
+      GROUP BY UPPER(fiscal_code)
+      HAVING COUNT(*) > 1
+      ORDER BY UPPER(fiscal_code)
+    `);
+    
+    return duplicates.rows.map((row: any) => ({
+      fiscalCode: row.fiscal_code,
+      members: row.members
+    }));
   }
 
   async createMember(member: InsertMember): Promise<Member> {
