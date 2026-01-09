@@ -70,6 +70,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/members/entity-cards", isAuthenticated, async (req, res) => {
+    try {
+      const members = await storage.getMembersWithEntityCards();
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching entity cards:", error);
+      res.status(500).json({ message: "Failed to fetch entity cards" });
+    }
+  });
+
   app.get("/api/members/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);

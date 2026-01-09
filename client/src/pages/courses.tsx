@@ -57,9 +57,10 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
     queryKey: ["/api/enrollments"],
   });
 
-  const { data: members } = useQuery<Member[]>({
+  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
   });
+  const members = membersData?.members || [];
 
   const createEnrollmentMutation = useMutation({
     mutationFn: async (data: { memberId: number; courseId: number }) => {
@@ -214,9 +215,10 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
     queryKey: ["/api/attendances"],
   });
 
-  const { data: members } = useQuery<Member[]>({
+  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
   });
+  const members = membersData?.members || [];
 
   const { data: enrollments } = useQuery<any[]>({
     queryKey: ["/api/enrollments"],

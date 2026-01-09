@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, or, isNotNull } from "drizzle-orm";
 import { ilike } from "drizzle-orm";
 import {
   users,
@@ -78,6 +78,7 @@ export interface IStorage {
   // Members
   getMembers(): Promise<Member[]>;
   getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }>;
+  getMembersWithEntityCards(): Promise<Member[]>;
   getMember(id: number): Promise<Member | undefined>;
   getMemberByFiscalCode(fiscalCode: string): Promise<Member | undefined>;
   getDuplicateFiscalCodes(): Promise<{ fiscalCode: string; members: { id: number; firstName: string; lastName: string; }[] }[]>;
@@ -243,6 +244,17 @@ export class DatabaseStorage implements IStorage {
   // ==== Members ====
   async getMembers(): Promise<Member[]> {
     return await db.select().from(members).orderBy(desc(members.createdAt));
+  }
+
+  async getMembersWithEntityCards(): Promise<Member[]> {
+    return await db.select().from(members)
+      .where(
+        or(
+          isNotNull(members.entityCardNumber),
+          isNotNull(members.entityCardType)
+        )
+      )
+      .orderBy(members.lastName, members.firstName);
   }
 
   async getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }> {
