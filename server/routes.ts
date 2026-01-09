@@ -800,7 +800,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Memberships Routes ====
   app.get("/api/memberships", isAuthenticated, async (req, res) => {
     try {
-      const memberships = await storage.getMemberships();
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
+      const memberships = memberId 
+        ? await storage.getMembershipsByMemberId(memberId)
+        : await storage.getMemberships();
       res.json(memberships);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch memberships" });
@@ -859,7 +862,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Medical Certificates Routes ====
   app.get("/api/medical-certificates", isAuthenticated, async (req, res) => {
     try {
-      const certificates = await storage.getMedicalCertificates();
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
+      const certificates = memberId 
+        ? await storage.getMedicalCertificatesByMemberId(memberId)
+        : await storage.getMedicalCertificates();
       res.json(certificates);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch medical certificates" });
@@ -939,7 +945,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Payments Routes ====
   app.get("/api/payments", isAuthenticated, async (req, res) => {
     try {
-      const payments = await storage.getPayments();
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
+      const payments = memberId 
+        ? await storage.getPaymentsByMemberId(memberId)
+        : await storage.getPayments();
       res.json(payments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch payments" });
@@ -1439,7 +1448,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Attendances Routes ====
   app.get("/api/attendances", isAuthenticated, async (req, res) => {
     try {
-      const attendances = await storage.getAttendances();
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
+      const attendances = memberId 
+        ? await storage.getAttendancesByMember(memberId)
+        : await storage.getAttendances();
       res.json(attendances);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch attendances" });
