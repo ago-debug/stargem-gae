@@ -14,15 +14,21 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { MemberSearch } from "@/components/ui/member-search";
 import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   User, CreditCard, Gift, IdCard, FileText, Trophy, Users,
   Dumbbell, BookOpen, Sun, Plus, Settings, Download, Upload, Save,
-  Search, MessageCircle, RotateCcw, ChevronUp, Building2
+  Search, MessageCircle, RotateCcw, ChevronUp, Building2, AlertTriangle
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member } from "@shared/schema";
+
+interface DuplicateFiscalCode {
+  fiscalCode: string;
+  members: { id: number; firstName: string; lastName: string; }[];
+}
 
 interface MemberFormData {
   firstName?: string;
@@ -84,7 +90,13 @@ export default function AnagraficaHome() {
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Query for duplicate fiscal codes
+  const { data: duplicateFiscalCodes } = useQuery<DuplicateFiscalCode[]>({
+    queryKey: ["/api/members/duplicates"],
+  });
 
   // Sync selectedMemberId with URL parameter changes
   useEffect(() => {
@@ -169,6 +181,7 @@ export default function AnagraficaHome() {
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
       toast({ title: selectedMemberId ? "Dati salvati con successo" : "Nuovo membro creato" });
       if (!selectedMemberId && data?.id) {
         setSelectedMemberId(data.id);
@@ -390,6 +403,17 @@ export default function AnagraficaHome() {
                 <Save className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Salva</span>
               </Button>
+              {duplicateFiscalCodes && duplicateFiscalCodes.length > 0 && (
+                <Button 
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDuplicatesModal(true)}
+                  data-testid="button-duplicate-warning"
+                >
+                  <AlertTriangle className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Duplicati ({duplicateFiscalCodes.length})</span>
+                </Button>
+              )}
               <Button 
                 size="sm"
                 onClick={handleNew}
@@ -948,6 +972,49 @@ export default function AnagraficaHome() {
           </Button>
         )}
       </div>
+
+      {/* Duplicate Fiscal Codes Modal */}
+      <Dialog open={showDuplicatesModal} onOpenChange={setShowDuplicatesModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              Codici Fiscali Duplicati
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              I seguenti codici fiscali sono presenti in più di un membro. Clicca sul nome per visualizzare e modificare il membro.
+            </p>
+            {duplicateFiscalCodes?.map((duplicate) => (
+              <Card key={duplicate.fiscalCode} className="p-4">
+                <div className="space-y-2">
+                  <div className="font-mono text-sm font-medium bg-muted px-2 py-1 rounded inline-block">
+                    {duplicate.fiscalCode}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {duplicate.members.map((member) => (
+                      <Button
+                        key={member.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowDuplicatesModal(false);
+                          setSelectedMemberId(member.id);
+                          setLocation(`/?memberId=${member.id}`);
+                        }}
+                        data-testid={`button-duplicate-member-${member.id}`}
+                      >
+                        {member.firstName} {member.lastName}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
