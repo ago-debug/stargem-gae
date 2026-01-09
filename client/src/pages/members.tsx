@@ -409,7 +409,14 @@ export default function Members() {
                     return (
                       <TableRow key={member.id} data-testid={`member-row-${member.id}`}>
                         <TableCell className="font-medium">
-                          {member.firstName} {member.lastName}
+                          <Link href={`/?memberId=${member.id}`}>
+                            <span 
+                              className="text-primary hover:underline cursor-pointer"
+                              data-testid={`link-member-${member.id}`}
+                            >
+                              {member.firstName} {member.lastName}
+                            </span>
+                          </Link>
                         </TableCell>
                         <TableCell className="font-mono text-sm">{member.fiscalCode || "-"}</TableCell>
                         <TableCell>{member.email || "-"}</TableCell>
