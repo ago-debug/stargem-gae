@@ -803,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
       const memberships = memberId 
         ? await storage.getMembershipsByMemberId(memberId)
-        : await storage.getMemberships();
+        : await storage.getMembershipsWithMembers();
       res.json(memberships);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch memberships" });
@@ -865,7 +865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
       const certificates = memberId 
         ? await storage.getMedicalCertificatesByMemberId(memberId)
-        : await storage.getMedicalCertificates();
+        : await storage.getMedicalCertificatesWithMembers();
       res.json(certificates);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch medical certificates" });
