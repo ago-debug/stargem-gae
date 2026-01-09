@@ -450,48 +450,54 @@ export default function Courses() {
     queryKey: ["/api/studios"],
   });
 
-  const { data: enrollments } = useQuery<any[]>({
-    queryKey: ["/api/enrollments"],
-  });
+  interface EnrollmentWithMember {
+    id: number;
+    courseId: number;
+    memberId: number;
+    status: string;
+    memberFirstName?: string | null;
+    memberLastName?: string | null;
+    memberEmail?: string | null;
+    memberFiscalCode?: string | null;
+  }
 
-  const { data: members } = useQuery<any[]>({
-    queryKey: ["/api/members"],
+  const { data: enrollments } = useQuery<EnrollmentWithMember[]>({
+    queryKey: ["/api/enrollments"],
   });
 
   const { data: attendances } = useQuery<Attendance[]>({
     queryKey: ["/api/attendances"],
   });
 
-  const getCourseEnrollments = (courseId: number): Array<{ id: number; firstName: string; lastName: string; gender: string | null }> => {
-    if (!enrollments || !members) return [];
-    return enrollments
-      .filter(e => e.courseId === courseId && e.status === 'active')
-      .map(e => {
-        const member = members.find(m => m.id === e.memberId);
-        return member ? { id: member.id, firstName: member.firstName, lastName: member.lastName, gender: member.gender } : null;
-      })
-      .filter((m): m is { id: number; firstName: string; lastName: string; gender: string | null } => m !== null);
+  const getCourseEnrollmentCount = (courseId: number): number => {
+    if (!enrollments) return 0;
+    return enrollments.filter(e => e.courseId === courseId && e.status === 'active').length;
   };
 
-  const getGenderCounts = (courseEnrollments: Array<{ gender: string | null }>) => {
-    const female = courseEnrollments.filter(e => e.gender === 'F').length;
-    const male = courseEnrollments.filter(e => e.gender === 'M').length;
-    return { female, male };
+  const getCourseEnrollmentsList = (courseId: number): Array<{ id: number; firstName: string; lastName: string }> => {
+    if (!enrollments) return [];
+    return enrollments
+      .filter(e => e.courseId === courseId && e.status === 'active')
+      .map(e => ({
+        id: e.memberId,
+        firstName: e.memberFirstName || '',
+        lastName: e.memberLastName || '',
+      }));
   };
 
   const getCourseAttendances = (courseId: number) => {
-    if (!attendances || !members) return [];
+    if (!attendances || !enrollments) return [];
     return attendances
       .filter(a => a.courseId === courseId)
       .map(a => {
-        const member = members.find(m => m.id === a.memberId);
+        const enrollment = enrollments.find(e => e.memberId === a.memberId);
         return {
           ...a,
-          memberName: member ? `${member.firstName} ${member.lastName}` : "Sconosciuto",
+          memberName: enrollment ? `${enrollment.memberFirstName || ''} ${enrollment.memberLastName || ''}` : "Sconosciuto",
         };
       })
       .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
-      .slice(0, 20); // Ultime 20 presenze
+      .slice(0, 20);
   };
 
   const createMutation = useMutation({
@@ -645,9 +651,6 @@ export default function Courses() {
                   <TableHead>Insegnante</TableHead>
                   <TableHead>Prezzo</TableHead>
                   <TableHead>Posti</TableHead>
-                  <TableHead>Disponibilità</TableHead>
-                  <TableHead>Donne</TableHead>
-                  <TableHead>Uomini</TableHead>
                   <TableHead>Iscritti</TableHead>
                   <TableHead>Periodo</TableHead>
                   <TableHead>Stato</TableHead>
@@ -656,15 +659,36 @@ export default function Courses() {
               </TableHeader>
               <TableBody>
                 {filteredCourses.map((course) => {
-                  const courseEnrollments = getCourseEnrollments(course.id);
-                  const genderCounts = getGenderCounts(courseEnrollments);
-                  const availableSpots = course.maxCapacity ? course.maxCapacity - (course.currentEnrollment || 0) : null;
+                  const enrollmentCount = getCourseEnrollmentCount(course.id);
+                  const enrollmentsList = getCourseEnrollmentsList(course.id);
                   return (
                   <TableRow key={course.id} data-testid={`course-row-${course.id}`}>
                     <TableCell className="font-medium">
                       <div className="flex flex-col">
-                        {course.sku && <span className="text-xs text-muted-foreground">{course.sku}</span>}
-                        <span>{course.name}</span>
+                        {course.sku && (
+                          <button
+                            onClick={() => openEditDialog(course)}
+                            className="text-xs text-muted-foreground hover:text-primary hover:underline text-left"
+                            data-testid={`link-course-sku-${course.id}`}
+                          >
+                            {course.sku}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setEditingCourse(course);
+                            setSelectedDayOfWeek(course.dayOfWeek || "");
+                            setSelectedStartTime(course.startTime || "");
+                            setSelectedEndTime(course.endTime || "");
+                            setSelectedRecurrence(course.recurrenceType || "");
+                            setActiveTab("enrollments");
+                            setIsFormOpen(true);
+                          }}
+                          className="hover:text-primary hover:underline text-left"
+                          data-testid={`link-course-name-${course.id}`}
+                        >
+                          {course.name}
+                        </button>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -676,31 +700,20 @@ export default function Courses() {
                         : "-"}
                     </TableCell>
                     <TableCell>€{course.price || "0.00"}</TableCell>
-                    <TableCell>{course.currentEnrollment || 0}/{course.maxCapacity || "∞"}</TableCell>
+                    <TableCell>{enrollmentCount}/{course.maxCapacity || "∞"}</TableCell>
                     <TableCell>
-                      {availableSpots !== null ? (
-                        <Badge variant={availableSpots > 0 ? "outline" : "destructive"}>
-                          {availableSpots > 0 ? availableSpots : "Esaurito"}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">∞</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">{genderCounts.female}</TableCell>
-                    <TableCell className="text-center">{genderCounts.male}</TableCell>
-                    <TableCell>
-                      {courseEnrollments.length > 0 ? (
+                      {enrollmentsList.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {courseEnrollments.slice(0, 2).map((member) => (
-                            <Link key={member.id} href={`/members?search=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`}>
+                          {enrollmentsList.slice(0, 2).map((member) => (
+                            <Link key={member.id} href={`/iscritti?search=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`}>
                               <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-member-${member.id}`}>
                                 {member.firstName} {member.lastName}
                               </Badge>
                             </Link>
                           ))}
-                          {courseEnrollments.length > 2 && (
+                          {enrollmentsList.length > 2 && (
                             <Badge variant="secondary" className="text-xs">
-                              +{courseEnrollments.length - 2} altri
+                              +{enrollmentsList.length - 2} altri
                             </Badge>
                           )}
                         </div>
@@ -768,7 +781,7 @@ export default function Courses() {
                 <TabsTrigger value="details" data-testid="tab-details">Dettagli</TabsTrigger>
                 <TabsTrigger value="enrollments" data-testid="tab-enrollments">
                   <Users className="w-4 h-4 mr-1" />
-                  Iscritti ({getCourseEnrollments(editingCourse.id).length})
+                  Iscritti ({getCourseEnrollmentCount(editingCourse.id)})
                 </TabsTrigger>
                 <TabsTrigger value="attendances" data-testid="tab-attendances">
                   <Calendar className="w-4 h-4 mr-1" />
