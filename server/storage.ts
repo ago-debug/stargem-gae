@@ -234,7 +234,10 @@ export class DatabaseStorage implements IStorage {
 
   async getMemberByFiscalCode(fiscalCode: string): Promise<Member | undefined> {
     if (!fiscalCode) return undefined;
-    const [member] = await db.select().from(members).where(eq(members.fiscalCode, fiscalCode.toUpperCase()));
+    // Use case-insensitive comparison since existing data may be mixed case
+    const [member] = await db.select().from(members).where(
+      sql`UPPER(${members.fiscalCode}) = ${fiscalCode.toUpperCase()}`
+    );
     return member;
   }
 
