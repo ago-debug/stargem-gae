@@ -24,6 +24,7 @@ import {
   provinces,
   cities,
   memberRelationships,
+  customReports,
   type User,
   type UpsertUser,
   type Member,
@@ -68,6 +69,8 @@ import {
   type InsertCity,
   type MemberRelationship,
   type InsertMemberRelationship,
+  type CustomReport,
+  type InsertCustomReport,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -217,6 +220,13 @@ export interface IStorage {
   searchCities(search: string, limit?: number): Promise<(City & { province?: Province })[]>;
   getCitiesByProvince(provinceId: number): Promise<City[]>;
   createCity(city: InsertCity): Promise<City>;
+
+  // Custom Reports
+  getCustomReports(): Promise<CustomReport[]>;
+  getCustomReport(id: number): Promise<CustomReport | undefined>;
+  createCustomReport(report: InsertCustomReport): Promise<CustomReport>;
+  updateCustomReport(id: number, report: Partial<InsertCustomReport>): Promise<CustomReport>;
+  deleteCustomReport(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1239,6 +1249,34 @@ export class DatabaseStorage implements IStorage {
   async createCity(city: InsertCity): Promise<City> {
     const [newCity] = await db.insert(cities).values(city).returning();
     return newCity;
+  }
+
+  // ==== Custom Reports ====
+  async getCustomReports(): Promise<CustomReport[]> {
+    return await db.select().from(customReports).orderBy(desc(customReports.createdAt));
+  }
+
+  async getCustomReport(id: number): Promise<CustomReport | undefined> {
+    const [report] = await db.select().from(customReports).where(eq(customReports.id, id));
+    return report;
+  }
+
+  async createCustomReport(report: InsertCustomReport): Promise<CustomReport> {
+    const [newReport] = await db.insert(customReports).values(report).returning();
+    return newReport;
+  }
+
+  async updateCustomReport(id: number, report: Partial<InsertCustomReport>): Promise<CustomReport> {
+    const [updated] = await db
+      .update(customReports)
+      .set({ ...report, updatedAt: new Date() })
+      .where(eq(customReports.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCustomReport(id: number): Promise<void> {
+    await db.delete(customReports).where(eq(customReports.id, id));
   }
 }
 

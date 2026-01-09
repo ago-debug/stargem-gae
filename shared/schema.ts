@@ -773,3 +773,29 @@ export const insertAttendanceSchema = createInsertSchema(attendances).omit({
 });
 export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
 export type Attendance = typeof attendances.$inferSelect;
+
+// ============================================================================
+// CUSTOM REPORTS (Report personalizzati)
+// ============================================================================
+
+export const customReports = pgTable("custom_reports", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  entityType: varchar("entity_type", { length: 100 }).notNull(), // 'members', 'courses', 'payments', 'enrollments', 'workshops', 'attendances', 'instructors'
+  selectedFields: jsonb("selected_fields").notNull().$type<string[]>(), // Array of field names
+  filters: jsonb("filters").$type<{ field: string; operator: string; value: string }[]>(), // Filter conditions
+  sortField: varchar("sort_field", { length: 100 }),
+  sortDirection: varchar("sort_direction", { length: 10 }).default("asc"), // 'asc' or 'desc'
+  createdBy: varchar("created_by", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCustomReportSchema = createInsertSchema(customReports).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCustomReport = z.infer<typeof insertCustomReportSchema>;
+export type CustomReport = typeof customReports.$inferSelect;
