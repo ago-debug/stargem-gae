@@ -122,10 +122,6 @@ export default function AnagraficaHome() {
     contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const { data: members } = useQuery<Member[]>({
-    queryKey: ["/api/members"],
-  });
-
   const { data: clientCategories, isLoading: loadingCategories } = useQuery<any[]>({
     queryKey: ["/api/client-categories"],
   });
@@ -134,7 +130,16 @@ export default function AnagraficaHome() {
     queryKey: ["/api/subscription-types"],
   });
 
-  const selectedMember = members?.find(m => m.id === selectedMemberId);
+  const { data: selectedMember } = useQuery<Member>({
+    queryKey: ["/api/members", selectedMemberId],
+    queryFn: async () => {
+      if (!selectedMemberId) return null;
+      const res = await fetch(`/api/members/${selectedMemberId}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch member");
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
 
   useEffect(() => {
     if (selectedMember) {
