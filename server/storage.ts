@@ -232,70 +232,72 @@ export class DatabaseStorage implements IStorage {
   async getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }> {
     const offset = (page - 1) * pageSize;
     
-    // Subquery for active course count per member
-    const activeCourseCountSubquery = sql<number>`(
-      SELECT COUNT(*)::int FROM ${enrollments} 
-      WHERE ${enrollments.memberId} = ${members.id} 
-      AND ${enrollments.status} = 'active'
-    )`.as('activeCourseCount');
-    
     let searchCondition = sql`1=1`;
     if (search && search.trim().length >= 2) {
       const searchTerm = `%${search.trim().toLowerCase()}%`;
       searchCondition = sql`(
-        LOWER(${members.firstName}) LIKE ${searchTerm} OR 
-        LOWER(${members.lastName}) LIKE ${searchTerm} OR 
-        LOWER(${members.email}) LIKE ${searchTerm} OR 
-        LOWER(${members.fiscalCode}) LIKE ${searchTerm} OR
-        LOWER(${members.cardNumber}) LIKE ${searchTerm}
+        LOWER(first_name) LIKE ${searchTerm} OR 
+        LOWER(last_name) LIKE ${searchTerm} OR 
+        LOWER(email) LIKE ${searchTerm} OR 
+        LOWER(fiscal_code) LIKE ${searchTerm} OR
+        LOWER(card_number) LIKE ${searchTerm}
       )`;
     }
     
-    // Count query
-    const [countResult] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(members)
-      .where(searchCondition);
-    const total = Number(countResult?.count || 0);
+    // Use raw SQL for the complete query with subquery
+    const result = await db.execute(sql`
+      SELECT 
+        m.*,
+        COALESCE((
+          SELECT COUNT(*)::int 
+          FROM enrollments e 
+          WHERE e.member_id = m.id AND e.status = 'active'
+        ), 0) as active_course_count
+      FROM members m
+      WHERE ${searchCondition}
+      ORDER BY m.last_name, m.first_name
+      LIMIT ${pageSize}
+      OFFSET ${offset}
+    `);
     
-    // Main query with course count
-    const membersList = await db
-      .select({
-        id: members.id,
-        firstName: members.firstName,
-        lastName: members.lastName,
-        email: members.email,
-        phone: members.phone,
-        mobile: members.mobile,
-        fiscalCode: members.fiscalCode,
-        dateOfBirth: members.dateOfBirth,
-        gender: members.gender,
-        placeOfBirth: members.placeOfBirth,
-        street: members.street,
-        city: members.city,
-        province: members.province,
-        postalCode: members.postalCode,
-        country: members.country,
-        notes: members.notes,
-        parentFirstName: members.parentFirstName,
-        parentLastName: members.parentLastName,
-        parentFiscalCode: members.parentFiscalCode,
-        parentPhone: members.parentPhone,
-        parentEmail: members.parentEmail,
-        hasMedicalCertificate: members.hasMedicalCertificate,
-        medicalCertificateExpiry: members.medicalCertificateExpiry,
-        cardNumber: members.cardNumber,
-        cardExpiryDate: members.cardExpiryDate,
-        active: members.active,
-        createdAt: members.createdAt,
-        categoryId: members.categoryId,
-        activeCourseCount: activeCourseCountSubquery,
-      })
-      .from(members)
-      .where(searchCondition)
-      .orderBy(members.lastName, members.firstName)
-      .limit(pageSize)
-      .offset(offset);
+    // Count query
+    const countResult = await db.execute(sql`
+      SELECT COUNT(*)::int as count FROM members WHERE ${searchCondition}
+    `);
+    const total = Number((countResult.rows[0] as any)?.count || 0);
+    
+    // Map snake_case to camelCase
+    const membersList = result.rows.map((row: any) => ({
+      id: row.id,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      email: row.email,
+      phone: row.phone,
+      mobile: row.mobile,
+      fiscalCode: row.fiscal_code,
+      dateOfBirth: row.date_of_birth,
+      gender: row.gender,
+      placeOfBirth: row.place_of_birth,
+      street: row.street,
+      city: row.city,
+      province: row.province,
+      postalCode: row.postal_code,
+      country: row.country,
+      notes: row.notes,
+      parentFirstName: row.parent_first_name,
+      parentLastName: row.parent_last_name,
+      parentFiscalCode: row.parent_fiscal_code,
+      parentPhone: row.parent_phone,
+      parentEmail: row.parent_email,
+      hasMedicalCertificate: row.has_medical_certificate,
+      medicalCertificateExpiry: row.medical_certificate_expiry,
+      cardNumber: row.card_number,
+      cardExpiryDate: row.card_expiry_date,
+      active: row.active,
+      createdAt: row.created_at,
+      categoryId: row.category_id,
+      activeCourseCount: row.active_course_count || 0,
+    }));
     
     return { members: membersList as (Member & { activeCourseCount: number })[], total };
   }
