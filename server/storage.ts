@@ -171,7 +171,7 @@ export interface IStorage {
   deletePayment(id: number): Promise<void>;
 
   // Enrollments
-  getEnrollments(): Promise<Enrollment[]>;
+  getEnrollments(): Promise<(Enrollment & { memberFirstName?: string; memberLastName?: string; memberEmail?: string; memberFiscalCode?: string })[]>;
   getEnrollmentsByMember(memberId: number): Promise<Enrollment[]>;
   getEnrollment(id: number): Promise<Enrollment | undefined>;
   createEnrollment(enrollment: InsertEnrollment): Promise<Enrollment>;
@@ -190,7 +190,7 @@ export interface IStorage {
   deleteAttendance(id: number): Promise<void>;
 
   // Workshop Enrollments
-  getWorkshopEnrollments(): Promise<WorkshopEnrollment[]>;
+  getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string; memberLastName?: string; memberEmail?: string; memberFiscalCode?: string })[]>;
   getWorkshopEnrollmentsByMember(memberId: number): Promise<WorkshopEnrollment[]>;
   getWorkshopEnrollment(id: number): Promise<WorkshopEnrollment | undefined>;
   createWorkshopEnrollment(enrollment: InsertWorkshopEnrollment): Promise<WorkshopEnrollment>;
@@ -850,8 +850,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Enrollments ====
-  async getEnrollments(): Promise<Enrollment[]> {
-    return await db.select().from(enrollments).orderBy(desc(enrollments.enrollmentDate));
+  async getEnrollments(): Promise<(Enrollment & { memberFirstName?: string; memberLastName?: string; memberEmail?: string; memberFiscalCode?: string })[]> {
+    const result = await db
+      .select({
+        id: enrollments.id,
+        memberId: enrollments.memberId,
+        courseId: enrollments.courseId,
+        enrollmentDate: enrollments.enrollmentDate,
+        startDate: enrollments.startDate,
+        endDate: enrollments.endDate,
+        status: enrollments.status,
+        notes: enrollments.notes,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberEmail: members.email,
+        memberFiscalCode: members.fiscalCode,
+      })
+      .from(enrollments)
+      .leftJoin(members, eq(enrollments.memberId, members.id))
+      .orderBy(desc(enrollments.enrollmentDate));
+    return result;
   }
 
   async getEnrollmentsByMember(memberId: number): Promise<Enrollment[]> {
@@ -1046,8 +1064,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Workshop Enrollments ====
-  async getWorkshopEnrollments(): Promise<WorkshopEnrollment[]> {
-    return await db.select().from(workshopEnrollments).orderBy(desc(workshopEnrollments.enrollmentDate));
+  async getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string; memberLastName?: string; memberEmail?: string; memberFiscalCode?: string })[]> {
+    const result = await db
+      .select({
+        id: workshopEnrollments.id,
+        workshopId: workshopEnrollments.workshopId,
+        memberId: workshopEnrollments.memberId,
+        enrollmentDate: workshopEnrollments.enrollmentDate,
+        startDate: workshopEnrollments.startDate,
+        endDate: workshopEnrollments.endDate,
+        status: workshopEnrollments.status,
+        notes: workshopEnrollments.notes,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberEmail: members.email,
+        memberFiscalCode: members.fiscalCode,
+      })
+      .from(workshopEnrollments)
+      .leftJoin(members, eq(workshopEnrollments.memberId, members.id))
+      .orderBy(desc(workshopEnrollments.enrollmentDate));
+    return result;
   }
 
   async getWorkshopEnrollmentsByMember(memberId: number): Promise<WorkshopEnrollment[]> {

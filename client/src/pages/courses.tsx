@@ -107,19 +107,13 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
 
   const courseEnrollments = enrollments
     ?.filter(e => e.courseId === courseId && e.status === 'active')
-    .map(e => {
-      const member = members?.find(m => m.id === e.memberId);
-      return {
-        enrollmentId: e.id,
-        memberId: e.memberId,
-        member: member || null,
-      };
-    })
-    .filter(e => e.member !== null) || [];
-
-  const availableMembers = members?.filter(m => 
-    !courseEnrollments.some(e => e.memberId === m.id)
-  ) || [];
+    .map(e => ({
+      enrollmentId: e.id,
+      memberId: e.memberId,
+      firstName: e.memberFirstName || '',
+      lastName: e.memberLastName || '',
+      email: e.memberEmail || '',
+    })) || [];
 
   return (
     <div className="space-y-4">
@@ -191,14 +185,14 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {courseEnrollments.map((enrollment: any) => (
+              {courseEnrollments.map((enrollment) => (
                 <TableRow key={enrollment.enrollmentId}>
-                  <TableCell className="font-medium">{enrollment.member.firstName}</TableCell>
-                  <TableCell>{enrollment.member.lastName}</TableCell>
-                  <TableCell>{enrollment.member.email || '-'}</TableCell>
+                  <TableCell className="font-medium">{enrollment.firstName}</TableCell>
+                  <TableCell>{enrollment.lastName}</TableCell>
+                  <TableCell>{enrollment.email || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link href={`/iscritti?search=${enrollment.member.lastName}`}>
+                      <Link href={`/iscritti?search=${enrollment.lastName}`}>
                         <Button variant="ghost" size="sm" data-testid={`button-view-member-${enrollment.memberId}`}>
                           Visualizza
                         </Button>
