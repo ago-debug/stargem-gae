@@ -145,6 +145,7 @@ export interface IStorage {
 
   // Medical Certificates
   getMedicalCertificates(): Promise<MedicalCertificate[]>;
+  getMedicalCertificatesByMemberId(memberId: number): Promise<MedicalCertificate[]>;
   getMedicalCertificate(id: number): Promise<MedicalCertificate | undefined>;
   createMedicalCertificate(cert: InsertMedicalCertificate): Promise<MedicalCertificate>;
   updateMedicalCertificate(id: number, cert: Partial<InsertMedicalCertificate>): Promise<MedicalCertificate>;
@@ -159,6 +160,7 @@ export interface IStorage {
 
   // Payments
   getPayments(): Promise<Payment[]>;
+  getPaymentsByMemberId(memberId: number): Promise<Payment[]>;
   getPayment(id: number): Promise<Payment | undefined>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment>;
@@ -650,6 +652,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(medicalCertificates).orderBy(desc(medicalCertificates.expiryDate));
   }
 
+  async getMedicalCertificatesByMemberId(memberId: number): Promise<MedicalCertificate[]> {
+    return await db.select().from(medicalCertificates).where(eq(medicalCertificates.memberId, memberId)).orderBy(desc(medicalCertificates.expiryDate));
+  }
+
   async getMedicalCertificate(id: number): Promise<MedicalCertificate | undefined> {
     const [cert] = await db.select().from(medicalCertificates).where(eq(medicalCertificates.id, id));
     return cert;
@@ -727,6 +733,10 @@ export class DatabaseStorage implements IStorage {
   // ==== Payments ====
   async getPayments(): Promise<Payment[]> {
     return await db.select().from(payments).orderBy(desc(payments.createdAt));
+  }
+
+  async getPaymentsByMemberId(memberId: number): Promise<Payment[]> {
+    return await db.select().from(payments).where(eq(payments.memberId, memberId)).orderBy(desc(payments.createdAt));
   }
 
   async getPayment(id: number): Promise<Payment | undefined> {
