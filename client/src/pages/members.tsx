@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member, InsertMember, Attendance } from "@shared/schema";
 
@@ -418,6 +418,55 @@ export default function Members() {
     }
   };
 
+  const exportToCSV = () => {
+    if (!members || members.length === 0) {
+      toast({ title: "Nessun dato da esportare", variant: "destructive" });
+      return;
+    }
+    
+    const headers = ["ID", "Nome", "Cognome", "Codice Fiscale", "Data Nascita", "Luogo Nascita", "Sesso", "Email", "Telefono", "Cellulare", "Indirizzo", "Città", "Provincia", "CAP", "N. Tessera", "Scadenza Tessera", "Certificato Medico", "Scadenza Certificato", "Note", "Stato"];
+    
+    const rows = members.map(member => [
+      member.id,
+      member.firstName || "",
+      member.lastName || "",
+      member.fiscalCode || "",
+      member.dateOfBirth ? new Date(member.dateOfBirth).toLocaleDateString('it-IT') : "",
+      member.placeOfBirth || "",
+      member.gender || "",
+      member.email || "",
+      member.phone || "",
+      member.mobile || "",
+      member.streetAddress || "",
+      member.city || "",
+      member.province || "",
+      member.postalCode || "",
+      member.cardNumber || "",
+      member.cardExpiryDate ? new Date(member.cardExpiryDate).toLocaleDateString('it-IT') : "",
+      member.hasMedicalCertificate ? "Sì" : "No",
+      member.medicalCertificateExpiry ? new Date(member.medicalCertificateExpiry).toLocaleDateString('it-IT') : "",
+      member.notes || "",
+      member.active ? "Attivo" : "Inattivo"
+    ]);
+    
+    const escapeCSV = (value: unknown) => {
+      const str = String(value ?? "");
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+    
+    const csvContent = "\ufeff" + [headers.map(escapeCSV).join(","), ...rows.map(row => row.map(escapeCSV).join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `clienti_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Esportazione completata" });
+  };
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
@@ -426,16 +475,26 @@ export default function Members() {
           <h1 className="text-3xl font-semibold text-foreground mb-2">Clienti/Anagrafiche</h1>
           <p className="text-muted-foreground">Anagrafica completa degli iscritti</p>
         </div>
-        <Button 
-          onClick={() => {
-            resetForm();
-            setIsFormOpen(true);
-          }}
-          data-testid="button-add-member"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nuovo Cliente
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={exportToCSV}
+            data-testid="button-export-csv"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Esporta CSV
+          </Button>
+          <Button 
+            onClick={() => {
+              resetForm();
+              setIsFormOpen(true);
+            }}
+            data-testid="button-add-member"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuovo Cliente
+          </Button>
+        </div>
       </div>
 
       <Card>

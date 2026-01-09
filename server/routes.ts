@@ -23,6 +23,7 @@ import {
   insertWorkshopAttendanceSchema,
   insertAccessLogSchema,
   insertAttendanceSchema,
+  insertCustomReportSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads
@@ -1539,6 +1540,254 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(cities);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch cities" });
+    }
+  });
+
+  // ==== Custom Reports Routes ====
+  app.get("/api/custom-reports", isAuthenticated, async (req, res) => {
+    try {
+      const reports = await storage.getCustomReports();
+      res.json(reports);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch custom reports" });
+    }
+  });
+
+  app.get("/api/custom-reports/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const report = await storage.getCustomReport(id);
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      res.json(report);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch custom report" });
+    }
+  });
+
+  app.post("/api/custom-reports", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertCustomReportSchema.parse(req.body);
+      const report = await storage.createCustomReport(validatedData);
+      res.status(201).json(report);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create custom report" });
+    }
+  });
+
+  app.patch("/api/custom-reports/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const report = await storage.updateCustomReport(id, req.body);
+      res.json(report);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update custom report" });
+    }
+  });
+
+  app.delete("/api/custom-reports/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCustomReport(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete custom report" });
+    }
+  });
+
+  // Execute a custom report and return data
+  app.post("/api/custom-reports/:id/execute", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const report = await storage.getCustomReport(id);
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+
+      // Get data based on entity type
+      let data: any[] = [];
+      switch (report.entityType) {
+        case 'members':
+          data = await storage.getMembers();
+          break;
+        case 'courses':
+          data = await storage.getCourses();
+          break;
+        case 'workshops':
+          data = await storage.getWorkshops();
+          break;
+        case 'payments':
+          data = await storage.getPaymentsWithMembers();
+          break;
+        case 'enrollments':
+          data = await storage.getEnrollments();
+          break;
+        case 'attendances':
+          data = await storage.getAttendances();
+          break;
+        case 'instructors':
+          data = await storage.getInstructors();
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid entity type" });
+      }
+
+      // Apply filters if present
+      if (report.filters && Array.isArray(report.filters)) {
+        data = data.filter(item => {
+          return report.filters!.every((filter: any) => {
+            const value = item[filter.field];
+            const filterValue = filter.value;
+            switch (filter.operator) {
+              case 'equals':
+                return String(value) === String(filterValue);
+              case 'contains':
+                return String(value || '').toLowerCase().includes(String(filterValue).toLowerCase());
+              case 'startsWith':
+                return String(value || '').toLowerCase().startsWith(String(filterValue).toLowerCase());
+              case 'endsWith':
+                return String(value || '').toLowerCase().endsWith(String(filterValue).toLowerCase());
+              case 'greaterThan':
+                return Number(value) > Number(filterValue);
+              case 'lessThan':
+                return Number(value) < Number(filterValue);
+              case 'isTrue':
+                return value === true;
+              case 'isFalse':
+                return value === false;
+              case 'isEmpty':
+                return !value || value === '';
+              case 'isNotEmpty':
+                return value && value !== '';
+              default:
+                return true;
+            }
+          });
+        });
+      }
+
+      // Apply sorting if present
+      if (report.sortField) {
+        data.sort((a, b) => {
+          const aVal = a[report.sortField!];
+          const bVal = b[report.sortField!];
+          if (aVal === bVal) return 0;
+          const comparison = aVal > bVal ? 1 : -1;
+          return report.sortDirection === 'desc' ? -comparison : comparison;
+        });
+      }
+
+      // Filter to selected fields only
+      const selectedFields = report.selectedFields || [];
+      if (selectedFields.length > 0) {
+        data = data.map(item => {
+          const filtered: any = {};
+          selectedFields.forEach(field => {
+            filtered[field] = item[field];
+          });
+          return filtered;
+        });
+      }
+
+      res.json({ data, total: data.length });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to execute report" });
+    }
+  });
+
+  // Get available fields for entity type
+  app.get("/api/report-fields/:entityType", isAuthenticated, async (req, res) => {
+    try {
+      const entityType = req.params.entityType;
+      
+      const fieldDefinitions: Record<string, { name: string; type: string; label: string }[]> = {
+        members: [
+          { name: 'id', type: 'number', label: 'ID' },
+          { name: 'firstName', type: 'string', label: 'Nome' },
+          { name: 'lastName', type: 'string', label: 'Cognome' },
+          { name: 'fiscalCode', type: 'string', label: 'Codice Fiscale' },
+          { name: 'email', type: 'string', label: 'Email' },
+          { name: 'phone', type: 'string', label: 'Telefono' },
+          { name: 'mobile', type: 'string', label: 'Cellulare' },
+          { name: 'dateOfBirth', type: 'date', label: 'Data Nascita' },
+          { name: 'gender', type: 'string', label: 'Sesso' },
+          { name: 'city', type: 'string', label: 'Città' },
+          { name: 'province', type: 'string', label: 'Provincia' },
+          { name: 'cardNumber', type: 'string', label: 'Numero Tessera' },
+          { name: 'cardExpiryDate', type: 'date', label: 'Scadenza Tessera' },
+          { name: 'hasMedicalCertificate', type: 'boolean', label: 'Certificato Medico' },
+          { name: 'medicalCertificateExpiry', type: 'date', label: 'Scadenza Certificato' },
+          { name: 'active', type: 'boolean', label: 'Attivo' },
+        ],
+        courses: [
+          { name: 'id', type: 'number', label: 'ID' },
+          { name: 'sku', type: 'string', label: 'SKU' },
+          { name: 'name', type: 'string', label: 'Nome' },
+          { name: 'description', type: 'string', label: 'Descrizione' },
+          { name: 'price', type: 'number', label: 'Prezzo' },
+          { name: 'maxParticipants', type: 'number', label: 'Max Partecipanti' },
+          { name: 'dayOfWeek', type: 'string', label: 'Giorno' },
+          { name: 'startTime', type: 'string', label: 'Orario Inizio' },
+          { name: 'endTime', type: 'string', label: 'Orario Fine' },
+          { name: 'startDate', type: 'date', label: 'Data Inizio' },
+          { name: 'endDate', type: 'date', label: 'Data Fine' },
+          { name: 'isActive', type: 'boolean', label: 'Attivo' },
+        ],
+        workshops: [
+          { name: 'id', type: 'number', label: 'ID' },
+          { name: 'name', type: 'string', label: 'Nome' },
+          { name: 'description', type: 'string', label: 'Descrizione' },
+          { name: 'price', type: 'number', label: 'Prezzo' },
+          { name: 'maxCapacity', type: 'number', label: 'Max Capacità' },
+          { name: 'startDate', type: 'date', label: 'Data Inizio' },
+          { name: 'endDate', type: 'date', label: 'Data Fine' },
+          { name: 'active', type: 'boolean', label: 'Attivo' },
+        ],
+        payments: [
+          { name: 'id', type: 'number', label: 'ID' },
+          { name: 'memberFirstName', type: 'string', label: 'Nome Cliente' },
+          { name: 'memberLastName', type: 'string', label: 'Cognome Cliente' },
+          { name: 'amount', type: 'number', label: 'Importo' },
+          { name: 'type', type: 'string', label: 'Tipo' },
+          { name: 'description', type: 'string', label: 'Descrizione' },
+          { name: 'status', type: 'string', label: 'Stato' },
+          { name: 'dueDate', type: 'date', label: 'Scadenza' },
+          { name: 'paidDate', type: 'date', label: 'Data Pagamento' },
+          { name: 'paymentMethod', type: 'string', label: 'Metodo' },
+        ],
+        enrollments: [
+          { name: 'id', type: 'number', label: 'ID' },
+          { name: 'memberFirstName', type: 'string', label: 'Nome Cliente' },
+          { name: 'memberLastName', type: 'string', label: 'Cognome Cliente' },
+          { name: 'courseId', type: 'number', label: 'ID Corso' },
+          { name: 'status', type: 'string', label: 'Stato' },
+          { name: 'enrollmentDate', type: 'date', label: 'Data Iscrizione' },
+        ],
+        attendances: [
+          { name: 'id', type: 'number', label: 'ID' },
+          { name: 'memberFirstName', type: 'string', label: 'Nome Cliente' },
+          { name: 'memberLastName', type: 'string', label: 'Cognome Cliente' },
+          { name: 'courseId', type: 'number', label: 'ID Corso' },
+          { name: 'attendanceDate', type: 'date', label: 'Data Presenza' },
+          { name: 'type', type: 'string', label: 'Tipo Check-in' },
+        ],
+        instructors: [
+          { name: 'id', type: 'number', label: 'ID' },
+          { name: 'firstName', type: 'string', label: 'Nome' },
+          { name: 'lastName', type: 'string', label: 'Cognome' },
+          { name: 'email', type: 'string', label: 'Email' },
+          { name: 'phone', type: 'string', label: 'Telefono' },
+          { name: 'specialization', type: 'string', label: 'Specializzazione' },
+          { name: 'hourlyRate', type: 'number', label: 'Tariffa Oraria' },
+          { name: 'active', type: 'boolean', label: 'Attivo' },
+        ],
+      };
+
+      const fields = fieldDefinitions[entityType] || [];
+      res.json(fields);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get report fields" });
     }
   });
 
