@@ -176,6 +176,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==== Member Relationships Routes (genitori/tutori) ====
+  app.get("/api/members/:memberId/relationships", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = parseInt(req.params.memberId);
+      const relationships = await storage.getMemberRelationships(memberId);
+      res.json(relationships);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch member relationships" });
+    }
+  });
+
+  app.get("/api/members/:memberId/children", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = parseInt(req.params.memberId);
+      const children = await storage.getMemberChildren(memberId);
+      res.json(children);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch member children" });
+    }
+  });
+
+  app.post("/api/member-relationships", isAuthenticated, async (req, res) => {
+    try {
+      const relationship = await storage.createMemberRelationship(req.body);
+      res.status(201).json(relationship);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create member relationship" });
+    }
+  });
+
+  app.delete("/api/member-relationships/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteMemberRelationship(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete member relationship" });
+    }
+  });
+
   // ==== Google Sheets Import Route ====
   app.post("/api/members/import-google-sheets", isAuthenticated, async (req, res) => {
     try {
@@ -604,7 +644,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Workshop Enrollments Routes ====
   app.get("/api/workshop-enrollments", isAuthenticated, async (req, res) => {
     try {
-      const enrollments = await storage.getWorkshopEnrollments();
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
+      const enrollments = memberId 
+        ? await storage.getWorkshopEnrollmentsByMember(memberId)
+        : await storage.getWorkshopEnrollments();
       res.json(enrollments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch workshop enrollments" });

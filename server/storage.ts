@@ -23,6 +23,7 @@ import {
   countries,
   provinces,
   cities,
+  memberRelationships,
   type User,
   type UpsertUser,
   type Member,
@@ -65,6 +66,8 @@ import {
   type InsertProvince,
   type City,
   type InsertCity,
+  type MemberRelationship,
+  type InsertMemberRelationship,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -182,6 +185,7 @@ export interface IStorage {
 
   // Workshop Enrollments
   getWorkshopEnrollments(): Promise<WorkshopEnrollment[]>;
+  getWorkshopEnrollmentsByMember(memberId: number): Promise<WorkshopEnrollment[]>;
   getWorkshopEnrollment(id: number): Promise<WorkshopEnrollment | undefined>;
   createWorkshopEnrollment(enrollment: InsertWorkshopEnrollment): Promise<WorkshopEnrollment>;
   updateWorkshopEnrollment(id: number, enrollment: Partial<InsertWorkshopEnrollment>): Promise<WorkshopEnrollment>;
@@ -192,6 +196,12 @@ export interface IStorage {
   getWorkshopAttendance(id: number): Promise<WorkshopAttendance | undefined>;
   createWorkshopAttendance(attendance: InsertWorkshopAttendance): Promise<WorkshopAttendance>;
   deleteWorkshopAttendance(id: number): Promise<void>;
+
+  // Member Relationships (genitori/tutori)
+  getMemberRelationships(memberId: number): Promise<MemberRelationship[]>;
+  getMemberChildren(memberId: number): Promise<MemberRelationship[]>;
+  createMemberRelationship(relationship: InsertMemberRelationship): Promise<MemberRelationship>;
+  deleteMemberRelationship(id: number): Promise<void>;
 
   // Locations (Countries, Provinces, Cities)
   getCountries(): Promise<Country[]>;
@@ -943,6 +953,14 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(workshopEnrollments).orderBy(desc(workshopEnrollments.enrollmentDate));
   }
 
+  async getWorkshopEnrollmentsByMember(memberId: number): Promise<WorkshopEnrollment[]> {
+    return await db
+      .select()
+      .from(workshopEnrollments)
+      .where(eq(workshopEnrollments.memberId, memberId))
+      .orderBy(desc(workshopEnrollments.enrollmentDate));
+  }
+
   async getWorkshopEnrollment(id: number): Promise<WorkshopEnrollment | undefined> {
     const [enrollment] = await db.select().from(workshopEnrollments).where(eq(workshopEnrollments.id, id));
     return enrollment;
@@ -983,6 +1001,30 @@ export class DatabaseStorage implements IStorage {
 
   async deleteWorkshopAttendance(id: number): Promise<void> {
     await db.delete(workshopAttendances).where(eq(workshopAttendances.id, id));
+  }
+
+  // ==== Member Relationships (genitori/tutori) ====
+  async getMemberRelationships(memberId: number): Promise<MemberRelationship[]> {
+    return await db
+      .select()
+      .from(memberRelationships)
+      .where(eq(memberRelationships.memberId, memberId));
+  }
+
+  async getMemberChildren(memberId: number): Promise<MemberRelationship[]> {
+    return await db
+      .select()
+      .from(memberRelationships)
+      .where(eq(memberRelationships.relatedMemberId, memberId));
+  }
+
+  async createMemberRelationship(relationship: InsertMemberRelationship): Promise<MemberRelationship> {
+    const [newRelationship] = await db.insert(memberRelationships).values(relationship).returning();
+    return newRelationship;
+  }
+
+  async deleteMemberRelationship(id: number): Promise<void> {
+    await db.delete(memberRelationships).where(eq(memberRelationships.id, id));
   }
 
   // ==== Locations (Countries, Provinces, Cities) ====
