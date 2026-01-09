@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,13 +12,17 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, IdCard, FileText, Building2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, IdCard, FileText, Building2, Check, ChevronsUpDown, UserPlus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import type { Membership, InsertMembership, MedicalCertificate, InsertMedicalCertificate, Member } from "@shared/schema";
 
 export default function Memberships() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [membershipSearch, setMembershipSearch] = useState("");
   const [entityCardSearch, setEntityCardSearch] = useState("");
   const [certificateSearch, setCertificateSearch] = useState("");
@@ -25,6 +30,14 @@ export default function Memberships() {
   const [isCertificateFormOpen, setIsCertificateFormOpen] = useState(false);
   const [editingMembership, setEditingMembership] = useState<Membership | null>(null);
   const [editingCertificate, setEditingCertificate] = useState<MedicalCertificate | null>(null);
+  
+  const [membershipMemberOpen, setMembershipMemberOpen] = useState(false);
+  const [membershipMemberSearch, setMembershipMemberSearch] = useState("");
+  const [selectedMembershipMember, setSelectedMembershipMember] = useState<Member | null>(null);
+  
+  const [certMemberOpen, setCertMemberOpen] = useState(false);
+  const [certMemberSearch, setCertMemberSearch] = useState("");
+  const [selectedCertMember, setSelectedCertMember] = useState<Member | null>(null);
 
   const { data: memberships, isLoading: membershipsLoading } = useQuery<Membership[]>({
     queryKey: ["/api/memberships"],
@@ -43,6 +56,24 @@ export default function Memberships() {
     queryKey: ["/api/members/entity-cards"],
   });
 
+  const { data: membershipSearchResults } = useQuery<{ members: Member[], total: number }>({
+    queryKey: ["/api/members", { search: membershipMemberSearch }],
+    queryFn: async () => {
+      const res = await fetch(`/api/members?search=${encodeURIComponent(membershipMemberSearch)}&pageSize=20`);
+      return res.json();
+    },
+    enabled: membershipMemberSearch.length >= 3,
+  });
+
+  const { data: certSearchResults } = useQuery<{ members: Member[], total: number }>({
+    queryKey: ["/api/members", { search: certMemberSearch }],
+    queryFn: async () => {
+      const res = await fetch(`/api/members?search=${encodeURIComponent(certMemberSearch)}&pageSize=20`);
+      return res.json();
+    },
+    enabled: certMemberSearch.length >= 3,
+  });
+
   const createMembershipMutation = useMutation({
     mutationFn: async (data: InsertMembership) => {
       await apiRequest("POST", "/api/memberships", data);
@@ -52,6 +83,8 @@ export default function Memberships() {
       toast({ title: "Tessera creata con successo" });
       setIsMembershipFormOpen(false);
       setEditingMembership(null);
+      setSelectedMembershipMember(null);
+      setMembershipMemberSearch("");
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -67,6 +100,8 @@ export default function Memberships() {
       toast({ title: "Certificato creato con successo" });
       setIsCertificateFormOpen(false);
       setEditingCertificate(null);
+      setSelectedCertMember(null);
+      setCertMemberSearch("");
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -75,9 +110,13 @@ export default function Memberships() {
 
   const handleMembershipSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!selectedMembershipMember) {
+      toast({ title: "Errore", description: "Seleziona un cliente", variant: "destructive" });
+      return;
+    }
     const formData = new FormData(e.currentTarget);
     const data: InsertMembership = {
-      memberId: parseInt(formData.get("memberId") as string),
+      memberId: selectedMembershipMember.id,
       membershipNumber: formData.get("membershipNumber") as string,
       barcode: formData.get("barcode") as string,
       issueDate: formData.get("issueDate") as string,
@@ -92,9 +131,13 @@ export default function Memberships() {
 
   const handleCertificateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!selectedCertMember) {
+      toast({ title: "Errore", description: "Seleziona un cliente", variant: "destructive" });
+      return;
+    }
     const formData = new FormData(e.currentTarget);
     const data: InsertMedicalCertificate = {
-      memberId: parseInt(formData.get("memberId") as string),
+      memberId: selectedCertMember.id,
       issueDate: formData.get("issueDate") as string,
       expiryDate: formData.get("expiryDate") as string,
       doctorName: formData.get("doctorName") as string || null,
@@ -478,19 +521,83 @@ export default function Memberships() {
           </DialogHeader>
           <form onSubmit={handleMembershipSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="memberId">Cliente *</Label>
-              <Select name="memberId" required>
-                <SelectTrigger data-testid="select-member">
-                  <SelectValue placeholder="Seleziona iscritto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {members?.map((member) => (
-                    <SelectItem key={member.id} value={member.id.toString()}>
-                      {member.firstName} {member.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center justify-between">
+                <Label>Cliente *</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsMembershipFormOpen(false);
+                    setLocation("/anagrafica?action=new");
+                  }}
+                  data-testid="button-new-member-membership"
+                >
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Nuovo Cliente
+                </Button>
+              </div>
+              <Popover open={membershipMemberOpen} onOpenChange={setMembershipMemberOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={membershipMemberOpen}
+                    className="w-full justify-between"
+                    data-testid="select-member"
+                  >
+                    {selectedMembershipMember 
+                      ? `${selectedMembershipMember.firstName} ${selectedMembershipMember.lastName}`
+                      : "Cerca cliente (min. 3 caratteri)..."
+                    }
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0" align="start">
+                  <Command shouldFilter={false}>
+                    <CommandInput 
+                      placeholder="Cerca per nome, cognome o codice fiscale..." 
+                      value={membershipMemberSearch}
+                      onValueChange={setMembershipMemberSearch}
+                      data-testid="input-search-member-membership"
+                    />
+                    <CommandList>
+                      {membershipMemberSearch.length < 3 ? (
+                        <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
+                      ) : !membershipSearchResults?.members?.length ? (
+                        <CommandEmpty>Nessun cliente trovato</CommandEmpty>
+                      ) : (
+                        <CommandGroup>
+                          {membershipSearchResults.members.map((member) => (
+                            <CommandItem
+                              key={member.id}
+                              value={member.id.toString()}
+                              onSelect={() => {
+                                setSelectedMembershipMember(member);
+                                setMembershipMemberOpen(false);
+                              }}
+                              data-testid={`member-option-${member.id}`}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedMembershipMember?.id === member.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div className="flex flex-col">
+                                <span className="font-medium">{member.firstName} {member.lastName}</span>
+                                {member.fiscalCode && (
+                                  <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -598,19 +705,83 @@ export default function Memberships() {
           </DialogHeader>
           <form onSubmit={handleCertificateSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="cert-memberId">Iscritto *</Label>
-              <Select name="memberId" required>
-                <SelectTrigger data-testid="select-cert-member">
-                  <SelectValue placeholder="Seleziona iscritto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {members?.map((member) => (
-                    <SelectItem key={member.id} value={member.id.toString()}>
-                      {member.firstName} {member.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center justify-between">
+                <Label>Cliente *</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsCertificateFormOpen(false);
+                    setLocation("/anagrafica?action=new");
+                  }}
+                  data-testid="button-new-member-certificate"
+                >
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Nuovo Cliente
+                </Button>
+              </div>
+              <Popover open={certMemberOpen} onOpenChange={setCertMemberOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={certMemberOpen}
+                    className="w-full justify-between"
+                    data-testid="select-cert-member"
+                  >
+                    {selectedCertMember 
+                      ? `${selectedCertMember.firstName} ${selectedCertMember.lastName}`
+                      : "Cerca cliente (min. 3 caratteri)..."
+                    }
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0" align="start">
+                  <Command shouldFilter={false}>
+                    <CommandInput 
+                      placeholder="Cerca per nome, cognome o codice fiscale..." 
+                      value={certMemberSearch}
+                      onValueChange={setCertMemberSearch}
+                      data-testid="input-search-member-certificate"
+                    />
+                    <CommandList>
+                      {certMemberSearch.length < 3 ? (
+                        <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
+                      ) : !certSearchResults?.members?.length ? (
+                        <CommandEmpty>Nessun cliente trovato</CommandEmpty>
+                      ) : (
+                        <CommandGroup>
+                          {certSearchResults.members.map((member) => (
+                            <CommandItem
+                              key={member.id}
+                              value={member.id.toString()}
+                              onSelect={() => {
+                                setSelectedCertMember(member);
+                                setCertMemberOpen(false);
+                              }}
+                              data-testid={`cert-member-option-${member.id}`}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedCertMember?.id === member.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div className="flex flex-col">
+                                <span className="font-medium">{member.firstName} {member.lastName}</span>
+                                {member.fiscalCode && (
+                                  <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
