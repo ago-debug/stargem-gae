@@ -26,9 +26,10 @@ export default function Payments() {
     queryKey: ["/api/payments"],
   });
 
-  const { data: members } = useQuery<Member[]>({
+  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
   });
+  const members = membersData?.members || [];
 
   const { data: enrollments } = useQuery<any[]>({
     queryKey: ["/api/enrollments"],
