@@ -948,7 +948,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
       const payments = memberId 
         ? await storage.getPaymentsByMemberId(memberId)
-        : await storage.getPayments();
+        : await storage.getPaymentsWithMembers();
       res.json(payments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch payments" });

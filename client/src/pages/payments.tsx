@@ -91,9 +91,12 @@ export default function Payments() {
     createMutation.mutate(data);
   };
 
-  const getMemberName = (memberId: number | null) => {
-    if (!memberId) return "-";
-    const member = members?.find(m => m.id === memberId);
+  const getMemberName = (payment: any) => {
+    if (payment.memberFirstName && payment.memberLastName) {
+      return `${payment.memberFirstName} ${payment.memberLastName}`;
+    }
+    if (!payment.memberId) return "-";
+    const member = members?.find(m => m.id === payment.memberId);
     return member ? `${member.firstName} ${member.lastName}` : "Sconosciuto";
   };
 
@@ -209,7 +212,7 @@ export default function Payments() {
                 {payments.map((payment) => (
                   <TableRow key={payment.id} data-testid={`payment-row-${payment.id}`}>
                     <TableCell className="font-medium">
-                      {getMemberName(payment.memberId)}
+                      {getMemberName(payment)}
                     </TableCell>
                     <TableCell className="capitalize">{payment.type}</TableCell>
                     <TableCell>{payment.description || "-"}</TableCell>
