@@ -38,7 +38,7 @@ export default function Payments() {
 
   // Server-side search for member selector (min 3 chars)
   const { data: searchedMembersData } = useQuery<{ members: Member[], total: number }>({
-    queryKey: ["/api/members", { search: memberSearchQuery }],
+    queryKey: [`/api/members?search=${encodeURIComponent(memberSearchQuery)}`],
     enabled: memberSearchQuery.length >= 3,
   });
   const searchedMembers = searchedMembersData?.members || [];
