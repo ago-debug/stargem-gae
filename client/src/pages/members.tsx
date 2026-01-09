@@ -77,12 +77,20 @@ export default function Members() {
       setIsFormOpen(false);
       resetForm();
     },
-    onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    onError: (error: any) => {
+      if (error.conflictWith) {
+        toast({ 
+          title: "Codice Fiscale Duplicato", 
+          description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.firstName} ${error.conflictWith.lastName}`,
+          variant: "destructive" 
+        });
+      } else {
+        toast({ title: "Errore", description: error.message, variant: "destructive" });
+      }
     },
   });
 
-  const updateMutation = useMutation<void, Error, { id: number; data: Partial<InsertMember> }>({
+  const updateMutation = useMutation<void, any, { id: number; data: Partial<InsertMember> }>({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertMember> }) => {
       await apiRequest("PATCH", `/api/members/${id}`, data);
     },
@@ -92,8 +100,16 @@ export default function Members() {
       setIsFormOpen(false);
       resetForm();
     },
-    onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    onError: (error: any) => {
+      if (error.conflictWith) {
+        toast({ 
+          title: "Codice Fiscale Duplicato", 
+          description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.firstName} ${error.conflictWith.lastName}`,
+          variant: "destructive" 
+        });
+      } else {
+        toast({ title: "Errore", description: error.message, variant: "destructive" });
+      }
     },
   });
 
