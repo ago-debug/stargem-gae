@@ -36,6 +36,13 @@ export default function Payments() {
   });
   const members = membersData?.members || [];
 
+  // Server-side search for member selector (min 3 chars)
+  const { data: searchedMembersData } = useQuery<{ members: Member[], total: number }>({
+    queryKey: ["/api/members", { search: memberSearchQuery }],
+    enabled: memberSearchQuery.length >= 3,
+  });
+  const searchedMembers = searchedMembersData?.members || [];
+
   const { data: enrollments } = useQuery<any[]>({
     queryKey: ["/api/enrollments"],
   });
@@ -306,16 +313,7 @@ export default function Payments() {
                       </CommandEmpty>
                       {memberSearchQuery.length >= 3 && (
                         <CommandGroup>
-                          {members
-                            ?.filter(m => {
-                              const search = memberSearchQuery.toLowerCase();
-                              const fullName = `${m.firstName} ${m.lastName}`.toLowerCase();
-                              const reverseName = `${m.lastName} ${m.firstName}`.toLowerCase();
-                              const fiscalCode = (m.fiscalCode || '').toLowerCase();
-                              return fullName.includes(search) || 
-                                     reverseName.includes(search) || 
-                                     fiscalCode.includes(search);
-                            })
+                          {searchedMembers
                             .slice(0, 20)
                             .map((member) => (
                               <CommandItem
