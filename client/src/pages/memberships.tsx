@@ -32,9 +32,10 @@ export default function Memberships() {
     queryKey: ["/api/medical-certificates"],
   });
 
-  const { data: members } = useQuery<Member[]>({
+  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
   });
+  const members = membersData?.members || [];
 
   const createMembershipMutation = useMutation({
     mutationFn: async (data: InsertMembership) => {
@@ -325,7 +326,7 @@ export default function Memberships() {
               </div>
             </CardHeader>
             <CardContent>
-              {!members ? (
+              {!membersData ? (
                 <div className="space-y-3">
                   {[...Array(5)].map((_, i) => (
                     <Skeleton key={i} className="h-16 w-full" />
