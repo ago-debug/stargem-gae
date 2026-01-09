@@ -483,15 +483,20 @@ export default function Workshops() {
     queryKey: ["/api/workshop-attendances"],
   });
 
-  const getWorkshopEnrollments = (workshopId: number): Array<{ id: number; firstName: string; lastName: string }> => {
-    if (!enrollments || !members) return [];
+  const getWorkshopEnrollmentCount = (workshopId: number): number => {
+    if (!enrollments) return 0;
+    return enrollments.filter(e => e.workshopId === workshopId && e.status === 'active').length;
+  };
+
+  const getWorkshopEnrollmentsList = (workshopId: number): Array<{ id: number; firstName: string; lastName: string }> => {
+    if (!enrollments) return [];
     return enrollments
       .filter(e => e.workshopId === workshopId && e.status === 'active')
-      .map(e => {
-        const member = members.find(m => m.id === e.memberId);
-        return member ? { id: member.id, firstName: member.firstName, lastName: member.lastName } : null;
-      })
-      .filter((m): m is { id: number; firstName: string; lastName: string } => m !== null);
+      .map(e => ({
+        id: e.memberId,
+        firstName: e.memberFirstName || '',
+        lastName: e.memberLastName || '',
+      }));
   };
 
   const getWorkshopAttendances = (workshopId: number) => {
@@ -670,7 +675,8 @@ export default function Workshops() {
               </TableHeader>
               <TableBody>
                 {filteredWorkshops.map((workshop) => {
-                  const workshopEnrollments = getWorkshopEnrollments(workshop.id);
+                  const enrollmentCount = getWorkshopEnrollmentCount(workshop.id);
+                  const enrollmentsList = getWorkshopEnrollmentsList(workshop.id);
                   return (
                   <TableRow key={workshop.id} data-testid={`workshop-row-${workshop.id}`}>
                     <TableCell className="font-medium">{workshop.name}</TableCell>
@@ -683,20 +689,20 @@ export default function Workshops() {
                         : "-"}
                     </TableCell>
                     <TableCell>€{workshop.price || "0.00"}</TableCell>
-                    <TableCell>{workshop.currentEnrollment}/{workshop.maxCapacity || "∞"}</TableCell>
+                    <TableCell>{enrollmentCount}/{workshop.maxCapacity || "∞"}</TableCell>
                     <TableCell>
-                      {workshopEnrollments.length > 0 ? (
+                      {enrollmentsList.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {workshopEnrollments.slice(0, 2).map((member) => (
+                          {enrollmentsList.slice(0, 2).map((member) => (
                             <Link key={member.id} href={`/members?search=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`}>
                               <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-workshop-member-${member.id}`}>
                                 {member.firstName} {member.lastName}
                               </Badge>
                             </Link>
                           ))}
-                          {workshopEnrollments.length > 2 && (
+                          {enrollmentsList.length > 2 && (
                             <Badge variant="secondary" className="text-xs">
-                              +{workshopEnrollments.length - 2} altri
+                              +{enrollmentsList.length - 2} altri
                             </Badge>
                           )}
                         </div>
@@ -764,7 +770,7 @@ export default function Workshops() {
                 <TabsTrigger value="details" data-testid="tab-workshop-details">Dettagli</TabsTrigger>
                 <TabsTrigger value="enrollments" data-testid="tab-workshop-enrollments">
                   <Users className="w-4 h-4 mr-1" />
-                  Iscritti ({getWorkshopEnrollments(editingWorkshop.id).length})
+                  Iscritti ({getWorkshopEnrollmentCount(editingWorkshop.id)})
                 </TabsTrigger>
                 <TabsTrigger value="attendances" data-testid="tab-workshop-attendances">
                   <Calendar className="w-4 h-4 mr-1" />
