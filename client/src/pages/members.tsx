@@ -441,7 +441,19 @@ export default function Members() {
                         <TableCell>
                           <span 
                             className="font-bold hover:underline cursor-pointer"
-                            onClick={() => window.location.href = `/?memberId=${member.id}`}
+                            onClick={async () => {
+                              try {
+                                const res = await fetch(`/api/members/${member.id}`, { credentials: "include" });
+                                if (res.ok) {
+                                  const fullMember = await res.json();
+                                  setEditingMember(fullMember);
+                                  setHasMedicalCert(fullMember.hasMedicalCertificate || false);
+                                  setIsFormOpen(true);
+                                }
+                              } catch (e) {
+                                console.error("Error loading member:", e);
+                              }
+                            }}
                             data-testid={`link-member-${member.id}`}
                           >
                             {member.firstName} {member.lastName}
