@@ -183,7 +183,7 @@ export interface IStorage {
   createAccessLog(log: InsertAccessLog): Promise<AccessLog>;
 
   // Attendances
-  getAttendances(): Promise<Attendance[]>;
+  getAttendances(): Promise<(Attendance & { memberFirstName?: string | null; memberLastName?: string | null; memberFiscalCode?: string | null })[]>;
   getAttendance(id: number): Promise<Attendance | undefined>;
   getAttendancesByMember(memberId: number): Promise<Attendance[]>;
   createAttendance(attendance: InsertAttendance): Promise<Attendance>;
@@ -1018,8 +1018,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Attendances ====
-  async getAttendances(): Promise<Attendance[]> {
-    return await db.select().from(attendances).orderBy(desc(attendances.attendanceDate));
+  async getAttendances(): Promise<(Attendance & { memberFirstName?: string | null; memberLastName?: string | null; memberFiscalCode?: string | null })[]> {
+    const result = await db
+      .select({
+        id: attendances.id,
+        memberId: attendances.memberId,
+        courseId: attendances.courseId,
+        enrollmentId: attendances.enrollmentId,
+        attendanceDate: attendances.attendanceDate,
+        status: attendances.status,
+        checkInMethod: attendances.checkInMethod,
+        notes: attendances.notes,
+        createdAt: attendances.createdAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberFiscalCode: members.fiscalCode,
+      })
+      .from(attendances)
+      .leftJoin(members, eq(attendances.memberId, members.id))
+      .orderBy(desc(attendances.attendanceDate));
+    return result;
   }
 
   async getAttendance(id: number): Promise<Attendance | undefined> {

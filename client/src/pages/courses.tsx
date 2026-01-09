@@ -465,7 +465,13 @@ export default function Courses() {
     queryKey: ["/api/enrollments"],
   });
 
-  const { data: attendances } = useQuery<Attendance[]>({
+  interface AttendanceWithMember extends Attendance {
+    memberFirstName?: string | null;
+    memberLastName?: string | null;
+    memberFiscalCode?: string | null;
+  }
+
+  const { data: attendances } = useQuery<AttendanceWithMember[]>({
     queryKey: ["/api/attendances"],
   });
 
@@ -486,16 +492,15 @@ export default function Courses() {
   };
 
   const getCourseAttendances = (courseId: number) => {
-    if (!attendances || !enrollments) return [];
+    if (!attendances) return [];
     return attendances
       .filter(a => a.courseId === courseId)
-      .map(a => {
-        const enrollment = enrollments.find(e => e.memberId === a.memberId);
-        return {
-          ...a,
-          memberName: enrollment ? `${enrollment.memberFirstName || ''} ${enrollment.memberLastName || ''}` : "Sconosciuto",
-        };
-      })
+      .map(a => ({
+        ...a,
+        memberName: (a.memberFirstName || a.memberLastName) 
+          ? `${a.memberFirstName || ''} ${a.memberLastName || ''}`.trim() 
+          : "Sconosciuto",
+      }))
       .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
       .slice(0, 20);
   };
