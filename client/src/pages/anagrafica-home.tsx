@@ -91,6 +91,9 @@ export default function AnagraficaHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
+  const [showNewPaymentDialog, setShowNewPaymentDialog] = useState(false);
+  const [newPaymentType, setNewPaymentType] = useState("");
+  const [newPaymentMethod, setNewPaymentMethod] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Query for duplicate fiscal codes
@@ -275,6 +278,45 @@ export default function AnagraficaHome() {
       }
     },
   });
+
+  // Query per metodi di pagamento
+  const { data: paymentMethods } = useQuery<any[]>({
+    queryKey: ["/api/payment-methods"],
+  });
+
+  // Mutation per creare pagamento
+  const createPaymentMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/payments", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/payments", "member", selectedMemberId] });
+      toast({ title: "Pagamento registrato con successo" });
+      setShowNewPaymentDialog(false);
+      setNewPaymentType("");
+      setNewPaymentMethod("");
+    },
+    onError: (error: any) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleCreatePayment = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const data = {
+      memberId: selectedMemberId,
+      amount: formData.get("amount") as string,
+      type: formData.get("type") as string,
+      description: formData.get("description") as string || null,
+      dueDate: formData.get("dueDate") as string || null,
+      paymentMethod: formData.get("paymentMethod") as string || null,
+      status: "pending",
+      notes: formData.get("notes") as string || null,
+    };
+    createPaymentMutation.mutate(data);
+  };
 
   const handleSave = () => {
     const warnings: string[] = [];
@@ -1018,11 +1060,21 @@ export default function AnagraficaHome() {
           {/* Tab Pagamenti */}
           <TabsContent value="pagamenti" className="mt-0">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="w-5 h-5" />
                   Pagamenti
                 </CardTitle>
+                {selectedMemberId && (
+                  <Button
+                    size="sm"
+                    onClick={() => setShowNewPaymentDialog(true)}
+                    data-testid="button-new-payment-member"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Nuovo Pagamento
+                  </Button>
+                )}
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
@@ -1330,6 +1382,137 @@ export default function AnagraficaHome() {
               </Card>
             ))}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Payment Dialog */}
+      <Dialog open={showNewPaymentDialog} onOpenChange={(open) => {
+        setShowNewPaymentDialog(open);
+        if (!open) {
+          setNewPaymentType("");
+          setNewPaymentMethod("");
+        }
+      }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Nuovo Pagamento
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreatePayment} className="space-y-4">
+            <div className="bg-muted/50 p-3 rounded-lg">
+              <p className="text-sm text-muted-foreground">Cliente:</p>
+              <p className="font-medium">{selectedMember?.firstName} {selectedMember?.lastName}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="payment-type">Tipo *</Label>
+                <Select 
+                  name="type" 
+                  required
+                  value={newPaymentType}
+                  onValueChange={setNewPaymentType}
+                >
+                  <SelectTrigger data-testid="select-payment-type">
+                    <SelectValue placeholder="Seleziona tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="course">Corso</SelectItem>
+                    <SelectItem value="membership">Tessera</SelectItem>
+                    <SelectItem value="other">Altro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment-amount">Importo (€) *</Label>
+                <Input
+                  id="payment-amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  required
+                  data-testid="input-payment-amount"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="payment-description">Descrizione</Label>
+              <Input
+                id="payment-description"
+                name="description"
+                placeholder="Es: Quota corso Yoga"
+                data-testid="input-payment-description"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="payment-due-date">Data Scadenza</Label>
+                <Input
+                  id="payment-due-date"
+                  name="dueDate"
+                  type="date"
+                  data-testid="input-payment-due-date"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment-method">Metodo Pagamento</Label>
+                <Select 
+                  name="paymentMethod"
+                  value={newPaymentMethod}
+                  onValueChange={setNewPaymentMethod}
+                >
+                  <SelectTrigger data-testid="select-payment-method">
+                    <SelectValue placeholder="Seleziona metodo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentMethods?.map((method: any) => (
+                      <SelectItem key={method.id} value={method.name.toLowerCase()}>
+                        {method.name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="contanti">Contanti</SelectItem>
+                    <SelectItem value="carta">Carta</SelectItem>
+                    <SelectItem value="bonifico">Bonifico</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="payment-notes">Note</Label>
+              <Textarea
+                id="payment-notes"
+                name="notes"
+                placeholder="Note aggiuntive..."
+                className="h-20"
+                data-testid="input-payment-notes"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowNewPaymentDialog(false)}
+              >
+                Annulla
+              </Button>
+              <Button
+                type="submit"
+                disabled={createPaymentMutation.isPending}
+                data-testid="button-submit-payment"
+              >
+                {createPaymentMutation.isPending ? "Salvataggio..." : "Registra Pagamento"}
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

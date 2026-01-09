@@ -11,8 +11,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, CreditCard } from "lucide-react";
+import { Plus, Search, CreditCard, Check, ChevronsUpDown, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import type { Payment, InsertPayment, Member } from "@shared/schema";
 
 export default function Payments() {
@@ -21,6 +24,8 @@ export default function Payments() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
+  const [memberSearchOpen, setMemberSearchOpen] = useState(false);
+  const [memberSearchQuery, setMemberSearchQuery] = useState("");
 
   const { data: payments, isLoading } = useQuery<Payment[]>({
     queryKey: ["/api/payments"],
@@ -239,6 +244,7 @@ export default function Payments() {
         if (!open) {
           setSelectedMemberId("");
           setSelectedType("");
+          setMemberSearchQuery("");
         }
       }}>
         <DialogContent className="max-w-2xl">
@@ -249,22 +255,96 @@ export default function Payments() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="memberId">Cliente (opzionale)</Label>
-              <Select 
-                name="memberId" 
-                value={selectedMemberId}
-                onValueChange={setSelectedMemberId}
-              >
-                <SelectTrigger data-testid="select-member">
-                  <SelectValue placeholder="Seleziona iscritto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {members?.map((member) => (
-                    <SelectItem key={member.id} value={member.id.toString()}>
-                      {member.firstName} {member.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <input type="hidden" name="memberId" value={selectedMemberId} />
+              <Popover open={memberSearchOpen} onOpenChange={setMemberSearchOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={memberSearchOpen}
+                    className="w-full justify-between font-normal"
+                    data-testid="select-member"
+                  >
+                    {selectedMemberId ? (
+                      <span>
+                        {members?.find(m => m.id.toString() === selectedMemberId)?.firstName}{' '}
+                        {members?.find(m => m.id.toString() === selectedMemberId)?.lastName}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Cerca per nome, cognome o CF...</span>
+                    )}
+                    <div className="flex items-center gap-1">
+                      {selectedMemberId && (
+                        <X
+                          className="h-4 w-4 text-muted-foreground hover:text-foreground"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedMemberId("");
+                          }}
+                        />
+                      )}
+                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                    </div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0" align="start">
+                  <Command shouldFilter={false}>
+                    <CommandInput 
+                      placeholder="Cerca cliente (min. 3 caratteri)..." 
+                      value={memberSearchQuery}
+                      onValueChange={setMemberSearchQuery}
+                      data-testid="input-search-member"
+                    />
+                    <CommandList>
+                      <CommandEmpty>
+                        {memberSearchQuery.length < 3 
+                          ? "Inserisci almeno 3 caratteri per cercare" 
+                          : "Nessun cliente trovato"}
+                      </CommandEmpty>
+                      {memberSearchQuery.length >= 3 && (
+                        <CommandGroup>
+                          {members
+                            ?.filter(m => {
+                              const search = memberSearchQuery.toLowerCase();
+                              const fullName = `${m.firstName} ${m.lastName}`.toLowerCase();
+                              const reverseName = `${m.lastName} ${m.firstName}`.toLowerCase();
+                              const fiscalCode = (m.fiscalCode || '').toLowerCase();
+                              return fullName.includes(search) || 
+                                     reverseName.includes(search) || 
+                                     fiscalCode.includes(search);
+                            })
+                            .slice(0, 20)
+                            .map((member) => (
+                              <CommandItem
+                                key={member.id}
+                                value={member.id.toString()}
+                                onSelect={() => {
+                                  setSelectedMemberId(member.id.toString());
+                                  setMemberSearchOpen(false);
+                                  setMemberSearchQuery("");
+                                }}
+                                data-testid={`member-option-${member.id}`}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedMemberId === member.id.toString() ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{member.firstName} {member.lastName}</span>
+                                  {member.fiscalCode && (
+                                    <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
+                                  )}
+                                </div>
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
