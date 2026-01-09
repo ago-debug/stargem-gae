@@ -73,6 +73,7 @@ export default function Members() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
       toast({ title: "Cliente creato con successo" });
       setIsFormOpen(false);
       resetForm();
@@ -96,6 +97,7 @@ export default function Members() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
       toast({ title: "Cliente aggiornato con successo" });
       setIsFormOpen(false);
       resetForm();
@@ -119,6 +121,7 @@ export default function Members() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
       toast({ title: "Cliente eliminato con successo" });
     },
     onError: (error: Error) => {
