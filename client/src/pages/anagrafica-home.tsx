@@ -141,6 +141,76 @@ export default function AnagraficaHome() {
     enabled: !!selectedMemberId,
   });
 
+  // Query per dati collegati al membro selezionato
+  const { data: memberPayments, isLoading: loadingPayments, error: errorPayments } = useQuery<any[]>({
+    queryKey: ["/api/payments", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/payments?memberId=${selectedMemberId}`, { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 404) return [];
+        throw new Error("Errore caricamento pagamenti");
+      }
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
+
+  const { data: memberEnrollments, isLoading: loadingEnrollments, error: errorEnrollments } = useQuery<any[]>({
+    queryKey: ["/api/enrollments", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/enrollments?memberId=${selectedMemberId}`, { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 404) return [];
+        throw new Error("Errore caricamento iscrizioni");
+      }
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
+
+  const { data: courses } = useQuery<any[]>({
+    queryKey: ["/api/courses"],
+  });
+
+  const { data: memberMemberships, isLoading: loadingMemberships, error: errorMemberships } = useQuery<any[]>({
+    queryKey: ["/api/memberships", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/memberships?memberId=${selectedMemberId}`, { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 404) return [];
+        throw new Error("Errore caricamento abbonamenti");
+      }
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
+
+  const { data: memberCertificates, isLoading: loadingCertificates, error: errorCertificates } = useQuery<any[]>({
+    queryKey: ["/api/medical-certificates", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/medical-certificates?memberId=${selectedMemberId}`, { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 404) return [];
+        throw new Error("Errore caricamento certificati");
+      }
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
+
+  const { data: memberAttendances, isLoading: loadingAttendances, error: errorAttendances } = useQuery<any[]>({
+    queryKey: ["/api/attendances", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/attendances?memberId=${selectedMemberId}`, { credentials: "include" });
+      if (!res.ok) {
+        if (res.status === 404) return [];
+        throw new Error("Errore caricamento presenze");
+      }
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
+
   useEffect(() => {
     if (selectedMember) {
       setFormData({
@@ -945,22 +1015,266 @@ export default function AnagraficaHome() {
             </div>
           </TabsContent>
 
-          {/* Other tabs - placeholder content */}
-          {tabs.filter(t => t.id !== "anagrafica" && t.id !== "tessere").map(tab => (
-            <TabsContent key={tab.id} value={tab.id} className="mt-0">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <tab.icon className="w-5 h-5" />
-                    {tab.label}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Sezione {tab.label} - in fase di sviluppo</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
+          {/* Tab Pagamenti */}
+          <TabsContent value="pagamenti" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  Pagamenti
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!selectedMemberId ? (
+                  <p className="text-muted-foreground">Seleziona un membro per visualizzare i pagamenti</p>
+                ) : loadingPayments ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                ) : errorPayments ? (
+                  <p className="text-destructive">Errore nel caricamento dei pagamenti</p>
+                ) : memberPayments && memberPayments.length > 0 ? (
+                  <div className="space-y-2">
+                    {memberPayments.map((p: any) => (
+                      <div key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div>
+                          <p className="font-medium">{p.description || p.type}</p>
+                          <p className="text-sm text-muted-foreground">{p.dueDate}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">€{p.amount}</p>
+                          <Badge variant={p.status === 'paid' ? 'default' : p.status === 'overdue' ? 'destructive' : 'secondary'}>
+                            {p.status === 'paid' ? 'Pagato' : p.status === 'overdue' ? 'Scaduto' : 'In Attesa'}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">Nessun pagamento registrato</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Corsi */}
+          <TabsContent value="corsi" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  Corsi
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!selectedMemberId ? (
+                  <p className="text-muted-foreground">Seleziona un membro per visualizzare i corsi</p>
+                ) : loadingEnrollments ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                ) : errorEnrollments ? (
+                  <p className="text-destructive">Errore nel caricamento delle iscrizioni</p>
+                ) : memberEnrollments && memberEnrollments.length > 0 ? (
+                  <div className="space-y-2">
+                    {memberEnrollments.map((e: any) => {
+                      const course = courses?.find((c: any) => c.id === e.courseId);
+                      return (
+                        <div key={e.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                          <div>
+                            <p className="font-medium">{course?.name || 'Corso sconosciuto'}</p>
+                            <p className="text-sm text-muted-foreground">Dal {e.startDate}</p>
+                          </div>
+                          <Badge variant={e.status === 'active' ? 'default' : 'secondary'}>
+                            {e.status === 'active' ? 'Attivo' : e.status}
+                          </Badge>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">Nessuna iscrizione ai corsi</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Certificati */}
+          <TabsContent value="certificati" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Certificati Medici
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!selectedMemberId ? (
+                  <p className="text-muted-foreground">Seleziona un membro per visualizzare i certificati</p>
+                ) : loadingCertificates ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                ) : errorCertificates ? (
+                  <p className="text-destructive">Errore nel caricamento dei certificati</p>
+                ) : memberCertificates && memberCertificates.length > 0 ? (
+                  <div className="space-y-2">
+                    {memberCertificates.map((c: any) => (
+                      <div key={c.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div>
+                          <p className="font-medium">{c.type || 'Certificato Medico'}</p>
+                          <p className="text-sm text-muted-foreground">Rilasciato: {c.issueDate}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm">Scadenza: {c.expiryDate}</p>
+                          <Badge variant={new Date(c.expiryDate) < new Date() ? 'destructive' : 'default'}>
+                            {new Date(c.expiryDate) < new Date() ? 'Scaduto' : 'Valido'}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground">
+                      {formData.hasMedicalCertificate 
+                        ? `Certificato presente - Scadenza: ${formData.medicalCertificateExpiry || 'Non specificata'}`
+                        : 'Nessun certificato medico registrato'}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Membership */}
+          <TabsContent value="membership" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Abbonamenti
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!selectedMemberId ? (
+                  <p className="text-muted-foreground">Seleziona un membro per visualizzare gli abbonamenti</p>
+                ) : loadingMemberships ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                ) : errorMemberships ? (
+                  <p className="text-destructive">Errore nel caricamento degli abbonamenti</p>
+                ) : memberMemberships && memberMemberships.length > 0 ? (
+                  <div className="space-y-2">
+                    {memberMemberships.map((m: any) => (
+                      <div key={m.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div>
+                          <p className="font-medium">{m.type || 'Abbonamento'}</p>
+                          <p className="text-sm text-muted-foreground">Dal {m.startDate} al {m.endDate}</p>
+                        </div>
+                        <Badge variant={m.status === 'active' ? 'default' : 'secondary'}>
+                          {m.status === 'active' ? 'Attivo' : m.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">Nessun abbonamento registrato</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Allenamenti (Presenze) */}
+          <TabsContent value="allenamenti" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Dumbbell className="w-5 h-5" />
+                  Presenze / Allenamenti
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!selectedMemberId ? (
+                  <p className="text-muted-foreground">Seleziona un membro per visualizzare le presenze</p>
+                ) : loadingAttendances ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                ) : errorAttendances ? (
+                  <p className="text-destructive">Errore nel caricamento delle presenze</p>
+                ) : memberAttendances && memberAttendances.length > 0 ? (
+                  <div className="space-y-2">
+                    {memberAttendances.slice(0, 20).map((a: any) => (
+                      <div key={a.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div>
+                          <p className="font-medium">{a.date}</p>
+                          <p className="text-sm text-muted-foreground">{a.checkInTime} - {a.checkOutTime || 'In corso'}</p>
+                        </div>
+                        <Badge variant="default">Presente</Badge>
+                      </div>
+                    ))}
+                    {memberAttendances.length > 20 && (
+                      <p className="text-sm text-muted-foreground text-center">
+                        ... e altre {memberAttendances.length - 20} presenze
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">Nessuna presenza registrata</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Buoni - Placeholder */}
+          <TabsContent value="buoni" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Gift className="w-5 h-5" />
+                  Buoni
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Nessun buono registrato per questo membro</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Gare - Placeholder */}
+          <TabsContent value="gare" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5" />
+                  Gare
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Nessuna gara registrata per questo membro</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Vacanze - Placeholder */}
+          <TabsContent value="vacanze" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sun className="w-5 h-5" />
+                  Vacanze
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Nessuna vacanza registrata per questo membro</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
 
         {/* Back to Top Button - Mobile only */}
