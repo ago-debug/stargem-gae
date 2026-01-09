@@ -83,6 +83,9 @@ export default function Members() {
   const totalMembers = membersData?.total || 0;
   const totalPages = Math.ceil(totalMembers / PAGE_SIZE);
 
+  const { data: clientCategories } = useQuery<any[]>({
+    queryKey: ["/api/client-categories"],
+  });
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertMember) => {
