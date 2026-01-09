@@ -99,8 +99,12 @@ export default function Memberships() {
     createCertificateMutation.mutate(data);
   };
 
-  const getMemberName = (memberId: number) => {
-    const member = members?.find(m => m.id === memberId);
+  const getMemberName = (item: any) => {
+    if (item.memberFirstName && item.memberLastName) {
+      return `${item.memberFirstName} ${item.memberLastName}`;
+    }
+    if (!item.memberId) return "-";
+    const member = members?.find(m => m.id === item.memberId);
     return member ? `${member.firstName} ${member.lastName}` : "Sconosciuto";
   };
 
@@ -196,7 +200,7 @@ export default function Memberships() {
                       return (
                         <TableRow key={membership.id} data-testid={`membership-row-${membership.id}`}>
                           <TableCell className="font-medium">
-                            {getMemberName(membership.memberId)}
+                            {getMemberName(membership)}
                           </TableCell>
                           <TableCell>{membership.membershipNumber}</TableCell>
                           <TableCell className="font-mono text-xs">{membership.barcode}</TableCell>
@@ -277,7 +281,7 @@ export default function Memberships() {
                       return (
                         <TableRow key={cert.id} data-testid={`certificate-row-${cert.id}`}>
                           <TableCell className="font-medium">
-                            {getMemberName(cert.memberId)}
+                            {getMemberName(cert)}
                           </TableCell>
                           <TableCell>{cert.doctorName || "-"}</TableCell>
                           <TableCell>{new Date(cert.issueDate).toLocaleDateString('it-IT')}</TableCell>
