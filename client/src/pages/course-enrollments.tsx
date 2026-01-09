@@ -21,14 +21,15 @@ export default function CourseEnrollments() {
     queryKey: ["/api/enrollments"],
   });
 
-  const { data: members, isLoading: membersLoading } = useQuery<any[]>({
+  const { data: membersData, isLoading: membersLoading } = useQuery<{ members: any[], total: number }>({
     queryKey: ["/api/members"],
   });
 
+  const members = membersData?.members || [];
   const isLoading = coursesLoading || enrollmentsLoading || membersLoading;
 
   const getEnrollmentsForCourse = (courseId: number) => {
-    if (!enrollments || !members) return [];
+    if (!enrollments || !members.length) return [];
     return enrollments
       .filter(e => e.courseId === courseId && e.status === 'active')
       .map(e => {
