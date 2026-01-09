@@ -278,7 +278,9 @@ export class DatabaseStorage implements IStorage {
         LOWER(last_name) LIKE ${searchTerm} OR 
         LOWER(email) LIKE ${searchTerm} OR 
         LOWER(fiscal_code) LIKE ${searchTerm} OR
-        LOWER(card_number) LIKE ${searchTerm}
+        LOWER(card_number) LIKE ${searchTerm} OR
+        LOWER(first_name || ' ' || last_name) LIKE ${searchTerm} OR
+        LOWER(last_name || ' ' || first_name) LIKE ${searchTerm}
       )`;
     }
     
