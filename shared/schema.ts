@@ -410,6 +410,9 @@ export const members = pgTable("members", {
   hasMedicalCertificate: boolean("has_medical_certificate").default(false), // Flag certificato medico
   medicalCertificateExpiry: date("medical_certificate_expiry"), // Scadenza certificato medico
   
+  // Flag minorenne
+  isMinor: boolean("is_minor").default(false), // Se il membro è minorenne
+  
   // Dati genitori (per minorenni)
   motherFirstName: varchar("mother_first_name", { length: 255 }), // Nome madre
   motherLastName: varchar("mother_last_name", { length: 255 }), // Cognome madre
@@ -458,9 +461,39 @@ export const insertMemberSchema = createInsertSchema(members).omit({
 }).extend({
   active: z.boolean().optional(),
   hasMedicalCertificate: z.boolean().optional(),
+  isMinor: z.boolean().optional(),
 });
 export type InsertMember = z.infer<typeof insertMemberSchema>;
 export type Member = typeof members.$inferSelect;
+
+// Member Relationships (relazioni tra membri - genitori/figli/tutori)
+export const memberRelationships = pgTable("member_relationships", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }), // Il minorenne
+  relatedMemberId: integer("related_member_id").notNull().references(() => members.id, { onDelete: "cascade" }), // Il genitore/tutore
+  relationshipType: varchar("relationship_type", { length: 50 }).notNull(), // 'mother', 'father', 'guardian'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const memberRelationshipsRelations = relations(memberRelationships, ({ one }) => ({
+  member: one(members, {
+    fields: [memberRelationships.memberId],
+    references: [members.id],
+    relationName: "childRelationships",
+  }),
+  relatedMember: one(members, {
+    fields: [memberRelationships.relatedMemberId],
+    references: [members.id],
+    relationName: "guardianRelationships",
+  }),
+}));
+
+export const insertMemberRelationshipSchema = createInsertSchema(memberRelationships).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertMemberRelationship = z.infer<typeof insertMemberRelationshipSchema>;
+export type MemberRelationship = typeof memberRelationships.$inferSelect;
 
 // Enrollments (iscrizioni ai corsi)
 export const enrollments = pgTable("enrollments", {
