@@ -408,15 +408,14 @@ export default function Members() {
                     const memberCourses = getMemberEnrollments(member.id);
                     return (
                       <TableRow key={member.id} data-testid={`member-row-${member.id}`}>
-                        <TableCell className="font-medium">
-                          <Link href={`/?memberId=${member.id}`}>
-                            <span 
-                              className="text-primary hover:underline cursor-pointer"
-                              data-testid={`link-member-${member.id}`}
-                            >
-                              {member.firstName} {member.lastName}
-                            </span>
-                          </Link>
+                        <TableCell>
+                          <span 
+                            className="font-bold hover:underline cursor-pointer"
+                            onClick={() => window.location.href = `/?memberId=${member.id}`}
+                            data-testid={`link-member-${member.id}`}
+                          >
+                            {member.firstName} {member.lastName}
+                          </span>
                         </TableCell>
                         <TableCell className="font-mono text-sm">{member.fiscalCode || "-"}</TableCell>
                         <TableCell>{member.email || "-"}</TableCell>
