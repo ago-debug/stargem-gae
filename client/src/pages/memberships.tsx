@@ -18,7 +18,9 @@ import type { Membership, InsertMembership, MedicalCertificate, InsertMedicalCer
 
 export default function Memberships() {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [membershipSearch, setMembershipSearch] = useState("");
+  const [entityCardSearch, setEntityCardSearch] = useState("");
+  const [certificateSearch, setCertificateSearch] = useState("");
   const [isMembershipFormOpen, setIsMembershipFormOpen] = useState(false);
   const [isCertificateFormOpen, setIsCertificateFormOpen] = useState(false);
   const [editingMembership, setEditingMembership] = useState<Membership | null>(null);
@@ -160,9 +162,9 @@ export default function Memberships() {
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Cerca tessera..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cerca per nome, cognome o codice fiscale..."
+                  value={membershipSearch}
+                  onChange={(e) => setMembershipSearch(e.target.value)}
                   className="pl-10"
                   data-testid="input-search-memberships"
                 />
@@ -181,7 +183,27 @@ export default function Memberships() {
                   <p className="text-lg font-medium mb-2">Nessuna tessera trovata</p>
                   <p className="text-sm">Inizia creando la prima tessera</p>
                 </div>
-              ) : (
+              ) : (() => {
+                const filteredMemberships = memberships.filter((membership: any) => {
+                  if (!membershipSearch || membershipSearch.length < 3) return true;
+                  const searchLower = membershipSearch.toLowerCase();
+                  const memberName = getMemberName(membership).toLowerCase();
+                  const member = members?.find(m => m.id === membership.memberId);
+                  const fiscalCode = member?.fiscalCode?.toLowerCase() || "";
+                  return memberName.includes(searchLower) || fiscalCode.includes(searchLower);
+                });
+
+                if (filteredMemberships.length === 0) {
+                  return (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <IdCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium mb-2">Nessun risultato trovato</p>
+                      <p className="text-sm">Prova con un altro termine di ricerca</p>
+                    </div>
+                  );
+                }
+
+                return (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -195,7 +217,7 @@ export default function Memberships() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {memberships.map((membership) => {
+                    {filteredMemberships.map((membership) => {
                       const expiryInfo = getExpiryStatus(membership.expiryDate);
                       return (
                         <TableRow key={membership.id} data-testid={`membership-row-${membership.id}`}>
@@ -230,7 +252,8 @@ export default function Memberships() {
                     })}
                   </TableBody>
                 </Table>
-              )}
+                );
+              })()}
             </CardContent>
           </Card>
         </TabsContent>
@@ -250,7 +273,19 @@ export default function Memberships() {
           </div>
 
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader>
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Cerca per nome, cognome o codice fiscale..."
+                  value={certificateSearch}
+                  onChange={(e) => setCertificateSearch(e.target.value)}
+                  className="pl-10"
+                  data-testid="input-search-certificates"
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
               {certificatesLoading ? (
                 <div className="space-y-3">
                   {[...Array(5)].map((_, i) => (
@@ -263,7 +298,27 @@ export default function Memberships() {
                   <p className="text-lg font-medium mb-2">Nessun certificato trovato</p>
                   <p className="text-sm">Inizia aggiungendo il primo certificato</p>
                 </div>
-              ) : (
+              ) : (() => {
+                const filteredCertificates = certificates.filter((cert: any) => {
+                  if (!certificateSearch || certificateSearch.length < 3) return true;
+                  const searchLower = certificateSearch.toLowerCase();
+                  const memberName = getMemberName(cert).toLowerCase();
+                  const member = members?.find(m => m.id === cert.memberId);
+                  const fiscalCode = member?.fiscalCode?.toLowerCase() || "";
+                  return memberName.includes(searchLower) || fiscalCode.includes(searchLower);
+                });
+
+                if (filteredCertificates.length === 0) {
+                  return (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium mb-2">Nessun risultato trovato</p>
+                      <p className="text-sm">Prova con un altro termine di ricerca</p>
+                    </div>
+                  );
+                }
+
+                return (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -276,7 +331,7 @@ export default function Memberships() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {certificates.map((cert) => {
+                    {filteredCertificates.map((cert) => {
                       const expiryInfo = getExpiryStatus(cert.expiryDate);
                       return (
                         <TableRow key={cert.id} data-testid={`certificate-row-${cert.id}`}>
@@ -310,7 +365,8 @@ export default function Memberships() {
                     })}
                   </TableBody>
                 </Table>
-              )}
+                );
+              })()}
             </CardContent>
           </Card>
         </TabsContent>
@@ -321,9 +377,9 @@ export default function Memberships() {
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Cerca tessera ente..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cerca per nome, cognome o codice fiscale..."
+                  value={entityCardSearch}
+                  onChange={(e) => setEntityCardSearch(e.target.value)}
                   className="pl-10"
                   data-testid="input-search-entity-cards"
                 />
@@ -340,13 +396,12 @@ export default function Memberships() {
                 const membersWithEntityCard = members.filter(m => 
                   m.entityCardNumber || m.entityCardType
                 ).filter(m => {
-                  if (!searchQuery) return true;
-                  const searchLower = searchQuery.toLowerCase();
+                  if (!entityCardSearch || entityCardSearch.length < 3) return true;
+                  const searchLower = entityCardSearch.toLowerCase();
                   return (
                     m.firstName?.toLowerCase().includes(searchLower) ||
                     m.lastName?.toLowerCase().includes(searchLower) ||
-                    m.entityCardNumber?.toLowerCase().includes(searchLower) ||
-                    m.entityCardType?.toLowerCase().includes(searchLower)
+                    m.fiscalCode?.toLowerCase().includes(searchLower)
                   );
                 });
 
