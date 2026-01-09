@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -612,6 +612,52 @@ export default function Workshops() {
     workshop.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
+  const exportToCSV = () => {
+    if (!filteredWorkshops.length) return;
+    
+    const headers = ["Nome", "Descrizione", "Categoria", "Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
+    
+    const rows = filteredWorkshops.map(workshop => {
+      const category = categories?.find(c => c.id === workshop.categoryId);
+      const instructor = instructors?.find(i => i.id === workshop.instructorId);
+      const dayLabel = WEEKDAYS.find(d => d.id === workshop.dayOfWeek)?.label || "";
+      const recurrenceLabel = RECURRENCE_TYPES.find(r => r.id === workshop.recurrenceType)?.label || "";
+      
+      return [
+        workshop.name,
+        workshop.description || "",
+        category?.name || "",
+        instructor ? `${instructor.firstName} ${instructor.lastName}` : "",
+        workshop.price || "",
+        workshop.maxCapacity || "",
+        dayLabel,
+        workshop.startTime || "",
+        workshop.endTime || "",
+        recurrenceLabel,
+        workshop.startDate ? new Date(workshop.startDate).toLocaleDateString('it-IT') : "",
+        workshop.endDate ? new Date(workshop.endDate).toLocaleDateString('it-IT') : "",
+        workshop.active ? "Attivo" : "Inattivo"
+      ];
+    });
+    
+    const escapeCSV = (value: unknown) => {
+      const str = String(value ?? "");
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+    
+    const csvContent = "\ufeff" + [headers.map(escapeCSV).join(","), ...rows.map(row => row.map(escapeCSV).join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `workshop_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -619,16 +665,26 @@ export default function Workshops() {
           <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Workshop</h1>
           <p className="text-muted-foreground">Organizza e gestisci i workshop disponibili</p>
         </div>
-        <Button 
-          onClick={() => {
-            closeDialog();
-            setIsFormOpen(true);
-          }}
-          data-testid="button-add-workshop"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nuovo Workshop
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={exportToCSV}
+            data-testid="button-export-csv"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Esporta CSV
+          </Button>
+          <Button 
+            onClick={() => {
+              closeDialog();
+              setIsFormOpen(true);
+            }}
+            data-testid="button-add-workshop"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuovo Workshop
+          </Button>
+        </div>
       </div>
 
       <Card>

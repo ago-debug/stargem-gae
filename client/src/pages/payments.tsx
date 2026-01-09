@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, CreditCard, Check, ChevronsUpDown, X } from "lucide-react";
+import { Plus, Search, CreditCard, Check, ChevronsUpDown, X, Edit, Download, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -22,10 +22,12 @@ export default function Payments() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
+  const [showPendingOnly, setShowPendingOnly] = useState(false);
 
   const { data: payments, isLoading } = useQuery<Payment[]>({
     queryKey: ["/api/payments"],
@@ -80,6 +82,77 @@ export default function Payments() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertPayment> }) => {
+      await apiRequest("PATCH", `/api/payments/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
+      toast({ title: "Pagamento aggiornato con successo" });
+      closeDialog();
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const closeDialog = () => {
+    setIsFormOpen(false);
+    setEditingPayment(null);
+    setSelectedMemberId("");
+    setSelectedType("");
+    setMemberSearchQuery("");
+  };
+
+  const openEditDialog = (payment: Payment) => {
+    setEditingPayment(payment);
+    setSelectedMemberId(payment.memberId?.toString() || "");
+    setSelectedType(payment.type || "");
+    setIsFormOpen(true);
+  };
+
+  const getMemberName = (payment: any) => {
+    if (payment.memberFirstName && payment.memberLastName) {
+      return `${payment.memberFirstName} ${payment.memberLastName}`;
+    }
+    if (!payment.memberId) return "-";
+    const member = members?.find(m => m.id === payment.memberId);
+    return member ? `${member.firstName} ${member.lastName}` : "Sconosciuto";
+  };
+
+  const exportToCSV = () => {
+    if (!payments || payments.length === 0) {
+      toast({ title: "Nessun dato da esportare", variant: "destructive" });
+      return;
+    }
+    const filteredData = showPendingOnly 
+      ? payments.filter(p => p.status === 'pending')
+      : payments;
+    
+    const headers = ["ID", "Cliente", "Tipo", "Descrizione", "Importo", "Scadenza", "Metodo", "Stato", "Data Pagamento"];
+    const rows = filteredData.map(p => [
+      p.id,
+      getMemberName(p),
+      p.type || "",
+      p.description || "",
+      p.amount,
+      p.dueDate ? new Date(p.dueDate).toLocaleDateString('it-IT') : "",
+      p.paymentMethod || "",
+      p.status,
+      p.paidDate ? new Date(p.paidDate).toLocaleDateString('it-IT') : ""
+    ]);
+    
+    const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `pagamenti_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Esportazione completata" });
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -91,21 +164,26 @@ export default function Payments() {
       description: formData.get("description") as string || null,
       dueDate: formData.get("dueDate") as string || null,
       paymentMethod: formData.get("paymentMethod") as string || null,
-      status: "pending",
+      status: editingPayment ? (formData.get("status") as string || editingPayment.status) : "pending",
       notes: formData.get("notes") as string || null,
     };
 
-    createMutation.mutate(data);
+    if (editingPayment) {
+      updateMutation.mutate({ id: editingPayment.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
   };
 
-  const getMemberName = (payment: any) => {
-    if (payment.memberFirstName && payment.memberLastName) {
-      return `${payment.memberFirstName} ${payment.memberLastName}`;
-    }
-    if (!payment.memberId) return "-";
-    const member = members?.find(m => m.id === payment.memberId);
-    return member ? `${member.firstName} ${member.lastName}` : "Sconosciuto";
-  };
+  // Filter payments based on search and pending filter
+  const filteredPayments = payments?.filter(p => {
+    const matchesSearch = !searchQuery || 
+      getMemberName(p).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.type || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesPending = !showPendingOnly || p.status === 'pending';
+    return matchesSearch && matchesPending;
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -127,13 +205,31 @@ export default function Payments() {
           <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Pagamenti</h1>
           <p className="text-muted-foreground">Traccia pagamenti, quote e incassi</p>
         </div>
-        <Button 
-          onClick={() => setIsFormOpen(true)}
-          data-testid="button-add-payment"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nuovo Pagamento
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant={showPendingOnly ? "default" : "outline"}
+            onClick={() => setShowPendingOnly(!showPendingOnly)}
+            data-testid="button-filter-pending"
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            {showPendingOnly ? "Tutti" : "In Sospeso"}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={exportToCSV}
+            data-testid="button-export-csv"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Esporta CSV
+          </Button>
+          <Button 
+            onClick={() => setIsFormOpen(true)}
+            data-testid="button-add-payment"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuovo Pagamento
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -195,7 +291,7 @@ export default function Payments() {
                 <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
-          ) : !payments || payments.length === 0 ? (
+          ) : !filteredPayments || filteredPayments.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <CreditCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">Nessun pagamento trovato</p>
@@ -216,7 +312,7 @@ export default function Payments() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payments.map((payment) => (
+                {filteredPayments.map((payment) => (
                   <TableRow key={payment.id} data-testid={`payment-row-${payment.id}`}>
                     <TableCell className="font-medium">
                       {getMemberName(payment)}
@@ -230,16 +326,26 @@ export default function Payments() {
                     <TableCell className="capitalize">{payment.paymentMethod || "-"}</TableCell>
                     <TableCell>{getStatusBadge(payment.status)}</TableCell>
                     <TableCell className="text-right">
-                      {payment.status === 'pending' && (
+                      <div className="flex items-center justify-end gap-2">
                         <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => updateStatusMutation.mutate({ id: payment.id, status: 'paid' })}
-                          data-testid={`button-mark-paid-${payment.id}`}
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEditDialog(payment)}
+                          data-testid={`button-edit-payment-${payment.id}`}
                         >
-                          Segna Pagato
+                          <Edit className="w-4 h-4" />
                         </Button>
-                      )}
+                        {payment.status === 'pending' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateStatusMutation.mutate({ id: payment.id, status: 'paid' })}
+                            data-testid={`button-mark-paid-${payment.id}`}
+                          >
+                            Segna Pagato
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -250,17 +356,15 @@ export default function Payments() {
       </Card>
 
       <Dialog open={isFormOpen} onOpenChange={(open) => {
-        setIsFormOpen(open);
-        if (!open) {
-          setSelectedMemberId("");
-          setSelectedType("");
-          setMemberSearchQuery("");
-        }
+        if (!open) closeDialog();
+        else setIsFormOpen(open);
       }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Nuovo Pagamento</DialogTitle>
-            <DialogDescription>Registra un nuovo pagamento o quota</DialogDescription>
+            <DialogTitle>{editingPayment ? "Modifica Pagamento" : "Nuovo Pagamento"}</DialogTitle>
+            <DialogDescription>
+              {editingPayment ? "Modifica i dettagli del pagamento" : "Registra un nuovo pagamento o quota"}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -377,6 +481,8 @@ export default function Payments() {
                   step="0.01"
                   min="0"
                   required
+                  defaultValue={editingPayment?.amount || ""}
+                  key={`amount-${editingPayment?.id || 'new'}`}
                   data-testid="input-amount"
                 />
               </div>
@@ -416,6 +522,8 @@ export default function Payments() {
                 id="description"
                 name="description"
                 placeholder="Es: Quota corso Yoga principianti"
+                defaultValue={editingPayment?.description || ""}
+                key={`description-${editingPayment?.id || 'new'}`}
                 data-testid="input-description"
               />
             </div>
@@ -427,6 +535,8 @@ export default function Payments() {
                   id="dueDate"
                   name="dueDate"
                   type="date"
+                  defaultValue={editingPayment?.dueDate?.split('T')[0] || ""}
+                  key={`dueDate-${editingPayment?.id || 'new'}`}
                   data-testid="input-dueDate"
                 />
               </div>
@@ -447,12 +557,30 @@ export default function Payments() {
               </div>
             </div>
 
+            {editingPayment && (
+              <div className="space-y-2">
+                <Label htmlFor="status">Stato</Label>
+                <Select name="status" defaultValue={editingPayment.status}>
+                  <SelectTrigger data-testid="select-status">
+                    <SelectValue placeholder="Seleziona stato" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">In Attesa</SelectItem>
+                    <SelectItem value="paid">Pagato</SelectItem>
+                    <SelectItem value="overdue">Scaduto</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="notes">Note</Label>
               <Textarea
                 id="notes"
                 name="notes"
                 rows={3}
+                defaultValue={editingPayment?.notes || ""}
+                key={`notes-${editingPayment?.id || 'new'}`}
                 data-testid="input-notes"
               />
             </div>
@@ -461,17 +589,17 @@ export default function Payments() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsFormOpen(false)}
+                onClick={closeDialog}
                 data-testid="button-cancel"
               >
                 Annulla
               </Button>
               <Button 
                 type="submit" 
-                disabled={createMutation.isPending}
+                disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-payment"
               >
-                Registra Pagamento
+                {editingPayment ? "Salva Modifiche" : "Registra Pagamento"}
               </Button>
             </DialogFooter>
           </form>

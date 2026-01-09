@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -601,6 +601,53 @@ export default function Courses() {
     course.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
+  const exportToCSV = () => {
+    if (!filteredCourses.length) return;
+    
+    const headers = ["SKU", "Nome", "Descrizione", "Categoria", "Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
+    
+    const rows = filteredCourses.map(course => {
+      const category = categories?.find(c => c.id === course.categoryId);
+      const instructor = instructors?.find(i => i.id === course.instructorId);
+      const dayLabel = WEEKDAYS.find(d => d.id === course.dayOfWeek)?.label || "";
+      const recurrenceLabel = RECURRENCE_TYPES.find(r => r.id === course.recurrenceType)?.label || "";
+      
+      return [
+        course.sku || "",
+        course.name,
+        course.description || "",
+        category?.name || "",
+        instructor ? `${instructor.firstName} ${instructor.lastName}` : "",
+        course.price || "",
+        course.maxParticipants || "",
+        dayLabel,
+        course.startTime || "",
+        course.endTime || "",
+        recurrenceLabel,
+        course.startDate ? new Date(course.startDate).toLocaleDateString('it-IT') : "",
+        course.endDate ? new Date(course.endDate).toLocaleDateString('it-IT') : "",
+        course.isActive ? "Attivo" : "Inattivo"
+      ];
+    });
+    
+    const escapeCSV = (value: unknown) => {
+      const str = String(value ?? "");
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+    
+    const csvContent = "\ufeff" + [headers.map(escapeCSV).join(","), ...rows.map(row => row.map(escapeCSV).join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `corsi_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -608,16 +655,26 @@ export default function Courses() {
           <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Corsi</h1>
           <p className="text-muted-foreground">Organizza e gestisci i corsi disponibili</p>
         </div>
-        <Button 
-          onClick={() => {
-            closeDialog();
-            setIsFormOpen(true);
-          }}
-          data-testid="button-add-course"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nuovo Corso
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={exportToCSV}
+            data-testid="button-export-csv"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Esporta CSV
+          </Button>
+          <Button 
+            onClick={() => {
+              closeDialog();
+              setIsFormOpen(true);
+            }}
+            data-testid="button-add-course"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuovo Corso
+          </Button>
+        </div>
       </div>
 
       <Card>
