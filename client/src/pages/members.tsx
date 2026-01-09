@@ -55,6 +55,10 @@ export default function Members() {
   const [memberEnrollments, setMemberEnrollments] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
   const [attendances, setAttendances] = useState<any[]>([]);
+  const [workshops, setWorkshops] = useState<any[]>([]);
+  const [memberWorkshopEnrollments, setMemberWorkshopEnrollments] = useState<any[]>([]);
+  const [selectedWorkshopToAdd, setSelectedWorkshopToAdd] = useState<string>("");
+  const [isMinorChecked, setIsMinorChecked] = useState(false);
   
   const dateOfBirthRef = useRef<HTMLInputElement>(null);
   const genderRef = useRef<HTMLSelectElement>(null);
@@ -231,6 +235,43 @@ export default function Members() {
     },
   });
 
+  const addWorkshopEnrollmentMutation = useMutation({
+    mutationFn: async (data: { memberId: number; workshopId: number }) => {
+      await apiRequest("POST", "/api/workshop-enrollments", data);
+      return data.memberId;
+    },
+    onSuccess: async (memberId) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments"] });
+      const res = await fetch(`/api/workshop-enrollments?memberId=${memberId}`, { credentials: "include" });
+      if (res.ok) {
+        setMemberWorkshopEnrollments(await res.json());
+      }
+      toast({ title: "Workshop aggiunto con successo" });
+      setSelectedWorkshopToAdd("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const removeWorkshopEnrollmentMutation = useMutation({
+    mutationFn: async (data: { enrollmentId: number; memberId: number }) => {
+      await apiRequest("DELETE", `/api/workshop-enrollments/${data.enrollmentId}`, undefined);
+      return data.memberId;
+    },
+    onSuccess: async (memberId) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments"] });
+      const res = await fetch(`/api/workshop-enrollments?memberId=${memberId}`, { credentials: "include" });
+      if (res.ok) {
+        setMemberWorkshopEnrollments(await res.json());
+      }
+      toast({ title: "Iscrizione workshop rimossa con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
   const resetForm = () => {
     setEditingMember(null);
     setShowParentFields(false);
@@ -238,14 +279,20 @@ export default function Members() {
     setSelectedCategoryId("none");
     setFiscalCodeError("");
     setAutoFilledData({ dateOfBirth: "", gender: "", placeOfBirth: "" });
+    setMemberWorkshopEnrollments([]);
+    setSelectedWorkshopToAdd("");
+    setIsMinorChecked(false);
   };
 
   useEffect(() => {
     if (editingMember) {
       setHasMedicalCert(editingMember.hasMedicalCertificate || false);
+      setIsMinorChecked(editingMember.isMinor || false);
       if (editingMember.dateOfBirth) {
         const age = calculateAge(editingMember.dateOfBirth);
-        setShowParentFields(age < 18);
+        setShowParentFields(age < 18 || editingMember.isMinor || false);
+      } else {
+        setShowParentFields(editingMember.isMinor || false);
       }
     }
   }, [editingMember]);
@@ -340,6 +387,9 @@ export default function Members() {
       // Certificato medico
       hasMedicalCertificate: hasMedicalCert,
       medicalCertificateExpiry: hasMedicalCert ? (formData.get("medicalCertificateExpiry") as string || null) : null,
+      
+      // Flag minorenne
+      isMinor: isMinorChecked,
       
       // Dati genitori
       motherFirstName: showParentFields ? (formData.get("motherFirstName") as string || null) : null,
@@ -472,16 +522,19 @@ export default function Members() {
                             className="font-bold hover:underline cursor-pointer"
                             onClick={async () => {
                               try {
-                                const [memberRes, enrollmentsRes, coursesRes, attendancesRes] = await Promise.all([
+                                const [memberRes, enrollmentsRes, coursesRes, attendancesRes, workshopsRes, workshopEnrollmentsRes] = await Promise.all([
                                   fetch(`/api/members/${member.id}`, { credentials: "include" }),
                                   fetch(`/api/enrollments?memberId=${member.id}`, { credentials: "include" }),
                                   fetch(`/api/courses`, { credentials: "include" }),
                                   fetch(`/api/attendances/member/${member.id}`, { credentials: "include" }),
+                                  fetch(`/api/workshops`, { credentials: "include" }),
+                                  fetch(`/api/workshop-enrollments?memberId=${member.id}`, { credentials: "include" }),
                                 ]);
                                 if (memberRes.ok) {
                                   const fullMember = await memberRes.json();
                                   setEditingMember(fullMember);
                                   setHasMedicalCert(fullMember.hasMedicalCertificate || false);
+                                  setIsMinorChecked(fullMember.isMinor || false);
                                   if (enrollmentsRes.ok) {
                                     setMemberEnrollments(await enrollmentsRes.json());
                                   }
@@ -490,6 +543,12 @@ export default function Members() {
                                   }
                                   if (attendancesRes.ok) {
                                     setAttendances(await attendancesRes.json());
+                                  }
+                                  if (workshopsRes.ok) {
+                                    setWorkshops(await workshopsRes.json());
+                                  }
+                                  if (workshopEnrollmentsRes.ok) {
+                                    setMemberWorkshopEnrollments(await workshopEnrollmentsRes.json());
                                   }
                                   setIsFormOpen(true);
                                 }
@@ -818,6 +877,26 @@ export default function Members() {
 
             <Separator />
 
+            {/* Minorenne */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="isMinor"
+                  checked={isMinorChecked}
+                  onCheckedChange={(checked) => {
+                    setIsMinorChecked(checked as boolean);
+                    setShowParentFields(checked as boolean);
+                  }}
+                  data-testid="checkbox-isMinor"
+                />
+                <Label htmlFor="isMinor" className="text-lg font-semibold cursor-pointer">
+                  Minorenne
+                </Label>
+              </div>
+            </div>
+
+            <Separator />
+
             {/* Certificato Medico */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
@@ -1110,6 +1189,122 @@ export default function Members() {
                   )}
                   <p className="text-xs text-muted-foreground">
                     {memberEnrollments.length}/6 corsi
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* Workshop Iscritti - Solo per membri esistenti */}
+            {editingMember && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Workshop Iscritti</h3>
+                    <Badge variant="secondary" data-testid="badge-enrolled-workshops-count">
+                      {memberWorkshopEnrollments.length || 0} workshop
+                    </Badge>
+                  </div>
+
+                  {/* Lista workshop iscritti */}
+                  <div className="space-y-2">
+                    {memberWorkshopEnrollments.length === 0 ? (
+                      <p className="text-sm text-muted-foreground" data-testid="text-no-workshop-enrollments">
+                        Nessun workshop iscritto
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {memberWorkshopEnrollments.map((enrollment) => {
+                          const workshop = workshops?.find(w => w.id === enrollment.workshopId);
+                          if (!workshop) return null;
+                          return (
+                            <div
+                              key={enrollment.id}
+                              className="flex items-center justify-between p-3 border rounded-md hover-elevate"
+                              data-testid={`workshop-enrollment-item-${enrollment.id}`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                                <div>
+                                  <p className="font-medium" data-testid={`workshop-enrollment-name-${enrollment.id}`}>
+                                    {workshop.name}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {workshop.workshopDate ? new Date(workshop.workshopDate).toLocaleDateString('it-IT') : workshop.sku}
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  if (confirm(`Rimuovere l'iscrizione al workshop "${workshop.name}"?`)) {
+                                    removeWorkshopEnrollmentMutation.mutate({ 
+                                      enrollmentId: enrollment.id, 
+                                      memberId: editingMember!.id 
+                                    });
+                                  }
+                                }}
+                                disabled={removeWorkshopEnrollmentMutation.isPending}
+                                data-testid={`button-remove-workshop-enrollment-${enrollment.id}`}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Aggiungi nuovo workshop - max 6 workshop */}
+                  {memberWorkshopEnrollments.length >= 6 ? (
+                    <p className="text-sm text-muted-foreground italic" data-testid="text-max-workshops-reached">
+                      Limite massimo di 6 workshop raggiunto
+                    </p>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Select
+                        value={selectedWorkshopToAdd}
+                        onValueChange={setSelectedWorkshopToAdd}
+                      >
+                        <SelectTrigger className="flex-1" data-testid="select-add-workshop">
+                          <SelectValue placeholder="Seleziona un workshop da aggiungere" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {workshops
+                            ?.filter(w => 
+                              w.active && 
+                              !memberWorkshopEnrollments.some(e => e.workshopId === w.id)
+                            )
+                            .map(workshop => (
+                              <SelectItem key={workshop.id} value={workshop.id.toString()}>
+                                {workshop.name} ({workshop.workshopDate ? new Date(workshop.workshopDate).toLocaleDateString('it-IT') : workshop.sku})
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          if (selectedWorkshopToAdd && editingMember) {
+                            addWorkshopEnrollmentMutation.mutate({
+                              memberId: editingMember.id,
+                              workshopId: parseInt(selectedWorkshopToAdd)
+                            });
+                          }
+                        }}
+                        disabled={!selectedWorkshopToAdd || addWorkshopEnrollmentMutation.isPending}
+                        data-testid="button-add-workshop-to-member"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Aggiungi
+                      </Button>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {memberWorkshopEnrollments.length}/6 workshop
                   </p>
                 </div>
               </>
