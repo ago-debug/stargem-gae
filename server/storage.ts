@@ -74,6 +74,7 @@ export interface IStorage {
 
   // Members
   getMembers(): Promise<Member[]>;
+  getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: Member[]; total: number }>;
   getMember(id: number): Promise<Member | undefined>;
   getMemberByFiscalCode(fiscalCode: string): Promise<Member | undefined>;
   getDuplicateFiscalCodes(): Promise<{ fiscalCode: string; members: { id: number; firstName: string; lastName: string; }[] }[]>;
@@ -226,6 +227,36 @@ export class DatabaseStorage implements IStorage {
   // ==== Members ====
   async getMembers(): Promise<Member[]> {
     return await db.select().from(members).orderBy(desc(members.createdAt));
+  }
+
+  async getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: Member[]; total: number }> {
+    const offset = (page - 1) * pageSize;
+    
+    let query = db.select().from(members);
+    let countQuery = db.select({ count: sql<number>`count(*)` }).from(members);
+    
+    if (search && search.trim().length >= 2) {
+      const searchTerm = `%${search.trim().toLowerCase()}%`;
+      const searchCondition = sql`(
+        LOWER(${members.firstName}) LIKE ${searchTerm} OR 
+        LOWER(${members.lastName}) LIKE ${searchTerm} OR 
+        LOWER(${members.email}) LIKE ${searchTerm} OR 
+        LOWER(${members.fiscalCode}) LIKE ${searchTerm} OR
+        LOWER(${members.cardNumber}) LIKE ${searchTerm}
+      )`;
+      query = query.where(searchCondition) as any;
+      countQuery = countQuery.where(searchCondition) as any;
+    }
+    
+    const [countResult] = await countQuery;
+    const total = Number(countResult?.count || 0);
+    
+    const membersList = await query
+      .orderBy(members.lastName, members.firstName)
+      .limit(pageSize)
+      .offset(offset);
+    
+    return { members: membersList, total };
   }
 
   async getMember(id: number): Promise<Member | undefined> {

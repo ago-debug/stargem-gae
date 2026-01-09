@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Link, useSearch, useLocation } from "wouter";
@@ -15,9 +15,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member, InsertMember, Attendance } from "@shared/schema";
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 export default function Members() {
   const { toast } = useToast();
@@ -27,6 +36,7 @@ export default function Members() {
   const initialSearch = urlParams.get('search') || "";
   
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [showParentFields, setShowParentFields] = useState(false);
@@ -47,9 +57,31 @@ export default function Members() {
   const genderRef = useRef<HTMLSelectElement>(null);
   const placeOfBirthRef = useRef<HTMLInputElement>(null);
 
-  const { data: members, isLoading } = useQuery<Member[]>({
-    queryKey: ["/api/members"],
+  const PAGE_SIZE = 50;
+  const debouncedSearch = useDebounce(searchQuery, 300);
+  
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
+
+  const { data: membersData, isLoading } = useQuery<{ members: Member[]; total: number }>({
+    queryKey: ["/api/members", { page: currentPage, pageSize: PAGE_SIZE, search: debouncedSearch }],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        pageSize: PAGE_SIZE.toString(),
+        search: debouncedSearch,
+      });
+      const res = await fetch(`/api/members?${params}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch members");
+      return res.json();
+    },
   });
+
+  const members = membersData?.members || [];
+  const totalMembers = membersData?.total || 0;
+  const totalPages = Math.ceil(totalMembers / PAGE_SIZE);
 
   const { data: enrollments } = useQuery<any[]>({
     queryKey: ["/api/enrollments"],
@@ -319,10 +351,6 @@ export default function Members() {
     }
   };
 
-  const filteredMembers = members?.filter((member) =>
-    `${member.firstName} ${member.lastName} ${member.email || ""} ${member.fiscalCode || ""}`.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
-
   const getMemberEnrollments = (memberId: number): Array<{ id: number; name: string }> => {
     if (!enrollments || !courses) return [];
     return enrollments
@@ -381,14 +409,40 @@ export default function Members() {
                 </div>
               ))}
             </div>
-          ) : filteredMembers.length === 0 ? (
+          ) : members.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">Nessun iscritto trovato</p>
-              <p className="text-sm">Inizia aggiungendo il primo iscritto</p>
+              <p className="text-sm">{debouncedSearch ? "Nessun risultato per la ricerca" : "Inizia aggiungendo il primo iscritto"}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
+              <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
+                <span>Totale: {totalMembers} clienti</span>
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      data-testid="button-prev-page"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <span>Pagina {currentPage} di {totalPages}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      data-testid="button-next-page"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -404,7 +458,7 @@ export default function Members() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredMembers.map((member) => {
+                  {members.map((member) => {
                     const memberCourses = getMemberEnrollments(member.id);
                     return (
                       <TableRow key={member.id} data-testid={`member-row-${member.id}`}>
