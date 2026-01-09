@@ -68,6 +68,7 @@ interface EnrollmentsTabProps {
 function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
   const { toast } = useToast();
   const [isAddingEnrollment, setIsAddingEnrollment] = useState(false);
+  const [memberSearchQuery, setMemberSearchQuery] = useState("");
 
   const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
     queryKey: ["/api/workshop-enrollments"],
@@ -77,6 +78,15 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
     queryKey: ["/api/members"],
   });
   const members = membersData?.members || [];
+
+  const { data: searchResults } = useQuery<{ members: Member[], total: number }>({
+    queryKey: ["/api/members", { search: memberSearchQuery }],
+    queryFn: async () => {
+      const res = await fetch(`/api/members?search=${encodeURIComponent(memberSearchQuery)}&pageSize=20`);
+      return res.json();
+    },
+    enabled: memberSearchQuery.length >= 3,
+  });
 
   const createEnrollmentMutation = useMutation({
     mutationFn: async (data: { memberId: number; workshopId: number }) => {
@@ -142,25 +152,41 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-0" align="end">
-            <Command>
-              <CommandInput placeholder="Cerca membro..." />
+            <Command shouldFilter={false}>
+              <CommandInput 
+                placeholder="Cerca per nome, cognome o CF (min. 3 caratteri)..." 
+                value={memberSearchQuery}
+                onValueChange={setMemberSearchQuery}
+              />
               <CommandList>
-                <CommandEmpty>Nessun membro trovato</CommandEmpty>
-                <CommandGroup>
-                  {availableMembers.map(member => (
-                    <CommandItem
-                      key={member.id}
-                      value={`${member.firstName} ${member.lastName}`}
-                      onSelect={() => {
-                        createEnrollmentMutation.mutate({ memberId: member.id, workshopId });
-                      }}
-                      data-testid={`option-workshop-member-${member.id}`}
-                    >
-                      {member.firstName} {member.lastName}
-                      {member.email && <span className="text-xs text-muted-foreground ml-2">({member.email})</span>}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                {memberSearchQuery.length < 3 ? (
+                  <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
+                ) : !searchResults?.members?.length ? (
+                  <CommandEmpty>Nessun membro trovato</CommandEmpty>
+                ) : (
+                  <CommandGroup>
+                    {searchResults.members
+                      .filter(m => !workshopEnrollments.some(e => e.memberId === m.id))
+                      .map(member => (
+                        <CommandItem
+                          key={member.id}
+                          value={member.id.toString()}
+                          onSelect={() => {
+                            createEnrollmentMutation.mutate({ memberId: member.id, workshopId });
+                            setMemberSearchQuery("");
+                          }}
+                          data-testid={`option-workshop-member-${member.id}`}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">{member.firstName} {member.lastName}</span>
+                            {member.fiscalCode && (
+                              <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                )}
               </CommandList>
             </Command>
           </PopoverContent>
