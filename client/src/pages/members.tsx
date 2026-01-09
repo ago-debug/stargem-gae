@@ -155,9 +155,16 @@ export default function Members() {
   const addEnrollmentMutation = useMutation({
     mutationFn: async (data: { memberId: number; courseId: number }) => {
       await apiRequest("POST", "/api/enrollments", data);
+      return data.memberId;
     },
-    onSuccess: () => {
+    onSuccess: async (memberId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      // Ricarica le iscrizioni locali
+      const res = await fetch(`/api/enrollments?memberId=${memberId}`, { credentials: "include" });
+      if (res.ok) {
+        setMemberEnrollments(await res.json());
+      }
       toast({ title: "Corso aggiunto con successo" });
       setSelectedCourseToAdd("");
     },
@@ -167,11 +174,18 @@ export default function Members() {
   });
 
   const removeEnrollmentMutation = useMutation({
-    mutationFn: async (enrollmentId: number) => {
-      await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`, undefined);
+    mutationFn: async (data: { enrollmentId: number; memberId: number }) => {
+      await apiRequest("DELETE", `/api/enrollments/${data.enrollmentId}`, undefined);
+      return data.memberId;
     },
-    onSuccess: () => {
+    onSuccess: async (memberId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      // Ricarica le iscrizioni locali
+      const res = await fetch(`/api/enrollments?memberId=${memberId}`, { credentials: "include" });
+      if (res.ok) {
+        setMemberEnrollments(await res.json());
+      }
       toast({ title: "Iscrizione rimossa con successo" });
     },
     onError: (error: Error) => {
@@ -182,9 +196,15 @@ export default function Members() {
   const addAttendanceMutation = useMutation({
     mutationFn: async (data: { memberId: number; courseId?: number; enrollmentId?: number; attendanceDate: string; notes?: string }) => {
       await apiRequest("POST", "/api/attendances", { ...data, type: "manual" });
+      return data.memberId;
     },
-    onSuccess: () => {
+    onSuccess: async (memberId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/attendances"] });
+      // Ricarica le presenze locali
+      const res = await fetch(`/api/attendances/member/${memberId}`, { credentials: "include" });
+      if (res.ok) {
+        setAttendances(await res.json());
+      }
       toast({ title: "Presenza registrata con successo" });
     },
     onError: (error: Error) => {
@@ -193,11 +213,17 @@ export default function Members() {
   });
 
   const deleteAttendanceMutation = useMutation({
-    mutationFn: async (attendanceId: number) => {
-      await apiRequest("DELETE", `/api/attendances/${attendanceId}`, undefined);
+    mutationFn: async (data: { attendanceId: number; memberId: number }) => {
+      await apiRequest("DELETE", `/api/attendances/${data.attendanceId}`, undefined);
+      return data.memberId;
     },
-    onSuccess: () => {
+    onSuccess: async (memberId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/attendances"] });
+      // Ricarica le presenze locali
+      const res = await fetch(`/api/attendances/member/${memberId}`, { credentials: "include" });
+      if (res.ok) {
+        setAttendances(await res.json());
+      }
       toast({ title: "Presenza eliminata con successo" });
     },
     onError: (error: Error) => {
@@ -450,7 +476,7 @@ export default function Members() {
                                   fetch(`/api/members/${member.id}`, { credentials: "include" }),
                                   fetch(`/api/enrollments?memberId=${member.id}`, { credentials: "include" }),
                                   fetch(`/api/courses`, { credentials: "include" }),
-                                  fetch(`/api/attendances?memberId=${member.id}`, { credentials: "include" }),
+                                  fetch(`/api/attendances/member/${member.id}`, { credentials: "include" }),
                                 ]);
                                 if (memberRes.ok) {
                                   const fullMember = await memberRes.json();
@@ -1019,7 +1045,10 @@ export default function Members() {
                                   variant="ghost"
                                   onClick={() => {
                                     if (confirm(`Rimuovere l'iscrizione al corso "${course.name}"?`)) {
-                                      removeEnrollmentMutation.mutate(enrollment.id);
+                                      removeEnrollmentMutation.mutate({ 
+                                        enrollmentId: enrollment.id, 
+                                        memberId: editingMember!.id 
+                                      });
                                     }
                                   }}
                                   disabled={removeEnrollmentMutation.isPending}
@@ -1034,45 +1063,54 @@ export default function Members() {
                     )}
                   </div>
 
-                  {/* Aggiungi nuovo corso */}
-                  <div className="flex gap-2">
-                    <Select
-                      value={selectedCourseToAdd}
-                      onValueChange={setSelectedCourseToAdd}
-                    >
-                      <SelectTrigger className="flex-1" data-testid="select-add-course">
-                        <SelectValue placeholder="Seleziona un corso da aggiungere" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {courses
-                          ?.filter(c => 
-                            c.active && 
-                            !memberEnrollments.some(e => e.courseId === c.id)
-                          )
-                          .map(course => (
-                            <SelectItem key={course.id} value={course.id.toString()}>
-                              {course.name} ({course.sku})
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        if (selectedCourseToAdd && editingMember) {
-                          addEnrollmentMutation.mutate({
-                            memberId: editingMember.id,
-                            courseId: parseInt(selectedCourseToAdd)
-                          });
-                        }
-                      }}
-                      disabled={!selectedCourseToAdd || addEnrollmentMutation.isPending}
-                      data-testid="button-add-course-to-member"
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Aggiungi
-                    </Button>
-                  </div>
+                  {/* Aggiungi nuovo corso - max 6 corsi */}
+                  {memberEnrollments.length >= 6 ? (
+                    <p className="text-sm text-muted-foreground italic" data-testid="text-max-courses-reached">
+                      Limite massimo di 6 corsi raggiunto
+                    </p>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Select
+                        value={selectedCourseToAdd}
+                        onValueChange={setSelectedCourseToAdd}
+                      >
+                        <SelectTrigger className="flex-1" data-testid="select-add-course">
+                          <SelectValue placeholder="Seleziona un corso da aggiungere" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {courses
+                            ?.filter(c => 
+                              c.active && 
+                              !memberEnrollments.some(e => e.courseId === c.id)
+                            )
+                            .map(course => (
+                              <SelectItem key={course.id} value={course.id.toString()}>
+                                {course.name} ({course.sku})
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          if (selectedCourseToAdd && editingMember) {
+                            addEnrollmentMutation.mutate({
+                              memberId: editingMember.id,
+                              courseId: parseInt(selectedCourseToAdd)
+                            });
+                          }
+                        }}
+                        disabled={!selectedCourseToAdd || addEnrollmentMutation.isPending}
+                        data-testid="button-add-course-to-member"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Aggiungi
+                      </Button>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {memberEnrollments.length}/6 corsi
+                  </p>
                 </div>
               </>
             )}
@@ -1221,7 +1259,10 @@ export default function Members() {
                                   variant="ghost"
                                   onClick={() => {
                                     if (confirm("Eliminare questa presenza?")) {
-                                      deleteAttendanceMutation.mutate(attendance.id);
+                                      deleteAttendanceMutation.mutate({
+                                        attendanceId: attendance.id,
+                                        memberId: editingMember!.id
+                                      });
                                     }
                                   }}
                                   disabled={deleteAttendanceMutation.isPending}
