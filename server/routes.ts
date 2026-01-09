@@ -47,9 +47,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Members Routes ====
   app.get("/api/members", isAuthenticated, async (req, res) => {
     try {
-      const members = await storage.getMembers();
-      res.json(members);
+      const page = parseInt(req.query.page as string) || 1;
+      const pageSize = parseInt(req.query.pageSize as string) || 50;
+      const search = req.query.search as string || "";
+      
+      // If no pagination params provided, return paginated by default
+      if (req.query.page || req.query.search) {
+        const result = await storage.getMembersPaginated(page, pageSize, search);
+        res.json(result);
+      } else {
+        // For backward compatibility, return all members if no params
+        const members = await storage.getMembers();
+        res.json(members);
+      }
     } catch (error) {
+      console.error("Error fetching members:", error);
       res.status(500).json({ message: "Failed to fetch members" });
     }
   });
