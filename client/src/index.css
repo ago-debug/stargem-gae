@@ -42,9 +42,9 @@
 
   --sidebar-ring: 9 75% 61%;
 
-  --popover: 45 25% 97%;
+  --popover: 0 0% 100%;
 
-  --popover-foreground: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
 
   --popover-border: 220 13% 89%;
 
@@ -60,9 +60,9 @@
 
   --muted-foreground: 0 0% 12.94%;
 
-  --accent: 0 0% 100%;
+  --accent: 0 0% 94%;
 
-  --accent-foreground: 0 0% 10.2%;
+  --accent-foreground: 0 0% 10%;
 
   --destructive: 0 0% 0%;
 
