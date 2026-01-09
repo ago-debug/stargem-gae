@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import type { Member } from "@shared/schema";
 
@@ -24,15 +24,30 @@ export function AutocompleteInput({
   "data-testid": testId,
 }: AutocompleteInputProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [debouncedValue, setDebouncedValue] = useState(value);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const filteredMembers = value.length >= 3
-    ? members.filter(member => {
-        const fieldValue = member[field];
-        if (!fieldValue) return false;
-        return fieldValue.toLowerCase().includes(value.toLowerCase());
-      }).slice(0, 8)
-    : [];
+  // Debounce search to avoid filtering on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [value]);
+
+  const filteredMembers = useMemo(() => {
+    if (debouncedValue.length < 3) return [];
+    const searchTerm = debouncedValue.toLowerCase();
+    const results: Member[] = [];
+    for (const member of members) {
+      if (results.length >= 8) break;
+      const fieldValue = member[field];
+      if (fieldValue && fieldValue.toLowerCase().includes(searchTerm)) {
+        results.push(member);
+      }
+    }
+    return results;
+  }, [debouncedValue, members, field]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
