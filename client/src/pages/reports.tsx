@@ -641,12 +641,12 @@ export default function Reports() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Ordina per (opzionale)</Label>
-                    <Select value={sortField} onValueChange={setSortField}>
+                    <Select value={sortField || "__none__"} onValueChange={(v) => setSortField(v === "__none__" ? "" : v)}>
                       <SelectTrigger data-testid="select-sort-field">
                         <SelectValue placeholder="Nessun ordinamento" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nessuno</SelectItem>
+                        <SelectItem value="__none__">Nessuno</SelectItem>
                         {availableFields.map((f) => (
                           <SelectItem key={f.name} value={f.name}>{f.label}</SelectItem>
                         ))}
