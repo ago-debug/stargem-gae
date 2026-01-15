@@ -609,6 +609,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sampleData = rows.slice(1, 4).map(row => 
         row.map((cell: any) => (cell || "").toString().trim())
       );
+      
+      console.log("[Google Sheets Preview] Sample data row 1:", JSON.stringify(sampleData[0]?.slice(0, 5)));
+      console.log("[Google Sheets Preview] Rows 1-3 raw:", rows.slice(1, 4).map(r => r?.slice(0, 3)));
 
       res.json({
         success: true,
