@@ -799,3 +799,24 @@ export const insertCustomReportSchema = createInsertSchema(customReports).omit({
 });
 export type InsertCustomReport = z.infer<typeof insertCustomReportSchema>;
 export type CustomReport = typeof customReports.$inferSelect;
+
+// ============================================================================
+// IMPORT CONFIGURATIONS (Configurazioni di importazione salvate)
+// ============================================================================
+
+export const importConfigs = pgTable("import_configs", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  entityType: varchar("entity_type", { length: 50 }).notNull(), // 'members' | 'courses'
+  sourceType: varchar("source_type", { length: 50 }).notNull(), // 'google_sheets' | 'file'
+  fieldMapping: jsonb("field_mapping").notNull().$type<Record<string, number>>(), // field -> column index
+  importKey: varchar("import_key", { length: 100 }), // field used for duplicate detection
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertImportConfigSchema = createInsertSchema(importConfigs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertImportConfig = z.infer<typeof insertImportConfigSchema>;
+export type ImportConfig = typeof importConfigs.$inferSelect;
