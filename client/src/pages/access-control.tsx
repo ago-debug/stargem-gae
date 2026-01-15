@@ -71,7 +71,14 @@ export default function AccessControl() {
   });
 
   const { data: searchMembersData, isLoading: searchLoading } = useQuery<{ members: Member[], total: number }>({
-    queryKey: ["/api/members", { search: searchQuery }],
+    queryKey: ["/api/members", "search", searchQuery],
+    queryFn: async () => {
+      const res = await fetch(`/api/members?search=${encodeURIComponent(searchQuery)}&pageSize=20`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error("Failed to fetch members");
+      return res.json();
+    },
     enabled: searchQuery.length >= 3,
   });
   const filteredMembers = searchMembersData?.members?.slice(0, 10) || [];
@@ -755,6 +762,7 @@ export default function AccessControl() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Data/Ora</TableHead>
+                  <TableHead>Nome e Cognome</TableHead>
                   <TableHead>Barcode</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Stato Tessera</TableHead>
@@ -766,6 +774,12 @@ export default function AccessControl() {
                   <TableRow key={index} data-testid={`access-log-${index}`}>
                     <TableCell>
                       {new Date(access.accessTime).toLocaleString('it-IT')}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {(access as any).memberFirstName || (access as any).memberLastName
+                        ? `${(access as any).memberFirstName || ''} ${(access as any).memberLastName || ''}`.trim()
+                        : <span className="text-muted-foreground">-</span>
+                      }
                     </TableCell>
                     <TableCell className="font-mono text-xs">{access.barcode}</TableCell>
                     <TableCell className="capitalize">{access.accessType}</TableCell>
