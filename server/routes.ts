@@ -2295,6 +2295,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // First row is headers
       const headerRow = rows[0];
+      
+      // Check if headers look like they weren't parsed correctly (all in one cell)
+      if (headerRow.length === 1 && headerRow[0] && headerRow[0].includes(';')) {
+        // Likely wrong delimiter - suggest semicolon
+        return res.status(400).json({ 
+          message: "Il file sembra usare il punto e virgola (;) come delimitatore. Seleziona 'Punto e virgola' nelle opzioni." 
+        });
+      }
+      
       const headers = headerRow.map((name: string, index: number) => ({
         index,
         name: name?.trim() || `Colonna ${index + 1}`,
