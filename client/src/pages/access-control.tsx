@@ -70,10 +70,11 @@ export default function AccessControl() {
     queryKey: ["/api/access-logs"],
   });
 
-  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
-    queryKey: ["/api/members"],
+  const { data: searchMembersData, isLoading: searchLoading } = useQuery<{ members: Member[], total: number }>({
+    queryKey: ["/api/members", { search: searchQuery }],
+    enabled: searchQuery.length >= 3,
   });
-  const members = membersData?.members || [];
+  const filteredMembers = searchMembersData?.members?.slice(0, 10) || [];
 
   const { data: enrollments } = useQuery<Enrollment[]>({
     queryKey: ["/api/enrollments"],
@@ -102,17 +103,6 @@ export default function AccessControl() {
   const { data: workshops } = useQuery<Workshop[]>({
     queryKey: ["/api/workshops"],
   });
-
-  const filteredMembers = useMemo(() => {
-    if (!members || searchQuery.length < 3) return [];
-    const query = searchQuery.toLowerCase().trim();
-    return members.filter(member => {
-      const fullName = `${member.firstName} ${member.lastName}`.toLowerCase();
-      const reverseName = `${member.lastName} ${member.firstName}`.toLowerCase();
-      return fullName.includes(query) || reverseName.includes(query) || 
-             member.fiscalCode?.toLowerCase().includes(query);
-    }).slice(0, 10);
-  }, [members, searchQuery]);
 
   const getMemberDetails = (member: Member): MemberSearchResult => {
     const memberEnrollments = enrollments?.filter(e => e.memberId === member.id) || [];
@@ -364,7 +354,14 @@ export default function AccessControl() {
                   </ScrollArea>
                 )}
 
-                {searchQuery.length >= 3 && filteredMembers.length === 0 && (
+                {searchQuery.length >= 3 && searchLoading && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
+                    <p>Ricerca in corso...</p>
+                  </div>
+                )}
+
+                {searchQuery.length >= 3 && !searchLoading && filteredMembers.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <User className="w-12 h-12 mx-auto mb-2 opacity-30" />
                     <p>Nessun iscritto trovato</p>

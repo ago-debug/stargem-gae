@@ -426,6 +426,7 @@ export default function Courses() {
   const initialSearch = urlParams.get('search') || "";
   
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<string>("");
@@ -597,9 +598,39 @@ export default function Courses() {
     setSelectedRecurrence("");
   };
 
-  const filteredCourses = courses?.filter((course) =>
-    course.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredCourses = courses?.filter((course) => {
+    const query = searchQuery.toLowerCase().trim();
+    
+    if (categoryFilter !== "all" && course.categoryId?.toString() !== categoryFilter) {
+      return false;
+    }
+    
+    if (!query) return true;
+    
+    const category = categories?.find(c => c.id === course.categoryId);
+    const instructor = instructors?.find(i => i.id === course.instructorId);
+    const secondaryInstructor1 = instructors?.find(i => i.id === course.secondaryInstructor1Id);
+    const secondaryInstructor2 = instructors?.find(i => i.id === course.secondaryInstructor2Id);
+    const studio = studios?.find(s => s.id === course.studioId);
+    const dayLabel = WEEKDAYS.find(d => d.id === course.dayOfWeek)?.label || "";
+    
+    return (
+      course.name?.toLowerCase().includes(query) ||
+      course.sku?.toLowerCase().includes(query) ||
+      course.description?.toLowerCase().includes(query) ||
+      category?.name?.toLowerCase().includes(query) ||
+      instructor?.firstName?.toLowerCase().includes(query) ||
+      instructor?.lastName?.toLowerCase().includes(query) ||
+      secondaryInstructor1?.firstName?.toLowerCase().includes(query) ||
+      secondaryInstructor1?.lastName?.toLowerCase().includes(query) ||
+      secondaryInstructor2?.firstName?.toLowerCase().includes(query) ||
+      secondaryInstructor2?.lastName?.toLowerCase().includes(query) ||
+      studio?.name?.toLowerCase().includes(query) ||
+      dayLabel.toLowerCase().includes(query) ||
+      course.startTime?.includes(query) ||
+      course.endTime?.includes(query)
+    );
+  }) || [];
 
   const exportToCSV = () => {
     if (!filteredCourses.length) return;
@@ -619,14 +650,14 @@ export default function Courses() {
         category?.name || "",
         instructor ? `${instructor.firstName} ${instructor.lastName}` : "",
         course.price || "",
-        course.maxParticipants || "",
+        course.maxCapacity || "",
         dayLabel,
         course.startTime || "",
         course.endTime || "",
         recurrenceLabel,
         course.startDate ? new Date(course.startDate).toLocaleDateString('it-IT') : "",
         course.endDate ? new Date(course.endDate).toLocaleDateString('it-IT') : "",
-        course.isActive ? "Attivo" : "Inattivo"
+        course.active ? "Attivo" : "Inattivo"
       ];
     });
     
@@ -679,17 +710,44 @@ export default function Courses() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-md">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="relative flex-1 min-w-[200px] max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Cerca corso..."
+                placeholder="Cerca in tutti i campi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
                 data-testid="input-search-courses"
               />
             </div>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-[180px]" data-testid="select-category-filter">
+                <SelectValue placeholder="Filtra per categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tutte le categorie</SelectItem>
+                {categories?.map((category) => (
+                  <SelectItem key={category.id} value={category.id.toString()}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {(categoryFilter !== "all" || searchQuery) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setCategoryFilter("all");
+                  setSearchQuery("");
+                }}
+                data-testid="button-clear-filters"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Pulisci filtri
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
