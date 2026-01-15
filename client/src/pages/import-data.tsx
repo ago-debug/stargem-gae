@@ -149,6 +149,9 @@ export default function ImportData() {
   const [saveConfigDialogOpen, setSaveConfigDialogOpen] = useState(false);
   const [newConfigName, setNewConfigName] = useState("");
   
+  // CSV delimiter for file imports
+  const [csvDelimiter, setCsvDelimiter] = useState<string>(",");
+  
   // Get current fields and import key options based on entity type
   const currentFields = entityType === "members" ? MEMBER_FIELDS : COURSE_FIELDS;
   const currentImportKeyOptions = entityType === "members" ? MEMBER_IMPORT_KEY_OPTIONS : COURSE_IMPORT_KEY_OPTIONS;
@@ -227,9 +230,10 @@ export default function ImportData() {
 
   // File preview mutation
   const filePreviewMutation = useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async ({ file, delimiter }: { file: File; delimiter: string }) => {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('delimiter', delimiter);
       const response = await fetch('/api/import/preview', {
         method: 'POST',
         body: formData,
@@ -265,12 +269,13 @@ export default function ImportData() {
 
   // File mapped import mutation
   const fileMappedImportMutation = useMutation({
-    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string }) => {
+    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string; delimiter: string }) => {
       const formData = new FormData();
       formData.append('file', params.file);
       formData.append('fieldMapping', JSON.stringify(params.fieldMapping));
       formData.append('importKey', params.importKey);
       formData.append('entityType', params.entityType);
+      formData.append('delimiter', params.delimiter);
       const response = await fetch('/api/import/mapped', {
         method: 'POST',
         body: formData,
@@ -452,6 +457,7 @@ export default function ImportData() {
         fieldMapping: activeMapping,
         importKey,
         entityType,
+        delimiter: csvDelimiter,
       });
     } else {
       mappedImportMutation.mutate({
@@ -469,7 +475,7 @@ export default function ImportData() {
       toast({ title: "Errore", description: "Seleziona un file", variant: "destructive" });
       return;
     }
-    filePreviewMutation.mutate(selectedFile);
+    filePreviewMutation.mutate({ file: selectedFile, delimiter: csvDelimiter });
   };
 
   const handleSaveConfig = () => {
@@ -1143,6 +1149,24 @@ export default function ImportData() {
                     )}
                   </label>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Delimitatore CSV</Label>
+                <Select value={csvDelimiter} onValueChange={setCsvDelimiter}>
+                  <SelectTrigger data-testid="select-csv-delimiter">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value=",">Virgola (,)</SelectItem>
+                    <SelectItem value=";">Punto e virgola (;)</SelectItem>
+                    <SelectItem value="\t">Tabulazione</SelectItem>
+                    <SelectItem value="|">Pipe (|)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Excel italiano spesso usa il punto e virgola come delimitatore
+                </p>
               </div>
 
               <Separator />
