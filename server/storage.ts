@@ -25,6 +25,7 @@ import {
   cities,
   memberRelationships,
   customReports,
+  importConfigs,
   type User,
   type UpsertUser,
   type Member,
@@ -71,6 +72,8 @@ import {
   type InsertMemberRelationship,
   type CustomReport,
   type InsertCustomReport,
+  type ImportConfig,
+  type InsertImportConfig,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -227,6 +230,12 @@ export interface IStorage {
   createCustomReport(report: InsertCustomReport): Promise<CustomReport>;
   updateCustomReport(id: number, report: Partial<InsertCustomReport>): Promise<CustomReport>;
   deleteCustomReport(id: number): Promise<void>;
+
+  // Import Configurations
+  getImportConfigs(entityType?: string, sourceType?: string): Promise<ImportConfig[]>;
+  getImportConfig(id: number): Promise<ImportConfig | undefined>;
+  createImportConfig(config: InsertImportConfig): Promise<ImportConfig>;
+  deleteImportConfig(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1279,6 +1288,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCustomReport(id: number): Promise<void> {
     await db.delete(customReports).where(eq(customReports.id, id));
+  }
+
+  // ==== Import Configurations ====
+  async getImportConfigs(entityType?: string, sourceType?: string): Promise<ImportConfig[]> {
+    let conditions = [];
+    if (entityType) conditions.push(eq(importConfigs.entityType, entityType));
+    if (sourceType) conditions.push(eq(importConfigs.sourceType, sourceType));
+    
+    if (conditions.length > 0) {
+      return await db.select().from(importConfigs)
+        .where(and(...conditions))
+        .orderBy(desc(importConfigs.createdAt));
+    }
+    return await db.select().from(importConfigs).orderBy(desc(importConfigs.createdAt));
+  }
+
+  async getImportConfig(id: number): Promise<ImportConfig | undefined> {
+    const [config] = await db.select().from(importConfigs).where(eq(importConfigs.id, id));
+    return config;
+  }
+
+  async createImportConfig(config: InsertImportConfig): Promise<ImportConfig> {
+    const [newConfig] = await db.insert(importConfigs).values(config).returning();
+    return newConfig;
+  }
+
+  async deleteImportConfig(id: number): Promise<void> {
+    await db.delete(importConfigs).where(eq(importConfigs.id, id));
   }
 }
 

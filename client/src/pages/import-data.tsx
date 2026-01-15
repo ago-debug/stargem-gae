@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download, Sheet, ArrowRight, Settings2, Key, Loader2 } from "lucide-react";
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download, Sheet, ArrowRight, Settings2, Key, Loader2, Save, Trash2, Users, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,6 +20,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 // All available member fields for mapping
 const MEMBER_FIELDS = [
@@ -61,8 +68,24 @@ const MEMBER_FIELDS = [
   { key: "notes", label: "Note" },
 ];
 
-// Import key options
-const IMPORT_KEY_OPTIONS = [
+// Course fields for mapping
+const COURSE_FIELDS = [
+  { key: "name", label: "Nome Corso", required: true },
+  { key: "sku", label: "SKU" },
+  { key: "description", label: "Descrizione" },
+  { key: "price", label: "Prezzo" },
+  { key: "maxCapacity", label: "Capacità Massima" },
+  { key: "dayOfWeek", label: "Giorno della Settimana" },
+  { key: "startTime", label: "Orario Inizio (HH:MM)" },
+  { key: "endTime", label: "Orario Fine (HH:MM)" },
+  { key: "recurrenceType", label: "Tipo Ricorrenza" },
+  { key: "startDate", label: "Data Inizio" },
+  { key: "endDate", label: "Data Fine" },
+  { key: "active", label: "Attivo (Si/No)" },
+];
+
+// Import key options for members
+const MEMBER_IMPORT_KEY_OPTIONS = [
   { key: "fiscalCode", label: "Codice Fiscale" },
   { key: "email", label: "Email" },
   { key: "cardNumber", label: "Numero Tessera" },
@@ -70,6 +93,21 @@ const IMPORT_KEY_OPTIONS = [
   { key: "mobile", label: "Cellulare" },
   { key: "phone", label: "Telefono" },
 ];
+
+// Import key options for courses
+const COURSE_IMPORT_KEY_OPTIONS = [
+  { key: "sku", label: "SKU" },
+  { key: "name", label: "Nome Corso" },
+];
+
+interface ImportConfig {
+  id: number;
+  name: string;
+  entityType: string;
+  sourceType: string;
+  fieldMapping: Record<string, number>;
+  importKey: string | null;
+}
 
 interface SheetHeader {
   index: number;
@@ -102,6 +140,23 @@ export default function ImportData() {
   const [sampleData, setSampleData] = useState<string[][]>([]);
   const [fieldMapping, setFieldMapping] = useState<Record<string, number | null>>({});
   const [importKey, setImportKey] = useState<string>("fiscalCode");
+  
+  // Entity type and source type for mapping
+  const [entityType, setEntityType] = useState<"members" | "courses">("members");
+  const [sourceType, setSourceType] = useState<"google_sheets" | "file">("google_sheets");
+  
+  // Saved configs
+  const [saveConfigDialogOpen, setSaveConfigDialogOpen] = useState(false);
+  const [newConfigName, setNewConfigName] = useState("");
+  
+  // Get current fields and import key options based on entity type
+  const currentFields = entityType === "members" ? MEMBER_FIELDS : COURSE_FIELDS;
+  const currentImportKeyOptions = entityType === "members" ? MEMBER_IMPORT_KEY_OPTIONS : COURSE_IMPORT_KEY_OPTIONS;
+  
+  // Fetch saved import configs
+  const { data: savedConfigs = [] } = useQuery<ImportConfig[]>({
+    queryKey: ["/api/import-configs"],
+  });
 
   const importMutation = useMutation({
     mutationFn: async ({ file, type }: { file: File; type: string }) => {
@@ -144,13 +199,17 @@ export default function ImportData() {
       setSheetHeaders(data.headers || []);
       setSampleData(data.sampleData || []);
       setStep("mapping");
+      setSourceType("google_sheets");
       
-      // Initialize field mapping
+      // Initialize field mapping based on current entity type
       const initialMapping: Record<string, number | null> = {};
-      MEMBER_FIELDS.forEach(field => {
+      currentFields.forEach(field => {
         initialMapping[field.key] = null;
       });
       setFieldMapping(initialMapping);
+      
+      // Set default import key
+      setImportKey(entityType === "members" ? "fiscalCode" : "sku");
       
       toast({ 
         title: "Anteprima caricata",
@@ -163,6 +222,101 @@ export default function ImportData() {
         description: error.message, 
         variant: "destructive" 
       });
+    },
+  });
+
+  // File preview mutation
+  const filePreviewMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch('/api/import/preview', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Errore lettura file');
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      setSheetHeaders(data.headers || []);
+      setSampleData(data.sampleData || []);
+      setStep("mapping");
+      setSourceType("file");
+      
+      // Initialize field mapping
+      const initialMapping: Record<string, number | null> = {};
+      currentFields.forEach(field => {
+        initialMapping[field.key] = null;
+      });
+      setFieldMapping(initialMapping);
+      
+      // Set default import key
+      setImportKey(entityType === "members" ? "fiscalCode" : "sku");
+      
+      toast({ 
+        title: "Anteprima caricata",
+        description: `Trovate ${data.headers?.length || 0} colonne e ${data.totalRows} righe.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // File mapped import mutation
+  const fileMappedImportMutation = useMutation({
+    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string }) => {
+      const formData = new FormData();
+      formData.append('file', params.file);
+      formData.append('fieldMapping', JSON.stringify(params.fieldMapping));
+      formData.append('importKey', params.importKey);
+      formData.append('entityType', params.entityType);
+      const response = await fetch('/api/import/mapped', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Errore importazione');
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      setImportResult(data);
+      toast({ 
+        title: "Importazione completata",
+        description: `${data.imported} nuovi, ${data.updated} aggiornati`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Save config mutation
+  const saveConfigMutation = useMutation({
+    mutationFn: async (config: { name: string; entityType: string; sourceType: string; fieldMapping: Record<string, number>; importKey: string }) => {
+      return await apiRequest("POST", "/api/import-configs", config);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/import-configs"] });
+      setSaveConfigDialogOpen(false);
+      setNewConfigName("");
+      toast({ title: "Configurazione salvata" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete config mutation
+  const deleteConfigMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/import-configs/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/import-configs"] });
+      toast({ title: "Configurazione eliminata" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
     },
   });
 
@@ -270,22 +424,83 @@ export default function ImportData() {
       return;
     }
 
-    // Check for required fields using explicit undefined check (index 0 is valid)
-    if (activeMapping.firstName === undefined && activeMapping.lastName === undefined) {
-      toast({ 
-        title: "Errore", 
-        description: "Nome o Cognome sono obbligatori", 
-        variant: "destructive" 
+    // Check for required fields based on entity type
+    if (entityType === "members") {
+      if (activeMapping.firstName === undefined && activeMapping.lastName === undefined) {
+        toast({ 
+          title: "Errore", 
+          description: "Nome o Cognome sono obbligatori", 
+          variant: "destructive" 
+        });
+        return;
+      }
+    } else if (entityType === "courses") {
+      if (activeMapping.name === undefined) {
+        toast({ 
+          title: "Errore", 
+          description: "Nome Corso è obbligatorio", 
+          variant: "destructive" 
+        });
+        return;
+      }
+    }
+
+    // Use file import or Google Sheets import based on source type
+    if (sourceType === "file" && selectedFile) {
+      fileMappedImportMutation.mutate({
+        file: selectedFile,
+        fieldMapping: activeMapping,
+        importKey,
+        entityType,
       });
+    } else {
+      mappedImportMutation.mutate({
+        spreadsheetId,
+        range: sheetRange || "A1:Z1000",
+        fieldMapping: activeMapping,
+        importKey,
+        entityType,
+      });
+    }
+  };
+
+  const handleFilePreview = () => {
+    if (!selectedFile) {
+      toast({ title: "Errore", description: "Seleziona un file", variant: "destructive" });
+      return;
+    }
+    filePreviewMutation.mutate(selectedFile);
+  };
+
+  const handleSaveConfig = () => {
+    if (!newConfigName.trim()) {
+      toast({ title: "Errore", description: "Inserisci un nome per la configurazione", variant: "destructive" });
       return;
     }
 
-    mappedImportMutation.mutate({
-      spreadsheetId,
-      range: sheetRange || "A1:Z1000",
+    const activeMapping: Record<string, number> = {};
+    for (const [key, value] of Object.entries(fieldMapping)) {
+      if (value !== null && value >= 0) {
+        activeMapping[key] = value;
+      }
+    }
+
+    saveConfigMutation.mutate({
+      name: newConfigName,
+      entityType,
+      sourceType,
       fieldMapping: activeMapping,
       importKey,
     });
+  };
+
+  const handleLoadConfig = (config: ImportConfig) => {
+    setEntityType(config.entityType as "members" | "courses");
+    setFieldMapping(config.fieldMapping);
+    if (config.importKey) {
+      setImportKey(config.importKey);
+    }
+    toast({ title: "Configurazione caricata", description: config.name });
   };
 
   const handleBackToInput = () => {
@@ -324,19 +539,84 @@ export default function ImportData() {
 
   // Render mapping interface
   if (step === "mapping") {
+    const isImporting = mappedImportMutation.isPending || fileMappedImportMutation.isPending;
+    const filteredConfigs = savedConfigs.filter(c => c.entityType === entityType);
+
     return (
       <div className="p-6 md:p-8 space-y-6 max-w-6xl mx-auto">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-semibold text-foreground mb-2">Mappatura Campi</h1>
             <p className="text-muted-foreground">
-              Associa le colonne del foglio Google ai campi del database
+              Associa le colonne {sourceType === "file" ? "del file" : "del foglio Google"} ai campi del database
             </p>
           </div>
-          <Button variant="outline" onClick={handleBackToInput} data-testid="button-back-to-input">
-            Indietro
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleBackToInput} data-testid="button-back-to-input">
+              Indietro
+            </Button>
+          </div>
         </div>
+
+        {/* Entity Type Selection and Saved Configs */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              {entityType === "members" ? <Users className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
+              Tipo di Importazione
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <div>
+                <Label>Importa come</Label>
+                <Select value={entityType} onValueChange={(v) => {
+                  setEntityType(v as "members" | "courses");
+                  setImportKey(v === "members" ? "fiscalCode" : "sku");
+                  // Reset mapping when entity type changes
+                  const initialMapping: Record<string, number | null> = {};
+                  (v === "members" ? MEMBER_FIELDS : COURSE_FIELDS).forEach(field => {
+                    initialMapping[field.key] = null;
+                  });
+                  setFieldMapping(initialMapping);
+                }}>
+                  <SelectTrigger className="w-48 mt-1" data-testid="select-entity-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="members">
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Clienti</span>
+                    </SelectItem>
+                    <SelectItem value="courses">
+                      <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {filteredConfigs.length > 0 && (
+                <div>
+                  <Label>Carica configurazione salvata</Label>
+                  <Select onValueChange={(v) => {
+                    const config = savedConfigs.find(c => c.id === parseInt(v));
+                    if (config) handleLoadConfig(config);
+                  }}>
+                    <SelectTrigger className="w-56 mt-1" data-testid="select-load-config">
+                      <SelectValue placeholder="Seleziona configurazione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredConfigs.map((config) => (
+                        <SelectItem key={config.id} value={config.id.toString()}>
+                          {config.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Sample Data Preview */}
         <Card>
@@ -395,7 +675,7 @@ export default function ImportData() {
                 <SelectValue placeholder="Seleziona chiave" />
               </SelectTrigger>
               <SelectContent>
-                {IMPORT_KEY_OPTIONS.map((opt) => (
+                {currentImportKeyOptions.map((opt) => (
                   <SelectItem key={opt.key} value={opt.key}>
                     {opt.label}
                   </SelectItem>
@@ -410,15 +690,15 @@ export default function ImportData() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Settings2 className="w-5 h-5" />
-              Mappatura Campi
+              Mappatura Campi {entityType === "members" ? "(Anagrafiche)" : "(Corsi)"}
             </CardTitle>
             <CardDescription>
-              Associa ogni campo del database alla colonna corrispondente del foglio
+              Associa ogni campo del database alla colonna corrispondente {sourceType === "file" ? "del file" : "del foglio"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {MEMBER_FIELDS.map((field) => (
+              {currentFields.map((field) => (
                 <div key={field.key} className="flex items-center gap-2">
                   <div className="flex-1 min-w-0">
                     <Label className={`text-sm ${field.required ? 'font-semibold' : ''}`}>
@@ -451,25 +731,64 @@ export default function ImportData() {
           </CardContent>
         </Card>
 
-        {/* Import Button */}
-        <div className="flex justify-end gap-4">
-          <Button variant="outline" onClick={handleBackToInput}>
-            Annulla
-          </Button>
-          <Button 
-            onClick={handleMappedImport}
-            disabled={mappedImportMutation.isPending}
-            data-testid="button-execute-mapped-import"
-          >
-            {mappedImportMutation.isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Importazione...
-              </>
-            ) : (
-              "Esegui Importazione"
-            )}
-          </Button>
+        {/* Import Button and Save Config */}
+        <div className="flex justify-between gap-4 flex-wrap">
+          <Dialog open={saveConfigDialogOpen} onOpenChange={setSaveConfigDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" data-testid="button-save-config">
+                <Save className="w-4 h-4 mr-2" />
+                Salva Configurazione
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Salva Configurazione di Importazione</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Nome Configurazione</Label>
+                  <Input
+                    value={newConfigName}
+                    onChange={(e) => setNewConfigName(e.target.value)}
+                    placeholder="es: Import Anagrafiche da Excel"
+                    className="mt-1"
+                    data-testid="input-config-name"
+                  />
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Questa configurazione salverà la mappatura campi attuale per {entityType === "members" ? "anagrafiche" : "corsi"}.
+                </div>
+                <Button 
+                  onClick={handleSaveConfig} 
+                  disabled={saveConfigMutation.isPending}
+                  className="w-full"
+                  data-testid="button-confirm-save-config"
+                >
+                  {saveConfigMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salva"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleBackToInput}>
+              Annulla
+            </Button>
+            <Button 
+              onClick={handleMappedImport}
+              disabled={isImporting}
+              data-testid="button-execute-mapped-import"
+            >
+              {isImporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Importazione...
+                </>
+              ) : (
+                `Importa ${entityType === "members" ? "Anagrafiche" : "Corsi"}`
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Results */}
@@ -771,33 +1090,36 @@ export default function ImportData() {
         <TabsContent value="file">
           <Card>
             <CardHeader>
-              <CardTitle>Carica File CSV/Excel</CardTitle>
+              <CardTitle>Carica File CSV/Excel con Mappatura</CardTitle>
               <CardDescription>
-                Seleziona un file CSV o Excel da importare
+                Seleziona un file e configura la mappatura dei campi
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="importType">Tipo di Importazione</Label>
-                <Select value={importType} onValueChange={setImportType}>
-                  <SelectTrigger data-testid="select-import-type">
-                    <SelectValue placeholder="Seleziona tipo" />
+                <Label>Tipo di Dati da Importare</Label>
+                <Select value={entityType} onValueChange={(v) => setEntityType(v as "members" | "courses")}>
+                  <SelectTrigger data-testid="select-file-entity-type">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="members">Iscritti</SelectItem>
-                    <SelectItem value="courses">Corsi</SelectItem>
-                    <SelectItem value="instructors">Insegnanti</SelectItem>
+                    <SelectItem value="members">
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Clienti</span>
+                    </SelectItem>
+                    <SelectItem value="courses">
+                      <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="file">File CSV/Excel</Label>
+                <Label htmlFor="file">File CSV</Label>
                 <div className="border-2 border-dashed rounded-lg p-8 text-center">
                   <input
                     id="file"
                     type="file"
-                    accept=".csv,.xlsx,.xls"
+                    accept=".csv"
                     onChange={handleFileChange}
                     className="hidden"
                     data-testid="input-file"
@@ -815,7 +1137,7 @@ export default function ImportData() {
                       <div>
                         <p className="text-sm font-medium">Clicca per selezionare un file</p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Oppure trascina il file qui
+                          Formato CSV con intestazioni nella prima riga.
                         </p>
                       </div>
                     )}
@@ -823,14 +1145,36 @@ export default function ImportData() {
                 </div>
               </div>
 
+              <Separator />
+
               <Button 
-                onClick={handleImport}
-                disabled={!selectedFile || !importType || importMutation.isPending}
+                onClick={handleFilePreview}
+                disabled={!selectedFile || filePreviewMutation.isPending}
                 className="w-full"
-                data-testid="button-import-file"
+                data-testid="button-file-preview"
               >
-                {importMutation.isPending ? "Importazione in corso..." : "Importa Dati"}
+                {filePreviewMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Caricamento anteprima...
+                  </>
+                ) : (
+                  <>
+                    <Settings2 className="w-4 h-4 mr-2" />
+                    Configura Mappatura Campi
+                  </>
+                )}
               </Button>
+
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium mb-2">Importazione con mappatura:</h4>
+                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                  <li>Carica un file CSV con intestazioni nella prima riga</li>
+                  <li>Mappa ogni colonna al campo corrispondente del database</li>
+                  <li>Scegli la chiave per identificare i duplicati</li>
+                  <li>Salva la configurazione per riutilizzarla</li>
+                </ul>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

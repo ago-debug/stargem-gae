@@ -29,6 +29,153 @@ import {
 // Configure multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() });
 
+// ==== Helper: Import Courses from Rows ====
+async function importCoursesFromRows(
+  dataRows: any[][],
+  fieldMapping: Record<string, number | null>,
+  importKey: string,
+  storageInstance: typeof storage
+): Promise<{ imported: number; updated: number; skipped: number; errors: { row: number; message: string }[] }> {
+  const getValue = (row: any[], colIdx: number): string => {
+    if (colIdx < 0 || colIdx >= row.length) return "";
+    return (row[colIdx] || "").toString().trim();
+  };
+
+  const parseDate = (val: string): string | undefined => {
+    if (!val) return undefined;
+    const parts = val.split(/[\/\-\.]/);
+    if (parts.length === 3) {
+      let [a, b, c] = parts;
+      if (a.length === 4) return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`;
+      if (c.length === 4) return `${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+      if (c.length === 2) {
+        const year = parseInt(c) > 50 ? `19${c}` : `20${c}`;
+        return `${year}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+      }
+    }
+    return undefined;
+  };
+
+  const parseTime = (val: string): string | undefined => {
+    if (!val) return undefined;
+    // Accept HH:MM or H:MM format
+    const match = val.match(/^(\d{1,2}):(\d{2})$/);
+    if (match) {
+      const h = match[1].padStart(2, '0');
+      const m = match[2];
+      if (parseInt(h) <= 23 && parseInt(m) <= 59) {
+        return `${h}:${m}`;
+      }
+    }
+    return undefined;
+  };
+
+  const parseNumber = (val: string): number | undefined => {
+    if (!val) return undefined;
+    const num = parseFloat(val.replace(',', '.'));
+    return isNaN(num) ? undefined : num;
+  };
+
+  const parseInt2 = (val: string): number | undefined => {
+    if (!val) return undefined;
+    const num = parseInt(val);
+    return isNaN(num) ? undefined : num;
+  };
+
+  const validRecurrenceTypes = ["weekly", "biweekly", "monthly", "once"];
+
+  // Build index of existing courses
+  const existingCourses = await storageInstance.getCourses();
+  const existingByKey = new Map<string, number>();
+
+  existingCourses.forEach(c => {
+    let keyValue: string | undefined;
+    if (importKey === "sku") {
+      keyValue = c.sku?.toUpperCase().trim();
+    } else {
+      keyValue = c.name?.toLowerCase().trim();
+    }
+    if (keyValue) {
+      existingByKey.set(keyValue, c.id);
+    }
+  });
+
+  let imported = 0;
+  let updated = 0;
+  let skipped = 0;
+  const errors: { row: number; message: string }[] = [];
+
+  for (let i = 0; i < dataRows.length; i++) {
+    const row = dataRows[i];
+    try {
+      const courseData: any = { active: true };
+
+      for (const [dbField, colIdx] of Object.entries(fieldMapping)) {
+        if (colIdx === null || colIdx === undefined || colIdx < 0) continue;
+
+        let value = getValue(row, colIdx as number);
+        if (!value) continue;
+
+        // Handle field types
+        if (dbField === "price") {
+          courseData[dbField] = parseNumber(value)?.toString();
+        } else if (dbField === "maxCapacity") {
+          courseData[dbField] = parseInt2(value);
+        } else if (dbField === "dayOfWeek") {
+          const day = parseInt2(value);
+          if (day !== undefined && day >= 0 && day <= 6) {
+            courseData[dbField] = day;
+          }
+        } else if (dbField === "startTime" || dbField === "endTime") {
+          courseData[dbField] = parseTime(value);
+        } else if (dbField === "recurrenceType") {
+          const rt = value.toLowerCase();
+          if (validRecurrenceTypes.includes(rt)) {
+            courseData[dbField] = rt;
+          }
+        } else if (dbField === "startDate" || dbField === "endDate") {
+          courseData[dbField] = parseDate(value);
+        } else if (dbField === "sku") {
+          courseData[dbField] = value.toUpperCase().trim();
+        } else {
+          courseData[dbField] = value;
+        }
+      }
+
+      // Check required fields
+      if (!courseData.name) {
+        skipped++;
+        continue;
+      }
+
+      // Get key value for duplicate check
+      let keyValue: string | undefined;
+      if (importKey === "sku") {
+        keyValue = courseData.sku?.toUpperCase().trim();
+      } else {
+        keyValue = courseData.name?.toLowerCase().trim();
+      }
+
+      if (keyValue && existingByKey.has(keyValue)) {
+        const existingId = existingByKey.get(keyValue)!;
+        await storageInstance.updateCourse(existingId, courseData);
+        updated++;
+      } else {
+        const newCourse = await storageInstance.createCourse(courseData);
+        if (keyValue) {
+          existingByKey.set(keyValue, newCourse.id);
+        }
+        imported++;
+      }
+    } catch (err: any) {
+      errors.push({ row: i + 2, message: err.message });
+      skipped++;
+    }
+  }
+
+  return { imported, updated, skipped, errors: errors.slice(0, 20) };
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   await setupAuth(app);
@@ -420,6 +567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         range = "A1:Z1000", 
         fieldMapping,  // { dbField: sheetColumnIndex }
         importKey = "fiscalCode",  // Which field to use as unique key
+        entityType = "members",  // "members" or "courses"
         limit = 500 
       } = req.body;
       
@@ -438,6 +586,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const dataRows = rows.slice(1, Math.min(rows.length, limit + 1));
+      
+      // Handle courses import
+      if (entityType === "courses") {
+        const result = await importCoursesFromRows(dataRows, fieldMapping, importKey, storage);
+        return res.json({
+          success: true,
+          ...result,
+          total: dataRows.length,
+        });
+      }
       
       // Helper functions
       const getValue = (row: any[], colIdx: number): string => {
@@ -1995,6 +2153,225 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(fields);
     } catch (error) {
       res.status(500).json({ message: "Failed to get report fields" });
+    }
+  });
+
+  // ==== Import Configurations ====
+  app.get("/api/import-configs", isAuthenticated, async (req, res) => {
+    try {
+      const { entityType, sourceType } = req.query;
+      const configs = await storage.getImportConfigs(
+        entityType as string | undefined,
+        sourceType as string | undefined
+      );
+      res.json(configs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore caricamento configurazioni" });
+    }
+  });
+
+  app.post("/api/import-configs", isAuthenticated, async (req, res) => {
+    try {
+      const { name, entityType, sourceType, fieldMapping, importKey } = req.body;
+      
+      // Validate required fields
+      if (!name || !entityType) {
+        return res.status(400).json({ message: "Nome e tipo entità sono obbligatori" });
+      }
+      
+      // Validate entityType
+      const validEntityTypes = ["members", "courses"];
+      if (!validEntityTypes.includes(entityType)) {
+        return res.status(400).json({ message: "Tipo entità non valido. Valori ammessi: members, courses" });
+      }
+      
+      // Validate sourceType if provided
+      if (sourceType) {
+        const validSourceTypes = ["google_sheets", "file"];
+        if (!validSourceTypes.includes(sourceType)) {
+          return res.status(400).json({ message: "Tipo sorgente non valido. Valori ammessi: google_sheets, file" });
+        }
+      }
+      
+      const config = await storage.createImportConfig(req.body);
+      res.json(config);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore salvataggio configurazione" });
+    }
+  });
+
+  app.delete("/api/import-configs/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteImportConfig(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore eliminazione configurazione" });
+    }
+  });
+
+  // ==== File Preview for CSV Import ====
+  app.post("/api/import/preview", isAuthenticated, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Nessun file caricato" });
+      }
+
+      const Papa = await import('papaparse');
+      const fileContent = req.file.buffer.toString('utf-8');
+      
+      const parsed = Papa.default.parse(fileContent, {
+        header: false,
+        skipEmptyLines: true,
+      });
+
+      const rows = parsed.data as string[][];
+      if (rows.length === 0) {
+        return res.status(400).json({ message: "File vuoto" });
+      }
+
+      // First row is headers
+      const headerRow = rows[0];
+      const headers = headerRow.map((name: string, index: number) => ({
+        index,
+        name: name?.trim() || `Colonna ${index + 1}`,
+        originalName: name?.trim() || ""
+      }));
+
+      // Sample data from rows 2-6 (skip header row)
+      const sampleData = rows.slice(1, 6);
+
+      res.json({
+        headers,
+        sampleData,
+        totalRows: rows.length - 1 // Exclude header row
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore lettura file" });
+    }
+  });
+
+  // ==== File Import with Custom Mapping ====
+  app.post("/api/import/mapped", isAuthenticated, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Nessun file caricato" });
+      }
+
+      const { fieldMapping, importKey, entityType } = req.body;
+      const mapping = typeof fieldMapping === 'string' ? JSON.parse(fieldMapping) : fieldMapping;
+      const entity = entityType || 'members';
+
+      const Papa = await import('papaparse');
+      const fileContent = req.file.buffer.toString('utf-8');
+      
+      const parsed = Papa.default.parse(fileContent, {
+        header: false,
+        skipEmptyLines: true,
+      });
+
+      const rows = parsed.data as string[][];
+      if (rows.length <= 1) {
+        return res.status(400).json({ message: "File senza dati" });
+      }
+
+      // Skip header row
+      const dataRows = rows.slice(1);
+
+      let imported = 0;
+      let updated = 0;
+      let skipped = 0;
+      const errors: { row: number; message: string }[] = [];
+
+      if (entity === 'members') {
+        for (let i = 0; i < dataRows.length; i++) {
+          const row = dataRows[i];
+          const rowNum = i + 2; // Account for header + 0-index
+
+          try {
+            const memberData: any = {};
+
+            // Map fields from row using column indices
+            for (const [field, colIndex] of Object.entries(mapping)) {
+              if (colIndex !== null && colIndex !== undefined && (colIndex as number) >= 0) {
+                let value = row[colIndex as number]?.trim();
+                if (value === undefined || value === "") continue;
+
+                // Handle date fields
+                if (["dateOfBirth", "cardIssueDate", "cardExpiryDate", "entityCardIssueDate", "entityCardExpiryDate", "medicalCertificateExpiry"].includes(field)) {
+                  const dateFormats = [/(\d{2})\/(\d{2})\/(\d{4})/, /(\d{4})-(\d{2})-(\d{2})/];
+                  let dateValue = null;
+                  for (const format of dateFormats) {
+                    const match = value.match(format);
+                    if (match) {
+                      if (format.source.startsWith("(\\d{2})")) {
+                        dateValue = new Date(`${match[3]}-${match[2]}-${match[1]}`);
+                      } else {
+                        dateValue = new Date(value);
+                      }
+                      break;
+                    }
+                  }
+                  if (dateValue && !isNaN(dateValue.getTime())) {
+                    memberData[field] = dateValue;
+                  }
+                } else if (field === "gender") {
+                  const g = value.toUpperCase();
+                  memberData[field] = g === "M" || g === "MASCHIO" ? "M" : g === "F" || g === "FEMMINA" ? "F" : null;
+                } else if (["isMinor", "hasMedicalCertificate"].includes(field)) {
+                  const b = value.toLowerCase();
+                  memberData[field] = b === "si" || b === "sì" || b === "yes" || b === "1" || b === "true";
+                } else {
+                  memberData[field] = value;
+                }
+              }
+            }
+
+            if (!memberData.firstName && !memberData.lastName) {
+              skipped++;
+              continue;
+            }
+
+            // Check for existing member based on import key
+            let existingMember = null;
+            if (importKey && memberData[importKey]) {
+              const allMembers = await storage.getMembers();
+              existingMember = allMembers.find((m: any) => 
+                m[importKey] && m[importKey].toLowerCase() === memberData[importKey].toLowerCase()
+              );
+            }
+
+            if (existingMember) {
+              await storage.updateMember(existingMember.id, memberData);
+              updated++;
+            } else {
+              await storage.createMember(memberData);
+              imported++;
+            }
+          } catch (err: any) {
+            errors.push({ row: rowNum, message: err.message || "Errore sconosciuto" });
+            skipped++;
+          }
+        }
+      } else if (entity === 'courses') {
+        // Use shared helper for consistent validation
+        const result = await importCoursesFromRows(dataRows, mapping, importKey || 'name', storage);
+        imported = result.imported;
+        updated = result.updated;
+        skipped = result.skipped;
+        errors.push(...result.errors);
+      }
+
+      res.json({
+        success: true,
+        imported,
+        updated,
+        skipped,
+        total: dataRows.length,
+        errors: errors.slice(0, 10)
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore importazione file" });
     }
   });
 
