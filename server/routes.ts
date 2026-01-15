@@ -372,6 +372,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==== Google Sheets Preview Headers (for custom mapping) ====
+  app.post("/api/google-sheets/preview-headers", isAuthenticated, async (req, res) => {
+    try {
+      const { spreadsheetId, range = "A1:Z1" } = req.body;
+      
+      if (!spreadsheetId) {
+        return res.status(400).json({ message: "spreadsheetId è obbligatorio" });
+      }
+
+      // Read only first 5 rows for preview
+      const previewRange = range.replace(/:\w+\d*$/, ":Z5").replace(/^(\w+!)?\w+/, "$1A");
+      const rows = await readSpreadsheet(spreadsheetId, previewRange || "A1:Z5");
+      
+      if (rows.length < 1) {
+        return res.status(400).json({ message: "Nessun dato trovato nel foglio" });
+      }
+
+      const headers = rows[0].map((h: string, i: number) => ({
+        index: i,
+        name: (h || `Colonna ${i + 1}`).toString().trim(),
+        originalName: h || ""
+      }));
+      
+      // Sample data (first 3 data rows)
+      const sampleData = rows.slice(1, 4).map(row => 
+        row.map((cell: any) => (cell || "").toString().trim())
+      );
+
+      res.json({
+        success: true,
+        headers,
+        sampleData,
+        totalColumns: headers.length
+      });
+    } catch (error: any) {
+      console.error("Google Sheets preview error:", error);
+      res.status(500).json({ message: error.message || "Errore lettura Google Sheets" });
+    }
+  });
+
+  // ==== Google Sheets Import with Custom Mapping ====
+  app.post("/api/google-sheets/import-mapped", isAuthenticated, async (req, res) => {
+    try {
+      const { 
+        spreadsheetId, 
+        range = "A1:Z1000", 
+        fieldMapping,  // { dbField: sheetColumnIndex }
+        importKey = "fiscalCode",  // Which field to use as unique key
+        limit = 500 
+      } = req.body;
+      
+      if (!spreadsheetId) {
+        return res.status(400).json({ message: "spreadsheetId è obbligatorio" });
+      }
+      
+      if (!fieldMapping || Object.keys(fieldMapping).length === 0) {
+        return res.status(400).json({ message: "Mappatura campi richiesta" });
+      }
+
+      const rows = await readSpreadsheet(spreadsheetId, range);
+      
+      if (rows.length < 2) {
+        return res.status(400).json({ message: "Nessun dato trovato nel foglio" });
+      }
+
+      const dataRows = rows.slice(1, Math.min(rows.length, limit + 1));
+      
+      // Helper functions
+      const getValue = (row: any[], colIdx: number): string => {
+        if (colIdx < 0 || colIdx >= row.length) return "";
+        return (row[colIdx] || "").toString().trim();
+      };
+      
+      const parseDate = (val: string): string | undefined => {
+        if (!val) return undefined;
+        const parts = val.split(/[\/\-\.]/);
+        if (parts.length === 3) {
+          let [a, b, c] = parts;
+          if (a.length === 4) return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`;
+          if (c.length === 4) return `${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+          if (c.length === 2) {
+            const year = parseInt(c) > 50 ? `19${c}` : `20${c}`;
+            return `${year}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+          }
+        }
+        return undefined;
+      };
+      
+      const parseGender = (val: string): string | undefined => {
+        const g = val.toUpperCase();
+        if (g === "M" || g === "MASCHIO" || g === "MALE") return "M";
+        if (g === "F" || g === "FEMMINA" || g === "FEMALE") return "F";
+        return undefined;
+      };
+      
+      // Date fields that need parsing
+      const dateFields = ["dateOfBirth", "cardIssueDate", "cardExpiryDate", "entityCardIssueDate", 
+                          "entityCardExpiryDate", "medicalCertificateExpiry"];
+      
+      // Boolean fields
+      const booleanFields = ["active", "hasMedicalCertificate", "isMinor"];
+
+      // Build existing members index based on chosen key
+      const existingMembers = await storage.getMembers();
+      const existingByKey = new Map<string, number>();
+      
+      existingMembers.forEach(m => {
+        let keyValue: string | undefined;
+        switch (importKey) {
+          case "fiscalCode": keyValue = m.fiscalCode?.toUpperCase(); break;
+          case "email": keyValue = m.email?.toLowerCase(); break;
+          case "cardNumber": keyValue = m.cardNumber; break;
+          case "entityCardNumber": keyValue = m.entityCardNumber; break;
+          case "mobile": keyValue = m.mobile; break;
+          case "phone": keyValue = m.phone; break;
+          default: keyValue = m.fiscalCode?.toUpperCase();
+        }
+        if (keyValue) {
+          existingByKey.set(keyValue, m.id);
+        }
+      });
+
+      let imported = 0;
+      let updated = 0;
+      let skipped = 0;
+      const errors: { row: number; message: string }[] = [];
+
+      for (let i = 0; i < dataRows.length; i++) {
+        const row = dataRows[i];
+        try {
+          const memberData: any = { active: true };
+          
+          // Map each field from the sheet
+          for (const [dbField, colIdx] of Object.entries(fieldMapping)) {
+            if (colIdx === null || colIdx === undefined || colIdx < 0) continue;
+            
+            let value = getValue(row, colIdx as number);
+            if (!value) continue;
+            
+            // Handle special field types
+            if (dbField === "gender") {
+              memberData[dbField] = parseGender(value);
+            } else if (dateFields.includes(dbField)) {
+              memberData[dbField] = parseDate(value);
+            } else if (booleanFields.includes(dbField)) {
+              const v = value.toLowerCase();
+              memberData[dbField] = v === "si" || v === "sì" || v === "yes" || v === "true" || v === "1";
+            } else if (dbField === "fiscalCode") {
+              memberData[dbField] = value.toUpperCase();
+            } else if (dbField === "province") {
+              memberData[dbField] = value.toUpperCase().substring(0, 2);
+            } else {
+              memberData[dbField] = value;
+            }
+          }
+          
+          // Check required fields
+          if (!memberData.firstName && !memberData.lastName) {
+            skipped++;
+            continue;
+          }
+          memberData.firstName = memberData.firstName || "Sconosciuto";
+          memberData.lastName = memberData.lastName || "Sconosciuto";
+          
+          // Get key value for duplicate check
+          let keyValue: string | undefined;
+          switch (importKey) {
+            case "fiscalCode": keyValue = memberData.fiscalCode?.toUpperCase(); break;
+            case "email": keyValue = memberData.email?.toLowerCase(); break;
+            case "cardNumber": keyValue = memberData.cardNumber; break;
+            case "entityCardNumber": keyValue = memberData.entityCardNumber; break;
+            case "mobile": keyValue = memberData.mobile; break;
+            case "phone": keyValue = memberData.phone; break;
+            default: keyValue = memberData.fiscalCode?.toUpperCase();
+          }
+          
+          if (keyValue && existingByKey.has(keyValue)) {
+            const existingId = existingByKey.get(keyValue)!;
+            await storage.updateMember(existingId, memberData);
+            updated++;
+          } else {
+            const newMember = await storage.createMember(memberData);
+            if (keyValue) {
+              existingByKey.set(keyValue, newMember.id);
+            }
+            imported++;
+          }
+        } catch (err: any) {
+          errors.push({ row: i + 2, message: err.message });
+          skipped++;
+        }
+      }
+
+      res.json({
+        success: true,
+        imported,
+        updated,
+        skipped,
+        total: dataRows.length,
+        errors: errors.slice(0, 20),
+      });
+    } catch (error: any) {
+      console.error("Google Sheets mapped import error:", error);
+      res.status(500).json({ message: error.message || "Errore importazione Google Sheets" });
+    }
+  });
+
   // ==== Categories Routes ====
   app.get("/api/categories", isAuthenticated, async (req, res) => {
     try {
