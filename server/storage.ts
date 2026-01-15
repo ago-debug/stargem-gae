@@ -185,7 +185,7 @@ export interface IStorage {
   deleteEnrollment(id: number): Promise<void>;
 
   // Access Logs
-  getAccessLogs(limit?: number): Promise<AccessLog[]>;
+  getAccessLogs(limit?: number): Promise<(AccessLog & { memberFirstName?: string | null; memberLastName?: string | null })[]>;
   createAccessLog(log: InsertAccessLog): Promise<AccessLog>;
 
   // Attendances
@@ -920,8 +920,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Access Logs ====
-  async getAccessLogs(limit: number = 100): Promise<AccessLog[]> {
-    return await db.select().from(accessLogs).orderBy(desc(accessLogs.accessTime)).limit(limit);
+  async getAccessLogs(limit: number = 100): Promise<(AccessLog & { memberFirstName?: string | null; memberLastName?: string | null })[]> {
+    const result = await db
+      .select({
+        id: accessLogs.id,
+        memberId: accessLogs.memberId,
+        barcode: accessLogs.barcode,
+        accessTime: accessLogs.accessTime,
+        accessType: accessLogs.accessType,
+        membershipStatus: accessLogs.membershipStatus,
+        notes: accessLogs.notes,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+      })
+      .from(accessLogs)
+      .leftJoin(members, eq(accessLogs.memberId, members.id))
+      .orderBy(desc(accessLogs.accessTime))
+      .limit(limit);
+    return result;
   }
 
   async createAccessLog(log: InsertAccessLog): Promise<AccessLog> {
