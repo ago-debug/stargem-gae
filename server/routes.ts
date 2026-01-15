@@ -165,31 +165,46 @@ async function importCoursesFromRows(
           courseData[dbField] = value.toUpperCase().trim();
         } else if (dbField === "instructorName") {
           // Resolve instructor by name
-          const instructorId = instructorByName.get(value.toLowerCase().trim());
+          const lookupKey = value.toLowerCase().trim();
+          const instructorId = instructorByName.get(lookupKey);
           if (instructorId) {
             courseData.instructorId = instructorId;
+          } else {
+            console.log(`[Import] Instructor not found: "${value}" (key: "${lookupKey}")`);
           }
         } else if (dbField === "secondaryInstructor1Name") {
-          const instructorId = instructorByName.get(value.toLowerCase().trim());
+          const lookupKey = value.toLowerCase().trim();
+          const instructorId = instructorByName.get(lookupKey);
           if (instructorId) {
             courseData.secondaryInstructor1Id = instructorId;
+          } else {
+            console.log(`[Import] Secondary Instructor 1 not found: "${value}"`);
           }
         } else if (dbField === "secondaryInstructor2Name") {
-          const instructorId = instructorByName.get(value.toLowerCase().trim());
+          const lookupKey = value.toLowerCase().trim();
+          const instructorId = instructorByName.get(lookupKey);
           if (instructorId) {
             courseData.secondaryInstructor2Id = instructorId;
+          } else {
+            console.log(`[Import] Secondary Instructor 2 not found: "${value}"`);
           }
         } else if (dbField === "studioName") {
           // Resolve studio by name
-          const studioId = studioByName.get(value.toLowerCase().trim());
+          const lookupKey = value.toLowerCase().trim();
+          const studioId = studioByName.get(lookupKey);
           if (studioId) {
             courseData.studioId = studioId;
+          } else {
+            console.log(`[Import] Studio not found: "${value}" (key: "${lookupKey}")`);
           }
         } else if (dbField === "categoryName") {
           // Resolve category by name
-          const categoryId = categoryByName.get(value.toLowerCase().trim());
+          const lookupKey = value.toLowerCase().trim();
+          const categoryId = categoryByName.get(lookupKey);
           if (categoryId) {
             courseData.categoryId = categoryId;
+          } else {
+            console.log(`[Import] Category not found: "${value}" (key: "${lookupKey}")`);
           }
         } else if (dbField === "active") {
           const b = value.toLowerCase();
