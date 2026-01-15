@@ -248,6 +248,109 @@ async function importCoursesFromRows(
   return { imported, updated, skipped, errors: errors.slice(0, 20) };
 }
 
+// Helper function to import instructors from row data (shared by file and Google Sheets import)
+async function importInstructorsFromRows(
+  dataRows: any[][],
+  fieldMapping: Record<string, number | null>,
+  importKey: string,
+  storageInstance: typeof storage
+): Promise<{ imported: number; updated: number; skipped: number; errors: { row: number; message: string }[] }> {
+  const getValue = (row: any[], colIdx: number): string => {
+    if (colIdx < 0 || colIdx >= row.length) return "";
+    return (row[colIdx] || "").toString().trim();
+  };
+
+  const parseNumber = (val: string): string | undefined => {
+    if (!val) return undefined;
+    const num = parseFloat(val.replace(',', '.'));
+    return isNaN(num) ? undefined : num.toString();
+  };
+
+  // Build index of existing instructors
+  const existingInstructors = await storageInstance.getInstructors();
+  const existingByEmail = new Map<string, number>();
+  const existingByFullName = new Map<string, number>();
+  const existingByPhone = new Map<string, number>();
+
+  existingInstructors.forEach(i => {
+    if (i.email) {
+      existingByEmail.set(i.email.toLowerCase().trim(), i.id);
+    }
+    const fullName = `${i.firstName} ${i.lastName}`.toLowerCase().trim();
+    existingByFullName.set(fullName, i.id);
+    if (i.phone) {
+      existingByPhone.set(i.phone.replace(/\s+/g, '').trim(), i.id);
+    }
+  });
+
+  let imported = 0;
+  let updated = 0;
+  let skipped = 0;
+  const errors: { row: number; message: string }[] = [];
+
+  for (let i = 0; i < dataRows.length; i++) {
+    const row = dataRows[i];
+    try {
+      const instructorData: any = { active: true };
+
+      for (const [dbField, colIdx] of Object.entries(fieldMapping)) {
+        if (colIdx === null || colIdx === undefined || colIdx < 0) continue;
+
+        let value = getValue(row, colIdx as number);
+        if (!value) continue;
+
+        if (dbField === "hourlyRate") {
+          instructorData[dbField] = parseNumber(value);
+        } else if (dbField === "active") {
+          const b = value.toLowerCase();
+          instructorData[dbField] = b === "si" || b === "sì" || b === "yes" || b === "1" || b === "true";
+        } else {
+          instructorData[dbField] = value;
+        }
+      }
+
+      // Check required fields
+      if (!instructorData.firstName || !instructorData.lastName) {
+        skipped++;
+        continue;
+      }
+
+      // Get key value for duplicate check
+      let existingId: number | undefined;
+      if (importKey === "email" && instructorData.email) {
+        existingId = existingByEmail.get(instructorData.email.toLowerCase().trim());
+      } else if (importKey === "fullName") {
+        const fullName = `${instructorData.firstName} ${instructorData.lastName}`.toLowerCase().trim();
+        existingId = existingByFullName.get(fullName);
+      } else if (importKey === "phone" && instructorData.phone) {
+        existingId = existingByPhone.get(instructorData.phone.replace(/\s+/g, '').trim());
+      }
+
+      if (existingId) {
+        await storageInstance.updateInstructor(existingId, instructorData);
+        updated++;
+      } else {
+        const newInstructor = await storageInstance.createInstructor(instructorData);
+        // Update lookup maps
+        if (instructorData.email) {
+          existingByEmail.set(instructorData.email.toLowerCase().trim(), newInstructor.id);
+        }
+        const fullName = `${instructorData.firstName} ${instructorData.lastName}`.toLowerCase().trim();
+        existingByFullName.set(fullName, newInstructor.id);
+        if (instructorData.phone) {
+          existingByPhone.set(instructorData.phone.replace(/\s+/g, '').trim(), newInstructor.id);
+        }
+        imported++;
+      }
+    } catch (err: any) {
+      errors.push({ row: i + 2, message: err.message });
+      skipped++;
+    }
+  }
+
+  return { imported, updated, skipped, errors: errors.slice(0, 20) };
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   await setupAuth(app);
@@ -671,6 +774,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle courses import
       if (entityType === "courses") {
         const result = await importCoursesFromRows(dataRows, fieldMapping, importKey, storage);
+        return res.json({
+          success: true,
+          ...result,
+          total: dataRows.length,
+        });
+      }
+      
+      // Handle instructors import
+      if (entityType === "instructors") {
+        const result = await importInstructorsFromRows(dataRows, fieldMapping, importKey, storage);
         return res.json({
           success: true,
           ...result,
@@ -2458,6 +2571,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (entity === 'courses') {
         // Use shared helper for consistent validation
         const result = await importCoursesFromRows(dataRows, mapping, importKey || 'name', storage);
+        imported = result.imported;
+        updated = result.updated;
+        skipped = result.skipped;
+        errors.push(...result.errors);
+      } else if (entity === 'instructors') {
+        // Use shared helper for instructors
+        const result = await importInstructorsFromRows(dataRows, mapping, importKey || 'email', storage);
         imported = result.imported;
         updated = result.updated;
         skipped = result.skipped;
