@@ -17,7 +17,7 @@ Key features and architectural decisions include:
 - **Studio Management**: Dedicated module for managing studios/rooms with capacity, equipment, operating days, and hours.
 - **Enrollment & Payments**: Comprehensive workflow supporting manual payment processing, automatic generation of payment records upon enrollment, and linking payments to specific enrollments.
 - **Membership & Access Control**: Membership cards with barcode support for attendance logging and access validation.
-- **Data Import**: Functionality to import data from CSV/Excel for members, courses, and instructors to facilitate migration.
+- **Data Import**: Functionality to import data from CSV/Excel for members, courses, and instructors to facilitate migration. Google Sheets integration with advanced import featuring customizable field mapping and selectable import key (fiscal code, email, card number, phone, etc.).
 - **Structured Scheduling**: Structured dropdown selectors for defining studio operating hours and course schedules (day of week, start/end times, recurrence type).
 - **Location Autocomplete**: City search with auto-fill for province and postal code. Database includes all 7904 Italian municipalities (comuni) with all 107 provinces. Minimum 3 characters required for search.
 
