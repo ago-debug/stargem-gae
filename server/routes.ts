@@ -83,6 +83,32 @@ async function importCoursesFromRows(
   };
 
   const validRecurrenceTypes = ["weekly", "biweekly", "monthly", "once"];
+  
+  // Load lookup tables for resolving names to IDs
+  const instructors = await storageInstance.getInstructors();
+  const studios = await storageInstance.getStudios();
+  const categories = await storageInstance.getCategories();
+  
+  // Create lookup maps (by name, case-insensitive)
+  const instructorByName = new Map<string, number>();
+  instructors.forEach(i => {
+    const fullName = `${i.firstName} ${i.lastName}`.toLowerCase().trim();
+    const reverseName = `${i.lastName} ${i.firstName}`.toLowerCase().trim();
+    instructorByName.set(fullName, i.id);
+    instructorByName.set(reverseName, i.id);
+    // Also try just last name for common usage
+    instructorByName.set(i.lastName.toLowerCase().trim(), i.id);
+  });
+  
+  const studioByName = new Map<string, number>();
+  studios.forEach(s => {
+    studioByName.set(s.name.toLowerCase().trim(), s.id);
+  });
+  
+  const categoryByName = new Map<string, number>();
+  categories.forEach(c => {
+    categoryByName.set(c.name.toLowerCase().trim(), c.id);
+  });
 
   // Build index of existing courses
   const existingCourses = await storageInstance.getCourses();
@@ -137,6 +163,37 @@ async function importCoursesFromRows(
           courseData[dbField] = parseDate(value);
         } else if (dbField === "sku") {
           courseData[dbField] = value.toUpperCase().trim();
+        } else if (dbField === "instructorName") {
+          // Resolve instructor by name
+          const instructorId = instructorByName.get(value.toLowerCase().trim());
+          if (instructorId) {
+            courseData.instructorId = instructorId;
+          }
+        } else if (dbField === "secondaryInstructor1Name") {
+          const instructorId = instructorByName.get(value.toLowerCase().trim());
+          if (instructorId) {
+            courseData.secondaryInstructor1Id = instructorId;
+          }
+        } else if (dbField === "secondaryInstructor2Name") {
+          const instructorId = instructorByName.get(value.toLowerCase().trim());
+          if (instructorId) {
+            courseData.secondaryInstructor2Id = instructorId;
+          }
+        } else if (dbField === "studioName") {
+          // Resolve studio by name
+          const studioId = studioByName.get(value.toLowerCase().trim());
+          if (studioId) {
+            courseData.studioId = studioId;
+          }
+        } else if (dbField === "categoryName") {
+          // Resolve category by name
+          const categoryId = categoryByName.get(value.toLowerCase().trim());
+          if (categoryId) {
+            courseData.categoryId = categoryId;
+          }
+        } else if (dbField === "active") {
+          const b = value.toLowerCase();
+          courseData[dbField] = b === "si" || b === "sì" || b === "yes" || b === "1" || b === "true";
         } else {
           courseData[dbField] = value;
         }

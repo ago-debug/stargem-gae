@@ -71,16 +71,21 @@ const MEMBER_FIELDS = [
 // Course fields for mapping
 const COURSE_FIELDS = [
   { key: "name", label: "Nome Corso", required: true },
-  { key: "sku", label: "SKU" },
+  { key: "sku", label: "SKU (Codice Univoco)" },
   { key: "description", label: "Descrizione" },
+  { key: "categoryName", label: "Categoria (Nome)" },
+  { key: "studioName", label: "Studio/Sala (Nome)" },
+  { key: "instructorName", label: "Insegnante Primario (Nome Cognome)" },
+  { key: "secondaryInstructor1Name", label: "Insegnante Secondario 1 (Nome Cognome)" },
+  { key: "secondaryInstructor2Name", label: "Insegnante Secondario 2 (Nome Cognome)" },
   { key: "price", label: "Prezzo" },
   { key: "maxCapacity", label: "Capacità Massima" },
-  { key: "dayOfWeek", label: "Giorno della Settimana" },
+  { key: "dayOfWeek", label: "Giorno (0=Dom, 1=Lun, 2=Mar, 3=Mer, 4=Gio, 5=Ven, 6=Sab)" },
   { key: "startTime", label: "Orario Inizio (HH:MM)" },
   { key: "endTime", label: "Orario Fine (HH:MM)" },
-  { key: "recurrenceType", label: "Tipo Ricorrenza" },
-  { key: "startDate", label: "Data Inizio" },
-  { key: "endDate", label: "Data Fine" },
+  { key: "recurrenceType", label: "Ricorrenza (weekly, biweekly, monthly, once)" },
+  { key: "startDate", label: "Data Inizio Corso" },
+  { key: "endDate", label: "Data Fine Corso" },
   { key: "active", label: "Attivo (Si/No)" },
 ];
 
@@ -326,7 +331,7 @@ export default function ImportData() {
   });
 
   const mappedImportMutation = useMutation({
-    mutationFn: async (params: { spreadsheetId: string; range: string; fieldMapping: Record<string, number | null>; importKey: string }) => {
+    mutationFn: async (params: { spreadsheetId: string; range: string; fieldMapping: Record<string, number | null>; importKey: string; entityType: string }) => {
       return await apiRequest("POST", "/api/google-sheets/import-mapped", params);
     },
     onSuccess: (data: any) => {
