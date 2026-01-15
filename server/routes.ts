@@ -579,25 +579,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Google Sheets Preview Headers (for custom mapping) ====
   app.post("/api/google-sheets/preview-headers", isAuthenticated, async (req, res) => {
     try {
-      const { spreadsheetId, range = "A1:Z1" } = req.body;
+      const { spreadsheetId, range = "A1:Z1000" } = req.body;
       
       if (!spreadsheetId) {
         return res.status(400).json({ message: "spreadsheetId è obbligatorio" });
       }
 
-      // Read only first 5 rows for preview
-      const previewRange = range.replace(/:\w+\d*$/, ":Z5").replace(/^(\w+!)?\w+/, "$1A");
-      const rows = await readSpreadsheet(spreadsheetId, previewRange || "A1:Z5");
+      // Read first 5 rows for preview - use the range as-is if provided, otherwise default
+      const previewRange = range || "A1:Z5";
+      console.log("[Google Sheets Preview] Range:", previewRange);
+      const rows = await readSpreadsheet(spreadsheetId, previewRange);
+      console.log("[Google Sheets Preview] Rows count:", rows.length);
+      console.log("[Google Sheets Preview] First row:", JSON.stringify(rows[0]?.slice(0, 5)));
       
       if (rows.length < 1) {
         return res.status(400).json({ message: "Nessun dato trovato nel foglio" });
       }
 
+      // First row contains headers
       const headers = rows[0].map((h: string, i: number) => ({
         index: i,
         name: (h || `Colonna ${i + 1}`).toString().trim(),
         originalName: h || ""
       }));
+      
+      console.log("[Google Sheets Preview] Headers parsed:", headers.slice(0, 5));
       
       // Sample data (first 3 data rows)
       const sampleData = rows.slice(1, 4).map(row => 
