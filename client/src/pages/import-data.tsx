@@ -89,6 +89,17 @@ const COURSE_FIELDS = [
   { key: "active", label: "Attivo (Si/No)" },
 ];
 
+const INSTRUCTOR_FIELDS = [
+  { key: "firstName", label: "Nome", required: true },
+  { key: "lastName", label: "Cognome", required: true },
+  { key: "email", label: "Email" },
+  { key: "phone", label: "Telefono" },
+  { key: "specialization", label: "Specializzazione" },
+  { key: "bio", label: "Biografia" },
+  { key: "hourlyRate", label: "Tariffa Oraria" },
+  { key: "active", label: "Attivo (Si/No)" },
+];
+
 // Import key options for members
 const MEMBER_IMPORT_KEY_OPTIONS = [
   { key: "fiscalCode", label: "Codice Fiscale" },
@@ -103,6 +114,13 @@ const MEMBER_IMPORT_KEY_OPTIONS = [
 const COURSE_IMPORT_KEY_OPTIONS = [
   { key: "sku", label: "SKU" },
   { key: "name", label: "Nome Corso" },
+];
+
+// Import key options for instructors
+const INSTRUCTOR_IMPORT_KEY_OPTIONS = [
+  { key: "email", label: "Email" },
+  { key: "fullName", label: "Nome Completo (Nome + Cognome)" },
+  { key: "phone", label: "Telefono" },
 ];
 
 interface ImportConfig {
@@ -147,7 +165,7 @@ export default function ImportData() {
   const [importKey, setImportKey] = useState<string>("fiscalCode");
   
   // Entity type and source type for mapping
-  const [entityType, setEntityType] = useState<"members" | "courses">("members");
+  const [entityType, setEntityType] = useState<"members" | "courses" | "instructors">("members");
   const [sourceType, setSourceType] = useState<"google_sheets" | "file">("google_sheets");
   
   // Saved configs
@@ -158,8 +176,16 @@ export default function ImportData() {
   const [csvDelimiter, setCsvDelimiter] = useState<string>(",");
   
   // Get current fields and import key options based on entity type
-  const currentFields = entityType === "members" ? MEMBER_FIELDS : COURSE_FIELDS;
-  const currentImportKeyOptions = entityType === "members" ? MEMBER_IMPORT_KEY_OPTIONS : COURSE_IMPORT_KEY_OPTIONS;
+  const currentFields = entityType === "members" 
+    ? MEMBER_FIELDS 
+    : entityType === "courses" 
+      ? COURSE_FIELDS 
+      : INSTRUCTOR_FIELDS;
+  const currentImportKeyOptions = entityType === "members" 
+    ? MEMBER_IMPORT_KEY_OPTIONS 
+    : entityType === "courses" 
+      ? COURSE_IMPORT_KEY_OPTIONS 
+      : INSTRUCTOR_IMPORT_KEY_OPTIONS;
   
   // Fetch saved import configs
   const { data: savedConfigs = [] } = useQuery<ImportConfig[]>({
@@ -582,11 +608,12 @@ export default function ImportData() {
               <div>
                 <Label>Importa come</Label>
                 <Select value={entityType} onValueChange={(v) => {
-                  setEntityType(v as "members" | "courses");
-                  setImportKey(v === "members" ? "fiscalCode" : "sku");
+                  setEntityType(v as "members" | "courses" | "instructors");
+                  setImportKey(v === "members" ? "fiscalCode" : v === "courses" ? "sku" : "email");
                   // Reset mapping when entity type changes
                   const initialMapping: Record<string, number | null> = {};
-                  (v === "members" ? MEMBER_FIELDS : COURSE_FIELDS).forEach(field => {
+                  const fields = v === "members" ? MEMBER_FIELDS : v === "courses" ? COURSE_FIELDS : INSTRUCTOR_FIELDS;
+                  fields.forEach(field => {
                     initialMapping[field.key] = null;
                   });
                   setFieldMapping(initialMapping);
@@ -600,6 +627,9 @@ export default function ImportData() {
                     </SelectItem>
                     <SelectItem value="courses">
                       <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>
+                    </SelectItem>
+                    <SelectItem value="instructors">
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Insegnanti</span>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -1109,7 +1139,7 @@ export default function ImportData() {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label>Tipo di Dati da Importare</Label>
-                <Select value={entityType} onValueChange={(v) => setEntityType(v as "members" | "courses")}>
+                <Select value={entityType} onValueChange={(v) => setEntityType(v as "members" | "courses" | "instructors")}>
                   <SelectTrigger data-testid="select-file-entity-type">
                     <SelectValue />
                   </SelectTrigger>
@@ -1119,6 +1149,9 @@ export default function ImportData() {
                     </SelectItem>
                     <SelectItem value="courses">
                       <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>
+                    </SelectItem>
+                    <SelectItem value="instructors">
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Insegnanti</span>
                     </SelectItem>
                   </SelectContent>
                 </Select>
