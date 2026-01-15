@@ -2217,12 +2217,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Nessun file caricato" });
       }
 
+      // Get delimiter from request body (default to comma)
+      let delimiter = req.body.delimiter || ",";
+      // Handle escaped tab character
+      if (delimiter === "\\t") delimiter = "\t";
+
       const Papa = await import('papaparse');
       const fileContent = req.file.buffer.toString('utf-8');
       
       const parsed = Papa.default.parse(fileContent, {
         header: false,
         skipEmptyLines: true,
+        delimiter: delimiter,
       });
 
       const rows = parsed.data as string[][];
@@ -2244,7 +2250,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         headers,
         sampleData,
-        totalRows: rows.length - 1 // Exclude header row
+        totalRows: rows.length - 1, // Exclude header row
+        delimiter: delimiter // Return used delimiter for confirmation
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Errore lettura file" });
@@ -2261,6 +2268,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { fieldMapping, importKey, entityType } = req.body;
       const mapping = typeof fieldMapping === 'string' ? JSON.parse(fieldMapping) : fieldMapping;
       const entity = entityType || 'members';
+      
+      // Get delimiter from request body (default to comma)
+      let delimiter = req.body.delimiter || ",";
+      if (delimiter === "\\t") delimiter = "\t";
 
       const Papa = await import('papaparse');
       const fileContent = req.file.buffer.toString('utf-8');
@@ -2268,6 +2279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parsed = Papa.default.parse(fileContent, {
         header: false,
         skipEmptyLines: true,
+        delimiter: delimiter,
       });
 
       const rows = parsed.data as string[][];
