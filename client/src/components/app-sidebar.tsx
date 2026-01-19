@@ -96,6 +96,11 @@ const mainMenuItems = [
     url: "/report",
     icon: BarChart3,
   },
+  {
+    title: "test Gae",
+    url: "/test-gae",
+    icon: Settings,
+  },
 ];
 
 const commonTablesItems = [
