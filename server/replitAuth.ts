@@ -1,26 +1,35 @@
-import * as client from "openid-client";
-import { Strategy, type VerifyFunction } from "openid-client/passport";
 import passport from "passport";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
-import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
 export const isExternalDeploy = !process.env.REPLIT_DOMAINS;
 
-const getOidcConfig = memoize(
-  async () => {
-    if (isExternalDeploy) {
-      return null;
-    }
-    return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
-    );
-  },
-  { maxAge: 3600 * 1000 }
-);
+// Dynamic imports for openid-client (only loaded when needed)
+let oidcClient: typeof import("openid-client") | null = null;
+let oidcConfig: any = null;
+
+async function getOidcClient() {
+  if (!oidcClient && !isExternalDeploy) {
+    oidcClient = await import("openid-client");
+  }
+  return oidcClient;
+}
+
+async function getOidcConfig() {
+  if (isExternalDeploy) return null;
+  if (oidcConfig) return oidcConfig;
+  
+  const client = await getOidcClient();
+  if (!client) return null;
+  
+  oidcConfig = await client.discovery(
+    new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
+    process.env.REPL_ID!
+  );
+  return oidcConfig;
+}
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -44,10 +53,7 @@ export function getSession() {
   });
 }
 
-function updateUserSession(
-  user: any,
-  tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
-) {
+function updateUserSession(user: any, tokens: any) {
   user.claims = tokens.claims();
   user.access_token = tokens.access_token;
   user.refresh_token = tokens.refresh_token;
@@ -71,34 +77,12 @@ export async function setupAuth(app: Express) {
   app.use(passport.session());
 
   if (isExternalDeploy) {
-    // External deploy: use simple local authentication
+    // External deploy: simplified auth bypass
     passport.serializeUser((user: Express.User, cb) => cb(null, user));
     passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-    // Create default admin user if not exists
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@local";
-    const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
-    
     app.post("/api/login", async (req, res) => {
-      const { email, password } = req.body;
-      if (email === adminEmail && password === adminPassword) {
-        const user = {
-          claims: {
-            sub: "local-admin",
-            email: adminEmail,
-            first_name: "Admin",
-            last_name: "Local",
-          },
-          expires_at: Math.floor(Date.now() / 1000) + 86400 * 7, // 7 days
-        };
-        await upsertUser(user.claims);
-        req.login(user, (err) => {
-          if (err) return res.status(500).json({ message: "Login failed" });
-          res.json({ success: true });
-        });
-      } else {
-        res.status(401).json({ message: "Invalid credentials" });
-      }
+      res.json({ success: true });
     });
 
     app.get("/api/login", (req, res) => {
@@ -106,21 +90,24 @@ export async function setupAuth(app: Express) {
     });
 
     app.get("/api/logout", (req, res) => {
-      req.logout(() => {
-        res.redirect("/");
-      });
+      res.redirect("/");
     });
 
     return;
   }
 
-  // Replit Auth setup
+  // Replit Auth setup - only loaded when not external deploy
+  const client = await getOidcClient();
   const config = await getOidcConfig();
+  
+  if (!client || !config) {
+    console.error("Failed to load OIDC configuration");
+    return;
+  }
 
-  const verify: VerifyFunction = async (
-    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
-  ) => {
+  const { Strategy } = await import("openid-client/passport");
+
+  const verify = async (tokens: any, verified: passport.AuthenticateCallback) => {
     const user = {};
     updateUserSession(user, tokens);
     await upsertUser(tokens.claims());
@@ -157,14 +144,20 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  app.get("/api/logout", (req, res) => {
+  app.get("/api/logout", async (req, res) => {
+    const client = await getOidcClient();
+    const config = await getOidcConfig();
     req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config!, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+      if (client && config) {
+        res.redirect(
+          client.buildEndSessionUrl(config, {
+            client_id: process.env.REPL_ID!,
+            post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          }).href
+        );
+      } else {
+        res.redirect("/");
+      }
     });
   });
 }
@@ -172,7 +165,6 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   // Bypass authentication completely for external deployments
   if (isExternalDeploy) {
-    // Set a mock user for compatibility with routes that need user info
     const mockClaims = {
       sub: "external-user",
       email: "user@external",
@@ -181,9 +173,8 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     };
     (req as any).user = {
       claims: mockClaims,
-      expires_at: Math.floor(Date.now() / 1000) + 86400 * 365, // 1 year
+      expires_at: Math.floor(Date.now() / 1000) + 86400 * 365,
     };
-    // Ensure user exists in database
     await upsertUser(mockClaims);
     return next();
   }
@@ -206,8 +197,9 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   try {
+    const client = await getOidcClient();
     const config = await getOidcConfig();
-    if (!config) {
+    if (!client || !config) {
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
