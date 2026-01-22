@@ -170,6 +170,24 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // Bypass authentication completely for external deployments
+  if (isExternalDeploy) {
+    // Set a mock user for compatibility with routes that need user info
+    const mockClaims = {
+      sub: "external-user",
+      email: "user@external",
+      first_name: "External",
+      last_name: "User",
+    };
+    (req as any).user = {
+      claims: mockClaims,
+      expires_at: Math.floor(Date.now() / 1000) + 86400 * 365, // 1 year
+    };
+    // Ensure user exists in database
+    await upsertUser(mockClaims);
+    return next();
+  }
+
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user.expires_at) {
@@ -179,12 +197,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const now = Math.floor(Date.now() / 1000);
   if (now <= user.expires_at) {
     return next();
-  }
-
-  // For external deploy, just check expiration
-  if (isExternalDeploy) {
-    res.status(401).json({ message: "Session expired" });
-    return;
   }
 
   const refreshToken = user.refresh_token;

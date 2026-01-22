@@ -16,7 +16,13 @@ export default function Landing() {
   useEffect(() => {
     fetch("/api/config")
       .then((res) => res.json())
-      .then((data) => setIsExternalDeploy(data.isExternalDeploy))
+      .then((data) => {
+        setIsExternalDeploy(data.isExternalDeploy);
+        // Bypass login page entirely for external deployments
+        if (data.isExternalDeploy) {
+          window.location.href = "/";
+        }
+      })
       .catch(() => {});
   }, []);
 
