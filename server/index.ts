@@ -1,11 +1,17 @@
-import crypto from "crypto";
+import * as nodeCrypto from "node:crypto";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Ensure crypto is available globally for dependencies
+// Ensure crypto is available globally for dependencies that expect browser-like crypto
 if (typeof globalThis.crypto === 'undefined') {
-  (globalThis as any).crypto = crypto;
+  (globalThis as any).crypto = nodeCrypto.webcrypto;
+}
+// Also ensure crypto module is available for libraries using require('crypto')
+if (typeof (globalThis as any).crypto.randomBytes === 'undefined') {
+  (globalThis as any).crypto.randomBytes = nodeCrypto.randomBytes;
+  (globalThis as any).crypto.createHash = nodeCrypto.createHash;
+  (globalThis as any).crypto.createHmac = nodeCrypto.createHmac;
 }
 
 const app = express();
