@@ -358,8 +358,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // App config endpoint (public)
   app.get('/api/config', (req, res) => {
     res.json({
-      isExternalDeploy,
-      authType: isExternalDeploy ? 'local' : 'replit',
+      isExternalDeploy: isExternalDeploy(),
+      authType: isExternalDeploy() ? 'local' : 'replit',
     });
   });
 

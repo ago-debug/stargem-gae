@@ -4,21 +4,24 @@ import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-export const isExternalDeploy = !process.env.REPLIT_DOMAINS;
+// Check at runtime, not at bundle time
+export function isExternalDeploy(): boolean {
+  return !process.env.REPLIT_DOMAINS;
+}
 
 // Dynamic imports for openid-client (only loaded when needed)
 let oidcClient: typeof import("openid-client") | null = null;
 let oidcConfig: any = null;
 
 async function getOidcClient() {
-  if (!oidcClient && !isExternalDeploy) {
+  if (!oidcClient && !isExternalDeploy()) {
     oidcClient = await import("openid-client");
   }
   return oidcClient;
 }
 
 async function getOidcConfig() {
-  if (isExternalDeploy) return null;
+  if (isExternalDeploy()) return null;
   if (oidcConfig) return oidcConfig;
   
   const client = await getOidcClient();
@@ -76,7 +79,7 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  if (isExternalDeploy) {
+  if (isExternalDeploy()) {
     // External deploy: simplified auth bypass
     passport.serializeUser((user: Express.User, cb) => cb(null, user));
     passport.deserializeUser((user: Express.User, cb) => cb(null, user));
@@ -164,7 +167,7 @@ export async function setupAuth(app: Express) {
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   // Bypass authentication completely for external deployments
-  if (isExternalDeploy) {
+  if (isExternalDeploy()) {
     const mockClaims = {
       sub: "external-user",
       email: "user@external",
