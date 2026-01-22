@@ -560,6 +560,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Google Sheets Import Route ====
   app.post("/api/members/import-google-sheets", isAuthenticated, async (req, res) => {
     try {
+      // Google Sheets non disponibile su deploy esterni
+      if (isExternalDeploy()) {
+        return res.status(503).json({ 
+          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV." 
+        });
+      }
+      
       const { spreadsheetId, range = "A1:Z501", limit = 500 } = req.body;
       
       if (!spreadsheetId) {
@@ -705,6 +712,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Google Sheets Preview Headers (for custom mapping) ====
   app.post("/api/google-sheets/preview-headers", isAuthenticated, async (req, res) => {
     try {
+      // Google Sheets non disponibile su deploy esterni
+      if (isExternalDeploy()) {
+        return res.status(503).json({ 
+          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV." 
+        });
+      }
+      
       const { spreadsheetId, range = "A1:Z1000" } = req.body;
       
       if (!spreadsheetId) {
@@ -754,6 +768,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Google Sheets Import with Custom Mapping ====
   app.post("/api/google-sheets/import-mapped", isAuthenticated, async (req, res) => {
     try {
+      // Google Sheets non disponibile su deploy esterni
+      if (isExternalDeploy()) {
+        return res.status(503).json({ 
+          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV." 
+        });
+      }
+      
       const { 
         spreadsheetId, 
         range = "A1:Z1000", 
@@ -1906,6 +1927,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Google Sheets Import Route ====
   app.post("/api/import/google-sheets", isAuthenticated, async (req, res) => {
     try {
+      // Google Sheets non disponibile su deploy esterni
+      if (isExternalDeploy()) {
+        return res.status(503).json({ 
+          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV." 
+        });
+      }
+      
       let { spreadsheetId, range, type } = req.body;
       
       if (!spreadsheetId || !range) {
