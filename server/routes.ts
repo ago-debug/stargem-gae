@@ -2540,6 +2540,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const errors: { row: number; message: string }[] = [];
 
       if (entity === 'members') {
+        // Load all members once before the loop for efficiency
+        const allMembers = await storage.getMembers();
+        
+        // Create a lookup map for faster duplicate detection
+        const memberLookup = new Map<string, any>();
+        if (importKey) {
+          for (const member of allMembers) {
+            const keyValue = member[importKey as keyof typeof member];
+            if (keyValue && typeof keyValue === 'string') {
+              // Normalize: trim, uppercase, remove extra spaces
+              const normalizedKey = keyValue.trim().toUpperCase().replace(/\s+/g, ' ');
+              memberLookup.set(normalizedKey, member);
+            }
+          }
+        }
+
         for (let i = 0; i < dataRows.length; i++) {
           const row = dataRows[i];
           const rowNum = i + 2; // Account for header + 0-index
@@ -2588,21 +2604,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               continue;
             }
 
-            // Check for existing member based on import key
+            // Check for existing member based on import key using the lookup map
             let existingMember = null;
             if (importKey && memberData[importKey]) {
-              const allMembers = await storage.getMembers();
-              existingMember = allMembers.find((m: any) => 
-                m[importKey] && m[importKey].toLowerCase() === memberData[importKey].toLowerCase()
-              );
+              const importKeyValue = String(memberData[importKey]).trim().toUpperCase().replace(/\s+/g, ' ');
+              existingMember = memberLookup.get(importKeyValue);
             }
 
             if (existingMember) {
               await storage.updateMember(existingMember.id, memberData);
               updated++;
             } else {
-              await storage.createMember(memberData);
+              const newMember = await storage.createMember(memberData);
               imported++;
+              // Add new member to lookup to handle duplicates within same import
+              if (importKey && memberData[importKey]) {
+                const importKeyValue = String(memberData[importKey]).trim().toUpperCase().replace(/\s+/g, ' ');
+                memberLookup.set(importKeyValue, newMember);
+              }
             }
           } catch (err: any) {
             errors.push({ row: rowNum, message: err.message || "Errore sconosciuto" });
