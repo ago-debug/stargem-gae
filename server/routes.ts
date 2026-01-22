@@ -2545,31 +2545,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Create a lookup map for faster duplicate detection
         const memberLookup = new Map<string, any>();
+        const seenInImport = new Set<string>(); // Track keys seen in current import
         if (importKey) {
           for (const member of allMembers) {
             const keyValue = member[importKey as keyof typeof member];
             if (keyValue && typeof keyValue === 'string') {
-              // Normalize: trim, uppercase, remove extra spaces
               const normalizedKey = keyValue.trim().toUpperCase().replace(/\s+/g, ' ');
               memberLookup.set(normalizedKey, member);
             }
           }
         }
 
+        // Prepare all member data first
+        const toInsert: any[] = [];
+        const toUpdate: { id: number; data: any }[] = [];
+
         for (let i = 0; i < dataRows.length; i++) {
           const row = dataRows[i];
-          const rowNum = i + 2; // Account for header + 0-index
+          const rowNum = i + 2;
 
           try {
             const memberData: any = {};
 
-            // Map fields from row using column indices
             for (const [field, colIndex] of Object.entries(mapping)) {
               if (colIndex !== null && colIndex !== undefined && (colIndex as number) >= 0) {
                 let value = row[colIndex as number]?.trim();
                 if (value === undefined || value === "") continue;
 
-                // Handle date fields
                 if (["dateOfBirth", "cardIssueDate", "cardExpiryDate", "entityCardIssueDate", "entityCardExpiryDate", "medicalCertificateExpiry"].includes(field)) {
                   const dateFormats = [/(\d{2})\/(\d{2})\/(\d{4})/, /(\d{4})-(\d{2})-(\d{2})/];
                   let dateValue = null;
@@ -2604,28 +2606,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
               continue;
             }
 
-            // Check for existing member based on import key using the lookup map
+            // Check for existing member or duplicate in current import
             let existingMember = null;
+            let importKeyValue = '';
             if (importKey && memberData[importKey]) {
-              const importKeyValue = String(memberData[importKey]).trim().toUpperCase().replace(/\s+/g, ' ');
+              importKeyValue = String(memberData[importKey]).trim().toUpperCase().replace(/\s+/g, ' ');
+              
+              // Skip if already seen in this import (duplicate in CSV)
+              if (seenInImport.has(importKeyValue)) {
+                skipped++;
+                continue;
+              }
+              seenInImport.add(importKeyValue);
               existingMember = memberLookup.get(importKeyValue);
             }
 
             if (existingMember) {
-              await storage.updateMember(existingMember.id, memberData);
-              updated++;
+              toUpdate.push({ id: existingMember.id, data: memberData });
             } else {
-              const newMember = await storage.createMember(memberData);
-              imported++;
-              // Add new member to lookup to handle duplicates within same import
-              if (importKey && memberData[importKey]) {
-                const importKeyValue = String(memberData[importKey]).trim().toUpperCase().replace(/\s+/g, ' ');
-                memberLookup.set(importKeyValue, newMember);
-              }
+              toInsert.push(memberData);
             }
           } catch (err: any) {
             errors.push({ row: rowNum, message: err.message || "Errore sconosciuto" });
             skipped++;
+          }
+        }
+
+        // Process inserts in batches of 100
+        const BATCH_SIZE = 100;
+        for (let i = 0; i < toInsert.length; i += BATCH_SIZE) {
+          const batch = toInsert.slice(i, i + BATCH_SIZE);
+          for (const memberData of batch) {
+            try {
+              await storage.createMember(memberData);
+              imported++;
+            } catch (err: any) {
+              errors.push({ row: 0, message: err.message || "Errore inserimento" });
+              skipped++;
+            }
+          }
+        }
+
+        // Process updates in batches of 100
+        for (let i = 0; i < toUpdate.length; i += BATCH_SIZE) {
+          const batch = toUpdate.slice(i, i + BATCH_SIZE);
+          for (const { id, data } of batch) {
+            try {
+              await storage.updateMember(id, data);
+              updated++;
+            } catch (err: any) {
+              errors.push({ row: 0, message: err.message || "Errore aggiornamento" });
+              skipped++;
+            }
           }
         }
       } else if (entity === 'courses') {
