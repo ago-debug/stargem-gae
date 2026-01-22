@@ -7,7 +7,7 @@ interface ConfigResponse {
 }
 
 export function useAuth() {
-  const { data: config } = useQuery<ConfigResponse>({
+  const { data: config, isLoading: configLoading } = useQuery<ConfigResponse>({
     queryKey: ["/api/config"],
     retry: false,
   });
@@ -15,17 +15,28 @@ export function useAuth() {
   const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     retry: false,
-    enabled: !config?.isExternalDeploy,
+    enabled: config !== undefined && !config.isExternalDeploy,
   });
 
+  // Still loading config
+  if (configLoading) {
+    return {
+      user: undefined,
+      isLoading: true,
+      isAuthenticated: false,
+    };
+  }
+
+  // External deploy - bypass auth completely
   if (config?.isExternalDeploy) {
     return {
-      user: { id: "external-user", email: "user@external", firstName: "External", lastName: "User" } as User,
+      user: { id: "external-user", email: "admin@studio", firstName: "Admin", lastName: "User" } as User,
       isLoading: false,
       isAuthenticated: true,
     };
   }
 
+  // Normal Replit auth
   return {
     user,
     isLoading: userLoading,
