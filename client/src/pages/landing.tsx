@@ -1,8 +1,56 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { LayoutDashboard, Users, Calendar, BarChart3 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Landing() {
+  const [isExternalDeploy, setIsExternalDeploy] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((res) => res.json())
+      .then((data) => setIsExternalDeploy(data.isExternalDeploy))
+      .catch(() => {});
+  }, []);
+
+  const handleLocalLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+      if (res.ok) {
+        window.location.href = "/";
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Errore di accesso",
+          description: data.message || "Credenziali non valide",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({
+        title: "Errore",
+        description: "Impossibile effettuare il login",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background">
       <div className="container mx-auto px-4 py-16 max-w-6xl">
@@ -13,14 +61,58 @@ export default function Landing() {
           <p className="text-xl text-muted-foreground mb-8">
             Gestisci iscritti, corsi, pagamenti e molto altro in un'unica piattaforma
           </p>
-          <Button 
-            size="lg" 
-            onClick={() => window.location.href = '/api/login'}
-            data-testid="button-login"
-            className="min-h-11"
-          >
-            Accedi alla Piattaforma
-          </Button>
+          
+          {isExternalDeploy ? (
+            <Card className="max-w-sm mx-auto">
+              <CardHeader>
+                <CardTitle>Accedi</CardTitle>
+                <CardDescription>Inserisci le tue credenziali</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleLocalLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="text"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="admin@local"
+                      data-testid="input-email"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="password"
+                      data-testid="input-password"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={isLoading}
+                    data-testid="button-login"
+                  >
+                    {isLoading ? "Accesso in corso..." : "Accedi"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ) : (
+            <Button 
+              size="lg" 
+              onClick={() => window.location.href = '/api/login'}
+              data-testid="button-login"
+              className="min-h-11"
+            >
+              Accedi alla Piattaforma
+            </Button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

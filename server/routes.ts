@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, isExternalDeploy } from "./replitAuth";
 import multer from "multer";
 import Papa from "papaparse";
 import { readSpreadsheet } from "./google-sheets";
@@ -354,6 +354,14 @@ async function importInstructorsFromRows(
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   await setupAuth(app);
+
+  // App config endpoint (public)
+  app.get('/api/config', (req, res) => {
+    res.json({
+      isExternalDeploy,
+      authType: isExternalDeploy ? 'local' : 'replit',
+    });
+  });
 
   // Auth user endpoint
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

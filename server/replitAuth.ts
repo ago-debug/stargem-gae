@@ -7,12 +7,13 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
+export const isExternalDeploy = !process.env.REPLIT_DOMAINS;
 
 const getOidcConfig = memoize(
   async () => {
+    if (isExternalDeploy) {
+      return null;
+    }
     return await client.discovery(
       new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
       process.env.REPL_ID!
@@ -69,6 +70,51 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  if (isExternalDeploy) {
+    // External deploy: use simple local authentication
+    passport.serializeUser((user: Express.User, cb) => cb(null, user));
+    passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+
+    // Create default admin user if not exists
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@local";
+    const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+    
+    app.post("/api/login", async (req, res) => {
+      const { email, password } = req.body;
+      if (email === adminEmail && password === adminPassword) {
+        const user = {
+          claims: {
+            sub: "local-admin",
+            email: adminEmail,
+            first_name: "Admin",
+            last_name: "Local",
+          },
+          expires_at: Math.floor(Date.now() / 1000) + 86400 * 7, // 7 days
+        };
+        await upsertUser(user.claims);
+        req.login(user, (err) => {
+          if (err) return res.status(500).json({ message: "Login failed" });
+          res.json({ success: true });
+        });
+      } else {
+        res.status(401).json({ message: "Invalid credentials" });
+      }
+    });
+
+    app.get("/api/login", (req, res) => {
+      res.redirect("/");
+    });
+
+    app.get("/api/logout", (req, res) => {
+      req.logout(() => {
+        res.redirect("/");
+      });
+    });
+
+    return;
+  }
+
+  // Replit Auth setup
   const config = await getOidcConfig();
 
   const verify: VerifyFunction = async (
@@ -114,7 +160,7 @@ export async function setupAuth(app: Express) {
   app.get("/api/logout", (req, res) => {
     req.logout(() => {
       res.redirect(
-        client.buildEndSessionUrl(config, {
+        client.buildEndSessionUrl(config!, {
           client_id: process.env.REPL_ID!,
           post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
         }).href
@@ -135,6 +181,12 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return next();
   }
 
+  // For external deploy, just check expiration
+  if (isExternalDeploy) {
+    res.status(401).json({ message: "Session expired" });
+    return;
+  }
+
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
     res.status(401).json({ message: "Unauthorized" });
@@ -143,6 +195,10 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
 
   try {
     const config = await getOidcConfig();
+    if (!config) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
     const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
     updateUserSession(user, tokenResponse);
     return next();
