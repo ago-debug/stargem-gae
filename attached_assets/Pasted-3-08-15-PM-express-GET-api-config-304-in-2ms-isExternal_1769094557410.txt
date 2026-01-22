@@ -1,0 +1,303 @@
+3:08:15 PM [express] GET /api/config 304 in 2ms :: {"isExternalDeploy":true,"authType":"local"}
+0|gestione-corsi  | 3:08:15 PM [express] GET /api/config 304 in 1ms :: {"isExternalDeploy":true,"authType":"local"}
+0|gestione-corsi  | ErrorEvent {
+0|gestione-corsi  |   [Symbol(kTarget)]: WebSocket {
+0|gestione-corsi  |     _events: [Object: null prototype] {
+0|gestione-corsi  |       error: [Function],
+0|gestione-corsi  |       message: [Function],
+0|gestione-corsi  |       close: [Function],
+0|gestione-corsi  |       open: [Function]
+0|gestione-corsi  |     },
+0|gestione-corsi  |     _eventsCount: 4,
+0|gestione-corsi  |     _maxListeners: undefined,
+0|gestione-corsi  |     _binaryType: 'arraybuffer',
+0|gestione-corsi  |     _closeCode: 1006,
+0|gestione-corsi  |     _closeFrameReceived: false,
+0|gestione-corsi  |     _closeFrameSent: false,
+0|gestione-corsi  |     _closeMessage: <Buffer >,
+0|gestione-corsi  |     _closeTimer: null,
+0|gestione-corsi  |     _errorEmitted: true,
+0|gestione-corsi  |     _extensions: {},
+0|gestione-corsi  |     _paused: false,
+0|gestione-corsi  |     _protocol: '',
+0|gestione-corsi  |     _readyState: 3,
+0|gestione-corsi  |     _receiver: null,
+0|gestione-corsi  |     _sender: null,
+0|gestione-corsi  |     _socket: null,
+0|gestione-corsi  |     _bufferedAmount: 0,
+0|gestione-corsi  |     _isServer: false,
+0|gestione-corsi  |     _redirects: 0,
+0|gestione-corsi  |     _autoPong: true,
+0|gestione-corsi  |     _url: 'wss://localhost/v2',
+0|gestione-corsi  |     _req: null,
+0|gestione-corsi  |     [Symbol(kCapture)]: false
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kType)]: 'error',
+0|gestione-corsi  |   [Symbol(kError)]: Error: connect ECONNREFUSED ::1:443
+0|gestione-corsi  |       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+0|gestione-corsi  |     errno: -111,
+0|gestione-corsi  |     code: 'ECONNREFUSED',
+0|gestione-corsi  |     syscall: 'connect',
+0|gestione-corsi  |     address: '::1',
+0|gestione-corsi  |     port: 443
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kMessage)]: 'connect ECONNREFUSED ::1:443'
+0|gestione-corsi  | }
+0|gestione-corsi  | ErrorEvent {
+0|gestione-corsi  |   [Symbol(kTarget)]: WebSocket {
+0|gestione-corsi  |     _events: [Object: null prototype] {
+0|gestione-corsi  |       error: [Function],
+0|gestione-corsi  |       message: [Function],
+0|gestione-corsi  |       close: [Function],
+0|gestione-corsi  |       open: [Function]
+0|gestione-corsi  |     },
+0|gestione-corsi  |     _eventsCount: 4,
+0|gestione-corsi  |     _maxListeners: undefined,
+0|gestione-corsi  |     _binaryType: 'arraybuffer',
+0|gestione-corsi  |     _closeCode: 1006,
+0|gestione-corsi  |     _closeFrameReceived: false,
+0|gestione-corsi  |     _closeFrameSent: false,
+0|gestione-corsi  |     _closeMessage: <Buffer >,
+0|gestione-corsi  |     _closeTimer: null,
+0|gestione-corsi  |     _errorEmitted: true,
+0|gestione-corsi  |     _extensions: {},
+0|gestione-corsi  |     _paused: false,
+0|gestione-corsi  |     _protocol: '',
+0|gestione-corsi  |     _readyState: 3,
+0|gestione-corsi  |     _receiver: null,
+0|gestione-corsi  |     _sender: null,
+0|gestione-corsi  |     _socket: null,
+0|gestione-corsi  |     _bufferedAmount: 0,
+0|gestione-corsi  |     _isServer: false,
+0|gestione-corsi  |     _redirects: 0,
+0|gestione-corsi  |     _autoPong: true,
+0|gestione-corsi  |     _url: 'wss://localhost/v2',
+0|gestione-corsi  |     _req: null,
+0|gestione-corsi  |     [Symbol(kCapture)]: false
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kType)]: 'error',
+0|gestione-corsi  |   [Symbol(kError)]: Error: connect ECONNREFUSED ::1:443
+0|gestione-corsi  |       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+0|gestione-corsi  |     errno: -111,
+0|gestione-corsi  |     code: 'ECONNREFUSED',
+0|gestione-corsi  |     syscall: 'connect',
+0|gestione-corsi  |     address: '::1',
+0|gestione-corsi  |     port: 443
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kMessage)]: 'connect ECONNREFUSED ::1:443'
+0|gestione-corsi  | }
+0|gestione-corsi  | ErrorEvent {
+0|gestione-corsi  |   [Symbol(kTarget)]: WebSocket {
+0|gestione-corsi  |     _events: [Object: null prototype] {
+0|gestione-corsi  |       error: [Function],
+0|gestione-corsi  |       message: [Function],
+0|gestione-corsi  |       close: [Function],
+0|gestione-corsi  |       open: [Function]
+0|gestione-corsi  |     },
+0|gestione-corsi  |     _eventsCount: 4,
+0|gestione-corsi  |     _maxListeners: undefined,
+0|gestione-corsi  |     _binaryType: 'arraybuffer',
+0|gestione-corsi  |     _closeCode: 1006,
+0|gestione-corsi  |     _closeFrameReceived: false,
+0|gestione-corsi  |     _closeFrameSent: false,
+0|gestione-corsi  |     _closeMessage: <Buffer >,
+0|gestione-corsi  |     _closeTimer: null,
+0|gestione-corsi  |     _errorEmitted: true,
+0|gestione-corsi  |     _extensions: {},
+0|gestione-corsi  |     _paused: false,
+0|gestione-corsi  |     _protocol: '',
+0|gestione-corsi  |     _readyState: 3,
+0|gestione-corsi  |     _receiver: null,
+0|gestione-corsi  |     _sender: null,
+0|gestione-corsi  |     _socket: null,
+0|gestione-corsi  |     _bufferedAmount: 0,
+0|gestione-corsi  |     _isServer: false,
+0|gestione-corsi  |     _redirects: 0,
+0|gestione-corsi  |     _autoPong: true,
+0|gestione-corsi  |     _url: 'wss://localhost/v2',
+0|gestione-corsi  |     _req: null,
+0|gestione-corsi  |     [Symbol(kCapture)]: false
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kType)]: 'error',
+0|gestione-corsi  |   [Symbol(kError)]: Error: connect ECONNREFUSED ::1:443
+0|gestione-corsi  |       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+0|gestione-corsi  |     errno: -111,
+0|gestione-corsi  |     code: 'ECONNREFUSED',
+0|gestione-corsi  |     syscall: 'connect',
+0|gestione-corsi  |     address: '::1',
+0|gestione-corsi  |     port: 443
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kMessage)]: 'connect ECONNREFUSED ::1:443'
+0|gestione-corsi  | }
+0|gestione-corsi  | ErrorEvent {
+0|gestione-corsi  |   [Symbol(kTarget)]: WebSocket {
+0|gestione-corsi  |     _events: [Object: null prototype] {
+0|gestione-corsi  |       error: [Function],
+0|gestione-corsi  |       message: [Function],
+0|gestione-corsi  |       close: [Function],
+0|gestione-corsi  |       open: [Function]
+0|gestione-corsi  |     },
+0|gestione-corsi  |     _eventsCount: 4,
+0|gestione-corsi  |     _maxListeners: undefined,
+0|gestione-corsi  |     _binaryType: 'arraybuffer',
+0|gestione-corsi  |     _closeCode: 1006,
+0|gestione-corsi  |     _closeFrameReceived: false,
+0|gestione-corsi  |     _closeFrameSent: false,
+0|gestione-corsi  |     _closeMessage: <Buffer >,
+0|gestione-corsi  |     _closeTimer: null,
+0|gestione-corsi  |     _errorEmitted: true,
+0|gestione-corsi  |     _extensions: {},
+0|gestione-corsi  |     _paused: false,
+0|gestione-corsi  |     _protocol: '',
+0|gestione-corsi  |     _readyState: 3,
+0|gestione-corsi  |     _receiver: null,
+0|gestione-corsi  |     _sender: null,
+0|gestione-corsi  |     _socket: null,
+0|gestione-corsi  |     _bufferedAmount: 0,
+0|gestione-corsi  |     _isServer: false,
+0|gestione-corsi  |     _redirects: 0,
+0|gestione-corsi  |     _autoPong: true,
+0|gestione-corsi  |     _url: 'wss://localhost/v2',
+0|gestione-corsi  |     _req: null,
+0|gestione-corsi  |     [Symbol(kCapture)]: false
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kType)]: 'error',
+0|gestione-corsi  |   [Symbol(kError)]: Error: connect ECONNREFUSED ::1:443
+0|gestione-corsi  |       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+0|gestione-corsi  |     errno: -111,
+0|gestione-corsi  |     code: 'ECONNREFUSED',
+0|gestione-corsi  |     syscall: 'connect',
+0|gestione-corsi  |     address: '::1',
+0|gestione-corsi  |     port: 443
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kMessage)]: 'connect ECONNREFUSED ::1:443'
+0|gestione-corsi  | }
+0|gestione-corsi  | ErrorEvent {
+0|gestione-corsi  |   [Symbol(kTarget)]: WebSocket {
+0|gestione-corsi  |     _events: [Object: null prototype] {
+0|gestione-corsi  |       error: [Function],
+0|gestione-corsi  |       message: [Function],
+0|gestione-corsi  |       close: [Function],
+0|gestione-corsi  |       open: [Function]
+0|gestione-corsi  |     },
+0|gestione-corsi  |     _eventsCount: 4,
+0|gestione-corsi  |     _maxListeners: undefined,
+0|gestione-corsi  |     _binaryType: 'arraybuffer',
+0|gestione-corsi  |     _closeCode: 1006,
+0|gestione-corsi  |     _closeFrameReceived: false,
+0|gestione-corsi  |     _closeFrameSent: false,
+0|gestione-corsi  |     _closeMessage: <Buffer >,
+0|gestione-corsi  |     _closeTimer: null,
+0|gestione-corsi  |     _errorEmitted: true,
+0|gestione-corsi  |     _extensions: {},
+0|gestione-corsi  |     _paused: false,
+0|gestione-corsi  |     _protocol: '',
+0|gestione-corsi  |     _readyState: 3,
+0|gestione-corsi  |     _receiver: null,
+0|gestione-corsi  |     _sender: null,
+0|gestione-corsi  |     _socket: null,
+0|gestione-corsi  |     _bufferedAmount: 0,
+0|gestione-corsi  |     _isServer: false,
+0|gestione-corsi  |     _redirects: 0,
+0|gestione-corsi  |     _autoPong: true,
+0|gestione-corsi  |     _url: 'wss://localhost/v2',
+0|gestione-corsi  |     _req: null,
+0|gestione-corsi  |     [Symbol(kCapture)]: false
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kType)]: 'error',
+0|gestione-corsi  |   [Symbol(kError)]: Error: connect ECONNREFUSED ::1:443
+0|gestione-corsi  |       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+0|gestione-corsi  |     errno: -111,
+0|gestione-corsi  |     code: 'ECONNREFUSED',
+0|gestione-corsi  |     syscall: 'connect',
+0|gestione-corsi  |     address: '::1',
+0|gestione-corsi  |     port: 443
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kMessage)]: 'connect ECONNREFUSED ::1:443'
+0|gestione-corsi  | }
+0|gestione-corsi  | ErrorEvent {
+0|gestione-corsi  |   [Symbol(kTarget)]: WebSocket {
+0|gestione-corsi  |     _events: [Object: null prototype] {
+0|gestione-corsi  |       error: [Function],
+0|gestione-corsi  |       message: [Function],
+0|gestione-corsi  |       close: [Function],
+0|gestione-corsi  |       open: [Function]
+0|gestione-corsi  |     },
+0|gestione-corsi  |     _eventsCount: 4,
+0|gestione-corsi  |     _maxListeners: undefined,
+0|gestione-corsi  |     _binaryType: 'arraybuffer',
+0|gestione-corsi  |     _closeCode: 1006,
+0|gestione-corsi  |     _closeFrameReceived: false,
+0|gestione-corsi  |     _closeFrameSent: false,
+0|gestione-corsi  |     _closeMessage: <Buffer >,
+0|gestione-corsi  |     _closeTimer: null,
+0|gestione-corsi  |     _errorEmitted: true,
+0|gestione-corsi  |     _extensions: {},
+0|gestione-corsi  |     _paused: false,
+0|gestione-corsi  |     _protocol: '',
+0|gestione-corsi  |     _readyState: 3,
+0|gestione-corsi  |     _receiver: null,
+0|gestione-corsi  |     _sender: null,
+0|gestione-corsi  |     _socket: null,
+0|gestione-corsi  |     _bufferedAmount: 0,
+0|gestione-corsi  |     _isServer: false,
+0|gestione-corsi  |     _redirects: 0,
+0|gestione-corsi  |     _autoPong: true,
+0|gestione-corsi  |     _url: 'wss://localhost/v2',
+0|gestione-corsi  |     _req: null,
+0|gestione-corsi  |     [Symbol(kCapture)]: false
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kType)]: 'error',
+0|gestione-corsi  |   [Symbol(kError)]: Error: connect ECONNREFUSED ::1:443
+0|gestione-corsi  |       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+0|gestione-corsi  |     errno: -111,
+0|gestione-corsi  |     code: 'ECONNREFUSED',
+0|gestione-corsi  |     syscall: 'connect',
+0|gestione-corsi  |     address: '::1',
+0|gestione-corsi  |     port: 443
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kMessage)]: 'connect ECONNREFUSED ::1:443'
+0|gestione-corsi  | }
+0|gestione-corsi  | ErrorEvent {
+0|gestione-corsi  |   [Symbol(kTarget)]: WebSocket {
+0|gestione-corsi  |     _events: [Object: null prototype] {
+0|gestione-corsi  |       error: [Function],
+0|gestione-corsi  |       message: [Function],
+0|gestione-corsi  |       close: [Function],
+0|gestione-corsi  |       open: [Function]
+0|gestione-corsi  |     },
+0|gestione-corsi  |     _eventsCount: 4,
+0|gestione-corsi  |     _maxListeners: undefined,
+0|gestione-corsi  |     _binaryType: 'arraybuffer',
+0|gestione-corsi  |     _closeCode: 1006,
+0|gestione-corsi  |     _closeFrameReceived: false,
+0|gestione-corsi  |     _closeFrameSent: false,
+0|gestione-corsi  |     _closeMessage: <Buffer >,
+0|gestione-corsi  |     _closeTimer: null,
+0|gestione-corsi  |     _errorEmitted: true,
+0|gestione-corsi  |     _extensions: {},
+0|gestione-corsi  |     _paused: false,
+0|gestione-corsi  |     _protocol: '',
+0|gestione-corsi  |     _readyState: 3,
+0|gestione-corsi  |     _receiver: null,
+0|gestione-corsi  |     _sender: null,
+0|gestione-corsi  |     _socket: null,
+0|gestione-corsi  |     _bufferedAmount: 0,
+0|gestione-corsi  |     _isServer: false,
+0|gestione-corsi  |     _redirects: 0,
+0|gestione-corsi  |     _autoPong: true,
+0|gestione-corsi  |     _url: 'wss://localhost/v2',
+0|gestione-corsi  |     _req: null,
+0|gestione-corsi  |     [Symbol(kCapture)]: false
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kType)]: 'error',
+0|gestione-corsi  |   [Symbol(kError)]: Error: connect ECONNREFUSED ::1:443
+0|gestione-corsi  |       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+0|gestione-corsi  |     errno: -111,
+0|gestione-corsi  |     code: 'ECONNREFUSED',
+0|gestione-corsi  |     syscall: 'connect',
+0|gestione-corsi  |     address: '::1',
+0|gestione-corsi  |     port: 443
+0|gestione-corsi  |   },
+0|gestione-corsi  |   [Symbol(kMessage)]: 'connect ECONNREFUSED ::1:443'
+0|gestione-corsi  | }
