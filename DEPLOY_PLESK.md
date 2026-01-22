@@ -34,13 +34,16 @@ Nella root del progetto, crea un file `.env`:
 NODE_ENV=production
 DATABASE_URL=postgresql://UTENTE:PASSWORD@localhost:5432/NOME_DATABASE
 SESSION_SECRET=genera_una_stringa_casuale_lunga_almeno_32_caratteri
-REPLIT_DEPLOYMENT=1
+ADMIN_EMAIL=tuaemail@esempio.com
+ADMIN_PASSWORD=la_tua_password_sicura
 ```
 
 Sostituisci:
-- `UTENTE` con l'utente del database
-- `PASSWORD` con la password del database
+- `UTENTE` con l'utente del database PostgreSQL
+- `PASSWORD` con la password del database PostgreSQL
 - `NOME_DATABASE` con il nome del database
+- `ADMIN_EMAIL` con l'email per accedere all'app
+- `ADMIN_PASSWORD` con la password per accedere all'app
 
 ### 2. Installa le dipendenze
 Via SSH, vai nella cartella del progetto e esegui:
@@ -84,6 +87,8 @@ Nella sezione Node.js di Plesk, aggiungi le variabili:
 - `NODE_ENV` = `production`
 - `DATABASE_URL` = `postgresql://UTENTE:PASSWORD@localhost:5432/NOME_DATABASE`
 - `SESSION_SECRET` = `la_tua_chiave_segreta`
+- `ADMIN_EMAIL` = `tuaemail@esempio.com`
+- `ADMIN_PASSWORD` = `la_tua_password_sicura`
 
 ### 3. Avvia l'applicazione
 Clicca su **Enable Node.js** e poi **Run NPM Install**.
