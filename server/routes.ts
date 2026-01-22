@@ -26,8 +26,13 @@ import {
   insertCustomReportSchema,
 } from "@shared/schema";
 
-// Configure multer for file uploads
-const upload = multer({ storage: multer.memoryStorage() });
+// Configure multer for file uploads with increased limits for large CSV files
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB max file size
+  }
+});
 
 // ==== Helper: Import Courses from Rows ====
 async function importCoursesFromRows(
