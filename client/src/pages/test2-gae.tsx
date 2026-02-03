@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AlertTriangle } from "lucide-react";
 import { 
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
   User, BookOpen, ShoppingBag
@@ -12,7 +13,9 @@ import {
 
 export default function Test2Gae() {
   const [formData, setFormData] = useState({
+    // Intestazione
     stagione: "2024-2025",
+    anagrafica: "",
     codiceId: "2425-000001",
     dataInserimento: new Date().toLocaleDateString("it-IT"),
     tipoPartecipante: "tesserato",
@@ -23,6 +26,7 @@ export default function Test2Gae() {
     tesseraEnte: "",
     scadenzaTesseraEnte: "",
     ente: "",
+    // Anagrafica principale
     cognome: "",
     nome: "",
     codiceFiscale: "",
@@ -37,19 +41,35 @@ export default function Test2Gae() {
     luogoNascita: "",
     sesso: "",
     eta: "",
+    allievo: "",
+    // Genitore 1
     cognomeGen1: "",
     nomeGen1: "",
     cfGen1: "",
     telGen1: "",
     emailGen1: "",
+    indirizzoGen1: "",
+    capGen1: "",
+    cittaGen1: "",
+    provinciaGen1: "",
+    codComuneGen1: "",
     dataNascitaGen1: "",
     luogoNascitaGen1: "",
     sessoGen1: "",
+    // Genitore 2
     cognomeGen2: "",
     nomeGen2: "",
     cfGen2: "",
     telGen2: "",
     emailGen2: "",
+    indirizzoGen2: "",
+    capGen2: "",
+    cittaGen2: "",
+    provinciaGen2: "",
+    codComuneGen2: "",
+    dataNascitaGen2: "",
+    luogoNascitaGen2: "",
+    sessoGen2: "",
   });
 
   const handleChange = (field: string, value: string) => {
@@ -125,10 +145,14 @@ export default function Test2Gae() {
               </div>
               <div className="space-y-2">
                 <Label>Anagrafica (chi scrive)</Label>
-                <Input placeholder="chi scrive" />
+                <Input 
+                  value={formData.anagrafica}
+                  onChange={(e) => handleChange("anagrafica", e.target.value)}
+                  placeholder="chi scrive" 
+                />
               </div>
               <div className="space-y-2">
-                <Label>Codice ID</Label>
+                <Label>Codice ID (C)</Label>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Auto</Badge>
                   <Input 
@@ -159,7 +183,11 @@ export default function Test2Gae() {
               </div>
               <div className="space-y-2">
                 <Label>Tessera</Label>
-                <Input value={formData.tessera} onChange={(e) => handleChange("tessera", e.target.value)} />
+                <Input 
+                  value={formData.tessera} 
+                  onChange={(e) => handleChange("tessera", e.target.value)} 
+                  className="bg-yellow-50 border-yellow-200"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Scadenza Tessera</Label>
@@ -167,7 +195,17 @@ export default function Test2Gae() {
               </div>
               <div className="space-y-2">
                 <Label>Da Dove Arriva</Label>
-                <Input value={formData.daDoveArriva} onChange={(e) => handleChange("daDoveArriva", e.target.value)} />
+                <Select value={formData.daDoveArriva} onValueChange={(v) => handleChange("daDoveArriva", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="web">Web</SelectItem>
+                    <SelectItem value="passaparola">Passaparola</SelectItem>
+                    <SelectItem value="social">Social</SelectItem>
+                    <SelectItem value="altro">Altro</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -185,7 +223,17 @@ export default function Test2Gae() {
               </div>
               <div className="space-y-2">
                 <Label>Ente</Label>
-                <Input value={formData.ente} onChange={(e) => handleChange("ente", e.target.value)} />
+                <Select value={formData.ente} onValueChange={(v) => handleChange("ente", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="acsi">ACSI</SelectItem>
+                    <SelectItem value="csen">CSEN</SelectItem>
+                    <SelectItem value="uisp">UISP</SelectItem>
+                    <SelectItem value="altro">Altro</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
@@ -203,7 +251,7 @@ export default function Test2Gae() {
             {/* Dati Personali */}
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Dati Personali</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Cognome *</Label>
                   <Input value={formData.cognome} onChange={(e) => handleChange("cognome", e.target.value)} />
@@ -213,19 +261,23 @@ export default function Test2Gae() {
                   <Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Codice Fiscale</Label>
-                  <Input value={formData.codiceFiscale} onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())} />
+                  <Label>Codice Fiscale (J)</Label>
+                  <Input 
+                    value={formData.codiceFiscale} 
+                    onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())} 
+                    className="bg-yellow-50 border-yellow-200"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Telefono</Label>
                   <Input value={formData.telefono} onChange={(e) => handleChange("telefono", e.target.value)} />
                 </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                 <div className="space-y-2">
                   <Label>Email</Label>
                   <Input type="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} />
                 </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                 <div className="space-y-2">
                   <Label>Indirizzo</Label>
                   <Input value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} />
@@ -238,8 +290,6 @@ export default function Test2Gae() {
                   <Label>Città</Label>
                   <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} />
                 </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                 <div className="space-y-2">
                   <Label>Provincia</Label>
                   <Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} />
@@ -248,6 +298,8 @@ export default function Test2Gae() {
                   <Label>Cod. Comune</Label>
                   <Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} />
                 </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                 <div className="space-y-2">
                   <Label>Data di Nascita</Label>
                   <Input type="date" value={formData.dataNascita} onChange={(e) => handleChange("dataNascita", e.target.value)} />
@@ -256,8 +308,6 @@ export default function Test2Gae() {
                   <Label>Luogo di Nascita</Label>
                   <Input value={formData.luogoNascita} onChange={(e) => handleChange("luogoNascita", e.target.value)} />
                 </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                 <div className="space-y-2">
                   <Label>Sesso</Label>
                   <Select value={formData.sesso} onValueChange={(v) => handleChange("sesso", v)}>
@@ -272,14 +322,18 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Età</Label>
-                  <Input value={formData.eta} onChange={(e) => handleChange("eta", e.target.value)} />
+                  <Input value={formData.eta} readOnly className="bg-muted" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Allievo</Label>
+                  <Input value={formData.allievo} onChange={(e) => handleChange("allievo", e.target.value)} />
                 </div>
               </div>
             </div>
 
             {/* Genitore 1 */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Genitore 1</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-teal-50 px-2 py-1 rounded">Genitore 1</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Cognome</Label>
@@ -300,6 +354,28 @@ export default function Test2Gae() {
                 <div className="space-y-2">
                   <Label>Email</Label>
                   <Input value={formData.emailGen1} onChange={(e) => handleChange("emailGen1", e.target.value)} />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Indirizzo</Label>
+                  <Input value={formData.indirizzoGen1} onChange={(e) => handleChange("indirizzoGen1", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>CAP</Label>
+                  <Input value={formData.capGen1} onChange={(e) => handleChange("capGen1", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Città</Label>
+                  <Input value={formData.cittaGen1} onChange={(e) => handleChange("cittaGen1", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Provincia</Label>
+                  <Input value={formData.provinciaGen1} onChange={(e) => handleChange("provinciaGen1", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Cod. Comune</Label>
+                  <Input value={formData.codComuneGen1} onChange={(e) => handleChange("codComuneGen1", e.target.value)} />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
@@ -328,7 +404,7 @@ export default function Test2Gae() {
 
             {/* Genitore 2 */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Genitore 2</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-teal-50 px-2 py-1 rounded">Genitore 2</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Cognome</Label>
@@ -351,6 +427,50 @@ export default function Test2Gae() {
                   <Input value={formData.emailGen2} onChange={(e) => handleChange("emailGen2", e.target.value)} />
                 </div>
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Indirizzo</Label>
+                  <Input value={formData.indirizzoGen2} onChange={(e) => handleChange("indirizzoGen2", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>CAP</Label>
+                  <Input value={formData.capGen2} onChange={(e) => handleChange("capGen2", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Città</Label>
+                  <Input value={formData.cittaGen2} onChange={(e) => handleChange("cittaGen2", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Provincia</Label>
+                  <Input value={formData.provinciaGen2} onChange={(e) => handleChange("provinciaGen2", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Cod. Comune</Label>
+                  <Input value={formData.codComuneGen2} onChange={(e) => handleChange("codComuneGen2", e.target.value)} />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Data di Nascita</Label>
+                  <Input type="date" value={formData.dataNascitaGen2} onChange={(e) => handleChange("dataNascitaGen2", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Luogo di Nascita</Label>
+                  <Input value={formData.luogoNascitaGen2} onChange={(e) => handleChange("luogoNascitaGen2", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sesso</Label>
+                  <Select value={formData.sessoGen2} onValueChange={(v) => handleChange("sessoGen2", v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="M">M</SelectItem>
+                      <SelectItem value="F">F</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -364,79 +484,75 @@ export default function Test2Gae() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
               <div className="space-y-2">
                 <Label>Attività</Label>
                 <Input />
               </div>
               <div className="space-y-2">
-                <Label>Dettaglio Iscrizione</Label>
+                <Label>Dettaglio Iscrizione (N)</Label>
                 <Input />
               </div>
               <div className="space-y-2">
-                <Label>Note Pagamenti</Label>
+                <Label>Note Pagamenti (O)</Label>
                 <Input />
               </div>
               <div className="space-y-2">
                 <Label>Quantità</Label>
                 <Input type="number" defaultValue={1} />
               </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label>Descrizione Quota</Label>
+                <Label>Descrizione Quota (Q)</Label>
                 <Input />
               </div>
               <div className="space-y-2">
-                <Label>Periodo</Label>
-                <Input />
-              </div>
-              <div className="space-y-2">
-                <Label>Totale Quota</Label>
-                <Input type="number" />
-              </div>
-              <div className="space-y-2">
-                <Label>Codice Sconto</Label>
+                <Label>Periodo (R)</Label>
                 <Input />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
               <div className="space-y-2">
-                <Label>Valore Sconto</Label>
+                <Label>Totale Quota (S)</Label>
                 <Input type="number" />
               </div>
               <div className="space-y-2">
-                <Label>% Sconto</Label>
-                <Input type="number" />
+                <Label>Codice Sconto (T)</Label>
+                <Input className="bg-yellow-50 border-yellow-200" />
               </div>
               <div className="space-y-2">
-                <Label>Codici Promo</Label>
-                <Input />
+                <Label>Valore Sconto (U)</Label>
+                <Input type="number" className="bg-yellow-50 border-yellow-200" />
               </div>
               <div className="space-y-2">
-                <Label>Valore Promo</Label>
-                <Input type="number" />
+                <Label>% Sconto (V)</Label>
+                <Input type="number" className="bg-yellow-50 border-yellow-200" />
+              </div>
+              <div className="space-y-2">
+                <Label>Codici Promo (W)</Label>
+                <Input className="bg-yellow-50 border-yellow-200" />
+              </div>
+              <div className="space-y-2">
+                <Label>Valore Promo (X)</Label>
+                <Input type="number" className="bg-yellow-50 border-yellow-200" />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
               <div className="space-y-2">
                 <Label>% Promo</Label>
+                <Input type="number" className="bg-yellow-50 border-yellow-200" />
+              </div>
+              <div className="space-y-2">
+                <Label>Acconto/Credito (Y)</Label>
                 <Input type="number" />
               </div>
               <div className="space-y-2">
-                <Label>Acconto/Credito</Label>
-                <Input type="number" />
-              </div>
-              <div className="space-y-2">
-                <Label>Data Pagamento</Label>
+                <Label>Data Pagamento (Z)</Label>
                 <Input type="date" />
               </div>
               <div className="space-y-2">
-                <Label>Saldo Annuale</Label>
+                <Label>Saldo Annuale (AA)</Label>
                 <Input type="number" />
               </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>N. Ricevute</Label>
                 <Input type="number" />
@@ -445,18 +561,20 @@ export default function Test2Gae() {
                 <Label>Conferma Bonifico</Label>
                 <Input type="date" />
               </div>
-              <div className="space-y-2 lg:col-span-2">
-                <Label>Saldo Totale</Label>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2 lg:col-span-4">
+                <Label>Saldo Totale (BO)</Label>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">Totale</Badge>
-                  <Input value="€ 0,00" readOnly className="bg-green-50 border-green-200 font-bold text-lg" />
+                  <Input value="€ 0,00" readOnly className="bg-green-50 border-green-200 font-bold text-lg max-w-xs" />
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* GIFT - BUONO - RESO */}
+        {/* GIFT - BUONO - RESO - HELLO GEM */}
         <Card id="gift" className="scroll-mt-32">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -499,11 +617,11 @@ export default function Test2Gae() {
                 <Input type="date" />
               </div>
               <div className="space-y-2">
-                <Label>Acquistato/Utilizzato per</Label>
+                <Label>Acquistato/Utilizzato per - Motivazione</Label>
                 <Input />
               </div>
               <div className="space-y-2">
-                <Label>Data Utilizzo/Reso</Label>
+                <Label>Data Utilizzo/Reso (Convalida)</Label>
                 <Input type="date" />
               </div>
               <div className="space-y-2">
@@ -525,15 +643,15 @@ export default function Test2Gae() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label>Quota Tessera</Label>
+                <Label>Quota Tessera (BY)</Label>
                 <Input type="number" />
               </div>
               <div className="space-y-2">
-                <Label>Pagamento Tessera</Label>
+                <Label>Pagamento Tessera (BZ)</Label>
                 <Input type="date" />
               </div>
               <div className="space-y-2">
-                <Label>Nuovo o Rinnovo</Label>
+                <Label>Nuovo o Rinnovo (CA)</Label>
                 <Select>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleziona" />
@@ -545,21 +663,21 @@ export default function Test2Gae() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Data Scad. Quota Tessera</Label>
+                <Label>Data Scad. Quota Tessera (CB)</Label>
                 <Input />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label>N. Tessera</Label>
+                <Label>N. Tessera (CC)</Label>
                 <Input />
               </div>
               <div className="space-y-2">
-                <Label>Tessera Ente</Label>
+                <Label>Tessera Ente (CD)</Label>
                 <Input />
               </div>
               <div className="space-y-2">
-                <Label>Domanda di Tesseramento</Label>
+                <Label>Domanda di Tesseramento (CE)</Label>
                 <Select>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleziona" />
@@ -583,7 +701,7 @@ export default function Test2Gae() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
               <div className="space-y-2">
                 <Label>Data Scadenza Certificato</Label>
                 <Input type="date" />
@@ -596,8 +714,6 @@ export default function Test2Gae() {
                 <Label>Rilasciato Da</Label>
                 <Input />
               </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Pagamento</Label>
                 <Input type="number" placeholder="€ 40" />
@@ -635,7 +751,7 @@ export default function Test2Gae() {
             {/* CORSI */}
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Corsi</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Input />
@@ -649,17 +765,19 @@ export default function Test2Gae() {
                   <Input />
                 </div>
                 <div className="space-y-2">
-                  <Label>Iscritti / Limite</Label>
-                  <div className="flex gap-2">
-                    <Input type="number" placeholder="Iscritti" />
-                    <Input type="number" placeholder="Limite" />
-                  </div>
+                  <Label>Iscritti</Label>
+                  <Input type="number" />
                 </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                 <div className="space-y-2">
-                  <Label>Attenzione</Label>
-                  <Input className="bg-orange-50 border-orange-200" placeholder="Avviso corsi pieni" />
+                  <Label>Limite</Label>
+                  <Input type="number" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3 text-orange-600" />
+                    Attenzione
+                  </Label>
+                  <Input className="bg-orange-50 border-orange-200" />
                 </div>
                 <div className="space-y-2">
                   <Label>Importo</Label>
@@ -671,7 +789,7 @@ export default function Test2Gae() {
             {/* PROVE A PAGAMENTO */}
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Prove a Pagamento</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Input />
@@ -681,11 +799,12 @@ export default function Test2Gae() {
                   <Input />
                 </div>
                 <div className="space-y-2">
-                  <Label>Iscritti / Posti Disp.</Label>
-                  <div className="flex gap-2">
-                    <Input type="number" placeholder="Iscritti" />
-                    <Input type="number" placeholder="Posti" />
-                  </div>
+                  <Label>Iscritti</Label>
+                  <Input type="number" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Posti Disp.</Label>
+                  <Input type="number" />
                 </div>
                 <div className="space-y-2">
                   <Label>Presenze</Label>
@@ -697,7 +816,7 @@ export default function Test2Gae() {
             {/* PROVE GRATUITE */}
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Prove Gratuite</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Input />
@@ -707,11 +826,12 @@ export default function Test2Gae() {
                   <Input />
                 </div>
                 <div className="space-y-2">
-                  <Label>Iscritti / Posti Disp.</Label>
-                  <div className="flex gap-2">
-                    <Input type="number" placeholder="Iscritti" />
-                    <Input type="number" placeholder="Posti" />
-                  </div>
+                  <Label>Iscritti</Label>
+                  <Input type="number" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Posti Disp.</Label>
+                  <Input type="number" />
                 </div>
                 <div className="space-y-2">
                   <Label>Data Prova</Label>
@@ -723,7 +843,7 @@ export default function Test2Gae() {
             {/* LEZIONI SINGOLE */}
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Lezioni Singole</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Input />
@@ -733,18 +853,22 @@ export default function Test2Gae() {
                   <Input />
                 </div>
                 <div className="space-y-2">
-                  <Label>Iscritti / Posti Disp.</Label>
-                  <div className="flex gap-2">
-                    <Input type="number" placeholder="Iscritti" />
-                    <Input type="number" placeholder="Posti" />
-                  </div>
+                  <Label>Iscritti</Label>
+                  <Input type="number" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Welfare / Presenze</Label>
-                  <div className="flex gap-2">
-                    <Input type="number" placeholder="Welfare" />
-                    <Input type="number" placeholder="Presenze" />
-                  </div>
+                  <Label>Posti Disp.</Label>
+                  <Input type="number" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Welfare</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Presenze</Label>
+                  <Input type="number" />
                 </div>
               </div>
             </div>
