@@ -866,65 +866,54 @@ export default function TestGae() {
         {/* ATTIVITÀ */}
         <SectionBand title="ATTIVITÀ" color="yellow">
           <div className="flex gap-4">
-            <div className="flex-1">
+            <div className="flex-1 space-y-4">
               {/* CORSI */}
-              <div className="mb-4">
-                <div className="bg-gray-200 px-2 py-1 font-bold text-xs mb-1">CORSI</div>
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">CORSI</div>
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
                       <Cell header>categorie</Cell>
-                      <Cell header>codici corso - iscrizioni</Cell>
+                      <Cell header>codici corso</Cell>
                       <Cell header>provenienza</Cell>
-                      <Cell header>quanti iscritti</Cell>
-                      <Cell header>limite max</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>limite</Cell>
                       <Cell header className="bg-orange-100">
                         <div className="flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3 text-orange-600" />
                           ATTENZIONE
                         </div>
                       </Cell>
-                      <Cell header>importo singolo corso</Cell>
+                      <Cell header>importo</Cell>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <Cell>
-                        <Select>
-                          <SelectTrigger className="h-6 text-xs border-0">
-                            <SelectValue placeholder="..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="danza">Danza</SelectItem>
-                            <SelectItem value="fitness">Fitness</SelectItem>
-                            <SelectItem value="yoga">Yoga</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Cell>
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
                       <Cell className="bg-orange-50 text-xs text-orange-700"></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
               {/* PROVE A PAGAMENTO */}
-              <div className="mb-4">
-                <div className="bg-gray-200 px-2 py-1 font-bold text-xs mb-1">PROVE A PAGAMENTO</div>
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">PROVE A PAGAMENTO</div>
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
                       <Cell header>categorie</Cell>
-                      <Cell header>codici corso - prove</Cell>
+                      <Cell header>codici corso</Cell>
                       <Cell header>provenienza</Cell>
-                      <Cell header>quanti iscritti</Cell>
-                      <Cell header>posti disponibili</Cell>
-                      <Cell header className="bg-orange-100">AVVISARE corsi pieni!!!</Cell>
-                      <Cell header>presenze - prove pagate</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>presenze</Cell>
                     </tr>
                   </thead>
                   <tbody>
@@ -932,28 +921,28 @@ export default function TestGae() {
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
                       <Cell className="bg-orange-50"></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
               {/* PROVE GRATUITE */}
-              <div className="mb-4">
-                <div className="bg-gray-200 px-2 py-1 font-bold text-xs mb-1">PROVE GRATUITE</div>
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">PROVE GRATUITE</div>
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
                       <Cell header>categorie</Cell>
-                      <Cell header>codici corso - prove</Cell>
+                      <Cell header>codici corso</Cell>
                       <Cell header>provenienza</Cell>
-                      <Cell header>quanti iscritti</Cell>
-                      <Cell header>posti disponibili</Cell>
-                      <Cell header className="bg-orange-100">AVVISARE corsi pieni!!!</Cell>
-                      <Cell header>data della prova</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>data prova</Cell>
                     </tr>
                   </thead>
                   <tbody>
@@ -961,8 +950,8 @@ export default function TestGae() {
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
                       <Cell className="bg-orange-50"></Cell>
                       <Cell><Input type="date" className="h-6 text-xs border-0 p-0" /></Cell>
                     </tr>
@@ -971,19 +960,19 @@ export default function TestGae() {
               </div>
 
               {/* LEZIONI SINGOLE */}
-              <div className="mb-4">
-                <div className="bg-gray-200 px-2 py-1 font-bold text-xs mb-1">LEZIONI SINGOLE</div>
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">LEZIONI SINGOLE</div>
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
                       <Cell header>categorie</Cell>
                       <Cell header>codici corso</Cell>
                       <Cell header>provenienza</Cell>
-                      <Cell header>quanti iscritti</Cell>
-                      <Cell header>posti disponibili</Cell>
-                      <Cell header className="bg-orange-100">AVVISARE corsi pieni!!!</Cell>
-                      <Cell header>welfare presenze</Cell>
-                      <Cell header>presenze - lezioni singole</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>welfare</Cell>
+                      <Cell header>presenze</Cell>
                     </tr>
                   </thead>
                   <tbody>
@@ -991,11 +980,259 @@ export default function TestGae() {
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
                       <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
                       <Cell className="bg-orange-50"></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0" /></Cell>
-                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* WORKSHOP */}
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">WORKSHOP</div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Cell header>categorie</Cell>
+                      <Cell header>codici</Cell>
+                      <Cell header>provenienza</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>data</Cell>
+                      <Cell header>importo</Cell>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell className="bg-orange-50"></Cell>
+                      <Cell><Input type="date" className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* DOMENICHE IN MOVIMENTO */}
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">DOMENICHE IN MOVIMENTO</div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Cell header>categorie</Cell>
+                      <Cell header>codici</Cell>
+                      <Cell header>provenienza</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>data</Cell>
+                      <Cell header>importo</Cell>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell className="bg-orange-50"></Cell>
+                      <Cell><Input type="date" className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ALLENAMENTI */}
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">ALLENAMENTI</div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Cell header>categorie</Cell>
+                      <Cell header>codici</Cell>
+                      <Cell header>provenienza</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>presenze</Cell>
+                      <Cell header>importo</Cell>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell className="bg-orange-50"></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* LEZIONI INDIVIDUALI */}
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">LEZIONI INDIVIDUALI</div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Cell header>categorie</Cell>
+                      <Cell header>codici</Cell>
+                      <Cell header>provenienza</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>presenze</Cell>
+                      <Cell header>importo</Cell>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell className="bg-orange-50"></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* CAMPUS */}
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">CAMPUS</div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Cell header>categorie</Cell>
+                      <Cell header>codici</Cell>
+                      <Cell header>provenienza</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>periodo</Cell>
+                      <Cell header>importo</Cell>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell className="bg-orange-50"></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* SAGGI */}
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">SAGGI</div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Cell header>categorie</Cell>
+                      <Cell header>codici</Cell>
+                      <Cell header>provenienza</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>data</Cell>
+                      <Cell header>importo</Cell>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell className="bg-orange-50"></Cell>
+                      <Cell><Input type="date" className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* VACANZA STUDIO */}
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">VACANZA STUDIO</div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Cell header>categorie</Cell>
+                      <Cell header>codici</Cell>
+                      <Cell header>provenienza</Cell>
+                      <Cell header>iscritti</Cell>
+                      <Cell header>posti disp.</Cell>
+                      <Cell header className="bg-orange-100">AVVISO</Cell>
+                      <Cell header>periodo</Cell>
+                      <Cell header>importo</Cell>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell className="bg-orange-50"></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* MERCHANDISING */}
+              <div className="border border-gray-300 bg-white">
+                <div className="bg-gray-200 px-2 py-1 font-bold text-xs">MERCHANDISING</div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Cell header>articolo</Cell>
+                      <Cell header>codice</Cell>
+                      <Cell header>taglia</Cell>
+                      <Cell header>quantità</Cell>
+                      <Cell header>prezzo unit.</Cell>
+                      <Cell header>totale</Cell>
+                      <Cell header>data acquisto</Cell>
+                      <Cell header>note</Cell>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-14" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                      <Cell><Input type="number" className="h-6 text-xs border-0 p-0 w-16" /></Cell>
+                      <Cell><Input type="date" className="h-6 text-xs border-0 p-0" /></Cell>
+                      <Cell><Input className="h-6 text-xs border-0 p-0" /></Cell>
                     </tr>
                   </tbody>
                 </table>
@@ -1003,29 +1240,12 @@ export default function TestGae() {
             </div>
 
             {/* Blocco vuoto a destra */}
-            <div className="w-64 border border-gray-300 bg-white min-h-[300px] flex items-center justify-center text-gray-400 text-xs">
-              blocco PERSONE
-              <br />
-              (spazio per future info)
+            <div className="w-64 border border-gray-300 bg-white min-h-[300px] flex items-center justify-center text-gray-400 text-xs flex-col">
+              <span>blocco PERSONE</span>
+              <span>(spazio per future info)</span>
             </div>
           </div>
         </SectionBand>
-
-        {/* Sezioni finali */}
-        <div className="grid grid-cols-3 gap-4 mt-4">
-          <div className="border border-gray-300 bg-white p-3">
-            <div className="font-bold text-sm mb-2">SAGGI</div>
-            <div className="text-xs text-gray-500">Codici e conteggi saggi</div>
-          </div>
-          <div className="border border-gray-300 bg-white p-3">
-            <div className="font-bold text-sm mb-2">VACANZA STUDIO</div>
-            <div className="text-xs text-gray-500">Codici e conteggi vacanza studio</div>
-          </div>
-          <div className="border border-gray-300 bg-white p-3">
-            <div className="font-bold text-sm mb-2">MERCHANDISING</div>
-            <div className="text-xs text-gray-500">Codici e conteggi merchandising</div>
-          </div>
-        </div>
       </div>
     </div>
   );
