@@ -1,56 +1,14 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity } from "lucide-react";
-
-interface SectionProps {
-  title: string;
-  children?: React.ReactNode;
-  id?: string;
-}
-
-function Section({ title, children, id }: SectionProps) {
-  return (
-    <Card className="mb-4 scroll-mt-16" id={id}>
-      <CardHeader className="py-3 px-4 bg-gray-100 border-b">
-        <CardTitle className="text-sm font-bold text-gray-700">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        {children}
-      </CardContent>
-    </Card>
-  );
-}
-
-interface SubSectionProps {
-  title: string;
-  children?: React.ReactNode;
-}
-
-function SubSection({ title, children }: SubSectionProps) {
-  return (
-    <div className="border-b border-gray-200 last:border-b-0">
-      <div className="bg-gray-50 px-4 py-2 font-semibold text-xs text-gray-600 border-b border-gray-200">
-        {title}
-      </div>
-      <div className="p-2">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function TableCell({ children, header = false, className = "", colSpan }: { children?: React.ReactNode; header?: boolean; className?: string; colSpan?: number }) {
-  const baseClasses = "border border-gray-200 px-2 py-1.5 text-xs";
-  const headerClasses = header ? "font-semibold bg-gray-50 text-gray-600" : "bg-white";
-  return (
-    <td colSpan={colSpan} className={`${baseClasses} ${headerClasses} ${className}`}>
-      {children}
-    </td>
-  );
-}
+import { Badge } from "@/components/ui/badge";
+import { 
+  FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
+  User, BookOpen, ShoppingBag
+} from "lucide-react";
 
 export default function Test2Gae() {
   const [formData, setFormData] = useState({
@@ -116,18 +74,25 @@ export default function Test2Gae() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100" data-testid="page-test2-gae">
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
-        <div className="max-w-[1600px] mx-auto px-4 py-2">
+    <div className="flex flex-col h-full" data-testid="page-test2-gae">
+      {/* Header fisso con navigazione */}
+      <div className="border-b bg-background sticky top-0 z-10">
+        <div className="p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-semibold">Test2 Gae - Maschera Iscrizioni</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">Versione con stile Anagrafica</p>
+            </div>
+          </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium text-gray-500 mr-2">Vai a:</span>
+            <span className="text-xs font-medium text-muted-foreground mr-2">Vai a:</span>
             {navItems.map((item) => (
               <Button
                 key={item.id}
                 variant="outline"
                 size="sm"
                 onClick={() => scrollToSection(item.id)}
-                className="text-xs h-7 px-3 text-gray-600 hover:bg-gray-100"
+                className="text-xs h-8"
                 data-testid={`nav-${item.id}`}
               >
                 <item.icon className="w-3 h-3 mr-1" />
@@ -138,682 +103,858 @@ export default function Test2Gae() {
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto p-4 pt-16">
-        <h1 className="text-xl font-bold mb-4 text-gray-800">Test2 Gae - Maschera Iscrizioni</h1>
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-4 space-y-6">
+        
+        {/* INTESTAZIONE */}
+        <Card id="intestazione" className="scroll-mt-32">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileText className="w-5 h-5" />
+              Intestazione
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Stagione</Label>
+                <Input 
+                  value={formData.stagione} 
+                  onChange={(e) => handleChange("stagione", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Anagrafica (chi scrive)</Label>
+                <Input placeholder="chi scrive" />
+              </div>
+              <div className="space-y-2">
+                <Label>Codice ID</Label>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Auto</Badge>
+                  <Input 
+                    value={formData.codiceId} 
+                    onChange={(e) => handleChange("codiceId", e.target.value)}
+                    className="bg-yellow-50 border-yellow-200 font-mono"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Data Inserimento</Label>
+                <Input value={formData.dataInserimento} readOnly className="bg-muted" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Tipo Partecipante</Label>
+                <Select value={formData.tipoPartecipante} onValueChange={(v) => handleChange("tipoPartecipante", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tesserato">Tesserato</SelectItem>
+                    <SelectItem value="non_tesserato">Non Tesserato</SelectItem>
+                    <SelectItem value="prova">Prova</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Tessera</Label>
+                <Input value={formData.tessera} onChange={(e) => handleChange("tessera", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Scadenza Tessera</Label>
+                <Input type="date" value={formData.scadenzaTessera} onChange={(e) => handleChange("scadenzaTessera", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Da Dove Arriva</Label>
+                <Input value={formData.daDoveArriva} onChange={(e) => handleChange("daDoveArriva", e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Team Segreteria</Label>
+                <Input value={formData.teamSegreteria} onChange={(e) => handleChange("teamSegreteria", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Tessera Ente</Label>
+                <Input value={formData.tesseraEnte} onChange={(e) => handleChange("tesseraEnte", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Scadenza Tessera Ente</Label>
+                <Input type="date" value={formData.scadenzaTesseraEnte} onChange={(e) => handleChange("scadenzaTesseraEnte", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Ente</Label>
+                <Input value={formData.ente} onChange={(e) => handleChange("ente", e.target.value)} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Section title="INTESTAZIONE" id="intestazione">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <tbody>
-                <tr>
-                  <TableCell header>Stagione</TableCell>
-                  <TableCell header>Anagrafica</TableCell>
-                  <TableCell header>Codice ID</TableCell>
-                  <TableCell header>Data Inserimento</TableCell>
-                  <TableCell header>Tipo Partecipante</TableCell>
-                  <TableCell header>Tessera</TableCell>
-                  <TableCell header>Scadenza Tessera</TableCell>
-                  <TableCell header>Da Dove Arriva</TableCell>
-                  <TableCell header>Team Segreteria</TableCell>
-                  <TableCell header>Tessera Ente</TableCell>
-                  <TableCell header>Scadenza Tessera Ente</TableCell>
-                  <TableCell header>Ente</TableCell>
-                </tr>
-                <tr>
-                  <TableCell>
-                    <Input value={formData.stagione} onChange={(e) => handleChange("stagione", e.target.value)} className="h-7 text-xs border-0 bg-transparent" />
-                  </TableCell>
-                  <TableCell>
-                    <Input className="h-7 text-xs border-0 bg-transparent" placeholder="chi scrive" />
-                  </TableCell>
-                  <TableCell>
-                    <Input value={formData.codiceId} onChange={(e) => handleChange("codiceId", e.target.value)} className="h-7 text-xs border-0 bg-transparent" />
-                  </TableCell>
-                  <TableCell>
-                    <Input value={formData.dataInserimento} readOnly className="h-7 text-xs border-0 bg-transparent" />
-                  </TableCell>
-                  <TableCell>
-                    <Select value={formData.tipoPartecipante} onValueChange={(v) => handleChange("tipoPartecipante", v)}>
-                      <SelectTrigger className="h-7 text-xs border-0 bg-transparent">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tesserato">Tesserato</SelectItem>
-                        <SelectItem value="non_tesserato">Non Tesserato</SelectItem>
-                        <SelectItem value="prova">Prova</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </Section>
-
-        <Section title="ANAGRAFICA" id="anagrafica">
-          <SubSection title="DATI PERSONALI">
-            <table className="w-full border-collapse">
-              <tbody>
-                <tr>
-                  <TableCell header>Cognome</TableCell>
-                  <TableCell header>Nome</TableCell>
-                  <TableCell header>Codice Fiscale</TableCell>
-                  <TableCell header>Telefono</TableCell>
-                  <TableCell header>Email</TableCell>
-                </tr>
-                <tr>
-                  <TableCell><Input value={formData.cognome} onChange={(e) => handleChange("cognome", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.codiceFiscale} onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.telefono} onChange={(e) => handleChange("telefono", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.email} onChange={(e) => handleChange("email", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                </tr>
-                <tr>
-                  <TableCell header>Indirizzo</TableCell>
-                  <TableCell header>CAP</TableCell>
-                  <TableCell header>Città</TableCell>
-                  <TableCell header>Provincia</TableCell>
-                  <TableCell header>Cod. Comune</TableCell>
-                </tr>
-                <tr>
-                  <TableCell><Input value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                </tr>
-                <tr>
-                  <TableCell header>Data di Nascita</TableCell>
-                  <TableCell header>Luogo di Nascita</TableCell>
-                  <TableCell header>Sesso</TableCell>
-                  <TableCell header>Età</TableCell>
-                  <TableCell header></TableCell>
-                </tr>
-                <tr>
-                  <TableCell><Input type="date" value={formData.dataNascita} onChange={(e) => handleChange("dataNascita", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.luogoNascita} onChange={(e) => handleChange("luogoNascita", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell>
-                    <Select value={formData.sesso} onValueChange={(v) => handleChange("sesso", v)}>
-                      <SelectTrigger className="h-7 text-xs border-0 bg-transparent">
-                        <SelectValue placeholder="..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="M">M</SelectItem>
-                        <SelectItem value="F">F</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell><Input value={formData.eta} onChange={(e) => handleChange("eta", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell></TableCell>
-                </tr>
-              </tbody>
-            </table>
-          </SubSection>
-
-          <SubSection title="GENITORE 1">
-            <table className="w-full border-collapse">
-              <tbody>
-                <tr>
-                  <TableCell header>Cognome</TableCell>
-                  <TableCell header>Nome</TableCell>
-                  <TableCell header>Codice Fiscale</TableCell>
-                  <TableCell header>Telefono</TableCell>
-                  <TableCell header>Email</TableCell>
-                </tr>
-                <tr>
-                  <TableCell><Input value={formData.cognomeGen1} onChange={(e) => handleChange("cognomeGen1", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.nomeGen1} onChange={(e) => handleChange("nomeGen1", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.cfGen1} onChange={(e) => handleChange("cfGen1", e.target.value.toUpperCase())} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.telGen1} onChange={(e) => handleChange("telGen1", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.emailGen1} onChange={(e) => handleChange("emailGen1", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                </tr>
-                <tr>
-                  <TableCell header>Data di Nascita</TableCell>
-                  <TableCell header>Luogo di Nascita</TableCell>
-                  <TableCell header>Sesso</TableCell>
-                  <TableCell header colSpan={2}></TableCell>
-                </tr>
-                <tr>
-                  <TableCell><Input type="date" value={formData.dataNascitaGen1} onChange={(e) => handleChange("dataNascitaGen1", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.luogoNascitaGen1} onChange={(e) => handleChange("luogoNascitaGen1", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell>
-                    <Select value={formData.sessoGen1} onValueChange={(v) => handleChange("sessoGen1", v)}>
-                      <SelectTrigger className="h-7 text-xs border-0 bg-transparent">
-                        <SelectValue placeholder="..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="M">M</SelectItem>
-                        <SelectItem value="F">F</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell colSpan={2}></TableCell>
-                </tr>
-              </tbody>
-            </table>
-          </SubSection>
-
-          <SubSection title="GENITORE 2">
-            <table className="w-full border-collapse">
-              <tbody>
-                <tr>
-                  <TableCell header>Cognome</TableCell>
-                  <TableCell header>Nome</TableCell>
-                  <TableCell header>Codice Fiscale</TableCell>
-                  <TableCell header>Telefono</TableCell>
-                  <TableCell header>Email</TableCell>
-                </tr>
-                <tr>
-                  <TableCell><Input value={formData.cognomeGen2} onChange={(e) => handleChange("cognomeGen2", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.nomeGen2} onChange={(e) => handleChange("nomeGen2", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.cfGen2} onChange={(e) => handleChange("cfGen2", e.target.value.toUpperCase())} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.telGen2} onChange={(e) => handleChange("telGen2", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  <TableCell><Input value={formData.emailGen2} onChange={(e) => handleChange("emailGen2", e.target.value)} className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                </tr>
-              </tbody>
-            </table>
-          </SubSection>
-        </Section>
-
-        <Section title="PAGAMENTI" id="pagamenti">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[1200px]">
-              <tbody>
-                <tr>
-                  <TableCell header>Attività</TableCell>
-                  <TableCell header>Dettaglio Iscrizione</TableCell>
-                  <TableCell header>Note Pagamenti</TableCell>
-                  <TableCell header>Quantità</TableCell>
-                  <TableCell header>Descrizione Quota</TableCell>
-                  <TableCell header>Periodo</TableCell>
-                  <TableCell header>Totale Quota</TableCell>
-                  <TableCell header>Codice Sconto</TableCell>
-                  <TableCell header>Valore Sconto</TableCell>
-                  <TableCell header>% Sconto</TableCell>
-                  <TableCell header>Codici Promo</TableCell>
-                  <TableCell header>Valore Promo</TableCell>
-                  <TableCell header>% Promo</TableCell>
-                  <TableCell header>Acconto/Credito</TableCell>
-                  <TableCell header>Data Pagamento</TableCell>
-                  <TableCell header>Saldo Annuale</TableCell>
-                  <TableCell header>N. Ricevute</TableCell>
-                  <TableCell header>Conferma Bonifico</TableCell>
-                </tr>
-                <tr>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent w-20" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent w-28" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent w-28" /></TableCell>
-                  <TableCell><Input type="number" defaultValue={1} className="h-7 text-xs border-0 bg-transparent w-12" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent w-28" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent w-20" /></TableCell>
-                  <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent w-20" /></TableCell>
-                  <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                  <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-12" /></TableCell>
-                  <TableCell><Input className="h-7 text-xs border-0 bg-transparent w-20" /></TableCell>
-                  <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                  <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-12" /></TableCell>
-                  <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent w-28" /></TableCell>
-                  <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-12" /></TableCell>
-                  <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent w-28" /></TableCell>
-                </tr>
-                <tr>
-                  <TableCell colSpan={15} className="text-right font-semibold">Saldo Totale:</TableCell>
-                  <TableCell colSpan={3} className="font-bold text-base">€ 0,00</TableCell>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </Section>
-
-        <Section title="GIFT - BUONO - RESO - HELLO GEM" id="gift">
-          <table className="w-full border-collapse">
-            <tbody>
-              <tr>
-                <TableCell header>Tipo</TableCell>
-                <TableCell header>Valore/Importo</TableCell>
-                <TableCell header>Numero</TableCell>
-                <TableCell header>Data Emissione</TableCell>
-                <TableCell header>Data Scadenza</TableCell>
-                <TableCell header>Acquistato/Utilizzato per</TableCell>
-                <TableCell header>Data Utilizzo/Reso</TableCell>
-                <TableCell header>IBAN</TableCell>
-              </tr>
-              <tr>
-                <TableCell>
-                  <Select>
-                    <SelectTrigger className="h-7 text-xs border-0 bg-transparent">
-                      <SelectValue placeholder="Tipo..." />
+        {/* ANAGRAFICA */}
+        <Card id="anagrafica" className="scroll-mt-32">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <User className="w-5 h-5" />
+              Anagrafica
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Dati Personali */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Dati Personali</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Cognome *</Label>
+                  <Input value={formData.cognome} onChange={(e) => handleChange("cognome", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nome *</Label>
+                  <Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codice Fiscale</Label>
+                  <Input value={formData.codiceFiscale} onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Telefono</Label>
+                  <Input value={formData.telefono} onChange={(e) => handleChange("telefono", e.target.value)} />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input type="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Indirizzo</Label>
+                  <Input value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>CAP</Label>
+                  <Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Città</Label>
+                  <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Provincia</Label>
+                  <Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Cod. Comune</Label>
+                  <Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Data di Nascita</Label>
+                  <Input type="date" value={formData.dataNascita} onChange={(e) => handleChange("dataNascita", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Luogo di Nascita</Label>
+                  <Input value={formData.luogoNascita} onChange={(e) => handleChange("luogoNascita", e.target.value)} />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Sesso</Label>
+                  <Select value={formData.sesso} onValueChange={(v) => handleChange("sesso", v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="gift">Gift Card</SelectItem>
-                      <SelectItem value="buono">Buono</SelectItem>
-                      <SelectItem value="reso">Reso</SelectItem>
-                      <SelectItem value="hellogem">Hello Gem</SelectItem>
+                      <SelectItem value="M">Maschio</SelectItem>
+                      <SelectItem value="F">Femmina</SelectItem>
                     </SelectContent>
                   </Select>
-                </TableCell>
-                <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-              </tr>
-            </tbody>
-          </table>
-        </Section>
+                </div>
+                <div className="space-y-2">
+                  <Label>Età</Label>
+                  <Input value={formData.eta} onChange={(e) => handleChange("eta", e.target.value)} />
+                </div>
+              </div>
+            </div>
 
-        <Section title="TESSERE" id="tessere">
-          <table className="w-full border-collapse">
-            <tbody>
-              <tr>
-                <TableCell header>Quota Tessera</TableCell>
-                <TableCell header>Pagamento Tessera</TableCell>
-                <TableCell header>Nuovo o Rinnovo</TableCell>
-                <TableCell header>Data Scad. Quota Tessera</TableCell>
-                <TableCell header>N. Tessera</TableCell>
-                <TableCell header>Tessera Ente</TableCell>
-                <TableCell header>Domanda di Tesseramento</TableCell>
-              </tr>
-              <tr>
-                <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell>
-                  <Select>
-                    <SelectTrigger className="h-7 text-xs border-0 bg-transparent">
-                      <SelectValue placeholder="..." />
+            {/* Genitore 1 */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Genitore 1</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="space-y-2">
+                  <Label>Cognome</Label>
+                  <Input value={formData.cognomeGen1} onChange={(e) => handleChange("cognomeGen1", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nome</Label>
+                  <Input value={formData.nomeGen1} onChange={(e) => handleChange("nomeGen1", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codice Fiscale</Label>
+                  <Input value={formData.cfGen1} onChange={(e) => handleChange("cfGen1", e.target.value.toUpperCase())} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Telefono</Label>
+                  <Input value={formData.telGen1} onChange={(e) => handleChange("telGen1", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input value={formData.emailGen1} onChange={(e) => handleChange("emailGen1", e.target.value)} />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Data di Nascita</Label>
+                  <Input type="date" value={formData.dataNascitaGen1} onChange={(e) => handleChange("dataNascitaGen1", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Luogo di Nascita</Label>
+                  <Input value={formData.luogoNascitaGen1} onChange={(e) => handleChange("luogoNascitaGen1", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sesso</Label>
+                  <Select value={formData.sessoGen1} onValueChange={(v) => handleChange("sessoGen1", v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="nuovo">Nuovo</SelectItem>
-                      <SelectItem value="rinnovo">Rinnovo</SelectItem>
+                      <SelectItem value="M">M</SelectItem>
+                      <SelectItem value="F">F</SelectItem>
                     </SelectContent>
                   </Select>
-                </TableCell>
-                <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell>
-                  <Select>
-                    <SelectTrigger className="h-7 text-xs border-0 bg-transparent">
-                      <SelectValue placeholder="..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="si">Sì</SelectItem>
-                      <SelectItem value="no">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-              </tr>
-            </tbody>
-          </table>
-        </Section>
+                </div>
+              </div>
+            </div>
 
-        <Section title="CERTIFICATO MEDICO" id="certificato">
-          <table className="w-full border-collapse">
-            <tbody>
-              <tr>
-                <TableCell header>Data Scadenza Certificato</TableCell>
-                <TableCell header>Data di Rinnovo</TableCell>
-                <TableCell header>Rilasciato Da</TableCell>
-                <TableCell header>Pagamento</TableCell>
-                <TableCell header>A Noi</TableCell>
-                <TableCell header>Tipo Certificato</TableCell>
-              </tr>
-              <tr>
-                <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent" placeholder="€ 40" /></TableCell>
-                <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent" placeholder="12,5" /></TableCell>
-                <TableCell>
-                  <Select>
-                    <SelectTrigger className="h-7 text-xs border-0 bg-transparent">
-                      <SelectValue placeholder="Tipo..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="non_agonistico">Sportivo Non Agonistico</SelectItem>
-                      <SelectItem value="agonistico">Sportivo Agonistico</SelectItem>
-                      <SelectItem value="base">Base</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-              </tr>
-            </tbody>
-          </table>
-        </Section>
+            {/* Genitore 2 */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Genitore 2</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="space-y-2">
+                  <Label>Cognome</Label>
+                  <Input value={formData.cognomeGen2} onChange={(e) => handleChange("cognomeGen2", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nome</Label>
+                  <Input value={formData.nomeGen2} onChange={(e) => handleChange("nomeGen2", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codice Fiscale</Label>
+                  <Input value={formData.cfGen2} onChange={(e) => handleChange("cfGen2", e.target.value.toUpperCase())} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Telefono</Label>
+                  <Input value={formData.telGen2} onChange={(e) => handleChange("telGen2", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input value={formData.emailGen2} onChange={(e) => handleChange("emailGen2", e.target.value)} />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Section title="ATTIVITÀ" id="attivita">
-          <div className="space-y-0">
-            <SubSection title="CORSI">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici Corso</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Limite</TableCell>
-                    <TableCell header>Attenzione</TableCell>
-                    <TableCell header>Importo</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+        {/* PAGAMENTI */}
+        <Card id="pagamenti" className="scroll-mt-32">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <CreditCard className="w-5 h-5" />
+              Pagamenti
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Attività</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Dettaglio Iscrizione</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Note Pagamenti</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Quantità</Label>
+                <Input type="number" defaultValue={1} />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Descrizione Quota</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Periodo</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Totale Quota</Label>
+                <Input type="number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Codice Sconto</Label>
+                <Input />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Valore Sconto</Label>
+                <Input type="number" />
+              </div>
+              <div className="space-y-2">
+                <Label>% Sconto</Label>
+                <Input type="number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Codici Promo</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Valore Promo</Label>
+                <Input type="number" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>% Promo</Label>
+                <Input type="number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Acconto/Credito</Label>
+                <Input type="number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Data Pagamento</Label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label>Saldo Annuale</Label>
+                <Input type="number" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>N. Ricevute</Label>
+                <Input type="number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Conferma Bonifico</Label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2 lg:col-span-2">
+                <Label>Saldo Totale</Label>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">Totale</Badge>
+                  <Input value="€ 0,00" readOnly className="bg-green-50 border-green-200 font-bold text-lg" />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            <SubSection title="PROVE A PAGAMENTO">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici Corso</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Presenze</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+        {/* GIFT - BUONO - RESO */}
+        <Card id="gift" className="scroll-mt-32">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Gift className="w-5 h-5" />
+              Gift - Buono - Reso - Hello Gem
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Tipo</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gift">Gift Card</SelectItem>
+                    <SelectItem value="buono">Buono</SelectItem>
+                    <SelectItem value="reso">Reso</SelectItem>
+                    <SelectItem value="hellogem">Hello Gem</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Valore/Importo</Label>
+                <Input type="number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Numero</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Data Emissione</Label>
+                <Input type="date" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Data Scadenza</Label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label>Acquistato/Utilizzato per</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Data Utilizzo/Reso</Label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label>IBAN</Label>
+                <Input />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            <SubSection title="PROVE GRATUITE">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici Corso</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Data Prova</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+        {/* TESSERE */}
+        <Card id="tessere" className="scroll-mt-32">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <IdCard className="w-5 h-5" />
+              Tessere
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Quota Tessera</Label>
+                <Input type="number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Pagamento Tessera</Label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label>Nuovo o Rinnovo</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nuovo">Nuovo</SelectItem>
+                    <SelectItem value="rinnovo">Rinnovo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Data Scad. Quota Tessera</Label>
+                <Input />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>N. Tessera</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Tessera Ente</Label>
+                <Input />
+              </div>
+              <div className="space-y-2">
+                <Label>Domanda di Tesseramento</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="si">Sì</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            <SubSection title="LEZIONI SINGOLE">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici Corso</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Welfare</TableCell>
-                    <TableCell header>Presenze</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+        {/* CERTIFICATO MEDICO */}
+        <Card id="certificato" className="scroll-mt-32">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Stethoscope className="w-5 h-5" />
+              Certificato Medico
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Data Scadenza Certificato</Label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label>Data di Rinnovo</Label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label>Rilasciato Da</Label>
+                <Input />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Pagamento</Label>
+                <Input type="number" placeholder="€ 40" />
+              </div>
+              <div className="space-y-2">
+                <Label>A Noi</Label>
+                <Input type="number" placeholder="12,5" />
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo Certificato</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="non_agonistico">Sportivo Non Agonistico</SelectItem>
+                    <SelectItem value="agonistico">Sportivo Agonistico</SelectItem>
+                    <SelectItem value="base">Base</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            <SubSection title="WORKSHOP">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Data</TableCell>
-                    <TableCell header>Importo</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+        {/* ATTIVITÀ */}
+        <Card id="attivita" className="scroll-mt-32">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <BookOpen className="w-5 h-5" />
+              Attività
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* CORSI */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Corsi</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici Corso</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Provenienza</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Iscritti / Limite</Label>
+                  <div className="flex gap-2">
+                    <Input type="number" placeholder="Iscritti" />
+                    <Input type="number" placeholder="Limite" />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Attenzione</Label>
+                  <Input className="bg-orange-50 border-orange-200" placeholder="Avviso corsi pieni" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Importo</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+            </div>
 
-            <SubSection title="DOMENICHE IN MOVIMENTO">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Data</TableCell>
-                    <TableCell header>Importo</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+            {/* PROVE A PAGAMENTO */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Prove a Pagamento</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici Corso</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Iscritti / Posti Disp.</Label>
+                  <div className="flex gap-2">
+                    <Input type="number" placeholder="Iscritti" />
+                    <Input type="number" placeholder="Posti" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Presenze</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+            </div>
 
-            <SubSection title="ALLENAMENTI">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Presenze</TableCell>
-                    <TableCell header>Importo</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+            {/* PROVE GRATUITE */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Prove Gratuite</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici Corso</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Iscritti / Posti Disp.</Label>
+                  <div className="flex gap-2">
+                    <Input type="number" placeholder="Iscritti" />
+                    <Input type="number" placeholder="Posti" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Data Prova</Label>
+                  <Input type="date" />
+                </div>
+              </div>
+            </div>
 
-            <SubSection title="LEZIONI INDIVIDUALI">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Presenze</TableCell>
-                    <TableCell header>Importo</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+            {/* LEZIONI SINGOLE */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Lezioni Singole</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici Corso</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Iscritti / Posti Disp.</Label>
+                  <div className="flex gap-2">
+                    <Input type="number" placeholder="Iscritti" />
+                    <Input type="number" placeholder="Posti" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Welfare / Presenze</Label>
+                  <div className="flex gap-2">
+                    <Input type="number" placeholder="Welfare" />
+                    <Input type="number" placeholder="Presenze" />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            <SubSection title="CAMPUS">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Periodo</TableCell>
-                    <TableCell header>Importo</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+            {/* WORKSHOP */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Workshop</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Data</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Importo</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+            </div>
 
-            <SubSection title="SAGGI">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Data</TableCell>
-                    <TableCell header>Importo</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+            {/* DOMENICHE IN MOVIMENTO */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Domeniche in Movimento</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Data</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Importo</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+            </div>
 
-            <SubSection title="VACANZA STUDIO">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Categorie</TableCell>
-                    <TableCell header>Codici</TableCell>
-                    <TableCell header>Provenienza</TableCell>
-                    <TableCell header>Iscritti</TableCell>
-                    <TableCell header>Posti Disp.</TableCell>
-                    <TableCell header>Avviso</TableCell>
-                    <TableCell header>Periodo</TableCell>
-                    <TableCell header>Importo</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell className="bg-orange-50"></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
+            {/* ALLENAMENTI */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Allenamenti</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Presenze</Label>
+                  <Input type="number" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Importo</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+            </div>
 
-            <SubSection title="MERCHANDISING">
-              <table className="w-full border-collapse">
-                <tbody>
-                  <tr>
-                    <TableCell header>Articolo</TableCell>
-                    <TableCell header>Codice</TableCell>
-                    <TableCell header>Taglia</TableCell>
-                    <TableCell header>Quantità</TableCell>
-                    <TableCell header>Prezzo Unit.</TableCell>
-                    <TableCell header>Totale</TableCell>
-                    <TableCell header>Data Acquisto</TableCell>
-                    <TableCell header>Note</TableCell>
-                  </tr>
-                  <tr>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-14" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                    <TableCell><Input type="number" className="h-7 text-xs border-0 bg-transparent w-16" /></TableCell>
-                    <TableCell><Input type="date" className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                    <TableCell><Input className="h-7 text-xs border-0 bg-transparent" /></TableCell>
-                  </tr>
-                </tbody>
-              </table>
-            </SubSection>
-          </div>
-        </Section>
+            {/* LEZIONI INDIVIDUALI */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Lezioni Individuali</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Presenze</Label>
+                  <Input type="number" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Importo</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+            </div>
+
+            {/* CAMPUS */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Campus</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Periodo</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Importo</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+            </div>
+
+            {/* SAGGI */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Saggi</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Data</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Importo</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+            </div>
+
+            {/* VACANZA STUDIO */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Vacanza Studio</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Categorie</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codici</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Periodo</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Importo</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+            </div>
+
+            {/* MERCHANDISING */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4" />
+                Merchandising
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Articolo</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codice</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Taglia</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Quantità</Label>
+                  <Input type="number" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Prezzo Unitario</Label>
+                  <Input type="number" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Totale</Label>
+                  <Input type="number" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Data Acquisto</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Note</Label>
+                  <Input />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
