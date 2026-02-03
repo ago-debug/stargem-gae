@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity } from "lucide-react";
 
 interface SectionBandProps {
   title: string;
   color: "orange" | "purple" | "yellow" | "blue" | "green" | "pink" | "teal";
   children?: React.ReactNode;
+  id?: string;
 }
 
-function SectionBand({ title, color, children }: SectionBandProps) {
+function SectionBand({ title, color, children, id }: SectionBandProps) {
   const colorClasses = {
     orange: "bg-orange-500 text-white",
     purple: "bg-purple-500 text-white",
@@ -21,8 +23,8 @@ function SectionBand({ title, color, children }: SectionBandProps) {
   };
 
   return (
-    <div className="mb-4">
-      <div className={`${colorClasses[color]} px-4 py-2 font-bold text-sm sticky top-0 z-10`}>
+    <div className="mb-4 scroll-mt-24" id={id}>
+      <div className={`${colorClasses[color]} px-4 py-2 font-bold text-sm sticky top-16 z-10`}>
         {title}
       </div>
       {children}
@@ -174,13 +176,52 @@ export default function TestGae() {
     "FOTO",
   ];
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const navItems = [
+    { id: "intestazione", label: "Intestazione", icon: FileText, color: "bg-orange-500 hover:bg-orange-600" },
+    { id: "anagrafica", label: "Anagrafica", icon: Users, color: "bg-purple-500 hover:bg-purple-600" },
+    { id: "pagamenti", label: "Pagamenti", icon: CreditCard, color: "bg-yellow-500 hover:bg-yellow-600" },
+    { id: "gift", label: "Gift/Buono", icon: Gift, color: "bg-blue-500 hover:bg-blue-600" },
+    { id: "tessere", label: "Tessere", icon: IdCard, color: "bg-green-500 hover:bg-green-600" },
+    { id: "certificato", label: "Certificato Medico", icon: Stethoscope, color: "bg-pink-500 hover:bg-pink-600" },
+    { id: "attivita", label: "Attività", icon: Activity, color: "bg-yellow-500 hover:bg-yellow-600" },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 overflow-auto" data-testid="page-test-gae">
+      {/* Menu navigazione sezioni */}
+      <div className="sticky top-0 z-20 bg-white border-b shadow-sm">
+        <div className="max-w-[1800px] mx-auto px-4 py-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-semibold text-gray-600 mr-2">Vai a:</span>
+            {navItems.map((item) => (
+              <Button
+                key={item.id}
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollToSection(item.id)}
+                className={`${item.color} text-white text-xs h-8`}
+                data-testid={`nav-${item.id}`}
+              >
+                <item.icon className="w-3 h-3 mr-1" />
+                {item.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-[1800px] mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Test Gae - Maschera Iscrizioni</h1>
 
         {/* INTESTAZIONE */}
-        <SectionBand title="INTESTAZIONE" color="orange">
+        <SectionBand title="INTESTAZIONE" color="orange" id="intestazione">
           <table className="w-full border-collapse">
             <tbody>
               <tr>
@@ -309,7 +350,7 @@ export default function TestGae() {
         </SectionBand>
 
         {/* ANAGRAFICA */}
-        <SectionBand title="ANAGRAFICA" color="purple">
+        <SectionBand title="ANAGRAFICA" color="purple" id="anagrafica">
           <div className="flex">
             <LabelColumn labels={allegatiLabels} />
             <div className="flex-1 overflow-x-auto">
@@ -641,7 +682,7 @@ export default function TestGae() {
         </SectionBand>
 
         {/* PAGAMENTI */}
-        <SectionBand title="PAGAMENTI" color="yellow">
+        <SectionBand title="PAGAMENTI" color="yellow" id="pagamenti">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse min-w-[1400px]">
               <thead>
@@ -737,7 +778,7 @@ export default function TestGae() {
         </SectionBand>
 
         {/* GIFT - BUONO - RESO - HELLO GEM */}
-        <SectionBand title="GIFT - BUONO - RESO - HELLO GEM" color="blue">
+        <SectionBand title="GIFT - BUONO - RESO - HELLO GEM" color="blue" id="gift">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -779,7 +820,7 @@ export default function TestGae() {
         </SectionBand>
 
         {/* TESSERE */}
-        <SectionBand title="TESSERE" color="green">
+        <SectionBand title="TESSERE" color="green" id="tessere">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -827,7 +868,7 @@ export default function TestGae() {
         </SectionBand>
 
         {/* CERTIFICATO MEDICO */}
-        <SectionBand title="CERTIFICATO MEDICO" color="pink">
+        <SectionBand title="CERTIFICATO MEDICO" color="pink" id="certificato">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -864,7 +905,7 @@ export default function TestGae() {
         </SectionBand>
 
         {/* ATTIVITÀ */}
-        <SectionBand title="ATTIVITÀ" color="yellow">
+        <SectionBand title="ATTIVITÀ" color="yellow" id="attivita">
           <div className="flex gap-4">
             <div className="flex-1 space-y-4">
               {/* CORSI */}
