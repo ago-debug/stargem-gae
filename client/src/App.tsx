@@ -28,6 +28,7 @@ import ResetStagione from "@/pages/reset-stagione";
 import MemberDashboard from "@/pages/member-dashboard";
 import AnagraficaHome from "@/pages/anagrafica-home";
 import TestGae from "@/pages/test-gae";
+import Test2Gae from "@/pages/test2-gae";
 import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
 
 function Router() {
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/reset-stagione" component={ResetStagione} />
       <Route path="/membro/:id" component={MemberDashboard} />
       <Route path="/test-gae" component={TestGae} />
+      <Route path="/test2-gae" component={Test2Gae} />
       <Route component={NotFound} />
     </Switch>
   );
