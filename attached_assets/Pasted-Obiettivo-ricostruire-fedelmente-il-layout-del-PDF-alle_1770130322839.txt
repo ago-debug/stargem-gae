@@ -1,0 +1,59 @@
+Obiettivo: ricostruire fedelmente il layout del PDF allegato (maschera iscrizioni stile Google Sheet) come interfaccia web, NON come foglio di calcolo, ma con la stessa struttura visiva: bande colorate + tabelle/griglie con celle, intestazioni e colonne.
+
+Stack richiesto:
+- React + Vite (TypeScript) oppure Next.js (App Router) se preferisci: scegli React+Vite per semplicità.
+- UI: solo HTML/CSS (o Tailwind se ti è più comodo), ma deve sembrare un foglio Google.
+- Componenti principali: SectionBand, GridTable, Cell, HeaderCell, HighlightCell, StickyHeader.
+- Nessun backend. Dati mock in JSON.
+
+Requisiti di layout (riprendi il PDF):
+PAGE 1: 
+1) INTESTAZIONE (banda arancione in alto) con griglia a celle:
+   - STAGIONE, ANAGRAFICA, CODICE ID (C), DATA DI INSERIMENTO
+   - TIPO PARTECIPANTE (select: tesserato / non tesserato)
+   - TESSERA, SCADENZA TESSERA, DA DOVE ARRIVA, TEAM SEGRETERIA, TESSERA ENTE, SCADENZA TESSERA ENTE, ENTE (select “formule”)
+   - Usa alcune celle evidenziate giallo come nel PDF per campi “chiave”.
+
+2) Sezione ANAGRAFICA (banda viola/chiaro con titolo “ANAGRAFICA”):
+   - Tabella con righe/colonne per: COGNOME, NOME, CODICE_FISCALE (J), TELEFONO, EMAIL, INDIRIZZO, CAP, CITTA, PROVINCIA, COD COMUNE, DATA DI NASCITA, LUOGO DI NASCITA, SESSO, ETA, ecc.
+   - A sinistra una colonna verticale “etichette” (tipo elenco: ALLIEVO/INSEGNANTE, dati bancari, DOMANDA DI TESSERAMENTO, REGOLAMENTO, PRIVACY, CERTIFICATO MEDICO, RICEVUTE PAGAMENTI, MODELLO DETRAZIONE, MODELLO CREDITI SCOLASTICI, TESSERINO TECNICO, TESSERA STUDIO GEM, FOTO, ecc.) con stile banda turchese/azzurro come nel PDF.
+
+3) Sezione PAGAMENTI (titolo “PAGAMENTI” sopra una tabella larga):
+   - Colonne come da PDF: note pagamenti (O), Quantità, descrizione quota, periodo, totale quota, codice sconto, valore sconto, % sconto, codici promo, valore promo, % promo, Acconto o Credito (Y), data pagamento (Z), saldo annuale (AA), numero ricevute fatte, ecc.
+   - Evidenzia in giallo le colonne “sconto/promo” come nel PDF.
+   - “saldo totale (BO)” in basso a destra evidenziato.
+
+4) Sezione “GIFT - BUONO - RESO - HELLO GEM” (banda blu) con una tabellina sotto (campi: tipo, valore/importo, numero, data emissione, data scadenza, acquistato/utilizzato, motivazione, data utilizzo/reso, convalida).
+
+5) Sezione “TESSERE” (banda verde) con tabella:
+   - quota tessera, (BY) nuovo o rinnovo, (CA) data scad, quota tessera (CB), n. tessera (CC), tessera ente (CD), domanda di tesseramento (CE), pagamento tessera (BZ), ecc.
+
+PAGE 2:
+6) Sezione “CERTIFICATO MEDICO” (banda rosa/viola) con tabella:
+   - data scadenza certificato, DATA DI RINNOVO, RILASCIATO DA, PAGAMENTO A NOI (es. 40), TIPO CERTIFICATO (es. sportivo non agonistico).
+
+7) Sezione “ATTIVITÀ” (banda gialla con check) con griglie per:
+   - CORSI (tendina sezione 1/2 ecc)
+   - PROVE A PAGAMENTO / PROVE GRATUITE / LEZIONI SINGOLE
+   - WORKSHOP, DOMENICHE IN MOVIMENTO, ALLENAMENTI, LEZIONI INDIVIDUALI, CAMPUS
+   - Ogni riga ha: codice attività, provenienza, iscritti, limite max, importo/tempo durata, note/alert “corsi pieni!!!”
+   - Inserisci un grande riquadro bianco a destra come nel PDF (spazio vuoto per future info).
+
+PAGE 3:
+8) Sezioni finali (testuali) per SAGGI, VACANZA STUDIO, MERCHANDISING con campi/codici e conteggi.
+
+Comportamento UI:
+- Layout principale in stile “sheet” con scroll sia orizzontale (pagine larghe) sia verticale.
+- Intestazioni di sezione sticky (restano visibili quando scrolli).
+- Celle con hover (bordo leggermente più scuro) e focus (outline).
+- Usa un sistema di dimensioni coerenti: altezza riga 28–32px, font 12–13px, bordi 1px grigio chiaro, header bold.
+- Colori: arancione header, viola anagrafica, giallo highlight, blu gift, verde tessere, rosa certificato medico, giallo attività.
+
+Consegna:
+- Repository con struttura pulita.
+- Una pagina unica “MascheraIscrizioni” che renderizza tutte le sezioni.
+- Dati mock: un oggetto per “anagrafica”, array per “pagamenti”, array per “attività”.
+- Commenti nel codice per indicare dove collegare dati reali in futuro.
+
+Output atteso:
+- App funzionante con layout che replica il PDF (priorità: fedeltà visiva e griglia).
