@@ -23,8 +23,8 @@ function SectionBand({ title, color, children, id }: SectionBandProps) {
   };
 
   return (
-    <div className="mb-4 scroll-mt-24" id={id}>
-      <div className={`${colorClasses[color]} px-4 py-2 font-bold text-sm sticky top-16 z-10`}>
+    <div className="mb-4 scroll-mt-16" id={id}>
+      <div className={`${colorClasses[color]} px-4 py-2 font-bold text-sm`}>
         {title}
       </div>
       {children}
@@ -194,9 +194,9 @@ export default function TestGae() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-auto" data-testid="page-test-gae">
-      {/* Menu navigazione sezioni */}
-      <div className="sticky top-0 z-20 bg-white border-b shadow-sm">
+    <div className="min-h-screen bg-gray-50" data-testid="page-test-gae">
+      {/* Menu navigazione sezioni - FISSO in alto */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
         <div className="max-w-[1800px] mx-auto px-4 py-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-semibold text-gray-600 mr-2">Vai a:</span>
@@ -217,7 +217,8 @@ export default function TestGae() {
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto p-4">
+      {/* Contenuto con padding-top per compensare il menu fisso */}
+      <div className="max-w-[1800px] mx-auto p-4 pt-16">
         <h1 className="text-2xl font-bold mb-4">Test Gae - Maschera Iscrizioni</h1>
 
         {/* INTESTAZIONE */}
