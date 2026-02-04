@@ -1,0 +1,72 @@
+OBIETTIVO
+Nel progetto esistente (CourseManager), ricostruisci una bozza/prototipo UI dentro la pagina di menu “test3 Gae”, che oggi è vuota. La pagina corrisponde alla route /test3-gae (in preview vedo URL ...replit.dev/test3-gae). Non voglio modificare manualmente file: fai tu tutte le modifiche necessarie.
+
+CONTESTO
+- Il progetto ha sidebar e routing già esistenti.
+- “test3 Gae” è già presente nel menu; la pagina è vuota e mostra solo il titolo “Test3 Gae”.
+- Voglio che quella pagina diventi un prototipo “Affitto Sale” (o comunque gestione prenotazioni sale) con:
+  1) vista Timeline (griglia oraria)
+  2) Nuova prenotazione con selezione mese/settimana + disponibilità
+  3) Riepilogo giorno con stati
+- Tutto può essere in-memory (nessun DB per ora).
+
+REQUISITI FUNZIONALI (MVP)
+1) HEADER pagina:
+   - Titolo: “Affitto Sale”
+   - Selettore Data (YYYY-MM-DD)
+   - Selettore Sala (Tutte, Sala A, Sala B, Sala C)
+   - Tab/Toggle: Timeline | Nuova prenotazione | Riepilogo giorno
+
+2) DATI DEMO (in-memory):
+   - 3 sale: Sala A, Sala B, Sala C
+   - prenotazioni demo già presenti per la data di oggi:
+     - Sala A 16:00-17:00 cliente Rossi (non pagato)
+     - Sala B 18:00-19:30 cliente Bianchi (pagato)
+
+3) TIMELINE:
+   - griglia oraria dalle 08:00 alle 22:00
+   - step 30 minuti (per ora)
+   - righe = sale, colonne = orari
+   - celle “occupate” se esiste una prenotazione che sovrappone quello slot
+   - (anche solo cella grigia per occupato va bene)
+   - mostra legenda “Libero/Occupato”
+
+4) NUOVA PRENOTAZIONE:
+   - campi: Sala, Data (precompilata), Ora inizio, Ora fine, Nome cliente, Telefono, checkbox Pagato
+   - se l’orario confligge con una prenotazione esistente (stessa sala e stessa data) mostra warning e disabilita “Crea prenotazione”
+   - click “Crea prenotazione” aggiunge prenotazione in-memory e porta a “Riepilogo giorno”
+
+5) RIEPILOGO GIORNO:
+   - lista prenotazioni filtrata per data e (se selezionata) sala
+   - ordinata per ora
+   - badge Pagato/Non pagato
+   - bottone “Toggle pagato” che cambia lo stato
+
+REQUISITO EXTRA (VISUALIZZAZIONE MESE/SETTIMANA in Nuova prenotazione)
+Sotto i campi principali (o in una colonna laterale) aggiungi:
+- Toggle: “Mese” / “Settimana”
+- Mese: mini calendario del mese con ogni giorno che mostra un conteggio tipo “liberi/totali” per la sala selezionata (o per tutte le sale, se selezionato “Tutte”)
+- Settimana: lista giorni lun-dom con lo stesso conteggio
+- Clic su un giorno imposta la data selezionata nella pagina (date picker) e aggiorna disponibilità.
+Per ora la disponibilità può essere calcolata così:
+- slot teorici dalle 08:00 alle 22:00 a step 30 min
+- “liberi” = slot non occupati
+- “occupati” = slot occupati
+Mostra “liberi / totali”.
+
+VINCOLI TECNICI
+- Non introdurre librerie esterne se non strettamente necessario.
+- Usa React già presente nel progetto.
+- Integra la UI nel layout esistente della pagina /test3-gae senza rompere sidebar o routing.
+- Mantieni tutto in un singolo componente di pagina se possibile (per semplicità del prototipo).
+
+TASK OPERATIVI (da fare tu)
+1) Identifica dove vive la pagina /test3-gae nel progetto (Next.js app router: app/test3-gae/page.jsx oppure pages/test3-gae.jsx oppure route config).
+2) Sostituisci il contenuto vuoto della pagina con il prototipo “Affitto Sale” con tab: Timeline / Nuova prenotazione / Riepilogo giorno.
+3) Assicurati che compili e che in Preview io veda la pagina funzionante cliccando “test3 Gae” dal menu.
+4) Se ci sono errori, correggili fino a ottenere preview stabile.
+
+CRITERI DI ACCETTAZIONE
+- Aprendo “test3 Gae” dal menu vedo “Affitto Sale” con i 3 tab.
+- Posso creare una prenotazione e vedere che appare nel riepilogo e che la timeline la marca come occupata.
+- Il toggle Mese/Settimana mostra conteggi e cliccando cambia la data.
