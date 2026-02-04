@@ -29,6 +29,7 @@ import MemberDashboard from "@/pages/member-dashboard";
 import AnagraficaHome from "@/pages/anagrafica-home";
 import TestGae from "@/pages/test-gae";
 import Test2Gae from "@/pages/test2-gae";
+import Test3Gae from "@/pages/test3-gae";
 import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
 
 function Router() {
@@ -65,6 +66,7 @@ function Router() {
       <Route path="/membro/:id" component={MemberDashboard} />
       <Route path="/test-gae" component={TestGae} />
       <Route path="/test2-gae" component={Test2Gae} />
+      <Route path="/test3-gae" component={Test3Gae} />
       <Route component={NotFound} />
     </Switch>
   );
