@@ -82,6 +82,7 @@ export default function Test2Gae() {
     codComune: "",
     dataNascita: "",
     luogoNascita: "",
+    provinciaNascita: "",
     sesso: "",
     eta: "",
     allievo: "",
@@ -98,7 +99,9 @@ export default function Test2Gae() {
     codComuneGen1: "",
     dataNascitaGen1: "",
     luogoNascitaGen1: "",
+    provinciaNascitaGen1: "",
     sessoGen1: "",
+    etaGen1: "",
     // Genitore 2
     cognomeGen2: "",
     nomeGen2: "",
@@ -112,11 +115,119 @@ export default function Test2Gae() {
     codComuneGen2: "",
     dataNascitaGen2: "",
     luogoNascitaGen2: "",
+    provinciaNascitaGen2: "",
     sessoGen2: "",
+    etaGen2: "",
   });
 
-  const handleChange = (field: string, value: string) => {
+  // Funzione per decodificare il codice fiscale italiano
+  const decodeFiscalCode = (cf: string) => {
+    if (!cf || cf.length !== 16) return null;
+    
+    const monthMap: { [key: string]: number } = {
+      'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'H': 6,
+      'L': 7, 'M': 8, 'P': 9, 'R': 10, 'S': 11, 'T': 12
+    };
+    
+    try {
+      // Anno (caratteri 6-7)
+      const yearCode = parseInt(cf.substring(6, 8));
+      const currentYear = new Date().getFullYear();
+      const century = yearCode > (currentYear % 100) + 10 ? 1900 : 2000;
+      const year = century + yearCode;
+      
+      // Mese (carattere 8)
+      const monthChar = cf.charAt(8).toUpperCase();
+      const month = monthMap[monthChar] || 1;
+      
+      // Giorno e sesso (caratteri 9-10)
+      let day = parseInt(cf.substring(9, 11));
+      const sesso = day > 40 ? 'F' : 'M';
+      if (day > 40) day -= 40;
+      
+      // Data di nascita formattata
+      const dataNascita = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      
+      // Codice comune (caratteri 11-15)
+      const codiceComune = cf.substring(11, 15).toUpperCase();
+      
+      // Calcola età
+      const birthDate = new Date(dataNascita);
+      const today = new Date();
+      let eta = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        eta--;
+      }
+      
+      return { dataNascita, sesso, eta: eta.toString(), codiceComune };
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // Funzione per cercare il comune dal codice catastale
+  const fetchComuneFromCode = async (codice: string) => {
+    try {
+      const response = await fetch(`/api/comuni/by-code/${codice}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      }
+    } catch (e) {
+      console.error("Errore nel recupero del comune:", e);
+    }
+    return null;
+  };
+
+  const handleChange = async (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    
+    // Auto-popola i campi quando viene inserito il codice fiscale
+    if (field === "codiceFiscale" && value.length === 16) {
+      const decoded = decodeFiscalCode(value);
+      if (decoded) {
+        const comuneData = await fetchComuneFromCode(decoded.codiceComune);
+        setFormData((prev) => ({
+          ...prev,
+          dataNascita: decoded.dataNascita,
+          sesso: decoded.sesso,
+          eta: decoded.eta,
+          luogoNascita: comuneData?.nome || "",
+          provinciaNascita: comuneData?.provincia || "",
+        }));
+      }
+    }
+    
+    if (field === "cfGen1" && value.length === 16) {
+      const decoded = decodeFiscalCode(value);
+      if (decoded) {
+        const comuneData = await fetchComuneFromCode(decoded.codiceComune);
+        setFormData((prev) => ({
+          ...prev,
+          dataNascitaGen1: decoded.dataNascita,
+          sessoGen1: decoded.sesso,
+          etaGen1: decoded.eta,
+          luogoNascitaGen1: comuneData?.nome || "",
+          provinciaNascitaGen1: comuneData?.provincia || "",
+        }));
+      }
+    }
+    
+    if (field === "cfGen2" && value.length === 16) {
+      const decoded = decodeFiscalCode(value);
+      if (decoded) {
+        const comuneData = await fetchComuneFromCode(decoded.codiceComune);
+        setFormData((prev) => ({
+          ...prev,
+          dataNascitaGen2: decoded.dataNascita,
+          sessoGen2: decoded.sesso,
+          etaGen2: decoded.eta,
+          luogoNascitaGen2: comuneData?.nome || "",
+          provinciaNascitaGen2: comuneData?.provincia || "",
+        }));
+      }
+    }
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -734,19 +845,39 @@ export default function Test2Gae() {
                   <Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} />
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
                 <div className="space-y-2">
                   <Label>Data di Nascita</Label>
-                  <Input type="date" value={formData.dataNascita} onChange={(e) => handleChange("dataNascita", e.target.value)} />
+                  <Input 
+                    type="date" 
+                    value={formData.dataNascita} 
+                    onChange={(e) => handleChange("dataNascita", e.target.value)} 
+                    readOnly
+                    className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Luogo di Nascita</Label>
-                  <Input value={formData.luogoNascita} onChange={(e) => handleChange("luogoNascita", e.target.value)} />
+                  <Input 
+                    value={formData.luogoNascita} 
+                    onChange={(e) => handleChange("luogoNascita", e.target.value)} 
+                    readOnly
+                    className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Prov. Nascita</Label>
+                  <Input 
+                    value={formData.provinciaNascita} 
+                    onChange={(e) => handleChange("provinciaNascita", e.target.value)} 
+                    readOnly
+                    className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Sesso</Label>
-                  <Select value={formData.sesso} onValueChange={(v) => handleChange("sesso", v)}>
-                    <SelectTrigger>
+                  <Select value={formData.sesso} onValueChange={(v) => handleChange("sesso", v)} disabled={!formData.codiceFiscale}>
+                    <SelectTrigger className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}>
                       <SelectValue placeholder="Seleziona" />
                     </SelectTrigger>
                     <SelectContent>
@@ -757,7 +888,11 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Età</Label>
-                  <Input value={formData.eta} readOnly className="bg-muted" />
+                  <Input 
+                    value={formData.eta} 
+                    readOnly 
+                    className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Partecipante</Label>
@@ -823,19 +958,39 @@ export default function Test2Gae() {
                   <Input value={formData.codComuneGen1} onChange={(e) => handleChange("codComuneGen1", e.target.value)} />
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
                 <div className="space-y-2">
                   <Label>Data di Nascita</Label>
-                  <Input type="date" value={formData.dataNascitaGen1} onChange={(e) => handleChange("dataNascitaGen1", e.target.value)} />
+                  <Input 
+                    type="date" 
+                    value={formData.dataNascitaGen1} 
+                    onChange={(e) => handleChange("dataNascitaGen1", e.target.value)} 
+                    readOnly
+                    className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Luogo di Nascita</Label>
-                  <Input value={formData.luogoNascitaGen1} onChange={(e) => handleChange("luogoNascitaGen1", e.target.value)} />
+                  <Input 
+                    value={formData.luogoNascitaGen1} 
+                    onChange={(e) => handleChange("luogoNascitaGen1", e.target.value)} 
+                    readOnly
+                    className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Prov. Nascita</Label>
+                  <Input 
+                    value={formData.provinciaNascitaGen1} 
+                    onChange={(e) => handleChange("provinciaNascitaGen1", e.target.value)} 
+                    readOnly
+                    className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Sesso</Label>
-                  <Select value={formData.sessoGen1} onValueChange={(v) => handleChange("sessoGen1", v)}>
-                    <SelectTrigger>
+                  <Select value={formData.sessoGen1} onValueChange={(v) => handleChange("sessoGen1", v)} disabled={!formData.cfGen1}>
+                    <SelectTrigger className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}>
                       <SelectValue placeholder="Seleziona" />
                     </SelectTrigger>
                     <SelectContent>
@@ -843,6 +998,14 @@ export default function Test2Gae() {
                       <SelectItem value="F">F</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Età</Label>
+                  <Input 
+                    value={formData.etaGen1} 
+                    readOnly 
+                    className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
                 </div>
               </div>
             </div>
@@ -894,19 +1057,39 @@ export default function Test2Gae() {
                   <Input value={formData.codComuneGen2} onChange={(e) => handleChange("codComuneGen2", e.target.value)} />
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
                 <div className="space-y-2">
                   <Label>Data di Nascita</Label>
-                  <Input type="date" value={formData.dataNascitaGen2} onChange={(e) => handleChange("dataNascitaGen2", e.target.value)} />
+                  <Input 
+                    type="date" 
+                    value={formData.dataNascitaGen2} 
+                    onChange={(e) => handleChange("dataNascitaGen2", e.target.value)} 
+                    readOnly
+                    className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Luogo di Nascita</Label>
-                  <Input value={formData.luogoNascitaGen2} onChange={(e) => handleChange("luogoNascitaGen2", e.target.value)} />
+                  <Input 
+                    value={formData.luogoNascitaGen2} 
+                    onChange={(e) => handleChange("luogoNascitaGen2", e.target.value)} 
+                    readOnly
+                    className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Prov. Nascita</Label>
+                  <Input 
+                    value={formData.provinciaNascitaGen2} 
+                    onChange={(e) => handleChange("provinciaNascitaGen2", e.target.value)} 
+                    readOnly
+                    className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Sesso</Label>
-                  <Select value={formData.sessoGen2} onValueChange={(v) => handleChange("sessoGen2", v)}>
-                    <SelectTrigger>
+                  <Select value={formData.sessoGen2} onValueChange={(v) => handleChange("sessoGen2", v)} disabled={!formData.cfGen2}>
+                    <SelectTrigger className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}>
                       <SelectValue placeholder="Seleziona" />
                     </SelectTrigger>
                     <SelectContent>
@@ -914,6 +1097,14 @@ export default function Test2Gae() {
                       <SelectItem value="F">F</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Età</Label>
+                  <Input 
+                    value={formData.etaGen2} 
+                    readOnly 
+                    className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                  />
                 </div>
               </div>
             </div>
