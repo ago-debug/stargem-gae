@@ -1,156 +1,170 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Save, Plus, Trash2, Info } from "lucide-react";
+import { BookOpen, Save, Plus, Trash2, Info, Loader2 } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import type { Knowledge } from "@shared/schema";
 
-export interface KnowledgeItem {
-  id: string;
-  sezione: string;
-  titolo: string;
-  descrizione: string;
-}
-
-const KNOWLEDGE_ITEMS_DEFAULT: KnowledgeItem[] = [
-  {
-    id: "allenamenti",
-    sezione: "Attività",
-    titolo: "Allenamenti",
-    descrizione: "Gli allenamenti comprendono tutte le sessioni di attività fisica programmate per i soci. Includono:\n\n• Allenamenti individuali personalizzati\n• Sessioni di gruppo\n• Programmi di preparazione atletica\n• Recupero funzionale\n\nPer ogni allenamento è possibile specificare la categoria, il tipo di attività, la durata e l'istruttore assegnato."
-  },
-  {
-    id: "corsi",
-    sezione: "Attività",
-    titolo: "Corsi",
-    descrizione: "I corsi sono attività formative strutturate con un programma definito. Possono essere settimanali, mensili o stagionali."
-  },
-  {
-    id: "workshop",
-    sezione: "Attività", 
-    titolo: "Workshop",
-    descrizione: "I workshop sono eventi formativi intensivi, solitamente di breve durata (1-2 giorni), focalizzati su argomenti specifici."
-  },
-  {
-    id: "merchandising",
-    sezione: "Attività",
-    titolo: "Merchandising",
-    descrizione: "Il merchandising comprende tutti gli articoli e prodotti venduti ai soci:\n\n• Abbigliamento sportivo (magliette, felpe, pantaloni)\n• Accessori (borse, zaini, cappellini)\n• Attrezzature (guanti, protezioni)\n• Materiale didattico\n\nPer ogni articolo è possibile specificare codice, taglia, colore, quantità e prezzo."
-  }
-];
-
-let globalKnowledgeItems = [...KNOWLEDGE_ITEMS_DEFAULT];
-
-export function getKnowledgeItem(id: string): KnowledgeItem | undefined {
-  return globalKnowledgeItems.find(item => item.id === id);
-}
-
-export function getAllKnowledgeItems(): KnowledgeItem[] {
-  return globalKnowledgeItems;
-}
-
-export default function Knowledge() {
-  const [items, setItems] = useState<KnowledgeItem[]>(globalKnowledgeItems);
+export default function KnowledgePage() {
+  const { toast } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [newItem, setNewItem] = useState<Partial<KnowledgeItem>>({
+  const [editedItems, setEditedItems] = useState<Record<string, Partial<Knowledge>>>({});
+  const [newItem, setNewItem] = useState<Partial<Knowledge>>({
+    id: "",
     sezione: "",
     titolo: "",
     descrizione: ""
   });
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const updateItem = (id: string, field: keyof KnowledgeItem, value: string) => {
-    const updated = items.map(item => 
-      item.id === id ? { ...item, [field]: value } : item
-    );
-    setItems(updated);
-    globalKnowledgeItems = updated;
+  const { data: items = [], isLoading } = useQuery<Knowledge[]>({
+    queryKey: ["/api/knowledge"],
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async (item: Partial<Knowledge>) => {
+      return await apiRequest("POST", "/api/knowledge", item);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/knowledge"] });
+      toast({ title: "Salvato", description: "Voce salvata con successo" });
+      setEditingId(null);
+      setEditedItems({});
+    },
+    onError: (error: any) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/knowledge/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/knowledge"] });
+      toast({ title: "Eliminato", description: "Voce eliminata con successo" });
+    },
+    onError: (error: any) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateLocalItem = (id: string, field: keyof Knowledge, value: string) => {
+    setEditedItems(prev => ({
+      ...prev,
+      [id]: { ...prev[id], [field]: value }
+    }));
   };
 
-  const deleteItem = (id: string) => {
-    const updated = items.filter(item => item.id !== id);
-    setItems(updated);
-    globalKnowledgeItems = updated;
+  const saveItem = (item: Knowledge) => {
+    const edited = editedItems[item.id] || {};
+    saveMutation.mutate({
+      id: item.id,
+      sezione: edited.sezione ?? item.sezione,
+      titolo: edited.titolo ?? item.titolo,
+      descrizione: edited.descrizione ?? item.descrizione,
+    });
   };
 
   const addItem = () => {
-    if (!newItem.titolo || !newItem.sezione) return;
+    if (!newItem.titolo || !newItem.sezione) {
+      toast({ title: "Errore", description: "Titolo e sezione sono obbligatori", variant: "destructive" });
+      return;
+    }
     
-    const item: KnowledgeItem = {
-      id: newItem.titolo.toLowerCase().replace(/\s+/g, '-'),
+    const id = newItem.id || newItem.titolo.toLowerCase().replace(/\s+/g, '-');
+    saveMutation.mutate({
+      id,
       sezione: newItem.sezione,
       titolo: newItem.titolo,
-      descrizione: newItem.descrizione || ""
-    };
-    
-    const updated = [...items, item];
-    setItems(updated);
-    globalKnowledgeItems = updated;
-    setNewItem({ sezione: "", titolo: "", descrizione: "" });
+      descrizione: newItem.descrizione || "",
+    });
+    setNewItem({ id: "", sezione: "", titolo: "", descrizione: "" });
     setShowAddForm(false);
   };
 
   const sezioni = Array.from(new Set(items.map(i => i.sezione)));
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <BookOpen className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold">Knowledge Base</h1>
+            <BookOpen className="w-8 h-8 text-primary" />
+            <div>
+              <h1 className="text-2xl font-bold">Knowledge Base</h1>
+              <p className="text-muted-foreground">Gestisci le descrizioni informative per le sezioni dell'applicazione</p>
+            </div>
           </div>
           <Button onClick={() => setShowAddForm(!showAddForm)} data-testid="button-add-knowledge">
             <Plus className="w-4 h-4 mr-2" />
-            Aggiungi Voce
+            Nuova Voce
           </Button>
         </div>
-
-        <p className="text-muted-foreground">
-          Gestisci le informazioni e descrizioni che appaiono nelle icone <Info className="w-4 h-4 inline" /> delle varie sezioni.
-        </p>
 
         {showAddForm && (
           <Card className="border-primary">
             <CardHeader>
-              <CardTitle className="text-lg">Nuova Voce Knowledge</CardTitle>
+              <CardTitle className="text-lg">Aggiungi Nuova Voce</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>ID (opzionale)</Label>
+                  <Input
+                    placeholder="es: corsi, workshop..."
+                    value={newItem.id || ""}
+                    onChange={(e) => setNewItem({ ...newItem, id: e.target.value })}
+                    data-testid="input-new-knowledge-id"
+                  />
+                  <p className="text-xs text-muted-foreground">Se vuoto, verrà generato dal titolo</p>
+                </div>
                 <div className="space-y-2">
                   <Label>Sezione *</Label>
                   <Input
-                    value={newItem.sezione}
-                    onChange={(e) => setNewItem(prev => ({ ...prev, sezione: e.target.value }))}
-                    placeholder="Es. Attività"
-                    data-testid="input-new-sezione"
+                    placeholder="es: Attività, Anagrafica..."
+                    value={newItem.sezione || ""}
+                    onChange={(e) => setNewItem({ ...newItem, sezione: e.target.value })}
+                    data-testid="input-new-knowledge-sezione"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Titolo *</Label>
                   <Input
-                    value={newItem.titolo}
-                    onChange={(e) => setNewItem(prev => ({ ...prev, titolo: e.target.value }))}
-                    placeholder="Es. Allenamenti"
-                    data-testid="input-new-titolo"
+                    placeholder="es: Corsi, Workshop..."
+                    value={newItem.titolo || ""}
+                    onChange={(e) => setNewItem({ ...newItem, titolo: e.target.value })}
+                    data-testid="input-new-knowledge-titolo"
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Descrizione</Label>
                 <Textarea
-                  value={newItem.descrizione}
-                  onChange={(e) => setNewItem(prev => ({ ...prev, descrizione: e.target.value }))}
-                  placeholder="Inserisci la descrizione dettagliata..."
-                  rows={5}
-                  data-testid="textarea-new-descrizione"
+                  placeholder="Descrizione dettagliata che apparirà nel popup informativo..."
+                  value={newItem.descrizione || ""}
+                  onChange={(e) => setNewItem({ ...newItem, descrizione: e.target.value })}
+                  rows={4}
+                  data-testid="input-new-knowledge-descrizione"
                 />
               </div>
               <div className="flex gap-2">
-                <Button onClick={addItem} data-testid="button-save-new">
-                  <Save className="w-4 h-4 mr-2" />
+                <Button onClick={addItem} disabled={saveMutation.isPending} data-testid="button-save-new-knowledge">
+                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   Salva
                 </Button>
                 <Button variant="outline" onClick={() => setShowAddForm(false)}>
@@ -161,75 +175,129 @@ export default function Knowledge() {
           </Card>
         )}
 
-        {sezioni.map(sezione => (
-          <div key={sezione} className="space-y-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Badge variant="outline">{sezione}</Badge>
-            </h2>
-            
-            {items.filter(i => i.sezione === sezione).map(item => (
-              <Card key={item.id} className="relative">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Info className="w-4 h-4 text-blue-500" />
-                      {editingId === item.id ? (
-                        <Input
-                          value={item.titolo}
-                          onChange={(e) => updateItem(item.id, 'titolo', e.target.value)}
-                          className="h-8 w-48"
-                        />
-                      ) : (
-                        item.titolo
-                      )}
-                    </CardTitle>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingId(editingId === item.id ? null : item.id)}
-                        data-testid={`button-edit-${item.id}`}
-                      >
-                        {editingId === item.id ? "Fatto" : "Modifica"}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteItem(item.id)}
-                        className="text-destructive hover:text-destructive"
-                        data-testid={`button-delete-${item.id}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {editingId === item.id ? (
-                    <Textarea
-                      value={item.descrizione}
-                      onChange={(e) => updateItem(item.id, 'descrizione', e.target.value)}
-                      rows={6}
-                      className="font-mono text-sm"
-                    />
-                  ) : (
-                    <p className="text-sm text-muted-foreground whitespace-pre-line">
-                      {item.descrizione || "Nessuna descrizione"}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ))}
-
-        {items.length === 0 && (
-          <Card className="p-8 text-center text-muted-foreground">
-            <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Nessuna voce knowledge presente.</p>
-            <p className="text-sm">Clicca "Aggiungi Voce" per iniziare.</p>
+        {items.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center text-muted-foreground">
+              <Info className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>Nessuna voce knowledge presente. Clicca "Nuova Voce" per iniziare.</p>
+            </CardContent>
           </Card>
+        ) : (
+          sezioni.map(sezione => (
+            <Card key={sezione}>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Badge variant="secondary">{sezione}</Badge>
+                  <span className="text-muted-foreground text-sm">
+                    ({items.filter(i => i.sezione === sezione).length} voci)
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {items.filter(i => i.sezione === sezione).map(item => {
+                  const isEditing = editingId === item.id;
+                  const edited = editedItems[item.id] || {};
+                  
+                  return (
+                    <div key={item.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">{item.id}</Badge>
+                            {isEditing ? (
+                              <Input
+                                value={edited.titolo ?? item.titolo}
+                                onChange={(e) => updateLocalItem(item.id, 'titolo', e.target.value)}
+                                className="font-semibold"
+                                data-testid={`input-knowledge-titolo-${item.id}`}
+                              />
+                            ) : (
+                              <span className="font-semibold">{item.titolo}</span>
+                            )}
+                          </div>
+                          {isEditing ? (
+                            <Textarea
+                              value={edited.descrizione ?? item.descrizione ?? ""}
+                              onChange={(e) => updateLocalItem(item.id, 'descrizione', e.target.value)}
+                              rows={4}
+                              data-testid={`input-knowledge-descrizione-${item.id}`}
+                            />
+                          ) : (
+                            <p className="text-sm text-muted-foreground whitespace-pre-line">
+                              {item.descrizione || "Nessuna descrizione"}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          {isEditing ? (
+                            <>
+                              <Button 
+                                size="sm" 
+                                onClick={() => saveItem(item)}
+                                disabled={saveMutation.isPending}
+                                data-testid={`button-save-knowledge-${item.id}`}
+                              >
+                                {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingId(null);
+                                  setEditedItems(prev => {
+                                    const { [item.id]: _, ...rest } = prev;
+                                    return rest;
+                                  });
+                                }}
+                              >
+                                Annulla
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => setEditingId(item.id)}
+                                data-testid={`button-edit-knowledge-${item.id}`}
+                              >
+                                Modifica
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => deleteMutation.mutate(item.id)}
+                                disabled={deleteMutation.isPending}
+                                data-testid={`button-delete-knowledge-${item.id}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          ))
         )}
+
+        <Card className="bg-muted/50">
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Info className="w-4 h-4 text-blue-500" />
+              Come usare la Knowledge Base
+            </h3>
+            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+              <li>Ogni voce ha un <strong>ID univoco</strong> che viene usato per collegare la descrizione alla sezione corrispondente</li>
+              <li>Le voci con ID "corsi", "workshop", "allenamenti", "merchandising" appaiono automaticamente nella Maschera Input Generale</li>
+              <li>Puoi aggiungere nuove voci per altre sezioni dell'applicazione</li>
+              <li>Le descrizioni supportano righe multiple per formattazione migliore</li>
+            </ul>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

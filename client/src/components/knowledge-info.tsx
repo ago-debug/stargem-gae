@@ -1,13 +1,19 @@
+import { useQuery } from "@tanstack/react-query";
 import { Info } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { getKnowledgeItem } from "@/pages/knowledge";
+import type { Knowledge } from "@shared/schema";
 
 interface KnowledgeInfoProps {
   id: string;
 }
 
 export function KnowledgeInfo({ id }: KnowledgeInfoProps) {
-  const item = getKnowledgeItem(id);
+  const { data: items = [] } = useQuery<Knowledge[]>({
+    queryKey: ["/api/knowledge"],
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const item = items.find(k => k.id === id);
   
   if (!item) return null;
   

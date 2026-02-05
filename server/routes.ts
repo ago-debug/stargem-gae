@@ -24,6 +24,7 @@ import {
   insertAccessLogSchema,
   insertAttendanceSchema,
   insertCustomReportSchema,
+  insertKnowledgeSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -2686,6 +2687,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Errore importazione file" });
+    }
+  });
+
+  // ======== KNOWLEDGE ROUTES ========
+  
+  // Get all knowledge items
+  app.get("/api/knowledge", async (_req, res) => {
+    try {
+      const items = await storage.getAllKnowledge();
+      res.json(items);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore recupero knowledge" });
+    }
+  });
+
+  // Get single knowledge item by ID
+  app.get("/api/knowledge/:id", async (req, res) => {
+    try {
+      const item = await storage.getKnowledgeById(req.params.id);
+      if (!item) {
+        return res.status(404).json({ message: "Voce non trovata" });
+      }
+      res.json(item);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore recupero knowledge" });
+    }
+  });
+
+  // Create or update knowledge item (upsert)
+  app.post("/api/knowledge", async (req, res) => {
+    try {
+      const parsed = insertKnowledgeSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
+      }
+      const item = await storage.upsertKnowledge(parsed.data);
+      res.json(item);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore salvataggio knowledge" });
+    }
+  });
+
+  // Delete knowledge item
+  app.delete("/api/knowledge/:id", async (req, res) => {
+    try {
+      await storage.deleteKnowledge(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore eliminazione knowledge" });
     }
   });
 
