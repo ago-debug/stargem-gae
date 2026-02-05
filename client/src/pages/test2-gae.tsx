@@ -35,8 +35,8 @@ export default function Test2Gae() {
     privacy: { hasFile: false, data: "", accettata: "" },
     certificatoMedico: { hasFile: false, dataRilascio: "", scadenza: "", tipo: "" },
     ricevutePagamenti: { hasFile: false, numeroRicevute: 0, note: "" },
-    modelloDetrazione: { hasFile: false, anno: "2025", richiesto: "" },
-    creditiScolastici: { hasFile: false, annoScolastico: "2024/2025", richiesto: "" },
+    modelloDetrazione: { hasFile: false, anno: "2026", richiesto: "" },
+    creditiScolastici: { hasFile: false, annoScolastico: "2025/2026", richiesto: "" },
     tesserinoTecnico: { hasFile: false, numero: "", dataRilascio: "" },
     tesseraEnte: { hasFile: false, numero: "", ente: "" },
   });
@@ -358,7 +358,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs">Data</Label>
+                    <Label className="text-xs">Data Inserimento</Label>
                     <Input 
                       type="date" 
                       className="h-7 text-xs"
@@ -400,7 +400,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs">Data</Label>
+                    <Label className="text-xs">Data Inserimento</Label>
                     <Input 
                       type="date" 
                       className="h-7 text-xs"
@@ -760,8 +760,18 @@ export default function Test2Gae() {
                   <Input value={formData.eta} readOnly className="bg-muted" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Allievo</Label>
-                  <Input value={formData.allievo} onChange={(e) => handleChange("allievo", e.target.value)} />
+                  <Label>Partecipante</Label>
+                  <Select value={formData.allievo} onValueChange={(v) => handleChange("allievo", v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="allievo">Allievo</SelectItem>
+                      <SelectItem value="insegnante">Insegnante</SelectItem>
+                      <SelectItem value="personal">Personal</SelectItem>
+                      <SelectItem value="basta">Basta</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
