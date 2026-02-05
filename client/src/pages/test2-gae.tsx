@@ -184,47 +184,83 @@ export default function Test2Gae() {
     setFormData((prev) => ({ ...prev, [field]: value }));
     
     // Auto-popola i campi quando viene inserito il codice fiscale
-    if (field === "codiceFiscale" && value.length === 16) {
-      const decoded = decodeFiscalCode(value);
-      if (decoded) {
-        const comuneData = await fetchComuneFromCode(decoded.codiceComune);
+    if (field === "codiceFiscale") {
+      if (value.length === 16) {
+        const decoded = decodeFiscalCode(value);
+        if (decoded) {
+          const comuneData = await fetchComuneFromCode(decoded.codiceComune);
+          setFormData((prev) => ({
+            ...prev,
+            dataNascita: decoded.dataNascita,
+            sesso: decoded.sesso,
+            eta: decoded.eta,
+            luogoNascita: comuneData?.nome || "",
+            provinciaNascita: comuneData?.provincia || "",
+          }));
+        }
+      } else {
+        // Svuota i campi se il CF viene cancellato o non è completo
         setFormData((prev) => ({
           ...prev,
-          dataNascita: decoded.dataNascita,
-          sesso: decoded.sesso,
-          eta: decoded.eta,
-          luogoNascita: comuneData?.nome || "",
-          provinciaNascita: comuneData?.provincia || "",
+          dataNascita: "",
+          sesso: "",
+          eta: "",
+          luogoNascita: "",
+          provinciaNascita: "",
         }));
       }
     }
     
-    if (field === "cfGen1" && value.length === 16) {
-      const decoded = decodeFiscalCode(value);
-      if (decoded) {
-        const comuneData = await fetchComuneFromCode(decoded.codiceComune);
+    if (field === "cfGen1") {
+      if (value.length === 16) {
+        const decoded = decodeFiscalCode(value);
+        if (decoded) {
+          const comuneData = await fetchComuneFromCode(decoded.codiceComune);
+          setFormData((prev) => ({
+            ...prev,
+            dataNascitaGen1: decoded.dataNascita,
+            sessoGen1: decoded.sesso,
+            etaGen1: decoded.eta,
+            luogoNascitaGen1: comuneData?.nome || "",
+            provinciaNascitaGen1: comuneData?.provincia || "",
+          }));
+        }
+      } else {
+        // Svuota i campi se il CF viene cancellato o non è completo
         setFormData((prev) => ({
           ...prev,
-          dataNascitaGen1: decoded.dataNascita,
-          sessoGen1: decoded.sesso,
-          etaGen1: decoded.eta,
-          luogoNascitaGen1: comuneData?.nome || "",
-          provinciaNascitaGen1: comuneData?.provincia || "",
+          dataNascitaGen1: "",
+          sessoGen1: "",
+          etaGen1: "",
+          luogoNascitaGen1: "",
+          provinciaNascitaGen1: "",
         }));
       }
     }
     
-    if (field === "cfGen2" && value.length === 16) {
-      const decoded = decodeFiscalCode(value);
-      if (decoded) {
-        const comuneData = await fetchComuneFromCode(decoded.codiceComune);
+    if (field === "cfGen2") {
+      if (value.length === 16) {
+        const decoded = decodeFiscalCode(value);
+        if (decoded) {
+          const comuneData = await fetchComuneFromCode(decoded.codiceComune);
+          setFormData((prev) => ({
+            ...prev,
+            dataNascitaGen2: decoded.dataNascita,
+            sessoGen2: decoded.sesso,
+            etaGen2: decoded.eta,
+            luogoNascitaGen2: comuneData?.nome || "",
+            provinciaNascitaGen2: comuneData?.provincia || "",
+          }));
+        }
+      } else {
+        // Svuota i campi se il CF viene cancellato o non è completo
         setFormData((prev) => ({
           ...prev,
-          dataNascitaGen2: decoded.dataNascita,
-          sessoGen2: decoded.sesso,
-          etaGen2: decoded.eta,
-          luogoNascitaGen2: comuneData?.nome || "",
-          provinciaNascitaGen2: comuneData?.provincia || "",
+          dataNascitaGen2: "",
+          sessoGen2: "",
+          etaGen2: "",
+          luogoNascitaGen2: "",
+          provinciaNascitaGen2: "",
         }));
       }
     }
