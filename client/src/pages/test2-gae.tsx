@@ -1429,7 +1429,10 @@ export default function Test2Gae() {
 
             {/* VACANZA STUDIO */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Vacanza Studio</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Vacanze Studio
+                <KnowledgeInfo id="vacanze-studio" />
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
