@@ -152,7 +152,7 @@ export default function Test2Gae() {
                 <FileSpreadsheet className="w-4 h-4 mr-1" />
                 GSheets
               </Button>
-              <Button variant="destructive" size="sm" data-testid="button-esporta">
+              <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white" data-testid="button-esporta">
                 <Upload className="w-4 h-4 mr-1" />
                 Esporta
               </Button>
@@ -164,7 +164,7 @@ export default function Test2Gae() {
                 <Save className="w-4 h-4 mr-1" />
                 Salva
               </Button>
-              <Button variant="destructive" size="sm" data-testid="button-nuovo">
+              <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white" data-testid="button-nuovo">
                 <Plus className="w-4 h-4 mr-1" />
                 Nuovo
               </Button>
@@ -175,7 +175,7 @@ export default function Test2Gae() {
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
-              placeholder="Cerca socio..." 
+              placeholder="Cerca partecipante..." 
               className="pl-10 bg-background"
               data-testid="input-search"
             />
