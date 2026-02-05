@@ -107,7 +107,7 @@ const mainMenuItems = [
     icon: Settings,
   },
   {
-    title: "test3 Gae",
+    title: "Affitto Studio Medico",
     url: "/test3-gae",
     icon: Settings,
   },
