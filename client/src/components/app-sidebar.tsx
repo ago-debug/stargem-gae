@@ -18,6 +18,7 @@ import {
   RotateCcw,
   GraduationCap,
   Sparkles,
+  CheckSquare,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -118,6 +119,11 @@ const draftItems = [
     title: "Knowledge",
     url: "/knowledge",
     icon: Settings,
+  },
+  {
+    title: "Cose da Fare",
+    url: "/todo-list",
+    icon: CheckSquare,
   },
   {
     title: "Attività",
