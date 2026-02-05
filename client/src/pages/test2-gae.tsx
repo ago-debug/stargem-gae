@@ -1137,7 +1137,27 @@ export default function Test2Gae() {
           <CardContent className="space-y-6">
             {/* CORSI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Corsi</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Corsi
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors cursor-pointer" data-testid="info-corsi">
+                      <Info className="w-3 h-3" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <Info className="w-4 h-4 text-blue-500" />
+                        {getKnowledgeItem("corsi")?.titolo || "Corsi"}
+                      </h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">
+                        {getKnowledgeItem("corsi")?.descrizione || "Nessuna descrizione disponibile. Vai alla pagina Knowledge per aggiungere informazioni."}
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
@@ -1262,7 +1282,27 @@ export default function Test2Gae() {
 
             {/* WORKSHOP */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Workshop</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Workshop
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors cursor-pointer" data-testid="info-workshop">
+                      <Info className="w-3 h-3" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <Info className="w-4 h-4 text-blue-500" />
+                        {getKnowledgeItem("workshop")?.titolo || "Workshop"}
+                      </h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">
+                        {getKnowledgeItem("workshop")?.descrizione || "Nessuna descrizione disponibile. Vai alla pagina Knowledge per aggiungere informazioni."}
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
@@ -1446,6 +1486,24 @@ export default function Test2Gae() {
               <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4" />
                 Merchandising
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors cursor-pointer" data-testid="info-merchandising">
+                      <Info className="w-3 h-3" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <Info className="w-4 h-4 text-blue-500" />
+                        {getKnowledgeItem("merchandising")?.titolo || "Merchandising"}
+                      </h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">
+                        {getKnowledgeItem("merchandising")?.descrizione || "Nessuna descrizione disponibile. Vai alla pagina Knowledge per aggiungere informazioni."}
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
