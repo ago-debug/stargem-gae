@@ -96,6 +96,9 @@ const mainMenuItems = [
     url: "/report",
     icon: BarChart3,
   },
+];
+
+const draftItems = [
   {
     title: "test Gae",
     url: "/test-gae",
@@ -214,6 +217,33 @@ export function AppSidebar() {
                       asChild 
                       isActive={isActive}
                       data-testid={`nav-${item.url.slice(1) || 'dashboard'}`}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-b border-green-300 dark:border-green-700 rounded px-2 py-1">
+            Bozze
+          </SidebarGroupLabel>
+          <SidebarGroupContent className="bg-green-50/50 dark:bg-green-900/10">
+            <SidebarMenu>
+              {draftItems.map((item) => {
+                const isActive = location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      data-testid={`nav-${item.url.slice(1)}`}
                     >
                       <Link href={item.url}>
                         <item.icon className="w-4 h-4" />
