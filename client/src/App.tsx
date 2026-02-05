@@ -30,6 +30,7 @@ import AnagraficaHome from "@/pages/anagrafica-home";
 import TestGae from "@/pages/test-gae";
 import Test2Gae from "@/pages/test2-gae";
 import Test3Gae from "@/pages/test3-gae";
+import Knowledge from "@/pages/knowledge";
 import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
 
 function Router() {
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/test-gae" component={TestGae} />
       <Route path="/test2-gae" component={Test2Gae} />
       <Route path="/test3-gae" component={Test3Gae} />
+      <Route path="/knowledge" component={Knowledge} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -111,6 +111,11 @@ const mainMenuItems = [
     url: "/test3-gae",
     icon: Settings,
   },
+  {
+    title: "Knowledge",
+    url: "/knowledge",
+    icon: Settings,
+  },
 ];
 
 const commonTablesItems = [
