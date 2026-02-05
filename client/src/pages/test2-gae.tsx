@@ -1177,7 +1177,10 @@ export default function Test2Gae() {
 
             {/* PROVE A PAGAMENTO */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Prove a Pagamento</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Prove a Pagamento
+                <KnowledgeInfo id="prove-a-pagamento" />
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
@@ -1204,7 +1207,10 @@ export default function Test2Gae() {
 
             {/* PROVE GRATUITE */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Prove Gratuite</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Prove Gratuite
+                <KnowledgeInfo id="prove-gratuite" />
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
@@ -1231,7 +1237,10 @@ export default function Test2Gae() {
 
             {/* LEZIONI SINGOLE */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Lezioni Singole</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Lezioni Singole
+                <KnowledgeInfo id="lezioni-singole" />
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
@@ -1290,7 +1299,10 @@ export default function Test2Gae() {
 
             {/* DOMENICHE IN MOVIMENTO */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Domeniche in Movimento</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Domeniche in Movimento
+                <KnowledgeInfo id="domeniche-in-movimento" />
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
@@ -1339,7 +1351,10 @@ export default function Test2Gae() {
 
             {/* LEZIONI INDIVIDUALI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Lezioni Individuali</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Lezioni Individuali
+                <KnowledgeInfo id="lezioni-individuali" />
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
@@ -1362,7 +1377,10 @@ export default function Test2Gae() {
 
             {/* CAMPUS */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Campus</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Campus
+                <KnowledgeInfo id="campus" />
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
@@ -1385,7 +1403,10 @@ export default function Test2Gae() {
 
             {/* SAGGI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">Saggi</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                Saggi
+                <KnowledgeInfo id="saggi" />
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
