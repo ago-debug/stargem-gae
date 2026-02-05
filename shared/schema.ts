@@ -820,3 +820,23 @@ export const insertImportConfigSchema = createInsertSchema(importConfigs).omit({
 });
 export type InsertImportConfig = z.infer<typeof insertImportConfigSchema>;
 export type ImportConfig = typeof importConfigs.$inferSelect;
+
+// ============================================================================
+// KNOWLEDGE (Descrizioni informative per le sezioni)
+// ============================================================================
+
+export const knowledge = pgTable("knowledge", {
+  id: varchar("id", { length: 100 }).primaryKey(), // es: "corsi", "workshop", "allenamenti"
+  sezione: varchar("sezione", { length: 100 }).notNull(), // es: "Attività", "Anagrafica"
+  titolo: varchar("titolo", { length: 255 }).notNull(),
+  descrizione: text("descrizione"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertKnowledgeSchema = createInsertSchema(knowledge).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertKnowledge = z.infer<typeof insertKnowledgeSchema>;
+export type Knowledge = typeof knowledge.$inferSelect;

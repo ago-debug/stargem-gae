@@ -26,6 +26,7 @@ import {
   memberRelationships,
   customReports,
   importConfigs,
+  knowledge,
   type User,
   type UpsertUser,
   type Member,
@@ -74,6 +75,8 @@ import {
   type InsertCustomReport,
   type ImportConfig,
   type InsertImportConfig,
+  type Knowledge,
+  type InsertKnowledge,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -1332,6 +1335,33 @@ export class DatabaseStorage implements IStorage {
 
   async deleteImportConfig(id: number): Promise<void> {
     await db.delete(importConfigs).where(eq(importConfigs.id, id));
+  }
+
+  // Knowledge operations
+  async getAllKnowledge(): Promise<Knowledge[]> {
+    return await db.select().from(knowledge).orderBy(knowledge.sezione, knowledge.titolo);
+  }
+
+  async getKnowledgeById(id: string): Promise<Knowledge | undefined> {
+    const [item] = await db.select().from(knowledge).where(eq(knowledge.id, id));
+    return item;
+  }
+
+  async upsertKnowledge(item: InsertKnowledge): Promise<Knowledge> {
+    const existing = await this.getKnowledgeById(item.id);
+    if (existing) {
+      const [updated] = await db.update(knowledge)
+        .set({ ...item, updatedAt: new Date() })
+        .where(eq(knowledge.id, item.id))
+        .returning();
+      return updated;
+    }
+    const [newItem] = await db.insert(knowledge).values(item).returning();
+    return newItem;
+  }
+
+  async deleteKnowledge(id: string): Promise<void> {
+    await db.delete(knowledge).where(eq(knowledge.id, id));
   }
 }
 
