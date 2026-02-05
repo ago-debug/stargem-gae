@@ -215,17 +215,22 @@ export default function Test2Gae() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Stagione</Label>
-                <Input 
-                  value={formData.stagione} 
-                  onChange={(e) => handleChange("stagione", e.target.value)}
-                />
+                <Select value={formData.stagione} onValueChange={(v) => handleChange("stagione", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2023-2024">2023-2024</SelectItem>
+                    <SelectItem value="2024-2025">2024-2025</SelectItem>
+                    <SelectItem value="2025-2026">2025-2026</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
-                <Label>Anagrafica (chi scrive)</Label>
+                <Label>&nbsp;</Label>
                 <Input 
                   value={formData.anagrafica}
                   onChange={(e) => handleChange("anagrafica", e.target.value)}
-                  placeholder="chi scrive" 
                 />
               </div>
               <div className="space-y-2">
@@ -288,7 +293,18 @@ export default function Test2Gae() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Team Segreteria</Label>
-                <Input value={formData.teamSegreteria} onChange={(e) => handleChange("teamSegreteria", e.target.value)} />
+                <Select value={formData.teamSegreteria} onValueChange={(v) => handleChange("teamSegreteria", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mario">Mario</SelectItem>
+                    <SelectItem value="giovanni">Giovanni</SelectItem>
+                    <SelectItem value="laura">Laura</SelectItem>
+                    <SelectItem value="anna">Anna</SelectItem>
+                    <SelectItem value="marco">Marco</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Tessera Ente</Label>
