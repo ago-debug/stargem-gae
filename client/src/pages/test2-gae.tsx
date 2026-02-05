@@ -134,6 +134,33 @@ export default function Test2Gae() {
     setVerificaStato(prev => ({ ...prev, [campo]: !prev[campo] }));
   };
 
+  // Funzione per avviare la verifica (simulata per ora, poi collegheremo Twilio/SMTP)
+  const avviaVerifica = (campo: keyof typeof verificaStato, tipo: 'telefono' | 'email') => {
+    const valore = tipo === 'telefono' 
+      ? (campo === 'telefono' ? formData.telefono : campo === 'telGen1' ? formData.telGen1 : formData.telGen2)
+      : (campo === 'email' ? formData.email : campo === 'emailGen1' ? formData.emailGen1 : formData.emailGen2);
+    
+    if (!valore) {
+      alert(`Inserisci prima ${tipo === 'telefono' ? 'il numero di telefono' : "l'indirizzo email"}`);
+      return;
+    }
+    
+    // Simulazione verifica (in futuro: Twilio per SMS/WhatsApp, SMTP per email)
+    const conferma = window.confirm(
+      tipo === 'telefono' 
+        ? `Inviare SMS di verifica a ${valore}?\n\n(Funzionalità da collegare con Twilio)`
+        : `Inviare email di verifica a ${valore}?\n\n(Funzionalità da collegare con SMTP)`
+    );
+    
+    if (conferma) {
+      // Per ora simuliamo il successo della verifica
+      setTimeout(() => {
+        setVerificaStato(prev => ({ ...prev, [campo]: true }));
+        alert(`${tipo === 'telefono' ? 'Telefono' : 'Email'} verificato con successo!`);
+      }, 500);
+    }
+  };
+
   // Funzione per decodificare il codice fiscale italiano
   const decodeFiscalCode = (cf: string) => {
     if (!cf || cf.length !== 16) return null;
@@ -867,38 +894,65 @@ export default function Test2Gae() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-1">
                     <Label>Telefono</Label>
-                    <button 
-                      type="button"
-                      onClick={() => toggleVerifica('telefono')}
-                      className="ml-1"
-                      title={verificaStato.telefono ? "Verificato" : "Da verificare"}
+                    <span 
+                      className="ml-1 cursor-help"
+                      title={verificaStato.telefono ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
                     >
                       {verificaStato.telefono ? (
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                       ) : (
                         <AlertCircle className="w-4 h-4 text-orange-400" />
                       )}
-                    </button>
+                    </span>
+                    {!verificaStato.telefono && (
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-5 px-2 text-xs ml-1"
+                        onClick={() => avviaVerifica('telefono', 'telefono')}
+                      >
+                        Verifica
+                      </Button>
+                    )}
                   </div>
-                  <Input value={formData.telefono} onChange={(e) => handleChange("telefono", e.target.value)} />
+                  <Input 
+                    value={formData.telefono} 
+                    onChange={(e) => handleChange("telefono", e.target.value)} 
+                    className={verificaStato.telefono ? "bg-green-50 border-green-300" : ""}
+                  />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-1">
                     <Label>Email</Label>
-                    <button 
-                      type="button"
-                      onClick={() => toggleVerifica('email')}
-                      className="ml-1"
-                      title={verificaStato.email ? "Verificato" : "Da verificare"}
+                    <span 
+                      className="ml-1 cursor-help"
+                      title={verificaStato.email ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
                     >
                       {verificaStato.email ? (
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                       ) : (
                         <AlertCircle className="w-4 h-4 text-orange-400" />
                       )}
-                    </button>
+                    </span>
+                    {!verificaStato.email && (
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-5 px-2 text-xs ml-1"
+                        onClick={() => avviaVerifica('email', 'email')}
+                      >
+                        Verifica
+                      </Button>
+                    )}
                   </div>
-                  <Input type="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} />
+                  <Input 
+                    type="email" 
+                    value={formData.email} 
+                    onChange={(e) => handleChange("email", e.target.value)} 
+                    className={verificaStato.email ? "bg-green-50 border-green-300" : ""}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
@@ -1000,38 +1054,64 @@ export default function Test2Gae() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-1">
                     <Label>Telefono</Label>
-                    <button 
-                      type="button"
-                      onClick={() => toggleVerifica('telGen1')}
-                      className="ml-1"
-                      title={verificaStato.telGen1 ? "Verificato" : "Da verificare"}
+                    <span 
+                      className="ml-1 cursor-help"
+                      title={verificaStato.telGen1 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
                     >
                       {verificaStato.telGen1 ? (
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                       ) : (
                         <AlertCircle className="w-4 h-4 text-orange-400" />
                       )}
-                    </button>
+                    </span>
+                    {!verificaStato.telGen1 && (
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-5 px-2 text-xs ml-1"
+                        onClick={() => avviaVerifica('telGen1', 'telefono')}
+                      >
+                        Verifica
+                      </Button>
+                    )}
                   </div>
-                  <Input value={formData.telGen1} onChange={(e) => handleChange("telGen1", e.target.value)} />
+                  <Input 
+                    value={formData.telGen1} 
+                    onChange={(e) => handleChange("telGen1", e.target.value)} 
+                    className={verificaStato.telGen1 ? "bg-green-50 border-green-300" : ""}
+                  />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-1">
                     <Label>Email</Label>
-                    <button 
-                      type="button"
-                      onClick={() => toggleVerifica('emailGen1')}
-                      className="ml-1"
-                      title={verificaStato.emailGen1 ? "Verificato" : "Da verificare"}
+                    <span 
+                      className="ml-1 cursor-help"
+                      title={verificaStato.emailGen1 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
                     >
                       {verificaStato.emailGen1 ? (
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                       ) : (
                         <AlertCircle className="w-4 h-4 text-orange-400" />
                       )}
-                    </button>
+                    </span>
+                    {!verificaStato.emailGen1 && (
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-5 px-2 text-xs ml-1"
+                        onClick={() => avviaVerifica('emailGen1', 'email')}
+                      >
+                        Verifica
+                      </Button>
+                    )}
                   </div>
-                  <Input value={formData.emailGen1} onChange={(e) => handleChange("emailGen1", e.target.value)} />
+                  <Input 
+                    value={formData.emailGen1} 
+                    onChange={(e) => handleChange("emailGen1", e.target.value)} 
+                    className={verificaStato.emailGen1 ? "bg-green-50 border-green-300" : ""}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
@@ -1119,38 +1199,64 @@ export default function Test2Gae() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-1">
                     <Label>Telefono</Label>
-                    <button 
-                      type="button"
-                      onClick={() => toggleVerifica('telGen2')}
-                      className="ml-1"
-                      title={verificaStato.telGen2 ? "Verificato" : "Da verificare"}
+                    <span 
+                      className="ml-1 cursor-help"
+                      title={verificaStato.telGen2 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
                     >
                       {verificaStato.telGen2 ? (
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                       ) : (
                         <AlertCircle className="w-4 h-4 text-orange-400" />
                       )}
-                    </button>
+                    </span>
+                    {!verificaStato.telGen2 && (
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-5 px-2 text-xs ml-1"
+                        onClick={() => avviaVerifica('telGen2', 'telefono')}
+                      >
+                        Verifica
+                      </Button>
+                    )}
                   </div>
-                  <Input value={formData.telGen2} onChange={(e) => handleChange("telGen2", e.target.value)} />
+                  <Input 
+                    value={formData.telGen2} 
+                    onChange={(e) => handleChange("telGen2", e.target.value)} 
+                    className={verificaStato.telGen2 ? "bg-green-50 border-green-300" : ""}
+                  />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-1">
                     <Label>Email</Label>
-                    <button 
-                      type="button"
-                      onClick={() => toggleVerifica('emailGen2')}
-                      className="ml-1"
-                      title={verificaStato.emailGen2 ? "Verificato" : "Da verificare"}
+                    <span 
+                      className="ml-1 cursor-help"
+                      title={verificaStato.emailGen2 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
                     >
                       {verificaStato.emailGen2 ? (
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                       ) : (
                         <AlertCircle className="w-4 h-4 text-orange-400" />
                       )}
-                    </button>
+                    </span>
+                    {!verificaStato.emailGen2 && (
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-5 px-2 text-xs ml-1"
+                        onClick={() => avviaVerifica('emailGen2', 'email')}
+                      >
+                        Verifica
+                      </Button>
+                    )}
                   </div>
-                  <Input value={formData.emailGen2} onChange={(e) => handleChange("emailGen2", e.target.value)} />
+                  <Input 
+                    value={formData.emailGen2} 
+                    onChange={(e) => handleChange("emailGen2", e.target.value)} 
+                    className={verificaStato.emailGen2 ? "bg-green-50 border-green-300" : ""}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
