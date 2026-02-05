@@ -13,7 +13,7 @@ export function KnowledgeInfo({ id }: KnowledgeInfoProps) {
     staleTime: 1000 * 60 * 5,
   });
 
-  const item = items.find(k => k.id === id);
+  const item = items.find(k => k.id.toLowerCase() === id.toLowerCase());
   
   if (!item) return null;
   
