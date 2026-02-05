@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Upload, Download, Paperclip } from "lucide-react";
+import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet } from "lucide-react";
 import { 
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
   User, BookOpen, ShoppingBag
@@ -139,23 +139,57 @@ export default function Test2Gae() {
   return (
     <div className="flex flex-col h-full" data-testid="page-test2-gae">
       {/* Header fisso con navigazione */}
-      <div className="border-b bg-background sticky top-0 z-10">
-        <div className="p-4 space-y-2">
-          <div className="flex items-center justify-between">
+      <div className="border-b bg-muted/30 sticky top-0 z-10">
+        <div className="p-4 space-y-4">
+          {/* Riga titolo e pulsanti azioni */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl font-semibold">Test2 Gae - Maschera Iscrizioni</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">Versione con stile Anagrafica</p>
+              <h1 className="text-xl sm:text-2xl font-bold">Sistema di Gestione Anagrafica</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="sm" data-testid="button-gsheets">
+                <FileSpreadsheet className="w-4 h-4 mr-1" />
+                GSheets
+              </Button>
+              <Button variant="destructive" size="sm" data-testid="button-esporta">
+                <Upload className="w-4 h-4 mr-1" />
+                Esporta
+              </Button>
+              <Button variant="outline" size="sm" data-testid="button-importa">
+                <Download className="w-4 h-4 mr-1" />
+                Importa
+              </Button>
+              <Button variant="outline" size="sm" data-testid="button-salva">
+                <Save className="w-4 h-4 mr-1" />
+                Salva
+              </Button>
+              <Button variant="destructive" size="sm" data-testid="button-nuovo">
+                <Plus className="w-4 h-4 mr-1" />
+                Nuovo
+              </Button>
             </div>
           </div>
+          
+          {/* Barra di ricerca */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="Cerca socio..." 
+              className="pl-10 bg-background"
+              data-testid="input-search"
+            />
+          </div>
+          
+          {/* Tab di navigazione */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium text-muted-foreground mr-2">Vai a:</span>
             {navItems.map((item) => (
               <Button
                 key={item.id}
                 variant="outline"
                 size="sm"
                 onClick={() => scrollToSection(item.id)}
-                className="text-xs h-8"
+                className="text-xs h-8 bg-background"
                 data-testid={`nav-${item.id}`}
               >
                 <item.icon className="w-3 h-3 mr-1" />
