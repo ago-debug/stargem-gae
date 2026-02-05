@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet } from "lucide-react";
+import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle } from "lucide-react";
 import { 
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
   User, BookOpen, ShoppingBag
@@ -119,6 +119,20 @@ export default function Test2Gae() {
     sessoGen2: "",
     etaGen2: "",
   });
+
+  // Stato verifica telefoni ed email
+  const [verificaStato, setVerificaStato] = useState({
+    telefono: false,
+    email: false,
+    telGen1: false,
+    emailGen1: false,
+    telGen2: false,
+    emailGen2: false,
+  });
+
+  const toggleVerifica = (campo: keyof typeof verificaStato) => {
+    setVerificaStato(prev => ({ ...prev, [campo]: !prev[campo] }));
+  };
 
   // Funzione per decodificare il codice fiscale italiano
   const decodeFiscalCode = (cf: string) => {
@@ -851,11 +865,39 @@ export default function Test2Gae() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Telefono</Label>
+                  <div className="flex items-center gap-1">
+                    <Label>Telefono</Label>
+                    <button 
+                      type="button"
+                      onClick={() => toggleVerifica('telefono')}
+                      className="ml-1"
+                      title={verificaStato.telefono ? "Verificato" : "Da verificare"}
+                    >
+                      {verificaStato.telefono ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                      )}
+                    </button>
+                  </div>
                   <Input value={formData.telefono} onChange={(e) => handleChange("telefono", e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
+                  <div className="flex items-center gap-1">
+                    <Label>Email</Label>
+                    <button 
+                      type="button"
+                      onClick={() => toggleVerifica('email')}
+                      className="ml-1"
+                      title={verificaStato.email ? "Verificato" : "Da verificare"}
+                    >
+                      {verificaStato.email ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                      )}
+                    </button>
+                  </div>
                   <Input type="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} />
                 </div>
               </div>
@@ -956,11 +998,39 @@ export default function Test2Gae() {
                   <Input value={formData.cfGen1} onChange={(e) => handleChange("cfGen1", e.target.value.toUpperCase())} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Telefono</Label>
+                  <div className="flex items-center gap-1">
+                    <Label>Telefono</Label>
+                    <button 
+                      type="button"
+                      onClick={() => toggleVerifica('telGen1')}
+                      className="ml-1"
+                      title={verificaStato.telGen1 ? "Verificato" : "Da verificare"}
+                    >
+                      {verificaStato.telGen1 ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                      )}
+                    </button>
+                  </div>
                   <Input value={formData.telGen1} onChange={(e) => handleChange("telGen1", e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
+                  <div className="flex items-center gap-1">
+                    <Label>Email</Label>
+                    <button 
+                      type="button"
+                      onClick={() => toggleVerifica('emailGen1')}
+                      className="ml-1"
+                      title={verificaStato.emailGen1 ? "Verificato" : "Da verificare"}
+                    >
+                      {verificaStato.emailGen1 ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                      )}
+                    </button>
+                  </div>
                   <Input value={formData.emailGen1} onChange={(e) => handleChange("emailGen1", e.target.value)} />
                 </div>
               </div>
@@ -1047,11 +1117,39 @@ export default function Test2Gae() {
                   <Input value={formData.cfGen2} onChange={(e) => handleChange("cfGen2", e.target.value.toUpperCase())} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Telefono</Label>
+                  <div className="flex items-center gap-1">
+                    <Label>Telefono</Label>
+                    <button 
+                      type="button"
+                      onClick={() => toggleVerifica('telGen2')}
+                      className="ml-1"
+                      title={verificaStato.telGen2 ? "Verificato" : "Da verificare"}
+                    >
+                      {verificaStato.telGen2 ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                      )}
+                    </button>
+                  </div>
                   <Input value={formData.telGen2} onChange={(e) => handleChange("telGen2", e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
+                  <div className="flex items-center gap-1">
+                    <Label>Email</Label>
+                    <button 
+                      type="button"
+                      onClick={() => toggleVerifica('emailGen2')}
+                      className="ml-1"
+                      title={verificaStato.emailGen2 ? "Verificato" : "Da verificare"}
+                    >
+                      {verificaStato.emailGen2 ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                      )}
+                    </button>
+                  </div>
                   <Input value={formData.emailGen2} onChange={(e) => handleChange("emailGen2", e.target.value)} />
                 </div>
               </div>
