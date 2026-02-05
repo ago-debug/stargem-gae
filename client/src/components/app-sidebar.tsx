@@ -102,7 +102,7 @@ const mainMenuItems = [
     icon: Settings,
   },
   {
-    title: "test2 Gae",
+    title: "Maschera Input Generale",
     url: "/test2-gae",
     icon: Settings,
   },
