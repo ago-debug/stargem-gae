@@ -32,6 +32,12 @@ const KNOWLEDGE_ITEMS_DEFAULT: KnowledgeItem[] = [
     sezione: "Attività", 
     titolo: "Workshop",
     descrizione: "I workshop sono eventi formativi intensivi, solitamente di breve durata (1-2 giorni), focalizzati su argomenti specifici."
+  },
+  {
+    id: "merchandising",
+    sezione: "Attività",
+    titolo: "Merchandising",
+    descrizione: "Il merchandising comprende tutti gli articoli e prodotti venduti ai soci:\n\n• Abbigliamento sportivo (magliette, felpe, pantaloni)\n• Accessori (borse, zaini, cappellini)\n• Attrezzature (guanti, protezioni)\n• Materiale didattico\n\nPer ogni articolo è possibile specificare codice, taglia, colore, quantità e prezzo."
   }
 ];
 
