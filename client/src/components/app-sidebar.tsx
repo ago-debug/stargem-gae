@@ -116,6 +116,41 @@ const mainMenuItems = [
     url: "/knowledge",
     icon: Settings,
   },
+  {
+    title: "Attività",
+    url: "/attivita",
+    icon: Settings,
+  },
+  {
+    title: "Elenchi",
+    url: "/elenchi",
+    icon: Settings,
+  },
+  {
+    title: "Quote/Listini",
+    url: "/quote-listini",
+    icon: Settings,
+  },
+  {
+    title: "Promo/Codici Sconto",
+    url: "/promo-codici-sconto",
+    icon: Settings,
+  },
+  {
+    title: "Date/Programmazione",
+    url: "/date-programmazione",
+    icon: Settings,
+  },
+  {
+    title: "Planning",
+    url: "/planning",
+    icon: Settings,
+  },
+  {
+    title: "Schede Iscrizioni",
+    url: "/schede-iscrizioni",
+    icon: Settings,
+  },
 ];
 
 const commonTablesItems = [
