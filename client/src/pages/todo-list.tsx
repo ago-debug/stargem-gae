@@ -13,15 +13,24 @@ interface TodoItem {
 }
 
 export default function TodoList() {
+  const defaultTodos: TodoItem[] = [
+    { id: '1', text: 'Implementare verifica SMS/WhatsApp con Twilio per numeri di telefono', completed: false, createdAt: new Date().toISOString() },
+    { id: '2', text: 'Implementare verifica email con invio link/codice OTP', completed: false, createdAt: new Date().toISOString() },
+    { id: '3', text: 'Collegare bottone "Verifica" a Twilio (SMS) e SMTP (email) per verifica reale telefono/email in anagrafica', completed: false, createdAt: new Date().toISOString() },
+  ];
+
   const [todos, setTodos] = useState<TodoItem[]>(() => {
     const saved = localStorage.getItem('project-todos');
     if (saved) {
-      return JSON.parse(saved);
+      const existing: TodoItem[] = JSON.parse(saved);
+      const existingTexts = existing.map(t => t.text);
+      const newItems = defaultTodos.filter(d => !existingTexts.includes(d.text));
+      if (newItems.length > 0) {
+        return [...existing, ...newItems];
+      }
+      return existing;
     }
-    return [
-      { id: '1', text: 'Implementare verifica SMS/WhatsApp con Twilio per numeri di telefono', completed: false, createdAt: new Date().toISOString() },
-      { id: '2', text: 'Implementare verifica email con invio link/codice OTP', completed: false, createdAt: new Date().toISOString() },
-    ];
+    return defaultTodos;
   });
   
   const [newTodo, setNewTodo] = useState("");
