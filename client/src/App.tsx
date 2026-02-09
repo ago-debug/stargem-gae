@@ -41,6 +41,8 @@ import Test3Gae from "@/pages/test3-gae";
 import Knowledge from "@/pages/knowledge";
 import TodoList from "@/pages/todo-list";
 import Attivita from "@/pages/attivita";
+import Gestione from "@/pages/gestione";
+import GestioneAttivitaStub from "@/pages/gestione-attivita-stub";
 import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
 
 function Router() {
@@ -89,6 +91,34 @@ function Router() {
       <Route path="/knowledge" component={Knowledge} />
       <Route path="/todo-list" component={TodoList} />
       <Route path="/attivita" component={Attivita} />
+      <Route path="/gestione" component={Gestione} />
+      <Route path="/gestione/prove-pagamento">
+        {() => <GestioneAttivitaStub title="Prove a Pagamento" description="Lezioni di prova a pagamento" />}
+      </Route>
+      <Route path="/gestione/prove-gratuite">
+        {() => <GestioneAttivitaStub title="Prove Gratuite" description="Lezioni di prova gratuite" />}
+      </Route>
+      <Route path="/gestione/lezioni-singole">
+        {() => <GestioneAttivitaStub title="Lezioni Singole" description="Lezioni singole o drop-in" />}
+      </Route>
+      <Route path="/gestione/domeniche-movimento">
+        {() => <GestioneAttivitaStub title="Domeniche in Movimento" description="Attività domenicali speciali" />}
+      </Route>
+      <Route path="/gestione/allenamenti">
+        {() => <GestioneAttivitaStub title="Allenamenti/Affitti" description="Sessioni di allenamento e affitti" />}
+      </Route>
+      <Route path="/gestione/lezioni-individuali">
+        {() => <GestioneAttivitaStub title="Lezioni Individuali" description="Lezioni private one-to-one" />}
+      </Route>
+      <Route path="/gestione/campus">
+        {() => <GestioneAttivitaStub title="Campus" description="Campus e programmi intensivi" />}
+      </Route>
+      <Route path="/gestione/saggi">
+        {() => <GestioneAttivitaStub title="Saggi" description="Saggi e spettacoli" />}
+      </Route>
+      <Route path="/gestione/vacanze-studio">
+        {() => <GestioneAttivitaStub title="Vacanze Studio" description="Vacanze studio e viaggi formativi" />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
