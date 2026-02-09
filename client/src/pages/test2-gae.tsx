@@ -1400,7 +1400,7 @@ export default function Test2Gae() {
                     <SelectItem value="lezioni-singole">Lezioni Singole</SelectItem>
                     <SelectItem value="workshop">Workshop</SelectItem>
                     <SelectItem value="domeniche-movimento">Domeniche in Movimento</SelectItem>
-                    <SelectItem value="allenamenti">Allenamenti</SelectItem>
+                    <SelectItem value="allenamenti">Allenamenti/Affitti</SelectItem>
                     <SelectItem value="lezioni-individuali">Lezioni Individuali</SelectItem>
                     <SelectItem value="campus">Campus</SelectItem>
                     <SelectItem value="saggi">Saggi</SelectItem>
@@ -2160,7 +2160,7 @@ export default function Test2Gae() {
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
                 <span className="flex items-center gap-2">
-                  Allenamenti
+                  Allenamenti/Affitti
                   <KnowledgeInfo id="allenamenti" />
                 </span>
                 <Button size="sm" variant="destructive" data-testid="button-aggiungi-allenamenti">

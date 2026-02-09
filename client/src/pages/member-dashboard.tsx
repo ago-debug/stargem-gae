@@ -267,7 +267,7 @@ export default function MemberDashboard() {
               </TabsTrigger>
               <TabsTrigger value="allenamenti" className="flex items-center gap-1 text-xs py-2" data-testid="tab-allenamenti">
                 <Dumbbell className="w-3 h-3" />
-                Allenamenti
+                Allenamenti/Affitti
               </TabsTrigger>
               <TabsTrigger value="corsi" className="flex items-center gap-1 text-xs py-2" data-testid="tab-corsi">
                 <BookOpen className="w-3 h-3" />
@@ -711,7 +711,7 @@ export default function MemberDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
                   <Dumbbell className="w-5 h-5" />
-                  Allenamenti / Presenze
+                  Allenamenti/Affitti / Presenze
                 </CardTitle>
               </CardHeader>
               <CardContent>
