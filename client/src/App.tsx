@@ -14,6 +14,7 @@ import Members from "@/pages/members";
 import Courses from "@/pages/courses";
 import Workshops from "@/pages/workshops";
 import CourseEnrollments from "@/pages/course-enrollments";
+import ActivityCategories from "@/pages/activity-categories";
 import Categories from "@/pages/categories";
 import WorkshopCategories from "@/pages/workshop-categories";
 import SundayCategories from "@/pages/sunday-categories";
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/corsi" component={Courses} />
       <Route path="/workshops" component={Workshops} />
       <Route path="/iscritti-corsi" component={CourseEnrollments} />
+      <Route path="/categorie-attivita" component={ActivityCategories} />
       <Route path="/categorie" component={Categories} />
       <Route path="/categorie-workshop" component={WorkshopCategories} />
       <Route path="/categorie-domeniche" component={SundayCategories} />
