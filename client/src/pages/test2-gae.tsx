@@ -1374,9 +1374,15 @@ export default function Test2Gae() {
         {/* PAGAMENTI */}
         <Card id="pagamenti" className="scroll-mt-32">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <CreditCard className="w-5 h-5" />
-              Pagamenti
+            <CardTitle className="flex items-center justify-between gap-2 text-lg">
+              <span className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Pagamenti
+              </span>
+              <Button size="sm" variant="destructive" data-testid="button-aggiungi-pagamento">
+                <Plus className="w-4 h-4" />
+                Aggiungi
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -1526,9 +1532,15 @@ export default function Test2Gae() {
         {/* GIFT - BUONO - RESO - HELLO GEM */}
         <Card id="gift" className="scroll-mt-32">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Gift className="w-5 h-5" />
-              Gift - Buono - Reso - Hello Gem
+            <CardTitle className="flex items-center justify-between gap-2 text-lg">
+              <span className="flex items-center gap-2">
+                <Gift className="w-5 h-5" />
+                Gift - Buono - Reso - Hello Gem
+              </span>
+              <Button size="sm" variant="destructive" data-testid="button-aggiungi-gift">
+                <Plus className="w-4 h-4" />
+                Aggiungi
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -1699,9 +1711,15 @@ export default function Test2Gae() {
           <CardContent className="space-y-6">
             {/* CORSI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Corsi
-                <KnowledgeInfo id="corsi" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Corsi
+                  <KnowledgeInfo id="corsi" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-corsi">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
                 <div className="space-y-2">
@@ -1777,9 +1795,15 @@ export default function Test2Gae() {
 
             {/* PROVE A PAGAMENTO */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Prove a Pagamento
-                <KnowledgeInfo id="prove-a-pagamento" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Prove a Pagamento
+                  <KnowledgeInfo id="prove-a-pagamento" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-prove-pagamento">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
@@ -1844,9 +1868,15 @@ export default function Test2Gae() {
 
             {/* PROVE GRATUITE */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Prove Gratuite
-                <KnowledgeInfo id="prove-gratuite" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Prove Gratuite
+                  <KnowledgeInfo id="prove-gratuite" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-prove-gratuite">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
@@ -1911,9 +1941,15 @@ export default function Test2Gae() {
 
             {/* LEZIONI SINGOLE */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Lezioni Singole
-                <KnowledgeInfo id="lezioni-singole" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Lezioni Singole
+                  <KnowledgeInfo id="lezioni-singole" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-lezioni-singole">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
@@ -1984,9 +2020,15 @@ export default function Test2Gae() {
 
             {/* WORKSHOP */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Workshop
-                <KnowledgeInfo id="workshop" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Workshop
+                  <KnowledgeInfo id="workshop" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-workshop">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2047,9 +2089,15 @@ export default function Test2Gae() {
 
             {/* DOMENICHE IN MOVIMENTO */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Domeniche in Movimento
-                <KnowledgeInfo id="domeniche-in-movimento" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Domeniche in Movimento
+                  <KnowledgeInfo id="domeniche-in-movimento" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-domeniche-movimento">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2110,9 +2158,15 @@ export default function Test2Gae() {
 
             {/* ALLENAMENTI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Allenamenti
-                <KnowledgeInfo id="allenamenti" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Allenamenti
+                  <KnowledgeInfo id="allenamenti" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-allenamenti">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2173,9 +2227,15 @@ export default function Test2Gae() {
 
             {/* LEZIONI INDIVIDUALI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Lezioni Individuali
-                <KnowledgeInfo id="lezioni-individuali" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Lezioni Individuali
+                  <KnowledgeInfo id="lezioni-individuali" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-lezioni-individuali">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2236,9 +2296,15 @@ export default function Test2Gae() {
 
             {/* CAMPUS */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Campus
-                <KnowledgeInfo id="campus" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Campus
+                  <KnowledgeInfo id="campus" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-campus">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2299,9 +2365,15 @@ export default function Test2Gae() {
 
             {/* SAGGI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Saggi
-                <KnowledgeInfo id="saggi" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Saggi
+                  <KnowledgeInfo id="saggi" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-saggi">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2362,9 +2434,15 @@ export default function Test2Gae() {
 
             {/* VACANZA STUDIO */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                Vacanze Studio
-                <KnowledgeInfo id="vacanze-studio" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  Vacanze Studio
+                  <KnowledgeInfo id="vacanze-studio" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-vacanze-studio">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2425,10 +2503,16 @@ export default function Test2Gae() {
 
             {/* MERCHANDISING */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4" />
-                Merchandising
-                <KnowledgeInfo id="merchandising" />
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4" />
+                  Merchandising
+                  <KnowledgeInfo id="merchandising" />
+                </span>
+                <Button size="sm" variant="destructive" data-testid="button-aggiungi-merchandising">
+                  <Plus className="w-4 h-4" />
+                  Aggiungi
+                </Button>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
