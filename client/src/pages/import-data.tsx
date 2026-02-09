@@ -623,7 +623,7 @@ export default function ImportData() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="members">
-                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Clienti</span>
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Partecipanti</span>
                     </SelectItem>
                     <SelectItem value="courses">
                       <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>
@@ -1145,7 +1145,7 @@ export default function ImportData() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="members">
-                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Clienti</span>
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Partecipanti</span>
                     </SelectItem>
                     <SelectItem value="courses">
                       <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>

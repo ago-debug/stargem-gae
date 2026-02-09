@@ -129,7 +129,7 @@ export default function Payments() {
       ? payments.filter(p => p.status === 'pending')
       : payments;
     
-    const headers = ["ID", "Cliente", "Tipo", "Descrizione", "Importo", "Scadenza", "Metodo", "Stato", "Data Pagamento"];
+    const headers = ["ID", "Partecipante", "Tipo", "Descrizione", "Importo", "Scadenza", "Metodo", "Stato", "Data Pagamento"];
     const rows = filteredData.map(p => [
       p.id,
       getMemberName(p),
@@ -301,7 +301,7 @@ export default function Payments() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Cliente</TableHead>
+                  <TableHead>Partecipante</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Descrizione</TableHead>
                   <TableHead>Importo</TableHead>
@@ -368,7 +368,7 @@ export default function Payments() {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="memberId">Cliente (opzionale)</Label>
+              <Label htmlFor="memberId">Partecipante (opzionale)</Label>
               <input type="hidden" name="memberId" value={selectedMemberId} />
               <Popover open={memberSearchOpen} onOpenChange={setMemberSearchOpen}>
                 <PopoverTrigger asChild>
@@ -404,7 +404,7 @@ export default function Payments() {
                 <PopoverContent className="w-[400px] p-0" align="start">
                   <Command shouldFilter={false}>
                     <CommandInput 
-                      placeholder="Cerca cliente (min. 3 caratteri)..." 
+                      placeholder="Cerca partecipante (min. 3 caratteri)..." 
                       value={memberSearchQuery}
                       onValueChange={setMemberSearchQuery}
                       data-testid="input-search-member"
@@ -413,7 +413,7 @@ export default function Payments() {
                       <CommandEmpty>
                         {memberSearchQuery.length < 3 
                           ? "Inserisci almeno 3 caratteri per cercare" 
-                          : "Nessun cliente trovato"}
+                          : "Nessun partecipante trovato"}
                       </CommandEmpty>
                       {memberSearchQuery.length >= 3 && (
                         <CommandGroup>
