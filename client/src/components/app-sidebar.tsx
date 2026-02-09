@@ -49,7 +49,7 @@ const mainMenuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Clienti/Lista",
+    title: "Partecipanti/Lista",
     url: "/iscritti",
     icon: Users,
   },

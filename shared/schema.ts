@@ -584,7 +584,7 @@ export const members = pgTable("members", {
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }), // Telefono fisso
   mobile: varchar("mobile", { length: 50 }), // Cellulare
-  categoryId: integer("category_id").references(() => clientCategories.id, { onDelete: "set null" }), // Categoria cliente (Tipologia Socio)
+  categoryId: integer("category_id").references(() => clientCategories.id, { onDelete: "set null" }), // Categoria partecipante (Tipologia Socio)
   subscriptionTypeId: integer("subscription_type_id").references(() => subscriptionTypes.id, { onDelete: "set null" }), // Tipo Iscrizione
   
   // Dati tessera

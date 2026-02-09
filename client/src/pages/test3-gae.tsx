@@ -24,7 +24,7 @@ interface Prenotazione {
   data: string;
   oraInizio: string;
   oraFine: string;
-  cliente: string;
+  partecipante: string;
   telefono: string;
   pagato: boolean;
 }
@@ -120,7 +120,7 @@ const PRENOTAZIONI_DEMO: Prenotazione[] = [
     data: oggi,
     oraInizio: "16:00",
     oraFine: "17:00",
-    cliente: "Rossi",
+    partecipante: "Rossi",
     telefono: "333-1234567",
     pagato: false
   },
@@ -130,7 +130,7 @@ const PRENOTAZIONI_DEMO: Prenotazione[] = [
     data: oggi,
     oraInizio: "18:00",
     oraFine: "19:30",
-    cliente: "Bianchi",
+    partecipante: "Bianchi",
     telefono: "339-7654321",
     pagato: true
   }
@@ -146,7 +146,7 @@ export default function Test3Gae() {
     sala: "Sala A",
     oraInizio: "09:00",
     oraFine: "10:00",
-    cliente: "",
+    partecipante: "",
     telefono: "",
     pagato: false
   });
@@ -171,14 +171,14 @@ export default function Test3Gae() {
       const pFine = oraToMinuti(p.oraFine);
       
       if (inizioMin < pFine && fineMin > pInizio) {
-        return `Conflitto con prenotazione ${p.cliente} (${p.oraInizio}-${p.oraFine})`;
+        return `Conflitto con prenotazione ${p.partecipante} (${p.oraInizio}-${p.oraFine})`;
       }
     }
     return null;
   }, [nuovaPrenotazione, prenotazioni, dataSelezionata]);
 
   const creaPrenotazione = () => {
-    if (conflitto || !nuovaPrenotazione.cliente.trim()) return;
+    if (conflitto || !nuovaPrenotazione.partecipante.trim()) return;
     
     const nuova: Prenotazione = {
       id: Date.now().toString(),
@@ -186,7 +186,7 @@ export default function Test3Gae() {
       data: dataSelezionata,
       oraInizio: nuovaPrenotazione.oraInizio,
       oraFine: nuovaPrenotazione.oraFine,
-      cliente: nuovaPrenotazione.cliente,
+      partecipante: nuovaPrenotazione.partecipante,
       telefono: nuovaPrenotazione.telefono,
       pagato: nuovaPrenotazione.pagato
     };
@@ -196,7 +196,7 @@ export default function Test3Gae() {
       sala: "Sala A",
       oraInizio: "09:00",
       oraFine: "10:00",
-      cliente: "",
+      partecipante: "",
       telefono: "",
       pagato: false
     });
@@ -371,11 +371,11 @@ export default function Test3Gae() {
                                     : 'bg-red-100 hover:bg-red-200 dark:bg-red-900/30'
                                   : 'bg-green-50 hover:bg-green-100 dark:bg-green-900/20'
                               }`}
-                              title={prenotazione ? `${prenotazione.cliente} (${prenotazione.oraInizio}-${prenotazione.oraFine})` : 'Libero'}
+                              title={prenotazione ? `${prenotazione.partecipante} (${prenotazione.oraInizio}-${prenotazione.oraFine})` : 'Libero'}
                             >
                               {isOccupato && (
                                 <span className="text-xs font-medium">
-                                  {prenotazione?.cliente.substring(0, 3)}
+                                  {prenotazione?.partecipante.substring(0, 3)}
                                 </span>
                               )}
                             </td>
@@ -466,12 +466,12 @@ export default function Test3Gae() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>Nome Cliente *</Label>
+                    <Label>Nome Partecipante *</Label>
                     <Input
-                      value={nuovaPrenotazione.cliente}
-                      onChange={(e) => setNuovaPrenotazione(prev => ({ ...prev, cliente: e.target.value }))}
+                      value={nuovaPrenotazione.partecipante}
+                      onChange={(e) => setNuovaPrenotazione(prev => ({ ...prev, partecipante: e.target.value }))}
                       placeholder="Es. Mario Rossi"
-                      data-testid="input-cliente"
+                      data-testid="input-partecipante"
                     />
                   </div>
                   
@@ -505,7 +505,7 @@ export default function Test3Gae() {
                 
                 <Button
                   onClick={creaPrenotazione}
-                  disabled={!!conflitto || !nuovaPrenotazione.cliente.trim()}
+                  disabled={!!conflitto || !nuovaPrenotazione.partecipante.trim()}
                   className="w-full sm:w-auto"
                   data-testid="button-crea-prenotazione"
                 >
@@ -689,7 +689,7 @@ export default function Test3Gae() {
                           <div className="text-xs text-muted-foreground">- {p.oraFine}</div>
                         </div>
                         <div>
-                          <div className="font-medium">{p.cliente}</div>
+                          <div className="font-medium">{p.partecipante}</div>
                           <div className="text-sm text-muted-foreground">{p.sala}</div>
                           {p.telefono && <div className="text-xs text-muted-foreground">{p.telefono}</div>}
                         </div>

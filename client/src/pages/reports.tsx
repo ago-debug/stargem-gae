@@ -30,7 +30,7 @@ interface ReportFilter {
 }
 
 const ENTITY_TYPES = [
-  { id: "members", label: "Clienti/Anagrafiche" },
+  { id: "members", label: "Partecipanti/Anagrafiche" },
   { id: "courses", label: "Corsi" },
   { id: "workshops", label: "Workshop" },
   { id: "payments", label: "Pagamenti" },
@@ -538,7 +538,7 @@ export default function Reports() {
                   id="reportName"
                   value={reportName}
                   onChange={(e) => setReportName(e.target.value)}
-                  placeholder="Es: Clienti attivi con certificato"
+                  placeholder="Es: Partecipanti attivi con certificato"
                   data-testid="input-report-name"
                 />
               </div>

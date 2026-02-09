@@ -111,7 +111,7 @@ export default function Memberships() {
   const handleMembershipSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedMembershipMember) {
-      toast({ title: "Errore", description: "Seleziona un cliente", variant: "destructive" });
+      toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
       return;
     }
     const formData = new FormData(e.currentTarget);
@@ -132,7 +132,7 @@ export default function Memberships() {
   const handleCertificateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedCertMember) {
-      toast({ title: "Errore", description: "Seleziona un cliente", variant: "destructive" });
+      toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
       return;
     }
     const formData = new FormData(e.currentTarget);
@@ -253,7 +253,7 @@ export default function Memberships() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Cliente</TableHead>
+                      <TableHead>Partecipante</TableHead>
                       <TableHead>N. Tessera</TableHead>
                       <TableHead>Barcode</TableHead>
                       <TableHead>Tipo</TableHead>
@@ -367,7 +367,7 @@ export default function Memberships() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Cliente</TableHead>
+                      <TableHead>Partecipante</TableHead>
                       <TableHead>Medico</TableHead>
                       <TableHead>Data Rilascio</TableHead>
                       <TableHead>Scadenza</TableHead>
@@ -463,7 +463,7 @@ export default function Memberships() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Cliente</TableHead>
+                        <TableHead>Partecipante</TableHead>
                         <TableHead>Tipo Ente</TableHead>
                         <TableHead>Numero Tessera</TableHead>
                         <TableHead>Data Rilascio</TableHead>
@@ -522,7 +522,7 @@ export default function Memberships() {
           <form onSubmit={handleMembershipSubmit} className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Cliente *</Label>
+                <Label>Partecipante *</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -534,7 +534,7 @@ export default function Memberships() {
                   data-testid="button-new-member-membership"
                 >
                   <UserPlus className="w-4 h-4 mr-1" />
-                  Nuovo Cliente
+                  Nuovo Partecipante
                 </Button>
               </div>
               <Popover open={membershipMemberOpen} onOpenChange={setMembershipMemberOpen}>
@@ -548,7 +548,7 @@ export default function Memberships() {
                   >
                     {selectedMembershipMember 
                       ? `${selectedMembershipMember.firstName} ${selectedMembershipMember.lastName}`
-                      : "Cerca cliente (min. 3 caratteri)..."
+                      : "Cerca partecipante (min. 3 caratteri)..."
                     }
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -565,7 +565,7 @@ export default function Memberships() {
                       {membershipMemberSearch.length < 3 ? (
                         <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                       ) : !membershipSearchResults?.members?.length ? (
-                        <CommandEmpty>Nessun cliente trovato</CommandEmpty>
+                        <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
                       ) : (
                         <CommandGroup>
                           {membershipSearchResults.members.map((member) => (
@@ -706,7 +706,7 @@ export default function Memberships() {
           <form onSubmit={handleCertificateSubmit} className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Cliente *</Label>
+                <Label>Partecipante *</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -718,7 +718,7 @@ export default function Memberships() {
                   data-testid="button-new-member-certificate"
                 >
                   <UserPlus className="w-4 h-4 mr-1" />
-                  Nuovo Cliente
+                  Nuovo Partecipante
                 </Button>
               </div>
               <Popover open={certMemberOpen} onOpenChange={setCertMemberOpen}>
@@ -732,7 +732,7 @@ export default function Memberships() {
                   >
                     {selectedCertMember 
                       ? `${selectedCertMember.firstName} ${selectedCertMember.lastName}`
-                      : "Cerca cliente (min. 3 caratteri)..."
+                      : "Cerca partecipante (min. 3 caratteri)..."
                     }
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -749,7 +749,7 @@ export default function Memberships() {
                       {certMemberSearch.length < 3 ? (
                         <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                       ) : !certSearchResults?.members?.length ? (
-                        <CommandEmpty>Nessun cliente trovato</CommandEmpty>
+                        <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
                       ) : (
                         <CommandGroup>
                           {certSearchResults.members.map((member) => (

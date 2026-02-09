@@ -1402,7 +1402,7 @@ export default function AnagraficaHome() {
           </DialogHeader>
           <form onSubmit={handleCreatePayment} className="space-y-4">
             <div className="bg-muted/50 p-3 rounded-lg">
-              <p className="text-sm text-muted-foreground">Cliente:</p>
+              <p className="text-sm text-muted-foreground">Partecipante:</p>
               <p className="font-medium">{selectedMember?.firstName} {selectedMember?.lastName}</p>
             </div>
 

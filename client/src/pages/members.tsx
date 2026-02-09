@@ -101,7 +101,7 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
-      toast({ title: "Cliente creato con successo" });
+      toast({ title: "Partecipante creato con successo" });
       setIsFormOpen(false);
       resetForm();
     },
@@ -125,7 +125,7 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
-      toast({ title: "Cliente aggiornato con successo" });
+      toast({ title: "Partecipante aggiornato con successo" });
       setIsFormOpen(false);
       resetForm();
     },
@@ -149,7 +149,7 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
-      toast({ title: "Cliente eliminato con successo" });
+      toast({ title: "Partecipante eliminato con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -462,7 +462,7 @@ export default function Members() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `clienti_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `partecipanti_export_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     toast({ title: "Esportazione completata" });
@@ -472,7 +472,7 @@ export default function Members() {
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Clienti/Anagrafiche</h1>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Partecipanti/Anagrafiche</h1>
           <p className="text-muted-foreground">Anagrafica completa degli iscritti</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -492,7 +492,7 @@ export default function Members() {
             data-testid="button-add-member"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Nuovo Cliente
+            Nuovo Partecipante
           </Button>
         </div>
       </div>
@@ -534,7 +534,7 @@ export default function Members() {
           ) : (
             <div className="overflow-x-auto">
               <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
-                <span>Totale: {totalMembers} clienti</span>
+                <span>Totale: {totalMembers} partecipanti</span>
                 {totalPages > 1 && (
                   <div className="flex items-center gap-2">
                     <Button
@@ -730,7 +730,7 @@ export default function Members() {
       }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingMember ? "Modifica Cliente" : "Nuovo Cliente"}</DialogTitle>
+            <DialogTitle>{editingMember ? "Modifica Partecipante" : "Nuovo Partecipante"}</DialogTitle>
             <DialogDescription>
               Inserisci i dati anagrafici completi dell'iscritto
             </DialogDescription>
@@ -763,7 +763,7 @@ export default function Members() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="categoryId">Categoria Cliente (opzionale)</Label>
+                <Label htmlFor="categoryId">Categoria Partecipante (opzionale)</Label>
                 <input type="hidden" name="categoryId" value={selectedCategoryId === "none" ? "" : selectedCategoryId} />
                 <Select 
                   value={selectedCategoryId}
@@ -1562,7 +1562,7 @@ export default function Members() {
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-member"
               >
-                {editingMember ? "Salva Modifiche" : "Crea Cliente"}
+                {editingMember ? "Salva Modifiche" : "Crea Partecipante"}
               </Button>
             </DialogFooter>
           </form>
