@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Users,
-  Calendar,
   FolderTree,
   Tags,
   Briefcase,
@@ -17,7 +16,6 @@ import {
   UserCog,
   RotateCcw,
   GraduationCap,
-  Sparkles,
   CheckSquare,
   Activity,
 } from "lucide-react";
@@ -54,14 +52,9 @@ const mainMenuItems = [
     icon: Users,
   },
   {
-    title: "Corsi",
-    url: "/corsi",
-    icon: Calendar,
-  },
-  {
-    title: "Workshops",
-    url: "/workshops",
-    icon: Sparkles,
+    title: "Gestione",
+    url: "/gestione",
+    icon: Activity,
   },
   {
     title: "Iscritti per Corso",
@@ -217,7 +210,9 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {mainMenuItems.map((item) => {
-                const isActive = location === item.url;
+                const isActive = item.url === "/gestione"
+                  ? location === "/gestione" || location === "/corsi" || location === "/workshops" || location.startsWith("/gestione/")
+                  : location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
