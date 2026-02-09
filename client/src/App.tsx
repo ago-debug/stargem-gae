@@ -16,6 +16,11 @@ import Workshops from "@/pages/workshops";
 import CourseEnrollments from "@/pages/course-enrollments";
 import Categories from "@/pages/categories";
 import WorkshopCategories from "@/pages/workshop-categories";
+import SundayCategories from "@/pages/sunday-categories";
+import TrainingCategories from "@/pages/training-categories";
+import IndividualLessonCategories from "@/pages/individual-lesson-categories";
+import CampusCategories from "@/pages/campus-categories";
+import RecitalCategories from "@/pages/recital-categories";
 import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
 import Studios from "@/pages/studios";
@@ -58,6 +63,11 @@ function Router() {
       <Route path="/iscritti-corsi" component={CourseEnrollments} />
       <Route path="/categorie" component={Categories} />
       <Route path="/categorie-workshop" component={WorkshopCategories} />
+      <Route path="/categorie-domeniche" component={SundayCategories} />
+      <Route path="/categorie-allenamenti" component={TrainingCategories} />
+      <Route path="/categorie-lezioni-individuali" component={IndividualLessonCategories} />
+      <Route path="/categorie-campus" component={CampusCategories} />
+      <Route path="/categorie-saggi" component={RecitalCategories} />
       <Route path="/categorie-clienti" component={ClientCategories} />
       <Route path="/insegnanti" component={Instructors} />
       <Route path="/studios" component={Studios} />
