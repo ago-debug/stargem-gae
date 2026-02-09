@@ -28,7 +28,7 @@ export default function ClientCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/client-categories"] });
-      toast({ title: "Categoria cliente creata con successo" });
+      toast({ title: "Categoria partecipante creata con successo" });
       setIsFormOpen(false);
       setEditingCategory(null);
     },
@@ -43,7 +43,7 @@ export default function ClientCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/client-categories"] });
-      toast({ title: "Categoria cliente aggiornata con successo" });
+      toast({ title: "Categoria partecipante aggiornata con successo" });
       setIsFormOpen(false);
       setEditingCategory(null);
     },
@@ -58,7 +58,7 @@ export default function ClientCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/client-categories"] });
-      toast({ title: "Categoria cliente eliminata con successo" });
+      toast({ title: "Categoria partecipante eliminata con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -97,8 +97,8 @@ export default function ClientCategories() {
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Categorie Clienti</h1>
-          <p className="text-muted-foreground">Organizza i clienti per categorie e sottocategorie</p>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Categoria Partecipante</h1>
+          <p className="text-muted-foreground">Organizza i partecipanti per categorie e sottocategorie</p>
         </div>
         <Button 
           onClick={() => {
@@ -116,7 +116,7 @@ export default function ClientCategories() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <FolderTree className="w-5 h-5 text-muted-foreground" />
-            <h2 className="text-lg font-medium">Struttura Categorie Clienti</h2>
+            <h2 className="text-lg font-medium">Struttura Categoria Partecipante</h2>
           </div>
         </CardHeader>
         <CardContent>
@@ -237,7 +237,7 @@ export default function ClientCategories() {
           <DialogHeader>
             <DialogTitle>{editingCategory ? "Modifica Categoria" : "Nuova Categoria"}</DialogTitle>
             <DialogDescription>
-              Inserisci i dettagli della categoria cliente
+              Inserisci i dettagli della categoria partecipante
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
