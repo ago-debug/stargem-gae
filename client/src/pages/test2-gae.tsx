@@ -124,6 +124,7 @@ export default function Test2Gae() {
   const [pagamentoAttivita, setPagamentoAttivita] = useState("");
   const [pagamentoDettaglio, setPagamentoDettaglio] = useState("");
   const [corsiDB, setCorsiDB] = useState<{id: number; name: string; sku: string}[]>([]);
+  const [categorieDB, setCategorieDB] = useState<{id: number; name: string}[]>([]);
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
   const attivitaKeys = ["corsi", "prove-pagamento", "prove-gratuite", "lezioni-singole", "workshop", "domeniche-movimento", "allenamenti", "lezioni-individuali", "campus", "saggi"] as const;
@@ -156,6 +157,10 @@ export default function Test2Gae() {
       .then(res => res.ok ? res.json() : [])
       .then(data => setCorsiDB(data))
       .catch(() => setCorsiDB([]));
+    fetch("/api/categories")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setCategorieDB(data))
+      .catch(() => setCategorieDB([]));
   }, []);
 
   // Stato verifica telefoni ed email
@@ -1706,11 +1711,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1784,11 +1789,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1851,11 +1856,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1918,11 +1923,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1991,11 +1996,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -2054,11 +2059,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -2117,11 +2122,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -2180,11 +2185,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -2243,11 +2248,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -2306,11 +2311,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -2369,11 +2374,11 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="danza">Danza</SelectItem>
-                      <SelectItem value="bambini">Bambini</SelectItem>
-                      <SelectItem value="ballo">Ballo</SelectItem>
+                      {categorieDB.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
