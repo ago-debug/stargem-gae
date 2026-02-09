@@ -387,7 +387,7 @@ export default function Attivita() {
                   <span className="text-sm text-muted-foreground">configurate</span>
                 </div>
                 <div className="flex items-center gap-3 mt-2">
-                  <Badge variant="outline">{instructors?.length || 0} insegnanti</Badge>
+                  <Badge variant="outline">{instructors?.length || 0} staff/insegnanti</Badge>
                   <Badge variant="outline">{studios?.length || 0} sale</Badge>
                 </div>
               </CardContent>

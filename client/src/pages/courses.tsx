@@ -635,7 +635,7 @@ export default function Courses() {
   const exportToCSV = () => {
     if (!filteredCourses.length) return;
     
-    const headers = ["SKU", "Nome", "Descrizione", "Categoria", "Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
+    const headers = ["SKU", "Nome", "Descrizione", "Categoria", "Staff/Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
     
     const rows = filteredCourses.map(course => {
       const category = categories?.find(c => c.id === course.categoryId);
@@ -768,7 +768,7 @@ export default function Courses() {
                 <TableRow>
                   <TableHead>Corso</TableHead>
                   <TableHead>Categoria</TableHead>
-                  <TableHead>Insegnante</TableHead>
+                  <TableHead>Staff/Insegnante</TableHead>
                   <TableHead>Prezzo</TableHead>
                   <TableHead>Posti</TableHead>
                   <TableHead>Iscritti</TableHead>
@@ -981,7 +981,7 @@ export default function Courses() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Insegnanti</Label>
+                    <Label>Staff/Insegnanti</Label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
@@ -1259,7 +1259,7 @@ export default function Courses() {
               </div>
 
               <div className="space-y-2">
-                <Label>Insegnanti</Label>
+                <Label>Staff/Insegnanti</Label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>

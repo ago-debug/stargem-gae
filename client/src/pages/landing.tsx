@@ -143,7 +143,7 @@ export default function Landing() {
               <Calendar className="w-10 h-10 text-primary mb-2" />
               <CardTitle>Corsi & Categorie</CardTitle>
               <CardDescription>
-                Organizza corsi per categoria con insegnanti assegnati
+                Organizza corsi per categoria con staff/insegnanti assegnati
               </CardDescription>
             </CardHeader>
           </Card>
@@ -190,7 +190,7 @@ export default function Landing() {
               <ul className="space-y-2">
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  Gestione insegnanti e tariffe
+                  Gestione staff/insegnanti e tariffe
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />

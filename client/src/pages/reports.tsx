@@ -36,7 +36,7 @@ const ENTITY_TYPES = [
   { id: "payments", label: "Pagamenti" },
   { id: "enrollments", label: "Iscrizioni" },
   { id: "attendances", label: "Presenze" },
-  { id: "instructors", label: "Insegnanti" },
+  { id: "instructors", label: "Staff/Insegnanti" },
 ];
 
 const OPERATORS = [

@@ -615,7 +615,7 @@ export default function Workshops() {
   const exportToCSV = () => {
     if (!filteredWorkshops.length) return;
     
-    const headers = ["Nome", "Descrizione", "Categoria", "Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
+    const headers = ["Nome", "Descrizione", "Categoria", "Staff/Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
     
     const rows = filteredWorkshops.map(workshop => {
       const category = categories?.find(c => c.id === workshop.categoryId);
@@ -720,7 +720,7 @@ export default function Workshops() {
                 <TableRow>
                   <TableHead>Nome Workshop</TableHead>
                   <TableHead>Categoria</TableHead>
-                  <TableHead>Insegnante</TableHead>
+                  <TableHead>Staff/Insegnante</TableHead>
                   <TableHead>Prezzo</TableHead>
                   <TableHead>Posti</TableHead>
                   <TableHead>Iscritti</TableHead>
@@ -906,7 +906,7 @@ export default function Workshops() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Insegnanti</Label>
+                    <Label>Staff/Insegnanti</Label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
@@ -1184,7 +1184,7 @@ export default function Workshops() {
               </div>
 
               <div className="space-y-2">
-                <Label>Insegnanti</Label>
+                <Label>Staff/Insegnanti</Label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>

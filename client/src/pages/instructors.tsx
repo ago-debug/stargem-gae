@@ -45,7 +45,7 @@ export default function Instructors() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
-      toast({ title: "Insegnante creato con successo" });
+      toast({ title: "Staff/insegnante creato con successo" });
       setIsFormOpen(false);
       setEditingInstructor(null);
     },
@@ -60,7 +60,7 @@ export default function Instructors() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
-      toast({ title: "Insegnante aggiornato con successo" });
+      toast({ title: "Staff/insegnante aggiornato con successo" });
       setIsFormOpen(false);
       setEditingInstructor(null);
     },
@@ -75,7 +75,7 @@ export default function Instructors() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
-      toast({ title: "Insegnante eliminato con successo" });
+      toast({ title: "Staff/insegnante eliminato con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -111,8 +111,8 @@ export default function Instructors() {
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Insegnanti</h1>
-          <p className="text-muted-foreground">Gestisci il team di insegnanti e le loro tariffe</p>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Staff/Insegnanti</h1>
+          <p className="text-muted-foreground">Gestisci il team di staff/insegnanti e le loro tariffe</p>
         </div>
         <Button 
           onClick={() => {
@@ -122,7 +122,7 @@ export default function Instructors() {
           data-testid="button-add-instructor"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Nuovo Insegnante
+          Nuovo Staff/Insegnante
         </Button>
       </div>
 
@@ -132,7 +132,7 @@ export default function Instructors() {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Cerca insegnante..."
+                placeholder="Cerca staff/insegnante..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -151,8 +151,8 @@ export default function Instructors() {
           ) : filteredInstructors.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Briefcase className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">Nessun insegnante trovato</p>
-              <p className="text-sm">Inizia aggiungendo il primo insegnante</p>
+              <p className="text-lg font-medium mb-2">Nessun staff/insegnante trovato</p>
+              <p className="text-sm">Inizia aggiungendo il primo staff/insegnante</p>
             </div>
           ) : (
             <Table>
@@ -232,7 +232,7 @@ export default function Instructors() {
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            if (confirm("Sei sicuro di voler eliminare questo insegnante?")) {
+                            if (confirm("Sei sicuro di voler eliminare questo staff/insegnante?")) {
                               deleteMutation.mutate(instructor.id);
                             }
                           }}
@@ -254,9 +254,9 @@ export default function Instructors() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingInstructor ? "Modifica Insegnante" : "Nuovo Insegnante"}</DialogTitle>
+            <DialogTitle>{editingInstructor ? "Modifica Staff/Insegnante" : "Nuovo Staff/Insegnante"}</DialogTitle>
             <DialogDescription>
-              Inserisci i dati dell'insegnante
+              Inserisci i dati dello staff/insegnante
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -354,7 +354,7 @@ export default function Instructors() {
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-instructor"
               >
-                {editingInstructor ? "Salva Modifiche" : "Crea Insegnante"}
+                {editingInstructor ? "Salva Modifiche" : "Crea Staff/Insegnante"}
               </Button>
             </DialogFooter>
           </form>
