@@ -11,6 +11,7 @@ import {
   individualLessonCategories,
   campusCategories,
   recitalCategories,
+  vacationCategories,
   clientCategories,
   subscriptionTypes,
   instructors,
@@ -51,6 +52,8 @@ import {
   type InsertCampusCategory,
   type RecitalCategory,
   type InsertRecitalCategory,
+  type InsertVacationCategory,
+  type VacationCategory,
   type ClientCategory,
   type InsertClientCategory,
   type SubscriptionType,
@@ -156,6 +159,13 @@ export interface IStorage {
   createRecitalCategory(category: InsertRecitalCategory): Promise<RecitalCategory>;
   updateRecitalCategory(id: number, category: Partial<InsertRecitalCategory>): Promise<RecitalCategory>;
   deleteRecitalCategory(id: number): Promise<void>;
+
+  // Vacation Study Categories
+  getVacationCategories(): Promise<VacationCategory[]>;
+  getVacationCategory(id: number): Promise<VacationCategory | undefined>;
+  createVacationCategory(category: InsertVacationCategory): Promise<VacationCategory>;
+  updateVacationCategory(id: number, category: Partial<InsertVacationCategory>): Promise<VacationCategory>;
+  deleteVacationCategory(id: number): Promise<void>;
 
   // Client Categories
   getClientCategories(): Promise<ClientCategory[]>;
@@ -670,6 +680,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteRecitalCategory(id: number): Promise<void> {
     await db.delete(recitalCategories).where(eq(recitalCategories.id, id));
+  }
+
+  // ==== Vacation Study Categories ====
+  async getVacationCategories(): Promise<VacationCategory[]> {
+    return await db.select().from(vacationCategories).orderBy(vacationCategories.name);
+  }
+
+  async getVacationCategory(id: number): Promise<VacationCategory | undefined> {
+    const [category] = await db.select().from(vacationCategories).where(eq(vacationCategories.id, id));
+    return category;
+  }
+
+  async createVacationCategory(category: InsertVacationCategory): Promise<VacationCategory> {
+    const [newCategory] = await db.insert(vacationCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updateVacationCategory(id: number, category: Partial<InsertVacationCategory>): Promise<VacationCategory> {
+    const [updated] = await db
+      .update(vacationCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(vacationCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteVacationCategory(id: number): Promise<void> {
+    await db.delete(vacationCategories).where(eq(vacationCategories.id, id));
   }
 
   // ==== Client Categories ====

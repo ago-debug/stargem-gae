@@ -20,7 +20,11 @@ import {
   Activity,
 } from "lucide-react";
 import { Link } from "wouter";
-import type { Course, Workshop, Category, WorkshopCategory, Instructor, Studio } from "@shared/schema";
+import type {
+  Course, Workshop, Category, WorkshopCategory, Instructor, Studio,
+  SundayCategory, TrainingCategory, IndividualLessonCategory,
+  CampusCategory, RecitalCategory, VacationCategory,
+} from "@shared/schema";
 
 const WEEKDAYS: Record<string, string> = {
   LUN: "Lunedì",
@@ -39,20 +43,22 @@ interface ActivitySection {
   description: string;
   type: "corsi" | "workshop" | "other";
   color: string;
+  categoryApiEndpoint?: string;
+  categoryManagementUrl?: string;
 }
 
 const activitySections: ActivitySection[] = [
-  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", type: "corsi", color: "bg-blue-500" },
-  { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", type: "workshop", color: "bg-purple-500" },
+  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", type: "corsi", color: "bg-blue-500", categoryApiEndpoint: "/api/categories", categoryManagementUrl: "/categorie" },
+  { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", type: "workshop", color: "bg-purple-500", categoryApiEndpoint: "/api/workshop-categories", categoryManagementUrl: "/categorie-workshop" },
   { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, description: "Lezioni di prova a pagamento", type: "other", color: "bg-orange-500" },
   { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", type: "other", color: "bg-green-500" },
   { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, description: "Lezioni singole o drop-in", type: "other", color: "bg-cyan-500" },
-  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", type: "other", color: "bg-yellow-500" },
-  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento libero e affitti", type: "other", color: "bg-red-500" },
-  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", type: "other", color: "bg-indigo-500" },
-  { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", type: "other", color: "bg-teal-500" },
-  { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", type: "other", color: "bg-pink-500" },
-  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, description: "Vacanze studio e viaggi formativi", type: "other", color: "bg-amber-500" },
+  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", type: "other", color: "bg-yellow-500", categoryApiEndpoint: "/api/sunday-categories", categoryManagementUrl: "/categorie-domeniche" },
+  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento libero e affitti", type: "other", color: "bg-red-500", categoryApiEndpoint: "/api/training-categories", categoryManagementUrl: "/categorie-allenamenti" },
+  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", type: "other", color: "bg-indigo-500", categoryApiEndpoint: "/api/individual-lesson-categories", categoryManagementUrl: "/categorie-lezioni-individuali" },
+  { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", type: "other", color: "bg-teal-500", categoryApiEndpoint: "/api/campus-categories", categoryManagementUrl: "/categorie-campus" },
+  { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", type: "other", color: "bg-pink-500", categoryApiEndpoint: "/api/recital-categories", categoryManagementUrl: "/categorie-saggi" },
+  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, description: "Vacanze studio e viaggi formativi", type: "other", color: "bg-amber-500", categoryApiEndpoint: "/api/vacation-categories", categoryManagementUrl: "/categorie-vacanze-studio" },
 ];
 
 function CourseCard({ course, categories, instructors }: { course: Course; categories?: Category[]; instructors?: Instructor[] }) {
@@ -144,6 +150,117 @@ function WorkshopCard({ workshop, categories, instructors }: { workshop: Worksho
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+type AnyCategory = { id: number; name: string; description?: string | null; parentId?: number | null; color?: string | null };
+
+function ActivitySectionTab({ section }: { section: ActivitySection }) {
+  const { data: sectionCategories } = useQuery<AnyCategory[]>({
+    queryKey: [section.categoryApiEndpoint],
+    enabled: !!section.categoryApiEndpoint,
+  });
+
+  const parentCategories = sectionCategories?.filter(c => !c.parentId) || [];
+  const subCategories = sectionCategories?.filter(c => c.parentId) || [];
+
+  return (
+    <TabsContent value={section.id} className="space-y-6 mt-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-xl font-semibold flex items-center gap-2" data-testid={`text-${section.id}-title`}>
+            <div className={`w-8 h-8 rounded-md ${section.color} flex items-center justify-center`}>
+              <section.icon className="w-4 h-4 text-white" />
+            </div>
+            {section.label}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">{section.description}</p>
+        </div>
+        {section.categoryManagementUrl && (
+          <Link href={section.categoryManagementUrl}>
+            <Button variant="outline" data-testid={`button-goto-${section.id}-categories`}>
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Gestione Categorie {section.label}
+            </Button>
+          </Link>
+        )}
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Categorie Configurate</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {sectionCategories && sectionCategories.length > 0 ? (
+            <div className="space-y-4">
+              {parentCategories.map((cat) => {
+                const children = subCategories.filter(s => s.parentId === cat.id);
+                return (
+                  <div key={cat.id} data-testid={`category-group-${cat.id}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      {cat.color && (
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
+                      )}
+                      <h3 className="text-sm font-semibold">{cat.name}</h3>
+                      {children.length > 0 && (
+                        <Badge variant="secondary" className="text-xs">{children.length} sotto</Badge>
+                      )}
+                    </div>
+                    {cat.description && (
+                      <p className="text-xs text-muted-foreground ml-5 mb-2">{cat.description}</p>
+                    )}
+                    {children.length > 0 && (
+                      <div className="ml-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {children.map((child) => (
+                          <div key={child.id} className="flex items-center gap-2 text-sm text-muted-foreground p-2 rounded-md border" data-testid={`subcategory-${child.id}`}>
+                            {child.color && (
+                              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: child.color }} />
+                            )}
+                            <span className="truncate">{child.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {subCategories.filter(s => !parentCategories.some(p => p.id === s.parentId)).length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-2">Altre Sottocategorie</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {subCategories.filter(s => !parentCategories.some(p => p.id === s.parentId)).map((child) => (
+                      <div key={child.id} className="flex items-center gap-2 text-sm text-muted-foreground p-2 rounded-md border">
+                        {child.color && (
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: child.color }} />
+                        )}
+                        <span className="truncate">{child.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : section.categoryApiEndpoint ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <section.icon className="w-10 h-10 mx-auto mb-3 opacity-50" />
+              <p className="text-sm mb-3">Nessuna categoria configurata per {section.label}</p>
+              {section.categoryManagementUrl && (
+                <Link href={section.categoryManagementUrl}>
+                  <Button variant="outline" data-testid={`button-add-categories-${section.id}`}>
+                    Configura Categorie
+                  </Button>
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <section.icon className="w-10 h-10 mx-auto mb-3 opacity-50" />
+              <p className="text-sm">Nessuna categoria dedicata per questa sezione</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </TabsContent>
   );
 }
 
@@ -458,55 +575,7 @@ export default function Attivita() {
         </TabsContent>
 
         {activitySections.filter(s => s.type === "other").map((section) => (
-          <TabsContent key={section.id} value={section.id} className="space-y-6 mt-6">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div>
-                <h2 className="text-xl font-semibold flex items-center gap-2" data-testid={`text-${section.id}-title`}>
-                  <div className={`w-8 h-8 rounded-md ${section.color} flex items-center justify-center`}>
-                    <section.icon className="w-4 h-4 text-white" />
-                  </div>
-                  {section.label}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">{section.description}</p>
-              </div>
-              <Link href={`/attivita?tab=${section.id}`}>
-                <Button variant="outline" data-testid={`button-goto-${section.id}-page`}>
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Gestione Completa {section.label}
-                </Button>
-              </Link>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Configurazione</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Corsi e attivit&agrave; associati a <strong>{section.label}</strong>:
-                  </p>
-                  {courses && courses.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {courses.filter(c => c.active).slice(0, 6).map((course) => (
-                        <CourseCard
-                          key={course.id}
-                          course={course}
-                          categories={categories}
-                          instructors={instructors}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <section.icon className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                      <p className="text-sm">Nessuna attivit&agrave; configurata per questa sezione</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <ActivitySectionTab key={section.id} section={section} />
         ))}
       </Tabs>
     </div>

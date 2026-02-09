@@ -200,6 +200,11 @@ const commonTablesItems = [
     icon: FolderTree,
   },
   {
+    title: "Categorie Vacanze Studio",
+    url: "/categorie-vacanze-studio",
+    icon: FolderTree,
+  },
+  {
     title: "Categorie Clienti",
     url: "/categorie-clienti",
     icon: Tags,
@@ -295,8 +300,10 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Tabelle Comuni</SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupLabel className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-b border-green-300 dark:border-green-700 rounded px-2 py-1">
+            Tabelle Comuni
+          </SidebarGroupLabel>
+          <SidebarGroupContent className="bg-green-50/50 dark:bg-green-900/10">
             <SidebarMenu>
               {commonTablesItems.map((item) => {
                 const isActive = location === item.url;

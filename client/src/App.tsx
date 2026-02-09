@@ -21,6 +21,7 @@ import TrainingCategories from "@/pages/training-categories";
 import IndividualLessonCategories from "@/pages/individual-lesson-categories";
 import CampusCategories from "@/pages/campus-categories";
 import RecitalCategories from "@/pages/recital-categories";
+import VacationCategories from "@/pages/vacation-categories";
 import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
 import Studios from "@/pages/studios";
@@ -68,6 +69,7 @@ function Router() {
       <Route path="/categorie-lezioni-individuali" component={IndividualLessonCategories} />
       <Route path="/categorie-campus" component={CampusCategories} />
       <Route path="/categorie-saggi" component={RecitalCategories} />
+      <Route path="/categorie-vacanze-studio" component={VacationCategories} />
       <Route path="/categorie-clienti" component={ClientCategories} />
       <Route path="/insegnanti" component={Instructors} />
       <Route path="/studios" component={Studios} />
