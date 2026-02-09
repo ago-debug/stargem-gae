@@ -75,9 +75,9 @@ const COURSE_FIELDS = [
   { key: "description", label: "Descrizione" },
   { key: "categoryName", label: "Categoria (Nome)" },
   { key: "studioName", label: "Studio/Sala (Nome)" },
-  { key: "instructorName", label: "Insegnante Primario (Nome Cognome)" },
-  { key: "secondaryInstructor1Name", label: "Insegnante Secondario 1 (Nome Cognome)" },
-  { key: "secondaryInstructor2Name", label: "Insegnante Secondario 2 (Nome Cognome)" },
+  { key: "instructorName", label: "Staff/Insegnante Primario (Nome Cognome)" },
+  { key: "secondaryInstructor1Name", label: "Staff/Insegnante Secondario 1 (Nome Cognome)" },
+  { key: "secondaryInstructor2Name", label: "Staff/Insegnante Secondario 2 (Nome Cognome)" },
   { key: "price", label: "Prezzo" },
   { key: "maxCapacity", label: "Capacità Massima" },
   { key: "dayOfWeek", label: "Giorno (0=Dom, 1=Lun, 2=Mar, 3=Mer, 4=Gio, 5=Ven, 6=Sab)" },
@@ -629,7 +629,7 @@ export default function ImportData() {
                       <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>
                     </SelectItem>
                     <SelectItem value="instructors">
-                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Insegnanti</span>
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Staff/Insegnanti</span>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -961,8 +961,8 @@ export default function ImportData() {
           data-testid="card-import-instructors"
         >
           <CardHeader>
-            <CardTitle className="text-lg">Insegnanti</CardTitle>
-            <CardDescription>Importa anagrafica insegnanti</CardDescription>
+            <CardTitle className="text-lg">Staff/Insegnanti</CardTitle>
+            <CardDescription>Importa anagrafica staff/insegnanti</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -1089,7 +1089,7 @@ export default function ImportData() {
                   <SelectContent>
                     <SelectItem value="members">Iscritti</SelectItem>
                     <SelectItem value="courses">Corsi</SelectItem>
-                    <SelectItem value="instructors">Insegnanti</SelectItem>
+                    <SelectItem value="instructors">Staff/Insegnanti</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1151,7 +1151,7 @@ export default function ImportData() {
                       <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>
                     </SelectItem>
                     <SelectItem value="instructors">
-                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Insegnanti</span>
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Staff/Insegnanti</span>
                     </SelectItem>
                   </SelectContent>
                 </Select>

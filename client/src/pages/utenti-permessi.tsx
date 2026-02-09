@@ -29,8 +29,8 @@ export default function UtentiPermessi() {
         </CardHeader>
         <CardContent className="space-y-4">
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-            <li>Creare e gestire account utente per staff e insegnanti</li>
-            <li>Assegnare ruoli (Admin, Staff, Insegnante, Receptionist)</li>
+            <li>Creare e gestire account utente per staff/insegnanti</li>
+            <li>Assegnare ruoli (Admin, Staff/Insegnante, Receptionist)</li>
             <li>Configurare permessi granulari per ogni ruolo</li>
             <li>Visualizzare log di accesso e attività utenti</li>
             <li>Gestire sessioni attive e password reset</li>

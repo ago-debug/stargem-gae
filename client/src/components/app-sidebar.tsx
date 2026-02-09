@@ -69,7 +69,7 @@ const mainMenuItems = [
     icon: GraduationCap,
   },
   {
-    title: "Insegnanti",
+    title: "Staff/Insegnanti",
     url: "/insegnanti",
     icon: Briefcase,
   },
