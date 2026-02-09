@@ -175,6 +175,31 @@ const commonTablesItems = [
     icon: FolderTree,
   },
   {
+    title: "Categorie Domeniche in Movimento",
+    url: "/categorie-domeniche",
+    icon: FolderTree,
+  },
+  {
+    title: "Categorie Allenamenti/Affitti",
+    url: "/categorie-allenamenti",
+    icon: FolderTree,
+  },
+  {
+    title: "Categorie Lezioni Individuali",
+    url: "/categorie-lezioni-individuali",
+    icon: FolderTree,
+  },
+  {
+    title: "Categorie Campus",
+    url: "/categorie-campus",
+    icon: FolderTree,
+  },
+  {
+    title: "Categorie Saggi",
+    url: "/categorie-saggi",
+    icon: FolderTree,
+  },
+  {
     title: "Categorie Clienti",
     url: "/categorie-clienti",
     icon: Tags,
