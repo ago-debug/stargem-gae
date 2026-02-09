@@ -14,6 +14,7 @@ import {
   insertIndividualLessonCategorySchema,
   insertCampusCategorySchema,
   insertRecitalCategorySchema,
+  insertVacationCategorySchema,
   insertClientCategorySchema,
   insertSubscriptionTypeSchema,
   insertInstructorSchema,
@@ -1244,6 +1245,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete recital category" });
+    }
+  });
+
+  // ==== Vacation Study Categories Routes ====
+  app.get("/api/vacation-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getVacationCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vacation categories" });
+    }
+  });
+
+  app.post("/api/vacation-categories", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertVacationCategorySchema.parse(req.body);
+      const category = await storage.createVacationCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create vacation category" });
+    }
+  });
+
+  app.patch("/api/vacation-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateVacationCategory(id, req.body);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update vacation category" });
+    }
+  });
+
+  app.delete("/api/vacation-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteVacationCategory(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete vacation category" });
     }
   });
 

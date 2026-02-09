@@ -296,6 +296,34 @@ export const insertRecitalCategorySchema = createInsertSchema(recitalCategories)
 export type InsertRecitalCategory = z.infer<typeof insertRecitalCategorySchema>;
 export type RecitalCategory = typeof recitalCategories.$inferSelect;
 
+// Vacation Study Categories (hierarchical structure for vacation study programs)
+export const vacationCategories = pgTable("vacation_categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  color: varchar("color", { length: 7 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const vacationCategoriesRelations = relations(vacationCategories, ({ one, many }) => ({
+  parent: one(vacationCategories, {
+    fields: [vacationCategories.parentId],
+    references: [vacationCategories.id],
+    relationName: "subcategories",
+  }),
+  subcategories: many(vacationCategories, { relationName: "subcategories" }),
+}));
+
+export const insertVacationCategorySchema = createInsertSchema(vacationCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVacationCategory = z.infer<typeof insertVacationCategorySchema>;
+export type VacationCategory = typeof vacationCategories.$inferSelect;
+
 // Client Categories (hierarchical structure for client classification)
 export const clientCategories = pgTable("client_categories", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
