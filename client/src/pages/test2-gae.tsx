@@ -1390,7 +1390,25 @@ export default function Test2Gae() {
               </div>
               <div className="space-y-2">
                 <Label>Dettaglio Iscrizione (N)</Label>
-                <Input />
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona dettaglio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="iscritto_donna">iscritto Donna</SelectItem>
+                    <SelectItem value="deve_pagare_d">deve pagare D</SelectItem>
+                    <SelectItem value="deve_pagare_u">deve pagare U</SelectItem>
+                    <SelectItem value="iscritto_donna_2">iscritto Donna</SelectItem>
+                    <SelectItem value="iscritto_uomo">iscritto Uomo</SelectItem>
+                    <SelectItem value="iscritto_welfare">iscritto welfare</SelectItem>
+                    <SelectItem value="lezione_welfare">lezione welfare</SelectItem>
+                    <SelectItem value="prova_donna">prova Donna</SelectItem>
+                    <SelectItem value="prova_pagata_d">prova pagata D</SelectItem>
+                    <SelectItem value="prova_pagata_u">prova pagata U</SelectItem>
+                    <SelectItem value="prova_uomo">prova Uomo</SelectItem>
+                    <SelectItem value="tessera">tessera</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Note Pagamenti (O)</Label>
