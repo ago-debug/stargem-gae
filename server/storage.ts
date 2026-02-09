@@ -5,6 +5,7 @@ import {
   users,
   members,
   categories,
+  workshopCategories,
   clientCategories,
   subscriptionTypes,
   instructors,
@@ -33,6 +34,8 @@ import {
   type InsertMember,
   type Category,
   type InsertCategory,
+  type WorkshopCategory,
+  type InsertWorkshopCategory,
   type ClientCategory,
   type InsertClientCategory,
   type SubscriptionType,
@@ -101,6 +104,13 @@ export interface IStorage {
   createCategory(category: InsertCategory): Promise<Category>;
   updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category>;
   deleteCategory(id: number): Promise<void>;
+
+  // Workshop Categories
+  getWorkshopCategories(): Promise<WorkshopCategory[]>;
+  getWorkshopCategory(id: number): Promise<WorkshopCategory | undefined>;
+  createWorkshopCategory(category: InsertWorkshopCategory): Promise<WorkshopCategory>;
+  updateWorkshopCategory(id: number, category: Partial<InsertWorkshopCategory>): Promise<WorkshopCategory>;
+  deleteWorkshopCategory(id: number): Promise<void>;
 
   // Client Categories
   getClientCategories(): Promise<ClientCategory[]>;
@@ -452,6 +462,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCategory(id: number): Promise<void> {
     await db.delete(categories).where(eq(categories.id, id));
+  }
+
+  // ==== Workshop Categories ====
+  async getWorkshopCategories(): Promise<WorkshopCategory[]> {
+    return await db.select().from(workshopCategories).orderBy(workshopCategories.name);
+  }
+
+  async getWorkshopCategory(id: number): Promise<WorkshopCategory | undefined> {
+    const [category] = await db.select().from(workshopCategories).where(eq(workshopCategories.id, id));
+    return category;
+  }
+
+  async createWorkshopCategory(category: InsertWorkshopCategory): Promise<WorkshopCategory> {
+    const [newCategory] = await db.insert(workshopCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updateWorkshopCategory(id: number, category: Partial<InsertWorkshopCategory>): Promise<WorkshopCategory> {
+    const [updated] = await db
+      .update(workshopCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(workshopCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteWorkshopCategory(id: number): Promise<void> {
+    await db.delete(workshopCategories).where(eq(workshopCategories.id, id));
   }
 
   // ==== Client Categories ====
