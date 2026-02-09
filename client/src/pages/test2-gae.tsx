@@ -131,6 +131,7 @@ export default function Test2Gae() {
   const [lezioniIndCategorieDB, setLezioniIndCategorieDB] = useState<{id: number; name: string}[]>([]);
   const [campusCategorieDB, setCampusCategorieDB] = useState<{id: number; name: string}[]>([]);
   const [saggiCategorieDB, setSaggiCategorieDB] = useState<{id: number; name: string}[]>([]);
+  const [vacanzeCategorieDB, setVacanzeCategorieDB] = useState<{id: number; name: string}[]>([]);
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
   const attivitaKeys = ["corsi", "prove-pagamento", "prove-gratuite", "lezioni-singole", "workshop", "domeniche-movimento", "allenamenti", "lezioni-individuali", "campus", "saggi"] as const;
@@ -191,6 +192,10 @@ export default function Test2Gae() {
       .then(res => res.ok ? res.json() : [])
       .then(data => setSaggiCategorieDB(data))
       .catch(() => setSaggiCategorieDB([]));
+    fetch("/api/vacation-categories")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setVacanzeCategorieDB(data))
+      .catch(() => setVacanzeCategorieDB([]));
   }, []);
 
   // Stato verifica telefoni ed email
@@ -2482,7 +2487,7 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categorieDB.map((cat) => (
+                      {vacanzeCategorieDB.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>
                           {cat.name}
                         </SelectItem>
