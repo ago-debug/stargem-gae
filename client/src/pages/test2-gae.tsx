@@ -125,6 +125,8 @@ export default function Test2Gae() {
   const [pagamentoDettaglio, setPagamentoDettaglio] = useState("");
   const [corsiDB, setCorsiDB] = useState<{id: number; name: string; sku: string}[]>([]);
   const [categorieDB, setCategorieDB] = useState<{id: number; name: string}[]>([]);
+  const [campusCategorieDB, setCampusCategorieDB] = useState<{id: number; name: string}[]>([]);
+  const [saggiCategorieDB, setSaggiCategorieDB] = useState<{id: number; name: string}[]>([]);
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
   const attivitaKeys = ["corsi", "prove-pagamento", "prove-gratuite", "lezioni-singole", "workshop", "domeniche-movimento", "allenamenti", "lezioni-individuali", "campus", "saggi"] as const;
@@ -161,6 +163,14 @@ export default function Test2Gae() {
       .then(res => res.ok ? res.json() : [])
       .then(data => setCategorieDB(data))
       .catch(() => setCategorieDB([]));
+    fetch("/api/campus-categories")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setCampusCategorieDB(data))
+      .catch(() => setCampusCategorieDB([]));
+    fetch("/api/recital-categories")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setSaggiCategorieDB(data))
+      .catch(() => setSaggiCategorieDB([]));
   }, []);
 
   // Stato verifica telefoni ed email
@@ -2314,7 +2324,7 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categorieDB.map((cat) => (
+                      {campusCategorieDB.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>
                           {cat.name}
                         </SelectItem>
@@ -2383,7 +2393,7 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categorieDB.map((cat) => (
+                      {saggiCategorieDB.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>
                           {cat.name}
                         </SelectItem>
