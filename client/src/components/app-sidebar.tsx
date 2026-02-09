@@ -170,6 +170,11 @@ const commonTablesItems = [
     icon: FolderTree,
   },
   {
+    title: "Categorie Workshop",
+    url: "/categorie-workshop",
+    icon: FolderTree,
+  },
+  {
     title: "Categorie Clienti",
     url: "/categorie-clienti",
     icon: Tags,

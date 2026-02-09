@@ -20,7 +20,7 @@ import {
   Activity,
 } from "lucide-react";
 import { Link } from "wouter";
-import type { Course, Workshop, Category, Instructor, Studio } from "@shared/schema";
+import type { Course, Workshop, Category, WorkshopCategory, Instructor, Studio } from "@shared/schema";
 
 const WEEKDAYS: Record<string, string> = {
   LUN: "Lunedì",
@@ -101,7 +101,7 @@ function CourseCard({ course, categories, instructors }: { course: Course; categ
   );
 }
 
-function WorkshopCard({ workshop, categories, instructors }: { workshop: Workshop; categories?: Category[]; instructors?: Instructor[] }) {
+function WorkshopCard({ workshop, categories, instructors }: { workshop: Workshop; categories?: WorkshopCategory[]; instructors?: Instructor[] }) {
   const category = categories?.find(c => c.id === workshop.categoryId);
   const instructor = instructors?.find(i => i.id === workshop.instructorId);
   const dayLabel = workshop.dayOfWeek ? WEEKDAYS[workshop.dayOfWeek] || workshop.dayOfWeek : null;
@@ -167,6 +167,7 @@ export default function Attivita() {
   const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
   const { data: workshops } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
   const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
+  const { data: workshopCategories } = useQuery<WorkshopCategory[]>({ queryKey: ["/api/workshop-categories"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
 
@@ -182,7 +183,7 @@ export default function Attivita() {
 
   const uncategorizedCourses = courses?.filter(c => !c.categoryId) || [];
 
-  const workshopsByCategory = categories?.map(cat => ({
+  const workshopsByCategory = workshopCategories?.map(cat => ({
     category: cat,
     workshops: workshops?.filter(w => w.categoryId === cat.id) || [],
   })).filter(g => g.workshops.length > 0) || [];
@@ -415,7 +416,7 @@ export default function Attivita() {
                       <WorkshopCard
                         key={workshop.id}
                         workshop={workshop}
-                        categories={categories}
+                        categories={workshopCategories}
                         instructors={instructors}
                       />
                     ))}
@@ -434,7 +435,7 @@ export default function Attivita() {
                       <WorkshopCard
                         key={workshop.id}
                         workshop={workshop}
-                        categories={categories}
+                        categories={workshopCategories}
                         instructors={instructors}
                       />
                     ))}

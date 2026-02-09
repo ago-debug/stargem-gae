@@ -15,6 +15,7 @@ import Courses from "@/pages/courses";
 import Workshops from "@/pages/workshops";
 import CourseEnrollments from "@/pages/course-enrollments";
 import Categories from "@/pages/categories";
+import WorkshopCategories from "@/pages/workshop-categories";
 import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
 import Studios from "@/pages/studios";
@@ -56,6 +57,7 @@ function Router() {
       <Route path="/workshops" component={Workshops} />
       <Route path="/iscritti-corsi" component={CourseEnrollments} />
       <Route path="/categorie" component={Categories} />
+      <Route path="/categorie-workshop" component={WorkshopCategories} />
       <Route path="/categorie-clienti" component={ClientCategories} />
       <Route path="/insegnanti" component={Instructors} />
       <Route path="/studios" component={Studios} />

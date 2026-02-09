@@ -19,7 +19,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import type { Workshop, InsertWorkshop, Category, Instructor, Studio, Member } from "@shared/schema";
+import type { Workshop, InsertWorkshop, WorkshopCategory, Instructor, Studio, Member } from "@shared/schema";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -458,8 +458,8 @@ export default function Workshops() {
     queryKey: ["/api/workshops"],
   });
 
-  const { data: categories } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
+  const { data: categories } = useQuery<WorkshopCategory[]>({
+    queryKey: ["/api/workshop-categories"],
   });
 
   const { data: instructors } = useQuery<Instructor[]>({
