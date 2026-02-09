@@ -125,6 +125,10 @@ export default function Test2Gae() {
   const [pagamentoDettaglio, setPagamentoDettaglio] = useState("");
   const [corsiDB, setCorsiDB] = useState<{id: number; name: string; sku: string}[]>([]);
   const [categorieDB, setCategorieDB] = useState<{id: number; name: string}[]>([]);
+  const [workshopCategorieDB, setWorkshopCategorieDB] = useState<{id: number; name: string}[]>([]);
+  const [domenicheCategorieDB, setDomenicheCategorieDB] = useState<{id: number; name: string}[]>([]);
+  const [allenamentiCategorieDB, setAllenamentiCategorieDB] = useState<{id: number; name: string}[]>([]);
+  const [lezioniIndCategorieDB, setLezioniIndCategorieDB] = useState<{id: number; name: string}[]>([]);
   const [campusCategorieDB, setCampusCategorieDB] = useState<{id: number; name: string}[]>([]);
   const [saggiCategorieDB, setSaggiCategorieDB] = useState<{id: number; name: string}[]>([]);
 
@@ -163,6 +167,22 @@ export default function Test2Gae() {
       .then(res => res.ok ? res.json() : [])
       .then(data => setCategorieDB(data))
       .catch(() => setCategorieDB([]));
+    fetch("/api/workshop-categories")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setWorkshopCategorieDB(data))
+      .catch(() => setWorkshopCategorieDB([]));
+    fetch("/api/sunday-categories")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setDomenicheCategorieDB(data))
+      .catch(() => setDomenicheCategorieDB([]));
+    fetch("/api/training-categories")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setAllenamentiCategorieDB(data))
+      .catch(() => setAllenamentiCategorieDB([]));
+    fetch("/api/individual-lesson-categories")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setLezioniIndCategorieDB(data))
+      .catch(() => setLezioniIndCategorieDB([]));
     fetch("/api/campus-categories")
       .then(res => res.ok ? res.json() : [])
       .then(data => setCampusCategorieDB(data))
@@ -2048,7 +2068,7 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categorieDB.map((cat) => (
+                      {workshopCategorieDB.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>
                           {cat.name}
                         </SelectItem>
@@ -2117,7 +2137,7 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categorieDB.map((cat) => (
+                      {domenicheCategorieDB.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>
                           {cat.name}
                         </SelectItem>
@@ -2186,7 +2206,7 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categorieDB.map((cat) => (
+                      {allenamentiCategorieDB.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>
                           {cat.name}
                         </SelectItem>
@@ -2255,7 +2275,7 @@ export default function Test2Gae() {
                       <SelectValue placeholder="Seleziona categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categorieDB.map((cat) => (
+                      {lezioniIndCategorieDB.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>
                           {cat.name}
                         </SelectItem>
