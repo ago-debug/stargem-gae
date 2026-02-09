@@ -458,7 +458,7 @@ export default function AnagraficaHome() {
     { id: "certificati", label: "Certificati", icon: FileText },
     { id: "gare", label: "Gare", icon: Trophy },
     { id: "membership", label: "Membership", icon: Users },
-    { id: "allenamenti", label: "Allenamenti", icon: Dumbbell },
+    { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell },
     { id: "corsi", label: "Corsi", icon: BookOpen },
     { id: "vacanze", label: "Vacanze", icon: Sun },
   ];
@@ -1246,7 +1246,7 @@ export default function AnagraficaHome() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Dumbbell className="w-5 h-5" />
-                  Presenze / Allenamenti
+                  Presenze / Allenamenti/Affitti
                 </CardTitle>
               </CardHeader>
               <CardContent>

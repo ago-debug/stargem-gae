@@ -48,7 +48,7 @@ const activitySections: ActivitySection[] = [
   { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", type: "other", color: "bg-green-500" },
   { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, description: "Lezioni singole o drop-in", type: "other", color: "bg-cyan-500" },
   { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", type: "other", color: "bg-yellow-500" },
-  { id: "allenamenti", label: "Allenamenti", icon: Dumbbell, description: "Sessioni di allenamento libero", type: "other", color: "bg-red-500" },
+  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento libero e affitti", type: "other", color: "bg-red-500" },
   { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", type: "other", color: "bg-indigo-500" },
   { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", type: "other", color: "bg-teal-500" },
   { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", type: "other", color: "bg-pink-500" },
@@ -458,14 +458,22 @@ export default function Attivita() {
 
         {activitySections.filter(s => s.type === "other").map((section) => (
           <TabsContent key={section.id} value={section.id} className="space-y-6 mt-6">
-            <div>
-              <h2 className="text-xl font-semibold flex items-center gap-2" data-testid={`text-${section.id}-title`}>
-                <div className={`w-8 h-8 rounded-md ${section.color} flex items-center justify-center`}>
-                  <section.icon className="w-4 h-4 text-white" />
-                </div>
-                {section.label}
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">{section.description}</p>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <h2 className="text-xl font-semibold flex items-center gap-2" data-testid={`text-${section.id}-title`}>
+                  <div className={`w-8 h-8 rounded-md ${section.color} flex items-center justify-center`}>
+                    <section.icon className="w-4 h-4 text-white" />
+                  </div>
+                  {section.label}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">{section.description}</p>
+              </div>
+              <Link href={`/attivita?tab=${section.id}`}>
+                <Button variant="outline" data-testid={`button-goto-${section.id}-page`}>
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Gestione Completa {section.label}
+                </Button>
+              </Link>
             </div>
 
             <Card>
