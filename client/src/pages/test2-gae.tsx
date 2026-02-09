@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -119,6 +119,17 @@ export default function Test2Gae() {
     sessoGen2: "",
     etaGen2: "",
   });
+
+  // Stato attività selezionata nei pagamenti e corsi dal DB
+  const [pagamentoAttivita, setPagamentoAttivita] = useState("");
+  const [corsiDB, setCorsiDB] = useState<{id: number; name: string; sku: string}[]>([]);
+
+  useEffect(() => {
+    fetch("/api/courses")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setCorsiDB(data))
+      .catch(() => setCorsiDB([]));
+  }, []);
 
   // Stato verifica telefoni ed email
   const [verificaStato, setVerificaStato] = useState({
@@ -1340,7 +1351,7 @@ export default function Test2Gae() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
               <div className="space-y-2">
                 <Label>Attività</Label>
-                <Select>
+                <Select value={pagamentoAttivita} onValueChange={setPagamentoAttivita}>
                   <SelectTrigger data-testid="select-attivita-pagamenti">
                     <SelectValue placeholder="Seleziona attività" />
                   </SelectTrigger>
@@ -1355,6 +1366,25 @@ export default function Test2Gae() {
                     <SelectItem value="lezioni-individuali">Lezioni Individuali</SelectItem>
                     <SelectItem value="campus">Campus</SelectItem>
                     <SelectItem value="saggi">Saggi</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Dettaglio Attività e codice</Label>
+                <Select>
+                  <SelectTrigger data-testid="select-dettaglio-attivita-pagamenti">
+                    <SelectValue placeholder="Seleziona dettaglio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {corsiDB.length > 0 ? (
+                      corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.id.toString()}>
+                          {corso.name} - {corso.sku}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="nessuno" disabled>Nessuna attività disponibile</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
