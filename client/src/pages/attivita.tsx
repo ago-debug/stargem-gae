@@ -18,7 +18,6 @@ import {
   UserCheck,
   ExternalLink,
   Activity,
-  Plus,
 } from "lucide-react";
 import { Link } from "wouter";
 import type { Course, Workshop, Category, Instructor, Studio } from "@shared/schema";
@@ -223,12 +222,6 @@ export default function Attivita() {
         </TabsList>
 
         <TabsContent value="panoramica" className="space-y-6 mt-6">
-          <div className="flex items-center justify-end">
-            <Button className="bg-red-600 hover:bg-red-700 text-white" data-testid="button-nuovo-panoramica">
-              <Plus className="w-4 h-4 mr-1" />
-              + Nuovo
-            </Button>
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card data-testid="card-stats-corsi">
               <CardHeader className="pb-2">
@@ -329,18 +322,12 @@ export default function Attivita() {
                 {courses?.length || 0} corsi totali &middot; {activeCourses.length} attivi
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button className="bg-red-600 hover:bg-red-700 text-white" data-testid="button-nuovo-corsi">
-                <Plus className="w-4 h-4 mr-1" />
-                + Nuovo
+            <Link href="/corsi">
+              <Button variant="outline" data-testid="button-goto-corsi-page">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Gestione Completa Corsi
               </Button>
-              <Link href="/corsi">
-                <Button variant="outline" data-testid="button-goto-corsi-page">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Gestione Completa Corsi
-                </Button>
-              </Link>
-            </div>
+            </Link>
           </div>
 
           {coursesByCategory.length > 0 || uncategorizedCourses.length > 0 ? (
@@ -406,18 +393,12 @@ export default function Attivita() {
                 {workshops?.length || 0} workshop totali &middot; {activeWorkshops.length} attivi
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button className="bg-red-600 hover:bg-red-700 text-white" data-testid="button-nuovo-workshop">
-                <Plus className="w-4 h-4 mr-1" />
-                + Nuovo
+            <Link href="/workshops">
+              <Button variant="outline" data-testid="button-goto-workshop-page">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Gestione Completa Workshop
               </Button>
-              <Link href="/workshops">
-                <Button variant="outline" data-testid="button-goto-workshop-page">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Gestione Completa Workshop
-                </Button>
-              </Link>
-            </div>
+            </Link>
           </div>
 
           {workshopsByCategory.length > 0 || uncategorizedWorkshops.length > 0 ? (
@@ -477,20 +458,14 @@ export default function Attivita() {
 
         {activitySections.filter(s => s.type === "other").map((section) => (
           <TabsContent key={section.id} value={section.id} className="space-y-6 mt-6">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div>
-                <h2 className="text-xl font-semibold flex items-center gap-2" data-testid={`text-${section.id}-title`}>
-                  <div className={`w-8 h-8 rounded-md ${section.color} flex items-center justify-center`}>
-                    <section.icon className="w-4 h-4 text-white" />
-                  </div>
-                  {section.label}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">{section.description}</p>
-              </div>
-              <Button className="bg-red-600 hover:bg-red-700 text-white" data-testid={`button-nuovo-${section.id}`}>
-                <Plus className="w-4 h-4 mr-1" />
-                + Nuovo
-              </Button>
+            <div>
+              <h2 className="text-xl font-semibold flex items-center gap-2" data-testid={`text-${section.id}-title`}>
+                <div className={`w-8 h-8 rounded-md ${section.color} flex items-center justify-center`}>
+                  <section.icon className="w-4 h-4 text-white" />
+                </div>
+                {section.label}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">{section.description}</p>
             </div>
 
             <Card>
