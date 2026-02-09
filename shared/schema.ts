@@ -161,6 +161,141 @@ export const insertWorkshopCategorySchema = createInsertSchema(workshopCategorie
 export type InsertWorkshopCategory = z.infer<typeof insertWorkshopCategorySchema>;
 export type WorkshopCategory = typeof workshopCategories.$inferSelect;
 
+export const sundayCategories = pgTable("sunday_categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  color: varchar("color", { length: 7 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const sundayCategoriesRelations = relations(sundayCategories, ({ one, many }) => ({
+  parent: one(sundayCategories, {
+    fields: [sundayCategories.parentId],
+    references: [sundayCategories.id],
+    relationName: "subcategories",
+  }),
+  subcategories: many(sundayCategories, { relationName: "subcategories" }),
+}));
+
+export const insertSundayCategorySchema = createInsertSchema(sundayCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSundayCategory = z.infer<typeof insertSundayCategorySchema>;
+export type SundayCategory = typeof sundayCategories.$inferSelect;
+
+export const trainingCategories = pgTable("training_categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  color: varchar("color", { length: 7 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const trainingCategoriesRelations = relations(trainingCategories, ({ one, many }) => ({
+  parent: one(trainingCategories, {
+    fields: [trainingCategories.parentId],
+    references: [trainingCategories.id],
+    relationName: "subcategories",
+  }),
+  subcategories: many(trainingCategories, { relationName: "subcategories" }),
+}));
+
+export const insertTrainingCategorySchema = createInsertSchema(trainingCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTrainingCategory = z.infer<typeof insertTrainingCategorySchema>;
+export type TrainingCategory = typeof trainingCategories.$inferSelect;
+
+export const individualLessonCategories = pgTable("individual_lesson_categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  color: varchar("color", { length: 7 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const individualLessonCategoriesRelations = relations(individualLessonCategories, ({ one, many }) => ({
+  parent: one(individualLessonCategories, {
+    fields: [individualLessonCategories.parentId],
+    references: [individualLessonCategories.id],
+    relationName: "subcategories",
+  }),
+  subcategories: many(individualLessonCategories, { relationName: "subcategories" }),
+}));
+
+export const insertIndividualLessonCategorySchema = createInsertSchema(individualLessonCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertIndividualLessonCategory = z.infer<typeof insertIndividualLessonCategorySchema>;
+export type IndividualLessonCategory = typeof individualLessonCategories.$inferSelect;
+
+export const campusCategories = pgTable("campus_categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  color: varchar("color", { length: 7 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const campusCategoriesRelations = relations(campusCategories, ({ one, many }) => ({
+  parent: one(campusCategories, {
+    fields: [campusCategories.parentId],
+    references: [campusCategories.id],
+    relationName: "subcategories",
+  }),
+  subcategories: many(campusCategories, { relationName: "subcategories" }),
+}));
+
+export const insertCampusCategorySchema = createInsertSchema(campusCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCampusCategory = z.infer<typeof insertCampusCategorySchema>;
+export type CampusCategory = typeof campusCategories.$inferSelect;
+
+export const recitalCategories = pgTable("recital_categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  color: varchar("color", { length: 7 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const recitalCategoriesRelations = relations(recitalCategories, ({ one, many }) => ({
+  parent: one(recitalCategories, {
+    fields: [recitalCategories.parentId],
+    references: [recitalCategories.id],
+    relationName: "subcategories",
+  }),
+  subcategories: many(recitalCategories, { relationName: "subcategories" }),
+}));
+
+export const insertRecitalCategorySchema = createInsertSchema(recitalCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertRecitalCategory = z.infer<typeof insertRecitalCategorySchema>;
+export type RecitalCategory = typeof recitalCategories.$inferSelect;
+
 // Client Categories (hierarchical structure for client classification)
 export const clientCategories = pgTable("client_categories", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
