@@ -20,6 +20,14 @@ import {
   Sparkles,
   CheckSquare,
   Activity,
+  ChevronRight,
+  Sun,
+  Dumbbell,
+  UserCheck,
+  Award,
+  Music,
+  BookOpen,
+  Gift,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -31,9 +39,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -52,16 +68,6 @@ const mainMenuItems = [
     title: "Partecipanti/Lista",
     url: "/iscritti",
     icon: Users,
-  },
-  {
-    title: "Corsi",
-    url: "/corsi",
-    icon: Calendar,
-  },
-  {
-    title: "Workshops",
-    url: "/workshops",
-    icon: Sparkles,
   },
   {
     title: "Iscritti per Corso",
@@ -97,6 +103,64 @@ const mainMenuItems = [
     title: "Report & Statistiche",
     url: "/report",
     icon: BarChart3,
+  },
+];
+
+const gestioneItems = [
+  {
+    title: "Corsi",
+    url: "/corsi",
+    icon: Calendar,
+  },
+  {
+    title: "Workshop",
+    url: "/workshops",
+    icon: Sparkles,
+  },
+  {
+    title: "Prove a Pagamento",
+    url: "/attivita?tab=prove-pagamento",
+    icon: CreditCard,
+  },
+  {
+    title: "Prove Gratuite",
+    url: "/attivita?tab=prove-gratuite",
+    icon: Gift,
+  },
+  {
+    title: "Lezioni Singole",
+    url: "/attivita?tab=lezioni-singole",
+    icon: BookOpen,
+  },
+  {
+    title: "Domeniche in Movimento",
+    url: "/attivita?tab=domeniche-movimento",
+    icon: Sun,
+  },
+  {
+    title: "Allenamenti/Affitti",
+    url: "/attivita?tab=allenamenti",
+    icon: Dumbbell,
+  },
+  {
+    title: "Lezioni Individuali",
+    url: "/attivita?tab=lezioni-individuali",
+    icon: UserCheck,
+  },
+  {
+    title: "Campus",
+    url: "/attivita?tab=campus",
+    icon: Users,
+  },
+  {
+    title: "Saggi",
+    url: "/attivita?tab=saggi",
+    icon: Award,
+  },
+  {
+    title: "Vacanze Studio",
+    url: "/attivita?tab=vacanze-studio",
+    icon: Music,
   },
 ];
 
@@ -203,6 +267,13 @@ export function AppSidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
 
+  const isGestioneActive = gestioneItems.some(item => {
+    if (item.url.includes("?")) {
+      return location.startsWith(item.url.split("?")[0]) && location.includes(item.url.split("?tab=")[1]);
+    }
+    return location === item.url;
+  });
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
@@ -233,6 +304,44 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+
+              <Collapsible defaultOpen={isGestioneActive} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      data-testid="nav-gestione"
+                      isActive={isGestioneActive}
+                    >
+                      <Activity className="w-4 h-4" />
+                      <span>Gestione</span>
+                      <ChevronRight className="ml-auto w-4 h-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {gestioneItems.map((item) => {
+                        const isActive = item.url.includes("?")
+                          ? location.startsWith(item.url.split("?")[0]) && location.includes(item.url.split("?tab=")[1])
+                          : location === item.url;
+                        return (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={isActive}
+                              data-testid={`nav-gestione-${item.title.toLowerCase().replace(/[\s\/]/g, '-')}`}
+                            >
+                              <Link href={item.url}>
+                                <item.icon className="w-4 h-4" />
+                                <span>{item.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
