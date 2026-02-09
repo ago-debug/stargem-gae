@@ -1340,7 +1340,23 @@ export default function Test2Gae() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
               <div className="space-y-2">
                 <Label>Attività</Label>
-                <Input />
+                <Select>
+                  <SelectTrigger data-testid="select-attivita-pagamenti">
+                    <SelectValue placeholder="Seleziona attività" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="corsi">Corsi</SelectItem>
+                    <SelectItem value="prove-pagamento">Prove a Pagamento</SelectItem>
+                    <SelectItem value="prove-gratuite">Prove Gratuite</SelectItem>
+                    <SelectItem value="lezioni-singole">Lezioni Singole</SelectItem>
+                    <SelectItem value="workshop">Workshop</SelectItem>
+                    <SelectItem value="domeniche-movimento">Domeniche in Movimento</SelectItem>
+                    <SelectItem value="allenamenti">Allenamenti</SelectItem>
+                    <SelectItem value="lezioni-individuali">Lezioni Individuali</SelectItem>
+                    <SelectItem value="campus">Campus</SelectItem>
+                    <SelectItem value="saggi">Saggi</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Dettaglio Iscrizione (N)</Label>
