@@ -8,6 +8,7 @@ import { readSpreadsheet } from "./google-sheets";
 import { 
   insertMemberSchema,
   insertCategorySchema,
+  insertWorkshopCategorySchema,
   insertClientCategorySchema,
   insertSubscriptionTypeSchema,
   insertInstructorSchema,
@@ -1003,6 +1004,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
+  // ==== Workshop Categories Routes ====
+  app.get("/api/workshop-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getWorkshopCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch workshop categories" });
+    }
+  });
+
+  app.post("/api/workshop-categories", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertWorkshopCategorySchema.parse(req.body);
+      const category = await storage.createWorkshopCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create workshop category" });
+    }
+  });
+
+  app.patch("/api/workshop-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateWorkshopCategory(id, req.body);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update workshop category" });
+    }
+  });
+
+  app.delete("/api/workshop-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteWorkshopCategory(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete workshop category" });
     }
   });
 

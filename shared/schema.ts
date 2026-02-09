@@ -132,6 +132,35 @@ export const insertCategorySchema = createInsertSchema(categories).omit({
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Category = typeof categories.$inferSelect;
 
+// Workshop Categories (separate category system for workshops)
+export const workshopCategories = pgTable("workshop_categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentId: integer("parent_id"),
+  color: varchar("color", { length: 7 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const workshopCategoriesRelations = relations(workshopCategories, ({ one, many }) => ({
+  parent: one(workshopCategories, {
+    fields: [workshopCategories.parentId],
+    references: [workshopCategories.id],
+    relationName: "subcategories",
+  }),
+  subcategories: many(workshopCategories, { relationName: "subcategories" }),
+  workshops: many(workshops),
+}));
+
+export const insertWorkshopCategorySchema = createInsertSchema(workshopCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertWorkshopCategory = z.infer<typeof insertWorkshopCategorySchema>;
+export type WorkshopCategory = typeof workshopCategories.$inferSelect;
+
 // Client Categories (hierarchical structure for client classification)
 export const clientCategories = pgTable("client_categories", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -328,7 +357,7 @@ export const workshops = pgTable("workshops", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
+  categoryId: integer("category_id").references(() => workshopCategories.id, { onDelete: "set null" }),
   studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
   secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
@@ -349,9 +378,9 @@ export const workshops = pgTable("workshops", {
 });
 
 export const workshopsRelations = relations(workshops, ({ one }) => ({
-  category: one(categories, {
+  category: one(workshopCategories, {
     fields: [workshops.categoryId],
-    references: [categories.id],
+    references: [workshopCategories.id],
   }),
   studio: one(studios, {
     fields: [workshops.studioId],
