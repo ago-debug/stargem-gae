@@ -454,7 +454,7 @@ export default function Memberships() {
                     <div className="text-center py-12 text-muted-foreground">
                       <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="text-lg font-medium mb-2">Nessuna tessera ente trovata</p>
-                      <p className="text-sm">Le tessere ente vengono gestite nella scheda Anagrafica del socio</p>
+                      <p className="text-sm">Le tessere ente vengono gestite nella scheda Anagrafica del partecipante</p>
                     </div>
                   );
                 }

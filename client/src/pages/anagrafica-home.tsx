@@ -476,7 +476,7 @@ export default function AnagraficaHome() {
               </div>
               <MemberSearch 
                 onSelect={handleMemberSelect}
-                placeholder="Cerca socio..."
+                placeholder="Cerca partecipante..."
                 useServerSearch={true}
               />
             </div>
@@ -660,7 +660,7 @@ export default function AnagraficaHome() {
                   </div>
                 </div>
 
-                {/* Row 3: Prima Iscrizione, Tipo Iscrizione, Tipologia Socio, Data Fine */}
+                {/* Row 3: Prima Iscrizione, Tipo Iscrizione, Tipologia Partecipante, Data Fine */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Prima Iscrizione</Label>
@@ -694,7 +694,7 @@ export default function AnagraficaHome() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Tipologia Socio</Label>
+                    <Label>Tipologia Partecipante</Label>
                     <SearchableSelect
                       options={clientCategories || []}
                       value={formData.categoryId || null}
@@ -707,7 +707,7 @@ export default function AnagraficaHome() {
                         try {
                           await apiRequest("POST", "/api/client-categories", { name });
                           queryClient.invalidateQueries({ queryKey: ["/api/client-categories"] });
-                          toast({ title: "Tipologia socio creata" });
+                          toast({ title: "Tipologia partecipante creata" });
                         } catch (error) {
                           toast({ title: "Errore nella creazione", variant: "destructive" });
                         }
@@ -925,12 +925,12 @@ export default function AnagraficaHome() {
           {/* Tessere Tab */}
           <TabsContent value="tessere" className="mt-0">
             <div className="space-y-6">
-              {/* Tessera Socio */}
+              {/* Tessera Partecipante */}
               <Card>
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <IdCard className="w-5 h-5" />
-                    Tessera Socio
+                    Tessera Partecipante
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
