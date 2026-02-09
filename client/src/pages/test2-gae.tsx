@@ -122,7 +122,34 @@ export default function Test2Gae() {
 
   // Stato attività selezionata nei pagamenti e corsi dal DB
   const [pagamentoAttivita, setPagamentoAttivita] = useState("");
+  const [pagamentoDettaglio, setPagamentoDettaglio] = useState("");
   const [corsiDB, setCorsiDB] = useState<{id: number; name: string; sku: string}[]>([]);
+
+  // Stato campi Corso e Codice per ogni sotto-sezione Attività
+  const attivitaKeys = ["corsi", "prove-pagamento", "prove-gratuite", "lezioni-singole", "workshop", "domeniche-movimento", "allenamenti", "lezioni-individuali", "campus", "saggi"] as const;
+  type AttivitaKey = typeof attivitaKeys[number];
+  const [attivitaCorso, setAttivitaCorso] = useState<Record<AttivitaKey, string>>({
+    "corsi": "", "prove-pagamento": "", "prove-gratuite": "", "lezioni-singole": "",
+    "workshop": "", "domeniche-movimento": "", "allenamenti": "", "lezioni-individuali": "",
+    "campus": "", "saggi": "",
+  });
+  const [attivitaCodice, setAttivitaCodice] = useState<Record<AttivitaKey, string>>({
+    "corsi": "", "prove-pagamento": "", "prove-gratuite": "", "lezioni-singole": "",
+    "workshop": "", "domeniche-movimento": "", "allenamenti": "", "lezioni-individuali": "",
+    "campus": "", "saggi": "",
+  });
+
+  const handlePagamentoDettaglio = (corsoId: string) => {
+    setPagamentoDettaglio(corsoId);
+    if (pagamentoAttivita && corsoId) {
+      const corso = corsiDB.find(c => String(c.id) === corsoId);
+      if (corso) {
+        const key = pagamentoAttivita as AttivitaKey;
+        setAttivitaCorso(prev => ({ ...prev, [key]: String(corso.id) }));
+        setAttivitaCodice(prev => ({ ...prev, [key]: corso.sku }));
+      }
+    }
+  };
 
   useEffect(() => {
     fetch("/api/courses")
@@ -1371,7 +1398,7 @@ export default function Test2Gae() {
               </div>
               <div className="space-y-2">
                 <Label>Dettaglio Attività e codice</Label>
-                <Select>
+                <Select value={pagamentoDettaglio} onValueChange={handlePagamentoDettaglio}>
                   <SelectTrigger data-testid="select-dettaglio-attivita-pagamenti">
                     <SelectValue placeholder="Seleziona dettaglio" />
                   </SelectTrigger>
@@ -1689,7 +1716,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["corsi"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "corsi": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -1704,7 +1731,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice Corso</Label>
-                  <Select>
+                  <Select value={attivitaCodice["corsi"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "corsi": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
@@ -1767,7 +1794,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["prove-pagamento"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "prove-pagamento": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -1782,7 +1809,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice Corso</Label>
-                  <Select>
+                  <Select value={attivitaCodice["prove-pagamento"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "prove-pagamento": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
@@ -1834,7 +1861,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["prove-gratuite"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "prove-gratuite": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -1849,7 +1876,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice Corso</Label>
-                  <Select>
+                  <Select value={attivitaCodice["prove-gratuite"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "prove-gratuite": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
@@ -1901,7 +1928,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["lezioni-singole"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "lezioni-singole": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -1916,7 +1943,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice Corso</Label>
-                  <Select>
+                  <Select value={attivitaCodice["lezioni-singole"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "lezioni-singole": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
@@ -1974,7 +2001,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["workshop"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "workshop": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -1989,7 +2016,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice</Label>
-                  <Select>
+                  <Select value={attivitaCodice["workshop"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "workshop": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
@@ -2037,7 +2064,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["domeniche-movimento"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "domeniche-movimento": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -2052,7 +2079,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice</Label>
-                  <Select>
+                  <Select value={attivitaCodice["domeniche-movimento"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "domeniche-movimento": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
@@ -2100,7 +2127,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["allenamenti"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "allenamenti": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -2115,7 +2142,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice</Label>
-                  <Select>
+                  <Select value={attivitaCodice["allenamenti"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "allenamenti": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
@@ -2163,7 +2190,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["lezioni-individuali"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "lezioni-individuali": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -2178,7 +2205,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice</Label>
-                  <Select>
+                  <Select value={attivitaCodice["lezioni-individuali"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "lezioni-individuali": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
@@ -2226,7 +2253,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["campus"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "campus": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -2241,7 +2268,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice</Label>
-                  <Select>
+                  <Select value={attivitaCodice["campus"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "campus": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
@@ -2289,7 +2316,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["saggi"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "saggi": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -2304,7 +2331,7 @@ export default function Test2Gae() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice</Label>
-                  <Select>
+                  <Select value={attivitaCodice["saggi"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "saggi": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
