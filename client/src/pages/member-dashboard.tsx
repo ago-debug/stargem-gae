@@ -362,7 +362,7 @@ export default function MemberDashboard() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Tipologia Socio</Label>
+                    <Label>Tipologia Partecipante</Label>
                     <Select 
                       value={formData.categoryId?.toString() || ""} 
                       onValueChange={(v) => setFormData(prev => ({ ...prev, categoryId: v ? parseInt(v) : undefined }))}

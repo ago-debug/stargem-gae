@@ -19,7 +19,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export function MemberSearch({ members = [], onSelect, placeholder = "Cerca socio (min 3 caratteri)...", useServerSearch = false }: MemberSearchProps) {
+export function MemberSearch({ members = [], onSelect, placeholder = "Cerca partecipante (min 3 caratteri)...", useServerSearch = false }: MemberSearchProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [serverResults, setServerResults] = useState<Member[]>([]);
