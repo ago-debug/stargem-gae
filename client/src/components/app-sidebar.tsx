@@ -165,43 +165,8 @@ const draftItems = [
 
 const commonTablesItems = [
   {
-    title: "Categorie Corsi",
-    url: "/categorie",
-    icon: FolderTree,
-  },
-  {
-    title: "Categorie Workshop",
-    url: "/categorie-workshop",
-    icon: FolderTree,
-  },
-  {
-    title: "Categorie Domeniche in Movimento",
-    url: "/categorie-domeniche",
-    icon: FolderTree,
-  },
-  {
-    title: "Categorie Allenamenti/Affitti",
-    url: "/categorie-allenamenti",
-    icon: FolderTree,
-  },
-  {
-    title: "Categorie Lezioni Individuali",
-    url: "/categorie-lezioni-individuali",
-    icon: FolderTree,
-  },
-  {
-    title: "Categorie Campus",
-    url: "/categorie-campus",
-    icon: FolderTree,
-  },
-  {
-    title: "Categorie Saggi",
-    url: "/categorie-saggi",
-    icon: FolderTree,
-  },
-  {
-    title: "Categorie Vacanze Studio",
-    url: "/categorie-vacanze-studio",
+    title: "Categorie Attività",
+    url: "/categorie-attivita",
     icon: FolderTree,
   },
   {
@@ -306,7 +271,9 @@ export function AppSidebar() {
           <SidebarGroupContent className="bg-green-50/50 dark:bg-green-900/10">
             <SidebarMenu>
               {commonTablesItems.map((item) => {
-                const isActive = location === item.url;
+                const isActive = item.url === "/categorie-attivita"
+                  ? location === item.url || location.startsWith("/categorie") && location !== "/categorie-clienti"
+                  : location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
