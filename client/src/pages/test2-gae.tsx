@@ -1678,15 +1678,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici Corso</Label>
-                  <Input />
+                  <Label>Codice Corso</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Provenienza</Label>
@@ -1745,15 +1756,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici Corso</Label>
-                  <Input />
+                  <Label>Codice Corso</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Iscritti</Label>
@@ -1801,15 +1823,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici Corso</Label>
-                  <Input />
+                  <Label>Codice Corso</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Iscritti</Label>
@@ -1857,15 +1890,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici Corso</Label>
-                  <Input />
+                  <Label>Codice Corso</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Iscritti</Label>
@@ -1919,15 +1963,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici</Label>
-                  <Input />
+                  <Label>Codice</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Data</Label>
@@ -1971,15 +2026,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici</Label>
-                  <Input />
+                  <Label>Codice</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Data</Label>
@@ -2023,15 +2089,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici</Label>
-                  <Input />
+                  <Label>Codice</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Presenze</Label>
@@ -2075,15 +2152,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici</Label>
-                  <Input />
+                  <Label>Codice</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Presenze</Label>
@@ -2127,15 +2215,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici</Label>
-                  <Input />
+                  <Label>Codice</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Periodo</Label>
@@ -2179,15 +2278,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici</Label>
-                  <Input />
+                  <Label>Codice</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Data</Label>
@@ -2231,15 +2341,26 @@ export default function Test2Gae() {
                     <SelectContent>
                       {corsiDB.map((corso) => (
                         <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name} - {corso.sku}
+                          {corso.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Codici</Label>
-                  <Input />
+                  <Label>Codice</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona codice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {corsiDB.map((corso) => (
+                        <SelectItem key={corso.id} value={corso.sku}>
+                          {corso.sku}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Periodo</Label>
