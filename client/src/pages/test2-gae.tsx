@@ -1656,7 +1656,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici Corso</Label>
@@ -1697,7 +1708,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici Corso</Label>
@@ -1727,7 +1749,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici Corso</Label>
@@ -1757,7 +1790,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici Corso</Label>
@@ -1793,7 +1837,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici</Label>
@@ -1819,7 +1874,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici</Label>
@@ -1845,7 +1911,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici</Label>
@@ -1871,7 +1948,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici</Label>
@@ -1897,7 +1985,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici</Label>
@@ -1923,7 +2022,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici</Label>
@@ -1949,7 +2059,18 @@ export default function Test2Gae() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
-                  <Input />
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aerial">Aerial</SelectItem>
+                      <SelectItem value="fitness">Fitness</SelectItem>
+                      <SelectItem value="danza">Danza</SelectItem>
+                      <SelectItem value="bambini">Bambini</SelectItem>
+                      <SelectItem value="ballo">Ballo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Codici</Label>
