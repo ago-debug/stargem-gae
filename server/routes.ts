@@ -9,6 +9,11 @@ import {
   insertMemberSchema,
   insertCategorySchema,
   insertWorkshopCategorySchema,
+  insertSundayCategorySchema,
+  insertTrainingCategorySchema,
+  insertIndividualLessonCategorySchema,
+  insertCampusCategorySchema,
+  insertRecitalCategorySchema,
   insertClientCategorySchema,
   insertSubscriptionTypeSchema,
   insertInstructorSchema,
@@ -1044,6 +1049,201 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete workshop category" });
+    }
+  });
+
+  app.get("/api/sunday-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getSundayCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sunday categories" });
+    }
+  });
+
+  app.post("/api/sunday-categories", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertSundayCategorySchema.parse(req.body);
+      const category = await storage.createSundayCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create sunday category" });
+    }
+  });
+
+  app.patch("/api/sunday-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateSundayCategory(id, req.body);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update sunday category" });
+    }
+  });
+
+  app.delete("/api/sunday-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSundayCategory(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete sunday category" });
+    }
+  });
+
+  app.get("/api/training-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getTrainingCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch training categories" });
+    }
+  });
+
+  app.post("/api/training-categories", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertTrainingCategorySchema.parse(req.body);
+      const category = await storage.createTrainingCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create training category" });
+    }
+  });
+
+  app.patch("/api/training-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateTrainingCategory(id, req.body);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update training category" });
+    }
+  });
+
+  app.delete("/api/training-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteTrainingCategory(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete training category" });
+    }
+  });
+
+  app.get("/api/individual-lesson-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getIndividualLessonCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch individual lesson categories" });
+    }
+  });
+
+  app.post("/api/individual-lesson-categories", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertIndividualLessonCategorySchema.parse(req.body);
+      const category = await storage.createIndividualLessonCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create individual lesson category" });
+    }
+  });
+
+  app.patch("/api/individual-lesson-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateIndividualLessonCategory(id, req.body);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update individual lesson category" });
+    }
+  });
+
+  app.delete("/api/individual-lesson-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteIndividualLessonCategory(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete individual lesson category" });
+    }
+  });
+
+  app.get("/api/campus-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getCampusCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch campus categories" });
+    }
+  });
+
+  app.post("/api/campus-categories", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertCampusCategorySchema.parse(req.body);
+      const category = await storage.createCampusCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create campus category" });
+    }
+  });
+
+  app.patch("/api/campus-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateCampusCategory(id, req.body);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update campus category" });
+    }
+  });
+
+  app.delete("/api/campus-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCampusCategory(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete campus category" });
+    }
+  });
+
+  app.get("/api/recital-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getRecitalCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch recital categories" });
+    }
+  });
+
+  app.post("/api/recital-categories", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertRecitalCategorySchema.parse(req.body);
+      const category = await storage.createRecitalCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create recital category" });
+    }
+  });
+
+  app.patch("/api/recital-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateRecitalCategory(id, req.body);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update recital category" });
+    }
+  });
+
+  app.delete("/api/recital-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteRecitalCategory(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete recital category" });
     }
   });
 
