@@ -19,6 +19,7 @@ import {
   GraduationCap,
   Sparkles,
   CheckSquare,
+  Activity,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -128,7 +129,7 @@ const draftItems = [
   {
     title: "Attività",
     url: "/attivita",
-    icon: Settings,
+    icon: Activity,
   },
   {
     title: "Elenchi",

@@ -32,6 +32,7 @@ import Test2Gae from "@/pages/test2-gae";
 import Test3Gae from "@/pages/test3-gae";
 import Knowledge from "@/pages/knowledge";
 import TodoList from "@/pages/todo-list";
+import Attivita from "@/pages/attivita";
 import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
 
 function Router() {
@@ -71,6 +72,7 @@ function Router() {
       <Route path="/test3-gae" component={Test3Gae} />
       <Route path="/knowledge" component={Knowledge} />
       <Route path="/todo-list" component={TodoList} />
+      <Route path="/attivita" component={Attivita} />
       <Route component={NotFound} />
     </Switch>
   );
