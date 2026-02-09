@@ -6,6 +6,11 @@ import {
   members,
   categories,
   workshopCategories,
+  sundayCategories,
+  trainingCategories,
+  individualLessonCategories,
+  campusCategories,
+  recitalCategories,
   clientCategories,
   subscriptionTypes,
   instructors,
@@ -36,6 +41,16 @@ import {
   type InsertCategory,
   type WorkshopCategory,
   type InsertWorkshopCategory,
+  type SundayCategory,
+  type InsertSundayCategory,
+  type TrainingCategory,
+  type InsertTrainingCategory,
+  type IndividualLessonCategory,
+  type InsertIndividualLessonCategory,
+  type CampusCategory,
+  type InsertCampusCategory,
+  type RecitalCategory,
+  type InsertRecitalCategory,
   type ClientCategory,
   type InsertClientCategory,
   type SubscriptionType,
@@ -111,6 +126,36 @@ export interface IStorage {
   createWorkshopCategory(category: InsertWorkshopCategory): Promise<WorkshopCategory>;
   updateWorkshopCategory(id: number, category: Partial<InsertWorkshopCategory>): Promise<WorkshopCategory>;
   deleteWorkshopCategory(id: number): Promise<void>;
+
+  getSundayCategories(): Promise<SundayCategory[]>;
+  getSundayCategory(id: number): Promise<SundayCategory | undefined>;
+  createSundayCategory(category: InsertSundayCategory): Promise<SundayCategory>;
+  updateSundayCategory(id: number, category: Partial<InsertSundayCategory>): Promise<SundayCategory>;
+  deleteSundayCategory(id: number): Promise<void>;
+
+  getTrainingCategories(): Promise<TrainingCategory[]>;
+  getTrainingCategory(id: number): Promise<TrainingCategory | undefined>;
+  createTrainingCategory(category: InsertTrainingCategory): Promise<TrainingCategory>;
+  updateTrainingCategory(id: number, category: Partial<InsertTrainingCategory>): Promise<TrainingCategory>;
+  deleteTrainingCategory(id: number): Promise<void>;
+
+  getIndividualLessonCategories(): Promise<IndividualLessonCategory[]>;
+  getIndividualLessonCategory(id: number): Promise<IndividualLessonCategory | undefined>;
+  createIndividualLessonCategory(category: InsertIndividualLessonCategory): Promise<IndividualLessonCategory>;
+  updateIndividualLessonCategory(id: number, category: Partial<InsertIndividualLessonCategory>): Promise<IndividualLessonCategory>;
+  deleteIndividualLessonCategory(id: number): Promise<void>;
+
+  getCampusCategories(): Promise<CampusCategory[]>;
+  getCampusCategory(id: number): Promise<CampusCategory | undefined>;
+  createCampusCategory(category: InsertCampusCategory): Promise<CampusCategory>;
+  updateCampusCategory(id: number, category: Partial<InsertCampusCategory>): Promise<CampusCategory>;
+  deleteCampusCategory(id: number): Promise<void>;
+
+  getRecitalCategories(): Promise<RecitalCategory[]>;
+  getRecitalCategory(id: number): Promise<RecitalCategory | undefined>;
+  createRecitalCategory(category: InsertRecitalCategory): Promise<RecitalCategory>;
+  updateRecitalCategory(id: number, category: Partial<InsertRecitalCategory>): Promise<RecitalCategory>;
+  deleteRecitalCategory(id: number): Promise<void>;
 
   // Client Categories
   getClientCategories(): Promise<ClientCategory[]>;
@@ -490,6 +535,141 @@ export class DatabaseStorage implements IStorage {
 
   async deleteWorkshopCategory(id: number): Promise<void> {
     await db.delete(workshopCategories).where(eq(workshopCategories.id, id));
+  }
+
+  async getSundayCategories(): Promise<SundayCategory[]> {
+    return await db.select().from(sundayCategories).orderBy(sundayCategories.name);
+  }
+
+  async getSundayCategory(id: number): Promise<SundayCategory | undefined> {
+    const [category] = await db.select().from(sundayCategories).where(eq(sundayCategories.id, id));
+    return category;
+  }
+
+  async createSundayCategory(category: InsertSundayCategory): Promise<SundayCategory> {
+    const [newCategory] = await db.insert(sundayCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updateSundayCategory(id: number, category: Partial<InsertSundayCategory>): Promise<SundayCategory> {
+    const [updated] = await db
+      .update(sundayCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(sundayCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSundayCategory(id: number): Promise<void> {
+    await db.delete(sundayCategories).where(eq(sundayCategories.id, id));
+  }
+
+  async getTrainingCategories(): Promise<TrainingCategory[]> {
+    return await db.select().from(trainingCategories).orderBy(trainingCategories.name);
+  }
+
+  async getTrainingCategory(id: number): Promise<TrainingCategory | undefined> {
+    const [category] = await db.select().from(trainingCategories).where(eq(trainingCategories.id, id));
+    return category;
+  }
+
+  async createTrainingCategory(category: InsertTrainingCategory): Promise<TrainingCategory> {
+    const [newCategory] = await db.insert(trainingCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updateTrainingCategory(id: number, category: Partial<InsertTrainingCategory>): Promise<TrainingCategory> {
+    const [updated] = await db
+      .update(trainingCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(trainingCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTrainingCategory(id: number): Promise<void> {
+    await db.delete(trainingCategories).where(eq(trainingCategories.id, id));
+  }
+
+  async getIndividualLessonCategories(): Promise<IndividualLessonCategory[]> {
+    return await db.select().from(individualLessonCategories).orderBy(individualLessonCategories.name);
+  }
+
+  async getIndividualLessonCategory(id: number): Promise<IndividualLessonCategory | undefined> {
+    const [category] = await db.select().from(individualLessonCategories).where(eq(individualLessonCategories.id, id));
+    return category;
+  }
+
+  async createIndividualLessonCategory(category: InsertIndividualLessonCategory): Promise<IndividualLessonCategory> {
+    const [newCategory] = await db.insert(individualLessonCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updateIndividualLessonCategory(id: number, category: Partial<InsertIndividualLessonCategory>): Promise<IndividualLessonCategory> {
+    const [updated] = await db
+      .update(individualLessonCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(individualLessonCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteIndividualLessonCategory(id: number): Promise<void> {
+    await db.delete(individualLessonCategories).where(eq(individualLessonCategories.id, id));
+  }
+
+  async getCampusCategories(): Promise<CampusCategory[]> {
+    return await db.select().from(campusCategories).orderBy(campusCategories.name);
+  }
+
+  async getCampusCategory(id: number): Promise<CampusCategory | undefined> {
+    const [category] = await db.select().from(campusCategories).where(eq(campusCategories.id, id));
+    return category;
+  }
+
+  async createCampusCategory(category: InsertCampusCategory): Promise<CampusCategory> {
+    const [newCategory] = await db.insert(campusCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updateCampusCategory(id: number, category: Partial<InsertCampusCategory>): Promise<CampusCategory> {
+    const [updated] = await db
+      .update(campusCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(campusCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCampusCategory(id: number): Promise<void> {
+    await db.delete(campusCategories).where(eq(campusCategories.id, id));
+  }
+
+  async getRecitalCategories(): Promise<RecitalCategory[]> {
+    return await db.select().from(recitalCategories).orderBy(recitalCategories.name);
+  }
+
+  async getRecitalCategory(id: number): Promise<RecitalCategory | undefined> {
+    const [category] = await db.select().from(recitalCategories).where(eq(recitalCategories.id, id));
+    return category;
+  }
+
+  async createRecitalCategory(category: InsertRecitalCategory): Promise<RecitalCategory> {
+    const [newCategory] = await db.insert(recitalCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updateRecitalCategory(id: number, category: Partial<InsertRecitalCategory>): Promise<RecitalCategory> {
+    const [updated] = await db
+      .update(recitalCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(recitalCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteRecitalCategory(id: number): Promise<void> {
+    await db.delete(recitalCategories).where(eq(recitalCategories.id, id));
   }
 
   // ==== Client Categories ====
