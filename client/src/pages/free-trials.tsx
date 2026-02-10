@@ -3,7 +3,7 @@ import ActivityManagementPage from "@/components/activity-management-page";
 export default function FreeTrials() {
   return (
     <ActivityManagementPage
-      title="Prove Gratuite"
+      title="Riepilogo Prove Gratuite"
       subtitle="Gestisci le lezioni di prova gratuite"
       apiEndpoint="/api/free-trials"
       categoryApiEndpoint="/api/categories"
