@@ -100,16 +100,6 @@ const draftItems = [
     icon: Settings,
   },
   {
-    title: "Affitto Studio Medico",
-    url: "/test3-gae",
-    icon: Settings,
-  },
-  {
-    title: "Knowledge",
-    url: "/knowledge",
-    icon: Settings,
-  },
-  {
     title: "Attività",
     url: "/attivita",
     icon: Activity,
@@ -142,6 +132,16 @@ const draftItems = [
   {
     title: "Schede Iscrizioni",
     url: "/schede-iscrizioni",
+    icon: Settings,
+  },
+  {
+    title: "Affitto Studio Medico",
+    url: "/test3-gae",
+    icon: Settings,
+  },
+  {
+    title: "Knowledge",
+    url: "/knowledge",
     icon: Settings,
   },
 ];
