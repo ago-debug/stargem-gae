@@ -50,17 +50,17 @@ interface ActivitySection {
 }
 
 const activitySections: ActivitySection[] = [
-  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", type: "corsi", color: "bg-blue-500", categoryApiEndpoint: "/api/categories", categoryManagementUrl: "/categorie", managementUrl: "/corsi" },
-  { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", type: "workshop", color: "bg-purple-500", categoryApiEndpoint: "/api/workshop-categories", categoryManagementUrl: "/categorie-workshop", managementUrl: "/workshops" },
-  { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, description: "Lezioni di prova a pagamento", type: "other", color: "bg-orange-500", managementUrl: "/gestione/prove-pagamento" },
-  { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", type: "other", color: "bg-green-500", managementUrl: "/gestione/prove-gratuite" },
-  { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, description: "Lezioni singole o drop-in", type: "other", color: "bg-cyan-500", managementUrl: "/gestione/lezioni-singole" },
-  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", type: "other", color: "bg-yellow-500", categoryApiEndpoint: "/api/sunday-categories", categoryManagementUrl: "/categorie-domeniche", managementUrl: "/gestione/domeniche-movimento" },
-  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento libero e affitti", type: "other", color: "bg-red-500", categoryApiEndpoint: "/api/training-categories", categoryManagementUrl: "/categorie-allenamenti", managementUrl: "/gestione/allenamenti" },
-  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", type: "other", color: "bg-indigo-500", categoryApiEndpoint: "/api/individual-lesson-categories", categoryManagementUrl: "/categorie-lezioni-individuali", managementUrl: "/gestione/lezioni-individuali" },
-  { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", type: "other", color: "bg-teal-500", categoryApiEndpoint: "/api/campus-categories", categoryManagementUrl: "/categorie-campus", managementUrl: "/gestione/campus" },
-  { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", type: "other", color: "bg-pink-500", categoryApiEndpoint: "/api/recital-categories", categoryManagementUrl: "/categorie-saggi", managementUrl: "/gestione/saggi" },
-  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, description: "Vacanze studio e viaggi formativi", type: "other", color: "bg-amber-500", categoryApiEndpoint: "/api/vacation-categories", categoryManagementUrl: "/categorie-vacanze-studio", managementUrl: "/gestione/vacanze-studio" },
+  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", type: "corsi", color: "bg-blue-500", categoryApiEndpoint: "/api/categories", categoryManagementUrl: "/categorie", managementUrl: "/attivita/corsi" },
+  { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", type: "workshop", color: "bg-purple-500", categoryApiEndpoint: "/api/workshop-categories", categoryManagementUrl: "/categorie-workshop", managementUrl: "/attivita/workshops" },
+  { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, description: "Lezioni di prova a pagamento", type: "other", color: "bg-orange-500", managementUrl: "/attivita/prove-pagamento" },
+  { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", type: "other", color: "bg-green-500", managementUrl: "/attivita/prove-gratuite" },
+  { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, description: "Lezioni singole o drop-in", type: "other", color: "bg-cyan-500", managementUrl: "/attivita/lezioni-singole" },
+  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", type: "other", color: "bg-yellow-500", categoryApiEndpoint: "/api/sunday-categories", categoryManagementUrl: "/categorie-domeniche", managementUrl: "/attivita/domeniche-movimento" },
+  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento libero e affitti", type: "other", color: "bg-red-500", categoryApiEndpoint: "/api/training-categories", categoryManagementUrl: "/categorie-allenamenti", managementUrl: "/attivita/allenamenti" },
+  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", type: "other", color: "bg-indigo-500", categoryApiEndpoint: "/api/individual-lesson-categories", categoryManagementUrl: "/categorie-lezioni-individuali", managementUrl: "/attivita/lezioni-individuali" },
+  { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", type: "other", color: "bg-teal-500", categoryApiEndpoint: "/api/campus-categories", categoryManagementUrl: "/categorie-campus", managementUrl: "/attivita/campus" },
+  { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", type: "other", color: "bg-pink-500", categoryApiEndpoint: "/api/recital-categories", categoryManagementUrl: "/categorie-saggi", managementUrl: "/attivita/saggi" },
+  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, description: "Vacanze studio e viaggi formativi", type: "other", color: "bg-amber-500", categoryApiEndpoint: "/api/vacation-categories", categoryManagementUrl: "/categorie-vacanze-studio", managementUrl: "/attivita/vacanze-studio" },
 ];
 
 function CourseCard({ course, categories, instructors }: { course: Course; categories?: Category[]; instructors?: Instructor[] }) {
@@ -460,7 +460,7 @@ export default function Attivita() {
                 {courses?.length || 0} corsi totali &middot; {activeCourses.length} attivi
               </p>
             </div>
-            <Link href="/corsi">
+            <Link href="/attivita/corsi">
               <Button variant="outline" data-testid="button-goto-corsi-page">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Gestione Completa Corsi
@@ -515,7 +515,7 @@ export default function Attivita() {
                 <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">Nessun corso configurato</p>
                 <p className="text-sm mb-4">Vai alla pagina Corsi per aggiungerne uno</p>
-                <Link href="/corsi">
+                <Link href="/attivita/corsi">
                   <Button data-testid="button-add-first-course">Vai a Gestione Corsi</Button>
                 </Link>
               </CardContent>
@@ -531,7 +531,7 @@ export default function Attivita() {
                 {workshops?.length || 0} workshop totali &middot; {activeWorkshops.length} attivi
               </p>
             </div>
-            <Link href="/workshops">
+            <Link href="/attivita/workshops">
               <Button variant="outline" data-testid="button-goto-workshop-page">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Gestione Completa Workshop
@@ -586,7 +586,7 @@ export default function Attivita() {
                 <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">Nessun workshop configurato</p>
                 <p className="text-sm mb-4">Vai alla pagina Workshop per aggiungerne uno</p>
-                <Link href="/workshops">
+                <Link href="/attivita/workshops">
                   <Button data-testid="button-add-first-workshop">Vai a Gestione Workshop</Button>
                 </Link>
               </CardContent>

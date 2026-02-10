@@ -70,8 +70,8 @@ function Router() {
       <Route path="/" component={AnagraficaHome} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/iscritti" component={Members} />
-      <Route path="/corsi" component={Courses} />
-      <Route path="/workshops" component={Workshops} />
+      <Route path="/attivita/corsi" component={Courses} />
+      <Route path="/attivita/workshops" component={Workshops} />
       <Route path="/iscritti-corsi" component={CourseEnrollments} />
       <Route path="/categorie-attivita" component={ActivityCategories} />
       <Route path="/categorie" component={Categories} />
@@ -98,16 +98,16 @@ function Router() {
       <Route path="/test3-gae" component={Test3Gae} />
       <Route path="/knowledge" component={Knowledge} />
       <Route path="/todo-list" component={TodoList} />
+      <Route path="/attivita/prove-pagamento" component={PaidTrials} />
+      <Route path="/attivita/prove-gratuite" component={FreeTrials} />
+      <Route path="/attivita/lezioni-singole" component={SingleLessons} />
+      <Route path="/attivita/domeniche-movimento" component={SundayActivities} />
+      <Route path="/attivita/allenamenti" component={Trainings} />
+      <Route path="/attivita/lezioni-individuali" component={IndividualLessons} />
+      <Route path="/attivita/campus" component={CampusActivities} />
+      <Route path="/attivita/saggi" component={Recitals} />
+      <Route path="/attivita/vacanze-studio" component={VacationStudies} />
       <Route path="/attivita" component={Attivita} />
-      <Route path="/gestione/prove-pagamento" component={PaidTrials} />
-      <Route path="/gestione/prove-gratuite" component={FreeTrials} />
-      <Route path="/gestione/lezioni-singole" component={SingleLessons} />
-      <Route path="/gestione/domeniche-movimento" component={SundayActivities} />
-      <Route path="/gestione/allenamenti" component={Trainings} />
-      <Route path="/gestione/lezioni-individuali" component={IndividualLessons} />
-      <Route path="/gestione/campus" component={CampusActivities} />
-      <Route path="/gestione/saggi" component={Recitals} />
-      <Route path="/gestione/vacanze-studio" component={VacationStudies} />
       <Route path="/gestione" component={Gestione} />
       <Route component={NotFound} />
     </Switch>
