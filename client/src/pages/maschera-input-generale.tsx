@@ -419,20 +419,20 @@ export default function MascheraInputGenerale() {
               <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" className="gold-3d-button" data-testid="button-gsheets">
-                <FileSpreadsheet className="w-4 h-4 mr-1" />
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-gsheets">
+                <FileSpreadsheet className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 GSheets
               </Button>
-              <Button size="sm" className="gold-3d-button" data-testid="button-esporta">
-                <Upload className="w-4 h-4 mr-1" />
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-esporta">
+                <Upload className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Esporta
               </Button>
-              <Button size="sm" className="gold-3d-button" data-testid="button-importa">
-                <Download className="w-4 h-4 mr-1" />
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-importa">
+                <Download className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Importa
               </Button>
-              <Button size="sm" className="gold-3d-button" data-testid="button-salva">
-                <Save className="w-4 h-4 mr-1" />
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-salva">
+                <Save className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Salva
               </Button>
               <Button size="sm" className="gold-3d-button" data-testid="button-nuovo">
