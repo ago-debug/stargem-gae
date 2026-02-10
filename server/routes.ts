@@ -32,6 +32,15 @@ import {
   insertAttendanceSchema,
   insertCustomReportSchema,
   insertKnowledgeSchema,
+  insertPaidTrialSchema,
+  insertFreeTrialSchema,
+  insertSingleLessonSchema,
+  insertSundayActivitySchema,
+  insertTrainingSchema,
+  insertIndividualLessonSchema,
+  insertCampusActivitySchema,
+  insertRecitalSchema,
+  insertVacationStudySchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -1525,6 +1534,393 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete workshop" });
+    }
+  });
+
+  // ==== Paid Trials Routes ====
+  app.get("/api/paid-trials", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getPaidTrials();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch paid trials" });
+    }
+  });
+
+  app.post("/api/paid-trials", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertPaidTrialSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const item = await storage.createPaidTrial(parsed.data);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create paid trial" });
+    }
+  });
+
+  app.patch("/api/paid-trials/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updatePaidTrial(id, req.body);
+      res.json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update paid trial" });
+    }
+  });
+
+  app.delete("/api/paid-trials/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePaidTrial(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete paid trial" });
+    }
+  });
+
+  // ==== Free Trials Routes ====
+  app.get("/api/free-trials", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getFreeTrials();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch free trials" });
+    }
+  });
+
+  app.post("/api/free-trials", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertFreeTrialSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const item = await storage.createFreeTrial(parsed.data);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create free trial" });
+    }
+  });
+
+  app.patch("/api/free-trials/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updateFreeTrial(id, req.body);
+      res.json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update free trial" });
+    }
+  });
+
+  app.delete("/api/free-trials/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteFreeTrial(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete free trial" });
+    }
+  });
+
+  // ==== Single Lessons Routes ====
+  app.get("/api/single-lessons", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getSingleLessons();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch single lessons" });
+    }
+  });
+
+  app.post("/api/single-lessons", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertSingleLessonSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const item = await storage.createSingleLesson(parsed.data);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create single lesson" });
+    }
+  });
+
+  app.patch("/api/single-lessons/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updateSingleLesson(id, req.body);
+      res.json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update single lesson" });
+    }
+  });
+
+  app.delete("/api/single-lessons/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSingleLesson(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete single lesson" });
+    }
+  });
+
+  // ==== Sunday Activities Routes ====
+  app.get("/api/sunday-activities", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getSundayActivities();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sunday activities" });
+    }
+  });
+
+  app.post("/api/sunday-activities", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertSundayActivitySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const item = await storage.createSundayActivity(parsed.data);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create sunday activity" });
+    }
+  });
+
+  app.patch("/api/sunday-activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updateSundayActivity(id, req.body);
+      res.json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update sunday activity" });
+    }
+  });
+
+  app.delete("/api/sunday-activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSundayActivity(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete sunday activity" });
+    }
+  });
+
+  // ==== Trainings Routes ====
+  app.get("/api/trainings", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getTrainings();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch trainings" });
+    }
+  });
+
+  app.post("/api/trainings", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertTrainingSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const item = await storage.createTraining(parsed.data);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create training" });
+    }
+  });
+
+  app.patch("/api/trainings/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updateTraining(id, req.body);
+      res.json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update training" });
+    }
+  });
+
+  app.delete("/api/trainings/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteTraining(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete training" });
+    }
+  });
+
+  // ==== Individual Lessons Routes ====
+  app.get("/api/individual-lessons", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getIndividualLessons();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch individual lessons" });
+    }
+  });
+
+  app.post("/api/individual-lessons", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertIndividualLessonSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const item = await storage.createIndividualLesson(parsed.data);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create individual lesson" });
+    }
+  });
+
+  app.patch("/api/individual-lessons/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updateIndividualLesson(id, req.body);
+      res.json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update individual lesson" });
+    }
+  });
+
+  app.delete("/api/individual-lessons/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteIndividualLesson(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete individual lesson" });
+    }
+  });
+
+  // ==== Campus Activities Routes ====
+  app.get("/api/campus-activities", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getCampusActivities();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch campus activities" });
+    }
+  });
+
+  app.post("/api/campus-activities", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertCampusActivitySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const item = await storage.createCampusActivity(parsed.data);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create campus activity" });
+    }
+  });
+
+  app.patch("/api/campus-activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updateCampusActivity(id, req.body);
+      res.json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update campus activity" });
+    }
+  });
+
+  app.delete("/api/campus-activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCampusActivity(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete campus activity" });
+    }
+  });
+
+  // ==== Recitals Routes ====
+  app.get("/api/recitals", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getRecitals();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch recitals" });
+    }
+  });
+
+  app.post("/api/recitals", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertRecitalSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const item = await storage.createRecital(parsed.data);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create recital" });
+    }
+  });
+
+  app.patch("/api/recitals/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updateRecital(id, req.body);
+      res.json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update recital" });
+    }
+  });
+
+  app.delete("/api/recitals/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteRecital(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete recital" });
+    }
+  });
+
+  // ==== Vacation Studies Routes ====
+  app.get("/api/vacation-studies", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getVacationStudies();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vacation studies" });
+    }
+  });
+
+  app.post("/api/vacation-studies", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertVacationStudySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const item = await storage.createVacationStudy(parsed.data);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create vacation study" });
+    }
+  });
+
+  app.patch("/api/vacation-studies/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updateVacationStudy(id, req.body);
+      res.json(item);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update vacation study" });
+    }
+  });
+
+  app.delete("/api/vacation-studies/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteVacationStudy(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete vacation study" });
     }
   });
 

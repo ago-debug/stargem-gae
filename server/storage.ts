@@ -34,6 +34,15 @@ import {
   customReports,
   importConfigs,
   knowledge,
+  paidTrials,
+  freeTrials,
+  singleLessons,
+  sundayActivities,
+  trainings,
+  individualLessons,
+  campusActivities,
+  recitals,
+  vacationStudies,
   type User,
   type UpsertUser,
   type Member,
@@ -98,6 +107,24 @@ import {
   type InsertImportConfig,
   type Knowledge,
   type InsertKnowledge,
+  type PaidTrial,
+  type InsertPaidTrial,
+  type FreeTrial,
+  type InsertFreeTrial,
+  type SingleLesson,
+  type InsertSingleLesson,
+  type SundayActivity,
+  type InsertSundayActivity,
+  type Training,
+  type InsertTraining,
+  type IndividualLesson,
+  type InsertIndividualLesson,
+  type CampusActivity,
+  type InsertCampusActivity,
+  type Recital,
+  type InsertRecital,
+  type VacationStudy,
+  type InsertVacationStudy,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -208,6 +235,69 @@ export interface IStorage {
   createWorkshop(workshop: InsertWorkshop): Promise<Workshop>;
   updateWorkshop(id: number, workshop: Partial<InsertWorkshop>): Promise<Workshop>;
   deleteWorkshop(id: number): Promise<void>;
+
+  // Paid Trials
+  getPaidTrials(): Promise<PaidTrial[]>;
+  getPaidTrialById(id: number): Promise<PaidTrial | undefined>;
+  createPaidTrial(item: InsertPaidTrial): Promise<PaidTrial>;
+  updatePaidTrial(id: number, item: Partial<InsertPaidTrial>): Promise<PaidTrial>;
+  deletePaidTrial(id: number): Promise<void>;
+
+  // Free Trials
+  getFreeTrials(): Promise<FreeTrial[]>;
+  getFreeTrialById(id: number): Promise<FreeTrial | undefined>;
+  createFreeTrial(item: InsertFreeTrial): Promise<FreeTrial>;
+  updateFreeTrial(id: number, item: Partial<InsertFreeTrial>): Promise<FreeTrial>;
+  deleteFreeTrial(id: number): Promise<void>;
+
+  // Single Lessons
+  getSingleLessons(): Promise<SingleLesson[]>;
+  getSingleLessonById(id: number): Promise<SingleLesson | undefined>;
+  createSingleLesson(item: InsertSingleLesson): Promise<SingleLesson>;
+  updateSingleLesson(id: number, item: Partial<InsertSingleLesson>): Promise<SingleLesson>;
+  deleteSingleLesson(id: number): Promise<void>;
+
+  // Sunday Activities
+  getSundayActivities(): Promise<SundayActivity[]>;
+  getSundayActivityById(id: number): Promise<SundayActivity | undefined>;
+  createSundayActivity(item: InsertSundayActivity): Promise<SundayActivity>;
+  updateSundayActivity(id: number, item: Partial<InsertSundayActivity>): Promise<SundayActivity>;
+  deleteSundayActivity(id: number): Promise<void>;
+
+  // Trainings
+  getTrainings(): Promise<Training[]>;
+  getTrainingById(id: number): Promise<Training | undefined>;
+  createTraining(item: InsertTraining): Promise<Training>;
+  updateTraining(id: number, item: Partial<InsertTraining>): Promise<Training>;
+  deleteTraining(id: number): Promise<void>;
+
+  // Individual Lessons
+  getIndividualLessons(): Promise<IndividualLesson[]>;
+  getIndividualLessonById(id: number): Promise<IndividualLesson | undefined>;
+  createIndividualLesson(item: InsertIndividualLesson): Promise<IndividualLesson>;
+  updateIndividualLesson(id: number, item: Partial<InsertIndividualLesson>): Promise<IndividualLesson>;
+  deleteIndividualLesson(id: number): Promise<void>;
+
+  // Campus Activities
+  getCampusActivities(): Promise<CampusActivity[]>;
+  getCampusActivityById(id: number): Promise<CampusActivity | undefined>;
+  createCampusActivity(item: InsertCampusActivity): Promise<CampusActivity>;
+  updateCampusActivity(id: number, item: Partial<InsertCampusActivity>): Promise<CampusActivity>;
+  deleteCampusActivity(id: number): Promise<void>;
+
+  // Recitals
+  getRecitals(): Promise<Recital[]>;
+  getRecitalById(id: number): Promise<Recital | undefined>;
+  createRecital(item: InsertRecital): Promise<Recital>;
+  updateRecital(id: number, item: Partial<InsertRecital>): Promise<Recital>;
+  deleteRecital(id: number): Promise<void>;
+
+  // Vacation Studies
+  getVacationStudies(): Promise<VacationStudy[]>;
+  getVacationStudyById(id: number): Promise<VacationStudy | undefined>;
+  createVacationStudy(item: InsertVacationStudy): Promise<VacationStudy>;
+  updateVacationStudy(id: number, item: Partial<InsertVacationStudy>): Promise<VacationStudy>;
+  deleteVacationStudy(id: number): Promise<void>;
 
   // Memberships
   getMemberships(): Promise<Membership[]>;
@@ -879,6 +969,186 @@ export class DatabaseStorage implements IStorage {
 
   async deleteWorkshop(id: number): Promise<void> {
     await db.delete(workshops).where(eq(workshops.id, id));
+  }
+
+  // ==== Paid Trials ====
+  async getPaidTrials(): Promise<PaidTrial[]> {
+    return await db.select().from(paidTrials).orderBy(desc(paidTrials.createdAt));
+  }
+  async getPaidTrialById(id: number): Promise<PaidTrial | undefined> {
+    const [item] = await db.select().from(paidTrials).where(eq(paidTrials.id, id));
+    return item;
+  }
+  async createPaidTrial(item: InsertPaidTrial): Promise<PaidTrial> {
+    const [newItem] = await db.insert(paidTrials).values(item).returning();
+    return newItem;
+  }
+  async updatePaidTrial(id: number, item: Partial<InsertPaidTrial>): Promise<PaidTrial> {
+    const [updated] = await db.update(paidTrials).set({ ...item, updatedAt: new Date() }).where(eq(paidTrials.id, id)).returning();
+    return updated;
+  }
+  async deletePaidTrial(id: number): Promise<void> {
+    await db.delete(paidTrials).where(eq(paidTrials.id, id));
+  }
+
+  // ==== Free Trials ====
+  async getFreeTrials(): Promise<FreeTrial[]> {
+    return await db.select().from(freeTrials).orderBy(desc(freeTrials.createdAt));
+  }
+  async getFreeTrialById(id: number): Promise<FreeTrial | undefined> {
+    const [item] = await db.select().from(freeTrials).where(eq(freeTrials.id, id));
+    return item;
+  }
+  async createFreeTrial(item: InsertFreeTrial): Promise<FreeTrial> {
+    const [newItem] = await db.insert(freeTrials).values(item).returning();
+    return newItem;
+  }
+  async updateFreeTrial(id: number, item: Partial<InsertFreeTrial>): Promise<FreeTrial> {
+    const [updated] = await db.update(freeTrials).set({ ...item, updatedAt: new Date() }).where(eq(freeTrials.id, id)).returning();
+    return updated;
+  }
+  async deleteFreeTrial(id: number): Promise<void> {
+    await db.delete(freeTrials).where(eq(freeTrials.id, id));
+  }
+
+  // ==== Single Lessons ====
+  async getSingleLessons(): Promise<SingleLesson[]> {
+    return await db.select().from(singleLessons).orderBy(desc(singleLessons.createdAt));
+  }
+  async getSingleLessonById(id: number): Promise<SingleLesson | undefined> {
+    const [item] = await db.select().from(singleLessons).where(eq(singleLessons.id, id));
+    return item;
+  }
+  async createSingleLesson(item: InsertSingleLesson): Promise<SingleLesson> {
+    const [newItem] = await db.insert(singleLessons).values(item).returning();
+    return newItem;
+  }
+  async updateSingleLesson(id: number, item: Partial<InsertSingleLesson>): Promise<SingleLesson> {
+    const [updated] = await db.update(singleLessons).set({ ...item, updatedAt: new Date() }).where(eq(singleLessons.id, id)).returning();
+    return updated;
+  }
+  async deleteSingleLesson(id: number): Promise<void> {
+    await db.delete(singleLessons).where(eq(singleLessons.id, id));
+  }
+
+  // ==== Sunday Activities ====
+  async getSundayActivities(): Promise<SundayActivity[]> {
+    return await db.select().from(sundayActivities).orderBy(desc(sundayActivities.createdAt));
+  }
+  async getSundayActivityById(id: number): Promise<SundayActivity | undefined> {
+    const [item] = await db.select().from(sundayActivities).where(eq(sundayActivities.id, id));
+    return item;
+  }
+  async createSundayActivity(item: InsertSundayActivity): Promise<SundayActivity> {
+    const [newItem] = await db.insert(sundayActivities).values(item).returning();
+    return newItem;
+  }
+  async updateSundayActivity(id: number, item: Partial<InsertSundayActivity>): Promise<SundayActivity> {
+    const [updated] = await db.update(sundayActivities).set({ ...item, updatedAt: new Date() }).where(eq(sundayActivities.id, id)).returning();
+    return updated;
+  }
+  async deleteSundayActivity(id: number): Promise<void> {
+    await db.delete(sundayActivities).where(eq(sundayActivities.id, id));
+  }
+
+  // ==== Trainings ====
+  async getTrainings(): Promise<Training[]> {
+    return await db.select().from(trainings).orderBy(desc(trainings.createdAt));
+  }
+  async getTrainingById(id: number): Promise<Training | undefined> {
+    const [item] = await db.select().from(trainings).where(eq(trainings.id, id));
+    return item;
+  }
+  async createTraining(item: InsertTraining): Promise<Training> {
+    const [newItem] = await db.insert(trainings).values(item).returning();
+    return newItem;
+  }
+  async updateTraining(id: number, item: Partial<InsertTraining>): Promise<Training> {
+    const [updated] = await db.update(trainings).set({ ...item, updatedAt: new Date() }).where(eq(trainings.id, id)).returning();
+    return updated;
+  }
+  async deleteTraining(id: number): Promise<void> {
+    await db.delete(trainings).where(eq(trainings.id, id));
+  }
+
+  // ==== Individual Lessons ====
+  async getIndividualLessons(): Promise<IndividualLesson[]> {
+    return await db.select().from(individualLessons).orderBy(desc(individualLessons.createdAt));
+  }
+  async getIndividualLessonById(id: number): Promise<IndividualLesson | undefined> {
+    const [item] = await db.select().from(individualLessons).where(eq(individualLessons.id, id));
+    return item;
+  }
+  async createIndividualLesson(item: InsertIndividualLesson): Promise<IndividualLesson> {
+    const [newItem] = await db.insert(individualLessons).values(item).returning();
+    return newItem;
+  }
+  async updateIndividualLesson(id: number, item: Partial<InsertIndividualLesson>): Promise<IndividualLesson> {
+    const [updated] = await db.update(individualLessons).set({ ...item, updatedAt: new Date() }).where(eq(individualLessons.id, id)).returning();
+    return updated;
+  }
+  async deleteIndividualLesson(id: number): Promise<void> {
+    await db.delete(individualLessons).where(eq(individualLessons.id, id));
+  }
+
+  // ==== Campus Activities ====
+  async getCampusActivities(): Promise<CampusActivity[]> {
+    return await db.select().from(campusActivities).orderBy(desc(campusActivities.createdAt));
+  }
+  async getCampusActivityById(id: number): Promise<CampusActivity | undefined> {
+    const [item] = await db.select().from(campusActivities).where(eq(campusActivities.id, id));
+    return item;
+  }
+  async createCampusActivity(item: InsertCampusActivity): Promise<CampusActivity> {
+    const [newItem] = await db.insert(campusActivities).values(item).returning();
+    return newItem;
+  }
+  async updateCampusActivity(id: number, item: Partial<InsertCampusActivity>): Promise<CampusActivity> {
+    const [updated] = await db.update(campusActivities).set({ ...item, updatedAt: new Date() }).where(eq(campusActivities.id, id)).returning();
+    return updated;
+  }
+  async deleteCampusActivity(id: number): Promise<void> {
+    await db.delete(campusActivities).where(eq(campusActivities.id, id));
+  }
+
+  // ==== Recitals ====
+  async getRecitals(): Promise<Recital[]> {
+    return await db.select().from(recitals).orderBy(desc(recitals.createdAt));
+  }
+  async getRecitalById(id: number): Promise<Recital | undefined> {
+    const [item] = await db.select().from(recitals).where(eq(recitals.id, id));
+    return item;
+  }
+  async createRecital(item: InsertRecital): Promise<Recital> {
+    const [newItem] = await db.insert(recitals).values(item).returning();
+    return newItem;
+  }
+  async updateRecital(id: number, item: Partial<InsertRecital>): Promise<Recital> {
+    const [updated] = await db.update(recitals).set({ ...item, updatedAt: new Date() }).where(eq(recitals.id, id)).returning();
+    return updated;
+  }
+  async deleteRecital(id: number): Promise<void> {
+    await db.delete(recitals).where(eq(recitals.id, id));
+  }
+
+  // ==== Vacation Studies ====
+  async getVacationStudies(): Promise<VacationStudy[]> {
+    return await db.select().from(vacationStudies).orderBy(desc(vacationStudies.createdAt));
+  }
+  async getVacationStudyById(id: number): Promise<VacationStudy | undefined> {
+    const [item] = await db.select().from(vacationStudies).where(eq(vacationStudies.id, id));
+    return item;
+  }
+  async createVacationStudy(item: InsertVacationStudy): Promise<VacationStudy> {
+    const [newItem] = await db.insert(vacationStudies).values(item).returning();
+    return newItem;
+  }
+  async updateVacationStudy(id: number, item: Partial<InsertVacationStudy>): Promise<VacationStudy> {
+    const [updated] = await db.update(vacationStudies).set({ ...item, updatedAt: new Date() }).where(eq(vacationStudies.id, id)).returning();
+    return updated;
+  }
+  async deleteVacationStudy(id: number): Promise<void> {
+    await db.delete(vacationStudies).where(eq(vacationStudies.id, id));
   }
 
   // ==== Memberships ====
