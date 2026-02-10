@@ -516,7 +516,7 @@ export default function Attivita() {
                 <p className="text-lg font-medium mb-2">Nessun corso configurato</p>
                 <p className="text-sm mb-4">Vai alla pagina Corsi per aggiungerne uno</p>
                 <Link href="/attivita/corsi">
-                  <Button data-testid="button-add-first-course">Vai a Gestione Corsi</Button>
+                  <Button data-testid="button-add-first-course">Vai a Riepilogo Corsi</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -587,7 +587,7 @@ export default function Attivita() {
                 <p className="text-lg font-medium mb-2">Nessun workshop configurato</p>
                 <p className="text-sm mb-4">Vai alla pagina Workshop per aggiungerne uno</p>
                 <Link href="/attivita/workshops">
-                  <Button data-testid="button-add-first-workshop">Vai a Gestione Workshop</Button>
+                  <Button data-testid="button-add-first-workshop">Vai a Riepilogo Workshop</Button>
                 </Link>
               </CardContent>
             </Card>

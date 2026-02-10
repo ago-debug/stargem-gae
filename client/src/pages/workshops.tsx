@@ -666,7 +666,7 @@ export default function Workshops() {
       </Button>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Workshop</h1>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Riepilogo Workshop</h1>
           <p className="text-muted-foreground">Organizza e gestisci i workshop disponibili</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">

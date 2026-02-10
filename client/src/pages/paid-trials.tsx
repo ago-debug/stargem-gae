@@ -3,7 +3,7 @@ import ActivityManagementPage from "@/components/activity-management-page";
 export default function PaidTrials() {
   return (
     <ActivityManagementPage
-      title="Prove a Pagamento"
+      title="Riepilogo Prove a Pagamento"
       subtitle="Gestisci le lezioni di prova a pagamento"
       apiEndpoint="/api/paid-trials"
       categoryApiEndpoint="/api/categories"

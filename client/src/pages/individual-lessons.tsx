@@ -3,7 +3,7 @@ import ActivityManagementPage from "@/components/activity-management-page";
 export default function IndividualLessons() {
   return (
     <ActivityManagementPage
-      title="Lezioni Individuali"
+      title="Riepilogo Lezioni Individuali"
       subtitle="Gestisci le lezioni private one-to-one"
       apiEndpoint="/api/individual-lessons"
       categoryApiEndpoint="/api/individual-lesson-categories"
