@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -57,7 +58,7 @@ const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => {
 export default function Studios() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingStudio, setEditingStudio] = useState<Studio | null>(null);
-  const { sortConfig, handleSort, sortItems } = useSortableTable<Studio>();
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Studio>("name");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [openTime, setOpenTime] = useState<string>("09:00");
   const [closeTime, setCloseTime] = useState<string>("21:00");
@@ -229,7 +230,7 @@ export default function Studios() {
           else setIsCreateOpen(true);
         }}>
           <DialogTrigger asChild>
-            <Button data-testid="button-create-studio">
+            <Button className="gold-3d-button" data-testid="button-create-studio">
               <Plus className="mr-2 h-4 w-4" />
               Nuovo Studio
             </Button>
@@ -402,6 +403,7 @@ export default function Studios() {
                   </Button>
                   <Button
                     type="submit"
+                    className="gold-3d-button"
                     disabled={createMutation.isPending || updateMutation.isPending}
                     data-testid="button-submit"
                   >
@@ -446,10 +448,10 @@ export default function Studios() {
               <TableBody>
                 {sortedStudios.map((studio) => (
                   <TableRow key={studio.id} data-testid={`row-studio-${studio.id}`}>
-                    <TableCell className="font-medium">{studio.name}</TableCell>
-                    <TableCell>{studio.floor || "-"}</TableCell>
-                    <TableCell>{studio.capacity || "-"}</TableCell>
-                    <TableCell>
+                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{studio.name}</TableCell>
+                    <TableCell className={isSortedColumn("floor") ? "sorted-column-cell" : undefined}>{studio.floor || "-"}</TableCell>
+                    <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{studio.capacity || "-"}</TableCell>
+                    <TableCell className={isSortedColumn("days") ? "sorted-column-cell" : undefined}>
                       {parseOperatingDays(studio.operatingDays).length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {parseOperatingDays(studio.operatingDays).map((day, idx) => (
@@ -462,8 +464,8 @@ export default function Studios() {
                         "-"
                       )}
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={studio.active ? "default" : "secondary"}>
+                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
+                      <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">
                         {studio.active ? "Attivo" : "Inattivo"}
                       </Badge>
                     </TableCell>

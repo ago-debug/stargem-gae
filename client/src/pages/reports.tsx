@@ -428,7 +428,7 @@ export default function Reports() {
         <TabsContent value="custom-reports" className="space-y-6">
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground">Crea e gestisci report personalizzati</p>
-            <Button onClick={() => { resetForm(); setIsCreateDialogOpen(true); }} data-testid="button-create-report">
+            <Button className="gold-3d-button" onClick={() => { resetForm(); setIsCreateDialogOpen(true); }} data-testid="button-create-report">
               <Plus className="w-4 h-4 mr-2" />
               Nuovo Report
             </Button>
@@ -485,8 +485,8 @@ export default function Reports() {
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Button
-                              variant="default"
                               size="sm"
+                              className="gold-3d-button"
                               onClick={() => {
                                 setExecutingReportId(report.id);
                                 executeReportMutation.mutate(report.id);
@@ -680,6 +680,7 @@ export default function Reports() {
               Annulla
             </Button>
             <Button 
+              className="gold-3d-button"
               onClick={handleSubmit} 
               disabled={createReportMutation.isPending || updateReportMutation.isPending}
               data-testid="button-save-report"

@@ -27,12 +27,16 @@ export function SortableTableHead({
   className,
   "data-testid": testId,
 }: SortableTableHeadProps) {
-  const isActive = currentSort.key === sortKey;
-  const direction = isActive ? currentSort.direction : null;
+  const isActive = currentSort.key === sortKey && currentSort.direction !== null;
+  const direction = currentSort.key === sortKey ? currentSort.direction : null;
 
   return (
     <TableHead
-      className={cn("cursor-pointer select-none", className)}
+      className={cn(
+        "cursor-pointer select-none transition-colors",
+        isActive && "sorted-column-header",
+        className
+      )}
       onClick={() => onSort(sortKey)}
       data-testid={testId}
     >
@@ -40,9 +44,9 @@ export function SortableTableHead({
         <span>{children}</span>
         <span className="inline-flex">
           {direction === "asc" ? (
-            <ArrowUp className="w-3 h-3 text-foreground" />
+            <ArrowUp className="w-3 h-3 text-amber-700 dark:text-amber-400" />
           ) : direction === "desc" ? (
-            <ArrowDown className="w-3 h-3 text-foreground" />
+            <ArrowDown className="w-3 h-3 text-amber-700 dark:text-amber-400" />
           ) : (
             <ArrowUpDown className="w-3 h-3 text-muted-foreground/50" />
           )}
@@ -55,7 +59,7 @@ export function SortableTableHead({
 export function useSortableTable<T>(defaultKey = "") {
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: defaultKey,
-    direction: null,
+    direction: defaultKey ? "asc" : null,
   });
 
   const handleSort = (key: string) => {
@@ -93,5 +97,7 @@ export function useSortableTable<T>(defaultKey = "") {
     });
   };
 
-  return { sortConfig, handleSort, sortItems };
+  const isSortedColumn = (key: string) => sortConfig.key === key && sortConfig.direction !== null;
+
+  return { sortConfig, handleSort, sortItems, isSortedColumn };
 }

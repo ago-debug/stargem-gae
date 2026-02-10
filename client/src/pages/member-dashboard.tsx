@@ -156,10 +156,10 @@ export default function MemberDashboard() {
     if (!formData.cardExpiryDate) return null;
     const expiry = new Date(formData.cardExpiryDate);
     const now = new Date();
-    if (expiry < now) return { status: "expired", label: "Scaduta", color: "bg-red-100 text-red-800" };
+    if (expiry < now) return { status: "expired", label: "Scaduta", color: "bg-muted/50 border border-amber-500/50 text-foreground" };
     const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    if (expiry < thirtyDays) return { status: "expiring", label: "In Scadenza", color: "bg-yellow-100 text-yellow-800" };
-    return { status: "active", label: "Attiva", color: "bg-green-100 text-green-800" };
+    if (expiry < thirtyDays) return { status: "expiring", label: "In Scadenza", color: "bg-muted/50 border border-amber-500/50 text-foreground" };
+    return { status: "active", label: "Attiva", color: "bg-muted/50 border border-amber-500/50 text-foreground" };
   };
 
   const cardStatus = getCardStatus();

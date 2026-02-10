@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Download, ArrowLeft } from "lucide-react";
@@ -210,7 +211,7 @@ export default function ActivityManagementPage({
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const { sortConfig, handleSort, sortItems } = useSortableTable<typeof filteredItems[0]>();
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<typeof filteredItems[0]>("sku");
 
   const getSortValue = (item: typeof filteredItems[0], key: string) => {
     switch (key) {
@@ -541,6 +542,7 @@ export default function ActivityManagementPage({
         </Button>
         <Button
           type="submit"
+          className="gold-3d-button"
           disabled={editingItem ? updateMutation.isPending : createMutation.isPending}
           data-testid={`button-${testIdPrefix}-submit`}
         >
@@ -574,6 +576,7 @@ export default function ActivityManagementPage({
                 Esporta CSV
               </Button>
               <Button
+                className="gold-3d-button"
                 onClick={() => {
                   closeDialog();
                   setIsFormOpen(true);
@@ -635,27 +638,27 @@ export default function ActivityManagementPage({
               <TableBody>
                 {sortedItems.map((item) => (
                   <TableRow key={item.id} data-testid={`${testIdPrefix}-row-${item.id}`}>
-                    <TableCell className="text-xs text-muted-foreground" data-testid={`text-${testIdPrefix}-sku-${item.id}`}>
+                    <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("sku") && "sorted-column-cell")} data-testid={`text-${testIdPrefix}-sku-${item.id}`}>
                       {item.sku || "-"}
                     </TableCell>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>
+                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{item.name}</TableCell>
+                    <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : undefined}>
                       {categories?.find(c => c.id === item.categoryId)?.name || "-"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : undefined}>
                       {instructors?.find(i => i.id === item.instructorId)
                         ? `${instructors.find(i => i.id === item.instructorId)?.firstName} ${instructors.find(i => i.id === item.instructorId)?.lastName}`
                         : "-"}
                     </TableCell>
-                    <TableCell>{item.price ? `€${item.price}` : "€0.00"}</TableCell>
-                    <TableCell>{item.maxCapacity || "∞"}</TableCell>
-                    <TableCell className="text-sm">
+                    <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : undefined}>{item.price ? `€${item.price}` : "€0.00"}</TableCell>
+                    <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{item.maxCapacity || "∞"}</TableCell>
+                    <TableCell className={cn("text-sm", isSortedColumn("period") && "sorted-column-cell")}>
                       {item.startDate && item.endDate
                         ? `${new Date(item.startDate).toLocaleDateString('it-IT')} - ${new Date(item.endDate).toLocaleDateString('it-IT')}`
                         : "-"}
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={item.active ? "default" : "secondary"}>
+                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
+                      <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">
                         {item.active ? "Attivo" : "Inattivo"}
                       </Badge>
                     </TableCell>

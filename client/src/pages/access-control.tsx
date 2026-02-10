@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -67,7 +68,7 @@ export default function AccessControl() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<MemberSearchResult | null>(null);
   const [activeTab, setActiveTab] = useState("search");
-  const { sortConfig, handleSort, sortItems } = useSortableTable<AccessLog>();
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<AccessLog>("datetime");
 
   const { data: recentAccesses, isLoading: accessesLoading } = useQuery<AccessLog[]>({
     queryKey: ["/api/access-logs"],
@@ -405,17 +406,17 @@ export default function AccessControl() {
                       </div>
                       <div className="flex items-center gap-2">
                         {hasErrors ? (
-                          <Badge variant="destructive" className="flex items-center gap-1">
+                          <Badge variant="outline" className="flex items-center gap-1 bg-muted/50 border-amber-500/50 text-foreground">
                             <ShieldAlert className="w-3 h-3" />
                             Anomalie
                           </Badge>
                         ) : hasWarnings ? (
-                          <Badge variant="secondary" className="flex items-center gap-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                          <Badge variant="outline" className="flex items-center gap-1 bg-muted/50 border-amber-500/50 text-foreground">
                             <AlertTriangle className="w-3 h-3" />
                             Avvisi
                           </Badge>
                         ) : (
-                          <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          <Badge variant="outline" className="flex items-center gap-1 bg-muted/50 border-amber-500/50 text-foreground">
                             <ShieldCheck className="w-3 h-3" />
                             Regolare
                           </Badge>
@@ -611,7 +612,7 @@ export default function AccessControl() {
                       <Button
                         onClick={() => handleRegisterAccess()}
                         disabled={scanMutation.isPending}
-                        className="min-w-[200px]"
+                        className="min-w-[200px] gold-3d-button"
                         data-testid="button-register-general-access"
                       >
                         {scanMutation.isPending ? (
@@ -796,23 +797,23 @@ export default function AccessControl() {
               <TableBody>
                 {sortedAccesses.map((access, index) => (
                   <TableRow key={index} data-testid={`access-log-${index}`}>
-                    <TableCell>
+                    <TableCell className={isSortedColumn("datetime") ? "sorted-column-cell" : undefined}>
                       {new Date(access.accessTime).toLocaleString('it-IT')}
                     </TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>
                       {(access as any).memberFirstName || (access as any).memberLastName
                         ? `${(access as any).memberFirstName || ''} ${(access as any).memberLastName || ''}`.trim()
                         : <span className="text-muted-foreground">-</span>
                       }
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{access.barcode}</TableCell>
-                    <TableCell className="capitalize">{access.accessType}</TableCell>
-                    <TableCell>
+                    <TableCell className={cn("font-mono text-xs", isSortedColumn("barcode") && "sorted-column-cell")}>{access.barcode}</TableCell>
+                    <TableCell className={cn("capitalize", isSortedColumn("type") && "sorted-column-cell")}>{access.accessType}</TableCell>
+                    <TableCell className={isSortedColumn("cardStatus") ? "sorted-column-cell" : undefined}>
                       <Badge variant={access.membershipStatus === 'active' ? 'default' : 'destructive'}>
                         {access.membershipStatus || 'Sconosciuto'}
                       </Badge>
                     </TableCell>
-                    <TableCell>{access.notes || "-"}</TableCell>
+                    <TableCell className={isSortedColumn("notes") ? "sorted-column-cell" : undefined}>{access.notes || "-"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

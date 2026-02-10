@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, ArrowLeft } from "lucide-react";
@@ -634,7 +635,7 @@ export default function Courses() {
     );
   }) || [];
 
-  const { sortConfig, handleSort, sortItems } = useSortableTable<typeof filteredCourses[0]>();
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<typeof filteredCourses[0]>("sku");
 
   const getSortValue = (course: typeof filteredCourses[0], key: string) => {
     switch (key) {
@@ -727,6 +728,7 @@ export default function Courses() {
                 Esporta CSV
               </Button>
               <Button 
+                className="gold-3d-button"
                 onClick={() => {
                   closeDialog();
                   setIsFormOpen(true);
@@ -819,7 +821,7 @@ export default function Courses() {
                   const enrollmentsList = getCourseEnrollmentsList(course.id);
                   return (
                   <TableRow key={course.id} data-testid={`course-row-${course.id}`}>
-                    <TableCell className="text-xs text-muted-foreground" data-testid={`text-course-sku-${course.id}`}>
+                    <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("sku") && "sorted-column-cell")} data-testid={`text-course-sku-${course.id}`}>
                       {course.sku ? (
                         <button
                           onClick={() => openEditDialog(course)}
@@ -830,7 +832,7 @@ export default function Courses() {
                         </button>
                       ) : "-"}
                     </TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>
                       <button
                         onClick={() => {
                           setEditingCourse(course);
@@ -847,17 +849,17 @@ export default function Courses() {
                         {course.name}
                       </button>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : undefined}>
                       {categories?.find(c => c.id === course.categoryId)?.name || "-"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : undefined}>
                       {instructors?.find(i => i.id === course.instructorId) 
                         ? `${instructors.find(i => i.id === course.instructorId)?.firstName} ${instructors.find(i => i.id === course.instructorId)?.lastName}`
                         : "-"}
                     </TableCell>
-                    <TableCell>€{course.price || "0.00"}</TableCell>
-                    <TableCell>{enrollmentCount}/{course.maxCapacity || "∞"}</TableCell>
-                    <TableCell>
+                    <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : undefined}>€{course.price || "0.00"}</TableCell>
+                    <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{enrollmentCount}/{course.maxCapacity || "∞"}</TableCell>
+                    <TableCell className={isSortedColumn("enrollments") ? "sorted-column-cell" : undefined}>
                       {enrollmentsList.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {enrollmentsList.slice(0, 2).map((member) => (
@@ -877,13 +879,13 @@ export default function Courses() {
                         <span className="text-xs text-muted-foreground">Nessun iscritto</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-sm">
+                    <TableCell className={cn("text-sm", isSortedColumn("period") && "sorted-column-cell")}>
                       {course.startDate && course.endDate 
                         ? `${new Date(course.startDate).toLocaleDateString('it-IT')} - ${new Date(course.endDate).toLocaleDateString('it-IT')}`
                         : "-"}
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={course.active ? "default" : "secondary"}>
+                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
+                      <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">
                         {course.active ? "Attivo" : "Inattivo"}
                       </Badge>
                     </TableCell>
@@ -1210,6 +1212,7 @@ export default function Courses() {
                     </Button>
                     <Button 
                       type="submit"
+                      className="gold-3d-button"
                       disabled={updateMutation.isPending}
                       data-testid="button-submit-course"
                     >
@@ -1483,6 +1486,7 @@ export default function Courses() {
                 </Button>
                 <Button 
                   type="submit" 
+                  className="gold-3d-button"
                   disabled={createMutation.isPending}
                   data-testid="button-submit-course"
                 >
