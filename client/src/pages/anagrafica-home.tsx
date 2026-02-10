@@ -551,7 +551,7 @@ export default function AnagraficaHome() {
                     className="data-[state=active]:bg-muted whitespace-nowrap text-xs sm:text-sm"
                     data-testid={`tab-${tab.id}`}
                   >
-                    <tab.icon className="w-4 h-4 sm:mr-2" />
+                    <tab.icon className="w-4 h-4 sm:mr-2 sidebar-icon-gold" />
                     <span className="hidden sm:inline">{tab.label}</span>
                   </TabsTrigger>
                 ))}
