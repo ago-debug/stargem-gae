@@ -425,6 +425,22 @@ export const insertInstructorRateSchema = createInsertSchema(instructorRates).om
 export type InsertInstructorRate = z.infer<typeof insertInstructorRateSchema>;
 export type InstructorRate = typeof instructorRates.$inferSelect;
 
+// Activity Statuses (Stati attività)
+export const activityStatuses = pgTable("activity_statuses", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 100 }).notNull(),
+  sortOrder: integer("sort_order").default(0),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertActivityStatusSchema = createInsertSchema(activityStatuses).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertActivityStatus = z.infer<typeof insertActivityStatusSchema>;
+export type ActivityStatus = typeof activityStatuses.$inferSelect;
+
 // Studios (sale/studi)
 export const studios = pgTable("studios", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -470,6 +486,7 @@ export const courses = pgTable("courses", {
   schedule: text("schedule"), // JSON: {day: "LUN", startTime: "15:00", endTime: "16:30", repeat: "weekly"} - legacy
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -535,6 +552,7 @@ export const workshops = pgTable("workshops", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -595,6 +613,7 @@ export const paidTrials = pgTable("paid_trials", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -655,6 +674,7 @@ export const freeTrials = pgTable("free_trials", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -715,6 +735,7 @@ export const singleLessons = pgTable("single_lessons", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -775,6 +796,7 @@ export const sundayActivities = pgTable("sunday_activities", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -835,6 +857,7 @@ export const trainings = pgTable("trainings", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -895,6 +918,7 @@ export const individualLessons = pgTable("individual_lessons", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -955,6 +979,7 @@ export const campusActivities = pgTable("campus_activities", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1015,6 +1040,7 @@ export const recitals = pgTable("recitals", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1075,6 +1101,7 @@ export const vacationStudies = pgTable("vacation_studies", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
+  statusTags: text("status_tags").array(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

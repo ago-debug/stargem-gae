@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, ArrowLeft } from "lucide-react";
+import { MultiSelectStatus } from "@/components/multi-select-status";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { format } from "date-fns";
@@ -438,6 +439,7 @@ export default function Courses() {
   const [selectedStartTime, setSelectedStartTime] = useState<string>("");
   const [selectedEndTime, setSelectedEndTime] = useState<string>("");
   const [selectedRecurrence, setSelectedRecurrence] = useState<string>("");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("details");
 
   const { data: courses, isLoading } = useQuery<Course[]>({
@@ -565,7 +567,6 @@ export default function Courses() {
       studioId: formData.get("studioId") ? parseInt(formData.get("studioId") as string) : null,
       instructorId: formData.get("instructorId") ? parseInt(formData.get("instructorId") as string) : null,
       secondaryInstructor1Id: formData.get("secondaryInstructor1Id") ? parseInt(formData.get("secondaryInstructor1Id") as string) : null,
-      secondaryInstructor2Id: formData.get("secondaryInstructor2Id") ? parseInt(formData.get("secondaryInstructor2Id") as string) : null,
       price: formData.get("price") ? formData.get("price") as string : null,
       maxCapacity: formData.get("maxCapacity") ? parseInt(formData.get("maxCapacity") as string) : null,
       dayOfWeek: selectedDayOfWeek || null,
@@ -575,6 +576,7 @@ export default function Courses() {
       schedule: formData.get("schedule") as string || null,
       startDate: formData.get("startDate") as string || null,
       endDate: formData.get("endDate") as string || null,
+      statusTags: selectedStatuses.length > 0 ? selectedStatuses : null,
       active: true,
     };
 
@@ -591,6 +593,7 @@ export default function Courses() {
     setSelectedStartTime(course.startTime || "");
     setSelectedEndTime(course.endTime || "");
     setSelectedRecurrence(course.recurrenceType || "");
+    setSelectedStatuses(course.statusTags || []);
     setIsFormOpen(true);
   };
 
@@ -601,6 +604,7 @@ export default function Courses() {
     setSelectedStartTime("");
     setSelectedEndTime("");
     setSelectedRecurrence("");
+    setSelectedStatuses([]);
   };
 
   const filteredCourses = courses?.filter((course) => {
@@ -652,7 +656,7 @@ export default function Courses() {
       case "capacity": return course.maxCapacity || 0;
       case "enrollments": return getCourseEnrollmentCount(course.id);
       case "period": return course.startDate;
-      case "status": return course.active;
+      case "status": return course.statusTags?.join(", ") || "";
       default: return null;
     }
   };
@@ -684,7 +688,7 @@ export default function Courses() {
         recurrenceLabel,
         course.startDate ? new Date(course.startDate).toLocaleDateString('it-IT') : "",
         course.endDate ? new Date(course.endDate).toLocaleDateString('it-IT') : "",
-        course.active ? "Attivo" : "Inattivo"
+        course.statusTags?.join(", ") || ""
       ];
     });
     
@@ -887,9 +891,17 @@ export default function Courses() {
                         : "-"}
                     </TableCell>
                     <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                      <Badge variant="outline" className="status-badge-gold">
-                        {course.active ? "Attivo" : "Inattivo"}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        {course.statusTags && course.statusTags.length > 0 ? (
+                          course.statusTags.map((tag: string) => (
+                            <Badge key={tag} variant="outline" className="status-badge-gold text-xs">
+                              {tag}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -977,6 +989,12 @@ export default function Courses() {
                     </div>
                   </div>
 
+                  <MultiSelectStatus
+                    selectedStatuses={selectedStatuses}
+                    onChange={setSelectedStatuses}
+                    testIdPrefix="course"
+                  />
+
                   <div className="space-y-2">
                     <Label htmlFor="description">Descrizione</Label>
                     <Textarea
@@ -1024,7 +1042,7 @@ export default function Courses() {
 
                   <div className="space-y-2">
                     <Label>Staff/Insegnanti</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
                         <Select name="instructorId" defaultValue={editingCourse.instructorId?.toString()}>
@@ -1045,22 +1063,6 @@ export default function Courses() {
                         <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
                         <Select name="secondaryInstructor1Id" defaultValue={editingCourse.secondaryInstructor1Id?.toString()}>
                           <SelectTrigger data-testid="select-secondary-instructor-1">
-                            <SelectValue placeholder="Nessuno" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {instructors?.map((instructor) => (
-                              <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                                {instructor.firstName} {instructor.lastName}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2</Label>
-                        <Select name="secondaryInstructor2Id" defaultValue={editingCourse.secondaryInstructor2Id?.toString()}>
-                          <SelectTrigger data-testid="select-secondary-instructor-2">
                             <SelectValue placeholder="Nessuno" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1257,6 +1259,12 @@ export default function Courses() {
                 </div>
               </div>
 
+              <MultiSelectStatus
+                selectedStatuses={selectedStatuses}
+                onChange={setSelectedStatuses}
+                testIdPrefix="course"
+              />
+
               <div className="space-y-2">
                 <Label htmlFor="description">Descrizione</Label>
                 <Textarea
@@ -1303,7 +1311,7 @@ export default function Courses() {
 
               <div className="space-y-2">
                 <Label>Staff/Insegnanti</Label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
                     <Select name="instructorId">
@@ -1324,22 +1332,6 @@ export default function Courses() {
                     <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1 (opzionale)</Label>
                     <Select name="secondaryInstructor1Id">
                       <SelectTrigger data-testid="select-secondary-instructor-1">
-                        <SelectValue placeholder="Nessuno" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {instructors?.map((instructor) => (
-                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                            {instructor.firstName} {instructor.lastName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2 (opzionale)</Label>
-                    <Select name="secondaryInstructor2Id">
-                      <SelectTrigger data-testid="select-secondary-instructor-2">
                         <SelectValue placeholder="Nessuno" />
                       </SelectTrigger>
                       <SelectContent>

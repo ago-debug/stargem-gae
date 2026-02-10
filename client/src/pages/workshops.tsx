@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, ArrowLeft } from "lucide-react";
+import { MultiSelectStatus } from "@/components/multi-select-status";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { format } from "date-fns";
@@ -457,6 +458,7 @@ export default function Workshops() {
   const [selectedStartTime, setSelectedStartTime] = useState<string>("");
   const [selectedEndTime, setSelectedEndTime] = useState<string>("");
   const [selectedRecurrence, setSelectedRecurrence] = useState<string>("");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("details");
 
   const { data: workshops, isLoading } = useQuery<Workshop[]>({
@@ -573,7 +575,6 @@ export default function Workshops() {
       studioId: formData.get("studioId") ? parseInt(formData.get("studioId") as string) : null,
       instructorId: formData.get("instructorId") ? parseInt(formData.get("instructorId") as string) : null,
       secondaryInstructor1Id: formData.get("secondaryInstructor1Id") ? parseInt(formData.get("secondaryInstructor1Id") as string) : null,
-      secondaryInstructor2Id: formData.get("secondaryInstructor2Id") ? parseInt(formData.get("secondaryInstructor2Id") as string) : null,
       price: formData.get("price") ? formData.get("price") as string : null,
       maxCapacity: formData.get("maxCapacity") ? parseInt(formData.get("maxCapacity") as string) : null,
       dayOfWeek: selectedDayOfWeek || null,
@@ -583,6 +584,7 @@ export default function Workshops() {
       schedule: formData.get("schedule") as string || null,
       startDate: formData.get("startDate") as string || null,
       endDate: formData.get("endDate") as string || null,
+      statusTags: selectedStatuses.length > 0 ? selectedStatuses : null,
       active: true,
     };
 
@@ -599,6 +601,7 @@ export default function Workshops() {
     setSelectedStartTime(workshop.startTime || "");
     setSelectedEndTime(workshop.endTime || "");
     setSelectedRecurrence(workshop.recurrenceType || "");
+    setSelectedStatuses(workshop.statusTags || []);
     setActiveTab("details");
     setIsFormOpen(true);
   };
@@ -610,6 +613,7 @@ export default function Workshops() {
     setSelectedStartTime("");
     setSelectedEndTime("");
     setSelectedRecurrence("");
+    setSelectedStatuses([]);
     setActiveTab("details");
   };
 
@@ -632,7 +636,7 @@ export default function Workshops() {
       case "capacity": return workshop.maxCapacity || 0;
       case "enrollments": return getWorkshopEnrollmentCount(workshop.id);
       case "period": return workshop.startDate;
-      case "status": return workshop.active;
+      case "status": return workshop.statusTags?.join(", ") || "";
       default: return null;
     }
   };
@@ -663,7 +667,7 @@ export default function Workshops() {
         recurrenceLabel,
         workshop.startDate ? new Date(workshop.startDate).toLocaleDateString('it-IT') : "",
         workshop.endDate ? new Date(workshop.endDate).toLocaleDateString('it-IT') : "",
-        workshop.active ? "Attivo" : "Inattivo"
+        workshop.statusTags?.join(", ") || ""
       ];
     });
     
@@ -815,9 +819,17 @@ export default function Workshops() {
                         : "-"}
                     </TableCell>
                     <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                      <Badge variant="outline" className="status-badge-gold">
-                        {workshop.active ? "Attivo" : "Inattivo"}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        {workshop.statusTags && workshop.statusTags.length > 0 ? (
+                          workshop.statusTags.map((tag: string) => (
+                            <Badge key={tag} variant="outline" className="status-badge-gold text-xs">
+                              {tag}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -905,6 +917,12 @@ export default function Workshops() {
                     </div>
                   </div>
 
+                  <MultiSelectStatus
+                    selectedStatuses={selectedStatuses}
+                    onChange={setSelectedStatuses}
+                    testIdPrefix="workshop"
+                  />
+
                   <div className="space-y-2">
                     <Label htmlFor="description">Descrizione</Label>
                     <Textarea
@@ -952,7 +970,7 @@ export default function Workshops() {
 
                   <div className="space-y-2">
                     <Label>Staff/Insegnanti</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
                         <Select name="instructorId" defaultValue={editingWorkshop.instructorId?.toString()}>
@@ -973,22 +991,6 @@ export default function Workshops() {
                         <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
                         <Select name="secondaryInstructor1Id" defaultValue={editingWorkshop.secondaryInstructor1Id?.toString()}>
                           <SelectTrigger data-testid="select-secondary-instructor-1">
-                            <SelectValue placeholder="Nessuno" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {instructors?.map((instructor) => (
-                              <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                                {instructor.firstName} {instructor.lastName}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2</Label>
-                        <Select name="secondaryInstructor2Id" defaultValue={editingWorkshop.secondaryInstructor2Id?.toString()}>
-                          <SelectTrigger data-testid="select-secondary-instructor-2">
                             <SelectValue placeholder="Nessuno" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1185,6 +1187,12 @@ export default function Workshops() {
                 </div>
               </div>
 
+              <MultiSelectStatus
+                selectedStatuses={selectedStatuses}
+                onChange={setSelectedStatuses}
+                testIdPrefix="workshop"
+              />
+
               <div className="space-y-2">
                 <Label htmlFor="description">Descrizione</Label>
                 <Textarea
@@ -1231,7 +1239,7 @@ export default function Workshops() {
 
               <div className="space-y-2">
                 <Label>Staff/Insegnanti</Label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
                     <Select name="instructorId">
@@ -1252,22 +1260,6 @@ export default function Workshops() {
                     <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1 (opzionale)</Label>
                     <Select name="secondaryInstructor1Id">
                       <SelectTrigger data-testid="select-secondary-instructor-1">
-                        <SelectValue placeholder="Nessuno" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {instructors?.map((instructor) => (
-                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                            {instructor.firstName} {instructor.lastName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2 (opzionale)</Label>
-                    <Select name="secondaryInstructor2Id">
-                      <SelectTrigger data-testid="select-secondary-instructor-2">
                         <SelectValue placeholder="Nessuno" />
                       </SelectTrigger>
                       <SelectContent>
