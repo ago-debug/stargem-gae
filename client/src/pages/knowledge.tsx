@@ -102,16 +102,14 @@ export default function KnowledgePage() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Indietro
-        </Button>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <BookOpen className="w-8 h-8 sidebar-icon-gold" />
+            <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
+              <ArrowLeft className="w-4 h-4 text-white" />
+            </Button>
             <div>
-              <h1 className="text-2xl font-bold">Knowledge Base</h1>
-              <p className="text-muted-foreground">Gestisci le descrizioni informative per le sezioni dell'applicazione</p>
+              <h1 className="text-2xl font-semibold text-foreground">Knowledge Base</h1>
+              <p className="text-muted-foreground text-sm">Gestisci le descrizioni informative per le sezioni dell'applicazione</p>
             </div>
           </div>
           <Button onClick={() => setShowAddForm(!showAddForm)} data-testid="button-add-knowledge">

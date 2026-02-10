@@ -200,8 +200,8 @@ export default function MemberDashboard() {
         <div className="p-4 space-y-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => window.history.back()} data-testid="button-back">
-                <ArrowLeft className="w-4 h-4" />
+              <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
+                <ArrowLeft className="w-4 h-4 text-white" />
               </Button>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold">Sistema di Gestione Anagrafica</h1>

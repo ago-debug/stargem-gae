@@ -94,15 +94,16 @@ export default function TrainingCategories() {
   const categoryTree = getCategoryTree();
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Indietro
-      </Button>
+    <div className="p-4 space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2" data-testid="text-page-title">Categorie Allenamenti/Affitti</h1>
-          <p className="text-muted-foreground">Organizza gli allenamenti e affitti per categorie e sottocategorie</p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
+            <ArrowLeft className="w-4 h-4 text-white" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Allenamenti/Affitti</h1>
+            <p className="text-muted-foreground text-sm">Organizza gli allenamenti e affitti per categorie e sottocategorie</p>
+          </div>
         </div>
         <Button 
           onClick={() => {
