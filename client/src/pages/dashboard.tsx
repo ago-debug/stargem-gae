@@ -28,7 +28,7 @@ export default function Dashboard() {
         <img 
           src={logoStarGem} 
           alt="StarGEM Logo" 
-          style={{ width: "94px", height: "auto" }}
+          style={{ width: "150px", height: "auto" }}
           data-testid="logo-dashboard"
         />
       </div>
