@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   Calendar,
   Sparkles,
@@ -21,6 +21,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import type {
   Course, Workshop, Category, WorkshopCategory, Instructor, Studio,
   SundayCategory, TrainingCategory, IndividualLessonCategory,
@@ -311,21 +312,24 @@ export default function Attivita() {
   const uncategorizedWorkshops = workshops?.filter(w => !w.categoryId) || [];
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Indietro
-      </Button>
+    <div className="p-4 space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2" data-testid="text-page-title">
-            Attivit&agrave;
-          </h1>
-          <p className="text-muted-foreground">
-            Panoramica e gestione di tutte le attivit&agrave;
-          </p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
+            <ArrowLeft className="w-4 h-4 text-white" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">
+              Attivit&agrave;
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Panoramica e gestione di tutte le attivit&agrave;
+            </p>
+          </div>
         </div>
       </div>
+
+      <ActivityNavMenu />
 
       <Tabs value={activeTab} onValueChange={(value) => {
         const section = activitySections.find(s => s.id === value);
@@ -335,38 +339,6 @@ export default function Attivita() {
         }
         setActiveTab(value);
       }} className="w-full">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin" data-testid="tabs-attivita">
-          <Button
-            variant={activeTab === "panoramica" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setActiveTab("panoramica")}
-            className="text-xs h-8 whitespace-nowrap flex-shrink-0"
-            data-testid="tab-panoramica"
-          >
-            <Activity className="w-3 h-3 mr-1 sidebar-icon-gold" />
-            Panoramica
-          </Button>
-          {activitySections.map((section) => (
-            <Button
-              key={section.id}
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                if (section.managementUrl) {
-                  navigate(section.managementUrl);
-                  return;
-                }
-                setActiveTab(section.id);
-              }}
-              className="text-xs h-8 whitespace-nowrap flex-shrink-0"
-              data-testid={`tab-${section.id}`}
-            >
-              <section.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
-              {section.label}
-            </Button>
-          ))}
-        </div>
-
         <TabsContent value="panoramica" className="space-y-6 mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card data-testid="card-stats-corsi">

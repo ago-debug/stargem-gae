@@ -23,7 +23,7 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-4 space-y-4">
       <div className="flex flex-col items-center gap-4 mb-6">
         <img 
           src={logoStarGem} 
@@ -33,8 +33,8 @@ export default function Dashboard() {
         />
       </div>
       <div>
-        <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Panoramica del sistema di gestione corsi</p>
+        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground text-sm">Panoramica del sistema di gestione corsi</p>
       </div>
 
       {/* Stats Grid */}

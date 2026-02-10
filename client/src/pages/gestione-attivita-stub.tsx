@@ -10,18 +10,20 @@ interface GestioneAttivitaStubProps {
 
 export default function GestioneAttivitaStub({ title, description }: GestioneAttivitaStubProps) {
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center gap-4 flex-wrap">
-        <Link href="/gestione">
-          <Button variant="ghost" size="icon" data-testid="button-back-gestione">
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-1" data-testid="text-activity-title">
-            Gestione {title}
-          </h1>
-          <p className="text-muted-foreground text-sm">{description}</p>
+    <div className="p-4 space-y-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <Link href="/gestione">
+            <Button variant="ghost" size="icon" className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back-gestione">
+              <ArrowLeft className="w-4 h-4 text-white" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-activity-title">
+              Gestione {title}
+            </h1>
+            <p className="text-muted-foreground text-sm">{description}</p>
+          </div>
         </div>
       </div>
 

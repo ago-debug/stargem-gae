@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -659,15 +660,17 @@ export default function Workshops() {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Indietro
-      </Button>
+    <div className="p-4 space-y-4">
+      <ActivityNavMenu />
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Riepilogo Workshop</h1>
-          <p className="text-muted-foreground">Organizza e gestisci i workshop disponibili</p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
+            <ArrowLeft className="w-4 h-4 text-white" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">Riepilogo Workshop</h1>
+            <p className="text-muted-foreground text-sm">Organizza e gestisci i workshop disponibili</p>
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button

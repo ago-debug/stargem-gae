@@ -580,10 +580,10 @@ export default function ImportData() {
     const filteredConfigs = savedConfigs.filter(c => c.entityType === entityType);
 
     return (
-      <div className="p-6 md:p-8 space-y-6 max-w-6xl mx-auto">
+      <div className="p-4 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground mb-2">Mappatura Campi</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Mappatura Campi</h1>
             <p className="text-muted-foreground">
               Associa le colonne {sourceType === "file" ? "del file" : "del foglio Google"} ai campi del database
             </p>
@@ -890,16 +890,19 @@ export default function ImportData() {
   }
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-4xl mx-auto">
-      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Indietro
-      </Button>
-      <div>
-        <h1 className="text-3xl font-semibold text-foreground mb-2">Importa Dati</h1>
-        <p className="text-muted-foreground">
-          Importa dati da file CSV/Excel o direttamente da Google Sheets
-        </p>
+    <div className="p-4 space-y-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
+            <ArrowLeft className="w-4 h-4 text-white" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">Importa Dati</h1>
+            <p className="text-muted-foreground text-sm">
+              Importa dati da file CSV/Excel o direttamente da Google Sheets
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
