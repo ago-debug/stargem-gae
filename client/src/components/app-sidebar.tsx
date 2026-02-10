@@ -211,7 +211,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {mainMenuItems.map((item) => {
                 const isActive = item.url === "/gestione"
-                  ? location === "/gestione" || location === "/corsi" || location === "/workshops" || location.startsWith("/gestione/")
+                  ? location === "/gestione" || location.startsWith("/gestione/")
                   : location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -239,7 +239,9 @@ export function AppSidebar() {
           <SidebarGroupContent className="bg-green-50/50 dark:bg-green-900/10">
             <SidebarMenu>
               {draftItems.map((item) => {
-                const isActive = location === item.url;
+                const isActive = item.url === "/attivita"
+                  ? location === "/attivita" || location.startsWith("/attivita/")
+                  : location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
