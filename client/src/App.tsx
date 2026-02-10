@@ -35,7 +35,7 @@ import UtentiPermessi from "@/pages/utenti-permessi";
 import ResetStagione from "@/pages/reset-stagione";
 import MemberDashboard from "@/pages/member-dashboard";
 import AnagraficaHome from "@/pages/anagrafica-home";
-import Test2Gae from "@/pages/test2-gae";
+import MascheraInputGenerale from "@/pages/maschera-input-generale";
 import Test3Gae from "@/pages/test3-gae";
 import Knowledge from "@/pages/knowledge";
 import TodoList from "@/pages/todo-list";
@@ -92,7 +92,7 @@ function Router() {
       <Route path="/utenti-permessi" component={UtentiPermessi} />
       <Route path="/reset-stagione" component={ResetStagione} />
       <Route path="/membro/:id" component={MemberDashboard} />
-      <Route path="/test2-gae" component={Test2Gae} />
+      <Route path="/maschera-input-generale" component={MascheraInputGenerale} />
       <Route path="/test3-gae" component={Test3Gae} />
       <Route path="/knowledge" component={Knowledge} />
       <Route path="/todo-list" component={TodoList} />

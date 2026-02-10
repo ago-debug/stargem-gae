@@ -29,7 +29,7 @@ interface AllegatiState {
   tesseraEnte: AllegatoState & { numero?: string; ente?: string };
 }
 
-export default function Test2Gae() {
+export default function MascheraInputGenerale() {
   const [allegati, setAllegati] = useState<AllegatiState>({
     regolamento: { hasFile: false, data: "", accettato: "" },
     privacy: { hasFile: false, data: "", accettata: "" },
@@ -408,34 +408,34 @@ export default function Test2Gae() {
   ];
 
   return (
-    <div className="flex flex-col h-full" data-testid="page-test2-gae">
+    <div className="flex flex-col h-full" data-testid="page-maschera-input-generale">
       {/* Header fisso con navigazione */}
       <div className="border-b bg-muted/30 sticky top-0 z-10">
         <div className="p-4 space-y-4">
           {/* Riga titolo e pulsanti azioni */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold">Sistema di Gestione Anagrafica</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">Maschera Input Generale</h1>
               <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" data-testid="button-gsheets">
+              <Button variant="outline" size="sm" className="gold-3d-button" data-testid="button-gsheets">
                 <FileSpreadsheet className="w-4 h-4 mr-1" />
                 GSheets
               </Button>
-              <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white" data-testid="button-esporta">
+              <Button size="sm" className="gold-3d-button" data-testid="button-esporta">
                 <Upload className="w-4 h-4 mr-1" />
                 Esporta
               </Button>
-              <Button variant="outline" size="sm" data-testid="button-importa">
+              <Button size="sm" className="gold-3d-button" data-testid="button-importa">
                 <Download className="w-4 h-4 mr-1" />
                 Importa
               </Button>
-              <Button variant="outline" size="sm" data-testid="button-salva">
+              <Button size="sm" className="gold-3d-button" data-testid="button-salva">
                 <Save className="w-4 h-4 mr-1" />
                 Salva
               </Button>
-              <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white" data-testid="button-nuovo">
+              <Button size="sm" className="gold-3d-button" data-testid="button-nuovo">
                 <Plus className="w-4 h-4 mr-1" />
                 Nuovo
               </Button>

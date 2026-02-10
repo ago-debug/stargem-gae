@@ -96,7 +96,7 @@ const mainMenuItems = [
 const draftItems = [
   {
     title: "Maschera Input Generale",
-    url: "/test2-gae",
+    url: "/maschera-input-generale",
     icon: Settings,
   },
   {
