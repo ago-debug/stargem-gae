@@ -312,25 +312,29 @@ export default function Attivita() {
   const uncategorizedWorkshops = workshops?.filter(w => !w.categoryId) || [];
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">
-              Attivit&agrave;
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Panoramica e gestione di tutte le attivit&agrave;
-            </p>
+    <div className="flex flex-col h-full">
+      <div className="border-b bg-muted/30 sticky top-0 z-10">
+        <div className="p-4 space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
+                <ArrowLeft className="w-4 h-4 text-white" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">
+                  Attivit&agrave;
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  Panoramica e gestione di tutte le attivit&agrave;
+                </p>
+              </div>
+            </div>
           </div>
+          <ActivityNavMenu />
         </div>
       </div>
 
-      <ActivityNavMenu />
-
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
       <Tabs value={activeTab} onValueChange={(value) => {
         const section = activitySections.find(s => s.id === value);
         if (section?.managementUrl) {
@@ -584,6 +588,7 @@ export default function Attivita() {
           <ActivitySectionTab key={section.id} section={section} />
         ))}
       </Tabs>
+      </div>
     </div>
   );
 }
