@@ -218,7 +218,7 @@ export function AppSidebar() {
                       data-testid={`nav-${item.url.slice(1)}`}
                     >
                       <Link href={item.url}>
-                        <item.icon className="w-4 h-4" />
+                        <item.icon className="w-4 h-4 sidebar-icon-gold" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -247,7 +247,7 @@ export function AppSidebar() {
                       data-testid={`nav-${item.url.slice(1)}`}
                     >
                       <Link href={item.url}>
-                        <item.icon className="w-4 h-4" />
+                        <item.icon className="w-4 h-4 sidebar-icon-gold" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -274,7 +274,7 @@ export function AppSidebar() {
                       data-testid={`nav-${item.url.slice(1) || 'dashboard'}`}
                     >
                       <Link href={item.url}>
-                        <item.icon className="w-4 h-4" />
+                        <item.icon className="w-4 h-4 sidebar-icon-gold" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -299,7 +299,7 @@ export function AppSidebar() {
                       data-testid={`nav-${item.url.slice(1)}`}
                     >
                       <Link href={item.url}>
-                        <item.icon className="w-4 h-4" />
+                        <item.icon className="w-4 h-4 sidebar-icon-gold" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
