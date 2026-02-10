@@ -715,7 +715,7 @@ export default function MemberDashboard() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon">
+                          <Button variant="outline" size="icon" className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </TableCell>

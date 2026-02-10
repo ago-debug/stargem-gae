@@ -472,16 +472,17 @@ export default function Studios() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
-                          variant="ghost"
                           size="icon"
+                          className="gold-3d-button"
                           onClick={() => openEditDialog(studio)}
                           data-testid={`button-edit-studio-${studio.id}`}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
+                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => deleteMutation.mutate(studio.id)}
                           disabled={deleteMutation.isPending}
                           data-testid={`button-delete-studio-${studio.id}`}

@@ -156,8 +156,8 @@ export default function ClientCategories() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                       <Button
-                        variant="ghost"
                         size="icon"
+                        className="gold-3d-button"
                         onClick={() => {
                           setEditingCategory(category);
                           setIsFormOpen(true);
@@ -167,8 +167,9 @@ export default function ClientCategories() {
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
+                        className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                         onClick={() => {
                           if (confirm("Sei sicuro di voler eliminare questa categoria?")) {
                             deleteMutation.mutate(category.id);
@@ -203,8 +204,8 @@ export default function ClientCategories() {
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                             <Button
-                              variant="ghost"
                               size="icon"
+                              className="gold-3d-button"
                               onClick={() => {
                                 setEditingCategory(child);
                                 setIsFormOpen(true);
@@ -214,8 +215,9 @@ export default function ClientCategories() {
                               <Edit className="w-3 h-3" />
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
+                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                               onClick={() => {
                                 if (confirm("Sei sicuro di voler eliminare questa sottocategoria?")) {
                                   deleteMutation.mutate(child.id);

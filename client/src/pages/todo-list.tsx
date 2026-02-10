@@ -136,10 +136,10 @@ export default function TodoList() {
                     {new Date(todo.createdAt).toLocaleDateString('it-IT')}
                   </span>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="icon"
                     onClick={() => deleteTodo(todo.id)}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                     data-testid={`button-delete-${todo.id}`}
                   >
                     <Trash2 className="w-4 h-4" />

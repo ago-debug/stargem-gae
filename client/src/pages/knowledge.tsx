@@ -259,7 +259,7 @@ export default function KnowledgePage() {
                             <>
                               <Button 
                                 size="sm" 
-                                variant="outline"
+                                className="gold-3d-button"
                                 onClick={() => setEditingId(item.id)}
                                 data-testid={`button-edit-knowledge-${item.id}`}
                               >
@@ -267,7 +267,8 @@ export default function KnowledgePage() {
                               </Button>
                               <Button 
                                 size="sm" 
-                                className="gold-3d-button"
+                                variant="outline"
+                                className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                                 onClick={() => deleteMutation.mutate(item.id)}
                                 disabled={deleteMutation.isPending}
                                 data-testid={`button-delete-knowledge-${item.id}`}

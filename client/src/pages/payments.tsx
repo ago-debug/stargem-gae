@@ -351,8 +351,8 @@ export default function Payments() {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button
-                          variant="ghost"
                           size="icon"
+                          className="gold-3d-button"
                           onClick={() => openEditDialog(payment)}
                           data-testid={`button-edit-payment-${payment.id}`}
                         >

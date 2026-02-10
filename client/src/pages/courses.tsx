@@ -201,8 +201,9 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
                         </Button>
                       </Link>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
+                        className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                         onClick={() => {
                           if (confirm("Sei sicuro di voler rimuovere questa iscrizione?")) {
                             deleteEnrollmentMutation.mutate(enrollment.enrollmentId);
@@ -400,8 +401,9 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
+                      className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                       onClick={() => {
                         if (confirm("Sei sicuro di voler eliminare questa presenza?")) {
                           deleteAttendanceMutation.mutate(attendance.id);
@@ -892,16 +894,17 @@ export default function Courses() {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button
-                          variant="ghost"
                           size="icon"
+                          className="gold-3d-button"
                           onClick={() => openEditDialog(course)}
                           data-testid={`button-edit-course-${course.id}`}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
+                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => {
                             if (confirm("Sei sicuro di voler eliminare questo corso?")) {
                               deleteMutation.mutate(course.id);
