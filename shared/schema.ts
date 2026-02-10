@@ -572,6 +572,546 @@ export const insertWorkshopSchema = createInsertSchema(workshops).omit({
 export type InsertWorkshop = z.infer<typeof insertWorkshopSchema>;
 export type Workshop = typeof workshops.$inferSelect;
 
+// ============================================================================
+// PAID TRIALS (identical structure to workshops, uses categories)
+// ============================================================================
+export const paidTrials = pgTable("paid_trials", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const paidTrialsRelations = relations(paidTrials, ({ one }) => ({
+  category: one(categories, {
+    fields: [paidTrials.categoryId],
+    references: [categories.id],
+  }),
+  studio: one(studios, {
+    fields: [paidTrials.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [paidTrials.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [paidTrials.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [paidTrials.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertPaidTrialSchema = createInsertSchema(paidTrials).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPaidTrial = z.infer<typeof insertPaidTrialSchema>;
+export type PaidTrial = typeof paidTrials.$inferSelect;
+
+// ============================================================================
+// FREE TRIALS (identical structure to workshops, uses categories)
+// ============================================================================
+export const freeTrials = pgTable("free_trials", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const freeTrialsRelations = relations(freeTrials, ({ one }) => ({
+  category: one(categories, {
+    fields: [freeTrials.categoryId],
+    references: [categories.id],
+  }),
+  studio: one(studios, {
+    fields: [freeTrials.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [freeTrials.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [freeTrials.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [freeTrials.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertFreeTrialSchema = createInsertSchema(freeTrials).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertFreeTrial = z.infer<typeof insertFreeTrialSchema>;
+export type FreeTrial = typeof freeTrials.$inferSelect;
+
+// ============================================================================
+// SINGLE LESSONS (identical structure to workshops, uses categories)
+// ============================================================================
+export const singleLessons = pgTable("single_lessons", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const singleLessonsRelations = relations(singleLessons, ({ one }) => ({
+  category: one(categories, {
+    fields: [singleLessons.categoryId],
+    references: [categories.id],
+  }),
+  studio: one(studios, {
+    fields: [singleLessons.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [singleLessons.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [singleLessons.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [singleLessons.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertSingleLessonSchema = createInsertSchema(singleLessons).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSingleLesson = z.infer<typeof insertSingleLessonSchema>;
+export type SingleLesson = typeof singleLessons.$inferSelect;
+
+// ============================================================================
+// SUNDAY ACTIVITIES (identical structure to workshops, uses sundayCategories)
+// ============================================================================
+export const sundayActivities = pgTable("sunday_activities", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => sundayCategories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const sundayActivitiesRelations = relations(sundayActivities, ({ one }) => ({
+  category: one(sundayCategories, {
+    fields: [sundayActivities.categoryId],
+    references: [sundayCategories.id],
+  }),
+  studio: one(studios, {
+    fields: [sundayActivities.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [sundayActivities.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [sundayActivities.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [sundayActivities.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertSundayActivitySchema = createInsertSchema(sundayActivities).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSundayActivity = z.infer<typeof insertSundayActivitySchema>;
+export type SundayActivity = typeof sundayActivities.$inferSelect;
+
+// ============================================================================
+// TRAININGS (identical structure to workshops, uses trainingCategories)
+// ============================================================================
+export const trainings = pgTable("trainings", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => trainingCategories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const trainingsRelations = relations(trainings, ({ one }) => ({
+  category: one(trainingCategories, {
+    fields: [trainings.categoryId],
+    references: [trainingCategories.id],
+  }),
+  studio: one(studios, {
+    fields: [trainings.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [trainings.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [trainings.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [trainings.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertTrainingSchema = createInsertSchema(trainings).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTraining = z.infer<typeof insertTrainingSchema>;
+export type Training = typeof trainings.$inferSelect;
+
+// ============================================================================
+// INDIVIDUAL LESSONS (identical structure to workshops, uses individualLessonCategories)
+// ============================================================================
+export const individualLessons = pgTable("individual_lessons", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => individualLessonCategories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const individualLessonsRelations = relations(individualLessons, ({ one }) => ({
+  category: one(individualLessonCategories, {
+    fields: [individualLessons.categoryId],
+    references: [individualLessonCategories.id],
+  }),
+  studio: one(studios, {
+    fields: [individualLessons.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [individualLessons.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [individualLessons.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [individualLessons.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertIndividualLessonSchema = createInsertSchema(individualLessons).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertIndividualLesson = z.infer<typeof insertIndividualLessonSchema>;
+export type IndividualLesson = typeof individualLessons.$inferSelect;
+
+// ============================================================================
+// CAMPUS ACTIVITIES (identical structure to workshops, uses campusCategories)
+// ============================================================================
+export const campusActivities = pgTable("campus_activities", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => campusCategories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const campusActivitiesRelations = relations(campusActivities, ({ one }) => ({
+  category: one(campusCategories, {
+    fields: [campusActivities.categoryId],
+    references: [campusCategories.id],
+  }),
+  studio: one(studios, {
+    fields: [campusActivities.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [campusActivities.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [campusActivities.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [campusActivities.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertCampusActivitySchema = createInsertSchema(campusActivities).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCampusActivity = z.infer<typeof insertCampusActivitySchema>;
+export type CampusActivity = typeof campusActivities.$inferSelect;
+
+// ============================================================================
+// RECITALS (identical structure to workshops, uses recitalCategories)
+// ============================================================================
+export const recitals = pgTable("recitals", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => recitalCategories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const recitalsRelations = relations(recitals, ({ one }) => ({
+  category: one(recitalCategories, {
+    fields: [recitals.categoryId],
+    references: [recitalCategories.id],
+  }),
+  studio: one(studios, {
+    fields: [recitals.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [recitals.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [recitals.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [recitals.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertRecitalSchema = createInsertSchema(recitals).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertRecital = z.infer<typeof insertRecitalSchema>;
+export type Recital = typeof recitals.$inferSelect;
+
+// ============================================================================
+// VACATION STUDIES (identical structure to workshops, uses vacationCategories)
+// ============================================================================
+export const vacationStudies = pgTable("vacation_studies", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  sku: varchar("sku", { length: 100 }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  categoryId: integer("category_id").references(() => vacationCategories.id, { onDelete: "set null" }),
+  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxCapacity: integer("max_capacity"),
+  currentEnrollment: integer("current_enrollment").default(0),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
+  startTime: varchar("start_time", { length: 10 }),
+  endTime: varchar("end_time", { length: 10 }),
+  recurrenceType: varchar("recurrence_type", { length: 20 }),
+  schedule: text("schedule"),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const vacationStudiesRelations = relations(vacationStudies, ({ one }) => ({
+  category: one(vacationCategories, {
+    fields: [vacationStudies.categoryId],
+    references: [vacationCategories.id],
+  }),
+  studio: one(studios, {
+    fields: [vacationStudies.studioId],
+    references: [studios.id],
+  }),
+  instructor: one(instructors, {
+    fields: [vacationStudies.instructorId],
+    references: [instructors.id],
+  }),
+  secondaryInstructor1: one(instructors, {
+    fields: [vacationStudies.secondaryInstructor1Id],
+    references: [instructors.id],
+  }),
+  secondaryInstructor2: one(instructors, {
+    fields: [vacationStudies.secondaryInstructor2Id],
+    references: [instructors.id],
+  }),
+}));
+
+export const insertVacationStudySchema = createInsertSchema(vacationStudies).omit({
+  id: true,
+  currentEnrollment: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVacationStudy = z.infer<typeof insertVacationStudySchema>;
+export type VacationStudy = typeof vacationStudies.$inferSelect;
+
 // Members (iscritti)
 export const members = pgTable("members", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
