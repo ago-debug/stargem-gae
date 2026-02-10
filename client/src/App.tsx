@@ -142,7 +142,7 @@ function AppContent() {
               <img 
                 src={logoStarGem} 
                 alt="StarGEM Logo" 
-                className="h-10"
+                style={{ width: "94px", height: "auto" }}
                 data-testid="logo-header"
               />
             </header>
