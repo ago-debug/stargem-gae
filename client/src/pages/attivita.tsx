@@ -319,7 +319,7 @@ export default function Attivita() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2" data-testid="text-page-title">
-            Programmazione Attivit&agrave;
+            Attivit&agrave;
           </h1>
           <p className="text-muted-foreground">
             Panoramica e gestione di tutte le attivit&agrave;
@@ -328,12 +328,9 @@ export default function Attivita() {
       </div>
 
       <Tabs value={activeTab} onValueChange={(value) => {
-        if (value === "corsi") {
-          navigate("/corsi");
-          return;
-        }
-        if (value === "workshop") {
-          navigate("/workshops");
+        const section = activitySections.find(s => s.id === value);
+        if (section?.managementUrl) {
+          navigate(section.managementUrl);
           return;
         }
         setActiveTab(value);
