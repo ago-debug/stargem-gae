@@ -485,17 +485,18 @@ export default function AnagraficaHome() {
                 variant="outline" 
                 size="sm"
                 data-testid="button-configure-gsheets"
-                className="hidden sm:inline-flex"
+                className="hidden sm:inline-flex text-xs h-8 bg-background"
               >
-                <Settings className="w-4 h-4 sm:mr-2" />
+                <Settings className="w-3 h-3 sm:mr-2 sidebar-icon-gold" />
                 <span className="hidden sm:inline">GSheets</span>
               </Button>
               <Button 
+                variant="outline"
                 size="sm"
                 data-testid="button-export-gsheets"
-                className="hidden sm:inline-flex gold-3d-button"
+                className="hidden sm:inline-flex text-xs h-8 bg-background"
               >
-                <Upload className="w-4 h-4 sm:mr-2" />
+                <Upload className="w-3 h-3 sm:mr-2 sidebar-icon-gold" />
                 <span className="hidden sm:inline">Esporta</span>
               </Button>
               <Button 
@@ -503,8 +504,9 @@ export default function AnagraficaHome() {
                 size="sm"
                 onClick={() => setLocation("/importa")}
                 data-testid="button-import-gsheets"
+                className="text-xs h-8 bg-background"
               >
-                <Download className="w-4 h-4 sm:mr-2" />
+                <Download className="w-3 h-3 sm:mr-2 sidebar-icon-gold" />
                 <span className="hidden sm:inline">Importa</span>
               </Button>
               <Button 
@@ -513,8 +515,9 @@ export default function AnagraficaHome() {
                 onClick={handleSave}
                 disabled={saveMutation.isPending}
                 data-testid="button-save-local"
+                className="text-xs h-8 bg-background"
               >
-                <Save className="w-4 h-4 sm:mr-2" />
+                <Save className="w-3 h-3 sm:mr-2 sidebar-icon-gold" />
                 <span className="hidden sm:inline">Salva</span>
               </Button>
               {duplicateFiscalCodes && duplicateFiscalCodes.length > 0 && (
