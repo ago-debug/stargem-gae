@@ -201,10 +201,10 @@ export function AppSidebar() {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-b border-amber-200 dark:border-amber-700 rounded px-2 py-1">
+          <SidebarGroupLabel className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border-b border-amber-300 dark:border-amber-700 rounded px-2 py-1">
             Bozze
           </SidebarGroupLabel>
-          <SidebarGroupContent className="bg-amber-50/30 dark:bg-amber-900/5">
+          <SidebarGroupContent className="bg-amber-50 dark:bg-amber-900/10">
             <SidebarMenu>
               {draftItems.map((item) => {
                 const isActive = item.url === "/attivita"
@@ -230,10 +230,10 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-b border-amber-200 dark:border-amber-700 rounded px-2 py-1">
+          <SidebarGroupLabel className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border-b border-amber-300 dark:border-amber-700 rounded px-2 py-1">
             Tabelle Comuni
           </SidebarGroupLabel>
-          <SidebarGroupContent className="bg-amber-50/30 dark:bg-amber-900/5">
+          <SidebarGroupContent className="bg-amber-50 dark:bg-amber-900/10">
             <SidebarMenu>
               {commonTablesItems.map((item) => {
                 const isActive = item.url === "/categorie-attivita"
