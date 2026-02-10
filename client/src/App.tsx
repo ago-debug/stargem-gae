@@ -50,7 +50,7 @@ import IndividualLessons from "@/pages/individual-lessons";
 import CampusActivities from "@/pages/campus-activities";
 import Recitals from "@/pages/recitals";
 import VacationStudies from "@/pages/vacation-studies";
-import logoStarGem from "@assets/034b9616-e6ae-43ea-9caf-f822133d16c6_1770747608980.png";
+import logoStarGem from "@assets/b4a42b7f-d509-4427-af5b-ebd8b17c6f92_1770748343779.png";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
