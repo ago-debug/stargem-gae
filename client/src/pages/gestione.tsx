@@ -27,17 +27,17 @@ interface ActivityCard {
 }
 
 const activityCards: ActivityCard[] = [
-  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", color: "bg-blue-500", url: "/attivita/corsi" },
-  { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", color: "bg-purple-500", url: "/attivita/workshops" },
-  { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, description: "Lezioni di prova a pagamento", color: "bg-orange-500", url: "/attivita/prove-pagamento" },
-  { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", color: "bg-green-500", url: "/attivita/prove-gratuite" },
-  { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, description: "Lezioni singole o drop-in", color: "bg-cyan-500", url: "/attivita/lezioni-singole" },
-  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", color: "bg-yellow-500", url: "/attivita/domeniche-movimento" },
-  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento e affitti", color: "bg-red-500", url: "/attivita/allenamenti" },
-  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", color: "bg-indigo-500", url: "/attivita/lezioni-individuali" },
-  { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", color: "bg-teal-500", url: "/attivita/campus" },
-  { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", color: "bg-pink-500", url: "/attivita/saggi" },
-  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, description: "Vacanze studio e viaggi formativi", color: "bg-amber-500", url: "/attivita/vacanze-studio" },
+  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", color: "icon-gold-bg", url: "/attivita/corsi" },
+  { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", color: "icon-gold-bg", url: "/attivita/workshops" },
+  { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, description: "Lezioni di prova a pagamento", color: "icon-gold-bg", url: "/attivita/prove-pagamento" },
+  { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", color: "icon-gold-bg", url: "/attivita/prove-gratuite" },
+  { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, description: "Lezioni singole o drop-in", color: "icon-gold-bg", url: "/attivita/lezioni-singole" },
+  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", color: "icon-gold-bg", url: "/attivita/domeniche-movimento" },
+  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento e affitti", color: "icon-gold-bg", url: "/attivita/allenamenti" },
+  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", color: "icon-gold-bg", url: "/attivita/lezioni-individuali" },
+  { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", color: "icon-gold-bg", url: "/attivita/campus" },
+  { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", color: "icon-gold-bg", url: "/attivita/saggi" },
+  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, description: "Vacanze studio e viaggi formativi", color: "icon-gold-bg", url: "/attivita/vacanze-studio" },
 ];
 
 export default function Gestione() {
