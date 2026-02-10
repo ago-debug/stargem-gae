@@ -815,7 +815,7 @@ export default function Workshops() {
                         : "-"}
                     </TableCell>
                     <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                      <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">
+                      <Badge variant="outline" className="status-badge-gold">
                         {workshop.active ? "Attivo" : "Inattivo"}
                       </Badge>
                     </TableCell>

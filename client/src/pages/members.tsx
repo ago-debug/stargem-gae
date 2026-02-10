@@ -678,7 +678,7 @@ export default function Members() {
                           )}
                         </TableCell>
                         <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                          <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">
+                          <Badge variant="outline" className="status-badge-gold">
                             {member.active ? "Attivo" : "Inattivo"}
                           </Badge>
                         </TableCell>
@@ -1769,11 +1769,11 @@ function EnrollmentDialog({
                           <div className="flex items-center gap-2">
                             <div className="font-medium">{course?.name || "Corso sconosciuto"}</div>
                             {isPaid ? (
-                              <Badge variant="outline" className="text-xs bg-muted/50 border-amber-500/50 text-foreground">Pagato</Badge>
+                              <Badge variant="outline" className="text-xs status-badge-gold">Pagato</Badge>
                             ) : enrollmentPayments.some(p => p.status === "overdue") ? (
-                              <Badge variant="outline" className="text-xs bg-muted/50 border-amber-500/50 text-foreground">Scaduto</Badge>
+                              <Badge variant="outline" className="text-xs status-badge-gold">Scaduto</Badge>
                             ) : (
-                              <Badge variant="outline" className="text-xs bg-muted/50 border-amber-500/50 text-foreground">In sospeso</Badge>
+                              <Badge variant="outline" className="text-xs status-badge-gold">In sospeso</Badge>
                             )}
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">

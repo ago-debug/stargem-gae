@@ -301,7 +301,7 @@ export default function Memberships() {
                           <TableCell className={isSortedColumn1("type") ? "sorted-column-cell" : undefined}>{membership.type || "-"}</TableCell>
                           <TableCell className={isSortedColumn1("expiry") ? "sorted-column-cell" : undefined}>{new Date(membership.expiryDate).toLocaleDateString('it-IT')}</TableCell>
                           <TableCell className={isSortedColumn1("status") ? "sorted-column-cell" : undefined}>
-                            <Badge variant={expiryInfo.variant} className="bg-muted/50 border-amber-500/50 text-foreground">
+                            <Badge variant={expiryInfo.variant} className="status-badge-gold">
                               {expiryInfo.label}
                             </Badge>
                           </TableCell>
@@ -427,7 +427,7 @@ export default function Memberships() {
                           <TableCell className={isSortedColumn2("issueDate") ? "sorted-column-cell" : undefined}>{new Date(cert.issueDate).toLocaleDateString('it-IT')}</TableCell>
                           <TableCell className={isSortedColumn2("expiry") ? "sorted-column-cell" : undefined}>{new Date(cert.expiryDate).toLocaleDateString('it-IT')}</TableCell>
                           <TableCell className={isSortedColumn2("status") ? "sorted-column-cell" : undefined}>
-                            <Badge variant={expiryInfo.variant} className="bg-muted/50 border-amber-500/50 text-foreground">
+                            <Badge variant={expiryInfo.variant} className="status-badge-gold">
                               {expiryInfo.label}
                             </Badge>
                           </TableCell>

@@ -406,17 +406,17 @@ export default function AccessControl() {
                       </div>
                       <div className="flex items-center gap-2">
                         {hasErrors ? (
-                          <Badge variant="outline" className="flex items-center gap-1 bg-muted/50 border-amber-500/50 text-foreground">
+                          <Badge variant="outline" className="flex items-center gap-1 status-badge-gold">
                             <ShieldAlert className="w-3 h-3" />
                             Anomalie
                           </Badge>
                         ) : hasWarnings ? (
-                          <Badge variant="outline" className="flex items-center gap-1 bg-muted/50 border-amber-500/50 text-foreground">
+                          <Badge variant="outline" className="flex items-center gap-1 status-badge-gold">
                             <AlertTriangle className="w-3 h-3" />
                             Avvisi
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="flex items-center gap-1 bg-muted/50 border-amber-500/50 text-foreground">
+                          <Badge variant="outline" className="flex items-center gap-1 status-badge-gold">
                             <ShieldCheck className="w-3 h-3" />
                             Regolare
                           </Badge>

@@ -875,7 +875,7 @@ export default function AnagraficaHome() {
                       {cardStatus ? (
                         <Badge className={cardStatus.color}>{cardStatus.label}</Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">Attiva</Badge>
+                        <Badge variant="outline" className="status-badge-gold">Attiva</Badge>
                       )}
                     </div>
                   </div>
@@ -1269,7 +1269,7 @@ export default function AnagraficaHome() {
                           <p className="font-medium">{a.date}</p>
                           <p className="text-sm text-muted-foreground">{a.checkInTime} - {a.checkOutTime || 'In corso'}</p>
                         </div>
-                        <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">Presente</Badge>
+                        <Badge variant="outline" className="status-badge-gold">Presente</Badge>
                       </div>
                     ))}
                     {memberAttendances.length > 20 && (

@@ -205,13 +205,13 @@ export default function Payments() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'paid':
-        return <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">Pagato</Badge>;
+        return <Badge variant="outline" className="status-badge-gold">Pagato</Badge>;
       case 'pending':
-        return <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">In Attesa</Badge>;
+        return <Badge variant="outline" className="status-badge-gold">In Attesa</Badge>;
       case 'overdue':
-        return <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">Scaduto</Badge>;
+        return <Badge variant="outline" className="status-badge-gold">Scaduto</Badge>;
       default:
-        return <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">{status}</Badge>;
+        return <Badge variant="outline" className="status-badge-gold">{status}</Badge>;
     }
   };
 
