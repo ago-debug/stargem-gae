@@ -50,7 +50,7 @@ import IndividualLessons from "@/pages/individual-lessons";
 import CampusActivities from "@/pages/campus-activities";
 import Recitals from "@/pages/recitals";
 import VacationStudies from "@/pages/vacation-studies";
-import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
+import logoStarGem from "@assets/034b9616-e6ae-43ea-9caf-f822133d16c6_1770747608980.png";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -140,9 +140,9 @@ function AppContent() {
             <header className="flex items-center justify-between h-14 px-4 border-b border-border bg-background flex-shrink-0">
               <SidebarTrigger data-testid="button-sidebar-toggle" />
               <img 
-                src={logoStudioGem} 
-                alt="Studio Gem Logo" 
-                className="h-8"
+                src={logoStarGem} 
+                alt="StarGEM Logo" 
+                className="h-10"
                 data-testid="logo-header"
               />
             </header>
