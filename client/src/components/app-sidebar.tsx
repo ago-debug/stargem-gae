@@ -195,38 +195,11 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <h1 className="text-lg font-semibold text-sidebar-foreground">
-          Gestione Corsi
+          Gestionale StarGEM
         </h1>
       </SidebarHeader>
       
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Menu Principale</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainMenuItems.map((item) => {
-                const isActive = item.url === "/gestione"
-                  ? location === "/gestione" || location.startsWith("/gestione/")
-                  : location === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={isActive}
-                      data-testid={`nav-${item.url.slice(1) || 'dashboard'}`}
-                    >
-                      <Link href={item.url}>
-                        <item.icon className="w-4 h-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
         <SidebarGroup>
           <SidebarGroupLabel className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-b border-green-300 dark:border-green-700 rounded px-2 py-1">
             Bozze
@@ -243,6 +216,33 @@ export function AppSidebar() {
                       asChild 
                       isActive={isActive}
                       data-testid={`nav-${item.url.slice(1)}`}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Menu Principale</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {mainMenuItems.map((item) => {
+                const isActive = item.url === "/gestione"
+                  ? location === "/gestione" || location.startsWith("/gestione/")
+                  : location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      data-testid={`nav-${item.url.slice(1) || 'dashboard'}`}
                     >
                       <Link href={item.url}>
                         <item.icon className="w-4 h-4" />
