@@ -267,7 +267,7 @@ export default function KnowledgePage() {
                               </Button>
                               <Button 
                                 size="sm" 
-                                variant="destructive"
+                                className="gold-3d-button"
                                 onClick={() => deleteMutation.mutate(item.id)}
                                 disabled={deleteMutation.isPending}
                                 data-testid={`button-delete-knowledge-${item.id}`}

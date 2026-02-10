@@ -76,7 +76,7 @@ function CourseCard({ course, categories, instructors }: { course: Course; categ
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-medium text-sm truncate">{course.name}</h4>
-              <Badge variant={course.active ? "default" : "secondary"} className="text-xs">
+              <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground text-xs">
                 {course.active ? "Attivo" : "Inattivo"}
               </Badge>
             </div>
@@ -122,7 +122,7 @@ function WorkshopCard({ workshop, categories, instructors }: { workshop: Worksho
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-medium text-sm truncate">{workshop.name}</h4>
-              <Badge variant={workshop.active ? "default" : "secondary"} className="text-xs">
+              <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground text-xs">
                 {workshop.active ? "Attivo" : "Inattivo"}
               </Badge>
             </div>
@@ -355,9 +355,9 @@ export default function Attivita() {
                   <span className="text-sm text-muted-foreground">totali</span>
                 </div>
                 <div className="flex items-center gap-3 mt-2">
-                  <Badge variant="default">{activeCourses.length} attivi</Badge>
+                  <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">{activeCourses.length} attivi</Badge>
                   {inactiveCourses.length > 0 && (
-                    <Badge variant="secondary">{inactiveCourses.length} inattivi</Badge>
+                    <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">{inactiveCourses.length} inattivi</Badge>
                   )}
                 </div>
               </CardContent>
@@ -373,9 +373,9 @@ export default function Attivita() {
                   <span className="text-sm text-muted-foreground">totali</span>
                 </div>
                 <div className="flex items-center gap-3 mt-2">
-                  <Badge variant="default">{activeWorkshops.length} attivi</Badge>
+                  <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">{activeWorkshops.length} attivi</Badge>
                   {inactiveWorkshops.length > 0 && (
-                    <Badge variant="secondary">{inactiveWorkshops.length} inattivi</Badge>
+                    <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">{inactiveWorkshops.length} inattivi</Badge>
                   )}
                 </div>
               </CardContent>

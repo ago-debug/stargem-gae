@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Briefcase, ArrowLeft } from "lucide-react";
@@ -21,7 +22,7 @@ export default function Instructors() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInstructor, setEditingInstructor] = useState<Instructor | null>(null);
-  const { sortConfig, handleSort, sortItems } = useSortableTable<Instructor>();
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Instructor>("name");
 
   const { data: instructors, isLoading } = useQuery<Instructor[]>({
     queryKey: ["/api/instructors"],
@@ -137,6 +138,7 @@ export default function Instructors() {
           </div>
         </div>
         <Button 
+          className="gold-3d-button"
           onClick={() => {
             setEditingInstructor(null);
             setIsFormOpen(true);
@@ -195,11 +197,11 @@ export default function Instructors() {
                   const assignedCourses = getInstructorCourses(instructor.id);
                   return (
                   <TableRow key={instructor.id} data-testid={`instructor-row-${instructor.id}`}>
-                    <TableCell className="font-medium">
+                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>
                       {instructor.firstName} {instructor.lastName}
                     </TableCell>
-                    <TableCell>{instructor.specialization || "-"}</TableCell>
-                    <TableCell>
+                    <TableCell className={isSortedColumn("specialization") ? "sorted-column-cell" : undefined}>{instructor.specialization || "-"}</TableCell>
+                    <TableCell className={isSortedColumn("courses") ? "sorted-column-cell" : undefined}>
                       <div className="flex flex-wrap gap-1">
                         {assignedCourses.length === 0 ? (
                           <span className="text-sm text-muted-foreground">Nessun corso</span>
@@ -227,13 +229,13 @@ export default function Instructors() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{instructor.email || "-"}</TableCell>
-                    <TableCell>{instructor.phone || "-"}</TableCell>
-                    <TableCell>
+                    <TableCell className={isSortedColumn("email") ? "sorted-column-cell" : undefined}>{instructor.email || "-"}</TableCell>
+                    <TableCell className={isSortedColumn("phone") ? "sorted-column-cell" : undefined}>{instructor.phone || "-"}</TableCell>
+                    <TableCell className={isSortedColumn("rate") ? "sorted-column-cell" : undefined}>
                       {instructor.hourlyRate ? `€${instructor.hourlyRate}/h` : "-"}
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={instructor.active ? "default" : "secondary"}>
+                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
+                      <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">
                         {instructor.active ? "Attivo" : "Inattivo"}
                       </Badge>
                     </TableCell>
@@ -373,6 +375,7 @@ export default function Instructors() {
               </Button>
               <Button 
                 type="submit" 
+                className="gold-3d-button"
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-instructor"
               >

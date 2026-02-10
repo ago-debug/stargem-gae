@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Search, Users, GraduationCap, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,7 +23,7 @@ interface CourseEnrollmentItem {
 
 export default function CourseEnrollments() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { sortConfig, handleSort, sortItems } = useSortableTable<CourseEnrollmentItem>();
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<CourseEnrollmentItem>("firstName");
 
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -178,10 +179,10 @@ export default function CourseEnrollments() {
                             <TableBody>
                               {sortedEnrollments.map((enrollment) => (
                                 <TableRow key={enrollment.enrollmentId}>
-                                  <TableCell className="font-medium">{enrollment.firstName}</TableCell>
-                                  <TableCell>{enrollment.lastName}</TableCell>
-                                  <TableCell>{enrollment.email || '-'}</TableCell>
-                                  <TableCell>
+                                  <TableCell className={cn("font-medium", isSortedColumn("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
+                                  <TableCell className={isSortedColumn("lastName") ? "sorted-column-cell" : undefined}>{enrollment.lastName}</TableCell>
+                                  <TableCell className={isSortedColumn("email") ? "sorted-column-cell" : undefined}>{enrollment.email || '-'}</TableCell>
+                                  <TableCell className={isSortedColumn("enrollDate") ? "sorted-column-cell" : undefined}>
                                     {enrollment.startDate 
                                       ? new Date(enrollment.startDate).toLocaleDateString('it-IT')
                                       : '-'}

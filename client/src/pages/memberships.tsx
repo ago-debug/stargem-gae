@@ -40,9 +40,9 @@ export default function Memberships() {
   const [certMemberSearch, setCertMemberSearch] = useState("");
   const [selectedCertMember, setSelectedCertMember] = useState<Member | null>(null);
 
-  const { sortConfig: sortConfig1, handleSort: handleSort1, sortItems: sortItems1 } = useSortableTable<Membership>();
-  const { sortConfig: sortConfig2, handleSort: handleSort2, sortItems: sortItems2 } = useSortableTable<MedicalCertificate>();
-  const { sortConfig: sortConfig3, handleSort: handleSort3, sortItems: sortItems3 } = useSortableTable<Member>();
+  const { sortConfig: sortConfig1, handleSort: handleSort1, sortItems: sortItems1, isSortedColumn: isSortedColumn1 } = useSortableTable<Membership>("member");
+  const { sortConfig: sortConfig2, handleSort: handleSort2, sortItems: sortItems2, isSortedColumn: isSortedColumn2 } = useSortableTable<MedicalCertificate>("member");
+  const { sortConfig: sortConfig3, handleSort: handleSort3, sortItems: sortItems3, isSortedColumn: isSortedColumn3 } = useSortableTable<Member>("member");
 
   const { data: memberships, isLoading: membershipsLoading } = useQuery<Membership[]>({
     queryKey: ["/api/memberships"],
@@ -167,9 +167,9 @@ export default function Memberships() {
     const expiry = new Date(expiryDate);
     const daysUntilExpiry = Math.floor((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
-    if (daysUntilExpiry < 0) return { status: "expired", label: "Scaduto", variant: "destructive" as const };
-    if (daysUntilExpiry <= 7) return { status: "expiring", label: "In Scadenza", variant: "secondary" as const };
-    return { status: "active", label: "Attivo", variant: "default" as const };
+    if (daysUntilExpiry < 0) return { status: "expired", label: "Scaduto", variant: "outline" as const };
+    if (daysUntilExpiry <= 7) return { status: "expiring", label: "In Scadenza", variant: "outline" as const };
+    return { status: "active", label: "Attivo", variant: "outline" as const };
   };
 
   return (
@@ -205,6 +205,7 @@ export default function Memberships() {
         <TabsContent value="memberships" className="space-y-6">
           <div className="flex items-center justify-end">
             <Button 
+              className="gold-3d-button"
               onClick={() => {
                 setEditingMembership(null);
                 setIsMembershipFormOpen(true);
@@ -292,15 +293,15 @@ export default function Memberships() {
                       const expiryInfo = getExpiryStatus(membership.expiryDate);
                       return (
                         <TableRow key={membership.id} data-testid={`membership-row-${membership.id}`}>
-                          <TableCell className="font-medium">
+                          <TableCell className={cn("font-medium", isSortedColumn1("member") && "sorted-column-cell")}>
                             {getMemberName(membership)}
                           </TableCell>
-                          <TableCell>{membership.membershipNumber}</TableCell>
-                          <TableCell className="font-mono text-xs">{membership.barcode}</TableCell>
-                          <TableCell>{membership.type || "-"}</TableCell>
-                          <TableCell>{new Date(membership.expiryDate).toLocaleDateString('it-IT')}</TableCell>
-                          <TableCell>
-                            <Badge variant={expiryInfo.variant}>
+                          <TableCell className={isSortedColumn1("number") ? "sorted-column-cell" : undefined}>{membership.membershipNumber}</TableCell>
+                          <TableCell className={cn("font-mono text-xs", isSortedColumn1("barcode") && "sorted-column-cell")}>{membership.barcode}</TableCell>
+                          <TableCell className={isSortedColumn1("type") ? "sorted-column-cell" : undefined}>{membership.type || "-"}</TableCell>
+                          <TableCell className={isSortedColumn1("expiry") ? "sorted-column-cell" : undefined}>{new Date(membership.expiryDate).toLocaleDateString('it-IT')}</TableCell>
+                          <TableCell className={isSortedColumn1("status") ? "sorted-column-cell" : undefined}>
+                            <Badge variant={expiryInfo.variant} className="bg-muted/50 border-amber-500/50 text-foreground">
                               {expiryInfo.label}
                             </Badge>
                           </TableCell>
@@ -332,6 +333,7 @@ export default function Memberships() {
         <TabsContent value="certificates" className="space-y-6">
           <div className="flex items-center justify-end">
             <Button 
+              className="gold-3d-button"
               onClick={() => {
                 setEditingCertificate(null);
                 setIsCertificateFormOpen(true);
@@ -417,14 +419,14 @@ export default function Memberships() {
                       const expiryInfo = getExpiryStatus(cert.expiryDate);
                       return (
                         <TableRow key={cert.id} data-testid={`certificate-row-${cert.id}`}>
-                          <TableCell className="font-medium">
+                          <TableCell className={cn("font-medium", isSortedColumn2("member") && "sorted-column-cell")}>
                             {getMemberName(cert)}
                           </TableCell>
-                          <TableCell>{cert.doctorName || "-"}</TableCell>
-                          <TableCell>{new Date(cert.issueDate).toLocaleDateString('it-IT')}</TableCell>
-                          <TableCell>{new Date(cert.expiryDate).toLocaleDateString('it-IT')}</TableCell>
-                          <TableCell>
-                            <Badge variant={expiryInfo.variant}>
+                          <TableCell className={isSortedColumn2("doctor") ? "sorted-column-cell" : undefined}>{cert.doctorName || "-"}</TableCell>
+                          <TableCell className={isSortedColumn2("issueDate") ? "sorted-column-cell" : undefined}>{new Date(cert.issueDate).toLocaleDateString('it-IT')}</TableCell>
+                          <TableCell className={isSortedColumn2("expiry") ? "sorted-column-cell" : undefined}>{new Date(cert.expiryDate).toLocaleDateString('it-IT')}</TableCell>
+                          <TableCell className={isSortedColumn2("status") ? "sorted-column-cell" : undefined}>
+                            <Badge variant={expiryInfo.variant} className="bg-muted/50 border-amber-500/50 text-foreground">
                               {expiryInfo.label}
                             </Badge>
                           </TableCell>
@@ -528,24 +530,24 @@ export default function Memberships() {
                           : { status: "unknown", label: "N/D", variant: "secondary" as const };
                         return (
                           <TableRow key={member.id} data-testid={`entity-card-row-${member.id}`}>
-                            <TableCell className="font-medium">
+                            <TableCell className={cn("font-medium", isSortedColumn3("member") && "sorted-column-cell")}>
                               {member.firstName} {member.lastName}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className={isSortedColumn3("type") ? "sorted-column-cell" : undefined}>
                               <Badge variant="outline">{member.entityCardType || "-"}</Badge>
                             </TableCell>
-                            <TableCell className="font-mono text-xs">{member.entityCardNumber || "-"}</TableCell>
-                            <TableCell>
+                            <TableCell className={cn("font-mono text-xs", isSortedColumn3("number") && "sorted-column-cell")}>{member.entityCardNumber || "-"}</TableCell>
+                            <TableCell className={isSortedColumn3("issueDate") ? "sorted-column-cell" : undefined}>
                               {member.entityCardIssueDate 
                                 ? new Date(member.entityCardIssueDate).toLocaleDateString('it-IT') 
                                 : "-"}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className={isSortedColumn3("expiry") ? "sorted-column-cell" : undefined}>
                               {member.entityCardExpiryDate 
                                 ? new Date(member.entityCardExpiryDate).toLocaleDateString('it-IT') 
                                 : "-"}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className={isSortedColumn3("status") ? "sorted-column-cell" : undefined}>
                               <Badge variant={expiryInfo.variant}>
                                 {expiryInfo.label}
                               </Badge>
@@ -736,6 +738,7 @@ export default function Memberships() {
               </Button>
               <Button 
                 type="submit" 
+                className="gold-3d-button"
                 disabled={createMembershipMutation.isPending}
                 data-testid="button-submit-membership"
               >
@@ -888,6 +891,7 @@ export default function Memberships() {
               </Button>
               <Button 
                 type="submit" 
+                className="gold-3d-button"
                 disabled={createCertificateMutation.isPending}
                 data-testid="button-submit-certificate"
               >

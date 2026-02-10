@@ -29,7 +29,7 @@ export default function Payments() {
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
   const [showPendingOnly, setShowPendingOnly] = useState(false);
-  const { sortConfig, handleSort, sortItems } = useSortableTable<Payment>();
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Payment>("member");
 
   const { data: payments, isLoading } = useQuery<Payment[]>({
     queryKey: ["/api/payments"],
@@ -205,13 +205,13 @@ export default function Payments() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'paid':
-        return <Badge variant="default">Pagato</Badge>;
+        return <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">Pagato</Badge>;
       case 'pending':
-        return <Badge variant="secondary">In Attesa</Badge>;
+        return <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">In Attesa</Badge>;
       case 'overdue':
-        return <Badge variant="destructive">Scaduto</Badge>;
+        return <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">Scaduto</Badge>;
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">{status}</Badge>;
     }
   };
 
@@ -245,6 +245,7 @@ export default function Payments() {
             Esporta CSV
           </Button>
           <Button 
+            className="gold-3d-button"
             onClick={() => setIsFormOpen(true)}
             data-testid="button-add-payment"
           >
@@ -336,17 +337,17 @@ export default function Payments() {
               <TableBody>
                 {sortedPayments.map((payment) => (
                   <TableRow key={payment.id} data-testid={`payment-row-${payment.id}`}>
-                    <TableCell className="font-medium">
+                    <TableCell className={cn("font-medium", isSortedColumn("member") && "sorted-column-cell")}>
                       {getMemberName(payment)}
                     </TableCell>
-                    <TableCell className="capitalize">{payment.type}</TableCell>
-                    <TableCell>{payment.description || "-"}</TableCell>
-                    <TableCell className="font-medium">€{payment.amount}</TableCell>
-                    <TableCell>
+                    <TableCell className={cn("capitalize", isSortedColumn("type") && "sorted-column-cell")}>{payment.type}</TableCell>
+                    <TableCell className={isSortedColumn("description") ? "sorted-column-cell" : undefined}>{payment.description || "-"}</TableCell>
+                    <TableCell className={cn("font-medium", isSortedColumn("amount") && "sorted-column-cell")}>€{payment.amount}</TableCell>
+                    <TableCell className={isSortedColumn("dueDate") ? "sorted-column-cell" : undefined}>
                       {payment.dueDate ? new Date(payment.dueDate).toLocaleDateString('it-IT') : "-"}
                     </TableCell>
-                    <TableCell className="capitalize">{payment.paymentMethod || "-"}</TableCell>
-                    <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                    <TableCell className={cn("capitalize", isSortedColumn("method") && "sorted-column-cell")}>{payment.paymentMethod || "-"}</TableCell>
+                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>{getStatusBadge(payment.status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button
@@ -618,6 +619,7 @@ export default function Payments() {
               </Button>
               <Button 
                 type="submit" 
+                className="gold-3d-button"
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-payment"
               >

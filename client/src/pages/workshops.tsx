@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, ArrowLeft } from "lucide-react";
@@ -614,7 +615,7 @@ export default function Workshops() {
     workshop.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const { sortConfig, handleSort, sortItems } = useSortableTable<typeof filteredWorkshops[0]>();
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<typeof filteredWorkshops[0]>("sku");
 
   const getSortValue = (workshop: typeof filteredWorkshops[0], key: string) => {
     switch (key) {
@@ -706,6 +707,7 @@ export default function Workshops() {
                 Esporta CSV
               </Button>
               <Button 
+                className="gold-3d-button"
                 onClick={() => {
                   closeDialog();
                   setIsFormOpen(true);
@@ -771,21 +773,21 @@ export default function Workshops() {
                   const enrollmentsList = getWorkshopEnrollmentsList(workshop.id);
                   return (
                   <TableRow key={workshop.id} data-testid={`workshop-row-${workshop.id}`}>
-                    <TableCell className="text-xs text-muted-foreground" data-testid={`text-workshop-sku-${workshop.id}`}>
+                    <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("sku") && "sorted-column-cell")} data-testid={`text-workshop-sku-${workshop.id}`}>
                       {workshop.sku || "-"}
                     </TableCell>
-                    <TableCell className="font-medium">{workshop.name}</TableCell>
-                    <TableCell>
+                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{workshop.name}</TableCell>
+                    <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : undefined}>
                       {categories?.find(c => c.id === workshop.categoryId)?.name || "-"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : undefined}>
                       {instructors?.find(i => i.id === workshop.instructorId) 
                         ? `${instructors.find(i => i.id === workshop.instructorId)?.firstName} ${instructors.find(i => i.id === workshop.instructorId)?.lastName}`
                         : "-"}
                     </TableCell>
-                    <TableCell>€{workshop.price || "0.00"}</TableCell>
-                    <TableCell>{enrollmentCount}/{workshop.maxCapacity || "∞"}</TableCell>
-                    <TableCell>
+                    <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : undefined}>€{workshop.price || "0.00"}</TableCell>
+                    <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{enrollmentCount}/{workshop.maxCapacity || "∞"}</TableCell>
+                    <TableCell className={isSortedColumn("enrollments") ? "sorted-column-cell" : undefined}>
                       {enrollmentsList.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {enrollmentsList.slice(0, 2).map((member) => (
@@ -805,13 +807,13 @@ export default function Workshops() {
                         <span className="text-xs text-muted-foreground">Nessun iscritto</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-sm">
+                    <TableCell className={cn("text-sm", isSortedColumn("period") && "sorted-column-cell")}>
                       {workshop.startDate && workshop.endDate 
                         ? `${new Date(workshop.startDate).toLocaleDateString('it-IT')} - ${new Date(workshop.endDate).toLocaleDateString('it-IT')}`
                         : "-"}
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={workshop.active ? "default" : "secondary"}>
+                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
+                      <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">
                         {workshop.active ? "Attivo" : "Inattivo"}
                       </Badge>
                     </TableCell>
@@ -1138,6 +1140,7 @@ export default function Workshops() {
                     </Button>
                     <Button 
                       type="submit"
+                      className="gold-3d-button"
                       disabled={updateMutation.isPending}
                       data-testid="button-submit-workshop"
                     >
@@ -1411,6 +1414,7 @@ export default function Workshops() {
                 </Button>
                 <Button 
                   type="submit" 
+                  className="gold-3d-button"
                   disabled={createMutation.isPending}
                   data-testid="button-submit-workshop"
                 >

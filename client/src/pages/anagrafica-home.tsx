@@ -441,10 +441,10 @@ export default function AnagraficaHome() {
     if (!formData.cardExpiryDate) return null;
     const expiry = new Date(formData.cardExpiryDate);
     const now = new Date();
-    if (expiry < now) return { status: "expired", label: "Scaduta", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+    if (expiry < now) return { status: "expired", label: "Scaduta", color: "bg-muted/50 border border-amber-500/50 text-foreground" };
     const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    if (expiry < thirtyDays) return { status: "expiring", label: "In Scadenza", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" };
-    return { status: "active", label: "Attiva", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" };
+    if (expiry < thirtyDays) return { status: "expiring", label: "In Scadenza", color: "bg-muted/50 border border-amber-500/50 text-foreground" };
+    return { status: "active", label: "Attiva", color: "bg-muted/50 border border-amber-500/50 text-foreground" };
   };
 
   const cardStatus = getCardStatus();
@@ -491,10 +491,9 @@ export default function AnagraficaHome() {
                 <span className="hidden sm:inline">GSheets</span>
               </Button>
               <Button 
-                variant="default" 
                 size="sm"
                 data-testid="button-export-gsheets"
-                className="hidden sm:inline-flex"
+                className="hidden sm:inline-flex gold-3d-button"
               >
                 <Upload className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Esporta</span>
@@ -520,8 +519,8 @@ export default function AnagraficaHome() {
               </Button>
               {duplicateFiscalCodes && duplicateFiscalCodes.length > 0 && (
                 <Button 
-                  variant="destructive"
                   size="sm"
+                  className="gold-3d-button"
                   onClick={() => setShowDuplicatesModal(true)}
                   data-testid="button-duplicate-warning"
                 >
@@ -873,7 +872,7 @@ export default function AnagraficaHome() {
                       {cardStatus ? (
                         <Badge className={cardStatus.color}>{cardStatus.label}</Badge>
                       ) : (
-                        <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Attiva</Badge>
+                        <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">Attiva</Badge>
                       )}
                     </div>
                   </div>
@@ -1267,7 +1266,7 @@ export default function AnagraficaHome() {
                           <p className="font-medium">{a.date}</p>
                           <p className="text-sm text-muted-foreground">{a.checkInTime} - {a.checkOutTime || 'In corso'}</p>
                         </div>
-                        <Badge variant="default">Presente</Badge>
+                        <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">Presente</Badge>
                       </div>
                     ))}
                     {memberAttendances.length > 20 && (

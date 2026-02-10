@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -91,7 +92,7 @@ export default function Members() {
   const totalMembers = membersData?.total || 0;
   const totalPages = Math.ceil(totalMembers / PAGE_SIZE);
 
-  const { sortConfig, handleSort, sortItems } = useSortableTable<Member>();
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Member>("name");
 
   const getSortValue = (member: Member, key: string) => {
     switch (key) {
@@ -509,6 +510,7 @@ export default function Members() {
             Esporta CSV
           </Button>
           <Button 
+            className="gold-3d-button"
             onClick={() => {
               resetForm();
               setIsFormOpen(true);
@@ -600,7 +602,7 @@ export default function Members() {
                 <TableBody>
                   {sortedMembers.map((member) => (
                       <TableRow key={member.id} data-testid={`member-row-${member.id}`}>
-                        <TableCell>
+                        <TableCell className={isSortedColumn("name") ? "sorted-column-cell" : undefined}>
                           <span 
                             className="font-bold hover:underline cursor-pointer"
                             onClick={async () => {
@@ -644,10 +646,10 @@ export default function Members() {
                             {member.firstName} {member.lastName}
                           </span>
                         </TableCell>
-                        <TableCell className="font-mono text-sm">{member.fiscalCode || "-"}</TableCell>
-                        <TableCell>{member.email || "-"}</TableCell>
-                        <TableCell>{member.mobile || member.phone || "-"}</TableCell>
-                        <TableCell>
+                        <TableCell className={cn("font-mono text-sm", isSortedColumn("fiscalCode") && "sorted-column-cell")}>{member.fiscalCode || "-"}</TableCell>
+                        <TableCell className={isSortedColumn("email") ? "sorted-column-cell" : undefined}>{member.email || "-"}</TableCell>
+                        <TableCell className={isSortedColumn("phone") ? "sorted-column-cell" : undefined}>{member.mobile || member.phone || "-"}</TableCell>
+                        <TableCell className={isSortedColumn("cardNumber") ? "sorted-column-cell" : undefined}>
                           {member.cardNumber ? (
                             <div className="text-sm">
                               <div>{member.cardNumber}</div>
@@ -659,7 +661,7 @@ export default function Members() {
                             </div>
                           ) : "-"}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={isSortedColumn("medicalCert") ? "sorted-column-cell" : undefined}>
                           {member.hasMedicalCertificate ? (
                             <Badge variant={
                               member.medicalCertificateExpiry && new Date(member.medicalCertificateExpiry) < new Date() 
@@ -675,12 +677,12 @@ export default function Members() {
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
-                        <TableCell>
-                          <Badge variant={member.active ? "default" : "secondary"}>
+                        <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
+                          <Badge variant="outline" className="bg-muted/50 border-amber-500/50 text-foreground">
                             {member.active ? "Attivo" : "Inattivo"}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={isSortedColumn("courses") ? "sorted-column-cell" : undefined}>
                           {(member as any).activeCourseCount > 0 ? (
                             <Badge variant="outline" className="text-xs">
                               {(member as any).activeCourseCount} {(member as any).activeCourseCount === 1 ? "corso" : "corsi"}
@@ -1583,6 +1585,7 @@ export default function Members() {
               </Button>
               <Button 
                 type="submit" 
+                className="gold-3d-button"
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-member"
               >
@@ -1762,11 +1765,11 @@ function EnrollmentDialog({
                           <div className="flex items-center gap-2">
                             <div className="font-medium">{course?.name || "Corso sconosciuto"}</div>
                             {isPaid ? (
-                              <Badge variant="default" className="text-xs">Pagato</Badge>
+                              <Badge variant="outline" className="text-xs bg-muted/50 border-amber-500/50 text-foreground">Pagato</Badge>
                             ) : enrollmentPayments.some(p => p.status === "overdue") ? (
-                              <Badge variant="destructive" className="text-xs">Scaduto</Badge>
+                              <Badge variant="outline" className="text-xs bg-muted/50 border-amber-500/50 text-foreground">Scaduto</Badge>
                             ) : (
-                              <Badge variant="secondary" className="text-xs">In sospeso</Badge>
+                              <Badge variant="outline" className="text-xs bg-muted/50 border-amber-500/50 text-foreground">In sospeso</Badge>
                             )}
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
@@ -2275,6 +2278,7 @@ function MembershipManagementDialog({
                   </Button>
                   <Button 
                     type="submit"
+                    className="gold-3d-button"
                     disabled={createMembershipMutation.isPending || updateMembershipMutation.isPending}
                     data-testid="button-submit-membership"
                   >
@@ -2455,6 +2459,7 @@ function MembershipManagementDialog({
                   </Button>
                   <Button 
                     type="submit"
+                    className="gold-3d-button"
                     disabled={createCertificateMutation.isPending || updateCertificateMutation.isPending}
                     data-testid="button-submit-certificate"
                   >
