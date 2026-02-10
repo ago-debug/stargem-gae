@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "wouter";
-import logoStudioGem from "@assets/logo-Studio-Gem1_page-0001_1761599206626.jpg";
+import logoStarGem from "@assets/034b9616-e6ae-43ea-9caf-f822133d16c6_1770747608980.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -26,8 +26,8 @@ export default function Dashboard() {
     <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
       <div className="flex flex-col items-center gap-4 mb-6">
         <img 
-          src={logoStudioGem} 
-          alt="Studio Gem Logo" 
+          src={logoStarGem} 
+          alt="StarGEM Logo" 
           className="h-16 md:h-20"
           data-testid="logo-dashboard"
         />
