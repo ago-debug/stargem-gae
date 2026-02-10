@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Briefcase, ArrowLeft } from "lucide-react";
@@ -20,6 +21,7 @@ export default function Instructors() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInstructor, setEditingInstructor] = useState<Instructor | null>(null);
+  const { sortConfig, handleSort, sortItems } = useSortableTable<Instructor>();
 
   const { data: instructors, isLoading } = useQuery<Instructor[]>({
     queryKey: ["/api/instructors"],
@@ -103,9 +105,24 @@ export default function Instructors() {
     }
   };
 
+  const getSortValue = (instructor: Instructor, key: string): any => {
+    switch (key) {
+      case "name": return `${instructor.firstName} ${instructor.lastName}`;
+      case "specialization": return instructor.specialization;
+      case "courses": return null;
+      case "email": return instructor.email;
+      case "phone": return instructor.phone;
+      case "rate": return instructor.hourlyRate ? parseFloat(instructor.hourlyRate) : null;
+      case "status": return instructor.active;
+      default: return null;
+    }
+  };
+
   const filteredInstructors = instructors?.filter((instructor) =>
     `${instructor.firstName} ${instructor.lastName} ${instructor.specialization}`.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
+
+  const sortedInstructors = sortItems(filteredInstructors, getSortValue);
 
   return (
     <div className="p-4 space-y-4">
@@ -163,18 +180,18 @@ export default function Instructors() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Specializzazione</TableHead>
-                  <TableHead>Corsi Assegnati</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Telefono</TableHead>
-                  <TableHead>Tariffa Oraria</TableHead>
-                  <TableHead>Stato</TableHead>
+                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                  <SortableTableHead sortKey="specialization" currentSort={sortConfig} onSort={handleSort}>Specializzazione</SortableTableHead>
+                  <SortableTableHead sortKey="courses" currentSort={sortConfig} onSort={handleSort}>Corsi Assegnati</SortableTableHead>
+                  <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
+                  <SortableTableHead sortKey="phone" currentSort={sortConfig} onSort={handleSort}>Telefono</SortableTableHead>
+                  <SortableTableHead sortKey="rate" currentSort={sortConfig} onSort={handleSort}>Tariffa Oraria</SortableTableHead>
+                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredInstructors.map((instructor) => {
+                {sortedInstructors.map((instructor) => {
                   const assignedCourses = getInstructorCourses(instructor.id);
                   return (
                   <TableRow key={instructor.id} data-testid={`instructor-row-${instructor.id}`}>

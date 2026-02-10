@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -66,6 +67,7 @@ export default function AccessControl() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<MemberSearchResult | null>(null);
   const [activeTab, setActiveTab] = useState("search");
+  const { sortConfig, handleSort, sortItems } = useSortableTable<AccessLog>();
 
   const { data: recentAccesses, isLoading: accessesLoading } = useQuery<AccessLog[]>({
     queryKey: ["/api/access-logs"],
@@ -766,19 +768,33 @@ export default function AccessControl() {
               <p className="text-sm">Gli accessi verranno visualizzati qui</p>
             </div>
           ) : (
+            (() => {
+              const getSortValue = (item: AccessLog, key: string) => {
+                switch (key) {
+                  case "datetime": return item.accessTime;
+                  case "name": return `${(item as any).memberFirstName || ''} ${(item as any).memberLastName || ''}`.trim();
+                  case "barcode": return item.barcode;
+                  case "type": return item.accessType;
+                  case "cardStatus": return item.membershipStatus || "";
+                  case "notes": return item.notes || "";
+                  default: return "";
+                }
+              };
+              const sortedAccesses = sortItems(recentAccesses, getSortValue);
+              return (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Data/Ora</TableHead>
-                  <TableHead>Nome e Cognome</TableHead>
-                  <TableHead>Barcode</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Stato Tessera</TableHead>
-                  <TableHead>Note</TableHead>
+                  <SortableTableHead sortKey="datetime" currentSort={sortConfig} onSort={handleSort}>Data/Ora</SortableTableHead>
+                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome e Cognome</SortableTableHead>
+                  <SortableTableHead sortKey="barcode" currentSort={sortConfig} onSort={handleSort}>Barcode</SortableTableHead>
+                  <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
+                  <SortableTableHead sortKey="cardStatus" currentSort={sortConfig} onSort={handleSort}>Stato Tessera</SortableTableHead>
+                  <SortableTableHead sortKey="notes" currentSort={sortConfig} onSort={handleSort}>Note</SortableTableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentAccesses.map((access, index) => (
+                {sortedAccesses.map((access, index) => (
                   <TableRow key={index} data-testid={`access-log-${index}`}>
                     <TableCell>
                       {new Date(access.accessTime).toLocaleString('it-IT')}
@@ -801,6 +817,8 @@ export default function AccessControl() {
                 ))}
               </TableBody>
             </Table>
+              );
+            })()
           )}
         </CardContent>
       </Card>

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -89,6 +90,24 @@ export default function Members() {
   const members = membersData?.members || [];
   const totalMembers = membersData?.total || 0;
   const totalPages = Math.ceil(totalMembers / PAGE_SIZE);
+
+  const { sortConfig, handleSort, sortItems } = useSortableTable<Member>();
+
+  const getSortValue = (member: Member, key: string) => {
+    switch (key) {
+      case "name": return `${member.firstName} ${member.lastName}`;
+      case "fiscalCode": return member.fiscalCode;
+      case "email": return member.email;
+      case "phone": return member.phone;
+      case "cardNumber": return member.cardNumber;
+      case "medicalCert": return member.medicalCertificateExpiry;
+      case "status": return member.active;
+      case "courses": return null;
+      default: return null;
+    }
+  };
+
+  const sortedMembers = sortItems(members, getSortValue);
 
   const { data: clientCategories } = useQuery<any[]>({
     queryKey: ["/api/client-categories"],
@@ -567,19 +586,19 @@ export default function Members() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nome e Cognome</TableHead>
-                    <TableHead>Codice Fiscale</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Mobile</TableHead>
-                    <TableHead>Tessera</TableHead>
-                    <TableHead>Cert. Medico</TableHead>
-                    <TableHead>Stato</TableHead>
-                    <TableHead>Corsi Attivi</TableHead>
+                    <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome e Cognome</SortableTableHead>
+                    <SortableTableHead sortKey="fiscalCode" currentSort={sortConfig} onSort={handleSort}>Codice Fiscale</SortableTableHead>
+                    <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
+                    <SortableTableHead sortKey="phone" currentSort={sortConfig} onSort={handleSort}>Mobile</SortableTableHead>
+                    <SortableTableHead sortKey="cardNumber" currentSort={sortConfig} onSort={handleSort}>Tessera</SortableTableHead>
+                    <SortableTableHead sortKey="medicalCert" currentSort={sortConfig} onSort={handleSort}>Cert. Medico</SortableTableHead>
+                    <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
+                    <SortableTableHead sortKey="courses" currentSort={sortConfig} onSort={() => {}} className="text-right">Corsi Attivi</SortableTableHead>
                     <TableHead className="text-right">Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.map((member) => (
+                  {sortedMembers.map((member) => (
                       <TableRow key={member.id} data-testid={`member-row-${member.id}`}>
                         <TableCell>
                           <span 

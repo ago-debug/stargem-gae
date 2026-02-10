@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -613,6 +614,28 @@ export default function Workshops() {
     workshop.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
+  const { sortConfig, handleSort, sortItems } = useSortableTable<typeof filteredWorkshops[0]>();
+
+  const getSortValue = (workshop: typeof filteredWorkshops[0], key: string) => {
+    switch (key) {
+      case "sku": return workshop.sku;
+      case "name": return workshop.name;
+      case "category": return categories?.find(c => c.id === workshop.categoryId)?.name;
+      case "instructor": {
+        const inst = instructors?.find(i => i.id === workshop.instructorId);
+        return inst ? `${inst.firstName} ${inst.lastName}` : null;
+      }
+      case "price": return Number(workshop.price) || 0;
+      case "capacity": return workshop.maxCapacity || 0;
+      case "enrollments": return getWorkshopEnrollmentCount(workshop.id);
+      case "period": return workshop.startDate;
+      case "status": return workshop.active;
+      default: return null;
+    }
+  };
+
+  const sortedWorkshops = sortItems(filteredWorkshops, getSortValue);
+
   const exportToCSV = () => {
     if (!filteredWorkshops.length) return;
     
@@ -730,20 +753,20 @@ export default function Workshops() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Codice</TableHead>
-                  <TableHead>Workshop</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Staff/Insegnante</TableHead>
-                  <TableHead>Prezzo</TableHead>
-                  <TableHead>Posti</TableHead>
-                  <TableHead>Iscritti</TableHead>
-                  <TableHead>Periodo</TableHead>
-                  <TableHead>Stato</TableHead>
+                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>Codice</SortableTableHead>
+                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Workshop</SortableTableHead>
+                  <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
+                  <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
+                  <SortableTableHead sortKey="price" currentSort={sortConfig} onSort={handleSort}>Prezzo</SortableTableHead>
+                  <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Posti</SortableTableHead>
+                  <SortableTableHead sortKey="enrollments" currentSort={sortConfig} onSort={handleSort}>Iscritti</SortableTableHead>
+                  <SortableTableHead sortKey="period" currentSort={sortConfig} onSort={handleSort}>Periodo</SortableTableHead>
+                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredWorkshops.map((workshop) => {
+                {sortedWorkshops.map((workshop) => {
                   const enrollmentCount = getWorkshopEnrollmentCount(workshop.id);
                   const enrollmentsList = getWorkshopEnrollmentsList(workshop.id);
                   return (
