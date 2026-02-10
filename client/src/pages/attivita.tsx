@@ -46,20 +46,21 @@ interface ActivitySection {
   color: string;
   categoryApiEndpoint?: string;
   categoryManagementUrl?: string;
+  managementUrl?: string;
 }
 
 const activitySections: ActivitySection[] = [
-  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", type: "corsi", color: "bg-blue-500", categoryApiEndpoint: "/api/categories", categoryManagementUrl: "/categorie" },
-  { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", type: "workshop", color: "bg-purple-500", categoryApiEndpoint: "/api/workshop-categories", categoryManagementUrl: "/categorie-workshop" },
-  { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, description: "Lezioni di prova a pagamento", type: "other", color: "bg-orange-500" },
-  { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", type: "other", color: "bg-green-500" },
-  { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, description: "Lezioni singole o drop-in", type: "other", color: "bg-cyan-500" },
-  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", type: "other", color: "bg-yellow-500", categoryApiEndpoint: "/api/sunday-categories", categoryManagementUrl: "/categorie-domeniche" },
-  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento libero e affitti", type: "other", color: "bg-red-500", categoryApiEndpoint: "/api/training-categories", categoryManagementUrl: "/categorie-allenamenti" },
-  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", type: "other", color: "bg-indigo-500", categoryApiEndpoint: "/api/individual-lesson-categories", categoryManagementUrl: "/categorie-lezioni-individuali" },
-  { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", type: "other", color: "bg-teal-500", categoryApiEndpoint: "/api/campus-categories", categoryManagementUrl: "/categorie-campus" },
-  { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", type: "other", color: "bg-pink-500", categoryApiEndpoint: "/api/recital-categories", categoryManagementUrl: "/categorie-saggi" },
-  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, description: "Vacanze studio e viaggi formativi", type: "other", color: "bg-amber-500", categoryApiEndpoint: "/api/vacation-categories", categoryManagementUrl: "/categorie-vacanze-studio" },
+  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", type: "corsi", color: "bg-blue-500", categoryApiEndpoint: "/api/categories", categoryManagementUrl: "/categorie", managementUrl: "/corsi" },
+  { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", type: "workshop", color: "bg-purple-500", categoryApiEndpoint: "/api/workshop-categories", categoryManagementUrl: "/categorie-workshop", managementUrl: "/workshops" },
+  { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, description: "Lezioni di prova a pagamento", type: "other", color: "bg-orange-500", managementUrl: "/gestione/prove-pagamento" },
+  { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", type: "other", color: "bg-green-500", managementUrl: "/gestione/prove-gratuite" },
+  { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, description: "Lezioni singole o drop-in", type: "other", color: "bg-cyan-500", managementUrl: "/gestione/lezioni-singole" },
+  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", type: "other", color: "bg-yellow-500", categoryApiEndpoint: "/api/sunday-categories", categoryManagementUrl: "/categorie-domeniche", managementUrl: "/gestione/domeniche-movimento" },
+  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento libero e affitti", type: "other", color: "bg-red-500", categoryApiEndpoint: "/api/training-categories", categoryManagementUrl: "/categorie-allenamenti", managementUrl: "/gestione/allenamenti" },
+  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", type: "other", color: "bg-indigo-500", categoryApiEndpoint: "/api/individual-lesson-categories", categoryManagementUrl: "/categorie-lezioni-individuali", managementUrl: "/gestione/lezioni-individuali" },
+  { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", type: "other", color: "bg-teal-500", categoryApiEndpoint: "/api/campus-categories", categoryManagementUrl: "/categorie-campus", managementUrl: "/gestione/campus" },
+  { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", type: "other", color: "bg-pink-500", categoryApiEndpoint: "/api/recital-categories", categoryManagementUrl: "/categorie-saggi", managementUrl: "/gestione/saggi" },
+  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, description: "Vacanze studio e viaggi formativi", type: "other", color: "bg-amber-500", categoryApiEndpoint: "/api/vacation-categories", categoryManagementUrl: "/categorie-vacanze-studio", managementUrl: "/gestione/vacanze-studio" },
 ];
 
 function CourseCard({ course, categories, instructors }: { course: Course; categories?: Category[]; instructors?: Instructor[] }) {
@@ -429,7 +430,13 @@ export default function Attivita() {
                   return (
                     <button
                       key={section.id}
-                      onClick={() => setActiveTab(section.id)}
+                      onClick={() => {
+                        if (section.managementUrl) {
+                          navigate(section.managementUrl);
+                        } else {
+                          setActiveTab(section.id);
+                        }
+                      }}
                       className="text-left hover-elevate rounded-md p-3 transition-colors"
                       data-testid={`button-goto-${section.id}`}
                     >
