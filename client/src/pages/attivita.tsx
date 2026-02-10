@@ -335,23 +335,37 @@ export default function Attivita() {
         }
         setActiveTab(value);
       }} className="w-full">
-        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1" data-testid="tabs-attivita">
-          <TabsTrigger value="panoramica" className="text-xs" data-testid="tab-panoramica">
-            <Activity className="w-3.5 h-3.5 mr-1" />
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin" data-testid="tabs-attivita">
+          <Button
+            variant={activeTab === "panoramica" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveTab("panoramica")}
+            className="text-xs h-8 whitespace-nowrap flex-shrink-0"
+            data-testid="tab-panoramica"
+          >
+            <Activity className="w-3 h-3 mr-1 sidebar-icon-gold" />
             Panoramica
-          </TabsTrigger>
+          </Button>
           {activitySections.map((section) => (
-            <TabsTrigger
+            <Button
               key={section.id}
-              value={section.id}
-              className="text-xs"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (section.managementUrl) {
+                  navigate(section.managementUrl);
+                  return;
+                }
+                setActiveTab(section.id);
+              }}
+              className="text-xs h-8 whitespace-nowrap flex-shrink-0"
               data-testid={`tab-${section.id}`}
             >
-              <section.icon className="w-3.5 h-3.5 mr-1" />
+              <section.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
               {section.label}
-            </TabsTrigger>
+            </Button>
           ))}
-        </TabsList>
+        </div>
 
         <TabsContent value="panoramica" className="space-y-6 mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
