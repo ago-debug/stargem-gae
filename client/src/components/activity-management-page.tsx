@@ -529,40 +529,45 @@ export default function ActivityManagementPage({
   );
 
   return (
-    <div className="p-4 space-y-4">
-      <ActivityNavMenu />
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground" data-testid={`text-${testIdPrefix}-title`}>{title}</h1>
-            <p className="text-muted-foreground text-sm" data-testid={`text-${testIdPrefix}-subtitle`}>{subtitle}</p>
+    <div className="flex flex-col h-full">
+      <div className="border-b bg-muted/30 sticky top-0 z-10">
+        <div className="p-4 space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
+                <ArrowLeft className="w-4 h-4 text-white" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-semibold text-foreground" data-testid={`text-${testIdPrefix}-title`}>{title}</h1>
+                <p className="text-muted-foreground text-sm" data-testid={`text-${testIdPrefix}-subtitle`}>{subtitle}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                onClick={exportToCSV}
+                data-testid={`button-${testIdPrefix}-export-csv`}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Esporta CSV
+              </Button>
+              <Button
+                onClick={() => {
+                  closeDialog();
+                  setIsFormOpen(true);
+                }}
+                data-testid={`button-${testIdPrefix}-add`}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {`Nuovo ${itemLabel.charAt(0).toUpperCase() + itemLabel.slice(1)}`}
+              </Button>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            onClick={exportToCSV}
-            data-testid={`button-${testIdPrefix}-export-csv`}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Esporta CSV
-          </Button>
-          <Button
-            onClick={() => {
-              closeDialog();
-              setIsFormOpen(true);
-            }}
-            data-testid={`button-${testIdPrefix}-add`}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            {`Nuovo ${itemLabel.charAt(0).toUpperCase() + itemLabel.slice(1)}`}
-          </Button>
+          <ActivityNavMenu />
         </div>
       </div>
 
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
@@ -594,6 +599,7 @@ export default function ActivityManagementPage({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Codice</TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead>Staff/Insegnante</TableHead>
@@ -607,6 +613,9 @@ export default function ActivityManagementPage({
               <TableBody>
                 {filteredItems.map((item) => (
                   <TableRow key={item.id} data-testid={`${testIdPrefix}-row-${item.id}`}>
+                    <TableCell className="text-xs text-muted-foreground" data-testid={`text-${testIdPrefix}-sku-${item.id}`}>
+                      {item.sku || "-"}
+                    </TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>
                       {categories?.find(c => c.id === item.categoryId)?.name || "-"}
@@ -659,6 +668,7 @@ export default function ActivityManagementPage({
           )}
         </CardContent>
       </Card>
+      </div>
 
       <Dialog open={isFormOpen} onOpenChange={(open) => {
         if (!open) closeDialog();
