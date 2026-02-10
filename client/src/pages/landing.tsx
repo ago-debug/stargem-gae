@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LayoutDashboard, Users, Calendar, BarChart3 } from "lucide-react";
+import logoStarGem from "@assets/b4a42b7f-d509-4427-af5b-ebd8b17c6f92_1770748343779.png";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Landing() {
@@ -57,8 +58,15 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background">
       <div className="container mx-auto px-4 py-16 max-w-6xl">
         <div className="text-center mb-16">
+          <img 
+            src={logoStarGem} 
+            alt="StarGEM Logo" 
+            style={{ width: "300px", height: "auto" }}
+            className="mx-auto mb-6"
+            data-testid="logo-landing"
+          />
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Sistema Gestione Corsi
+            Gestionale StarGEM
           </h1>
           <p className="text-xl text-muted-foreground mb-8">
             Gestisci iscritti, corsi, pagamenti e molto altro in un'unica piattaforma
