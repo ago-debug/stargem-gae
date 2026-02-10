@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, FolderTree } from "lucide-react";
+import { Plus, Edit, Trash2, FolderTree, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { VacationCategory, InsertVacationCategory } from "@shared/schema";
 
@@ -95,6 +95,10 @@ export default function VacationCategories() {
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Indietro
+      </Button>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2" data-testid="text-page-title">Categorie Vacanze Studio</h1>

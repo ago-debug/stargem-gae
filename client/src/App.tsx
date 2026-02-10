@@ -99,7 +99,6 @@ function Router() {
       <Route path="/knowledge" component={Knowledge} />
       <Route path="/todo-list" component={TodoList} />
       <Route path="/attivita" component={Attivita} />
-      <Route path="/gestione" component={Gestione} />
       <Route path="/gestione/prove-pagamento" component={PaidTrials} />
       <Route path="/gestione/prove-gratuite" component={FreeTrials} />
       <Route path="/gestione/lezioni-singole" component={SingleLessons} />
@@ -109,6 +108,7 @@ function Router() {
       <Route path="/gestione/campus" component={CampusActivities} />
       <Route path="/gestione/saggi" component={Recitals} />
       <Route path="/gestione/vacanze-studio" component={VacationStudies} />
+      <Route path="/gestione" component={Gestione} />
       <Route component={NotFound} />
     </Switch>
   );

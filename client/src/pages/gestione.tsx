@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Calendar,
   Sparkles,
@@ -12,6 +13,7 @@ import {
   Award,
   Music,
   Settings2,
+  ArrowLeft,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -41,6 +43,10 @@ const activityCards: ActivityCard[] = [
 export default function Gestione() {
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Indietro
+      </Button>
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2" data-testid="text-gestione-title">Gestione Attività</h1>
         <p className="text-muted-foreground">Seleziona un'attività per gestirla</p>

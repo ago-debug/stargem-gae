@@ -18,6 +18,7 @@ import {
   UserCheck,
   ExternalLink,
   Activity,
+  ArrowLeft,
 } from "lucide-react";
 import { Link } from "wouter";
 import type {
@@ -309,6 +310,10 @@ export default function Attivita() {
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Indietro
+      </Button>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2" data-testid="text-page-title">

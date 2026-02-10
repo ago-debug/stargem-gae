@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Briefcase } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Briefcase, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Instructor, InsertInstructor, Course } from "@shared/schema";
 
@@ -109,6 +109,10 @@ export default function Instructors() {
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Indietro
+      </Button>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Staff/Insegnanti</h1>

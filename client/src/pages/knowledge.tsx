@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Save, Plus, Trash2, Info, Loader2 } from "lucide-react";
+import { BookOpen, Save, Plus, Trash2, Info, Loader2, ArrowLeft } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Knowledge } from "@shared/schema";
@@ -102,6 +102,10 @@ export default function KnowledgePage() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
+        <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Indietro
+        </Button>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BookOpen className="w-8 h-8 text-primary" />
