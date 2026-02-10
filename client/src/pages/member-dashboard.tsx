@@ -21,9 +21,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import type { Member, Attendance, Enrollment, MedicalCertificate, Membership, InsertMember } from "@shared/schema";
+import type { Member, Attendance, Enrollment, MedicalCertificate, Membership } from "@shared/schema";
 
-type MemberFormData = Partial<InsertMember>;
+type MemberFormData = Partial<Omit<Member, "id" | "createdAt" | "updatedAt">>;
 
 const GENDER_OPTIONS = [
   { id: "M", label: "Maschio" },
