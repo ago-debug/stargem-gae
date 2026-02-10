@@ -41,6 +41,7 @@ import {
   insertCampusActivitySchema,
   insertRecitalSchema,
   insertVacationStudySchema,
+  insertActivityStatusSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -3414,6 +3415,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Errore eliminazione knowledge" });
+    }
+  });
+
+  // ======== ACTIVITY STATUS ROUTES ========
+
+  app.get("/api/activity-statuses", async (_req, res) => {
+    try {
+      const statuses = await storage.getActivityStatuses();
+      res.json(statuses);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore recupero stati" });
+    }
+  });
+
+  app.post("/api/activity-statuses", async (req, res) => {
+    try {
+      const parsed = insertActivityStatusSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
+      }
+      const status = await storage.createActivityStatus(parsed.data);
+      res.json(status);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore creazione stato" });
+    }
+  });
+
+  app.patch("/api/activity-statuses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const status = await storage.updateActivityStatus(id, req.body);
+      res.json(status);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore aggiornamento stato" });
+    }
+  });
+
+  app.delete("/api/activity-statuses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteActivityStatus(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore eliminazione stato" });
     }
   });
 

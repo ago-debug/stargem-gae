@@ -43,6 +43,7 @@ import {
   campusActivities,
   recitals,
   vacationStudies,
+  activityStatuses,
   type User,
   type UpsertUser,
   type Member,
@@ -125,6 +126,8 @@ import {
   type InsertRecital,
   type VacationStudy,
   type InsertVacationStudy,
+  type ActivityStatus,
+  type InsertActivityStatus,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -394,6 +397,13 @@ export interface IStorage {
   getImportConfig(id: number): Promise<ImportConfig | undefined>;
   createImportConfig(config: InsertImportConfig): Promise<ImportConfig>;
   deleteImportConfig(id: number): Promise<void>;
+
+  // Activity Statuses
+  getActivityStatuses(): Promise<ActivityStatus[]>;
+  getActivityStatus(id: number): Promise<ActivityStatus | undefined>;
+  createActivityStatus(status: InsertActivityStatus): Promise<ActivityStatus>;
+  updateActivityStatus(id: number, status: Partial<InsertActivityStatus>): Promise<ActivityStatus>;
+  deleteActivityStatus(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1888,6 +1898,30 @@ export class DatabaseStorage implements IStorage {
 
   async deleteKnowledge(id: string): Promise<void> {
     await db.delete(knowledge).where(eq(knowledge.id, id));
+  }
+
+  // ==== Activity Statuses ====
+  async getActivityStatuses(): Promise<ActivityStatus[]> {
+    return await db.select().from(activityStatuses).orderBy(activityStatuses.sortOrder);
+  }
+
+  async getActivityStatus(id: number): Promise<ActivityStatus | undefined> {
+    const [status] = await db.select().from(activityStatuses).where(eq(activityStatuses.id, id));
+    return status;
+  }
+
+  async createActivityStatus(status: InsertActivityStatus): Promise<ActivityStatus> {
+    const [newStatus] = await db.insert(activityStatuses).values(status).returning();
+    return newStatus;
+  }
+
+  async updateActivityStatus(id: number, status: Partial<InsertActivityStatus>): Promise<ActivityStatus> {
+    const [updated] = await db.update(activityStatuses).set(status).where(eq(activityStatuses.id, id)).returning();
+    return updated;
+  }
+
+  async deleteActivityStatus(id: number): Promise<void> {
+    await db.delete(activityStatuses).where(eq(activityStatuses.id, id));
   }
 }
 
