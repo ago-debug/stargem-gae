@@ -95,11 +95,6 @@ const mainMenuItems = [
 
 const draftItems = [
   {
-    title: "test Gae",
-    url: "/test-gae",
-    icon: Settings,
-  },
-  {
     title: "Maschera Input Generale",
     url: "/test2-gae",
     icon: Settings,
