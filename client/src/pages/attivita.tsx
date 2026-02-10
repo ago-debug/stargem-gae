@@ -20,7 +20,7 @@ import {
   Activity,
   ArrowLeft,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import type {
   Course, Workshop, Category, WorkshopCategory, Instructor, Studio,
   SundayCategory, TrainingCategory, IndividualLessonCategory,
@@ -281,6 +281,7 @@ function SummaryStats({ label, count, active, icon: Icon, color }: { label: stri
 
 export default function Attivita() {
   const [activeTab, setActiveTab] = useState("panoramica");
+  const [, navigate] = useLocation();
 
   const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
   const { data: workshops } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
@@ -325,7 +326,17 @@ export default function Attivita() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => {
+        if (value === "corsi") {
+          navigate("/corsi");
+          return;
+        }
+        if (value === "workshop") {
+          navigate("/workshops");
+          return;
+        }
+        setActiveTab(value);
+      }} className="w-full">
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1" data-testid="tabs-attivita">
           <TabsTrigger value="panoramica" className="text-xs" data-testid="tab-panoramica">
             <Activity className="w-3.5 h-3.5 mr-1" />
