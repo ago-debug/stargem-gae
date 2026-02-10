@@ -498,16 +498,17 @@ export default function Reports() {
                               Esegui
                             </Button>
                             <Button
-                              variant="ghost"
                               size="icon"
+                              className="gold-3d-button"
                               onClick={() => openEditDialog(report)}
                               data-testid={`button-edit-report-${report.id}`}
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
+                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                               onClick={() => deleteReportMutation.mutate(report.id)}
                               data-testid={`button-delete-report-${report.id}`}
                             >
@@ -634,7 +635,7 @@ export default function Reports() {
                             placeholder="Valore"
                             className="flex-1"
                           />
-                          <Button variant="ghost" size="icon" onClick={() => removeFilter(index)}>
+                          <Button variant="outline" size="icon" className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100" onClick={() => removeFilter(index)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>

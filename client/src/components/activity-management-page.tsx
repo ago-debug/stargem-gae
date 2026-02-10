@@ -665,16 +665,17 @@ export default function ActivityManagementPage({
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button
-                          variant="ghost"
                           size="icon"
+                          className="gold-3d-button"
                           onClick={() => openEditDialog(item)}
                           data-testid={`button-${testIdPrefix}-edit-${item.id}`}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
+                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => {
                             if (confirm(`Sei sicuro di voler eliminare questo ${itemLabel}?`)) {
                               deleteMutation.mutate(item.id);

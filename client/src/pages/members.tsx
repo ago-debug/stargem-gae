@@ -718,8 +718,8 @@ export default function Members() {
                               Tessere
                             </Button>
                             <Button
-                              variant="ghost"
                               size="icon"
+                              className="gold-3d-button"
                               onClick={() => setLocation(`/?memberId=${member.id}`)}
                               title="Apri in Anagrafica"
                               data-testid={`button-edit-member-${member.id}`}
@@ -727,8 +727,9 @@ export default function Members() {
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
+                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                               onClick={() => {
                                 if (confirm("Sei sicuro di voler eliminare questo iscritto?")) {
                                   deleteMutation.mutate(member.id);
@@ -1206,7 +1207,8 @@ export default function Members() {
                                 <Button
                                   type="button"
                                   size="sm"
-                                  variant="ghost"
+                                  variant="outline"
+                                  className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                                   onClick={() => {
                                     if (confirm(`Rimuovere l'iscrizione al corso "${course.name}"?`)) {
                                       removeEnrollmentMutation.mutate({ 
@@ -1322,7 +1324,8 @@ export default function Members() {
                               <Button
                                 type="button"
                                 size="sm"
-                                variant="ghost"
+                                variant="outline"
+                                className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                                 onClick={() => {
                                   if (confirm(`Rimuovere l'iscrizione al workshop "${workshop.name}"?`)) {
                                     removeWorkshopEnrollmentMutation.mutate({ 
@@ -1536,7 +1539,8 @@ export default function Members() {
                                 <Button
                                   type="button"
                                   size="sm"
-                                  variant="ghost"
+                                  variant="outline"
+                                  className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                                   onClick={() => {
                                     if (confirm("Eliminare questa presenza?")) {
                                       deleteAttendanceMutation.mutate({
@@ -1782,8 +1786,9 @@ function EnrollmentDialog({
                           </div>
                         </div>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
+                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => {
                             if (confirm("Vuoi eliminare questa iscrizione?")) {
                               deleteEnrollmentMutation.mutate(enrollment.id);
@@ -2155,16 +2160,17 @@ function MembershipManagementDialog({
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
-                          variant="ghost"
                           size="icon"
+                          className="gold-3d-button"
                           onClick={() => setEditingMembership(membership)}
                           data-testid={`button-edit-membership-${membership.id}`}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
+                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => {
                             if (confirm("Sei sicuro di voler eliminare questa tessera?")) {
                               deleteMembershipMutation.mutate(membership.id);
@@ -2351,16 +2357,17 @@ function MembershipManagementDialog({
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
-                          variant="ghost"
                           size="icon"
+                          className="gold-3d-button"
                           onClick={() => setEditingCertificate(cert)}
                           data-testid={`button-edit-certificate-${cert.id}`}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
+                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => {
                             if (confirm("Sei sicuro di voler eliminare questo certificato?")) {
                               deleteCertificateMutation.mutate(cert.id);

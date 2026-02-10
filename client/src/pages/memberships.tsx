@@ -307,8 +307,9 @@ export default function Memberships() {
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
+                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                               onClick={() => {
                                 if (confirm("Sei sicuro di voler eliminare questa tessera?")) {
                                   // Delete mutation here
@@ -432,8 +433,9 @@ export default function Memberships() {
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
+                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                               onClick={() => {
                                 if (confirm("Sei sicuro di voler eliminare questo certificato?")) {
                                   // Delete mutation here
