@@ -463,7 +463,7 @@ export default function Test2Gae() {
                 className="text-xs h-8 bg-background"
                 data-testid={`nav-${item.id}`}
               >
-                <item.icon className="w-3 h-3 mr-1" />
+                <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 {item.label}
               </Button>
             ))}
