@@ -115,11 +115,6 @@ const draftItems = [
     icon: Settings,
   },
   {
-    title: "Cose da Fare",
-    url: "/todo-list",
-    icon: CheckSquare,
-  },
-  {
     title: "Attività",
     url: "/attivita",
     icon: Activity,
@@ -157,6 +152,11 @@ const draftItems = [
 ];
 
 const commonTablesItems = [
+  {
+    title: "Cose da Fare",
+    url: "/todo-list",
+    icon: CheckSquare,
+  },
   {
     title: "Categorie Attività",
     url: "/categorie-attivita",
