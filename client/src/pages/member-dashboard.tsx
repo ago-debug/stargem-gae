@@ -209,23 +209,23 @@ export default function MemberDashboard() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setIsGSheetsDialogOpen(true)} data-testid="button-gsheets">
-                <Settings className="w-4 h-4 mr-1" />
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" onClick={() => setIsGSheetsDialogOpen(true)} data-testid="button-gsheets">
+                <Settings className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 GSheets
               </Button>
-              <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white border-amber-700" data-testid="button-esporta">
-                <Upload className="w-4 h-4 mr-1" />
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-esporta">
+                <Upload className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Esporta
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setLocation("/importa")} data-testid="button-importa">
-                <Download className="w-4 h-4 mr-1" />
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" onClick={() => setLocation("/importa")} data-testid="button-importa">
+                <Download className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Importa
               </Button>
-              <Button variant="outline" size="sm" onClick={handleSave} disabled={saveMutation.isPending} data-testid="button-salva">
-                <Save className="w-4 h-4 mr-1" />
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" onClick={handleSave} disabled={saveMutation.isPending} data-testid="button-salva">
+                <Save className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Salva
               </Button>
-              <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white border-amber-700" onClick={() => setLocation("/membro/nuovo")} data-testid="button-nuovo">
+              <Button size="sm" className="gold-3d-button" onClick={() => setLocation("/membro/nuovo")} data-testid="button-nuovo">
                 <Plus className="w-4 h-4 mr-1" />
                 Nuovo
               </Button>
