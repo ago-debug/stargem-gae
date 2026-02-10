@@ -478,7 +478,7 @@ export default function Test2Gae() {
         <Card id="intestazione" className="scroll-mt-32">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <FileText className="w-5 h-5" />
+              <FileText className="w-5 h-5 sidebar-icon-gold" />
               Intestazione
             </CardTitle>
           </CardHeader>
@@ -949,7 +949,7 @@ export default function Test2Gae() {
           <Card className="flex-1">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <User className="w-5 h-5" />
+                <User className="w-5 h-5 sidebar-icon-gold" />
                 Anagrafica
               </CardTitle>
             </CardHeader>
@@ -1417,7 +1417,7 @@ export default function Test2Gae() {
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between gap-2 text-lg">
               <span className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
+                <CreditCard className="w-5 h-5 sidebar-icon-gold" />
                 Pagamenti
               </span>
               <Button size="sm" variant="destructive" data-testid="button-aggiungi-pagamento">
@@ -1575,7 +1575,7 @@ export default function Test2Gae() {
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between gap-2 text-lg">
               <span className="flex items-center gap-2">
-                <Gift className="w-5 h-5" />
+                <Gift className="w-5 h-5 sidebar-icon-gold" />
                 Gift - Buono - Reso - Hello Gem
               </span>
               <Button size="sm" variant="destructive" data-testid="button-aggiungi-gift">
@@ -1638,7 +1638,7 @@ export default function Test2Gae() {
         <Card id="tessere" className="scroll-mt-32">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <IdCard className="w-5 h-5" />
+              <IdCard className="w-5 h-5 sidebar-icon-gold" />
               Tessere
             </CardTitle>
           </CardHeader>
@@ -1698,7 +1698,7 @@ export default function Test2Gae() {
         <Card id="certificato" className="scroll-mt-32">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Stethoscope className="w-5 h-5" />
+              <Stethoscope className="w-5 h-5 sidebar-icon-gold" />
               Certificato Medico
             </CardTitle>
           </CardHeader>
@@ -1745,7 +1745,7 @@ export default function Test2Gae() {
         <Card id="attivita" className="scroll-mt-32">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <BookOpen className="w-5 h-5" />
+              <BookOpen className="w-5 h-5 sidebar-icon-gold" />
               Attività
             </CardTitle>
           </CardHeader>

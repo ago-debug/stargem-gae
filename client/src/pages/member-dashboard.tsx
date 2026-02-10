@@ -291,8 +291,8 @@ export default function MemberDashboard() {
           <TabsContent value="anagrafica" className="mt-0">
             <Card>
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <User className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <User className="w-5 h-5 sidebar-icon-gold" />
                   Anagrafica
                 </CardTitle>
               </CardHeader>
@@ -520,8 +520,8 @@ export default function MemberDashboard() {
           <TabsContent value="pagamenti" className="mt-0">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <CreditCard className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <CreditCard className="w-5 h-5 sidebar-icon-gold" />
                   Pagamenti
                 </CardTitle>
               </CardHeader>
@@ -536,8 +536,8 @@ export default function MemberDashboard() {
           <TabsContent value="buoni" className="mt-0">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <Gift className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <Gift className="w-5 h-5 sidebar-icon-gold" />
                   Buoni
                 </CardTitle>
               </CardHeader>
@@ -552,8 +552,8 @@ export default function MemberDashboard() {
           <TabsContent value="tessere" className="mt-0">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <IdCard className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <IdCard className="w-5 h-5 sidebar-icon-gold" />
                   Tessere
                 </CardTitle>
               </CardHeader>
@@ -603,8 +603,8 @@ export default function MemberDashboard() {
           <TabsContent value="certificati" className="mt-0">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <FileText className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <FileText className="w-5 h-5 sidebar-icon-gold" />
                   Certificati Medici
                 </CardTitle>
                 <Button size="sm" data-testid="button-add-certificate">
@@ -650,8 +650,8 @@ export default function MemberDashboard() {
           <TabsContent value="gare" className="mt-0">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <Trophy className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <Trophy className="w-5 h-5 sidebar-icon-gold" />
                   Gare
                 </CardTitle>
               </CardHeader>
@@ -666,8 +666,8 @@ export default function MemberDashboard() {
           <TabsContent value="membership" className="mt-0">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <Users className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <Users className="w-5 h-5 sidebar-icon-gold" />
                   Membership
                 </CardTitle>
                 <Button size="sm" data-testid="button-add-membership">
@@ -713,8 +713,8 @@ export default function MemberDashboard() {
           <TabsContent value="allenamenti" className="mt-0">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <Dumbbell className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <Dumbbell className="w-5 h-5 sidebar-icon-gold" />
                   Allenamenti/Affitti / Presenze
                 </CardTitle>
               </CardHeader>
@@ -760,8 +760,8 @@ export default function MemberDashboard() {
           <TabsContent value="corsi" className="mt-0">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <BookOpen className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <BookOpen className="w-5 h-5 sidebar-icon-gold" />
                   Corsi Iscritti
                 </CardTitle>
                 <Button size="sm" data-testid="button-add-course">
@@ -816,8 +816,8 @@ export default function MemberDashboard() {
           <TabsContent value="vacanze" className="mt-0">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
-                  <Sun className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sidebar-icon-gold">
+                  <Sun className="w-5 h-5 sidebar-icon-gold" />
                   Vacanze / Sospensioni
                 </CardTitle>
               </CardHeader>

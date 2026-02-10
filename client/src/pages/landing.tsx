@@ -128,7 +128,7 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader>
-              <LayoutDashboard className="w-10 h-10 text-primary mb-2" />
+              <LayoutDashboard className="w-10 h-10 sidebar-icon-gold mb-2" />
               <CardTitle>Dashboard</CardTitle>
               <CardDescription>
                 Panoramica completa di corsi, iscritti e scadenze
@@ -138,7 +138,7 @@ export default function Landing() {
 
           <Card>
             <CardHeader>
-              <Users className="w-10 h-10 text-primary mb-2" />
+              <Users className="w-10 h-10 sidebar-icon-gold mb-2" />
               <CardTitle>Gestione Iscritti</CardTitle>
               <CardDescription>
                 Anagrafica completa con tessere e certificati medici
@@ -148,7 +148,7 @@ export default function Landing() {
 
           <Card>
             <CardHeader>
-              <Calendar className="w-10 h-10 text-primary mb-2" />
+              <Calendar className="w-10 h-10 sidebar-icon-gold mb-2" />
               <CardTitle>Corsi & Categorie</CardTitle>
               <CardDescription>
                 Organizza corsi per categoria con staff/insegnanti assegnati
@@ -158,7 +158,7 @@ export default function Landing() {
 
           <Card>
             <CardHeader>
-              <BarChart3 className="w-10 h-10 text-primary mb-2" />
+              <BarChart3 className="w-10 h-10 sidebar-icon-gold mb-2" />
               <CardTitle>Report & Statistiche</CardTitle>
               <CardDescription>
                 Analisi dettagliate su iscrizioni, entrate e presenze

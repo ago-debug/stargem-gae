@@ -568,7 +568,7 @@ export default function AnagraficaHome() {
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <User className="w-5 h-5" />
+                  <User className="w-5 h-5 sidebar-icon-gold" />
                   Anagrafica
                 </CardTitle>
               </CardHeader>
@@ -929,7 +929,7 @@ export default function AnagraficaHome() {
               <Card>
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <IdCard className="w-5 h-5" />
+                    <IdCard className="w-5 h-5 sidebar-icon-gold" />
                     Tessera Partecipante
                   </CardTitle>
                 </CardHeader>
@@ -981,7 +981,7 @@ export default function AnagraficaHome() {
               <Card>
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <Building2 className="w-5 h-5" />
+                    <Building2 className="w-5 h-5 sidebar-icon-gold" />
                     Tessera Ente
                   </CardTitle>
                 </CardHeader>
@@ -1062,7 +1062,7 @@ export default function AnagraficaHome() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
+                  <CreditCard className="w-5 h-5 sidebar-icon-gold" />
                   Pagamenti
                 </CardTitle>
                 {selectedMemberId && (
@@ -1115,7 +1115,7 @@ export default function AnagraficaHome() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
+                  <BookOpen className="w-5 h-5 sidebar-icon-gold" />
                   Corsi
                 </CardTitle>
               </CardHeader>
@@ -1158,7 +1158,7 @@ export default function AnagraficaHome() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
+                  <FileText className="w-5 h-5 sidebar-icon-gold" />
                   Certificati Medici
                 </CardTitle>
               </CardHeader>
@@ -1206,7 +1206,7 @@ export default function AnagraficaHome() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
+                  <Users className="w-5 h-5 sidebar-icon-gold" />
                   Abbonamenti
                 </CardTitle>
               </CardHeader>
@@ -1245,7 +1245,7 @@ export default function AnagraficaHome() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Dumbbell className="w-5 h-5" />
+                  <Dumbbell className="w-5 h-5 sidebar-icon-gold" />
                   Presenze / Allenamenti/Affitti
                 </CardTitle>
               </CardHeader>
@@ -1288,7 +1288,7 @@ export default function AnagraficaHome() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Gift className="w-5 h-5" />
+                  <Gift className="w-5 h-5 sidebar-icon-gold" />
                   Buoni
                 </CardTitle>
               </CardHeader>
@@ -1303,7 +1303,7 @@ export default function AnagraficaHome() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Trophy className="w-5 h-5" />
+                  <Trophy className="w-5 h-5 sidebar-icon-gold" />
                   Gare
                 </CardTitle>
               </CardHeader>
@@ -1318,7 +1318,7 @@ export default function AnagraficaHome() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sun className="w-5 h-5" />
+                  <Sun className="w-5 h-5 sidebar-icon-gold" />
                   Vacanze
                 </CardTitle>
               </CardHeader>
@@ -1396,7 +1396,7 @@ export default function AnagraficaHome() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5" />
+              <CreditCard className="w-5 h-5 sidebar-icon-gold" />
               Nuovo Pagamento
             </DialogTitle>
           </DialogHeader>
