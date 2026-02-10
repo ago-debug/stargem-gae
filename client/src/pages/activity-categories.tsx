@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Calendar,
@@ -11,6 +12,7 @@ import {
   Award,
   Music,
   FolderTree,
+  ArrowLeft,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -75,6 +77,10 @@ function CategoryCard({ info }: { info: CategoryInfo }) {
 export default function ActivityCategories() {
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Indietro
+      </Button>
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2" data-testid="text-page-title">
           Categorie Attivit&agrave;

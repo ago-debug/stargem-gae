@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   User, CreditCard, Gift, IdCard, FileText, Trophy, Users, Dumbbell, 
   BookOpen, Sun, Plus, Settings, Download, Upload, Save, ChevronLeft,
-  Trash2, Calendar, X
+  Trash2, Calendar, X, ArrowLeft
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -182,6 +182,10 @@ export default function MemberDashboard() {
     <div className="flex flex-col h-full">
       <div className="border-b bg-background sticky top-0 z-10">
         <div className="p-4 space-y-4">
+          <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Indietro
+          </Button>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-foreground">Sistema di Gestione Anagrafica</h1>

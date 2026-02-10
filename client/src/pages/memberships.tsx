@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, IdCard, FileText, Building2, Check, ChevronsUpDown, UserPlus } from "lucide-react";
+import { Plus, Search, Edit, Trash2, IdCard, FileText, Building2, Check, ChevronsUpDown, UserPlus, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { Membership, InsertMembership, MedicalCertificate, InsertMedicalCertificate, Member } from "@shared/schema";
@@ -169,6 +169,10 @@ export default function Memberships() {
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Indietro
+      </Button>
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2">Tessere & Certificati Medici</h1>
         <p className="text-muted-foreground">Gestisci tessere associative e certificati medici</p>

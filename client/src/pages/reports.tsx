@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { BarChart3, TrendingUp, Users, Calendar, Plus, Play, Trash2, Edit, Download, FileText, Save } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Calendar, Plus, Play, Trash2, Edit, Download, FileText, Save, ArrowLeft } from "lucide-react";
 import type { CustomReport } from "@shared/schema";
 
 interface FieldDefinition {
@@ -251,6 +251,10 @@ export default function Reports() {
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mb-2" data-testid="button-back">
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Indietro
+      </Button>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2">Report & Statistiche</h1>
