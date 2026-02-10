@@ -26,14 +26,14 @@ interface CategoryInfo {
 }
 
 const categoryPages: CategoryInfo[] = [
-  { id: "corsi", label: "Categorie Corsi", icon: Calendar, color: "bg-blue-500", url: "/categorie", apiEndpoint: "/api/categories" },
-  { id: "workshop", label: "Categorie Workshop", icon: Sparkles, color: "bg-purple-500", url: "/categorie-workshop", apiEndpoint: "/api/workshop-categories" },
-  { id: "domeniche", label: "Categorie Domeniche in Movimento", icon: Sun, color: "bg-yellow-500", url: "/categorie-domeniche", apiEndpoint: "/api/sunday-categories" },
-  { id: "allenamenti", label: "Categorie Allenamenti/Affitti", icon: Dumbbell, color: "bg-red-500", url: "/categorie-allenamenti", apiEndpoint: "/api/training-categories" },
-  { id: "lezioni", label: "Categorie Lezioni Individuali", icon: UserCheck, color: "bg-indigo-500", url: "/categorie-lezioni-individuali", apiEndpoint: "/api/individual-lesson-categories" },
-  { id: "campus", label: "Categorie Campus", icon: Users, color: "bg-teal-500", url: "/categorie-campus", apiEndpoint: "/api/campus-categories" },
-  { id: "saggi", label: "Categorie Saggi", icon: Award, color: "bg-pink-500", url: "/categorie-saggi", apiEndpoint: "/api/recital-categories" },
-  { id: "vacanze", label: "Categorie Vacanze Studio", icon: Music, color: "bg-amber-500", url: "/categorie-vacanze-studio", apiEndpoint: "/api/vacation-categories" },
+  { id: "corsi", label: "Categorie Corsi", icon: Calendar, color: "icon-gold-bg", url: "/categorie", apiEndpoint: "/api/categories" },
+  { id: "workshop", label: "Categorie Workshop", icon: Sparkles, color: "icon-gold-bg", url: "/categorie-workshop", apiEndpoint: "/api/workshop-categories" },
+  { id: "domeniche", label: "Categorie Domeniche in Movimento", icon: Sun, color: "icon-gold-bg", url: "/categorie-domeniche", apiEndpoint: "/api/sunday-categories" },
+  { id: "allenamenti", label: "Categorie Allenamenti/Affitti", icon: Dumbbell, color: "icon-gold-bg", url: "/categorie-allenamenti", apiEndpoint: "/api/training-categories" },
+  { id: "lezioni", label: "Categorie Lezioni Individuali", icon: UserCheck, color: "icon-gold-bg", url: "/categorie-lezioni-individuali", apiEndpoint: "/api/individual-lesson-categories" },
+  { id: "campus", label: "Categorie Campus", icon: Users, color: "icon-gold-bg", url: "/categorie-campus", apiEndpoint: "/api/campus-categories" },
+  { id: "saggi", label: "Categorie Saggi", icon: Award, color: "icon-gold-bg", url: "/categorie-saggi", apiEndpoint: "/api/recital-categories" },
+  { id: "vacanze", label: "Categorie Vacanze Studio", icon: Music, color: "icon-gold-bg", url: "/categorie-vacanze-studio", apiEndpoint: "/api/vacation-categories" },
 ];
 
 type AnyCategory = { id: number; name: string; parentId?: number | null };
