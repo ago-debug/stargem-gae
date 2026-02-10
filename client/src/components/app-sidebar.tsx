@@ -194,9 +194,9 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <h1 className="text-lg font-semibold text-sidebar-foreground">
+        <a href="/" className="text-lg font-semibold text-sidebar-foreground cursor-pointer" data-testid="link-landing">
           Gestionale StarGEM
-        </h1>
+        </a>
       </SidebarHeader>
       
       <SidebarContent>
