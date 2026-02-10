@@ -107,7 +107,7 @@ export default function CourseEnrollments() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3">
                           <div className="p-2 bg-primary/10 rounded-lg">
-                            <GraduationCap className="w-5 h-5 text-primary" />
+                            <GraduationCap className="w-5 h-5 sidebar-icon-gold" />
                           </div>
                           <div>
                             <h3 className="text-lg font-semibold">{course.name}</h3>

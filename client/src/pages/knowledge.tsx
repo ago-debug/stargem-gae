@@ -108,7 +108,7 @@ export default function KnowledgePage() {
         </Button>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <BookOpen className="w-8 h-8 text-primary" />
+            <BookOpen className="w-8 h-8 sidebar-icon-gold" />
             <div>
               <h1 className="text-2xl font-bold">Knowledge Base</h1>
               <p className="text-muted-foreground">Gestisci le descrizioni informative per le sezioni dell'applicazione</p>

@@ -245,7 +245,7 @@ export default function Test3Gae() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Building2 className="w-6 h-6 text-primary" />
+              <Building2 className="w-6 h-6 sidebar-icon-gold" />
               <h1 className="text-2xl font-bold">Affitto Studio Medico</h1>
             </div>
             
