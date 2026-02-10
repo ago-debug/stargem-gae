@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import {
   Dialog,
   DialogContent,
@@ -56,6 +57,7 @@ const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => {
 export default function Studios() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingStudio, setEditingStudio] = useState<Studio | null>(null);
+  const { sortConfig, handleSort, sortItems } = useSortableTable<Studio>();
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [openTime, setOpenTime] = useState<string>("09:00");
   const [closeTime, setCloseTime] = useState<string>("21:00");
@@ -185,6 +187,19 @@ export default function Studios() {
     setCloseTime("21:00");
     form.reset();
   };
+
+  const getSortValue = (studio: Studio, key: string): any => {
+    switch (key) {
+      case "name": return studio.name;
+      case "floor": return studio.floor;
+      case "capacity": return studio.capacity ? Number(studio.capacity) : null;
+      case "days": return studio.operatingDays;
+      case "status": return studio.active;
+      default: return null;
+    }
+  };
+
+  const sortedStudios = sortItems(studios, getSortValue);
 
   const parseOperatingDays = (daysStr: string | null): string[] => {
     if (!daysStr) return [];
@@ -420,16 +435,16 @@ export default function Studios() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Piano</TableHead>
-                  <TableHead>Capienza</TableHead>
-                  <TableHead>Giorni Operativi</TableHead>
-                  <TableHead>Stato</TableHead>
+                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                  <SortableTableHead sortKey="floor" currentSort={sortConfig} onSort={handleSort}>Piano</SortableTableHead>
+                  <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Capienza</SortableTableHead>
+                  <SortableTableHead sortKey="days" currentSort={sortConfig} onSort={handleSort}>Giorni Operativi</SortableTableHead>
+                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {studios.map((studio) => (
+                {sortedStudios.map((studio) => (
                   <TableRow key={studio.id} data-testid={`row-studio-${studio.id}`}>
                     <TableCell className="font-medium">{studio.name}</TableCell>
                     <TableCell>{studio.floor || "-"}</TableCell>

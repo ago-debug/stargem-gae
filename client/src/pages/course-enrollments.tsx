@@ -4,14 +4,25 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
 import { Search, Users, GraduationCap, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import type { Course } from "@shared/schema";
 
+interface CourseEnrollmentItem {
+  enrollmentId: number;
+  memberId: number;
+  firstName: string;
+  lastName: string;
+  email: string | null | undefined;
+  startDate: string | null | undefined;
+}
+
 export default function CourseEnrollments() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { sortConfig, handleSort, sortItems } = useSortableTable<CourseEnrollmentItem>();
 
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -142,18 +153,30 @@ export default function CourseEnrollments() {
                         </p>
                       ) : (
                         <div className="border rounded-lg overflow-hidden">
+                          {(() => {
+                            const getSortValue = (item: CourseEnrollmentItem, key: string) => {
+                              switch (key) {
+                                case "firstName": return item.firstName;
+                                case "lastName": return item.lastName;
+                                case "email": return item.email || "";
+                                case "enrollDate": return item.startDate || "";
+                                default: return "";
+                              }
+                            };
+                            const sortedEnrollments = sortItems(courseEnrollments, getSortValue);
+                            return (
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Nome</TableHead>
-                                <TableHead>Cognome</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Data Iscrizione</TableHead>
+                                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                                <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
+                                <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
+                                <SortableTableHead sortKey="enrollDate" currentSort={sortConfig} onSort={handleSort}>Data Iscrizione</SortableTableHead>
                                 <TableHead className="text-right">Azioni</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {courseEnrollments.map((enrollment) => (
+                              {sortedEnrollments.map((enrollment) => (
                                 <TableRow key={enrollment.enrollmentId}>
                                   <TableCell className="font-medium">{enrollment.firstName}</TableCell>
                                   <TableCell>{enrollment.lastName}</TableCell>
@@ -174,6 +197,8 @@ export default function CourseEnrollments() {
                               ))}
                             </TableBody>
                           </Table>
+                            );
+                          })()}
                         </div>
                       )}
                     </CardContent>

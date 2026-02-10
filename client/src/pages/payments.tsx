@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, CreditCard, Check, ChevronsUpDown, X, Edit, Download, Filter, ArrowLeft } from "lucide-react";
@@ -28,6 +29,7 @@ export default function Payments() {
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
   const [showPendingOnly, setShowPendingOnly] = useState(false);
+  const { sortConfig, handleSort, sortItems } = useSortableTable<Payment>();
 
   const { data: payments, isLoading } = useQuery<Payment[]>({
     queryKey: ["/api/payments"],
@@ -175,6 +177,19 @@ export default function Payments() {
     }
   };
 
+  const getSortValue = (payment: Payment, key: string): any => {
+    switch (key) {
+      case "member": return getMemberName(payment);
+      case "type": return payment.type;
+      case "description": return payment.description;
+      case "amount": return parseFloat(payment.amount);
+      case "dueDate": return payment.dueDate;
+      case "method": return payment.paymentMethod;
+      case "status": return payment.status;
+      default: return null;
+    }
+  };
+
   // Filter payments based on search and pending filter
   const filteredPayments = payments?.filter(p => {
     const matchesSearch = !searchQuery || 
@@ -184,6 +199,8 @@ export default function Payments() {
     const matchesPending = !showPendingOnly || p.status === 'pending';
     return matchesSearch && matchesPending;
   });
+
+  const sortedPayments = sortItems(filteredPayments || [], getSortValue);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -306,18 +323,18 @@ export default function Payments() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Partecipante</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Descrizione</TableHead>
-                  <TableHead>Importo</TableHead>
-                  <TableHead>Scadenza</TableHead>
-                  <TableHead>Metodo</TableHead>
-                  <TableHead>Stato</TableHead>
+                  <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Partecipante</SortableTableHead>
+                  <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
+                  <SortableTableHead sortKey="description" currentSort={sortConfig} onSort={handleSort}>Descrizione</SortableTableHead>
+                  <SortableTableHead sortKey="amount" currentSort={sortConfig} onSort={handleSort}>Importo</SortableTableHead>
+                  <SortableTableHead sortKey="dueDate" currentSort={sortConfig} onSort={handleSort}>Scadenza</SortableTableHead>
+                  <SortableTableHead sortKey="method" currentSort={sortConfig} onSort={handleSort}>Metodo</SortableTableHead>
+                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPayments.map((payment) => (
+                {sortedPayments.map((payment) => (
                   <TableRow key={payment.id} data-testid={`payment-row-${payment.id}`}>
                     <TableCell className="font-medium">
                       {getMemberName(payment)}

@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -633,6 +634,28 @@ export default function Courses() {
     );
   }) || [];
 
+  const { sortConfig, handleSort, sortItems } = useSortableTable<typeof filteredCourses[0]>();
+
+  const getSortValue = (course: typeof filteredCourses[0], key: string) => {
+    switch (key) {
+      case "sku": return course.sku;
+      case "name": return course.name;
+      case "category": return categories?.find(c => c.id === course.categoryId)?.name;
+      case "instructor": {
+        const inst = instructors?.find(i => i.id === course.instructorId);
+        return inst ? `${inst.firstName} ${inst.lastName}` : null;
+      }
+      case "price": return Number(course.price) || 0;
+      case "capacity": return course.maxCapacity || 0;
+      case "enrollments": return getCourseEnrollmentCount(course.id);
+      case "period": return course.startDate;
+      case "status": return course.active;
+      default: return null;
+    }
+  };
+
+  const sortedCourses = sortItems(filteredCourses, getSortValue);
+
   const exportToCSV = () => {
     if (!filteredCourses.length) return;
     
@@ -778,20 +801,20 @@ export default function Courses() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Codice</TableHead>
-                  <TableHead>Corso</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Staff/Insegnante</TableHead>
-                  <TableHead>Prezzo</TableHead>
-                  <TableHead>Posti</TableHead>
-                  <TableHead>Iscritti</TableHead>
-                  <TableHead>Periodo</TableHead>
-                  <TableHead>Stato</TableHead>
+                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>Codice</SortableTableHead>
+                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Corso</SortableTableHead>
+                  <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
+                  <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
+                  <SortableTableHead sortKey="price" currentSort={sortConfig} onSort={handleSort}>Prezzo</SortableTableHead>
+                  <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Posti</SortableTableHead>
+                  <SortableTableHead sortKey="enrollments" currentSort={sortConfig} onSort={handleSort}>Iscritti</SortableTableHead>
+                  <SortableTableHead sortKey="period" currentSort={sortConfig} onSort={handleSort}>Periodo</SortableTableHead>
+                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCourses.map((course) => {
+                {sortedCourses.map((course) => {
                   const enrollmentCount = getCourseEnrollmentCount(course.id);
                   const enrollmentsList = getCourseEnrollmentsList(course.id);
                   return (

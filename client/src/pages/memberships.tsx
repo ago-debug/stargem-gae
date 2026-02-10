@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -38,6 +39,10 @@ export default function Memberships() {
   const [certMemberOpen, setCertMemberOpen] = useState(false);
   const [certMemberSearch, setCertMemberSearch] = useState("");
   const [selectedCertMember, setSelectedCertMember] = useState<Member | null>(null);
+
+  const { sortConfig: sortConfig1, handleSort: handleSort1, sortItems: sortItems1 } = useSortableTable<Membership>();
+  const { sortConfig: sortConfig2, handleSort: handleSort2, sortItems: sortItems2 } = useSortableTable<MedicalCertificate>();
+  const { sortConfig: sortConfig3, handleSort: handleSort3, sortItems: sortItems3 } = useSortableTable<Member>();
 
   const { data: memberships, isLoading: membershipsLoading } = useQuery<Membership[]>({
     queryKey: ["/api/memberships"],
@@ -256,21 +261,34 @@ export default function Memberships() {
                   );
                 }
 
+                const getSortValue1 = (item: Membership, key: string) => {
+                  switch (key) {
+                    case "member": return getMemberName(item);
+                    case "cardNumber": return item.membershipNumber;
+                    case "barcode": return item.barcode;
+                    case "type": return item.type || "";
+                    case "expiry": return item.expiryDate;
+                    case "status": return getExpiryStatus(item.expiryDate).label;
+                    default: return "";
+                  }
+                };
+                const sortedMemberships = sortItems1(filteredMemberships, getSortValue1);
+
                 return (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Partecipante</TableHead>
-                      <TableHead>N. Tessera</TableHead>
-                      <TableHead>Barcode</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Scadenza</TableHead>
-                      <TableHead>Stato</TableHead>
+                      <SortableTableHead sortKey="member" currentSort={sortConfig1} onSort={handleSort1}>Partecipante</SortableTableHead>
+                      <SortableTableHead sortKey="cardNumber" currentSort={sortConfig1} onSort={handleSort1}>N. Tessera</SortableTableHead>
+                      <SortableTableHead sortKey="barcode" currentSort={sortConfig1} onSort={handleSort1}>Barcode</SortableTableHead>
+                      <SortableTableHead sortKey="type" currentSort={sortConfig1} onSort={handleSort1}>Tipo</SortableTableHead>
+                      <SortableTableHead sortKey="expiry" currentSort={sortConfig1} onSort={handleSort1}>Scadenza</SortableTableHead>
+                      <SortableTableHead sortKey="status" currentSort={sortConfig1} onSort={handleSort1}>Stato</SortableTableHead>
                       <TableHead className="text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredMemberships.map((membership) => {
+                    {sortedMemberships.map((membership) => {
                       const expiryInfo = getExpiryStatus(membership.expiryDate);
                       return (
                         <TableRow key={membership.id} data-testid={`membership-row-${membership.id}`}>
@@ -370,20 +388,32 @@ export default function Memberships() {
                   );
                 }
 
+                const getSortValue2 = (item: MedicalCertificate, key: string) => {
+                  switch (key) {
+                    case "member": return getMemberName(item);
+                    case "doctor": return item.doctorName || "";
+                    case "issueDate": return item.issueDate;
+                    case "expiry": return item.expiryDate;
+                    case "status": return getExpiryStatus(item.expiryDate).label;
+                    default: return "";
+                  }
+                };
+                const sortedCertificates = sortItems2(filteredCertificates, getSortValue2);
+
                 return (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Partecipante</TableHead>
-                      <TableHead>Medico</TableHead>
-                      <TableHead>Data Rilascio</TableHead>
-                      <TableHead>Scadenza</TableHead>
-                      <TableHead>Stato</TableHead>
+                      <SortableTableHead sortKey="member" currentSort={sortConfig2} onSort={handleSort2}>Partecipante</SortableTableHead>
+                      <SortableTableHead sortKey="doctor" currentSort={sortConfig2} onSort={handleSort2}>Medico</SortableTableHead>
+                      <SortableTableHead sortKey="issueDate" currentSort={sortConfig2} onSort={handleSort2}>Data Rilascio</SortableTableHead>
+                      <SortableTableHead sortKey="expiry" currentSort={sortConfig2} onSort={handleSort2}>Scadenza</SortableTableHead>
+                      <SortableTableHead sortKey="status" currentSort={sortConfig2} onSort={handleSort2}>Stato</SortableTableHead>
                       <TableHead className="text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredCertificates.map((cert) => {
+                    {sortedCertificates.map((cert) => {
                       const expiryInfo = getExpiryStatus(cert.expiryDate);
                       return (
                         <TableRow key={cert.id} data-testid={`certificate-row-${cert.id}`}>
@@ -466,20 +496,33 @@ export default function Memberships() {
                   );
                 }
 
+                const getSortValue3 = (item: Member, key: string) => {
+                  switch (key) {
+                    case "member": return `${item.firstName} ${item.lastName}`;
+                    case "entityType": return item.entityCardType || "";
+                    case "cardNumber": return item.entityCardNumber || "";
+                    case "issueDate": return item.entityCardIssueDate || "";
+                    case "expiry": return item.entityCardExpiryDate || "";
+                    case "status": return item.entityCardExpiryDate ? getExpiryStatus(item.entityCardExpiryDate).label : "N/D";
+                    default: return "";
+                  }
+                };
+                const sortedEntityCards = sortItems3(filteredEntityCards, getSortValue3);
+
                 return (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Partecipante</TableHead>
-                        <TableHead>Tipo Ente</TableHead>
-                        <TableHead>Numero Tessera</TableHead>
-                        <TableHead>Data Rilascio</TableHead>
-                        <TableHead>Scadenza</TableHead>
-                        <TableHead>Stato</TableHead>
+                        <SortableTableHead sortKey="member" currentSort={sortConfig3} onSort={handleSort3}>Partecipante</SortableTableHead>
+                        <SortableTableHead sortKey="entityType" currentSort={sortConfig3} onSort={handleSort3}>Tipo Ente</SortableTableHead>
+                        <SortableTableHead sortKey="cardNumber" currentSort={sortConfig3} onSort={handleSort3}>Numero Tessera</SortableTableHead>
+                        <SortableTableHead sortKey="issueDate" currentSort={sortConfig3} onSort={handleSort3}>Data Rilascio</SortableTableHead>
+                        <SortableTableHead sortKey="expiry" currentSort={sortConfig3} onSort={handleSort3}>Scadenza</SortableTableHead>
+                        <SortableTableHead sortKey="status" currentSort={sortConfig3} onSort={handleSort3}>Stato</SortableTableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredEntityCards.map((member) => {
+                      {sortedEntityCards.map((member) => {
                         const expiryInfo = member.entityCardExpiryDate 
                           ? getExpiryStatus(member.entityCardExpiryDate) 
                           : { status: "unknown", label: "N/D", variant: "secondary" as const };
