@@ -99,7 +99,6 @@ export default function MascheraInputGenerale() {
     codiceFiscale: "",
     telefono: "",
     email: "",
-    residenza: "",
     indirizzo: "",
     cap: "",
     citta: "",
@@ -117,7 +116,6 @@ export default function MascheraInputGenerale() {
     cfGen1: "",
     telGen1: "",
     emailGen1: "",
-    residenzaGen1: "",
     indirizzoGen1: "",
     capGen1: "",
     cittaGen1: "",
@@ -134,7 +132,6 @@ export default function MascheraInputGenerale() {
     cfGen2: "",
     telGen2: "",
     emailGen2: "",
-    residenzaGen2: "",
     indirizzoGen2: "",
     capGen2: "",
     cittaGen2: "",
@@ -162,6 +159,23 @@ export default function MascheraInputGenerale() {
   const [partecipanteCategorieDB, setPartecipanteCategorieDB] = useState<{id: number; name: string}[]>([]);
   const [selectedPaymentNotes, setSelectedPaymentNotes] = useState<string[]>([]);
   const [selectedEnrollmentDetails, setSelectedEnrollmentDetails] = useState<string[]>([]);
+
+  const isFormValid = !!(
+    formData.cognome.trim() &&
+    formData.nome.trim() &&
+    formData.codiceFiscale.trim() &&
+    formData.telefono.trim() &&
+    formData.email.trim() &&
+    formData.indirizzo.trim() &&
+    formData.cap.trim() &&
+    formData.citta.trim() &&
+    formData.dataNascita &&
+    formData.luogoNascita.trim() &&
+    formData.provinciaNascita.trim() &&
+    formData.sesso &&
+    formData.eta &&
+    formData.allievo
+  );
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
   const attivitaKeys = ["corsi", "prove-pagamento", "prove-gratuite", "lezioni-singole", "workshop", "domeniche-movimento", "allenamenti", "lezioni-individuali", "campus", "saggi"] as const;
@@ -464,7 +478,14 @@ export default function MascheraInputGenerale() {
                 <Download className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Importa
               </Button>
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-salva">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs h-8 bg-background" 
+                data-testid="button-salva"
+                disabled={!isFormValid}
+                title={!isFormValid ? "Compila tutti i campi obbligatori (*) per salvare" : ""}
+              >
                 <Save className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Salva
               </Button>
@@ -650,22 +671,28 @@ export default function MascheraInputGenerale() {
               {/* REGOLAMENTO */}
               <div className="border-b">
                 <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.regolamento.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  className={`p-3 cursor-pointer transition-colors ${allegati.regolamento.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'}`}
                   onClick={() => toggleAllegatoSection('regolamento')}
                   data-testid="button-toggle-regolamento"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">REGOLAMENTO</span>
+                    <span className={`text-sm font-medium ${allegati.regolamento.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>REGOLAMENTO</span>
                     {allegati.regolamento.hasFile ? (
                       <Check className="w-4 h-4 text-green-600" />
                     ) : (
                       <ArrowDown className="w-4 h-4 text-muted-foreground" />
                     )}
                   </div>
+                  {allegati.regolamento.hasFile && (
+                    <div className="flex items-center gap-2 mt-1 text-xs text-green-600 dark:text-green-400">
+                      <Check className="w-3 h-3" />
+                      <span className="truncate">{allegati.regolamento.fileName || 'File caricato'}</span>
+                    </div>
+                  )}
                 </div>
                 {openAllegatoSections.regolamento && (
                   <div className="p-3 pt-0 space-y-3">
-                    <div className="border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-md p-3 text-center">
+                    <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.regolamento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
                       <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
@@ -685,14 +712,14 @@ export default function MascheraInputGenerale() {
                             size="icon"
                             variant="ghost"
                             className="text-destructive"
-                            onClick={() => removeAllegatoFile('regolamento')}
+                            onClick={(e) => { e.stopPropagation(); removeAllegatoFile('regolamento'); }}
                             data-testid="button-remove-regolamento"
                           >
                             <X className="w-3 h-3" />
                           </Button>
                         </div>
                       ) : (
-                        <label htmlFor="upload-regolamento" className="cursor-pointer flex flex-col items-center gap-1">
+                        <label htmlFor="upload-regolamento" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-regolamento">
                           <FileUp className="w-6 h-6 text-amber-500" />
                           <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
                         </label>
@@ -718,7 +745,7 @@ export default function MascheraInputGenerale() {
                             <SelectValue placeholder="Seleziona" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="si">Sì</SelectItem>
+                            <SelectItem value="si">Si</SelectItem>
                             <SelectItem value="no">No</SelectItem>
                           </SelectContent>
                         </Select>
@@ -731,22 +758,28 @@ export default function MascheraInputGenerale() {
               {/* PRIVACY */}
               <div className="border-b">
                 <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.privacy.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  className={`p-3 cursor-pointer transition-colors ${allegati.privacy.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'}`}
                   onClick={() => toggleAllegatoSection('privacy')}
                   data-testid="button-toggle-privacy"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">PRIVACY</span>
+                    <span className={`text-sm font-medium ${allegati.privacy.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>PRIVACY</span>
                     {allegati.privacy.hasFile ? (
                       <Check className="w-4 h-4 text-green-600" />
                     ) : (
                       <ArrowDown className="w-4 h-4 text-muted-foreground" />
                     )}
                   </div>
+                  {allegati.privacy.hasFile && (
+                    <div className="flex items-center gap-2 mt-1 text-xs text-green-600 dark:text-green-400">
+                      <Check className="w-3 h-3" />
+                      <span className="truncate">{allegati.privacy.fileName || 'File caricato'}</span>
+                    </div>
+                  )}
                 </div>
                 {openAllegatoSections.privacy && (
                   <div className="p-3 pt-0 space-y-3">
-                    <div className="border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-md p-3 text-center">
+                    <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.privacy.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
                       <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
@@ -766,14 +799,14 @@ export default function MascheraInputGenerale() {
                             size="icon"
                             variant="ghost"
                             className="text-destructive"
-                            onClick={() => removeAllegatoFile('privacy')}
+                            onClick={(e) => { e.stopPropagation(); removeAllegatoFile('privacy'); }}
                             data-testid="button-remove-privacy"
                           >
                             <X className="w-3 h-3" />
                           </Button>
                         </div>
                       ) : (
-                        <label htmlFor="upload-privacy" className="cursor-pointer flex flex-col items-center gap-1">
+                        <label htmlFor="upload-privacy" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-privacy">
                           <FileUp className="w-6 h-6 text-amber-500" />
                           <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
                         </label>
@@ -799,7 +832,7 @@ export default function MascheraInputGenerale() {
                             <SelectValue placeholder="Seleziona" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="si">Sì</SelectItem>
+                            <SelectItem value="si">Si</SelectItem>
                             <SelectItem value="no">No</SelectItem>
                           </SelectContent>
                         </Select>
@@ -1110,7 +1143,7 @@ export default function MascheraInputGenerale() {
                   <Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Codice Fiscale (J)</Label>
+                  <Label>Codice Fiscale (J) *</Label>
                   <Input 
                     value={formData.codiceFiscale} 
                     onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())} 
@@ -1119,7 +1152,7 @@ export default function MascheraInputGenerale() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-1">
-                    <Label>Telefono</Label>
+                    <Label>Telefono *</Label>
                     <span 
                       className="ml-1 cursor-help"
                       title={verificaStato.telefono ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
@@ -1150,7 +1183,7 @@ export default function MascheraInputGenerale() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-1">
-                    <Label>Email</Label>
+                    <Label>Email *</Label>
                     <span 
                       className="ml-1 cursor-help"
                       title={verificaStato.email ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
@@ -1181,35 +1214,31 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                 <div className="space-y-2">
-                  <Label>Residenza</Label>
-                  <Input value={formData.residenza} onChange={(e) => handleChange("residenza", e.target.value)} />
+                  <Label>Indirizzo residenza *</Label>
+                  <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} data-testid="input-indirizzo" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Indirizzo</Label>
-                  <Input value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} />
+                  <Label>CAP *</Label>
+                  <Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} data-testid="input-cap" />
                 </div>
                 <div className="space-y-2">
-                  <Label>CAP</Label>
-                  <Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Città</Label>
-                  <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} />
+                  <Label>Città *</Label>
+                  <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} data-testid="input-citta" />
                 </div>
                 <div className="space-y-2">
                   <Label>Provincia</Label>
-                  <Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} />
+                  <Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} data-testid="input-provincia" />
                 </div>
                 <div className="space-y-2">
                   <Label>Cod. Comune</Label>
-                  <Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} />
+                  <Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} data-testid="input-cod-comune" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
                 <div className="space-y-2">
-                  <Label>Data di Nascita</Label>
+                  <Label>Data di Nascita *</Label>
                   <Input 
                     value={formData.dataNascita ? new Date(formData.dataNascita).toLocaleDateString('it-IT') : ''} 
                     readOnly
@@ -1217,7 +1246,7 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Luogo di Nascita</Label>
+                  <Label>Luogo di Nascita *</Label>
                   <Input 
                     value={formData.luogoNascita} 
                     readOnly
@@ -1225,7 +1254,7 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Prov. Nascita</Label>
+                  <Label>Prov. Nascita *</Label>
                   <Input 
                     value={formData.provinciaNascita} 
                     readOnly
@@ -1233,7 +1262,7 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Sesso</Label>
+                  <Label>Sesso *</Label>
                   <Input 
                     value={formData.sesso === 'M' ? 'Maschio' : formData.sesso === 'F' ? 'Femmina' : ''} 
                     readOnly
@@ -1241,7 +1270,7 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Età</Label>
+                  <Label>Età *</Label>
                   <Input 
                     value={formData.eta} 
                     readOnly 
@@ -1249,7 +1278,7 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Partecipante</Label>
+                  <Label>Partecipante *</Label>
                   <Select value={formData.allievo} onValueChange={(v) => handleChange("allievo", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona..." />
@@ -1345,30 +1374,26 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                 <div className="space-y-2">
-                  <Label>Residenza</Label>
-                  <Input value={formData.residenzaGen1} onChange={(e) => handleChange("residenzaGen1", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Indirizzo</Label>
-                  <Input value={formData.indirizzoGen1} onChange={(e) => handleChange("indirizzoGen1", e.target.value)} />
+                  <Label>Indirizzo residenza</Label>
+                  <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzoGen1} onChange={(e) => handleChange("indirizzoGen1", e.target.value)} data-testid="input-indirizzo-gen1" />
                 </div>
                 <div className="space-y-2">
                   <Label>CAP</Label>
-                  <Input value={formData.capGen1} onChange={(e) => handleChange("capGen1", e.target.value)} />
+                  <Input value={formData.capGen1} onChange={(e) => handleChange("capGen1", e.target.value)} data-testid="input-cap-gen1" />
                 </div>
                 <div className="space-y-2">
                   <Label>Città</Label>
-                  <Input value={formData.cittaGen1} onChange={(e) => handleChange("cittaGen1", e.target.value)} />
+                  <Input value={formData.cittaGen1} onChange={(e) => handleChange("cittaGen1", e.target.value)} data-testid="input-citta-gen1" />
                 </div>
                 <div className="space-y-2">
                   <Label>Provincia</Label>
-                  <Input value={formData.provinciaGen1} onChange={(e) => handleChange("provinciaGen1", e.target.value)} />
+                  <Input value={formData.provinciaGen1} onChange={(e) => handleChange("provinciaGen1", e.target.value)} data-testid="input-provincia-gen1" />
                 </div>
                 <div className="space-y-2">
                   <Label>Cod. Comune</Label>
-                  <Input value={formData.codComuneGen1} onChange={(e) => handleChange("codComuneGen1", e.target.value)} />
+                  <Input value={formData.codComuneGen1} onChange={(e) => handleChange("codComuneGen1", e.target.value)} data-testid="input-cod-comune-gen1" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
@@ -1494,30 +1519,26 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                 <div className="space-y-2">
-                  <Label>Residenza</Label>
-                  <Input value={formData.residenzaGen2} onChange={(e) => handleChange("residenzaGen2", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Indirizzo</Label>
-                  <Input value={formData.indirizzoGen2} onChange={(e) => handleChange("indirizzoGen2", e.target.value)} />
+                  <Label>Indirizzo residenza</Label>
+                  <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzoGen2} onChange={(e) => handleChange("indirizzoGen2", e.target.value)} data-testid="input-indirizzo-gen2" />
                 </div>
                 <div className="space-y-2">
                   <Label>CAP</Label>
-                  <Input value={formData.capGen2} onChange={(e) => handleChange("capGen2", e.target.value)} />
+                  <Input value={formData.capGen2} onChange={(e) => handleChange("capGen2", e.target.value)} data-testid="input-cap-gen2" />
                 </div>
                 <div className="space-y-2">
                   <Label>Città</Label>
-                  <Input value={formData.cittaGen2} onChange={(e) => handleChange("cittaGen2", e.target.value)} />
+                  <Input value={formData.cittaGen2} onChange={(e) => handleChange("cittaGen2", e.target.value)} data-testid="input-citta-gen2" />
                 </div>
                 <div className="space-y-2">
                   <Label>Provincia</Label>
-                  <Input value={formData.provinciaGen2} onChange={(e) => handleChange("provinciaGen2", e.target.value)} />
+                  <Input value={formData.provinciaGen2} onChange={(e) => handleChange("provinciaGen2", e.target.value)} data-testid="input-provincia-gen2" />
                 </div>
                 <div className="space-y-2">
                   <Label>Cod. Comune</Label>
-                  <Input value={formData.codComuneGen2} onChange={(e) => handleChange("codComuneGen2", e.target.value)} />
+                  <Input value={formData.codComuneGen2} onChange={(e) => handleChange("codComuneGen2", e.target.value)} data-testid="input-cod-comune-gen2" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
