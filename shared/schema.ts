@@ -459,6 +459,23 @@ export const insertPaymentNoteSchema = createInsertSchema(paymentNotes).omit({
 export type InsertPaymentNote = z.infer<typeof insertPaymentNoteSchema>;
 export type PaymentNote = typeof paymentNotes.$inferSelect;
 
+// Enrollment Details (dettaglio iscrizione)
+export const enrollmentDetails = pgTable("enrollment_details", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 100 }).notNull(),
+  color: varchar("color", { length: 50 }),
+  sortOrder: integer("sort_order").default(0),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertEnrollmentDetailSchema = createInsertSchema(enrollmentDetails).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertEnrollmentDetail = z.infer<typeof insertEnrollmentDetailSchema>;
+export type EnrollmentDetail = typeof enrollmentDetails.$inferSelect;
+
 // Studios (sale/studi)
 export const studios = pgTable("studios", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),

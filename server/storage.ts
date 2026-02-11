@@ -45,6 +45,7 @@ import {
   vacationStudies,
   activityStatuses,
   paymentNotes,
+  enrollmentDetails,
   type User,
   type UpsertUser,
   type Member,
@@ -131,6 +132,8 @@ import {
   type InsertActivityStatus,
   type PaymentNote,
   type InsertPaymentNote,
+  type EnrollmentDetail,
+  type InsertEnrollmentDetail,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -414,6 +417,13 @@ export interface IStorage {
   createPaymentNote(note: InsertPaymentNote): Promise<PaymentNote>;
   updatePaymentNote(id: number, note: Partial<InsertPaymentNote>): Promise<PaymentNote>;
   deletePaymentNote(id: number): Promise<void>;
+
+  // Enrollment Details
+  getEnrollmentDetails(): Promise<EnrollmentDetail[]>;
+  getEnrollmentDetail(id: number): Promise<EnrollmentDetail | undefined>;
+  createEnrollmentDetail(detail: InsertEnrollmentDetail): Promise<EnrollmentDetail>;
+  updateEnrollmentDetail(id: number, detail: Partial<InsertEnrollmentDetail>): Promise<EnrollmentDetail>;
+  deleteEnrollmentDetail(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1955,6 +1965,29 @@ export class DatabaseStorage implements IStorage {
 
   async deletePaymentNote(id: number): Promise<void> {
     await db.delete(paymentNotes).where(eq(paymentNotes.id, id));
+  }
+
+  async getEnrollmentDetails(): Promise<EnrollmentDetail[]> {
+    return await db.select().from(enrollmentDetails).orderBy(enrollmentDetails.sortOrder);
+  }
+
+  async getEnrollmentDetail(id: number): Promise<EnrollmentDetail | undefined> {
+    const [detail] = await db.select().from(enrollmentDetails).where(eq(enrollmentDetails.id, id));
+    return detail;
+  }
+
+  async createEnrollmentDetail(detail: InsertEnrollmentDetail): Promise<EnrollmentDetail> {
+    const [newDetail] = await db.insert(enrollmentDetails).values(detail).returning();
+    return newDetail;
+  }
+
+  async updateEnrollmentDetail(id: number, detail: Partial<InsertEnrollmentDetail>): Promise<EnrollmentDetail> {
+    const [updated] = await db.update(enrollmentDetails).set(detail).where(eq(enrollmentDetails.id, id)).returning();
+    return updated;
+  }
+
+  async deleteEnrollmentDetail(id: number): Promise<void> {
+    await db.delete(enrollmentDetails).where(eq(enrollmentDetails.id, id));
   }
 }
 
