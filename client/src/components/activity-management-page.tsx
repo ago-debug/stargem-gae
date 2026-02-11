@@ -297,11 +297,11 @@ export default function ActivityManagementPage({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="sku">SKU</Label>
+          <Label htmlFor="sku">SKU/Codice</Label>
           <Input
             id="sku"
             name="sku"
-            placeholder="es: SKU-2526"
+            placeholder="es: 2526-NEMBRI-LUN-15"
             defaultValue={defaultItem?.sku || ""}
             data-testid={`input-${testIdPrefix}-sku`}
           />
@@ -618,7 +618,7 @@ export default function ActivityManagementPage({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>Codice</SortableTableHead>
+                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
                   <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
                   <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
                   <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>

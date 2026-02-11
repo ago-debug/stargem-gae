@@ -761,7 +761,7 @@ export default function Workshops() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>Codice</SortableTableHead>
+                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
                   <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Workshop</SortableTableHead>
                   <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
                   <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
@@ -906,7 +906,7 @@ export default function Workshops() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="sku">SKU</Label>
+                      <Label htmlFor="sku">SKU/Codice</Label>
                       <Input
                         id="sku"
                         name="sku"
@@ -1177,7 +1177,7 @@ export default function Workshops() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sku">SKU</Label>
+                  <Label htmlFor="sku">SKU/Codice</Label>
                   <Input
                     id="sku"
                     name="sku"

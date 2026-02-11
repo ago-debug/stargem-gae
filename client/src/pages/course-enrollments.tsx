@@ -91,7 +91,7 @@ export default function CourseEnrollments() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Cerca corso per nome o SKU..."
+                placeholder="Cerca corso per nome o SKU/Codice..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -125,7 +125,7 @@ export default function CourseEnrollments() {
                           <div>
                             <h3 className="text-lg font-semibold">{course.name}</h3>
                             {course.sku && (
-                              <p className="text-sm text-muted-foreground">SKU: {course.sku}</p>
+                              <p className="text-sm text-muted-foreground">SKU/Codice: {course.sku}</p>
                             )}
                             {course.dayOfWeek && course.startTime && (
                               <p className="text-sm text-muted-foreground mt-1">
