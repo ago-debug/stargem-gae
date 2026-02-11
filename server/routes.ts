@@ -42,6 +42,7 @@ import {
   insertRecitalSchema,
   insertVacationStudySchema,
   insertActivityStatusSchema,
+  insertPaymentNoteSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -3459,6 +3460,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Errore eliminazione stato" });
+    }
+  });
+
+  // ======== PAYMENT NOTES ROUTES ========
+
+  app.get("/api/payment-notes", async (_req, res) => {
+    try {
+      const notes = await storage.getPaymentNotes();
+      res.json(notes);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore recupero note pagamenti" });
+    }
+  });
+
+  app.post("/api/payment-notes", async (req, res) => {
+    try {
+      const parsed = insertPaymentNoteSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
+      }
+      const note = await storage.createPaymentNote(parsed.data);
+      res.json(note);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore creazione nota pagamento" });
+    }
+  });
+
+  app.patch("/api/payment-notes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const note = await storage.updatePaymentNote(id, req.body);
+      res.json(note);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore aggiornamento nota pagamento" });
+    }
+  });
+
+  app.delete("/api/payment-notes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePaymentNote(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore eliminazione nota pagamento" });
     }
   });
 

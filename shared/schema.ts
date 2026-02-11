@@ -442,6 +442,23 @@ export const insertActivityStatusSchema = createInsertSchema(activityStatuses).o
 export type InsertActivityStatus = z.infer<typeof insertActivityStatusSchema>;
 export type ActivityStatus = typeof activityStatuses.$inferSelect;
 
+// Payment Notes (Note pagamenti)
+export const paymentNotes = pgTable("payment_notes", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 100 }).notNull(),
+  color: varchar("color", { length: 50 }),
+  sortOrder: integer("sort_order").default(0),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPaymentNoteSchema = createInsertSchema(paymentNotes).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertPaymentNote = z.infer<typeof insertPaymentNoteSchema>;
+export type PaymentNote = typeof paymentNotes.$inferSelect;
+
 // Studios (sale/studi)
 export const studios = pgTable("studios", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
