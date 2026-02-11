@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X } from "lucide-react";
+import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X, Camera } from "lucide-react";
 import { 
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
   User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music
@@ -44,6 +44,26 @@ export default function MascheraInputGenerale() {
     tesserinoTecnico: { hasFile: false, numero: "", dataRilascio: "" },
     tesseraEnte: { hasFile: false, numero: "", ente: "" },
   });
+
+  const [photoFile, setPhotoFile] = useState<{ file: File | null; preview: string | null }>({ file: null, preview: null });
+
+  const handlePhotoUpload = (file: File | null) => {
+    if (!file) return;
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'image/avif', 'image/tiff'];
+    if (!allowedTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|heic|heif|webp|avif|tiff?)$/i)) {
+      alert('Formato foto non supportato. Usa JPG, PNG, HEIC, HEIF o WebP.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPhotoFile({ file, preview: e.target?.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removePhoto = () => {
+    setPhotoFile({ file: null, preview: null });
+  };
 
   const [openAllegatoSections, setOpenAllegatoSections] = useState<Record<string, boolean>>({});
 
@@ -659,8 +679,60 @@ export default function MascheraInputGenerale() {
 
         {/* ANAGRAFICA con ALLEGATI */}
         <div id="anagrafica" className="scroll-mt-32 flex flex-col lg:flex-row gap-4">
-          {/* ALLEGATI DA INSERIRE - Colonna sinistra */}
-          <Card className="lg:w-72 shrink-0">
+          {/* FOTO + ALLEGATI DA INSERIRE - Colonna sinistra */}
+          <div className="lg:w-72 shrink-0 space-y-4">
+          {/* FOTO PARTECIPANTE */}
+          <Card>
+            <CardHeader className="pb-2 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-amber-800 dark:text-amber-200">
+                <Camera className="w-4 h-4" />
+                FOTO
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-3">
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png,.heic,.heif,.webp,.avif,.tiff,.tif"
+                className="hidden"
+                id="upload-photo"
+                onChange={(e) => handlePhotoUpload(e.target.files?.[0] || null)}
+                data-testid="input-upload-photo"
+              />
+              {photoFile.preview ? (
+                <div className="relative">
+                  <img
+                    src={photoFile.preview}
+                    alt="Foto partecipante"
+                    className="w-full aspect-[3/4] object-cover rounded-md border border-input"
+                    data-testid="img-photo-preview"
+                  />
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="absolute top-1 right-1 bg-background/80 text-destructive"
+                    onClick={removePhoto}
+                    data-testid="button-remove-photo"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-1 truncate text-center" data-testid="text-photo-filename">{photoFile.file?.name}</p>
+                </div>
+              ) : (
+                <label
+                  htmlFor="upload-photo"
+                  className="cursor-pointer flex flex-col items-center justify-center gap-2 border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-md aspect-[3/4] transition-colors hover:bg-muted/50"
+                  data-testid="label-upload-photo"
+                >
+                  <Camera className="w-10 h-10 text-amber-400" />
+                  <span className="text-xs text-muted-foreground text-center px-2">Carica foto<br />JPG, PNG, HEIC, WebP</span>
+                </label>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* ALLEGATI DA INSERIRE */}
+          <Card>
             <CardHeader className="pb-2 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg">
               <CardTitle className="flex items-center gap-2 text-sm font-bold text-amber-800 dark:text-amber-200">
                 <Paperclip className="w-4 h-4" />
@@ -1120,6 +1192,8 @@ export default function MascheraInputGenerale() {
               </div>
             </CardContent>
           </Card>
+
+          </div>
 
           {/* ANAGRAFICA - Colonna destra */}
           <Card className="flex-1">
