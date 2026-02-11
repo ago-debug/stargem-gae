@@ -48,6 +48,7 @@ import IndividualLessons from "@/pages/individual-lessons";
 import CampusActivities from "@/pages/campus-activities";
 import Recitals from "@/pages/recitals";
 import VacationStudies from "@/pages/vacation-studies";
+import Elenchi from "@/pages/elenchi";
 import logoStarGem from "@assets/2fded732-6b1d-4121-a9a7-9eae89138609_1770777971616.png";
 
 function Router() {
@@ -104,6 +105,7 @@ function Router() {
       <Route path="/attivita/saggi" component={Recitals} />
       <Route path="/attivita/vacanze-studio" component={VacationStudies} />
       <Route path="/attivita" component={Attivita} />
+      <Route path="/elenchi" component={Elenchi} />
       <Route component={NotFound} />
     </Switch>
   );
