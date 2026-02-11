@@ -429,6 +429,7 @@ export type InstructorRate = typeof instructorRates.$inferSelect;
 export const activityStatuses = pgTable("activity_statuses", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: varchar("name", { length: 100 }).notNull(),
+  color: varchar("color", { length: 50 }),
   sortOrder: integer("sort_order").default(0),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),

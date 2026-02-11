@@ -17,8 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Download, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
-import { MultiSelectStatus } from "@/components/multi-select-status";
-import type { Instructor, Studio } from "@shared/schema";
+import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
+import type { Instructor, Studio, ActivityStatus } from "@shared/schema";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -115,6 +115,10 @@ export default function ActivityManagementPage({
 
   const { data: studios } = useQuery<Studio[]>({
     queryKey: ["/api/studios"],
+  });
+
+  const { data: activityStatuses } = useQuery<ActivityStatus[]>({
+    queryKey: ["/api/activity-statuses"],
   });
 
   const createMutation = useMutation({
@@ -655,9 +659,11 @@ export default function ActivityManagementPage({
                       <div className="flex flex-wrap gap-1">
                         {item.statusTags && item.statusTags.length > 0 ? (
                           item.statusTags.map((tag) => (
-                            <Badge key={tag} variant="outline" className="status-badge-gold text-xs">
-                              {tag}
-                            </Badge>
+                            <StatusBadge
+                              key={tag}
+                              name={tag}
+                              color={getStatusColor(tag, activityStatuses)}
+                            />
                           ))
                         ) : (
                           <span className="text-xs text-muted-foreground">-</span>

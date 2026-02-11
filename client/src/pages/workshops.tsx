@@ -16,14 +16,14 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, ArrowLeft } from "lucide-react";
-import { MultiSelectStatus } from "@/components/multi-select-status";
+import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import type { Workshop, InsertWorkshop, WorkshopCategory, Instructor, Studio, Member } from "@shared/schema";
+import type { Workshop, InsertWorkshop, WorkshopCategory, Instructor, Studio, Member, ActivityStatus } from "@shared/schema";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -477,6 +477,10 @@ export default function Workshops() {
     queryKey: ["/api/studios"],
   });
 
+  const { data: activityStatuses } = useQuery<ActivityStatus[]>({
+    queryKey: ["/api/activity-statuses"],
+  });
+
   const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
     queryKey: ["/api/workshop-enrollments"],
   });
@@ -822,9 +826,11 @@ export default function Workshops() {
                       <div className="flex flex-wrap gap-1">
                         {workshop.statusTags && workshop.statusTags.length > 0 ? (
                           workshop.statusTags.map((tag: string) => (
-                            <Badge key={tag} variant="outline" className="status-badge-gold text-xs">
-                              {tag}
-                            </Badge>
+                            <StatusBadge
+                              key={tag}
+                              name={tag}
+                              color={getStatusColor(tag, activityStatuses)}
+                            />
                           ))
                         ) : (
                           <span className="text-xs text-muted-foreground">-</span>
