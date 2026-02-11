@@ -67,6 +67,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={AnagraficaHome} />
+      <Route path="/anagrafica/:section" component={AnagraficaHome} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/iscritti" component={Members} />
       <Route path="/attivita/corsi" component={Courses} />
