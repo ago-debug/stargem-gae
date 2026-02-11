@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle } from "lucide-react";
 import { 
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
-  User, BookOpen, ShoppingBag
+  User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music
 } from "lucide-react";
+import { Link } from "wouter";
 import { KnowledgeInfo } from "@/components/knowledge-info";
 
 interface AllegatoState {
@@ -1752,15 +1753,10 @@ export default function MascheraInputGenerale() {
           <CardContent className="space-y-6">
             {/* CORSI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Corsi
-                  <KnowledgeInfo id="corsi" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-corsi">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <Calendar className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/corsi" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-corsi">Corsi</Link>
+                <KnowledgeInfo id="corsi" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
                 <div className="space-y-2">
@@ -1836,15 +1832,10 @@ export default function MascheraInputGenerale() {
 
             {/* PROVE A PAGAMENTO */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Prove a Pagamento
-                  <KnowledgeInfo id="prove-a-pagamento" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-prove-pagamento">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <CreditCard className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/prove-pagamento" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-prove-pagamento">Prove a Pagamento</Link>
+                <KnowledgeInfo id="prove-a-pagamento" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
@@ -1909,15 +1900,10 @@ export default function MascheraInputGenerale() {
 
             {/* PROVE GRATUITE */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Prove Gratuite
-                  <KnowledgeInfo id="prove-gratuite" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-prove-gratuite">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <Gift className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/prove-gratuite" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-prove-gratuite">Prove Gratuite</Link>
+                <KnowledgeInfo id="prove-gratuite" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
@@ -1982,15 +1968,10 @@ export default function MascheraInputGenerale() {
 
             {/* LEZIONI SINGOLE */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Lezioni Singole
-                  <KnowledgeInfo id="lezioni-singole" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-lezioni-singole">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <BookOpen className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/lezioni-singole" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-lezioni-singole">Lezioni Singole</Link>
+                <KnowledgeInfo id="lezioni-singole" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
@@ -2061,15 +2042,10 @@ export default function MascheraInputGenerale() {
 
             {/* WORKSHOP */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Workshop
-                  <KnowledgeInfo id="workshop" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-workshop">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <Sparkles className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/workshops" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-workshop">Workshop</Link>
+                <KnowledgeInfo id="workshop" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2130,15 +2106,10 @@ export default function MascheraInputGenerale() {
 
             {/* DOMENICHE IN MOVIMENTO */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Domeniche in Movimento
-                  <KnowledgeInfo id="domeniche-in-movimento" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-domeniche-movimento">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <Sun className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/domeniche-movimento" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-domeniche-movimento">Domeniche in Movimento</Link>
+                <KnowledgeInfo id="domeniche-in-movimento" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2199,15 +2170,10 @@ export default function MascheraInputGenerale() {
 
             {/* ALLENAMENTI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Allenamenti/Affitti
-                  <KnowledgeInfo id="allenamenti" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-allenamenti">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <Dumbbell className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/allenamenti" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-allenamenti">Allenamenti/Affitti</Link>
+                <KnowledgeInfo id="allenamenti" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2268,15 +2234,10 @@ export default function MascheraInputGenerale() {
 
             {/* LEZIONI INDIVIDUALI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Lezioni Individuali
-                  <KnowledgeInfo id="lezioni-individuali" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-lezioni-individuali">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <UserCheck className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/lezioni-individuali" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-lezioni-individuali">Lezioni Individuali</Link>
+                <KnowledgeInfo id="lezioni-individuali" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2337,15 +2298,10 @@ export default function MascheraInputGenerale() {
 
             {/* CAMPUS */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Campus
-                  <KnowledgeInfo id="campus" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-campus">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <Users className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/campus" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-campus">Campus</Link>
+                <KnowledgeInfo id="campus" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2406,15 +2362,10 @@ export default function MascheraInputGenerale() {
 
             {/* SAGGI */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Saggi
-                  <KnowledgeInfo id="saggi" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-saggi">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <Award className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/saggi" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-saggi">Saggi</Link>
+                <KnowledgeInfo id="saggi" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2475,15 +2426,10 @@ export default function MascheraInputGenerale() {
 
             {/* VACANZA STUDIO */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  Vacanze Studio
-                  <KnowledgeInfo id="vacanze-studio" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-vacanze-studio">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <Music className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/vacanze-studio" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-vacanze-studio">Vacanze Studio</Link>
+                <KnowledgeInfo id="vacanze-studio" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
@@ -2544,16 +2490,10 @@ export default function MascheraInputGenerale() {
 
             {/* MERCHANDISING */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  <ShoppingBag className="w-4 h-4" />
-                  Merchandising
-                  <KnowledgeInfo id="merchandising" />
-                </span>
-                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-merchandising">
-                  <Plus className="w-4 h-4" />
-                  Aggiungi
-                </Button>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/merchandising" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-merchandising">Merchandising</Link>
+                <KnowledgeInfo id="merchandising" />
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
