@@ -1420,7 +1420,7 @@ export default function MascheraInputGenerale() {
                 <CreditCard className="w-5 h-5 sidebar-icon-gold" />
                 Pagamenti
               </span>
-              <Button size="sm" variant="destructive" data-testid="button-aggiungi-pagamento">
+              <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-pagamento">
                 <Plus className="w-4 h-4" />
                 Aggiungi
               </Button>
@@ -1562,8 +1562,8 @@ export default function MascheraInputGenerale() {
               <div className="space-y-2 lg:col-span-4">
                 <Label>Saldo Totale (BO)</Label>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">Totale</Badge>
-                  <Input value="€ 0,00" readOnly className="bg-green-50 border-green-200 font-bold text-lg max-w-xs" />
+                  <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Totale</Badge>
+                  <Input value="€ 0,00" readOnly className="bg-yellow-50 border-yellow-200 font-bold text-lg max-w-xs" />
                 </div>
               </div>
             </div>
@@ -1578,7 +1578,7 @@ export default function MascheraInputGenerale() {
                 <Gift className="w-5 h-5 sidebar-icon-gold" />
                 Gift - Buono - Reso - Hello Gem
               </span>
-              <Button size="sm" variant="destructive" data-testid="button-aggiungi-gift">
+              <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-gift">
                 <Plus className="w-4 h-4" />
                 Aggiungi
               </Button>
@@ -1757,7 +1757,7 @@ export default function MascheraInputGenerale() {
                   Corsi
                   <KnowledgeInfo id="corsi" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-corsi">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-corsi">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -1841,7 +1841,7 @@ export default function MascheraInputGenerale() {
                   Prove a Pagamento
                   <KnowledgeInfo id="prove-a-pagamento" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-prove-pagamento">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-prove-pagamento">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -1914,7 +1914,7 @@ export default function MascheraInputGenerale() {
                   Prove Gratuite
                   <KnowledgeInfo id="prove-gratuite" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-prove-gratuite">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-prove-gratuite">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -1987,7 +1987,7 @@ export default function MascheraInputGenerale() {
                   Lezioni Singole
                   <KnowledgeInfo id="lezioni-singole" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-lezioni-singole">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-lezioni-singole">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -2066,7 +2066,7 @@ export default function MascheraInputGenerale() {
                   Workshop
                   <KnowledgeInfo id="workshop" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-workshop">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-workshop">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -2135,7 +2135,7 @@ export default function MascheraInputGenerale() {
                   Domeniche in Movimento
                   <KnowledgeInfo id="domeniche-in-movimento" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-domeniche-movimento">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-domeniche-movimento">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -2204,7 +2204,7 @@ export default function MascheraInputGenerale() {
                   Allenamenti/Affitti
                   <KnowledgeInfo id="allenamenti" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-allenamenti">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-allenamenti">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -2273,7 +2273,7 @@ export default function MascheraInputGenerale() {
                   Lezioni Individuali
                   <KnowledgeInfo id="lezioni-individuali" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-lezioni-individuali">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-lezioni-individuali">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -2342,7 +2342,7 @@ export default function MascheraInputGenerale() {
                   Campus
                   <KnowledgeInfo id="campus" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-campus">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-campus">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -2411,7 +2411,7 @@ export default function MascheraInputGenerale() {
                   Saggi
                   <KnowledgeInfo id="saggi" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-saggi">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-saggi">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -2480,7 +2480,7 @@ export default function MascheraInputGenerale() {
                   Vacanze Studio
                   <KnowledgeInfo id="vacanze-studio" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-vacanze-studio">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-vacanze-studio">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
@@ -2550,7 +2550,7 @@ export default function MascheraInputGenerale() {
                   Merchandising
                   <KnowledgeInfo id="merchandising" />
                 </span>
-                <Button size="sm" variant="destructive" data-testid="button-aggiungi-merchandising">
+                <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-merchandising">
                   <Plus className="w-4 h-4" />
                   Aggiungi
                 </Button>
