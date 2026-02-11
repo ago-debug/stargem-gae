@@ -4,8 +4,6 @@ import {
   FolderTree,
   Tags,
   Briefcase,
-  CreditCard,
-  IdCard,
   ScanBarcode,
   BarChart3,
   Upload,
@@ -18,13 +16,6 @@ import {
   GraduationCap,
   CheckSquare,
   Activity,
-  User,
-  Gift,
-  FileText,
-  Trophy,
-  Dumbbell,
-  BookOpen,
-  Sun,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -42,59 +33,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
-const anagraficaSections = [
-  {
-    title: "Anagrafica",
-    url: "/",
-    icon: User,
-  },
-  {
-    title: "Pagamenti",
-    url: "/anagrafica/pagamenti",
-    icon: CreditCard,
-  },
-  {
-    title: "Buoni",
-    url: "/anagrafica/buoni",
-    icon: Gift,
-  },
-  {
-    title: "Tessere",
-    url: "/anagrafica/tessere",
-    icon: IdCard,
-  },
-  {
-    title: "Certificati",
-    url: "/anagrafica/certificati",
-    icon: FileText,
-  },
-  {
-    title: "Gare",
-    url: "/anagrafica/gare",
-    icon: Trophy,
-  },
-  {
-    title: "Membership",
-    url: "/anagrafica/membership",
-    icon: Users,
-  },
-  {
-    title: "Allenamenti/Affitti",
-    url: "/anagrafica/allenamenti",
-    icon: Dumbbell,
-  },
-  {
-    title: "Corsi",
-    url: "/anagrafica/corsi",
-    icon: BookOpen,
-  },
-  {
-    title: "Vacanze",
-    url: "/anagrafica/vacanze",
-    icon: Sun,
-  },
-];
-
 const mainMenuItems = [
   {
     title: "Dashboard Statistiche",
@@ -105,11 +43,6 @@ const mainMenuItems = [
     title: "Partecipanti/Lista",
     url: "/iscritti",
     icon: Users,
-  },
-  {
-    title: "Gestione",
-    url: "/gestione",
-    icon: Activity,
   },
   {
     title: "Iscritti per Corso",
@@ -304,40 +237,11 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Anagrafica</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {anagraficaSections.map((item) => {
-                const isActive = item.url === "/"
-                  ? location === "/" && !location.startsWith("/anagrafica/")
-                  : location === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={isActive}
-                      data-testid={`nav-anagrafica-${item.url === "/" ? "home" : item.url.split("/").pop()}`}
-                    >
-                      <Link href={item.url}>
-                        <item.icon className="w-4 h-4 sidebar-icon-gold" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
           <SidebarGroupLabel>Menu Principale</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainMenuItems.map((item) => {
-                const isActive = item.url === "/gestione"
-                  ? location === "/gestione" || location.startsWith("/gestione/")
-                  : location === item.url;
+                const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
