@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw } from "lucide-react";
+import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X } from "lucide-react";
 import { 
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
   User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music
@@ -19,6 +19,7 @@ interface AllegatoState {
   hasFile: boolean;
   data?: string;
   note?: string;
+  fileName?: string;
 }
 
 interface AllegatiState {
@@ -44,10 +45,30 @@ export default function MascheraInputGenerale() {
     tesseraEnte: { hasFile: false, numero: "", ente: "" },
   });
 
-  const toggleAllegato = (key: keyof AllegatiState) => {
+  const [openAllegatoSections, setOpenAllegatoSections] = useState<Record<string, boolean>>({});
+
+  const toggleAllegatoSection = (key: string) => {
+    setOpenAllegatoSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleFileUpload = (key: keyof AllegatiState, file: File | null) => {
+    if (!file) return;
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Formato file non supportato. Usa PDF, JPG o PNG.');
+      return;
+    }
+    const today = new Date().toISOString().split('T')[0];
     setAllegati(prev => ({
       ...prev,
-      [key]: { ...prev[key], hasFile: !prev[key].hasFile }
+      [key]: { ...prev[key], hasFile: true, fileName: file.name, data: today }
+    }));
+  };
+
+  const removeAllegatoFile = (key: keyof AllegatiState) => {
+    setAllegati(prev => ({
+      ...prev,
+      [key]: { ...prev[key], hasFile: false, fileName: '', data: '' }
     }));
   };
 
@@ -78,6 +99,7 @@ export default function MascheraInputGenerale() {
     codiceFiscale: "",
     telefono: "",
     email: "",
+    residenza: "",
     indirizzo: "",
     cap: "",
     citta: "",
@@ -95,6 +117,7 @@ export default function MascheraInputGenerale() {
     cfGen1: "",
     telGen1: "",
     emailGen1: "",
+    residenzaGen1: "",
     indirizzoGen1: "",
     capGen1: "",
     cittaGen1: "",
@@ -111,6 +134,7 @@ export default function MascheraInputGenerale() {
     cfGen2: "",
     telGen2: "",
     emailGen2: "",
+    residenzaGen2: "",
     indirizzoGen2: "",
     capGen2: "",
     cittaGen2: "",
@@ -624,332 +648,442 @@ export default function MascheraInputGenerale() {
             </CardHeader>
             <CardContent className="p-0">
               {/* REGOLAMENTO */}
-              <div 
-                className={`border-b p-3 cursor-pointer transition-colors ${allegati.regolamento.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                onClick={() => toggleAllegato('regolamento')}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">REGOLAMENTO</span>
-                  {allegati.regolamento.hasFile ? (
-                    <Download className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Data Inserimento</Label>
-                    <Input 
-                      type="date" 
-                      className="h-7 text-xs"
-                      value={allegati.regolamento.data || ''}
-                      onChange={(e) => updateAllegato('regolamento', 'data', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Accettato</Label>
-                    <Select 
-                      value={allegati.regolamento.accettato || ''} 
-                      onValueChange={(v) => updateAllegato('regolamento', 'accettato', v)}
-                    >
-                      <SelectTrigger className="h-7 text-xs" onClick={(e) => e.stopPropagation()}>
-                        <SelectValue placeholder="Seleziona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="si">Sì</SelectItem>
-                        <SelectItem value="no">No</SelectItem>
-                      </SelectContent>
-                    </Select>
+              <div className="border-b">
+                <div 
+                  className={`p-3 cursor-pointer transition-colors ${allegati.regolamento.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  onClick={() => toggleAllegatoSection('regolamento')}
+                  data-testid="button-toggle-regolamento"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">REGOLAMENTO</span>
+                    {allegati.regolamento.hasFile ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
+                {openAllegatoSections.regolamento && (
+                  <div className="p-3 pt-0 space-y-3">
+                    <div className="border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-md p-3 text-center">
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="hidden"
+                        id="upload-regolamento"
+                        onChange={(e) => handleFileUpload('regolamento', e.target.files?.[0] || null)}
+                        data-testid="input-upload-regolamento"
+                      />
+                      {allegati.regolamento.hasFile ? (
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                            <Check className="w-4 h-4" />
+                            <span className="truncate">{allegati.regolamento.fileName || 'File caricato'}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="text-destructive"
+                            onClick={() => removeAllegatoFile('regolamento')}
+                            data-testid="button-remove-regolamento"
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <label htmlFor="upload-regolamento" className="cursor-pointer flex flex-col items-center gap-1">
+                          <FileUp className="w-6 h-6 text-amber-500" />
+                          <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
+                        </label>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Data Inserimento</Label>
+                        <Input 
+                          type="date" 
+                          className="h-7 text-xs"
+                          value={allegati.regolamento.data || ''}
+                          onChange={(e) => updateAllegato('regolamento', 'data', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Accettato</Label>
+                        <Select 
+                          value={allegati.regolamento.accettato || ''} 
+                          onValueChange={(v) => updateAllegato('regolamento', 'accettato', v)}
+                        >
+                          <SelectTrigger className={`h-7 text-xs ${allegati.regolamento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.regolamento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
+                            <SelectValue placeholder="Seleziona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="si">Sì</SelectItem>
+                            <SelectItem value="no">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* PRIVACY */}
-              <div 
-                className={`border-b p-3 cursor-pointer transition-colors ${allegati.privacy.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                onClick={() => toggleAllegato('privacy')}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">PRIVACY</span>
-                  {allegati.privacy.hasFile ? (
-                    <Download className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Data Inserimento</Label>
-                    <Input 
-                      type="date" 
-                      className="h-7 text-xs"
-                      value={allegati.privacy.data || ''}
-                      onChange={(e) => updateAllegato('privacy', 'data', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Accettata</Label>
-                    <Select 
-                      value={allegati.privacy.accettata || ''} 
-                      onValueChange={(v) => updateAllegato('privacy', 'accettata', v)}
-                    >
-                      <SelectTrigger className="h-7 text-xs" onClick={(e) => e.stopPropagation()}>
-                        <SelectValue placeholder="Seleziona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="si">Sì</SelectItem>
-                        <SelectItem value="no">No</SelectItem>
-                      </SelectContent>
-                    </Select>
+              <div className="border-b">
+                <div 
+                  className={`p-3 cursor-pointer transition-colors ${allegati.privacy.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  onClick={() => toggleAllegatoSection('privacy')}
+                  data-testid="button-toggle-privacy"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">PRIVACY</span>
+                    {allegati.privacy.hasFile ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
+                {openAllegatoSections.privacy && (
+                  <div className="p-3 pt-0 space-y-3">
+                    <div className="border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-md p-3 text-center">
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="hidden"
+                        id="upload-privacy"
+                        onChange={(e) => handleFileUpload('privacy', e.target.files?.[0] || null)}
+                        data-testid="input-upload-privacy"
+                      />
+                      {allegati.privacy.hasFile ? (
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                            <Check className="w-4 h-4" />
+                            <span className="truncate">{allegati.privacy.fileName || 'File caricato'}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="text-destructive"
+                            onClick={() => removeAllegatoFile('privacy')}
+                            data-testid="button-remove-privacy"
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <label htmlFor="upload-privacy" className="cursor-pointer flex flex-col items-center gap-1">
+                          <FileUp className="w-6 h-6 text-amber-500" />
+                          <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
+                        </label>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Data Inserimento</Label>
+                        <Input 
+                          type="date" 
+                          className="h-7 text-xs"
+                          value={allegati.privacy.data || ''}
+                          onChange={(e) => updateAllegato('privacy', 'data', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Accettata</Label>
+                        <Select 
+                          value={allegati.privacy.accettata || ''} 
+                          onValueChange={(v) => updateAllegato('privacy', 'accettata', v)}
+                        >
+                          <SelectTrigger className={`h-7 text-xs ${allegati.privacy.accettata === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.privacy.accettata === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
+                            <SelectValue placeholder="Seleziona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="si">Sì</SelectItem>
+                            <SelectItem value="no">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* CERTIFICATO MEDICO */}
-              <div 
-                className={`border-b p-3 cursor-pointer transition-colors ${allegati.certificatoMedico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                onClick={() => toggleAllegato('certificatoMedico')}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CERTIFICATO MEDICO</span>
-                  {allegati.certificatoMedico.hasFile ? (
-                    <Download className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Data Rilascio</Label>
-                    <Input 
-                      type="date" 
-                      className="h-7 text-xs"
-                      value={allegati.certificatoMedico.dataRilascio || ''}
-                      onChange={(e) => updateAllegato('certificatoMedico', 'dataRilascio', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Scadenza</Label>
-                    <Input 
-                      type="date" 
-                      className="h-7 text-xs"
-                      value={allegati.certificatoMedico.scadenza || ''}
-                      onChange={(e) => updateAllegato('certificatoMedico', 'scadenza', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
+              <div className="border-b">
+                <div 
+                  className={`p-3 cursor-pointer transition-colors ${allegati.certificatoMedico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  onClick={() => toggleAllegatoSection('certificatoMedico')}
+                  data-testid="button-toggle-certificato-medico"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CERTIFICATO MEDICO</span>
+                    {allegati.certificatoMedico.hasFile ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Tipo</Label>
-                  <Select 
-                    value={allegati.certificatoMedico.tipo || ''} 
-                    onValueChange={(v) => updateAllegato('certificatoMedico', 'tipo', v)}
-                  >
-                    <SelectTrigger className="h-7 text-xs" onClick={(e) => e.stopPropagation()}>
-                      <SelectValue placeholder="Tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="non_agonistico">Non Agonistico</SelectItem>
-                      <SelectItem value="agonistico">Agonistico</SelectItem>
-                      <SelectItem value="base">Base</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {openAllegatoSections.certificatoMedico && (
+                  <div className="p-3 pt-0 space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Data Rilascio</Label>
+                        <Input 
+                          type="date" 
+                          className="h-7 text-xs"
+                          value={allegati.certificatoMedico.dataRilascio || ''}
+                          onChange={(e) => updateAllegato('certificatoMedico', 'dataRilascio', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Scadenza</Label>
+                        <Input 
+                          type="date" 
+                          className="h-7 text-xs"
+                          value={allegati.certificatoMedico.scadenza || ''}
+                          onChange={(e) => updateAllegato('certificatoMedico', 'scadenza', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Tipo</Label>
+                      <Select 
+                        value={allegati.certificatoMedico.tipo || ''} 
+                        onValueChange={(v) => updateAllegato('certificatoMedico', 'tipo', v)}
+                      >
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue placeholder="Tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="non_agonistico">Non Agonistico</SelectItem>
+                          <SelectItem value="agonistico">Agonistico</SelectItem>
+                          <SelectItem value="base">Base</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* RICEVUTE PAGAMENTI */}
-              <div 
-                className={`border-b p-3 cursor-pointer transition-colors ${allegati.ricevutePagamenti.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                onClick={() => toggleAllegato('ricevutePagamenti')}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">RICEVUTE PAGAMENTI</span>
-                  {allegati.ricevutePagamenti.hasFile ? (
-                    <Download className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label className="text-xs">N° Ricevute</Label>
-                    <Input 
-                      type="number" 
-                      className="h-7 text-xs"
-                      value={allegati.ricevutePagamenti.numeroRicevute || 0}
-                      onChange={(e) => updateAllegato('ricevutePagamenti', 'numeroRicevute', parseInt(e.target.value) || 0)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Note</Label>
-                    <Input 
-                      className="h-7 text-xs"
-                      value={allegati.ricevutePagamenti.note || ''}
-                      onChange={(e) => updateAllegato('ricevutePagamenti', 'note', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
+              <div className="border-b">
+                <div 
+                  className={`p-3 cursor-pointer transition-colors ${allegati.ricevutePagamenti.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  onClick={() => toggleAllegatoSection('ricevutePagamenti')}
+                  data-testid="button-toggle-ricevute-pagamenti"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">RICEVUTE PAGAMENTI</span>
+                    {allegati.ricevutePagamenti.hasFile ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
+                {openAllegatoSections.ricevutePagamenti && (
+                  <div className="p-3 pt-0">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">N° Ricevute</Label>
+                        <Input 
+                          type="number" 
+                          className="h-7 text-xs"
+                          value={allegati.ricevutePagamenti.numeroRicevute || 0}
+                          onChange={(e) => updateAllegato('ricevutePagamenti', 'numeroRicevute', parseInt(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Note</Label>
+                        <Input 
+                          className="h-7 text-xs"
+                          value={allegati.ricevutePagamenti.note || ''}
+                          onChange={(e) => updateAllegato('ricevutePagamenti', 'note', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* MODELLO DETRAZIONE */}
-              <div 
-                className={`border-b p-3 cursor-pointer transition-colors ${allegati.modelloDetrazione.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                onClick={() => toggleAllegato('modelloDetrazione')}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">MODELLO DETRAZIONE</span>
-                  {allegati.modelloDetrazione.hasFile ? (
-                    <Download className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Anno</Label>
-                    <Input 
-                      className="h-7 text-xs"
-                      value={allegati.modelloDetrazione.anno || ''}
-                      onChange={(e) => updateAllegato('modelloDetrazione', 'anno', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Richiesto</Label>
-                    <Select 
-                      value={allegati.modelloDetrazione.richiesto || ''} 
-                      onValueChange={(v) => updateAllegato('modelloDetrazione', 'richiesto', v)}
-                    >
-                      <SelectTrigger className="h-7 text-xs" onClick={(e) => e.stopPropagation()}>
-                        <SelectValue placeholder="Seleziona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="si">Sì</SelectItem>
-                        <SelectItem value="no">No</SelectItem>
-                      </SelectContent>
-                    </Select>
+              <div className="border-b">
+                <div 
+                  className={`p-3 cursor-pointer transition-colors ${allegati.modelloDetrazione.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  onClick={() => toggleAllegatoSection('modelloDetrazione')}
+                  data-testid="button-toggle-modello-detrazione"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">MODELLO DETRAZIONE</span>
+                    {allegati.modelloDetrazione.hasFile ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
+                {openAllegatoSections.modelloDetrazione && (
+                  <div className="p-3 pt-0">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Anno</Label>
+                        <Input 
+                          className="h-7 text-xs"
+                          value={allegati.modelloDetrazione.anno || ''}
+                          onChange={(e) => updateAllegato('modelloDetrazione', 'anno', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Richiesto</Label>
+                        <Select 
+                          value={allegati.modelloDetrazione.richiesto || ''} 
+                          onValueChange={(v) => updateAllegato('modelloDetrazione', 'richiesto', v)}
+                        >
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Seleziona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="si">Sì</SelectItem>
+                            <SelectItem value="no">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* CREDITI SCOLASTICI */}
-              <div 
-                className={`border-b p-3 cursor-pointer transition-colors ${allegati.creditiScolastici.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                onClick={() => toggleAllegato('creditiScolastici')}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CREDITI SCOLASTICI</span>
-                  {allegati.creditiScolastici.hasFile ? (
-                    <Download className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Anno Scolastico</Label>
-                    <Input 
-                      className="h-7 text-xs"
-                      value={allegati.creditiScolastici.annoScolastico || ''}
-                      onChange={(e) => updateAllegato('creditiScolastici', 'annoScolastico', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Richiesto</Label>
-                    <Select 
-                      value={allegati.creditiScolastici.richiesto || ''} 
-                      onValueChange={(v) => updateAllegato('creditiScolastici', 'richiesto', v)}
-                    >
-                      <SelectTrigger className="h-7 text-xs" onClick={(e) => e.stopPropagation()}>
-                        <SelectValue placeholder="Seleziona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="si">Sì</SelectItem>
-                        <SelectItem value="no">No</SelectItem>
-                      </SelectContent>
-                    </Select>
+              <div className="border-b">
+                <div 
+                  className={`p-3 cursor-pointer transition-colors ${allegati.creditiScolastici.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  onClick={() => toggleAllegatoSection('creditiScolastici')}
+                  data-testid="button-toggle-crediti-scolastici"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CREDITI SCOLASTICI</span>
+                    {allegati.creditiScolastici.hasFile ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
+                {openAllegatoSections.creditiScolastici && (
+                  <div className="p-3 pt-0">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Anno Scolastico</Label>
+                        <Input 
+                          className="h-7 text-xs"
+                          value={allegati.creditiScolastici.annoScolastico || ''}
+                          onChange={(e) => updateAllegato('creditiScolastici', 'annoScolastico', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Richiesto</Label>
+                        <Select 
+                          value={allegati.creditiScolastici.richiesto || ''} 
+                          onValueChange={(v) => updateAllegato('creditiScolastici', 'richiesto', v)}
+                        >
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Seleziona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="si">Sì</SelectItem>
+                            <SelectItem value="no">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* TESSERINO TECNICO */}
-              <div 
-                className={`border-b p-3 cursor-pointer transition-colors ${allegati.tesserinoTecnico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                onClick={() => toggleAllegato('tesserinoTecnico')}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERINO TECNICO</span>
-                  {allegati.tesserinoTecnico.hasFile ? (
-                    <Download className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Numero</Label>
-                    <Input 
-                      className="h-7 text-xs"
-                      placeholder="N° Tesserino"
-                      value={allegati.tesserinoTecnico.numero || ''}
-                      onChange={(e) => updateAllegato('tesserinoTecnico', 'numero', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Data Rilascio</Label>
-                    <Input 
-                      type="date" 
-                      className="h-7 text-xs"
-                      value={allegati.tesserinoTecnico.dataRilascio || ''}
-                      onChange={(e) => updateAllegato('tesserinoTecnico', 'dataRilascio', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
+              <div className="border-b">
+                <div 
+                  className={`p-3 cursor-pointer transition-colors ${allegati.tesserinoTecnico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  onClick={() => toggleAllegatoSection('tesserinoTecnico')}
+                  data-testid="button-toggle-tesserino-tecnico"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERINO TECNICO</span>
+                    {allegati.tesserinoTecnico.hasFile ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
+                {openAllegatoSections.tesserinoTecnico && (
+                  <div className="p-3 pt-0">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Numero</Label>
+                        <Input 
+                          className="h-7 text-xs"
+                          placeholder="N° Tesserino"
+                          value={allegati.tesserinoTecnico.numero || ''}
+                          onChange={(e) => updateAllegato('tesserinoTecnico', 'numero', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Data Rilascio</Label>
+                        <Input 
+                          type="date" 
+                          className="h-7 text-xs"
+                          value={allegati.tesserinoTecnico.dataRilascio || ''}
+                          onChange={(e) => updateAllegato('tesserinoTecnico', 'dataRilascio', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* TESSERA ENTE */}
-              <div 
-                className={`p-3 cursor-pointer transition-colors ${allegati.tesseraEnte.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                onClick={() => toggleAllegato('tesseraEnte')}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERA ENTE</span>
-                  {allegati.tesseraEnte.hasFile ? (
-                    <Download className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Numero</Label>
-                    <Input 
-                      className="h-7 text-xs"
-                      placeholder="N° Tessera"
-                      value={allegati.tesseraEnte.numero || ''}
-                      onChange={(e) => updateAllegato('tesseraEnte', 'numero', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Ente</Label>
-                    <Input 
-                      className="h-7 text-xs"
-                      placeholder="Ente"
-                      value={allegati.tesseraEnte.ente || ''}
-                      onChange={(e) => updateAllegato('tesseraEnte', 'ente', e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
+              <div>
+                <div 
+                  className={`p-3 cursor-pointer transition-colors ${allegati.tesseraEnte.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                  onClick={() => toggleAllegatoSection('tesseraEnte')}
+                  data-testid="button-toggle-tessera-ente"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERA ENTE</span>
+                    {allegati.tesseraEnte.hasFile ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
+                {openAllegatoSections.tesseraEnte && (
+                  <div className="p-3 pt-0">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Numero</Label>
+                        <Input 
+                          className="h-7 text-xs"
+                          placeholder="N° Tessera"
+                          value={allegati.tesseraEnte.numero || ''}
+                          onChange={(e) => updateAllegato('tesseraEnte', 'numero', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Ente</Label>
+                        <Input 
+                          className="h-7 text-xs"
+                          placeholder="Ente"
+                          value={allegati.tesseraEnte.ente || ''}
+                          onChange={(e) => updateAllegato('tesseraEnte', 'ente', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -1047,7 +1181,11 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Residenza</Label>
+                  <Input value={formData.residenza} onChange={(e) => handleChange("residenza", e.target.value)} />
+                </div>
                 <div className="space-y-2">
                   <Label>Indirizzo</Label>
                   <Input value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} />
@@ -1130,7 +1268,7 @@ export default function MascheraInputGenerale() {
 
             {/* Genitore 1 */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-teal-50 px-2 py-1 rounded">Genitore 1</h3>
+              <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-4 border-b pb-2 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">Genitore 1</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Cognome</Label>
@@ -1207,7 +1345,11 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Residenza</Label>
+                  <Input value={formData.residenzaGen1} onChange={(e) => handleChange("residenzaGen1", e.target.value)} />
+                </div>
                 <div className="space-y-2">
                   <Label>Indirizzo</Label>
                   <Input value={formData.indirizzoGen1} onChange={(e) => handleChange("indirizzoGen1", e.target.value)} />
@@ -1275,7 +1417,7 @@ export default function MascheraInputGenerale() {
 
             {/* Genitore 2 */}
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-teal-50 px-2 py-1 rounded">Genitore 2</h3>
+              <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-4 border-b pb-2 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">Genitore 2</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Cognome</Label>
@@ -1352,7 +1494,11 @@ export default function MascheraInputGenerale() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Residenza</Label>
+                  <Input value={formData.residenzaGen2} onChange={(e) => handleChange("residenzaGen2", e.target.value)} />
+                </div>
                 <div className="space-y-2">
                   <Label>Indirizzo</Label>
                   <Input value={formData.indirizzoGen2} onChange={(e) => handleChange("indirizzoGen2", e.target.value)} />
