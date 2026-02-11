@@ -26,6 +26,7 @@ Key features and architectural decisions include:
   - Shared validation logic between file and Google Sheets imports via `importCoursesFromRows` helper
 - **Structured Scheduling**: Structured dropdown selectors for defining studio operating hours and course schedules (day of week, start/end times, recurrence type).
 - **Location Autocomplete**: City search with auto-fill for province and postal code. Database includes all 7904 Italian municipalities (comuni) with all 107 provinces. Minimum 3 characters required for search.
+- **Elenchi Page** (`/elenchi`): Central management page for all custom dropdown lists (Stato, Note Pagamenti, Dettaglio Iscrizione). Any future custom dropdown fields that don't have their own dedicated page should be added here as a new `EditableListSection` component instance.
 
 ## External Dependencies
 - **Database**: PostgreSQL (Neon)
