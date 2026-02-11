@@ -49,6 +49,9 @@ import CampusActivities from "@/pages/campus-activities";
 import Recitals from "@/pages/recitals";
 import VacationStudies from "@/pages/vacation-studies";
 import Elenchi from "@/pages/elenchi";
+import Commenti from "@/pages/commenti";
+import NoteTeam from "@/pages/note-team";
+import { NotificationBell } from "@/components/notification-bell";
 import logoStarGem from "@assets/2fded732-6b1d-4121-a9a7-9eae89138609_1770777971616.png";
 
 function Router() {
@@ -106,6 +109,8 @@ function Router() {
       <Route path="/attivita/vacanze-studio" component={VacationStudies} />
       <Route path="/attivita" component={Attivita} />
       <Route path="/elenchi" component={Elenchi} />
+      <Route path="/commenti" component={Commenti} />
+      <Route path="/note-team" component={NoteTeam} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -138,12 +143,15 @@ function AppContent() {
           <div className="flex flex-col flex-1 overflow-hidden">
             <header className="flex items-center justify-between h-14 px-4 border-b border-border bg-background flex-shrink-0">
               <SidebarTrigger data-testid="button-sidebar-toggle" />
-              <img 
-                src={logoStarGem} 
-                alt="StarGEM Logo" 
-                style={{ width: "200px", height: "auto" }}
-                data-testid="logo-header"
-              />
+              <div className="flex items-center gap-3">
+                <NotificationBell />
+                <img 
+                  src={logoStarGem} 
+                  alt="StarGEM Logo" 
+                  style={{ width: "200px", height: "auto" }}
+                  data-testid="logo-header"
+                />
+              </div>
             </header>
             <main className="flex-1 overflow-auto bg-background">
               <Router />
