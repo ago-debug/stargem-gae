@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { X, Edit, Plus, Trash2, GripVertical, Search, Check } from "lucide-react";
+import { X, Edit, Plus, Trash2, GripVertical, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { PaymentNote } from "@shared/schema";
 
@@ -210,10 +210,18 @@ export function MultiSelectPaymentNotes({ selectedNotes, onChange, testIdPrefix 
                     data-testid={`option-${testIdPrefix}-${note.id}`}
                   >
                     <div className="flex items-center gap-2">
-                      <PaymentNoteBadge name={note.name} color={note.color} />
+                      {note.color && (
+                        <span
+                          className="w-3 h-3 rounded-sm flex-shrink-0 border border-black/10"
+                          style={{ backgroundColor: note.color }}
+                        />
+                      )}
+                      <span>{note.name}</span>
                     </div>
                     {isSelected && (
-                      <Check className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">
+                        #{selectedNotes.indexOf(note.name) + 1}
+                      </span>
                     )}
                   </div>
                 );
