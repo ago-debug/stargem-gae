@@ -16,6 +16,8 @@ import {
   GraduationCap,
   CheckSquare,
   Activity,
+  MessageSquarePlus,
+  StickyNote,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -121,6 +123,16 @@ const draftItems = [
     title: "Knowledge",
     url: "/knowledge",
     icon: Settings,
+  },
+  {
+    title: "Commento",
+    url: "/commenti",
+    icon: MessageSquarePlus,
+  },
+  {
+    title: "Inserisci Nota",
+    url: "/note-team",
+    icon: StickyNote,
   },
 ];
 

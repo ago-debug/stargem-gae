@@ -134,6 +134,15 @@ import {
   type InsertPaymentNote,
   type EnrollmentDetail,
   type InsertEnrollmentDetail,
+  teamComments,
+  teamNotes,
+  teamNotifications,
+  type TeamComment,
+  type InsertTeamComment,
+  type TeamNote,
+  type InsertTeamNote,
+  type TeamNotification,
+  type InsertTeamNotification,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -424,6 +433,27 @@ export interface IStorage {
   createEnrollmentDetail(detail: InsertEnrollmentDetail): Promise<EnrollmentDetail>;
   updateEnrollmentDetail(id: number, detail: Partial<InsertEnrollmentDetail>): Promise<EnrollmentDetail>;
   deleteEnrollmentDetail(id: number): Promise<void>;
+
+  // Team Comments
+  getTeamComments(): Promise<TeamComment[]>;
+  getTeamComment(id: number): Promise<TeamComment | undefined>;
+  createTeamComment(comment: InsertTeamComment): Promise<TeamComment>;
+  updateTeamComment(id: number, comment: Partial<InsertTeamComment>): Promise<TeamComment>;
+  deleteTeamComment(id: number): Promise<void>;
+
+  // Team Notes
+  getTeamNotes(): Promise<TeamNote[]>;
+  getTeamNote(id: number): Promise<TeamNote | undefined>;
+  createTeamNote(note: InsertTeamNote): Promise<TeamNote>;
+  updateTeamNote(id: number, note: Partial<InsertTeamNote>): Promise<TeamNote>;
+  deleteTeamNote(id: number): Promise<void>;
+
+  // Team Notifications
+  getTeamNotifications(userId: string): Promise<TeamNotification[]>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
+  createTeamNotification(notification: InsertTeamNotification): Promise<TeamNotification>;
+  markNotificationRead(id: number): Promise<void>;
+  markAllNotificationsRead(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1988,6 +2018,77 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEnrollmentDetail(id: number): Promise<void> {
     await db.delete(enrollmentDetails).where(eq(enrollmentDetails.id, id));
+  }
+
+  // ==== Team Comments ====
+  async getTeamComments(): Promise<TeamComment[]> {
+    return await db.select().from(teamComments).orderBy(desc(teamComments.createdAt));
+  }
+
+  async getTeamComment(id: number): Promise<TeamComment | undefined> {
+    const [comment] = await db.select().from(teamComments).where(eq(teamComments.id, id));
+    return comment;
+  }
+
+  async createTeamComment(comment: InsertTeamComment): Promise<TeamComment> {
+    const [newComment] = await db.insert(teamComments).values(comment).returning();
+    return newComment;
+  }
+
+  async updateTeamComment(id: number, comment: Partial<InsertTeamComment>): Promise<TeamComment> {
+    const [updated] = await db.update(teamComments).set({ ...comment, updatedAt: new Date() }).where(eq(teamComments.id, id)).returning();
+    return updated;
+  }
+
+  async deleteTeamComment(id: number): Promise<void> {
+    await db.delete(teamComments).where(eq(teamComments.id, id));
+  }
+
+  // ==== Team Notes ====
+  async getTeamNotes(): Promise<TeamNote[]> {
+    return await db.select().from(teamNotes).orderBy(desc(teamNotes.isPinned), desc(teamNotes.createdAt));
+  }
+
+  async getTeamNote(id: number): Promise<TeamNote | undefined> {
+    const [note] = await db.select().from(teamNotes).where(eq(teamNotes.id, id));
+    return note;
+  }
+
+  async createTeamNote(note: InsertTeamNote): Promise<TeamNote> {
+    const [newNote] = await db.insert(teamNotes).values(note).returning();
+    return newNote;
+  }
+
+  async updateTeamNote(id: number, note: Partial<InsertTeamNote>): Promise<TeamNote> {
+    const [updated] = await db.update(teamNotes).set({ ...note, updatedAt: new Date() }).where(eq(teamNotes.id, id)).returning();
+    return updated;
+  }
+
+  async deleteTeamNote(id: number): Promise<void> {
+    await db.delete(teamNotes).where(eq(teamNotes.id, id));
+  }
+
+  // ==== Team Notifications ====
+  async getTeamNotifications(userId: string): Promise<TeamNotification[]> {
+    return await db.select().from(teamNotifications).where(eq(teamNotifications.userId, userId)).orderBy(desc(teamNotifications.createdAt));
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const [result] = await db.select({ count: sql<number>`count(*)::int` }).from(teamNotifications).where(and(eq(teamNotifications.userId, userId), eq(teamNotifications.isRead, false)));
+    return result?.count || 0;
+  }
+
+  async createTeamNotification(notification: InsertTeamNotification): Promise<TeamNotification> {
+    const [newNotification] = await db.insert(teamNotifications).values(notification).returning();
+    return newNotification;
+  }
+
+  async markNotificationRead(id: number): Promise<void> {
+    await db.update(teamNotifications).set({ isRead: true }).where(eq(teamNotifications.id, id));
+  }
+
+  async markAllNotificationsRead(userId: string): Promise<void> {
+    await db.update(teamNotifications).set({ isRead: true }).where(eq(teamNotifications.userId, userId));
   }
 }
 

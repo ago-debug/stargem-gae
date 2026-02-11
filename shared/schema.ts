@@ -1634,3 +1634,72 @@ export const insertKnowledgeSchema = createInsertSchema(knowledge).omit({
 });
 export type InsertKnowledge = z.infer<typeof insertKnowledgeSchema>;
 export type Knowledge = typeof knowledge.$inferSelect;
+
+// ============================================================================
+// TEAM COMMENTS (Commenti interni del team)
+// ============================================================================
+
+export const teamComments = pgTable("team_comments", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  authorId: varchar("author_id", { length: 255 }).notNull(),
+  authorName: varchar("author_name", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  priority: varchar("priority", { length: 20 }).default("normale"),
+  isResolved: boolean("is_resolved").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTeamCommentSchema = createInsertSchema(teamComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTeamComment = z.infer<typeof insertTeamCommentSchema>;
+export type TeamComment = typeof teamComments.$inferSelect;
+
+// ============================================================================
+// TEAM NOTES (Note interne del team)
+// ============================================================================
+
+export const teamNotes = pgTable("team_notes", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  authorId: varchar("author_id", { length: 255 }).notNull(),
+  authorName: varchar("author_name", { length: 255 }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  category: varchar("category", { length: 50 }).default("generale"),
+  isPinned: boolean("is_pinned").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTeamNoteSchema = createInsertSchema(teamNotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTeamNote = z.infer<typeof insertTeamNoteSchema>;
+export type TeamNote = typeof teamNotes.$inferSelect;
+
+// ============================================================================
+// TEAM NOTIFICATIONS (Notifiche per il team)
+// ============================================================================
+
+export const teamNotifications = pgTable("team_notifications", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  type: varchar("type", { length: 20 }).notNull(),
+  referenceId: integer("reference_id").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message"),
+  isRead: boolean("is_read").default(false),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTeamNotificationSchema = createInsertSchema(teamNotifications).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertTeamNotification = z.infer<typeof insertTeamNotificationSchema>;
+export type TeamNotification = typeof teamNotifications.$inferSelect;

@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
+import { users as usersTable } from "@shared/schema";
 import { setupAuth, isAuthenticated, isExternalDeploy } from "./replitAuth";
 import multer from "multer";
 import Papa from "papaparse";
@@ -44,6 +46,8 @@ import {
   insertActivityStatusSchema,
   insertPaymentNoteSchema,
   insertEnrollmentDetailSchema,
+  insertTeamCommentSchema,
+  insertTeamNoteSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -3549,6 +3553,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Errore eliminazione dettaglio iscrizione" });
+    }
+  });
+
+  // ======== TEAM COMMENTS ROUTES ========
+
+  app.get("/api/team-comments", isAuthenticated, async (_req, res) => {
+    try {
+      const comments = await storage.getTeamComments();
+      res.json(comments);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore recupero commenti" });
+    }
+  });
+
+  app.post("/api/team-comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userName = `${req.user?.claims?.first_name || ""} ${req.user?.claims?.last_name || ""}`.trim() || "Utente";
+      const parsed = insertTeamCommentSchema.safeParse({
+        ...req.body,
+        authorId: userId,
+        authorName: userName,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
+      }
+      const comment = await storage.createTeamComment(parsed.data);
+      const allUsers = await db.select().from(usersTable);
+      for (const user of allUsers) {
+        if (user.id !== userId) {
+          await storage.createTeamNotification({
+            type: "comment",
+            referenceId: comment.id,
+            title: "Nuovo commento",
+            message: `${userName}: ${parsed.data.content.substring(0, 100)}`,
+            isRead: false,
+            userId: user.id,
+          });
+        }
+      }
+      res.json(comment);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore creazione commento" });
+    }
+  });
+
+  app.patch("/api/team-comments/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const comment = await storage.updateTeamComment(id, req.body);
+      res.json(comment);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore aggiornamento commento" });
+    }
+  });
+
+  app.delete("/api/team-comments/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const existing = await storage.getTeamComment(id);
+      if (!existing) return res.status(404).json({ message: "Commento non trovato" });
+      if (existing.authorId !== req.user?.claims?.sub) {
+        return res.status(403).json({ message: "Non autorizzato" });
+      }
+      await storage.deleteTeamComment(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore eliminazione commento" });
+    }
+  });
+
+  // ======== TEAM NOTES ROUTES ========
+
+  app.get("/api/team-notes", isAuthenticated, async (_req, res) => {
+    try {
+      const notes = await storage.getTeamNotes();
+      res.json(notes);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore recupero note" });
+    }
+  });
+
+  app.post("/api/team-notes", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userName = `${req.user?.claims?.first_name || ""} ${req.user?.claims?.last_name || ""}`.trim() || "Utente";
+      const parsed = insertTeamNoteSchema.safeParse({
+        ...req.body,
+        authorId: userId,
+        authorName: userName,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
+      }
+      const note = await storage.createTeamNote(parsed.data);
+      const allUsers = await db.select().from(usersTable);
+      for (const user of allUsers) {
+        if (user.id !== userId) {
+          await storage.createTeamNotification({
+            type: "note",
+            referenceId: note.id,
+            title: "Nuova nota",
+            message: `${userName}: ${parsed.data.title}`,
+            isRead: false,
+            userId: user.id,
+          });
+        }
+      }
+      res.json(note);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore creazione nota" });
+    }
+  });
+
+  app.patch("/api/team-notes/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const note = await storage.updateTeamNote(id, req.body);
+      res.json(note);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore aggiornamento nota" });
+    }
+  });
+
+  app.delete("/api/team-notes/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const existing = await storage.getTeamNote(id);
+      if (!existing) return res.status(404).json({ message: "Nota non trovata" });
+      if (existing.authorId !== req.user?.claims?.sub) {
+        return res.status(403).json({ message: "Non autorizzato" });
+      }
+      await storage.deleteTeamNote(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore eliminazione nota" });
+    }
+  });
+
+  // ======== TEAM NOTIFICATIONS ROUTES ========
+
+  app.get("/api/team-notifications", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const notifications = await storage.getTeamNotifications(userId);
+      res.json(notifications);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore recupero notifiche" });
+    }
+  });
+
+  app.get("/api/team-notifications/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore conteggio notifiche" });
+    }
+  });
+
+  app.patch("/api/team-notifications/:id/read", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.markNotificationRead(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore aggiornamento notifica" });
+    }
+  });
+
+  app.post("/api/team-notifications/mark-all-read", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      await storage.markAllNotificationsRead(userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore aggiornamento notifiche" });
     }
   });
 

@@ -27,6 +27,10 @@ Key features and architectural decisions include:
 - **Structured Scheduling**: Structured dropdown selectors for defining studio operating hours and course schedules (day of week, start/end times, recurrence type).
 - **Location Autocomplete**: City search with auto-fill for province and postal code. Database includes all 7904 Italian municipalities (comuni) with all 107 provinces. Minimum 3 characters required for search.
 - **Elenchi Page** (`/elenchi`): Central management page for all custom dropdown lists (Stato, Note Pagamenti, Dettaglio Iscrizione). Any future custom dropdown fields that don't have their own dedicated page should be added here as a new `EditableListSection` component instance.
+- **Team Communication System**: Internal team communication with two modules accessible from Bozze menu:
+  - **Commenti** (`/commenti`): Team comments with priority levels (bassa, normale, alta, urgente), resolve/unresolve toggle, and author-only deletion. DB table: `team_comments`.
+  - **Note Team** (`/note-team`): Team notes with categories (generale, problema, idea, promemoria, urgente), pin/unpin, dialog-based creation/editing. DB table: `team_notes`.
+  - **Notification System**: Bell icon in header with unread count badge (auto-refreshes every 30s). Notifications are created for all team members when a comment or note is posted. Popover shows recent notifications with links to relevant pages. DB table: `team_notifications`.
 
 ## External Dependencies
 - **Database**: PostgreSQL (Neon)
