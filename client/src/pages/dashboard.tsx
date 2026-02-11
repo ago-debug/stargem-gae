@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "wouter";
-import logoStarGem from "@assets/b4a42b7f-d509-4427-af5b-ebd8b17c6f92_1770748343779.png";
+import logoStarGem from "@assets/2fded732-6b1d-4121-a9a7-9eae89138609_1770777971616.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
