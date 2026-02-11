@@ -666,7 +666,7 @@ export default function Courses() {
   const exportToCSV = () => {
     if (!filteredCourses.length) return;
     
-    const headers = ["SKU", "Nome", "Descrizione", "Categoria", "Staff/Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
+    const headers = ["SKU/Codice", "Nome", "Descrizione", "Categoria", "Staff/Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
     
     const rows = filteredCourses.map(course => {
       const category = categories?.find(c => c.id === course.categoryId);
@@ -809,7 +809,7 @@ export default function Courses() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>Codice</SortableTableHead>
+                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
                   <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Corso</SortableTableHead>
                   <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
                   <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
@@ -978,7 +978,7 @@ export default function Courses() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="sku">SKU</Label>
+                      <Label htmlFor="sku">SKU/Codice</Label>
                       <Input
                         id="sku"
                         name="sku"
@@ -1249,7 +1249,7 @@ export default function Courses() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sku">SKU</Label>
+                  <Label htmlFor="sku">SKU/Codice</Label>
                   <Input
                     id="sku"
                     name="sku"

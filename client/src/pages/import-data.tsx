@@ -71,7 +71,7 @@ const MEMBER_FIELDS = [
 // Course fields for mapping
 const COURSE_FIELDS = [
   { key: "name", label: "Nome Corso", required: true },
-  { key: "sku", label: "SKU (Codice Univoco)" },
+  { key: "sku", label: "SKU/Codice (Codice Univoco)" },
   { key: "description", label: "Descrizione" },
   { key: "categoryName", label: "Categoria (Nome)" },
   { key: "studioName", label: "Studio/Sala (Nome)" },
@@ -112,7 +112,7 @@ const MEMBER_IMPORT_KEY_OPTIONS = [
 
 // Import key options for courses
 const COURSE_IMPORT_KEY_OPTIONS = [
-  { key: "sku", label: "SKU" },
+  { key: "sku", label: "SKU/Codice" },
   { key: "name", label: "Nome Corso" },
 ];
 
