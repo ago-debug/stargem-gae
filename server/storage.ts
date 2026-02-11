@@ -44,6 +44,7 @@ import {
   recitals,
   vacationStudies,
   activityStatuses,
+  paymentNotes,
   type User,
   type UpsertUser,
   type Member,
@@ -128,6 +129,8 @@ import {
   type InsertVacationStudy,
   type ActivityStatus,
   type InsertActivityStatus,
+  type PaymentNote,
+  type InsertPaymentNote,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -404,6 +407,13 @@ export interface IStorage {
   createActivityStatus(status: InsertActivityStatus): Promise<ActivityStatus>;
   updateActivityStatus(id: number, status: Partial<InsertActivityStatus>): Promise<ActivityStatus>;
   deleteActivityStatus(id: number): Promise<void>;
+
+  // Payment Notes
+  getPaymentNotes(): Promise<PaymentNote[]>;
+  getPaymentNote(id: number): Promise<PaymentNote | undefined>;
+  createPaymentNote(note: InsertPaymentNote): Promise<PaymentNote>;
+  updatePaymentNote(id: number, note: Partial<InsertPaymentNote>): Promise<PaymentNote>;
+  deletePaymentNote(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1922,6 +1932,29 @@ export class DatabaseStorage implements IStorage {
 
   async deleteActivityStatus(id: number): Promise<void> {
     await db.delete(activityStatuses).where(eq(activityStatuses.id, id));
+  }
+
+  async getPaymentNotes(): Promise<PaymentNote[]> {
+    return await db.select().from(paymentNotes).orderBy(paymentNotes.sortOrder);
+  }
+
+  async getPaymentNote(id: number): Promise<PaymentNote | undefined> {
+    const [note] = await db.select().from(paymentNotes).where(eq(paymentNotes.id, id));
+    return note;
+  }
+
+  async createPaymentNote(note: InsertPaymentNote): Promise<PaymentNote> {
+    const [newNote] = await db.insert(paymentNotes).values(note).returning();
+    return newNote;
+  }
+
+  async updatePaymentNote(id: number, note: Partial<InsertPaymentNote>): Promise<PaymentNote> {
+    const [updated] = await db.update(paymentNotes).set(note).where(eq(paymentNotes.id, id)).returning();
+    return updated;
+  }
+
+  async deletePaymentNote(id: number): Promise<void> {
+    await db.delete(paymentNotes).where(eq(paymentNotes.id, id));
   }
 }
 

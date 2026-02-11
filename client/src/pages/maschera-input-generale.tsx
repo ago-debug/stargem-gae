@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { KnowledgeInfo } from "@/components/knowledge-info";
+import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
 
 interface AllegatoState {
   hasFile: boolean;
@@ -134,6 +135,7 @@ export default function MascheraInputGenerale() {
   const [saggiCategorieDB, setSaggiCategorieDB] = useState<{id: number; name: string}[]>([]);
   const [vacanzeCategorieDB, setVacanzeCategorieDB] = useState<{id: number; name: string}[]>([]);
   const [partecipanteCategorieDB, setPartecipanteCategorieDB] = useState<{id: number; name: string}[]>([]);
+  const [selectedPaymentNotes, setSelectedPaymentNotes] = useState<string[]>([]);
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
   const attivitaKeys = ["corsi", "prove-pagamento", "prove-gratuite", "lezioni-singole", "workshop", "domeniche-movimento", "allenamenti", "lezioni-individuali", "campus", "saggi"] as const;
@@ -1495,8 +1497,11 @@ export default function MascheraInputGenerale() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Note Pagamenti (O)</Label>
-                <Input />
+                <MultiSelectPaymentNotes
+                  selectedNotes={selectedPaymentNotes}
+                  onChange={setSelectedPaymentNotes}
+                  testIdPrefix="payment-note"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Quantità</Label>
