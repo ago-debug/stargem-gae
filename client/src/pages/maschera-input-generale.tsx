@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle } from "lucide-react";
+import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw } from "lucide-react";
 import { 
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
   User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music
@@ -423,6 +423,10 @@ export default function MascheraInputGenerale() {
               <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-gsheets">
                 <FileSpreadsheet className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 GSheets
+              </Button>
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-pulisci">
+                <RotateCcw className="w-3 h-3 mr-1 sidebar-icon-gold" />
+                Pulisci
               </Button>
               <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-esporta">
                 <Upload className="w-3 h-3 mr-1 sidebar-icon-gold" />
