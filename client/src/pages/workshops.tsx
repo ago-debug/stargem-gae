@@ -164,7 +164,7 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
                 {memberSearchQuery.length < 3 ? (
                   <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                 ) : !searchResults?.members?.length ? (
-                  <CommandEmpty>Nessun membro trovato</CommandEmpty>
+                  <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
                 ) : (
                   <CommandGroup>
                     {searchResults.members

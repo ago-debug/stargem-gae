@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation, useSearch } from "wouter";
+import { useLocation, useSearch, useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { validateFiscalCode, parseFiscalCode } from "@/lib/fiscalCodeUtils";
 import { Button } from "@/components/ui/button";
@@ -77,11 +77,21 @@ const GENDER_OPTIONS = [
 export default function AnagraficaHome() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [, routeParams] = useRoute("/anagrafica/:section");
+  const sectionFromUrl = routeParams?.section;
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const memberIdFromUrl = urlParams.get('memberId');
   
-  const [activeTab, setActiveTab] = useState("anagrafica");
+  const validSections = ["anagrafica", "pagamenti", "buoni", "tessere", "certificati", "gare", "membership", "allenamenti", "corsi", "vacanze"];
+  const initialTab = sectionFromUrl && validSections.includes(sectionFromUrl) ? sectionFromUrl : "anagrafica";
+  const [activeTab, setActiveTab] = useState(initialTab);
+  
+  useEffect(() => {
+    if (sectionFromUrl && validSections.includes(sectionFromUrl)) {
+      setActiveTab(sectionFromUrl);
+    }
+  }, [sectionFromUrl]);
   const [formData, setFormData] = useState<MemberFormData>({
     country: "Italia",
   });
@@ -144,7 +154,7 @@ export default function AnagraficaHome() {
     enabled: !!selectedMemberId,
   });
 
-  // Query per dati collegati al membro selezionato
+  // Query per dati collegati al partecipante selezionato
   const { data: memberPayments, isLoading: loadingPayments, error: errorPayments } = useQuery<any[]>({
     queryKey: ["/api/payments", "member", selectedMemberId],
     queryFn: async () => {
@@ -260,7 +270,7 @@ export default function AnagraficaHome() {
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
-      toast({ title: selectedMemberId ? "Dati salvati con successo" : "Nuovo membro creato" });
+      toast({ title: selectedMemberId ? "Dati salvati con successo" : "Nuovo partecipante creato" });
       if (!selectedMemberId && data?.id) {
         setSelectedMemberId(data.id);
       }
@@ -471,7 +481,7 @@ export default function AnagraficaHome() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="space-y-2 min-w-0">
               <div>
-                <h1 className="text-xl sm:text-2xl font-semibold" data-testid="text-page-title">Sistema di Gestione Anagrafica</h1>
+                <h1 className="text-xl sm:text-2xl font-semibold" data-testid="text-page-title">Anagrafica</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
               </div>
               <MemberSearch 
@@ -578,7 +588,7 @@ export default function AnagraficaHome() {
                 {/* Row 1: ID, Cognome, Nome, Data Nascita */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <Label>ID Membro</Label>
+                    <Label>ID Partecipante</Label>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700">Auto</Badge>
                       <Input 
@@ -1080,7 +1090,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare i pagamenti</p>
+                  <p className="text-muted-foreground">Seleziona un partecipante per visualizzare i pagamenti</p>
                 ) : loadingPayments ? (
                   <div className="space-y-2">
                     <Skeleton className="h-16 w-full" />
@@ -1123,7 +1133,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare i corsi</p>
+                  <p className="text-muted-foreground">Seleziona un partecipante per visualizzare i corsi</p>
                 ) : loadingEnrollments ? (
                   <div className="space-y-2">
                     <Skeleton className="h-16 w-full" />
@@ -1166,7 +1176,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare i certificati</p>
+                  <p className="text-muted-foreground">Seleziona un partecipante per visualizzare i certificati</p>
                 ) : loadingCertificates ? (
                   <div className="space-y-2">
                     <Skeleton className="h-16 w-full" />
@@ -1214,7 +1224,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare gli abbonamenti</p>
+                  <p className="text-muted-foreground">Seleziona un partecipante per visualizzare gli abbonamenti</p>
                 ) : loadingMemberships ? (
                   <div className="space-y-2">
                     <Skeleton className="h-16 w-full" />
@@ -1253,7 +1263,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare le presenze</p>
+                  <p className="text-muted-foreground">Seleziona un partecipante per visualizzare le presenze</p>
                 ) : loadingAttendances ? (
                   <div className="space-y-2">
                     <Skeleton className="h-16 w-full" />
@@ -1295,7 +1305,7 @@ export default function AnagraficaHome() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Nessun buono registrato per questo membro</p>
+                <p className="text-muted-foreground">Nessun buono registrato per questo partecipante</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1310,7 +1320,7 @@ export default function AnagraficaHome() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Nessuna gara registrata per questo membro</p>
+                <p className="text-muted-foreground">Nessuna gara registrata per questo partecipante</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1325,7 +1335,7 @@ export default function AnagraficaHome() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Nessuna vacanza registrata per questo membro</p>
+                <p className="text-muted-foreground">Nessuna vacanza registrata per questo partecipante</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1355,7 +1365,7 @@ export default function AnagraficaHome() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              I seguenti codici fiscali sono presenti in più di un membro. Clicca sul nome per visualizzare e modificare il membro.
+              I seguenti codici fiscali sono presenti in più di un partecipante. Clicca sul nome per visualizzare e modificare il partecipante.
             </p>
             {duplicateFiscalCodes?.map((duplicate) => (
               <Card key={duplicate.fiscalCode} className="p-4">

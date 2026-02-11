@@ -1163,7 +1163,7 @@ export default function Members() {
               </>
             )}
 
-            {/* Corsi Iscritti - Solo per membri esistenti */}
+            {/* Corsi Iscritti - Solo per partecipanti esistenti */}
             {editingMember && (
               <>
                 <Separator />
@@ -1281,7 +1281,7 @@ export default function Members() {
               </>
             )}
 
-            {/* Workshop Iscritti - Solo per membri esistenti */}
+            {/* Workshop Iscritti - Solo per partecipanti esistenti */}
             {editingMember && (
               <>
                 <Separator />
@@ -1398,7 +1398,7 @@ export default function Members() {
               </>
             )}
 
-            {/* Presenze - Solo per membri esistenti */}
+            {/* Presenze - Solo per partecipanti esistenti */}
             {editingMember && (
               <>
                 <Separator />

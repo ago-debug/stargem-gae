@@ -105,7 +105,7 @@ export default function MemberDashboard() {
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      toast({ title: isNewMember ? "Membro creato con successo" : "Dati salvati con successo" });
+      toast({ title: isNewMember ? "Partecipante creato con successo" : "Dati salvati con successo" });
       if (isNewMember && data?.id) {
         setLocation(`/membro/${data.id}`);
       }
@@ -204,7 +204,7 @@ export default function MemberDashboard() {
                 <ArrowLeft className="w-4 h-4 text-white" />
               </Button>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold">Sistema di Gestione Anagrafica</h1>
+                <h1 className="text-xl sm:text-2xl font-bold">Anagrafica</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
               </div>
             </div>
@@ -271,7 +271,7 @@ export default function MemberDashboard() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label>ID Membro</Label>
+                <Label>ID Partecipante</Label>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700">Auto</Badge>
                   <Input 
@@ -457,7 +457,7 @@ export default function MemberDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-center py-8">
-              Storico pagamenti per questo membro
+              Storico pagamenti per questo partecipante
             </p>
           </CardContent>
         </Card>
@@ -471,7 +471,7 @@ export default function MemberDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-center py-8">
-              Buoni e voucher del membro
+              Buoni e voucher del partecipante
             </p>
           </CardContent>
         </Card>

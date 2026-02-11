@@ -123,7 +123,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">
-          Membri Iscritti ({courseEnrollments.length})
+          Partecipanti Iscritti ({courseEnrollments.length})
         </h3>
         <Popover open={isAddingEnrollment} onOpenChange={setIsAddingEnrollment}>
           <PopoverTrigger asChild>
@@ -143,7 +143,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
                 {memberSearchQuery.length < 3 ? (
                   <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                 ) : !searchResults?.members?.length ? (
-                  <CommandEmpty>Nessun membro trovato</CommandEmpty>
+                  <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
                 ) : (
                   <CommandGroup>
                     {searchResults.members
@@ -176,7 +176,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
       </div>
       
       {courseEnrollments.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">Nessun membro iscritto a questo corso</p>
+        <p className="text-sm text-muted-foreground text-center py-8">Nessun partecipante iscritto a questo corso</p>
       ) : (
         <div className="border rounded-lg">
           <Table>
@@ -319,14 +319,14 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Registra Presenza</DialogTitle>
-              <DialogDescription>Seleziona il membro e la data della presenza</DialogDescription>
+              <DialogDescription>Seleziona il partecipante e la data della presenza</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="member">Membro *</Label>
+                <Label htmlFor="member">Partecipante *</Label>
                 <Select value={selectedMemberId?.toString() || ""} onValueChange={(v) => setSelectedMemberId(parseInt(v))}>
                   <SelectTrigger data-testid="select-attendance-member">
-                    <SelectValue placeholder="Seleziona membro" />
+                    <SelectValue placeholder="Seleziona partecipante" />
                   </SelectTrigger>
                   <SelectContent>
                     {enrolledMembers.map(member => (
@@ -355,7 +355,7 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
               <Button
                 onClick={() => {
                   if (!selectedMemberId) {
-                    toast({ title: "Errore", description: "Seleziona un membro", variant: "destructive" });
+                    toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
                     return;
                   }
                   createAttendanceMutation.mutate({
@@ -381,7 +381,7 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Membro</TableHead>
+                <TableHead>Partecipante</TableHead>
                 <TableHead>Data e Ora</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead className="text-right">Azioni</TableHead>

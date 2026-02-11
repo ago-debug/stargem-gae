@@ -1171,7 +1171,7 @@ export const members = pgTable("members", {
   medicalCertificateExpiry: date("medical_certificate_expiry"), // Scadenza certificato medico
   
   // Flag minorenne
-  isMinor: boolean("is_minor").default(false), // Se il membro è minorenne
+  isMinor: boolean("is_minor").default(false), // Se il partecipante è minorenne
   
   // Dati genitori (per minorenni)
   motherFirstName: varchar("mother_first_name", { length: 255 }), // Nome madre
@@ -1226,7 +1226,7 @@ export const insertMemberSchema = createInsertSchema(members).omit({
 export type InsertMember = z.infer<typeof insertMemberSchema>;
 export type Member = typeof members.$inferSelect;
 
-// Member Relationships (relazioni tra membri - genitori/figli/tutori)
+// Member Relationships (relazioni tra partecipanti - genitori/figli/tutori)
 export const memberRelationships = pgTable("member_relationships", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }), // Il minorenne
