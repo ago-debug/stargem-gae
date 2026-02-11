@@ -13,6 +13,7 @@ import {
 import { Link } from "wouter";
 import { KnowledgeInfo } from "@/components/knowledge-info";
 import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
+import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollment-details";
 
 interface AllegatoState {
   hasFile: boolean;
@@ -136,6 +137,7 @@ export default function MascheraInputGenerale() {
   const [vacanzeCategorieDB, setVacanzeCategorieDB] = useState<{id: number; name: string}[]>([]);
   const [partecipanteCategorieDB, setPartecipanteCategorieDB] = useState<{id: number; name: string}[]>([]);
   const [selectedPaymentNotes, setSelectedPaymentNotes] = useState<string[]>([]);
+  const [selectedEnrollmentDetails, setSelectedEnrollmentDetails] = useState<string[]>([]);
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
   const attivitaKeys = ["corsi", "prove-pagamento", "prove-gratuite", "lezioni-singole", "workshop", "domeniche-movimento", "allenamenti", "lezioni-individuali", "campus", "saggi"] as const;
@@ -1475,26 +1477,11 @@ export default function MascheraInputGenerale() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Dettaglio Iscrizione (N)</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleziona dettaglio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="iscritto_donna">iscritto Donna</SelectItem>
-                    <SelectItem value="deve_pagare_d">deve pagare D</SelectItem>
-                    <SelectItem value="deve_pagare_u">deve pagare U</SelectItem>
-                    <SelectItem value="iscritto_donna_2">iscritto Donna</SelectItem>
-                    <SelectItem value="iscritto_uomo">iscritto Uomo</SelectItem>
-                    <SelectItem value="iscritto_welfare">iscritto welfare</SelectItem>
-                    <SelectItem value="lezione_welfare">lezione welfare</SelectItem>
-                    <SelectItem value="prova_donna">prova Donna</SelectItem>
-                    <SelectItem value="prova_pagata_d">prova pagata D</SelectItem>
-                    <SelectItem value="prova_pagata_u">prova pagata U</SelectItem>
-                    <SelectItem value="prova_uomo">prova Uomo</SelectItem>
-                    <SelectItem value="tessera">tessera</SelectItem>
-                  </SelectContent>
-                </Select>
+                <MultiSelectEnrollmentDetails
+                  selectedDetails={selectedEnrollmentDetails}
+                  onChange={setSelectedEnrollmentDetails}
+                  testIdPrefix="enrollment-detail"
+                />
               </div>
               <div className="space-y-2">
                 <MultiSelectPaymentNotes

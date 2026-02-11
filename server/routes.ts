@@ -43,6 +43,7 @@ import {
   insertVacationStudySchema,
   insertActivityStatusSchema,
   insertPaymentNoteSchema,
+  insertEnrollmentDetailSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -3504,6 +3505,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Errore eliminazione nota pagamento" });
+    }
+  });
+
+  // ======== ENROLLMENT DETAILS ROUTES ========
+
+  app.get("/api/enrollment-details", async (_req, res) => {
+    try {
+      const details = await storage.getEnrollmentDetails();
+      res.json(details);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore recupero dettagli iscrizione" });
+    }
+  });
+
+  app.post("/api/enrollment-details", async (req, res) => {
+    try {
+      const parsed = insertEnrollmentDetailSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
+      }
+      const detail = await storage.createEnrollmentDetail(parsed.data);
+      res.json(detail);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore creazione dettaglio iscrizione" });
+    }
+  });
+
+  app.patch("/api/enrollment-details/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const detail = await storage.updateEnrollmentDetail(id, req.body);
+      res.json(detail);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore aggiornamento dettaglio iscrizione" });
+    }
+  });
+
+  app.delete("/api/enrollment-details/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteEnrollmentDetail(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Errore eliminazione dettaglio iscrizione" });
     }
   });
 
