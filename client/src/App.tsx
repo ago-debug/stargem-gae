@@ -34,13 +34,11 @@ import ImportData from "@/pages/import-data";
 import UtentiPermessi from "@/pages/utenti-permessi";
 import ResetStagione from "@/pages/reset-stagione";
 import MemberDashboard from "@/pages/member-dashboard";
-import AnagraficaHome from "@/pages/anagrafica-home";
 import MascheraInputGenerale from "@/pages/maschera-input-generale";
 import Test3Gae from "@/pages/test3-gae";
 import Knowledge from "@/pages/knowledge";
 import TodoList from "@/pages/todo-list";
 import Attivita from "@/pages/attivita";
-import Gestione from "@/pages/gestione";
 import PaidTrials from "@/pages/paid-trials";
 import FreeTrials from "@/pages/free-trials";
 import SingleLessons from "@/pages/single-lessons";
@@ -66,8 +64,7 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={AnagraficaHome} />
-      <Route path="/anagrafica/:section" component={AnagraficaHome} />
+      <Route path="/" component={Dashboard} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/iscritti" component={Members} />
       <Route path="/attivita/corsi" component={Courses} />
@@ -107,7 +104,6 @@ function Router() {
       <Route path="/attivita/saggi" component={Recitals} />
       <Route path="/attivita/vacanze-studio" component={VacationStudies} />
       <Route path="/attivita" component={Attivita} />
-      <Route path="/gestione" component={Gestione} />
       <Route component={NotFound} />
     </Switch>
   );
