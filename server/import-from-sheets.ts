@@ -4,11 +4,11 @@ import { storage } from "./storage";
 async function importMembersFromGoogleSheets() {
   const spreadsheetId = "1RGHlAF488FerC6ufu2AZKkKU_KqDIrYSBCjyFVZnAS4";
   const limit = 500;
-  
+
   console.log("Reading data from Google Sheets...");
-  
+
   const rows = await readSpreadsheet(spreadsheetId, "A1:Z501");
-  
+
   if (rows.length < 2) {
     console.log("No data found in spreadsheet");
     return;
@@ -104,25 +104,37 @@ async function importMembersFromGoogleSheets() {
         continue;
       }
 
-      const parseDate = (val: string): string | undefined => {
+      const parseDate = (val: string): Date | undefined => {
         if (!val) return undefined;
         const parts = val.split(/[\/\-\.]/);
         if (parts.length === 3) {
           let [a, b, c] = parts;
-          if (a.length === 4) return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`;
-          if (c.length === 4) return `${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
-          if (c.length === 2) {
-            const year = parseInt(c) > 50 ? `19${c}` : `20${c}`;
-            return `${year}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+          let year, month, day;
+          if (a.length === 4) {
+            year = parseInt(a);
+            month = parseInt(b) - 1;
+            day = parseInt(c);
+          } else if (c.length === 4) {
+            year = parseInt(c);
+            month = parseInt(b) - 1;
+            day = parseInt(a);
+          } else if (c.length === 2) {
+            year = parseInt(c) > 50 ? 1900 + parseInt(c) : 2000 + parseInt(c);
+            month = parseInt(b) - 1;
+            day = parseInt(a);
+          } else {
+            return undefined;
           }
+          const d = new Date(year, month, day);
+          return isNaN(d.getTime()) ? undefined : d;
         }
         return undefined;
       };
 
       const genderRaw = getValue(colGender).toUpperCase();
-      const gender = genderRaw === "M" || genderRaw === "MASCHIO" || genderRaw === "MALE" ? "M" 
-                   : genderRaw === "F" || genderRaw === "FEMMINA" || genderRaw === "FEMALE" ? "F" 
-                   : undefined;
+      const gender = genderRaw === "M" || genderRaw === "MASCHIO" || genderRaw === "MALE" ? "M"
+        : genderRaw === "F" || genderRaw === "FEMMINA" || genderRaw === "FEMALE" ? "F"
+          : undefined;
 
       const memberData = {
         firstName: firstName || "Sconosciuto",
@@ -168,7 +180,7 @@ async function importMembersFromGoogleSheets() {
   console.log(`Updated: ${updated}`);
   console.log(`Skipped: ${skipped}`);
   console.log(`Total processed: ${dataRows.length}`);
-  
+
   if (errors.length > 0) {
     console.log(`\nFirst ${Math.min(10, errors.length)} errors:`);
     errors.slice(0, 10).forEach(e => console.log(`  - ${e}`));

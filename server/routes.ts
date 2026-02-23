@@ -1,22 +1,22 @@
-import type { Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { db } from "./db";
-import { users as usersTable } from "@shared/schema";
-import { setupAuth, isAuthenticated, isExternalDeploy } from "./replitAuth";
+import { setupAuth, isAuthenticated, isExternalDeploy } from "./auth";
 import multer from "multer";
 import Papa from "papaparse";
 import { readSpreadsheet } from "./google-sheets";
-import { 
+import {
+  getGoogleCalendarClient,
+  createCalendarEvent,
+  updateCalendarEvent,
+  deleteCalendarEvent,
+  getGoogleAuthUrl,
+  getGoogleOAuth2Client
+} from "./google-calendar";
+import { log } from "./vite";
+import {
   insertMemberSchema,
   insertCategorySchema,
-  insertWorkshopCategorySchema,
-  insertSundayCategorySchema,
-  insertTrainingCategorySchema,
-  insertIndividualLessonCategorySchema,
-  insertCampusCategorySchema,
-  insertRecitalCategorySchema,
-  insertVacationCategorySchema,
   insertClientCategorySchema,
   insertSubscriptionTypeSchema,
   insertInstructorSchema,
@@ -33,25 +33,17 @@ import {
   insertAccessLogSchema,
   insertAttendanceSchema,
   insertCustomReportSchema,
-  insertKnowledgeSchema,
+  insertBookingServiceSchema,
+  insertStudioBookingSchema,
+  insertSeasonSchema,
+  insertPriceListSchema,
+  insertPriceListItemSchema,
+  insertQuoteSchema,
   insertPaidTrialSchema,
-  insertFreeTrialSchema,
-  insertSingleLessonSchema,
-  insertSundayActivitySchema,
-  insertTrainingSchema,
-  insertIndividualLessonSchema,
-  insertCampusActivitySchema,
-  insertRecitalSchema,
-  insertVacationStudySchema,
-  insertActivityStatusSchema,
-  insertPaymentNoteSchema,
-  insertEnrollmentDetailSchema,
-  insertTeamCommentSchema,
-  insertTeamNoteSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
-const upload = multer({ 
+const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB max file size
@@ -63,7 +55,8 @@ async function importCoursesFromRows(
   dataRows: any[][],
   fieldMapping: Record<string, number | null>,
   importKey: string,
-  storageInstance: typeof storage
+  storageInstance: typeof storage,
+  autoCreateRecords: boolean = false
 ): Promise<{ imported: number; updated: number; skipped: number; errors: { row: number; message: string }[] }> {
   const getValue = (row: any[], colIdx: number): string => {
     if (colIdx < 0 || colIdx >= row.length) return "";
@@ -87,8 +80,8 @@ async function importCoursesFromRows(
 
   const parseTime = (val: string): string | undefined => {
     if (!val) return undefined;
-    // Accept HH:MM or H:MM format
-    const match = val.match(/^(\d{1,2}):(\d{2})$/);
+    // Accept HH:MM, H:MM, HH:MM:SS or H:MM:SS format
+    const match = val.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
     if (match) {
       const h = match[1].padStart(2, '0');
       const m = match[2];
@@ -112,12 +105,12 @@ async function importCoursesFromRows(
   };
 
   const validRecurrenceTypes = ["weekly", "biweekly", "monthly", "once"];
-  
+
   // Load lookup tables for resolving names to IDs
   const instructors = await storageInstance.getInstructors();
   const studios = await storageInstance.getStudios();
   const categories = await storageInstance.getCategories();
-  
+
   // Create lookup maps (by name, case-insensitive)
   const instructorByName = new Map<string, number>();
   instructors.forEach(i => {
@@ -128,12 +121,12 @@ async function importCoursesFromRows(
     // Also try just last name for common usage
     instructorByName.set(i.lastName.toLowerCase().trim(), i.id);
   });
-  
+
   const studioByName = new Map<string, number>();
   studios.forEach(s => {
     studioByName.set(s.name.toLowerCase().trim(), s.id);
   });
-  
+
   const categoryByName = new Map<string, number>();
   categories.forEach(c => {
     categoryByName.set(c.name.toLowerCase().trim(), c.id);
@@ -177,9 +170,27 @@ async function importCoursesFromRows(
         } else if (dbField === "maxCapacity") {
           courseData[dbField] = parseInt2(value);
         } else if (dbField === "dayOfWeek") {
-          const day = parseInt2(value);
-          if (day !== undefined && day >= 0 && day <= 6) {
-            courseData[dbField] = day;
+          const DAYS_MAP: Record<string, string> = {
+            "LUNEDI": "LUN", "LUNEDÌ": "LUN", "MONDAY": "LUN",
+            "MARTEDI": "MAR", "MARTEDÌ": "MAR", "TUESDAY": "MAR",
+            "MERCOLEDI": "MER", "MERCOLEDÌ": "MER", "WEDNESDAY": "MER",
+            "GIOVEDI": "GIO", "GIOVEDÌ": "GIO", "THURSDAY": "GIO",
+            "VENERDI": "VEN", "VENERDÌ": "VEN", "FRIDAY": "VEN",
+            "SABATO": "SAB", "SATURDAY": "SAB",
+            "DOMENICA": "DOM", "SUNDAY": "DOM",
+            "0": "DOM", "1": "LUN", "2": "MAR", "3": "MER", "4": "GIO", "5": "VEN", "6": "SAB"
+          };
+          const normalized = value.toUpperCase().trim();
+          if (DAYS_MAP[normalized]) {
+            courseData[dbField] = DAYS_MAP[normalized];
+          } else {
+            // Fallback for 3-letter abbreviations
+            const short = normalized.substring(0, 3);
+            if (["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"].includes(short)) {
+              courseData[dbField] = short;
+            } else {
+              courseData[dbField] = value; // Keep as is if unknown
+            }
           }
         } else if (dbField === "startTime" || dbField === "endTime") {
           courseData[dbField] = parseTime(value);
@@ -195,7 +206,22 @@ async function importCoursesFromRows(
         } else if (dbField === "instructorName") {
           // Resolve instructor by name
           const lookupKey = value.toLowerCase().trim();
-          const instructorId = instructorByName.get(lookupKey);
+          let instructorId = instructorByName.get(lookupKey);
+
+          if (!instructorId && autoCreateRecords && value) {
+            const parts = value.trim().split(/\s+/);
+            const firstName = parts[0] || "Insegnante";
+            const lastName = parts.slice(1).join(" ") || "Nuovo";
+            try {
+              const newInstructor = await storageInstance.createInstructor({ firstName, lastName, active: true });
+              instructorId = newInstructor.id;
+              instructorByName.set(lookupKey, instructorId);
+              console.log(`[Import] Created missing instructor: "${value}"`);
+            } catch (err) {
+              console.error(`[Import] Failed to create instructor "${value}":`, err);
+            }
+          }
+
           if (instructorId) {
             courseData.instructorId = instructorId;
           } else {
@@ -220,7 +246,19 @@ async function importCoursesFromRows(
         } else if (dbField === "studioName") {
           // Resolve studio by name
           const lookupKey = value.toLowerCase().trim();
-          const studioId = studioByName.get(lookupKey);
+          let studioId = studioByName.get(lookupKey);
+
+          if (!studioId && autoCreateRecords && value) {
+            try {
+              const newStudio = await storageInstance.createStudio({ name: value, active: true });
+              studioId = newStudio.id;
+              studioByName.set(lookupKey, studioId);
+              console.log(`[Import] Created missing studio: "${value}"`);
+            } catch (err) {
+              console.error(`[Import] Failed to create studio "${value}":`, err);
+            }
+          }
+
           if (studioId) {
             courseData.studioId = studioId;
           } else {
@@ -229,7 +267,19 @@ async function importCoursesFromRows(
         } else if (dbField === "categoryName") {
           // Resolve category by name
           const lookupKey = value.toLowerCase().trim();
-          const categoryId = categoryByName.get(lookupKey);
+          let categoryId = categoryByName.get(lookupKey);
+
+          if (!categoryId && autoCreateRecords && value) {
+            try {
+              const newCategory = await storageInstance.createCategory({ name: value });
+              categoryId = newCategory.id;
+              categoryByName.set(lookupKey, categoryId);
+              console.log(`[Import] Created missing category: "${value}"`);
+            } catch (err) {
+              console.error(`[Import] Failed to create category "${value}":`, err);
+            }
+          }
+
           if (categoryId) {
             courseData.categoryId = categoryId;
           } else {
@@ -282,7 +332,8 @@ async function importInstructorsFromRows(
   dataRows: any[][],
   fieldMapping: Record<string, number | null>,
   importKey: string,
-  storageInstance: typeof storage
+  storageInstance: typeof storage,
+  autoCreateRecords: boolean = false
 ): Promise<{ imported: number; updated: number; skipped: number; errors: { row: number; message: string }[] }> {
   const getValue = (row: any[], colIdx: number): string => {
     if (colIdx < 0 || colIdx >= row.length) return "";
@@ -380,37 +431,467 @@ async function importInstructorsFromRows(
   return { imported, updated, skipped, errors: errors.slice(0, 20) };
 }
 
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execPromise = promisify(exec);
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
-  await setupAuth(app);
+  setupAuth(app);
+
+  const isAdmin = (req: any, res: Response, next: NextFunction) => {
+    if (req.user && (req.user.role === 'admin' || (req.user.permissions && req.user.permissions["*"] === "write"))) {
+      return next();
+    }
+    res.status(403).json({ message: "Accesso negato: solo amministratori." });
+  };
+
+  const checkPermission = (uiPath: string, level: 'read' | 'write' = 'read') => {
+    return (req: any, res: Response, next: NextFunction) => {
+      const user = req.user;
+      if (!user) {
+        console.log(`[AUTH] Permission Denied: No user for ${req.url}`);
+        return res.status(401).json({ message: "Non autenticato" });
+      }
+
+      if (user.role === 'admin') {
+        // console.log(`[AUTH] Permission Granted: Admin status for ${req.url}`);
+        return next();
+      }
+
+      const perms = user.permissions || {};
+      const userLevel = perms[uiPath];
+
+      const granted = (perms["*"] === "write") ||
+        (level === 'read' && perms["*"] === "read") ||
+        (userLevel === 'write') ||
+        (level === 'read' && userLevel === 'read');
+
+      if (granted) {
+        return next();
+      }
+
+      console.log(`[AUTH] Permission Denied: User ${user.username} (role: ${user.role}) attempted ${level} on ${uiPath} (${req.url}) but has perms:`, perms);
+      res.status(403).json({ message: `Accesso negato: richiesto permesso di ${level} per ${uiPath}.` });
+    };
+  };
+
+  // ==== Google Calendar Helpers ====
+  const getGlobalCalendarId = () => process.env.GOOGLE_CALENDAR_ID || 'primary';
+  const TIMEZONE = 'Europe/Rome';
+
+  const formatGoogleEvent = (title: string, date: Date | string, startTime: string, endTime: string, description?: string) => {
+    const dStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
+    return {
+      summary: title,
+      description: description || '',
+      start: {
+        dateTime: `${dStr}T${startTime}:00`,
+        timeZone: TIMEZONE,
+      },
+      end: {
+        dateTime: `${dStr}T${endTime}:00`,
+        timeZone: TIMEZONE,
+      },
+    };
+  };
+
+  const syncStudioBookingToGoogle = async (booking: any) => {
+    try {
+      const studio = await storage.getStudio(booking.studioId);
+      const service = booking.serviceId ? await storage.getBookingService(booking.serviceId) : null;
+
+      let title = booking.title || 'Prenotazione';
+      if (booking.memberFirstName && booking.memberLastName) {
+        title = `${title} - ${booking.memberFirstName} ${booking.memberLastName}`;
+      }
+      if (studio) title = `[${studio.name}] ${title}`;
+
+      const event = formatGoogleEvent(
+        title,
+        booking.bookingDate,
+        booking.startTime,
+        booking.endTime,
+        `Servizio: ${service?.name || 'N/A'}\nNote: ${booking.description || ''}`
+      );
+
+      const calendarId = studio?.googleCalendarId || getGlobalCalendarId();
+
+      if (booking.googleEventId) {
+        await updateCalendarEvent(booking.googleEventId, event, calendarId);
+      } else {
+        const newEvent = await createCalendarEvent(event, calendarId);
+        if (newEvent.id) {
+          await storage.updateStudioBooking(booking.id, { googleEventId: newEvent.id });
+        }
+      }
+    } catch (e) {
+      console.error("Failed to sync booking to Google Calendar:", e);
+    }
+  };
+
+  const deleteStudioBookingFromGoogle = async (googleEventId: string | null, studioId: number) => {
+    if (!googleEventId) return;
+    try {
+      const studio = await storage.getStudio(studioId);
+      const calendarId = studio?.googleCalendarId || getGlobalCalendarId();
+      await deleteCalendarEvent(googleEventId, calendarId);
+    } catch (e) {
+      console.error("Failed to delete booking from Google Calendar:", e);
+    }
+  };
+
+  const deleteCourseFromGoogle = async (googleEventId: string | null, studioId: number) => {
+    if (!googleEventId) return;
+    try {
+      const studio = await storage.getStudio(studioId);
+      const calendarId = studio?.googleCalendarId || getGlobalCalendarId();
+      await deleteCalendarEvent(googleEventId, calendarId);
+    } catch (e) {
+      console.error("Failed to delete course from Google Calendar:", e);
+    }
+  };
+
+  const syncCourseToGoogle = async (course: any) => {
+    // For courses (weekly recurring), it's more complex. 
+    // For now, let's sync them as single events on their next occurrence or 
+    // just ignore for a first pass if it's too risky.
+    // However, the user asked for "google calendar", so classes should likely be there.
+    try {
+      const studio = await storage.getStudio(course.studioId);
+      const instructor = await storage.getInstructor(course.instructorId);
+
+      let title = `Corso: ${course.name}`;
+      if (studio) title = `[${studio.name}] ${title}`;
+      if (instructor) title += ` (${instructor.firstName} ${instructor.lastName})`;
+
+      // This is a simplification: syncing only the first occurrence or a placeholder
+      // In a real app we'd use RRULE for recurrence.
+      const event: any = formatGoogleEvent(
+        title,
+        course.startDate || new Date(),
+        course.startTime,
+        course.endTime,
+        course.description
+      );
+
+      // Add recurrence if weekly
+      if (course.dayOfWeek) {
+        // Map day IDs to Google RRULE days
+        const dayMap: any = { 'LUN': 'MO', 'MAR': 'TU', 'MER': 'WE', 'GIO': 'TH', 'VEN': 'FR', 'SAB': 'SA', 'DOM': 'SU' };
+        const gDay = dayMap[course.dayOfWeek];
+        if (gDay) {
+          event.recurrence = [`RRULE:FREQ=WEEKLY;BYDAY=${gDay}`];
+        }
+      }
+
+      const calendarId = studio?.googleCalendarId || getGlobalCalendarId();
+
+      if (course.googleEventId) {
+        await updateCalendarEvent(course.googleEventId, event, calendarId);
+      } else {
+        const newEvent = await createCalendarEvent(event, calendarId);
+        if (newEvent.id) {
+          await storage.updateCourse(course.id, { googleEventId: newEvent.id });
+        }
+      }
+    } catch (e) {
+      console.error("Failed to sync course to Google Calendar:", e);
+    }
+  };
+
+
+  // Helper to log user activities
+  const logUserActivity = async (req: Request, action: string, entityType?: string, entityId?: string, details?: any) => {
+    if (req.user) {
+      try {
+        await storage.logActivity({
+          userId: (req.user as any).id,
+          action,
+          entityType: entityType || null,
+          entityId: entityId || null,
+          details: details ? details : null,
+          ipAddress: req.ip || null,
+        });
+      } catch (err) {
+        log(`Failed to log activity: ${err instanceof Error ? err.message : String(err)}`, "error");
+      }
+    }
+  };
+
+  // ==== Google Auth Routes ====
+  app.get("/api/auth/google/url", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const url = await getGoogleAuthUrl();
+      res.json({ url });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/auth/google/callback", async (req, res) => {
+    const code = req.query.code as string;
+    if (!code) return res.status(400).send("Code missing");
+
+    try {
+      const oauth2Client = getGoogleOAuth2Client();
+      const { tokens } = await oauth2Client.getToken(code);
+
+      if (tokens.refresh_token) {
+        await storage.updateSystemConfig('google_refresh_token', tokens.refresh_token);
+        res.send("<h1>Autenticazione completata!</h1><p>Puoi chiudere questa finestra.</p><script>window.setTimeout(() => window.close(), 2000);</script>");
+      } else {
+        res.send("<h1>Attenzione</h1><p>Non è stato ricevuto un Refresh Token. Se avevi già collegato l'account, prova a disconnettere l'app dalle impostazioni Google e riprova.</p>");
+      }
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.get("/api/auth/google/status", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const refreshToken = await storage.getSystemConfig('google_refresh_token');
+      res.json({
+        connected: !!refreshToken?.value,
+        method: refreshToken?.value ? 'Direct' : (process.env.REPLIT_CONNECTORS_HOSTNAME ? 'Connector' : 'None')
+      });
+    } catch (e: any) {
+      res.status(500).json({ message: e.message });
+    }
+  });
+
+  // Activity Logs Route
+  app.get("/api/activity-logs", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const logs = await storage.getUserActivityLogs(200);
+      res.json(logs);
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+  // Admin DB Sync endpoint
+  app.post("/api/admin/db-sync", isAuthenticated, async (req, res) => {
+    try {
+      log("Starting database synchronization (drizzle-kit push)...", "admin");
+      const { stdout, stderr } = await execPromise("npx drizzle-kit push");
+      log("Database synchronization completed.", "admin");
+      res.json({ success: true, stdout, stderr });
+    } catch (error: any) {
+      log(`Database synchronization failed: ${error.message}`, "admin");
+      res.status(500).json({
+        success: false,
+        message: "Failed to sync database",
+        error: error.message,
+        stderr: error.stderr
+      });
+    }
+  });
+
+  // Admin Seed Payment Methods
+  app.post("/api/admin/seed-payment-methods", isAuthenticated, async (req, res) => {
+    try {
+      const existing = await storage.getPaymentMethods();
+      if (existing.length > 0) {
+        return res.json({ success: true, message: "Metodi già presenti", count: 0 });
+      }
+
+      const defaultMethods = [
+        { name: "Contanti", description: "Pagamento in contanti" },
+        { name: "Bonifico", description: "Bonifico Bancario" },
+        { name: "POS/Carta", description: "Pagamento elettronico (Carta/Bancomat)" },
+        { name: "Assegno", description: "Assegno Bancario/Circolare" }
+      ];
+
+      for (const m of defaultMethods) {
+        await storage.createPaymentMethod(m as any);
+      }
+
+      log("Default payment methods seeded.", "admin");
+      res.json({ success: true, count: defaultMethods.length });
+    } catch (error: any) {
+      log(`Seeding failed: ${error.message}`, "admin");
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // User Management Routes
+
+  app.get("/api/users", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getUsers();
+      // Don't send passwords
+      const safeUsers = users.map(u => {
+        const { password, ...safe } = u;
+        return safe;
+      });
+      res.json(safeUsers);
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.post("/api/users", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { username, password, firstName, lastName, email, role } = req.body;
+      if (!username || !password) {
+        return res.status(400).send("Username and password are required");
+      }
+
+      const existing = await storage.getUserByUsername(username);
+      if (existing) {
+        return res.status(400).send("Username already exists");
+      }
+
+      const { hashPassword } = await import("./auth");
+      const hashedPassword = await hashPassword(password);
+
+      const newUser = await storage.upsertUser({
+        username,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        email,
+        role: role || 'operator'
+      } as any);
+
+      const { password: _, ...safeUser } = newUser;
+      res.status(201).json(safeUser);
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.patch("/api/users/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { firstName, lastName, email, role } = req.body;
+      const updatedUser = await storage.updateUser(req.params.id, {
+        firstName,
+        lastName,
+        email,
+        role
+      } as any);
+
+      const { password: _, ...safeUser } = updatedUser;
+      res.json(safeUser);
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.post("/api/users/:id/password", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { password } = req.body;
+      if (!password) {
+        return res.status(400).send("Password is required");
+      }
+
+      const { hashPassword } = await import("./auth");
+      const hashedPassword = await hashPassword(password);
+
+      await storage.updateUser(req.params.id, { password: hashedPassword });
+      res.json({ success: true, message: "Password updated successfully" });
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.delete("/api/users/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      // Don't allow deleting yourself
+      if ((req.user as any).id === req.params.id) {
+        return res.status(400).send("You cannot delete your own account");
+      }
+
+      await storage.deleteUser(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  // User Role Routes
+  app.get("/api/roles", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const roles = await storage.getUserRoles();
+      res.json(roles);
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.post("/api/roles", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { name, description, permissions } = req.body;
+      if (!name || !permissions) {
+        return res.status(400).send("Name and permissions are required");
+      }
+
+      const existing = await storage.getUserRoleByName(name);
+      if (existing) {
+        return res.status(400).send("Role name already exists");
+      }
+
+      const newRole = await storage.createUserRole({
+        name,
+        description,
+        permissions
+      });
+      res.status(201).json(newRole);
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.patch("/api/roles/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { id: bodyId, createdAt, updatedAt, ...roleUpdate } = req.body;
+
+      const role = await storage.updateUserRole(id, roleUpdate);
+      await logUserActivity(req, "UPDATE", "roles", id.toString(), { name: role.name });
+      res.json(role);
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.delete("/api/roles/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const role = await storage.getUserRole(id);
+      if (role?.name === 'admin') {
+        return res.status(400).send("Cannot delete admin role");
+      }
+      await storage.deleteUserRole(id);
+      await logUserActivity(req, "DELETE", "roles", id.toString(), { name: role?.name });
+      res.sendStatus(204);
+    } catch (error: any) {
+      res.status(500).send(error.message);
+    }
+  });
 
   // App config endpoint (public)
   app.get('/api/config', (req, res) => {
     res.json({
-      isExternalDeploy: isExternalDeploy(),
-      authType: isExternalDeploy() ? 'local' : 'replit',
+      isExternalDeploy: true,
+      authType: 'local',
     });
   });
 
+
   // Auth user endpoint
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
+  app.get('/api/auth/user', isAuthenticated, (req, res) => {
+    res.json(req.user);
   });
 
   // ==== Members Routes ====
-  app.get("/api/members", isAuthenticated, async (req, res) => {
+  app.get("/api/members", isAuthenticated, checkPermission("/iscritti", "read"), async (req, res) => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const pageSize = parseInt(req.query.pageSize as string) || 50;
       const search = req.query.search as string || "";
-      
+
       // Always use paginated query for performance
       const result = await storage.getMembersPaginated(page, pageSize, search);
       res.json(result);
@@ -440,7 +921,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/members/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/members/:id", isAuthenticated, checkPermission("/membro", "read"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const member = await storage.getMember(id);
@@ -453,7 +934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/members", isAuthenticated, async (req, res) => {
+  app.post("/api/members", isAuthenticated, checkPermission("/iscritti", "write"), async (req, res) => {
     try {
       const normalizeEmpty = (val: any): any => {
         if (val === "" || val === undefined) return null;
@@ -462,21 +943,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       const normalizedData: any = {};
       for (const [key, value] of Object.entries(req.body)) {
-        normalizedData[key] = normalizeEmpty(value);
+        if (key === 'photoUrl') {
+          normalizedData[key] = value;
+        } else {
+          normalizedData[key] = normalizeEmpty(value);
+        }
       }
       if (!normalizedData.firstName) normalizedData.firstName = "Sconosciuto";
       if (!normalizedData.lastName) normalizedData.lastName = "Sconosciuto";
-      
+
       // Normalize fiscal code to uppercase
       if (normalizedData.fiscalCode) {
         normalizedData.fiscalCode = normalizedData.fiscalCode.toUpperCase().trim();
       }
-      
+
       // Check for duplicate fiscal code
       if (normalizedData.fiscalCode) {
         const existingMember = await storage.getMemberByFiscalCode(normalizedData.fiscalCode);
         if (existingMember) {
-          return res.status(409).json({ 
+          return res.status(409).json({
             message: `Codice fiscale già presente nel sistema`,
             conflictWith: {
               id: existingMember.id,
@@ -487,15 +972,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-      
+
       const member = await storage.createMember(normalizedData);
+      await logUserActivity(req, "CREATE", "members", member.id.toString(), { name: `${member.firstName} ${member.lastName}` });
       res.status(201).json(member);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create member" });
     }
   });
 
-  app.patch("/api/members/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/members/:id", isAuthenticated, checkPermission("/iscritti", "write"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const normalizeEmpty = (val: any): any => {
@@ -505,19 +991,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       const normalizedData: any = {};
       for (const [key, value] of Object.entries(req.body)) {
-        normalizedData[key] = normalizeEmpty(value);
+        if (key === 'photoUrl') {
+          // Explicitly allow null/string for photoUrl
+          normalizedData[key] = value;
+        } else {
+          normalizedData[key] = normalizeEmpty(value);
+        }
       }
-      
+
       // Normalize fiscal code to uppercase
       if (normalizedData.fiscalCode) {
         normalizedData.fiscalCode = normalizedData.fiscalCode.toUpperCase().trim();
       }
-      
+
       // Check for duplicate fiscal code (excluding current member)
       if (normalizedData.fiscalCode) {
         const existingMember = await storage.getMemberByFiscalCode(normalizedData.fiscalCode);
         if (existingMember && existingMember.id !== id) {
-          return res.status(409).json({ 
+          return res.status(409).json({
             message: `Codice fiscale già presente nel sistema`,
             conflictWith: {
               id: existingMember.id,
@@ -528,18 +1019,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-      
-      const member = await storage.updateMember(id, normalizedData);
-      res.json(member);
+
+      const updatedMember = await storage.updateMember(id, normalizedData);
+      await logUserActivity(req, "UPDATE", "members", id.toString(), { name: `${updatedMember.firstName} ${updatedMember.lastName}` });
+      res.json(updatedMember);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to update member" });
     }
   });
 
-  app.delete("/api/members/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/members/:id", isAuthenticated, checkPermission("/iscritti", "write"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const memberToDelete = await storage.getMember(id);
       await storage.deleteMember(id);
+      await logUserActivity(req, "DELETE", "members", id.toString(), { name: `${memberToDelete?.firstName} ${memberToDelete?.lastName}` });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete member" });
@@ -570,6 +1064,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/member-relationships", isAuthenticated, async (req, res) => {
     try {
       const relationship = await storage.createMemberRelationship(req.body);
+      await logUserActivity(req, "CREATE", "member_relationships", relationship.id.toString(), { member1: relationship.memberId, member2: relationship.relatedMemberId, type: relationship.relationshipType });
       res.status(201).json(relationship);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create member relationship" });
@@ -580,6 +1075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteMemberRelationship(id);
+      await logUserActivity(req, "DELETE", "member_relationships", id.toString());
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete member relationship" });
@@ -591,26 +1087,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Google Sheets non disponibile su deploy esterni
       if (isExternalDeploy()) {
-        return res.status(503).json({ 
-          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV." 
+        return res.status(503).json({
+          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV."
         });
       }
-      
+
       const { spreadsheetId, range = "A1:Z501", limit = 500 } = req.body;
-      
+
       if (!spreadsheetId) {
         return res.status(400).json({ message: "spreadsheetId is required" });
       }
 
       const rows = await readSpreadsheet(spreadsheetId, range);
-      
+
       if (rows.length < 2) {
         return res.status(400).json({ message: "No data found in spreadsheet" });
       }
 
       const headers = rows[0].map((h: string) => h?.toLowerCase().trim() || "");
       const dataRows = rows.slice(1, Math.min(rows.length, limit + 1));
-      
+
       const headerMap: Record<string, number> = {};
       headers.forEach((h: string, i: number) => {
         headerMap[h] = i;
@@ -685,25 +1181,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
 
           const genderRaw = getValue(colGender).toUpperCase();
-          const gender = genderRaw === "M" || genderRaw === "MASCHIO" || genderRaw === "MALE" ? "M" 
-                       : genderRaw === "F" || genderRaw === "FEMMINA" || genderRaw === "FEMALE" ? "F" 
-                       : undefined;
+          const gender = genderRaw === "M" || genderRaw === "MASCHIO" || genderRaw === "MALE" ? "M"
+            : genderRaw === "F" || genderRaw === "FEMMINA" || genderRaw === "FEMALE" ? "F"
+              : undefined;
 
-          const memberData = {
+          const memberData: any = {
             firstName: firstName || "Sconosciuto",
             lastName: lastName || "Sconosciuto",
-            fiscalCode: fiscalCode || undefined,
-            email: getValue(colEmail) || undefined,
-            phone: getValue(colPhone) || undefined,
-            mobile: getValue(colMobile) || undefined,
-            dateOfBirth: parseDate(getValue(colDateOfBirth)),
-            placeOfBirth: getValue(colPlaceOfBirth) || undefined,
-            gender,
-            streetAddress: getValue(colStreet) || undefined,
-            city: getValue(colCity) || undefined,
-            province: getValue(colProvince).toUpperCase().substring(0, 2) || undefined,
-            postalCode: getValue(colPostalCode) || undefined,
-            cardNumber: getValue(colCardNumber) || undefined,
+            fiscalCode: fiscalCode || null,
+            email: getValue(colEmail) || null,
+            phone: getValue(colPhone) || null,
+            mobile: getValue(colMobile) || null,
+            dateOfBirth: parseDate(getValue(colDateOfBirth)) ? new Date(parseDate(getValue(colDateOfBirth))!) : null,
+            placeOfBirth: getValue(colPlaceOfBirth) || null,
+            gender: gender || null,
+            streetAddress: getValue(colStreet) || null,
+            city: getValue(colCity) || null,
+            province: getValue(colProvince).toUpperCase().substring(0, 2) || null,
+            postalCode: getValue(colPostalCode) || null,
+            cardNumber: getValue(colCardNumber) || null,
             active: true,
           };
 
@@ -724,6 +1220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      await logUserActivity(req, "IMPORT", "members", undefined, { source: "Google Sheets", imported, updated, skipped, errors: errors.length });
       res.json({
         success: true,
         imported,
@@ -743,13 +1240,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Google Sheets non disponibile su deploy esterni
       if (isExternalDeploy()) {
-        return res.status(503).json({ 
-          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV." 
+        return res.status(503).json({
+          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV."
         });
       }
-      
+
       const { spreadsheetId, range = "A1:Z1000" } = req.body;
-      
+
       if (!spreadsheetId) {
         return res.status(400).json({ message: "spreadsheetId è obbligatorio" });
       }
@@ -760,7 +1257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rows = await readSpreadsheet(spreadsheetId, previewRange);
       console.log("[Google Sheets Preview] Rows count:", rows.length);
       console.log("[Google Sheets Preview] First row:", JSON.stringify(rows[0]?.slice(0, 5)));
-      
+
       if (rows.length < 1) {
         return res.status(400).json({ message: "Nessun dato trovato nel foglio" });
       }
@@ -771,14 +1268,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: (h || `Colonna ${i + 1}`).toString().trim(),
         originalName: h || ""
       }));
-      
+
       console.log("[Google Sheets Preview] Headers parsed:", headers.slice(0, 5));
-      
+
       // Sample data (first 3 data rows)
-      const sampleData = rows.slice(1, 4).map(row => 
+      const sampleData = rows.slice(1, 4).map(row =>
         row.map((cell: any) => (cell || "").toString().trim())
       );
-      
+
       console.log("[Google Sheets Preview] Sample data row 1:", JSON.stringify(sampleData[0]?.slice(0, 5)));
       console.log("[Google Sheets Preview] Rows 1-3 raw:", rows.slice(1, 4).map(r => r?.slice(0, 3)));
 
@@ -799,62 +1296,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Google Sheets non disponibile su deploy esterni
       if (isExternalDeploy()) {
-        return res.status(503).json({ 
-          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV." 
+        return res.status(503).json({
+          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV."
         });
       }
-      
-      const { 
-        spreadsheetId, 
-        range = "A1:Z1000", 
+
+      const {
+        spreadsheetId,
+        range = "A1:Z1000",
         fieldMapping,  // { dbField: sheetColumnIndex }
         importKey = "fiscalCode",  // Which field to use as unique key
         entityType = "members",  // "members" or "courses"
-        limit = 500 
+        limit = 500,
+        autoCreateRecords = false
       } = req.body;
-      
+
       if (!spreadsheetId) {
         return res.status(400).json({ message: "spreadsheetId è obbligatorio" });
       }
-      
+
       if (!fieldMapping || Object.keys(fieldMapping).length === 0) {
         return res.status(400).json({ message: "Mappatura campi richiesta" });
       }
 
       const rows = await readSpreadsheet(spreadsheetId, range);
-      
+
       if (rows.length < 2) {
         return res.status(400).json({ message: "Nessun dato trovato nel foglio" });
       }
 
       const dataRows = rows.slice(1, Math.min(rows.length, limit + 1));
-      
+
       // Handle courses import
       if (entityType === "courses") {
-        const result = await importCoursesFromRows(dataRows, fieldMapping, importKey, storage);
+        const result = await importCoursesFromRows(dataRows, fieldMapping, importKey, storage, autoCreateRecords);
+        await logUserActivity(req, "IMPORT", "courses", undefined, { source: "Google Sheets (mapped)", ...result });
         return res.json({
           success: true,
           ...result,
           total: dataRows.length,
         });
       }
-      
+
       // Handle instructors import
       if (entityType === "instructors") {
-        const result = await importInstructorsFromRows(dataRows, fieldMapping, importKey, storage);
+        const result = await importInstructorsFromRows(dataRows, fieldMapping, importKey, storage, autoCreateRecords);
+        await logUserActivity(req, "IMPORT", "instructors", undefined, { source: "Google Sheets (mapped)", ...result });
         return res.json({
           success: true,
           ...result,
           total: dataRows.length,
         });
       }
-      
+
       // Helper functions
       const getValue = (row: any[], colIdx: number): string => {
         if (colIdx < 0 || colIdx >= row.length) return "";
         return (row[colIdx] || "").toString().trim();
       };
-      
+
       const parseDate = (val: string): string | undefined => {
         if (!val) return undefined;
         const parts = val.split(/[\/\-\.]/);
@@ -869,35 +1369,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         return undefined;
       };
-      
+
       const parseGender = (val: string): string | undefined => {
         const g = val.toUpperCase();
         if (g === "M" || g === "MASCHIO" || g === "MALE") return "M";
         if (g === "F" || g === "FEMMINA" || g === "FEMALE") return "F";
         return undefined;
       };
-      
+
       // Date fields that need parsing
-      const dateFields = ["dateOfBirth", "cardIssueDate", "cardExpiryDate", "entityCardIssueDate", 
-                          "entityCardExpiryDate", "medicalCertificateExpiry"];
-      
-      // Boolean fields
+      const dateFields = ["dateOfBirth", "cardIssueDate", "cardExpiryDate", "entityCardIssueDate",
+        "entityCardExpiryDate", "medicalCertificateExpiry"];
+
       const booleanFields = ["active", "hasMedicalCertificate", "isMinor"];
+
+      // Load lookup tables for resolving names
+      const clientCategories = await storage.getClientCategories();
+      const catByName = new Map<string, number>(clientCategories.map(c => [c.name.toLowerCase().trim(), c.id]));
+
+      const subscriptionTypes = await storage.getSubscriptionTypes();
+      const subByName = new Map<string, number>(subscriptionTypes.map(s => [s.name.toLowerCase().trim(), s.id]));
 
       // Build existing members index based on chosen key
       const existingMembers = await storage.getMembers();
       const existingByKey = new Map<string, number>();
-      
+
       existingMembers.forEach(m => {
         let keyValue: string | undefined;
         switch (importKey) {
-          case "fiscalCode": keyValue = m.fiscalCode?.toUpperCase(); break;
-          case "email": keyValue = m.email?.toLowerCase(); break;
-          case "cardNumber": keyValue = m.cardNumber; break;
-          case "entityCardNumber": keyValue = m.entityCardNumber; break;
-          case "mobile": keyValue = m.mobile; break;
-          case "phone": keyValue = m.phone; break;
-          default: keyValue = m.fiscalCode?.toUpperCase();
+          case "fiscalCode": keyValue = m.fiscalCode?.toUpperCase() || undefined; break;
+          case "email": keyValue = m.email?.toLowerCase() || undefined; break;
+          case "cardNumber": keyValue = m.cardNumber || undefined; break;
+          case "entityCardNumber": keyValue = m.entityCardNumber || undefined; break;
+          case "mobile": keyValue = m.mobile || undefined; break;
+          case "phone": keyValue = m.phone || undefined; break;
+          default: keyValue = m.fiscalCode?.toUpperCase() || undefined;
         }
         if (keyValue) {
           existingByKey.set(keyValue, m.id);
@@ -913,19 +1419,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const row = dataRows[i];
         try {
           const memberData: any = { active: true };
-          
+
           // Map each field from the sheet
-          for (const [dbField, colIdx] of Object.entries(fieldMapping)) {
-            if (colIdx === null || colIdx === undefined || colIdx < 0) continue;
-            
+          for (const [dbField, colIdx] of Object.entries(fieldMapping as Record<string, any>)) {
+            if (colIdx === null || colIdx === undefined || (colIdx as any) < 0) continue;
+
             let value = getValue(row, colIdx as number);
             if (!value) continue;
-            
+
             // Handle special field types
             if (dbField === "gender") {
-              memberData[dbField] = parseGender(value);
+              memberData[dbField] = parseGender(value) || null;
             } else if (dateFields.includes(dbField)) {
-              memberData[dbField] = parseDate(value);
+              memberData[dbField] = parseDate(value) || null;
             } else if (booleanFields.includes(dbField)) {
               const v = value.toLowerCase();
               memberData[dbField] = v === "si" || v === "sì" || v === "yes" || v === "true" || v === "1";
@@ -933,11 +1439,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
               memberData[dbField] = value.toUpperCase();
             } else if (dbField === "province") {
               memberData[dbField] = value.toUpperCase().substring(0, 2);
+            } else if (dbField === "clientCategoryName") {
+              const lookupKey = value.toLowerCase().trim();
+              let catId = catByName.get(lookupKey);
+              if (!catId && autoCreateRecords && value) {
+                try {
+                  const newCat = await storage.createClientCategory({ name: value });
+                  catId = newCat.id;
+                  catByName.set(lookupKey, catId);
+                  console.log(`[Import] Created missing client category: "${value}"`);
+                } catch (err) {
+                  console.error(`[Import] Failed to create client category "${value}":`, err);
+                }
+              }
+              if (catId) memberData.categoryId = catId;
+            } else if (dbField === "subscriptionTypeName") {
+              const lookupKey = value.toLowerCase().trim();
+              let subId = subByName.get(lookupKey);
+              if (!subId && autoCreateRecords && value) {
+                try {
+                  const newSub = await storage.createSubscriptionType({ name: value, active: true });
+                  subId = newSub.id;
+                  subByName.set(lookupKey, subId);
+                  console.log(`[Import] Created missing subscription type: "${value}"`);
+                } catch (err) {
+                  console.error(`[Import] Failed to create subscription type "${value}":`, err);
+                }
+              }
+              if (subId) memberData.subscriptionTypeId = subId;
             } else {
-              memberData[dbField] = value;
+              memberData[dbField] = value || null;
             }
           }
-          
+
           // Check required fields
           if (!memberData.firstName && !memberData.lastName) {
             skipped++;
@@ -945,7 +1479,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           memberData.firstName = memberData.firstName || "Sconosciuto";
           memberData.lastName = memberData.lastName || "Sconosciuto";
-          
+
+          // Ensure nulls for other fields if not set
+          memberData.fiscalCode = memberData.fiscalCode || null;
+          memberData.email = memberData.email || null;
+          memberData.phone = memberData.phone || null;
+          memberData.mobile = memberData.mobile || null;
+          memberData.streetAddress = memberData.streetAddress || null;
+          memberData.city = memberData.city || null;
+          memberData.province = memberData.province || null;
+          memberData.postalCode = memberData.postalCode || null;
+          memberData.cardNumber = memberData.cardNumber || null;
+          memberData.entityCardNumber = memberData.entityCardNumber || null;
+
           // Get key value for duplicate check
           let keyValue: string | undefined;
           switch (importKey) {
@@ -957,7 +1503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             case "phone": keyValue = memberData.phone; break;
             default: keyValue = memberData.fiscalCode?.toUpperCase();
           }
-          
+
           if (keyValue && existingByKey.has(keyValue)) {
             const existingId = existingByKey.get(keyValue)!;
             await storage.updateMember(existingId, memberData);
@@ -975,6 +1521,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      await logUserActivity(req, "IMPORT", "members", undefined, { source: "Google Sheets (mapped)", imported, updated, skipped, errors: errors.length });
       res.json({
         success: true,
         imported,
@@ -989,7 +1536,593 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ==== Categories Routes ====
+  
+  // WorkshopCategories Routes
+  app.get("/api/workshop-categories", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getWorkshopCategories();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/workshop-categories", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createWorkshopCategory(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/workshop-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateWorkshopCategory(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/workshop-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteWorkshopCategory(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // SundayCategories Routes
+  app.get("/api/sunday-categories", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getSundayCategories();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/sunday-categories", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createSundayCategory(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/sunday-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateSundayCategory(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/sunday-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSundayCategory(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // TrainingCategories Routes
+  app.get("/api/training-categories", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getTrainingCategories();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/training-categories", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createTrainingCategory(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/training-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateTrainingCategory(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/training-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteTrainingCategory(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // IndividualLessonCategories Routes
+  app.get("/api/individual-lesson-categories", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getIndividualLessonCategories();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/individual-lesson-categories", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createIndividualLessonCategory(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/individual-lesson-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateIndividualLessonCategory(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/individual-lesson-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteIndividualLessonCategory(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // CampusCategories Routes
+  app.get("/api/campus-categories", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getCampusCategories();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/campus-categories", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createCampusCategory(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/campus-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateCampusCategory(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/campus-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCampusCategory(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // RecitalCategories Routes
+  app.get("/api/recital-categories", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getRecitalCategories();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/recital-categories", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createRecitalCategory(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/recital-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateRecitalCategory(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/recital-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteRecitalCategory(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // VacationCategories Routes
+  app.get("/api/vacation-categories", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getVacationCategories();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/vacation-categories", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createVacationCategory(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/vacation-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateVacationCategory(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/vacation-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteVacationCategory(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // FreeTrials Routes
+  app.get("/api/free-trials", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getFreeTrials();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/free-trials", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createFreeTrial(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/free-trials/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateFreeTrial(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/free-trials/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteFreeTrial(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // SingleLessons Routes
+  app.get("/api/single-lessons", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getSingleLessons();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/single-lessons", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createSingleLesson(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/single-lessons/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateSingleLesson(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/single-lessons/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSingleLesson(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // SundayActivities Routes
+  app.get("/api/sunday-activities", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getSundayActivities();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/sunday-activities", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createSundayActivity(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/sunday-activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateSundayActivity(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/sunday-activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSundayActivity(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Trainings Routes
+  app.get("/api/trainings", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getTrainings();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/trainings", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createTraining(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/trainings/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateTraining(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/trainings/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteTraining(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // IndividualLessons Routes
+  app.get("/api/individual-lessons", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getIndividualLessons();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/individual-lessons", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createIndividualLesson(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/individual-lessons/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateIndividualLesson(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/individual-lessons/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteIndividualLesson(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // CampusActivities Routes
+  app.get("/api/campus-activities", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getCampusActivities();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/campus-activities", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createCampusActivity(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/campus-activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateCampusActivity(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/campus-activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCampusActivity(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Recitals Routes
+  app.get("/api/recitals", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getRecitals();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/recitals", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createRecital(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/recitals/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateRecital(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/recitals/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteRecital(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // VacationStudies Routes
+  app.get("/api/vacation-studies", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getVacationStudies();
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/vacation-studies", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createVacationStudy(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/vacation-studies/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.updateVacationStudy(id, req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/vacation-studies/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteVacationStudy(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+// ==== Categories Routes ====
   app.get("/api/categories", isAuthenticated, async (req, res) => {
     try {
       const categories = await storage.getCategories();
@@ -1003,6 +2136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertCategorySchema.parse(req.body);
       const category = await storage.createCategory(validatedData);
+      await logUserActivity(req, "CREATE", "categories", category.id.toString(), { name: category.name });
       res.status(201).json(category);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create category" });
@@ -1013,6 +2147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const category = await storage.updateCategory(id, req.body);
+      await logUserActivity(req, "UPDATE", "categories", id.toString(), { name: category.name });
       res.json(category);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to update category" });
@@ -1022,285 +2157,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/categories/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const categoryToDelete = await storage.getCategory(id);
       await storage.deleteCategory(id);
+      await logUserActivity(req, "DELETE", "categories", id.toString(), { name: categoryToDelete?.name });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete category" });
-    }
-  });
-
-  // ==== Workshop Categories Routes ====
-  app.get("/api/workshop-categories", isAuthenticated, async (req, res) => {
-    try {
-      const categories = await storage.getWorkshopCategories();
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch workshop categories" });
-    }
-  });
-
-  app.post("/api/workshop-categories", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertWorkshopCategorySchema.parse(req.body);
-      const category = await storage.createWorkshopCategory(validatedData);
-      res.status(201).json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create workshop category" });
-    }
-  });
-
-  app.patch("/api/workshop-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const category = await storage.updateWorkshopCategory(id, req.body);
-      res.json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update workshop category" });
-    }
-  });
-
-  app.delete("/api/workshop-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteWorkshopCategory(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete workshop category" });
-    }
-  });
-
-  app.get("/api/sunday-categories", isAuthenticated, async (req, res) => {
-    try {
-      const categories = await storage.getSundayCategories();
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch sunday categories" });
-    }
-  });
-
-  app.post("/api/sunday-categories", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertSundayCategorySchema.parse(req.body);
-      const category = await storage.createSundayCategory(validatedData);
-      res.status(201).json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create sunday category" });
-    }
-  });
-
-  app.patch("/api/sunday-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const category = await storage.updateSundayCategory(id, req.body);
-      res.json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update sunday category" });
-    }
-  });
-
-  app.delete("/api/sunday-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteSundayCategory(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete sunday category" });
-    }
-  });
-
-  app.get("/api/training-categories", isAuthenticated, async (req, res) => {
-    try {
-      const categories = await storage.getTrainingCategories();
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch training categories" });
-    }
-  });
-
-  app.post("/api/training-categories", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertTrainingCategorySchema.parse(req.body);
-      const category = await storage.createTrainingCategory(validatedData);
-      res.status(201).json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create training category" });
-    }
-  });
-
-  app.patch("/api/training-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const category = await storage.updateTrainingCategory(id, req.body);
-      res.json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update training category" });
-    }
-  });
-
-  app.delete("/api/training-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteTrainingCategory(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete training category" });
-    }
-  });
-
-  app.get("/api/individual-lesson-categories", isAuthenticated, async (req, res) => {
-    try {
-      const categories = await storage.getIndividualLessonCategories();
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch individual lesson categories" });
-    }
-  });
-
-  app.post("/api/individual-lesson-categories", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertIndividualLessonCategorySchema.parse(req.body);
-      const category = await storage.createIndividualLessonCategory(validatedData);
-      res.status(201).json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create individual lesson category" });
-    }
-  });
-
-  app.patch("/api/individual-lesson-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const category = await storage.updateIndividualLessonCategory(id, req.body);
-      res.json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update individual lesson category" });
-    }
-  });
-
-  app.delete("/api/individual-lesson-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteIndividualLessonCategory(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete individual lesson category" });
-    }
-  });
-
-  app.get("/api/campus-categories", isAuthenticated, async (req, res) => {
-    try {
-      const categories = await storage.getCampusCategories();
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch campus categories" });
-    }
-  });
-
-  app.post("/api/campus-categories", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertCampusCategorySchema.parse(req.body);
-      const category = await storage.createCampusCategory(validatedData);
-      res.status(201).json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create campus category" });
-    }
-  });
-
-  app.patch("/api/campus-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const category = await storage.updateCampusCategory(id, req.body);
-      res.json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update campus category" });
-    }
-  });
-
-  app.delete("/api/campus-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteCampusCategory(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete campus category" });
-    }
-  });
-
-  app.get("/api/recital-categories", isAuthenticated, async (req, res) => {
-    try {
-      const categories = await storage.getRecitalCategories();
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch recital categories" });
-    }
-  });
-
-  app.post("/api/recital-categories", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertRecitalCategorySchema.parse(req.body);
-      const category = await storage.createRecitalCategory(validatedData);
-      res.status(201).json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create recital category" });
-    }
-  });
-
-  app.patch("/api/recital-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const category = await storage.updateRecitalCategory(id, req.body);
-      res.json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update recital category" });
-    }
-  });
-
-  app.delete("/api/recital-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteRecitalCategory(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete recital category" });
-    }
-  });
-
-  // ==== Vacation Study Categories Routes ====
-  app.get("/api/vacation-categories", isAuthenticated, async (req, res) => {
-    try {
-      const categories = await storage.getVacationCategories();
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch vacation categories" });
-    }
-  });
-
-  app.post("/api/vacation-categories", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertVacationCategorySchema.parse(req.body);
-      const category = await storage.createVacationCategory(validatedData);
-      res.status(201).json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create vacation category" });
-    }
-  });
-
-  app.patch("/api/vacation-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const category = await storage.updateVacationCategory(id, req.body);
-      res.json(category);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update vacation category" });
-    }
-  });
-
-  app.delete("/api/vacation-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteVacationCategory(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete vacation category" });
     }
   });
 
@@ -1318,6 +2180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertClientCategorySchema.parse(req.body);
       const category = await storage.createClientCategory(validatedData);
+      await logUserActivity(req, "CREATE", "client_categories", category.id.toString(), { name: category.name });
       res.status(201).json(category);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create client category" });
@@ -1328,6 +2191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const category = await storage.updateClientCategory(id, req.body);
+      await logUserActivity(req, "UPDATE", "client_categories", id.toString(), { name: category.name });
       res.json(category);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to update client category" });
@@ -1337,7 +2201,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/client-categories/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const categoryToDelete = await storage.getClientCategory(id);
       await storage.deleteClientCategory(id);
+      await logUserActivity(req, "DELETE", "client_categories", id.toString(), { name: categoryToDelete?.name });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete client category" });
@@ -1358,6 +2224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertSubscriptionTypeSchema.parse(req.body);
       const subscriptionType = await storage.createSubscriptionType(validatedData);
+      await logUserActivity(req, "CREATE", "subscription_types", subscriptionType.id.toString(), { name: subscriptionType.name });
       res.status(201).json(subscriptionType);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create subscription type" });
@@ -1368,6 +2235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const subscriptionType = await storage.updateSubscriptionType(id, req.body);
+      await logUserActivity(req, "UPDATE", "subscription_types", id.toString(), { name: subscriptionType.name });
       res.json(subscriptionType);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to update subscription type" });
@@ -1377,7 +2245,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/subscription-types/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const subscriptionTypeToDelete = await storage.getSubscriptionType(id);
       await storage.deleteSubscriptionType(id);
+      await logUserActivity(req, "DELETE", "subscription_types", id.toString(), { name: subscriptionTypeToDelete?.name });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete subscription type" });
@@ -1398,6 +2268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertInstructorSchema.parse(req.body);
       const instructor = await storage.createInstructor(validatedData);
+      await logUserActivity(req, "CREATE", "instructors", instructor.id.toString(), { name: instructor.firstName + " " + instructor.lastName });
       res.status(201).json(instructor);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create instructor" });
@@ -1408,6 +2279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const instructor = await storage.updateInstructor(id, req.body);
+      await logUserActivity(req, "UPDATE", "instructors", id.toString(), { name: instructor.firstName + " " + instructor.lastName });
       res.json(instructor);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to update instructor" });
@@ -1417,7 +2289,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/instructors/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const instructorToDelete = await storage.getInstructor(id);
       await storage.deleteInstructor(id);
+      await logUserActivity(req, "DELETE", "instructors", id.toString(), { name: instructorToDelete?.firstName + " " + instructorToDelete?.lastName });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete instructor" });
@@ -1438,6 +2312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertStudioSchema.parse(req.body);
       const studio = await storage.createStudio(validatedData);
+      await logUserActivity(req, "CREATE", "studios", studio.id.toString(), { name: studio.name });
       res.status(201).json(studio);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create studio" });
@@ -1465,59 +2340,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==== Courses Routes ====
-  app.get("/api/courses", isAuthenticated, async (req, res) => {
+  app.get("/api/courses", isAuthenticated, checkPermission("/corsi", "read"), async (req, res) => {
     try {
-      const courses = await storage.getCourses();
-      res.json(courses);
+      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
+      let coursesList;
+      if (seasonId) {
+        coursesList = await storage.getCoursesBySeason(seasonId);
+      } else {
+        const activeSeason = await storage.getActiveSeason();
+        if (activeSeason) {
+          coursesList = await storage.getCoursesBySeason(activeSeason.id);
+        } else {
+          coursesList = await storage.getCourses();
+        }
+      }
+      res.json(coursesList);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch courses" });
     }
   });
 
-  app.post("/api/courses", isAuthenticated, async (req, res) => {
+  app.post("/api/courses", isAuthenticated, checkPermission("/corsi", "write"), async (req, res) => {
     try {
       const validatedData = insertCourseSchema.parse(req.body);
+      const force = req.query.force === 'true' || req.body.force === true;
+
+      if (!force && validatedData.studioId && validatedData.startDate && validatedData.startTime && validatedData.endTime) {
+        const conflict = await storage.checkStudioConflict(
+          validatedData.studioId!,
+          validatedData.startDate!,
+          validatedData.startTime!,
+          validatedData.endTime!
+        );
+        if (conflict) {
+          const conflictTypeLabel =
+            conflict.type === 'course' ? 'corso' :
+              conflict.type === 'booking' ? 'prenotazione' :
+                conflict.type === 'workshop' ? 'workshop' :
+                  'orario di chiusura';
+
+          const message = conflict.type === 'operating_hours'
+            ? `Attenzione: ${conflict.name}. Vuoi forzare il salvataggio?`
+            : `Conflitto rilevato: lo slot è già occupato da un ${conflictTypeLabel} (${conflict.name}). Vuoi forzare il salvataggio?`;
+
+          return res.status(409).json({
+            message,
+            conflict
+          });
+        }
+      }
+
       const course = await storage.createCourse(validatedData);
+
+      // Sync to Google Calendar (async)
+      syncCourseToGoogle(course);
+      await logUserActivity(req, "CREATE", "courses", course.id.toString(), { name: course.name });
       res.status(201).json(course);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create course" });
     }
   });
 
-  app.patch("/api/courses/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/courses/:id", isAuthenticated, checkPermission("/corsi", "write"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const course = await storage.updateCourse(id, req.body);
+      const validatedData = insertCourseSchema.partial().parse(req.body);
+      const force = req.query.force === 'true' || req.body.force === true;
+
+      const existingCourse = await storage.getCourse(id);
+      if (existingCourse && !force) {
+        const studioId = validatedData.studioId || existingCourse.studioId;
+        const startDate = validatedData.startDate || existingCourse.startDate;
+        const startTime = validatedData.startTime || existingCourse.startTime;
+        const endTime = validatedData.endTime || existingCourse.endTime;
+
+        if (studioId && startDate && startTime && endTime) {
+          const conflict = await storage.checkStudioConflict(
+            studioId,
+            startDate,
+            startTime,
+            endTime,
+            id
+          );
+          if (conflict) {
+            const conflictTypeLabel =
+              conflict.type === 'course' ? 'corso' :
+                conflict.type === 'booking' ? 'prenotazione' :
+                  conflict.type === 'workshop' ? 'workshop' :
+                    'orario di chiusura';
+
+            const message = conflict.type === 'operating_hours'
+              ? `Attenzione: ${conflict.name}. Vuoi forzare il salvataggio?`
+              : `Conflitto rilevato: lo slot è già occupato da un ${conflictTypeLabel} (${conflict.name}). Vuoi forzare il salvataggio?`;
+
+            return res.status(409).json({
+              message,
+              conflict
+            });
+          }
+        }
+      }
+
+      const course = await storage.updateCourse(id, validatedData);
+
+      // Sync to Google Calendar (async)
+      syncCourseToGoogle(course);
+      await logUserActivity(req, "UPDATE", "courses", id.toString(), { name: course.name });
       res.json(course);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to update course" });
     }
   });
 
-  app.delete("/api/courses/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/courses/:id", isAuthenticated, checkPermission("/corsi", "write"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const course = await storage.getCourse(id);
+      if (course?.googleEventId) {
+        deleteCourseFromGoogle(course.googleEventId, course.studioId!);
+      }
       await storage.deleteCourse(id);
-      res.status(204).send();
+      await logUserActivity(req, "DELETE", "courses", id.toString());
+      res.sendStatus(204);
     } catch (error) {
       res.status(500).json({ message: "Failed to delete course" });
     }
   });
 
   // ==== Workshops Routes ====
-  app.get("/api/workshops", isAuthenticated, async (req, res) => {
+  app.get("/api/workshops", isAuthenticated, checkPermission("/workshops", "read"), async (req, res) => {
     try {
-      const workshops = await storage.getWorkshops();
-      res.json(workshops);
+      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
+      let workshopsList;
+      if (seasonId) {
+        workshopsList = await storage.getWorkshopsBySeason(seasonId);
+      } else {
+        const activeSeason = await storage.getActiveSeason();
+        if (activeSeason) {
+          workshopsList = await storage.getWorkshopsBySeason(activeSeason.id);
+        } else {
+          workshopsList = await storage.getWorkshops();
+        }
+      }
+      res.json(workshopsList);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch workshops" });
     }
   });
 
-  app.post("/api/workshops", isAuthenticated, async (req, res) => {
+  app.post("/api/workshops", isAuthenticated, checkPermission("/workshops", "write"), async (req, res) => {
     try {
       const validatedData = insertWorkshopSchema.parse(req.body);
+      const force = req.query.force === 'true' || req.body.force === true;
+
+      if (!force && validatedData.studioId && validatedData.startDate && validatedData.startTime && validatedData.endTime) {
+        const conflict = await storage.checkStudioConflict(
+          validatedData.studioId,
+          validatedData.startDate,
+          validatedData.startTime,
+          validatedData.endTime
+        );
+        if (conflict) {
+          const conflictTypeLabel =
+            conflict.type === 'course' ? 'corso' :
+              conflict.type === 'booking' ? 'prenotazione' :
+                conflict.type === 'workshop' ? 'workshop' :
+                  'orario di chiusura';
+
+          const message = conflict.type === 'operating_hours'
+            ? `Attenzione: ${conflict.name}. Vuoi forzare il salvataggio?`
+            : `Conflitto rilevato: lo slot è già occupato da un ${conflictTypeLabel} (${conflict.name}). Vuoi forzare il salvataggio?`;
+
+          return res.status(409).json({
+            message,
+            conflict
+          });
+        }
+      }
+
       const workshop = await storage.createWorkshop(validatedData);
+      await logUserActivity(req, "CREATE", "workshops", workshop.id.toString(), { name: workshop.name });
       res.status(201).json(workshop);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create workshop" });
@@ -1527,7 +2529,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/workshops/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const workshop = await storage.updateWorkshop(id, req.body);
+      const force = req.query.force === 'true' || req.body.force === true;
+      const updatedData = req.body;
+
+      if (!force && updatedData.studioId && updatedData.startDate && updatedData.startTime && updatedData.endTime) {
+        const conflict = await storage.checkStudioConflict(
+          updatedData.studioId,
+          updatedData.startDate,
+          updatedData.startTime,
+          updatedData.endTime
+        );
+
+        if (conflict) {
+          return res.status(409).json({
+            message: `Conflitto rilevato: lo slot è già occupato (${conflict.name}). Vuoi forzare il salvataggio?`,
+            conflict
+          });
+        }
+      }
+
+      const workshop = await storage.updateWorkshop(id, updatedData);
+      await logUserActivity(req, "UPDATE", "workshops", id.toString(), { name: workshop.name });
       res.json(workshop);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to update workshop" });
@@ -1538,396 +2560,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteWorkshop(id);
-      res.status(204).send();
+      await logUserActivity(req, "DELETE", "workshops", id.toString());
+      res.status(204).end();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete workshop" });
-    }
-  });
-
-  // ==== Paid Trials Routes ====
-  app.get("/api/paid-trials", isAuthenticated, async (req, res) => {
-    try {
-      const items = await storage.getPaidTrials();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch paid trials" });
-    }
-  });
-
-  app.post("/api/paid-trials", isAuthenticated, async (req, res) => {
-    try {
-      const parsed = insertPaidTrialSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
-      }
-      const item = await storage.createPaidTrial(parsed.data);
-      res.status(201).json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create paid trial" });
-    }
-  });
-
-  app.patch("/api/paid-trials/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const item = await storage.updatePaidTrial(id, req.body);
-      res.json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update paid trial" });
-    }
-  });
-
-  app.delete("/api/paid-trials/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deletePaidTrial(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete paid trial" });
-    }
-  });
-
-  // ==== Free Trials Routes ====
-  app.get("/api/free-trials", isAuthenticated, async (req, res) => {
-    try {
-      const items = await storage.getFreeTrials();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch free trials" });
-    }
-  });
-
-  app.post("/api/free-trials", isAuthenticated, async (req, res) => {
-    try {
-      const parsed = insertFreeTrialSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
-      }
-      const item = await storage.createFreeTrial(parsed.data);
-      res.status(201).json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create free trial" });
-    }
-  });
-
-  app.patch("/api/free-trials/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const item = await storage.updateFreeTrial(id, req.body);
-      res.json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update free trial" });
-    }
-  });
-
-  app.delete("/api/free-trials/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteFreeTrial(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete free trial" });
-    }
-  });
-
-  // ==== Single Lessons Routes ====
-  app.get("/api/single-lessons", isAuthenticated, async (req, res) => {
-    try {
-      const items = await storage.getSingleLessons();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch single lessons" });
-    }
-  });
-
-  app.post("/api/single-lessons", isAuthenticated, async (req, res) => {
-    try {
-      const parsed = insertSingleLessonSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
-      }
-      const item = await storage.createSingleLesson(parsed.data);
-      res.status(201).json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create single lesson" });
-    }
-  });
-
-  app.patch("/api/single-lessons/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const item = await storage.updateSingleLesson(id, req.body);
-      res.json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update single lesson" });
-    }
-  });
-
-  app.delete("/api/single-lessons/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteSingleLesson(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete single lesson" });
-    }
-  });
-
-  // ==== Sunday Activities Routes ====
-  app.get("/api/sunday-activities", isAuthenticated, async (req, res) => {
-    try {
-      const items = await storage.getSundayActivities();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch sunday activities" });
-    }
-  });
-
-  app.post("/api/sunday-activities", isAuthenticated, async (req, res) => {
-    try {
-      const parsed = insertSundayActivitySchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
-      }
-      const item = await storage.createSundayActivity(parsed.data);
-      res.status(201).json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create sunday activity" });
-    }
-  });
-
-  app.patch("/api/sunday-activities/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const item = await storage.updateSundayActivity(id, req.body);
-      res.json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update sunday activity" });
-    }
-  });
-
-  app.delete("/api/sunday-activities/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteSundayActivity(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete sunday activity" });
-    }
-  });
-
-  // ==== Trainings Routes ====
-  app.get("/api/trainings", isAuthenticated, async (req, res) => {
-    try {
-      const items = await storage.getTrainings();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch trainings" });
-    }
-  });
-
-  app.post("/api/trainings", isAuthenticated, async (req, res) => {
-    try {
-      const parsed = insertTrainingSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
-      }
-      const item = await storage.createTraining(parsed.data);
-      res.status(201).json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create training" });
-    }
-  });
-
-  app.patch("/api/trainings/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const item = await storage.updateTraining(id, req.body);
-      res.json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update training" });
-    }
-  });
-
-  app.delete("/api/trainings/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteTraining(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete training" });
-    }
-  });
-
-  // ==== Individual Lessons Routes ====
-  app.get("/api/individual-lessons", isAuthenticated, async (req, res) => {
-    try {
-      const items = await storage.getIndividualLessons();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch individual lessons" });
-    }
-  });
-
-  app.post("/api/individual-lessons", isAuthenticated, async (req, res) => {
-    try {
-      const parsed = insertIndividualLessonSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
-      }
-      const item = await storage.createIndividualLesson(parsed.data);
-      res.status(201).json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create individual lesson" });
-    }
-  });
-
-  app.patch("/api/individual-lessons/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const item = await storage.updateIndividualLesson(id, req.body);
-      res.json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update individual lesson" });
-    }
-  });
-
-  app.delete("/api/individual-lessons/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteIndividualLesson(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete individual lesson" });
-    }
-  });
-
-  // ==== Campus Activities Routes ====
-  app.get("/api/campus-activities", isAuthenticated, async (req, res) => {
-    try {
-      const items = await storage.getCampusActivities();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch campus activities" });
-    }
-  });
-
-  app.post("/api/campus-activities", isAuthenticated, async (req, res) => {
-    try {
-      const parsed = insertCampusActivitySchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
-      }
-      const item = await storage.createCampusActivity(parsed.data);
-      res.status(201).json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create campus activity" });
-    }
-  });
-
-  app.patch("/api/campus-activities/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const item = await storage.updateCampusActivity(id, req.body);
-      res.json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update campus activity" });
-    }
-  });
-
-  app.delete("/api/campus-activities/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteCampusActivity(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete campus activity" });
-    }
-  });
-
-  // ==== Recitals Routes ====
-  app.get("/api/recitals", isAuthenticated, async (req, res) => {
-    try {
-      const items = await storage.getRecitals();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch recitals" });
-    }
-  });
-
-  app.post("/api/recitals", isAuthenticated, async (req, res) => {
-    try {
-      const parsed = insertRecitalSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
-      }
-      const item = await storage.createRecital(parsed.data);
-      res.status(201).json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create recital" });
-    }
-  });
-
-  app.patch("/api/recitals/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const item = await storage.updateRecital(id, req.body);
-      res.json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update recital" });
-    }
-  });
-
-  app.delete("/api/recitals/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteRecital(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete recital" });
-    }
-  });
-
-  // ==== Vacation Studies Routes ====
-  app.get("/api/vacation-studies", isAuthenticated, async (req, res) => {
-    try {
-      const items = await storage.getVacationStudies();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch vacation studies" });
-    }
-  });
-
-  app.post("/api/vacation-studies", isAuthenticated, async (req, res) => {
-    try {
-      const parsed = insertVacationStudySchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
-      }
-      const item = await storage.createVacationStudy(parsed.data);
-      res.status(201).json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create vacation study" });
-    }
-  });
-
-  app.patch("/api/vacation-studies/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const item = await storage.updateVacationStudy(id, req.body);
-      res.json(item);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to update vacation study" });
-    }
-  });
-
-  app.delete("/api/vacation-studies/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteVacationStudy(id);
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete vacation study" });
     }
   });
 
@@ -1935,7 +2571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/workshop-enrollments", isAuthenticated, async (req, res) => {
     try {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const enrollments = memberId 
+      const enrollments = memberId
         ? await storage.getWorkshopEnrollmentsByMember(memberId)
         : await storage.getWorkshopEnrollments();
       res.json(enrollments);
@@ -1948,14 +2584,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertWorkshopEnrollmentSchema.parse(req.body);
       const enrollment = await storage.createWorkshopEnrollment(validatedData);
-      
+
       const workshop = await storage.getWorkshop(enrollment.workshopId);
       if (workshop) {
         await storage.updateWorkshop(workshop.id, {
           currentEnrollment: (workshop.currentEnrollment || 0) + 1,
+        } as any);
+
+        // CREATE AUTOMATIC DEBT (Pending Payment)
+        await storage.createPayment({
+          memberId: enrollment.memberId,
+          workshopEnrollmentId: enrollment.id,
+          amount: workshop.price || "0",
+          type: "workshop",
+          description: `Debito iscrizione workshop: ${workshop.name}`,
+          status: "pending",
+          dueDate: new Date(),
+          paidDate: null,
+          transferConfirmationDate: null,
         });
       }
-      
+
       res.status(201).json(enrollment);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create workshop enrollment" });
@@ -1976,16 +2625,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const enrollment = await storage.getWorkshopEnrollment(id);
-      
+
       if (enrollment) {
         const workshop = await storage.getWorkshop(enrollment.workshopId);
         if (workshop && workshop.currentEnrollment && workshop.currentEnrollment > 0) {
           await storage.updateWorkshop(workshop.id, {
             currentEnrollment: workshop.currentEnrollment - 1,
-          });
+          } as any);
         }
       }
-      
+
       await storage.deleteWorkshopEnrollment(id);
       res.status(204).send();
     } catch (error) {
@@ -2024,31 +2673,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==== Enrollments Routes ====
-  app.get("/api/enrollments", isAuthenticated, async (req, res) => {
+  app.get("/api/enrollments", isAuthenticated, checkPermission("/iscritti-corsi", "read"), async (req, res) => {
     try {
+      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const enrollments = memberId 
-        ? await storage.getEnrollmentsByMember(memberId)
-        : await storage.getEnrollments();
+
+      let enrollments;
+      if (memberId) {
+        enrollments = await storage.getEnrollmentsByMember(memberId);
+      } else if (seasonId) {
+        enrollments = await storage.getEnrollmentsBySeason(seasonId);
+      } else {
+        const activeSeason = await storage.getActiveSeason();
+        if (activeSeason) {
+          enrollments = await storage.getEnrollmentsBySeason(activeSeason.id);
+        } else {
+          enrollments = await storage.getEnrollments();
+        }
+      }
       res.json(enrollments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch enrollments" });
     }
   });
 
-  app.post("/api/enrollments", isAuthenticated, async (req, res) => {
+  app.post("/api/enrollments", isAuthenticated, checkPermission("/iscritti-corsi", "write"), async (req, res) => {
     try {
       const validatedData = insertEnrollmentSchema.parse(req.body);
       const enrollment = await storage.createEnrollment(validatedData);
-      
+
       // Update course current enrollment count
       const course = await storage.getCourse(enrollment.courseId);
       if (course) {
         await storage.updateCourse(course.id, {
           currentEnrollment: (course.currentEnrollment || 0) + 1,
+        } as any);
+
+        // CREATE AUTOMATIC DEBT (Pending Payment)
+        await storage.createPayment({
+          memberId: enrollment.memberId,
+          enrollmentId: enrollment.id,
+          amount: course.price || "0",
+          type: "course",
+          description: `Debito iscrizione corso: ${course.name}`,
+          status: "pending",
+          dueDate: new Date(),
+          paidDate: null,
+          transferConfirmationDate: null,
+          createdById: (req.user as any).id,
         });
       }
-      
+
       res.status(201).json(enrollment);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create enrollment" });
@@ -2069,17 +2744,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const enrollment = await storage.getEnrollment(id);
-      
+
       if (enrollment) {
         // Update course current enrollment count
         const course = await storage.getCourse(enrollment.courseId);
         if (course && course.currentEnrollment && course.currentEnrollment > 0) {
           await storage.updateCourse(course.id, {
             currentEnrollment: course.currentEnrollment - 1,
-          });
+          } as any);
         }
       }
-      
+
       await storage.deleteEnrollment(id);
       res.status(204).send();
     } catch (error) {
@@ -2091,7 +2766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/memberships", isAuthenticated, async (req, res) => {
     try {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const memberships = memberId 
+      const memberships = memberId
         ? await storage.getMembershipsByMemberId(memberId)
         : await storage.getMembershipsWithMembers();
       res.json(memberships);
@@ -2103,7 +2778,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/memberships", isAuthenticated, async (req, res) => {
     try {
       let validatedData = insertMembershipSchema.parse(req.body);
-      
+
       // Generate membership number automatically if not provided
       if (!validatedData.membershipNumber) {
         const existingMemberships = await storage.getMemberships();
@@ -2112,17 +2787,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .map(m => m.membershipNumber)
           .filter(num => num && typeof num === 'string' && num.startsWith(currentYear))
           .map(num => parseInt(num.substring(4)) || 0);
-        
+
         const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
         validatedData.membershipNumber = `${currentYear}${nextNumber.toString().padStart(6, '0')}`;
       }
-      
+
       // Generate barcode if not provided (same as membership number)
       if (!validatedData.barcode) {
         validatedData.barcode = validatedData.membershipNumber;
       }
-      
+
       const membership = await storage.createMembership(validatedData);
+
+      if (membership.memberId) {
+        await storage.createPayment({
+          memberId: membership.memberId,
+          membershipId: membership.id,
+          amount: membership.fee || "0",
+          type: "membership",
+          description: `Quota associativa: ${membership.membershipNumber}`,
+          status: "pending",
+          dueDate: new Date(),
+          paidDate: null,
+          transferConfirmationDate: null,
+          createdById: (req.user as any).id,
+        });
+      }
+
       res.status(201).json(membership);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create membership" });
@@ -2153,7 +2844,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/medical-certificates", isAuthenticated, async (req, res) => {
     try {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const certificates = memberId 
+      const certificates = memberId
         ? await storage.getMedicalCertificatesByMemberId(memberId)
         : await storage.getMedicalCertificatesWithMembers();
       res.json(certificates);
@@ -2233,38 +2924,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==== Payments Routes ====
-  app.get("/api/payments", isAuthenticated, async (req, res) => {
+  app.get("/api/payments", isAuthenticated, checkPermission("/pagamenti", "read"), async (req, res) => {
     try {
+      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const payments = memberId 
-        ? await storage.getPaymentsByMemberId(memberId)
-        : await storage.getPaymentsWithMembers();
-      res.json(payments);
+
+      let paymentsList;
+      if (memberId) {
+        paymentsList = await storage.getPaymentsByMemberId(memberId);
+      } else if (seasonId) {
+        paymentsList = await storage.getPaymentsBySeason(seasonId);
+      } else {
+        const activeSeason = await storage.getActiveSeason();
+        if (activeSeason) {
+          paymentsList = await storage.getPaymentsBySeason(activeSeason.id);
+        } else {
+          paymentsList = await storage.getPaymentsWithMembers();
+        }
+      }
+      res.json(paymentsList);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch payments" });
     }
   });
 
-  app.post("/api/payments", isAuthenticated, async (req, res) => {
+  app.post("/api/payments", isAuthenticated, checkPermission("/pagamenti", "write"), async (req, res) => {
     try {
       const validatedData = insertPaymentSchema.parse(req.body);
-      const payment = await storage.createPayment(validatedData);
+      const payment = await storage.createPayment({
+        ...validatedData,
+        createdById: (req.user as any).id
+      });
       res.status(201).json(payment);
     } catch (error: any) {
       res.status(400).json({ message: error.message || "Failed to create payment" });
     }
   });
 
-  app.patch("/api/payments/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/payments/:id", isAuthenticated, checkPermission("/pagamenti", "write"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const payment = await storage.updatePayment(id, req.body);
+      const validatedData = insertPaymentSchema.partial().parse(req.body);
+
+      const payment = await storage.updatePayment(id, {
+        ...validatedData,
+        updatedById: (req.user as any).id
+      });
       res.json(payment);
     } catch (error: any) {
+      console.error("Error updating payment:", error);
       res.status(400).json({ message: error.message || "Failed to update payment" });
     }
   });
 
+  // ==== Maschera Generale Save Endpoint ====
+  app.post("/api/maschera-generale/save", isAuthenticated, async (req, res) => {
+    try {
+      const { memberData, enrollments: enrollmentItems, payments: paymentItems } = req.body;
+
+      if (!memberData) {
+        return res.status(400).json({ message: "Dati anagrafica mancanti" });
+      }
+
+      // 1. Upsert Member
+      let member;
+      if (memberData.fiscalCode) {
+        const existingMember = await storage.getMemberByFiscalCode(memberData.fiscalCode);
+        if (existingMember) {
+          member = await storage.updateMember(existingMember.id, memberData);
+        } else {
+          member = await storage.createMember(memberData);
+        }
+      } else {
+        member = await storage.createMember(memberData);
+      }
+
+      // 2. Process Enrollments and Payments
+      const results = {
+        memberId: member.id,
+        enrollments: [] as any[],
+        payments: [] as any[]
+      };
+
+      if (enrollmentItems && Array.isArray(enrollmentItems)) {
+        for (const enrData of enrollmentItems) {
+          try {
+            const enrollment = await storage.createEnrollment({
+              ...enrData,
+              memberId: member.id
+            });
+            results.enrollments.push(enrollment);
+
+            // Find matching payment for this enrollment
+            if (paymentItems && Array.isArray(paymentItems)) {
+              const matchingPayment = paymentItems.find(p => p.courseId === enrData.courseId || p.tempId === enrData.tempId);
+              if (matchingPayment) {
+                const payment = await storage.createPayment({
+                  ...matchingPayment,
+                  memberId: member.id,
+                  enrollmentId: enrollment.id,
+                  createdById: (req.user as any).id
+                });
+                results.payments.push(payment);
+              }
+            }
+          } catch (e) {
+            console.error("Error creating enrollment/payment in bulk save:", e);
+          }
+        }
+      }
+
+      res.status(200).json(results);
+    } catch (error: any) {
+      console.error("Error in maschera-generale save:", error);
+      res.status(500).json({ message: error.message || "Failed to save data" });
+    }
+  });
+
+  // Keep existing routes below
   // ==== Access Logs Routes ====
   app.get("/api/access-logs", isAuthenticated, async (req, res) => {
     try {
@@ -2278,22 +3055,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/access-logs", isAuthenticated, async (req, res) => {
     try {
       const { barcode, accessType, notes: clientNotes, memberId: clientMemberId } = req.body;
-      
+
       const isManualEntry = barcode?.startsWith('MANUAL-');
-      
+
       // For manual entries, use memberId directly; for barcode entries, look up membership
       let membership = null;
       if (!isManualEntry && barcode) {
         membership = await storage.getMembershipByBarcode(barcode);
       }
-      
+
       // If we have a memberId (manual or from barcode lookup), find the member's active membership
       const effectiveMemberId = clientMemberId || (membership?.memberId);
       if (!membership && effectiveMemberId) {
         const memberMemberships = await storage.getMembershipsByMemberId(effectiveMemberId);
         membership = memberMemberships.find(m => m.status === 'active') || memberMemberships[0];
       }
-      
+
       let logData: any = {
         barcode: barcode || `MANUAL-${clientMemberId}`,
         accessType: accessType || "entry",
@@ -2321,7 +3098,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         logData.memberId = membership.memberId;
         const today = new Date();
         const expiry = new Date(membership.expiryDate);
-        
+
         if (membership.status === "active" && expiry > today) {
           logData.membershipStatus = "active";
         } else if (expiry < today) {
@@ -2338,7 +3115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const log = await storage.createAccessLog(logData);
-      
+
       // Return additional info for UI feedback
       let memberName = "Unknown";
       const memberIdToCheck = logData.memberId || clientMemberId;
@@ -2394,9 +3171,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .filter(p => {
           if (!p.createdAt) return false;
           const createdDate = new Date(p.createdAt);
-          return p.status === "paid" && 
-                 createdDate.getMonth() === currentMonth && 
-                 createdDate.getFullYear() === currentYear;
+          return p.status === "paid" &&
+            createdDate.getMonth() === currentMonth &&
+            createdDate.getFullYear() === currentYear;
         })
         .reduce((sum, p) => sum + parseFloat(p.amount), 0);
 
@@ -2535,80 +3312,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let skipped = 0;
       const errors: any[] = [];
 
-      // Process each row based on type
-      for (let i = 0; i < parseResult.data.length; i++) {
-        const row: any = parseResult.data[i];
-        try {
-          if (type === 'members') {
-            const memberData = {
-              firstName: row['Nome'] || row['First Name'] || row['firstName'],
-              lastName: row['Cognome'] || row['Last Name'] || row['lastName'],
-              email: row['Email'] || row['email'] || null,
-              phone: row['Telefono'] || row['Phone'] || row['phone'] || null,
-              dateOfBirth: row['Data Nascita'] || row['Date of Birth'] || row['dateOfBirth'] || null,
-              address: row['Indirizzo'] || row['Address'] || row['address'] || null,
-              notes: row['Note'] || row['Notes'] || row['notes'] || null,
-              active: true,
-            };
+      // Bulk import for members
+      if (type === 'members') {
+        const membersToImport: any[] = [];
 
-            if (!memberData.firstName || !memberData.lastName) {
-              throw new Error("Nome e Cognome sono obbligatori");
-            }
+        for (let i = 0; i < parseResult.data.length; i++) {
+          const row: any = parseResult.data[i];
+          const memberData = {
+            firstName: row['Nome'] || row['First Name'] || row['firstName'] || "Sconosciuto",
+            lastName: row['Cognome'] || row['Last Name'] || row['lastName'] || "Sconosciuto",
+            fiscalCode: row['Codice Fiscale'] || row['Fiscal Code'] || row['fiscalCode'] || null,
+            email: row['Email'] || row['email'] || null,
+            phone: row['Telefono'] || row['Phone'] || row['phone'] || null,
+            dateOfBirth: row['Data Nascita'] || row['Date of Birth'] || row['dateOfBirth'] ? new Date(row['Data Nascita'] || row['Date of Birth'] || row['dateOfBirth']) : null,
+            address: row['Indirizzo'] || row['Address'] || row['address'] || null,
+            notes: row['Note'] || row['Notes'] || row['notes'] || null,
+            active: true,
+          };
 
-            await storage.createMember(memberData);
-            imported++;
-          } else if (type === 'courses') {
-            const courseData = {
-              name: row['Nome'] || row['Name'] || row['name'],
-              description: row['Descrizione'] || row['Description'] || row['description'] || null,
-              price: row['Prezzo'] || row['Price'] || row['price'] || null,
-              maxCapacity: row['Posti Max'] || row['Max Capacity'] || row['maxCapacity'] ? parseInt(row['Posti Max'] || row['Max Capacity'] || row['maxCapacity']) : null,
-              startDate: row['Data Inizio'] || row['Start Date'] || row['startDate'] || null,
-              endDate: row['Data Fine'] || row['End Date'] || row['endDate'] || null,
-              schedule: row['Orario'] || row['Schedule'] || row['schedule'] || null,
-              categoryId: null,
-              instructorId: null,
-              active: true,
-            };
+          membersToImport.push(memberData);
+        }
 
-            if (!courseData.name) {
-              throw new Error("Nome corso è obbligatorio");
-            }
-
-            await storage.createCourse(courseData);
-            imported++;
-          } else if (type === 'instructors') {
-            const instructorData = {
-              firstName: row['Nome'] || row['First Name'] || row['firstName'],
-              lastName: row['Cognome'] || row['Last Name'] || row['lastName'],
-              email: row['Email'] || row['email'] || null,
-              phone: row['Telefono'] || row['Phone'] || row['phone'] || null,
-              specialization: row['Specializzazione'] || row['Specialization'] || row['specialization'] || null,
-              hourlyRate: row['Tariffa Oraria'] || row['Hourly Rate'] || row['hourlyRate'] || null,
-              bio: null,
-              active: true,
-            };
-
-            if (!instructorData.firstName || !instructorData.lastName) {
-              throw new Error("Nome e Cognome sono obbligatori");
-            }
-
-            await storage.createInstructor(instructorData);
-            imported++;
+        if (membersToImport.length > 0) {
+          try {
+            const result = await storage.bulkCreateMembers(membersToImport);
+            imported = result.imported;
+            skipped += result.skipped;
+          } catch (err: any) {
+            console.error("Bulk import failed:", err);
+            throw new Error("Bulk import failed: " + err.message);
           }
-        } catch (error: any) {
-          skipped++;
-          errors.push({
-            row: i + 2, // +2 because header is row 1 and array is 0-indexed
-            message: error.message || "Errore sconosciuto",
-          });
+        }
+      } else {
+        // Sequential import for courses and instructors
+        for (let i = 0; i < parseResult.data.length; i++) {
+          const row: any = parseResult.data[i];
+          try {
+            if (type === 'courses') {
+              const courseData = {
+                name: row['Nome'] || row['Name'] || row['name'],
+                description: row['Descrizione'] || row['Description'] || row['description'] || null,
+                price: row['Prezzo'] || row['Price'] || row['price'] || null,
+                maxCapacity: row['Posti Max'] || row['Max Capacity'] || row['maxCapacity'] ? parseInt(row['Posti Max'] || row['Max Capacity'] || row['maxCapacity']) : null,
+                startDate: row['Data Inizio'] || row['Start Date'] || row['startDate'] || null,
+                endDate: row['Data Fine'] || row['End Date'] || row['endDate'] || null,
+                schedule: row['Orario'] || row['Schedule'] || row['schedule'] || null,
+                categoryId: null,
+                instructorId: null,
+                active: true,
+              };
+
+              if (!courseData.name) {
+                throw new Error("Nome corso è obbligatorio");
+              }
+
+              await storage.createCourse(courseData);
+              imported++;
+            } else if (type === 'instructors') {
+              const instructorData = {
+                firstName: row['Nome'] || row['First Name'] || row['firstName'],
+                lastName: row['Cognome'] || row['Last Name'] || row['lastName'],
+                email: row['Email'] || row['email'] || null,
+                phone: row['Telefono'] || row['Phone'] || row['phone'] || null,
+                specialization: row['Specializzazione'] || row['Specialization'] || row['specialization'] || null,
+                hourlyRate: row['Tariffa Oraria'] || row['Hourly Rate'] || row['hourlyRate'] || null,
+                bio: null,
+                active: true,
+              };
+
+              if (!instructorData.firstName || !instructorData.lastName) {
+                throw new Error("Nome e Cognome sono obbligatori");
+              }
+
+              await storage.createInstructor(instructorData);
+              imported++;
+            }
+          } catch (error: any) {
+            skipped++;
+            errors.push({
+              row: i + 2,
+              message: error.message || "Errore sconosciuto",
+            });
+          }
         }
       }
 
       res.json({
         imported,
         skipped,
-        errors: errors.slice(0, 50), // Limit errors to first 50
+        errors: errors.slice(0, 50),
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Failed to import data" });
@@ -2620,13 +3412,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Google Sheets non disponibile su deploy esterni
       if (isExternalDeploy()) {
-        return res.status(503).json({ 
-          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV." 
+        return res.status(503).json({
+          message: "Google Sheets non disponibile su questo server. Usa l'importazione CSV."
         });
       }
-      
+
       let { spreadsheetId, range, type } = req.body;
-      
+
       if (!spreadsheetId || !range) {
         return res.status(400).json({ message: "SpreadsheetId e range sono obbligatori" });
       }
@@ -2641,7 +3433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Read data from Google Sheets
       const rows = await readSpreadsheet(spreadsheetId, range);
-      
+
       if (!rows || rows.length === 0) {
         return res.status(400).json({ message: "Nessun dato trovato nel range specificato" });
       }
@@ -2670,7 +3462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               lastName: rowData['Cognome'] || rowData['Last Name'] || rowData['lastName'],
               email: rowData['Email'] || rowData['email'] || null,
               phone: rowData['Telefono'] || rowData['Phone'] || rowData['phone'] || null,
-              dateOfBirth: rowData['Data di Nascita'] || rowData['Date of Birth'] || rowData['dateOfBirth'] || null,
+              dateOfBirth: rowData['Data di Nascita'] || rowData['Date of Birth'] || rowData['dateOfBirth'] ? new Date(rowData['Data di Nascita'] || rowData['Date of Birth'] || rowData['dateOfBirth']) : null,
               address: rowData['Indirizzo'] || rowData['Address'] || rowData['address'] || null,
               city: rowData['Città'] || rowData['City'] || rowData['city'] || null,
               zipCode: rowData['CAP'] || rowData['Zip Code'] || rowData['zipCode'] || null,
@@ -2743,13 +3535,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==== Attendances Routes ====
-  app.get("/api/attendances", isAuthenticated, async (req, res) => {
+  app.get("/api/attendances", isAuthenticated, checkPermission("/iscritti-corsi", "read"), async (req, res) => {
     try {
+      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const attendances = memberId 
-        ? await storage.getAttendancesByMember(memberId)
-        : await storage.getAttendances();
-      res.json(attendances);
+
+      let attendancesList;
+      if (memberId) {
+        attendancesList = await storage.getAttendancesByMember(memberId);
+      } else if (seasonId) {
+        attendancesList = await storage.getAttendancesBySeason(seasonId);
+      } else {
+        const activeSeason = await storage.getActiveSeason();
+        if (activeSeason) {
+          attendancesList = await storage.getAttendancesBySeason(activeSeason.id);
+        } else {
+          attendancesList = await storage.getAttendances();
+        }
+      }
+      res.json(attendancesList);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch attendances" });
     }
@@ -2765,7 +3569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/attendances", isAuthenticated, async (req, res) => {
+  app.post("/api/attendances", isAuthenticated, checkPermission("/iscritti-corsi", "write"), async (req, res) => {
     try {
       const validatedData = insertAttendanceSchema.parse(req.body);
       const attendance = await storage.createAttendance(validatedData);
@@ -2826,6 +3630,232 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(cities);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch cities" });
+    }
+  });
+
+  app.get(["/api/comuni/by-code/:code", "/api/locations/cities/by-code/:code"], isAuthenticated, async (req, res) => {
+    try {
+      const code = req.params.code;
+      if (!code) return res.status(400).json({ message: "Code is required" });
+      const city = await storage.getCityByIstatCode(code);
+      if (!city) return res.status(404).json({ message: "City not found" });
+      res.json(city);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch city by code" });
+    }
+  });
+
+  // ==== Price Lists Routes ====
+  app.get("/api/price-lists", isAuthenticated, async (req, res) => {
+    try {
+      const priceLists = await storage.getPriceLists();
+      res.json(priceLists);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch price lists" });
+    }
+  });
+
+  app.get("/api/price-lists/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const priceList = await storage.getPriceList(id);
+      if (!priceList) {
+        return res.status(404).json({ message: "Price list not found" });
+      }
+      res.json(priceList);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch price list" });
+    }
+  });
+
+  app.get("/api/price-lists/:id/items", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const items = await storage.getPriceListItems(id);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch price list items" });
+    }
+  });
+
+  app.post("/api/price-lists", isAuthenticated, async (req, res) => {
+    try {
+      const fs = await import('fs');
+      // Log request body to debug file
+      try {
+        fs.appendFileSync('DEBUG_REQUEST_PRICE_LIST.txt', JSON.stringify(req.body, null, 2) + '\n---\n');
+      } catch (e) { console.error("Failed to write debug log", e); }
+
+      const data = insertPriceListSchema.parse(req.body);
+      const priceList = await storage.createPriceList(data);
+      res.status(201).json(priceList);
+    } catch (error) {
+      const fs = await import('fs');
+      try {
+        fs.writeFileSync('DEBUG_ERROR_PRICE_LIST.txt', String(error) + '\n' + (error instanceof Error ? error.stack : ''));
+      } catch (e) {
+        console.error("Failed to write error log", e);
+      }
+      console.error("Error creating price list:", error);
+
+      // Return detailed error to client if possible (dev mode)
+      res.status(500).json({
+        message: "Failed to create price list",
+        error: String(error),
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.patch("/api/price-lists/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const priceList = await storage.updatePriceList(id, req.body);
+      res.json(priceList);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update price list" });
+    }
+  });
+
+  app.delete("/api/price-lists/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePriceList(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete price list" });
+    }
+  });
+
+  app.post("/api/price-list-items", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertPriceListItemSchema.parse(req.body);
+      // Ensure quoteId is passed if present, or handled correctly
+      const item = await storage.upsertPriceListItem(data);
+      res.status(201).json(item);
+    } catch (error) {
+      console.error("Error upserting price list item:", error);
+      res.status(500).json({ message: "Failed to upsert price list item" });
+    }
+  });
+
+  // Quotes Routes
+  app.get("/api/quotes", isAuthenticated, async (req, res) => {
+    try {
+      const quotes = await storage.getQuotes();
+      res.json(quotes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quotes" });
+    }
+  });
+
+  app.post("/api/quotes", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertQuoteSchema.parse(req.body);
+      const quote = await storage.createQuote(data);
+      res.status(201).json(quote);
+    } catch (error) {
+      console.error("Error creating quote:", error);
+      res.status(500).json({ message: "Failed to create quote" });
+    }
+  });
+
+  app.patch("/api/quotes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const quote = await storage.updateQuote(id, req.body);
+      res.json(quote);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update quote" });
+    }
+  });
+
+  app.delete("/api/quotes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteQuote(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete quote" });
+    }
+  });
+
+  // Paid Trials Routes
+  app.get("/api/paid-trials", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getPaidTrials();
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch paid trials" });
+    }
+  });
+
+  app.post("/api/paid-trials", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertPaidTrialSchema.parse(req.body);
+      const trial = await storage.createPaidTrial(data);
+      res.status(201).json(trial);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create paid trial" });
+    }
+  });
+
+  app.patch("/api/paid-trials/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const trial = await storage.updatePaidTrial(id, req.body);
+      res.json(trial);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update paid trial" });
+    }
+  });
+
+  app.delete("/api/paid-trials/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePaidTrial(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete paid trial" });
+    }
+  });
+
+  app.delete("/api/price-list-items/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePriceListItem(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete price list item" });
+    }
+  });
+
+  // ==== Notifications Routes ====
+  app.get("/api/notifications", isAuthenticated, async (req, res) => {
+    try {
+      const notifications = await storage.getNotifications(req.user!.id);
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.post("/api/notifications/:id/read", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.markNotificationRead(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.post("/api/notifications/read-all", isAuthenticated, async (req, res) => {
+    try {
+      await storage.markAllNotificationsRead(req.user!.id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
     }
   });
 
@@ -2986,7 +4016,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/report-fields/:entityType", isAuthenticated, async (req, res) => {
     try {
       const entityType = req.params.entityType;
-      
+
       const fieldDefinitions: Record<string, { name: string; type: string; label: string }[]> = {
         members: [
           { name: 'id', type: 'number', label: 'ID' },
@@ -3032,28 +4062,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ],
         payments: [
           { name: 'id', type: 'number', label: 'ID' },
-          { name: 'memberFirstName', type: 'string', label: 'Nome Partecipante' },
-          { name: 'memberLastName', type: 'string', label: 'Cognome Partecipante' },
+          { name: 'memberFirstName', type: 'string', label: 'Nome Cliente' },
+          { name: 'memberLastName', type: 'string', label: 'Cognome Cliente' },
           { name: 'amount', type: 'number', label: 'Importo' },
           { name: 'type', type: 'string', label: 'Tipo' },
           { name: 'description', type: 'string', label: 'Descrizione' },
           { name: 'status', type: 'string', label: 'Stato' },
-          { name: 'dueDate', type: 'date', label: 'Scadenza' },
+          { name: 'paymentMethod', type: 'string', label: 'Metodo Pagamento' },
+          { name: 'dueDate', type: 'date', label: 'Data Scadenza' },
           { name: 'paidDate', type: 'date', label: 'Data Pagamento' },
-          { name: 'paymentMethod', type: 'string', label: 'Metodo' },
         ],
         enrollments: [
           { name: 'id', type: 'number', label: 'ID' },
-          { name: 'memberFirstName', type: 'string', label: 'Nome Partecipante' },
-          { name: 'memberLastName', type: 'string', label: 'Cognome Partecipante' },
+          { name: 'memberFirstName', type: 'string', label: 'Nome Cliente' },
+          { name: 'memberLastName', type: 'string', label: 'Cognome Cliente' },
           { name: 'courseId', type: 'number', label: 'ID Corso' },
           { name: 'status', type: 'string', label: 'Stato' },
           { name: 'enrollmentDate', type: 'date', label: 'Data Iscrizione' },
         ],
         attendances: [
           { name: 'id', type: 'number', label: 'ID' },
-          { name: 'memberFirstName', type: 'string', label: 'Nome Partecipante' },
-          { name: 'memberLastName', type: 'string', label: 'Cognome Partecipante' },
+          { name: 'memberFirstName', type: 'string', label: 'Nome Cliente' },
+          { name: 'memberLastName', type: 'string', label: 'Cognome Cliente' },
           { name: 'courseId', type: 'number', label: 'ID Corso' },
           { name: 'attendanceDate', type: 'date', label: 'Data Presenza' },
           { name: 'type', type: 'string', label: 'Tipo Check-in' },
@@ -3094,18 +4124,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/import-configs", isAuthenticated, async (req, res) => {
     try {
       const { name, entityType, sourceType, fieldMapping, importKey } = req.body;
-      
+
       // Validate required fields
       if (!name || !entityType) {
         return res.status(400).json({ message: "Nome e tipo entità sono obbligatori" });
       }
-      
+
       // Validate entityType
       const validEntityTypes = ["members", "courses"];
       if (!validEntityTypes.includes(entityType)) {
         return res.status(400).json({ message: "Tipo entità non valido. Valori ammessi: members, courses" });
       }
-      
+
       // Validate sourceType if provided
       if (sourceType) {
         const validSourceTypes = ["google_sheets", "file"];
@@ -3113,7 +4143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Tipo sorgente non valido. Valori ammessi: google_sheets, file" });
         }
       }
-      
+
       const config = await storage.createImportConfig(req.body);
       res.json(config);
     } catch (error: any) {
@@ -3145,7 +4175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const Papa = await import('papaparse');
       const fileContent = req.file.buffer.toString('utf-8');
-      
+
       const parsed = Papa.default.parse(fileContent, {
         header: false,
         skipEmptyLines: true,
@@ -3159,15 +4189,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // First row is headers
       const headerRow = rows[0];
-      
+
       // Check if headers look like they weren't parsed correctly (all in one cell)
       if (headerRow.length === 1 && headerRow[0] && headerRow[0].includes(';')) {
         // Likely wrong delimiter - suggest semicolon
-        return res.status(400).json({ 
-          message: "Il file sembra usare il punto e virgola (;) come delimitatore. Seleziona 'Punto e virgola' nelle opzioni." 
+        return res.status(400).json({
+          message: "Il file sembra usare il punto e virgola (;) come delimitatore. Seleziona 'Punto e virgola' nelle opzioni."
         });
       }
-      
+
       const headers = headerRow.map((name: string, index: number) => ({
         index,
         name: name?.trim() || `Colonna ${index + 1}`,
@@ -3195,17 +4225,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Nessun file caricato" });
       }
 
-      const { fieldMapping, importKey, entityType } = req.body;
+      const { fieldMapping, importKey, entityType, autoCreateRecords } = req.body;
       const mapping = typeof fieldMapping === 'string' ? JSON.parse(fieldMapping) : fieldMapping;
+      const autoCreate = autoCreateRecords === 'true' || autoCreateRecords === true;
       const entity = entityType || 'members';
-      
+
       // Get delimiter from request body (default to comma)
       let delimiter = req.body.delimiter || ",";
       if (delimiter === "\\t") delimiter = "\t";
 
       const Papa = await import('papaparse');
       const fileContent = req.file.buffer.toString('utf-8');
-      
+
       const parsed = Papa.default.parse(fileContent, {
         header: false,
         skipEmptyLines: true,
@@ -3228,7 +4259,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (entity === 'members') {
         // Load all members once before the loop for efficiency
         const allMembers = await storage.getMembers();
-        
+
+        // Load lookup tables for resolving names
+        const clientCategories = await storage.getClientCategories();
+        const catByName = new Map<string, number>(clientCategories.map(c => [c.name.toLowerCase().trim(), c.id]));
+
+        const subscriptionTypes = await storage.getSubscriptionTypes();
+        const subByName = new Map<string, number>(subscriptionTypes.map(s => [s.name.toLowerCase().trim(), s.id]));
+
         // Create a lookup map for faster duplicate detection
         const memberLookup = new Map<string, any>();
         const seenInImport = new Set<string>(); // Track keys seen in current import
@@ -3281,6 +4319,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 } else if (["isMinor", "hasMedicalCertificate"].includes(field)) {
                   const b = value.toLowerCase();
                   memberData[field] = b === "si" || b === "sì" || b === "yes" || b === "1" || b === "true";
+                } else if (field === "clientCategoryName") {
+                  const lookupKey = value.toLowerCase().trim();
+                  let catId = catByName.get(lookupKey);
+                  if (!catId && autoCreate && value) {
+                    try {
+                      const newCat = await storage.createClientCategory({ name: value });
+                      catId = newCat.id;
+                      catByName.set(lookupKey, catId);
+                    } catch (err) {
+                      console.error(`[Import] CSV: Failed to create client category "${value}":`, err);
+                    }
+                  }
+                  if (catId) memberData.categoryId = catId;
+                } else if (field === "subscriptionTypeName") {
+                  const lookupKey = value.toLowerCase().trim();
+                  let subId = subByName.get(lookupKey);
+                  if (!subId && autoCreate && value) {
+                    try {
+                      const newSub = await storage.createSubscriptionType({ name: value, active: true });
+                      subId = newSub.id;
+                      subByName.set(lookupKey, subId);
+                    } catch (err) {
+                      console.error(`[Import] CSV: Failed to create subscription type "${value}":`, err);
+                    }
+                  }
+                  if (subId) memberData.subscriptionTypeId = subId;
                 } else {
                   memberData[field] = value;
                 }
@@ -3297,7 +4361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             let importKeyValue = '';
             if (importKey && memberData[importKey]) {
               importKeyValue = String(memberData[importKey]).trim().toUpperCase().replace(/\s+/g, ' ');
-              
+
               // Skip if already seen in this import (duplicate in CSV)
               if (seenInImport.has(importKeyValue)) {
                 skipped++;
@@ -3348,14 +4412,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } else if (entity === 'courses') {
         // Use shared helper for consistent validation
-        const result = await importCoursesFromRows(dataRows, mapping, importKey || 'name', storage);
+        const result = await importCoursesFromRows(dataRows, mapping, importKey || 'name', storage, autoCreate);
         imported = result.imported;
         updated = result.updated;
         skipped = result.skipped;
         errors.push(...result.errors);
       } else if (entity === 'instructors') {
         // Use shared helper for instructors
-        const result = await importInstructorsFromRows(dataRows, mapping, importKey || 'email', storage);
+        const result = await importInstructorsFromRows(dataRows, mapping, importKey || 'email', storage, autoCreate);
         imported = result.imported;
         updated = result.updated;
         skipped = result.skipped;
@@ -3375,365 +4439,310 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ======== KNOWLEDGE ROUTES ========
-  
-  // Get all knowledge items
-  app.get("/api/knowledge", async (_req, res) => {
-    try {
-      const items = await storage.getAllKnowledge();
-      res.json(items);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore recupero knowledge" });
-    }
-  });
-
-  // Get single knowledge item by ID
-  app.get("/api/knowledge/:id", async (req, res) => {
-    try {
-      const item = await storage.getKnowledgeById(req.params.id);
-      if (!item) {
-        return res.status(404).json({ message: "Voce non trovata" });
-      }
-      res.json(item);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore recupero knowledge" });
-    }
-  });
-
-  // Create or update knowledge item (upsert)
-  app.post("/api/knowledge", async (req, res) => {
-    try {
-      const parsed = insertKnowledgeSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
-      }
-      const item = await storage.upsertKnowledge(parsed.data);
-      res.json(item);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore salvataggio knowledge" });
-    }
-  });
-
-  // Delete knowledge item
-  app.delete("/api/knowledge/:id", async (req, res) => {
-    try {
-      await storage.deleteKnowledge(req.params.id);
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore eliminazione knowledge" });
-    }
-  });
-
-  // ======== ACTIVITY STATUS ROUTES ========
-
-  app.get("/api/activity-statuses", async (_req, res) => {
-    try {
-      const statuses = await storage.getActivityStatuses();
-      res.json(statuses);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore recupero stati" });
-    }
-  });
-
-  app.post("/api/activity-statuses", async (req, res) => {
-    try {
-      const parsed = insertActivityStatusSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
-      }
-      const status = await storage.createActivityStatus(parsed.data);
-      res.json(status);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore creazione stato" });
-    }
-  });
-
-  app.patch("/api/activity-statuses/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const status = await storage.updateActivityStatus(id, req.body);
-      res.json(status);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore aggiornamento stato" });
-    }
-  });
-
-  app.delete("/api/activity-statuses/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteActivityStatus(id);
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore eliminazione stato" });
-    }
-  });
-
-  // ======== PAYMENT NOTES ROUTES ========
-
-  app.get("/api/payment-notes", async (_req, res) => {
-    try {
-      const notes = await storage.getPaymentNotes();
-      res.json(notes);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore recupero note pagamenti" });
-    }
-  });
-
-  app.post("/api/payment-notes", async (req, res) => {
-    try {
-      const parsed = insertPaymentNoteSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
-      }
-      const note = await storage.createPaymentNote(parsed.data);
-      res.json(note);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore creazione nota pagamento" });
-    }
-  });
-
-  app.patch("/api/payment-notes/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const note = await storage.updatePaymentNote(id, req.body);
-      res.json(note);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore aggiornamento nota pagamento" });
-    }
-  });
-
-  app.delete("/api/payment-notes/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deletePaymentNote(id);
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore eliminazione nota pagamento" });
-    }
-  });
-
-  // ======== ENROLLMENT DETAILS ROUTES ========
-
-  app.get("/api/enrollment-details", async (_req, res) => {
-    try {
-      const details = await storage.getEnrollmentDetails();
-      res.json(details);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore recupero dettagli iscrizione" });
-    }
-  });
-
-  app.post("/api/enrollment-details", async (req, res) => {
-    try {
-      const parsed = insertEnrollmentDetailSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
-      }
-      const detail = await storage.createEnrollmentDetail(parsed.data);
-      res.json(detail);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore creazione dettaglio iscrizione" });
-    }
-  });
-
-  app.patch("/api/enrollment-details/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const detail = await storage.updateEnrollmentDetail(id, req.body);
-      res.json(detail);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore aggiornamento dettaglio iscrizione" });
-    }
-  });
-
-  app.delete("/api/enrollment-details/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteEnrollmentDetail(id);
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore eliminazione dettaglio iscrizione" });
-    }
-  });
-
-  // ======== TEAM COMMENTS ROUTES ========
-
-  app.get("/api/team-comments", isAuthenticated, async (_req, res) => {
-    try {
-      const comments = await storage.getTeamComments();
-      res.json(comments);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore recupero commenti" });
-    }
-  });
-
-  app.post("/api/team-comments", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      const userName = `${req.user?.claims?.first_name || ""} ${req.user?.claims?.last_name || ""}`.trim() || "Utente";
-      const parsed = insertTeamCommentSchema.safeParse({
-        ...req.body,
-        authorId: userId,
-        authorName: userName,
-      });
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
-      }
-      const comment = await storage.createTeamComment(parsed.data);
-      const allUsers = await db.select().from(usersTable);
-      for (const user of allUsers) {
-        if (user.id !== userId) {
-          await storage.createTeamNotification({
-            type: "comment",
-            referenceId: comment.id,
-            title: "Nuovo commento",
-            message: `${userName}: ${parsed.data.content.substring(0, 100)}`,
-            isRead: false,
-            userId: user.id,
-          });
-        }
-      }
-      res.json(comment);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore creazione commento" });
-    }
-  });
-
-  app.patch("/api/team-comments/:id", isAuthenticated, async (req: any, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const comment = await storage.updateTeamComment(id, req.body);
-      res.json(comment);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore aggiornamento commento" });
-    }
-  });
-
-  app.delete("/api/team-comments/:id", isAuthenticated, async (req: any, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const existing = await storage.getTeamComment(id);
-      if (!existing) return res.status(404).json({ message: "Commento non trovato" });
-      if (existing.authorId !== req.user?.claims?.sub) {
-        return res.status(403).json({ message: "Non autorizzato" });
-      }
-      await storage.deleteTeamComment(id);
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore eliminazione commento" });
-    }
-  });
-
-  // ======== TEAM NOTES ROUTES ========
-
-  app.get("/api/team-notes", isAuthenticated, async (_req, res) => {
-    try {
-      const notes = await storage.getTeamNotes();
-      res.json(notes);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore recupero note" });
-    }
-  });
-
-  app.post("/api/team-notes", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      const userName = `${req.user?.claims?.first_name || ""} ${req.user?.claims?.last_name || ""}`.trim() || "Utente";
-      const parsed = insertTeamNoteSchema.safeParse({
-        ...req.body,
-        authorId: userId,
-        authorName: userName,
-      });
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Dati non validi", errors: parsed.error.errors });
-      }
-      const note = await storage.createTeamNote(parsed.data);
-      const allUsers = await db.select().from(usersTable);
-      for (const user of allUsers) {
-        if (user.id !== userId) {
-          await storage.createTeamNotification({
-            type: "note",
-            referenceId: note.id,
-            title: "Nuova nota",
-            message: `${userName}: ${parsed.data.title}`,
-            isRead: false,
-            userId: user.id,
-          });
-        }
-      }
-      res.json(note);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore creazione nota" });
-    }
-  });
-
-  app.patch("/api/team-notes/:id", isAuthenticated, async (req: any, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const note = await storage.updateTeamNote(id, req.body);
-      res.json(note);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore aggiornamento nota" });
-    }
-  });
-
-  app.delete("/api/team-notes/:id", isAuthenticated, async (req: any, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const existing = await storage.getTeamNote(id);
-      if (!existing) return res.status(404).json({ message: "Nota non trovata" });
-      if (existing.authorId !== req.user?.claims?.sub) {
-        return res.status(403).json({ message: "Non autorizzato" });
-      }
-      await storage.deleteTeamNote(id);
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore eliminazione nota" });
-    }
-  });
-
-  // ======== TEAM NOTIFICATIONS ROUTES ========
-
-  app.get("/api/team-notifications", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      const notifications = await storage.getTeamNotifications(userId);
-      res.json(notifications);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore recupero notifiche" });
-    }
-  });
-
-  app.get("/api/team-notifications/unread-count", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      const count = await storage.getUnreadNotificationCount(userId);
-      res.json({ count });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore conteggio notifiche" });
-    }
-  });
-
-  app.patch("/api/team-notifications/:id/read", isAuthenticated, async (req: any, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.markNotificationRead(id);
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore aggiornamento notifica" });
-    }
-  });
-
-  app.post("/api/team-notifications/mark-all-read", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user?.claims?.sub;
-      await storage.markAllNotificationsRead(userId);
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Errore aggiornamento notifiche" });
-    }
-  });
-
   const httpServer = createServer(app);
+  // ==== Booking Services Routes ====
+  app.get("/api/booking-services", isAuthenticated, async (req, res) => {
+    try {
+      const services = await storage.getBookingServices();
+      res.json(services);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch booking services" });
+    }
+  });
+
+  app.post("/api/booking-services", isAuthenticated, async (req, res) => {
+    try {
+      const result = insertBookingServiceSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid service data", errors: result.error.errors });
+      }
+      const service = await storage.createBookingService(result.data);
+      res.status(201).json(service);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create booking service" });
+    }
+  });
+
+  app.patch("/api/booking-services/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const service = await storage.updateBookingService(id, req.body);
+      res.json(service);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update booking service" });
+    }
+  });
+
+  app.delete("/api/booking-services/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteBookingService(id);
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete booking service" });
+    }
+  });
+
+  // ==== Studio Bookings Routes ====
+  app.get("/api/studio-bookings", isAuthenticated, async (req, res) => {
+    try {
+      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+
+      let bookings;
+      if (startDate && endDate) {
+        bookings = await storage.getStudioBookings(startDate, endDate);
+      } else if (seasonId) {
+        bookings = await storage.getStudioBookingsBySeason(seasonId);
+      } else {
+        const activeSeason = await storage.getActiveSeason();
+        if (activeSeason) {
+          bookings = await storage.getStudioBookingsBySeason(activeSeason.id);
+        } else {
+          bookings = await storage.getStudioBookings();
+        }
+      }
+      res.json(bookings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch studio bookings" });
+    }
+  });
+
+  app.post("/api/studio-bookings", isAuthenticated, async (req, res) => {
+    try {
+      const { paymentMethodId, ...bookingData } = req.body;
+      const result = insertStudioBookingSchema.safeParse(bookingData);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid booking data", errors: result.error.errors });
+      }
+
+      // Check for conflicts unless forced
+      if (!req.body.force) {
+        const conflict = await storage.checkStudioConflict(
+          result.data.studioId,
+          result.data.bookingDate,
+          result.data.startTime,
+          result.data.endTime
+        );
+        if (conflict) {
+          const message = conflict.type === 'operating_hours'
+            ? `Attenzione: ${conflict.name}. Vuoi forzare la prenotazione?`
+            : `Conflitto: lo studio è già occupato da "${conflict.name}". Vuoi forzare la prenotazione?`;
+
+          return res.status(409).json({
+            message,
+            conflictWith: conflict
+          });
+        }
+      }
+
+      const booking = await storage.createStudioBooking(result.data);
+
+      // Sync to Google Calendar (async)
+      syncStudioBookingToGoogle(booking);
+
+      // If paid is true and memberId is present, create a payment record
+      if (booking.paid && booking.memberId && booking.amount) {
+        const { paidAmount } = req.body;
+        let paymentMethodName = "Contanti"; // Default
+        if (paymentMethodId) {
+          const pm = await storage.getPaymentMethod(paymentMethodId);
+          if (pm) paymentMethodName = pm.name;
+        }
+
+        await storage.createPayment({
+          memberId: booking.memberId,
+          amount: paidAmount || booking.amount.toString(),
+          type: "service_booking",
+          description: `Pagamento prenotazione: ${booking.title || 'Servizio'}`,
+          status: "paid",
+          dueDate: null,
+          paidDate: new Date() as any,
+          transferConfirmationDate: null,
+          paymentMethodId: paymentMethodId || null,
+          paymentMethod: paymentMethodName,
+        });
+      } else if (!booking.paid && booking.memberId && booking.amount) {
+        // CREATE AUTOMATIC DEBT (Pending Payment)
+        await storage.createPayment({
+          memberId: booking.memberId,
+          bookingId: booking.id,
+          amount: booking.amount.toString(),
+          type: "service_booking",
+          description: `Debito prenotazione: ${booking.title || 'Servizio'}`,
+          status: "pending",
+          dueDate: new Date(booking.bookingDate),
+          paidDate: null,
+          transferConfirmationDate: null,
+        });
+      }
+
+      await logUserActivity(req, "CREATE", "studio_bookings", booking.id.toString(), { title: booking.title });
+      res.status(201).json(booking);
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      res.status(500).json({ message: error.message || "Failed to create studio booking" });
+    }
+  });
+
+  app.patch("/api/studio-bookings/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { paymentMethodId, ...bookingData } = req.body;
+      const oldBooking = await storage.getStudioBooking(id);
+      if (!oldBooking) return res.status(404).json({ message: "Booking not found" });
+
+      // Check for conflicts unless forced
+      if (!req.body.force && bookingData.studioId && bookingData.bookingDate && bookingData.startTime && bookingData.endTime) {
+        const conflict = await storage.checkStudioConflict(
+          bookingData.studioId,
+          bookingData.bookingDate,
+          bookingData.startTime,
+          bookingData.endTime,
+          id
+        );
+        if (conflict) {
+          const message = conflict.type === 'operating_hours'
+            ? `Attenzione: ${conflict.name}. Vuoi forzare la prenotazione?`
+            : `Conflitto: lo studio è già occupato da "${conflict.name}". Vuoi forzare la prenotazione?`;
+
+          return res.status(409).json({
+            message,
+            conflictWith: conflict
+          });
+        }
+      }
+
+      const result = insertStudioBookingSchema.partial().safeParse(bookingData);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid booking data", errors: result.error.errors });
+      }
+
+      const booking = await storage.updateStudioBooking(id, result.data);
+
+      // Sync to Google Calendar (async)
+      syncStudioBookingToGoogle(booking);
+
+      // If it was not paid and now it is paid, create a payment record
+      if (oldBooking && !oldBooking.paid && booking.paid && booking.memberId && booking.amount) {
+        const { paidAmount } = req.body;
+        let paymentMethodName = "Contanti";
+        if (paymentMethodId) {
+          const pm = await storage.getPaymentMethod(paymentMethodId);
+          if (pm) paymentMethodName = pm.name;
+        }
+
+        await storage.createPayment({
+          memberId: booking.memberId,
+          amount: paidAmount || booking.amount.toString(),
+          type: "service_booking",
+          description: `Pagamento prenotazione: ${booking.title || 'Servizio'}`,
+          status: "paid",
+          paidDate: new Date() as any,
+          paymentMethodId: paymentMethodId || null,
+          paymentMethod: paymentMethodName,
+        });
+      }
+
+      await logUserActivity(req, "UPDATE", "studio_bookings", id.toString(), { title: booking.title });
+      res.json(booking);
+    } catch (error: any) {
+      console.error("Booking update error:", error);
+      res.status(500).json({ message: error.message || "Failed to update studio booking" });
+    }
+  });
+
+  app.delete("/api/studio-bookings/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const booking = await storage.getStudioBooking(id);
+      if (booking?.googleEventId) {
+        deleteStudioBookingFromGoogle(booking.googleEventId, booking.studioId);
+      }
+      await storage.deleteStudioBooking(id);
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete studio booking" });
+    }
+  });
+
+  // ==== Seasons Routes ====
+  app.get("/api/seasons", isAuthenticated, async (req, res) => {
+    try {
+      const allSeasons = await storage.getSeasons();
+      res.json(allSeasons);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch seasons" });
+    }
+  });
+
+  app.get("/api/seasons/active", isAuthenticated, async (req, res) => {
+    try {
+      const season = await storage.getActiveSeason();
+      res.json(season || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch active season" });
+    }
+  });
+
+  app.post("/api/seasons", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertSeasonSchema.parse(req.body);
+      const season = await storage.createSeason(validatedData);
+      res.status(201).json(season);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create season" });
+    }
+  });
+
+  app.patch("/api/seasons/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const season = await storage.updateSeason(id, req.body);
+      res.json(season);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to update season" });
+    }
+  });
+
+  app.post("/api/seasons/:id/activate", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.setActiveSeason(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to activate season" });
+    }
+  });
+
+  // Season Reset (Archiviazione)
+  app.post("/api/seasons/reset", isAuthenticated, async (req, res) => {
+    try {
+      const { name, description, startDate, endDate } = req.body;
+
+      // 1. Get current active season if any
+      const currentSeason = await storage.getActiveSeason();
+
+      // 2. Create new season
+      const newSeason = await storage.createSeason({
+        name,
+        description,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        active: true
+      });
+
+      // 3. Deactivate old season
+      if (currentSeason) {
+        await storage.updateSeason(currentSeason.id, { active: false });
+      }
+
+      res.status(201).json(newSeason);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to reset season" });
+    }
+  });
+
   return httpServer;
 }

@@ -4,37 +4,53 @@ import { Users, Calendar, AlertCircle, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLocation } from "wouter";
-import logoStarGem from "@assets/2fded732-6b1d-4121-a9a7-9eae89138609_1770777971616.png";
+import { useLocation, Link } from "wouter";
+const logoStarGem = "/logo_stargem.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  
-  const { data: stats, isLoading: statsLoading } = useQuery({
+
+  interface DashboardStats {
+    totalMembers: number;
+    activeMemberships: number;
+    activeCourses: number;
+    totalEnrollments: number;
+    expiringThisWeek: number;
+    monthlyRevenue: number;
+    pendingPayments: number;
+  }
+
+  interface AlertStats {
+    expiringMemberships: number;
+    expiredCertificates: number;
+    overduePayments: number;
+  }
+
+  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/stats/dashboard"],
   });
 
-  const { data: alerts, isLoading: alertsLoading } = useQuery({
+  const { data: alerts, isLoading: alertsLoading } = useQuery<AlertStats>({
     queryKey: ["/api/stats/alerts"],
   });
 
-  const { data: recentActivity, isLoading: activityLoading } = useQuery({
+  const { data: recentActivity, isLoading: activityLoading } = useQuery<any[]>({
     queryKey: ["/api/stats/recent-activity"],
   });
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
       <div className="flex flex-col items-center gap-4 mb-6">
-        <img 
-          src={logoStarGem} 
-          alt="StarGEM Logo" 
-          style={{ width: "200px", height: "auto" }}
+        <img
+          src={logoStarGem}
+          alt="StarGem Logo"
+          className="h-32 md:h-40 object-contain mix-blend-multiply"
           data-testid="logo-dashboard"
         />
       </div>
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground text-sm">Panoramica del sistema di gestione corsi</p>
+        <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard</h1>
+        <p className="text-muted-foreground">Panoramica del sistema di gestione corsi</p>
       </div>
 
       {/* Stats Grid */}
@@ -75,7 +91,12 @@ export default function Dashboard() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats?.activeCourses || 0}</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-2xl font-bold">{stats?.activeCourses || 0}</div>
+                  <Link href="/corsi">
+                    <Button variant="ghost" size="sm" className="h-8 text-xs">Vedi tutti</Button>
+                  </Link>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {stats?.totalEnrollments || 0} iscrizioni totali
                 </p>
@@ -102,7 +123,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  €{stats?.monthlyRevenue?.toFixed(2) || '0.00'}
+                  €{stats?.monthlyRevenue != null ? stats.monthlyRevenue.toFixed(2) : '0.00'}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {stats?.pendingPayments || 0} pagamenti in attesa
@@ -131,16 +152,16 @@ export default function Dashboard() {
           </>
         ) : (
           <>
-            <Card className={alerts?.expiringMemberships > 0 ? "border-destructive/50" : ""}>
+            <Card className={(alerts?.expiringMemberships ?? 0) > 0 ? "border-destructive/50" : ""}>
               <CardHeader>
                 <CardTitle className="text-lg">Tessere in Scadenza</CardTitle>
                 <CardDescription>Prossimi 7 giorni</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <span className="text-3xl font-bold">{alerts?.expiringMemberships || 0}</span>
-                  <Button 
-                    variant="outline" 
+                  <span className="text-3xl font-bold">{alerts?.expiringMemberships ?? 0}</span>
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setLocation('/tessere')}
                     data-testid="button-view-memberships"
@@ -151,16 +172,16 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className={alerts?.expiredCertificates > 0 ? "border-destructive/50" : ""}>
+            <Card className={(alerts?.expiredCertificates ?? 0) > 0 ? "border-destructive/50" : ""}>
               <CardHeader>
                 <CardTitle className="text-lg">Certificati Scaduti</CardTitle>
                 <CardDescription>Richiedono rinnovo</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <span className="text-3xl font-bold">{alerts?.expiredCertificates || 0}</span>
-                  <Button 
-                    variant="outline" 
+                  <span className="text-3xl font-bold">{alerts?.expiredCertificates ?? 0}</span>
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setLocation('/tessere')}
                     data-testid="button-view-certificates"
@@ -171,16 +192,16 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className={alerts?.overduePayments > 0 ? "border-destructive/50" : ""}>
+            <Card className={(alerts?.overduePayments ?? 0) > 0 ? "border-destructive/50" : ""}>
               <CardHeader>
                 <CardTitle className="text-lg">Pagamenti in Sospeso</CardTitle>
                 <CardDescription>Richiedono attenzione</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <span className="text-3xl font-bold">{alerts?.overduePayments || 0}</span>
-                  <Button 
-                    variant="outline" 
+                  <span className="text-3xl font-bold">{alerts?.overduePayments ?? 0}</span>
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setLocation('/pagamenti')}
                     data-testid="button-view-payments"
@@ -220,7 +241,7 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-1">
               {recentActivity.map((activity: any, index: number) => (
-                <div 
+                <div
                   key={index}
                   className="flex items-center justify-between py-3 border-b last:border-0"
                 >

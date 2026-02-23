@@ -5,26 +5,21 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, AuthProvider } from "@/hooks/use-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { User as SelectUser } from "@shared/schema";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
+import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
 import Courses from "@/pages/courses";
 import Workshops from "@/pages/workshops";
 import CourseEnrollments from "@/pages/course-enrollments";
-import ActivityCategories from "@/pages/activity-categories";
 import Categories from "@/pages/categories";
-import WorkshopCategories from "@/pages/workshop-categories";
-import SundayCategories from "@/pages/sunday-categories";
-import TrainingCategories from "@/pages/training-categories";
-import IndividualLessonCategories from "@/pages/individual-lesson-categories";
-import CampusCategories from "@/pages/campus-categories";
-import RecitalCategories from "@/pages/recital-categories";
-import VacationCategories from "@/pages/vacation-categories";
 import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
+import PaymentMethods from "@/pages/payment-methods";
 import Studios from "@/pages/studios";
 import Memberships from "@/pages/memberships";
 import Payments from "@/pages/payments";
@@ -34,13 +29,20 @@ import ImportData from "@/pages/import-data";
 import UtentiPermessi from "@/pages/utenti-permessi";
 import ResetStagione from "@/pages/reset-stagione";
 import MemberDashboard from "@/pages/member-dashboard";
+import AnagraficaHome from "@/pages/anagrafica-home";
+import TestGae from "@/pages/test-gae";
+import CardGenerator from "@/pages/card-generator";
+import AdminPanel from "@/pages/admin-panel";
+import CalendarPage from "@/pages/calendar";
+import BookingServices from "@/pages/booking-services";
+import StudioBookings from "@/pages/studio-bookings";
+import AccountingSheet from "@/pages/accounting-sheet";
 import MascheraInputGenerale from "@/pages/maschera-input-generale";
-import Test3Gae from "@/pages/test3-gae";
-import Knowledge from "@/pages/knowledge";
-import TodoList from "@/pages/todo-list";
+import PriceLists from "@/pages/listini";
 import Attivita from "@/pages/attivita";
-import PaidTrials from "@/pages/paid-trials";
+
 import FreeTrials from "@/pages/free-trials";
+import PaidTrials from "@/pages/paid-trials";
 import SingleLessons from "@/pages/single-lessons";
 import SundayActivities from "@/pages/sunday-activities";
 import Trainings from "@/pages/trainings";
@@ -48,76 +50,122 @@ import IndividualLessons from "@/pages/individual-lessons";
 import CampusActivities from "@/pages/campus-activities";
 import Recitals from "@/pages/recitals";
 import VacationStudies from "@/pages/vacation-studies";
-import Elenchi from "@/pages/elenchi";
-import Commenti from "@/pages/commenti";
-import NoteTeam from "@/pages/note-team";
-import { NotificationBell } from "@/components/notification-bell";
-import logoStarGem from "@assets/2fded732-6b1d-4121-a9a7-9eae89138609_1770777971616.png";
 
-function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+import WorkshopCategories from "@/pages/workshop-categories";
+import SundayCategories from "@/pages/sunday-categories";
+import TrainingCategories from "@/pages/training-categories";
+import IndividualLessonCategories from "@/pages/individual-lesson-categories";
+import CampusCategories from "@/pages/campus-categories";
+import RecitalCategories from "@/pages/recital-categories";
+import VacationCategories from "@/pages/vacation-categories";
 
-  if (isLoading || !isAuthenticated) {
-    return (
-      <Switch>
-        <Route path="/" component={Landing} />
-        <Route component={NotFound} />
-      </Switch>
-    );
+import { NotificationCenter } from "@/components/notification-center";
+const logoStarGem = "/logo_stargem.png";
+
+export function hasPermission(user: SelectUser | null, path: string) {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  const perms = (user as any).permissions || {};
+  if (perms["*"] === "write" || perms["*"] === "read") return true;
+
+  // Check direct match
+  if (perms[path] === "read" || perms[path] === "write") return true;
+
+  // Check parent path match (e.g. /membro/1 matches /membro)
+  const segments = path.split('/').filter(Boolean);
+  if (segments.length > 0) {
+    const parentPath = `/${segments[0]}`;
+    if (perms[parentPath] === "read" || perms[parentPath] === "write") return true;
   }
 
+  return false;
+}
+
+export function hasWritePermission(user: SelectUser | null, path: string) {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  const perms = (user as any).permissions || {};
+  if (perms["*"] === "write") return true;
+
+  if (perms[path] === "write") return true;
+
+  const segments = path.split('/').filter(Boolean);
+  if (segments.length > 0) {
+    const parentPath = `/${segments[0]}`;
+    if (perms[parentPath] === "write") return true;
+  }
+
+  return false;
+}
+
+function ProtectedRoute({ path, component: Component }: { path: string, component: any }) {
+  const { user } = useAuth();
+
+  return (
+    <Route path={path}>
+      {(params) => hasPermission(user, path) ? <Component params={params} /> : <NotFound />}
+    </Route>
+  );
+}
+
+function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/iscritti" component={Members} />
-      <Route path="/attivita/corsi" component={Courses} />
-      <Route path="/attivita/workshops" component={Workshops} />
-      <Route path="/iscritti-corsi" component={CourseEnrollments} />
-      <Route path="/categorie-attivita" component={ActivityCategories} />
-      <Route path="/categorie" component={Categories} />
-      <Route path="/categorie-workshop" component={WorkshopCategories} />
-      <Route path="/categorie-domeniche" component={SundayCategories} />
-      <Route path="/categorie-allenamenti" component={TrainingCategories} />
-      <Route path="/categorie-lezioni-individuali" component={IndividualLessonCategories} />
-      <Route path="/categorie-campus" component={CampusCategories} />
-      <Route path="/categorie-saggi" component={RecitalCategories} />
-      <Route path="/categorie-vacanze-studio" component={VacationCategories} />
-      <Route path="/categorie-clienti" component={ClientCategories} />
-      <Route path="/insegnanti" component={Instructors} />
-      <Route path="/studios" component={Studios} />
-      <Route path="/tessere" component={Memberships} />
-      <Route path="/pagamenti" component={Payments} />
-      <Route path="/accessi" component={AccessControl} />
-      <Route path="/report" component={Reports} />
-      <Route path="/importa" component={ImportData} />
-      <Route path="/utenti-permessi" component={UtentiPermessi} />
-      <Route path="/reset-stagione" component={ResetStagione} />
-      <Route path="/membro/:id" component={MemberDashboard} />
-      <Route path="/maschera-input-generale" component={MascheraInputGenerale} />
-      <Route path="/test3-gae" component={Test3Gae} />
-      <Route path="/knowledge" component={Knowledge} />
-      <Route path="/todo-list" component={TodoList} />
-      <Route path="/attivita/prove-pagamento" component={PaidTrials} />
-      <Route path="/attivita/prove-gratuite" component={FreeTrials} />
-      <Route path="/attivita/lezioni-singole" component={SingleLessons} />
-      <Route path="/attivita/domeniche-movimento" component={SundayActivities} />
-      <Route path="/attivita/allenamenti" component={Trainings} />
-      <Route path="/attivita/lezioni-individuali" component={IndividualLessons} />
-      <Route path="/attivita/campus" component={CampusActivities} />
-      <Route path="/attivita/saggi" component={Recitals} />
-      <Route path="/attivita/vacanze-studio" component={VacationStudies} />
-      <Route path="/attivita" component={Attivita} />
-      <Route path="/elenchi" component={Elenchi} />
-      <Route path="/commenti" component={Commenti} />
-      <Route path="/note-team" component={NoteTeam} />
+      <ProtectedRoute path="/" component={AnagraficaHome} />
+      <ProtectedRoute path="/dashboard" component={Dashboard} />
+      <ProtectedRoute path="/iscritti" component={Members} />
+      <ProtectedRoute path="/corsi" component={Courses} />
+      <ProtectedRoute path="/workshops" component={Workshops} />
+      <ProtectedRoute path="/iscritti-corsi" component={CourseEnrollments} />
+      <ProtectedRoute path="/calendario" component={CalendarPage} />
+      <ProtectedRoute path="/categorie" component={Categories} />
+      <ProtectedRoute path="/categorie-clienti" component={ClientCategories} />
+      <ProtectedRoute path="/metodi-pagamento" component={PaymentMethods} />
+      <ProtectedRoute path="/insegnanti" component={Instructors} />
+      <ProtectedRoute path="/studios" component={Studios} />
+      <ProtectedRoute path="/tessere" component={Memberships} />
+      <ProtectedRoute path="/pagamenti" component={Payments} />
+      <ProtectedRoute path="/accessi" component={AccessControl} />
+      <ProtectedRoute path="/report" component={Reports} />
+      <ProtectedRoute path="/importa" component={ImportData} />
+      <ProtectedRoute path="/utenti-permessi" component={UtentiPermessi} />
+      <ProtectedRoute path="/reset-stagione" component={ResetStagione} />
+      <ProtectedRoute path="/membro/:id" component={MemberDashboard} />
+      <ProtectedRoute path="/test-gae" component={TestGae} />
+      <ProtectedRoute path="/generazione-tessere" component={CardGenerator} />
+      <ProtectedRoute path="/admin" component={AdminPanel} />
+      <ProtectedRoute path="/booking-services" component={BookingServices} />
+      <ProtectedRoute path="/prenotazioni-sale" component={StudioBookings} />
+      <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
+      <ProtectedRoute path="/maschera-generale" component={MascheraInputGenerale} />
+      <ProtectedRoute path="/attivita" component={Attivita} />
+      <ProtectedRoute path="/attivita/corsi" component={Courses} />
+      <ProtectedRoute path="/attivita/workshops" component={Workshops} />
+      <ProtectedRoute path="/attivita/prove-pagamento" component={PaidTrials} />
+      <ProtectedRoute path="/attivita/prove-gratuite" component={FreeTrials} />
+      <ProtectedRoute path="/attivita/lezioni-singole" component={SingleLessons} />
+      <ProtectedRoute path="/attivita/domeniche-movimento" component={SundayActivities} />
+      <ProtectedRoute path="/attivita/allenamenti" component={Trainings} />
+      <ProtectedRoute path="/attivita/lezioni-individuali" component={IndividualLessons} />
+      <ProtectedRoute path="/attivita/campus" component={CampusActivities} />
+      <ProtectedRoute path="/attivita/saggi" component={Recitals} />
+      <ProtectedRoute path="/attivita/vacanze-studio" component={VacationStudies} />
+
+      <ProtectedRoute path="/categorie-workshop" component={WorkshopCategories} />
+      <ProtectedRoute path="/categorie-domeniche" component={SundayCategories} />
+      <ProtectedRoute path="/categorie-allenamenti" component={TrainingCategories} />
+      <ProtectedRoute path="/categorie-lezioni-individuali" component={IndividualLessonCategories} />
+      <ProtectedRoute path="/categorie-campus" component={CampusCategories} />
+      <ProtectedRoute path="/categorie-saggi" component={RecitalCategories} />
+      <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
+      <ProtectedRoute path="/listini" component={PriceLists} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
 function AppContent() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const isMobile = useIsMobile();
 
   // Custom sidebar width
@@ -126,50 +174,53 @@ function AppContent() {
     "--sidebar-width-icon": "3rem",
   };
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading) {
     return (
-      <>
-        <Router />
-        <Toaster />
-      </>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
+  if (!user) {
+    return <AuthPage />;
+  }
+
   return (
-    <>
-      <SidebarProvider style={style as React.CSSProperties} defaultOpen={!isMobile}>
-        <div className="flex h-screen w-full">
-          <AppSidebar />
-          <div className="flex flex-col flex-1 overflow-hidden">
-            <header className="flex items-center justify-between h-14 px-4 border-b border-border bg-background flex-shrink-0">
-              <SidebarTrigger data-testid="button-sidebar-toggle" />
-              <div className="flex items-center gap-3">
-                <NotificationBell />
-                <img 
-                  src={logoStarGem} 
-                  alt="StarGEM Logo" 
-                  style={{ width: "200px", height: "auto" }}
-                  data-testid="logo-header"
-                />
-              </div>
-            </header>
-            <main className="flex-1 overflow-auto bg-background">
-              <Router />
-            </main>
-          </div>
+    <SidebarProvider style={style as React.CSSProperties} defaultOpen={!isMobile}>
+      <div className="flex h-screen w-full">
+        <AppSidebar />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <header className="flex items-center justify-between h-14 px-4 border-b border-border bg-background flex-shrink-0">
+            <SidebarTrigger data-testid="button-sidebar-toggle" />
+            <div className="flex items-center gap-4 h-full">
+              <NotificationCenter />
+              <img
+                src={logoStarGem}
+                alt="StarGem Logo"
+                className="h-full py-2 object-contain mix-blend-multiply"
+                data-testid="logo-header"
+              />
+            </div>
+          </header>
+          <main className="flex-1 overflow-auto bg-background">
+            <Router />
+          </main>
         </div>
-      </SidebarProvider>
-      <Toaster />
-    </>
+      </div>
+    </SidebarProvider>
   );
 }
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AppContent />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <AppContent />
+          <Toaster />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

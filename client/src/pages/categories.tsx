@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, FolderTree, ArrowLeft } from "lucide-react";
+import { Plus, Edit, Trash2, FolderTree } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Category, InsertCategory } from "@shared/schema";
 
@@ -94,16 +94,11 @@ export default function Categories() {
   const categoryTree = getCategoryTree();
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Gestione Categorie</h1>
-            <p className="text-muted-foreground text-sm">Organizza i corsi per categorie e sottocategorie</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Categorie</h1>
+          <p className="text-muted-foreground">Organizza i corsi per categorie e sottocategorie</p>
         </div>
         <Button 
           onClick={() => {
@@ -156,8 +151,8 @@ export default function Categories() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                       <Button
+                        variant="ghost"
                         size="icon"
-                        className="gold-3d-button"
                         onClick={() => {
                           setEditingCategory(category);
                           setIsFormOpen(true);
@@ -167,9 +162,8 @@ export default function Categories() {
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                         onClick={() => {
                           if (confirm("Sei sicuro di voler eliminare questa categoria?")) {
                             deleteMutation.mutate(category.id);
@@ -205,8 +199,8 @@ export default function Categories() {
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                             <Button
+                              variant="ghost"
                               size="icon"
-                              className="gold-3d-button"
                               onClick={() => {
                                 setEditingCategory(child);
                                 setIsFormOpen(true);
@@ -216,9 +210,8 @@ export default function Categories() {
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="icon"
-                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                               onClick={() => {
                                 if (confirm("Sei sicuro di voler eliminare questa categoria?")) {
                                   deleteMutation.mutate(child.id);

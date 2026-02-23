@@ -31,11 +31,11 @@ interface FiscalCodeData {
  */
 export function validateFiscalCodeFormat(fiscalCode: string): boolean {
   if (!fiscalCode || typeof fiscalCode !== 'string') return false;
-  
+
   const normalized = fiscalCode.toUpperCase().trim();
-  
+
   const pattern = /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/;
-  
+
   return pattern.test(normalized);
 }
 
@@ -45,18 +45,18 @@ export function validateFiscalCodeFormat(fiscalCode: string): boolean {
 function calculateControlChar(fiscalCode: string): string {
   const code = fiscalCode.substring(0, 15).toUpperCase();
   let sum = 0;
-  
+
   for (let i = 0; i < 15; i++) {
     const char = code[i];
     const isOdd = i % 2 === 0;
-    
+
     if (isOdd) {
       sum += ODD_VALUES[char] || 0;
     } else {
       sum += EVEN_VALUES[char] || 0;
     }
   }
-  
+
   return CONTROL_CHARS[sum % 26];
 }
 
@@ -65,10 +65,10 @@ function calculateControlChar(fiscalCode: string): string {
  */
 export function validateFiscalCode(fiscalCode: string): boolean {
   if (!validateFiscalCodeFormat(fiscalCode)) return false;
-  
+
   const normalized = fiscalCode.toUpperCase().trim();
   const controlChar = calculateControlChar(normalized);
-  
+
   return controlChar === normalized[15];
 }
 
@@ -77,38 +77,38 @@ export function validateFiscalCode(fiscalCode: string): boolean {
  */
 export function parseFiscalCode(fiscalCode: string): FiscalCodeData | null {
   if (!validateFiscalCode(fiscalCode)) return null;
-  
+
   const normalized = fiscalCode.toUpperCase().trim();
-  
+
   try {
     let year = parseInt(normalized.substring(6, 8));
     const currentYear = new Date().getFullYear();
     const currentCentury = Math.floor(currentYear / 100) * 100;
     const lastTwoDigits = currentYear % 100;
-    
+
     if (year > lastTwoDigits) {
       year += currentCentury - 100;
     } else {
       year += currentCentury;
     }
-    
+
     const monthChar = normalized[8];
     const monthIndex = MONTHS.indexOf(monthChar);
     if (monthIndex === -1) return null;
     const month = monthIndex + 1;
-    
+
     let day = parseInt(normalized.substring(9, 11));
     let gender: 'M' | 'F' = 'M';
-    
+
     if (day > 40) {
       gender = 'F';
       day -= 40;
     }
-    
+
     const dateOfBirth = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    
+
     const placeCode = normalized.substring(11, 15);
-    
+
     return {
       dateOfBirth,
       gender,
@@ -123,41 +123,72 @@ export function parseFiscalCode(fiscalCode: string): FiscalCodeData | null {
 /**
  * Dizionario dei comuni italiani più comuni (codice catastale -> nome)
  */
+/**
+ * Dizionario dei comuni italiani più comuni (codice catastale -> nome|provincia)
+ */
 const COMMON_CITIES: Record<string, string> = {
-  'A001': 'Abano Terme',
-  'A015': 'Abbiategrasso',
-  'A087': 'Acerra',
-  'A182': 'Agrigento',
-  'A225': 'Albano Laziale',
-  'A326': 'Alessandria',
-  'A336': 'Alfonsine',
-  'A345': 'Alghero',
-  'A462': 'Ancona',
-  'A479': 'Andria',
-  'A547': 'Anzio',
-  'A565': 'Aosta',
-  'A594': 'Aprilia',
-  'A662': 'Arezzo',
-  'A669': 'Ariccia',
-  'A717': 'Arzignano',
-  'A794': 'Ascoli Piceno',
-  'A859': 'Asti',
-  'B354': 'Bari',
-  'B519': 'Barletta',
-  'B963': 'Bergamo',
-  'C351': 'Bologna',
-  'C523': 'Bolzano',
-  'D612': 'Firenze',
-  'F205': 'Milano',
-  'G273': 'Napoli',
-  'H501': 'Roma',
-  'I304': 'Torino',
-  'L736': 'Venezia',
+  'A001': 'Abano Terme|PD',
+  'A015': 'Abbiategrasso|MI',
+  'A087': 'Acerra|NA',
+  'A182': 'Agrigento|AG',
+  'A225': 'Albano Laziale|RM',
+  'A326': 'Alessandria|AL',
+  'A336': 'Alfonsine|RA',
+  'A345': 'Alghero|SS',
+  'A462': 'Ancona|AN',
+  'A479': 'Andria|BT',
+  'A547': 'Anzio|RM',
+  'A565': 'Aosta|AO',
+  'A594': 'Aprilia|LT',
+  'A662': 'Arezzo|AR',
+  'A669': 'Ariccia|RM',
+  'A717': 'Arzignano|VI',
+  'A794': 'Ascoli Piceno|AP',
+  'A859': 'Asti|AT',
+  'B354': 'Bari|BA',
+  'B519': 'Barletta|BT',
+  'B963': 'Bergamo|BG',
+  'C351': 'Bologna|BO',
+  'C523': 'Bolzano|BZ',
+  'D612': 'Firenze|FI',
+  'F205': 'Milano|MI',
+  'G273': 'Napoli|NA',
+  'H501': 'Roma|RM',
+  'I304': 'Torino|TO',
+  'L736': 'Venezia|VE',
 };
 
 /**
  * Converte il codice catastale in nome del comune
  */
 export function getPlaceName(placeCode: string): string | null {
-  return COMMON_CITIES[placeCode] || null;
+  const place = COMMON_CITIES[placeCode];
+  return place ? place.split('|')[0] : null;
+}
+
+/**
+ * Restituisce dettagli del luogo (città e provincia)
+ */
+export function getPlaceDetails(placeCode: string): { city: string; province: string } | null {
+  const place = COMMON_CITIES[placeCode];
+  if (!place) return null;
+  const [city, province] = place.split('|');
+  return { city, province };
+}
+
+/**
+ * Calcola l'età dalla data di nascita (formato YYYY-MM-DD)
+ */
+export function calculateAge(dateOfBirth: string): number {
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age;
 }

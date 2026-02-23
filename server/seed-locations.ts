@@ -228,29 +228,30 @@ const ITALIAN_CITIES = [
 
 export async function seedLocations() {
   console.log("Seeding locations...");
-  
+
   const existingCountries = await db.select().from(countries);
   if (existingCountries.length > 0) {
     console.log("Locations already seeded, skipping...");
     return;
   }
 
-  const [italy] = await db.insert(countries).values({
+  const [result] = await db.insert(countries).values({
     code: "IT",
     name: "Italia",
     isDefault: true,
-  }).returning();
-  console.log(`Created country: ${italy.name}`);
+  });
+  const italyId = result.insertId;
+  console.log(`Created country: Italia (ID: ${italyId})`);
 
   const provinceMap = new Map<string, number>();
   for (const prov of ITALIAN_PROVINCES) {
-    const [inserted] = await db.insert(provinces).values({
+    const [pResult] = await db.insert(provinces).values({
       code: prov.code,
       name: prov.name,
       region: prov.region,
-      countryId: italy.id,
-    }).returning();
-    provinceMap.set(prov.code, inserted.id);
+      countryId: italyId,
+    });
+    provinceMap.set(prov.code, pResult.insertId);
   }
   console.log(`Created ${ITALIAN_PROVINCES.length} provinces`);
 
@@ -265,7 +266,7 @@ export async function seedLocations() {
     }
   }
   console.log(`Created ${ITALIAN_CITIES.length} cities`);
-  
+
   console.log("Location seeding complete!");
 }
 

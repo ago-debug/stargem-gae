@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download, Sheet, ArrowRight, Settings2, Key, Loader2, Save, Trash2, Users, BookOpen, ArrowLeft } from "lucide-react";
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download, Sheet, ArrowRight, Settings2, Key, Loader2, Save, Trash2, Users, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -66,18 +67,20 @@ const MEMBER_FIELDS = [
   { key: "fatherPhone", label: "Telefono Padre" },
   { key: "fatherMobile", label: "Cellulare Padre" },
   { key: "notes", label: "Note" },
+  { key: "clientCategoryName", label: "Categoria (Nome)" },
+  { key: "subscriptionTypeName", label: "Tipo Iscrizione (Nome)" },
 ];
 
 // Course fields for mapping
 const COURSE_FIELDS = [
   { key: "name", label: "Nome Corso", required: true },
-  { key: "sku", label: "SKU/Codice (Codice Univoco)" },
+  { key: "sku", label: "SKU (Codice Univoco)" },
   { key: "description", label: "Descrizione" },
   { key: "categoryName", label: "Categoria (Nome)" },
   { key: "studioName", label: "Studio/Sala (Nome)" },
-  { key: "instructorName", label: "Staff/Insegnante Primario (Nome Cognome)" },
-  { key: "secondaryInstructor1Name", label: "Staff/Insegnante Secondario 1 (Nome Cognome)" },
-  { key: "secondaryInstructor2Name", label: "Staff/Insegnante Secondario 2 (Nome Cognome)" },
+  { key: "instructorName", label: "Insegnante Primario (Nome Cognome)" },
+  { key: "secondaryInstructor1Name", label: "Insegnante Secondario 1 (Nome Cognome)" },
+  { key: "secondaryInstructor2Name", label: "Insegnante Secondario 2 (Nome Cognome)" },
   { key: "price", label: "Prezzo" },
   { key: "maxCapacity", label: "Capacità Massima" },
   { key: "dayOfWeek", label: "Giorno (0=Dom, 1=Lun, 2=Mar, 3=Mer, 4=Gio, 5=Ven, 6=Sab)" },
@@ -112,7 +115,7 @@ const MEMBER_IMPORT_KEY_OPTIONS = [
 
 // Import key options for courses
 const COURSE_IMPORT_KEY_OPTIONS = [
-  { key: "sku", label: "SKU/Codice" },
+  { key: "sku", label: "SKU" },
   { key: "name", label: "Nome Corso" },
 ];
 
@@ -152,41 +155,42 @@ export default function ImportData() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importType, setImportType] = useState<string>("");
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
-  
+
   // Google Sheets state
   const [spreadsheetId, setSpreadsheetId] = useState<string>("");
   const [sheetRange, setSheetRange] = useState<string>("");
-  
+
   // Mapping state
   const [step, setStep] = useState<"input" | "mapping">("input");
   const [sheetHeaders, setSheetHeaders] = useState<SheetHeader[]>([]);
   const [sampleData, setSampleData] = useState<string[][]>([]);
   const [fieldMapping, setFieldMapping] = useState<Record<string, number | null>>({});
   const [importKey, setImportKey] = useState<string>("fiscalCode");
-  
+  const [autoCreateRecords, setAutoCreateRecords] = useState<boolean>(true);
+
   // Entity type and source type for mapping
   const [entityType, setEntityType] = useState<"members" | "courses" | "instructors">("members");
   const [sourceType, setSourceType] = useState<"google_sheets" | "file">("google_sheets");
-  
+
   // Saved configs
   const [saveConfigDialogOpen, setSaveConfigDialogOpen] = useState(false);
   const [newConfigName, setNewConfigName] = useState("");
-  
+
   // CSV delimiter for file imports
   const [csvDelimiter, setCsvDelimiter] = useState<string>(",");
-  
+
   // Get current fields and import key options based on entity type
-  const currentFields = entityType === "members" 
-    ? MEMBER_FIELDS 
-    : entityType === "courses" 
-      ? COURSE_FIELDS 
+  const currentFields = entityType === "members"
+    ? MEMBER_FIELDS
+    : entityType === "courses"
+      ? COURSE_FIELDS
       : INSTRUCTOR_FIELDS;
-  const currentImportKeyOptions = entityType === "members" 
-    ? MEMBER_IMPORT_KEY_OPTIONS 
-    : entityType === "courses" 
-      ? COURSE_IMPORT_KEY_OPTIONS 
+  const currentImportKeyOptions = entityType === "members"
+    ? MEMBER_IMPORT_KEY_OPTIONS
+    : entityType === "courses"
+      ? COURSE_IMPORT_KEY_OPTIONS
       : INSTRUCTOR_IMPORT_KEY_OPTIONS;
-  
+
   // Fetch saved import configs
   const { data: savedConfigs = [] } = useQuery<ImportConfig[]>({
     queryKey: ["/api/import-configs"],
@@ -197,30 +201,30 @@ export default function ImportData() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('type', type);
-      
+
       const response = await fetch('/api/import', {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         throw new Error('Errore durante l\'importazione');
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
       setImportResult(data);
-      toast({ 
+      toast({
         title: "Importazione completata",
         description: `${data.imported} record importati con successo`,
       });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Errore", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive"
       });
     },
   });
@@ -234,27 +238,27 @@ export default function ImportData() {
       setSampleData(data.sampleData || []);
       setStep("mapping");
       setSourceType("google_sheets");
-      
+
       // Initialize field mapping based on current entity type
       const initialMapping: Record<string, number | null> = {};
       currentFields.forEach(field => {
         initialMapping[field.key] = null;
       });
       setFieldMapping(initialMapping);
-      
+
       // Set default import key
       setImportKey(entityType === "members" ? "fiscalCode" : "sku");
-      
-      toast({ 
+
+      toast({
         title: "Anteprima caricata",
         description: `Trovate ${data.headers?.length || 0} colonne. Configura la mappatura.`,
       });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Errore", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive"
       });
     },
   });
@@ -277,18 +281,18 @@ export default function ImportData() {
       setSampleData(data.sampleData || []);
       setStep("mapping");
       setSourceType("file");
-      
+
       // Initialize field mapping
       const initialMapping: Record<string, number | null> = {};
       currentFields.forEach(field => {
         initialMapping[field.key] = null;
       });
       setFieldMapping(initialMapping);
-      
+
       // Set default import key
       setImportKey(entityType === "members" ? "fiscalCode" : "sku");
-      
-      toast({ 
+
+      toast({
         title: "Anteprima caricata",
         description: `Trovate ${data.headers?.length || 0} colonne e ${data.totalRows} righe.`,
       });
@@ -300,13 +304,14 @@ export default function ImportData() {
 
   // File mapped import mutation
   const fileMappedImportMutation = useMutation({
-    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string; delimiter: string }) => {
+    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string; delimiter: string; autoCreateRecords?: boolean }) => {
       const formData = new FormData();
       formData.append('file', params.file);
       formData.append('fieldMapping', JSON.stringify(params.fieldMapping));
       formData.append('importKey', params.importKey);
       formData.append('entityType', params.entityType);
       formData.append('delimiter', params.delimiter);
+      formData.append('autoCreateRecords', String(params.autoCreateRecords || false));
       const response = await fetch('/api/import/mapped', {
         method: 'POST',
         body: formData,
@@ -316,7 +321,7 @@ export default function ImportData() {
     },
     onSuccess: (data: any) => {
       setImportResult(data);
-      toast({ 
+      toast({
         title: "Importazione completata",
         description: `${data.imported} nuovi, ${data.updated} aggiornati`,
       });
@@ -357,21 +362,21 @@ export default function ImportData() {
   });
 
   const mappedImportMutation = useMutation({
-    mutationFn: async (params: { spreadsheetId: string; range: string; fieldMapping: Record<string, number | null>; importKey: string; entityType: string }) => {
+    mutationFn: async (params: { spreadsheetId: string; range: string; fieldMapping: Record<string, number | null>; importKey: string; entityType: string; autoCreateRecords?: boolean }) => {
       return await apiRequest("POST", "/api/google-sheets/import-mapped", params);
     },
     onSuccess: (data: any) => {
       setImportResult(data);
-      toast({ 
+      toast({
         title: "Importazione completata",
         description: `${data.imported} nuovi, ${data.updated} aggiornati`,
       });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Errore", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive"
       });
     },
   });
@@ -382,16 +387,16 @@ export default function ImportData() {
     },
     onSuccess: (data: any) => {
       setImportResult(data);
-      toast({ 
+      toast({
         title: "Importazione completata",
         description: `${data.imported} record importati con successo da Google Sheets`,
       });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Errore", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive"
       });
     },
   });
@@ -405,10 +410,10 @@ export default function ImportData() {
 
   const handleImport = () => {
     if (!selectedFile || !importType) {
-      toast({ 
-        title: "Errore", 
-        description: "Seleziona un file e un tipo di importazione", 
-        variant: "destructive" 
+      toast({
+        title: "Errore",
+        description: "Seleziona un file e un tipo di importazione",
+        variant: "destructive"
       });
       return;
     }
@@ -418,10 +423,10 @@ export default function ImportData() {
 
   const handleGoogleSheetsImport = () => {
     if (!spreadsheetId || !sheetRange || !importType) {
-      toast({ 
-        title: "Errore", 
-        description: "Completa tutti i campi richiesti", 
-        variant: "destructive" 
+      toast({
+        title: "Errore",
+        description: "Completa tutti i campi richiesti",
+        variant: "destructive"
       });
       return;
     }
@@ -431,10 +436,10 @@ export default function ImportData() {
 
   const handlePreviewHeaders = () => {
     if (!spreadsheetId) {
-      toast({ 
-        title: "Errore", 
-        description: "Inserisci l'ID del foglio Google", 
-        variant: "destructive" 
+      toast({
+        title: "Errore",
+        description: "Inserisci l'ID del foglio Google",
+        variant: "destructive"
       });
       return;
     }
@@ -452,10 +457,10 @@ export default function ImportData() {
     }
 
     if (Object.keys(activeMapping).length === 0) {
-      toast({ 
-        title: "Errore", 
-        description: "Mappa almeno un campo", 
-        variant: "destructive" 
+      toast({
+        title: "Errore",
+        description: "Mappa almeno un campo",
+        variant: "destructive"
       });
       return;
     }
@@ -463,19 +468,19 @@ export default function ImportData() {
     // Check for required fields based on entity type
     if (entityType === "members") {
       if (activeMapping.firstName === undefined && activeMapping.lastName === undefined) {
-        toast({ 
-          title: "Errore", 
-          description: "Nome o Cognome sono obbligatori", 
-          variant: "destructive" 
+        toast({
+          title: "Errore",
+          description: "Nome o Cognome sono obbligatori",
+          variant: "destructive"
         });
         return;
       }
     } else if (entityType === "courses") {
       if (activeMapping.name === undefined) {
-        toast({ 
-          title: "Errore", 
-          description: "Nome Corso è obbligatorio", 
-          variant: "destructive" 
+        toast({
+          title: "Errore",
+          description: "Nome Corso è obbligatorio",
+          variant: "destructive"
         });
         return;
       }
@@ -489,6 +494,7 @@ export default function ImportData() {
         importKey,
         entityType,
         delimiter: csvDelimiter,
+        autoCreateRecords,
       });
     } else {
       mappedImportMutation.mutate({
@@ -497,6 +503,7 @@ export default function ImportData() {
         fieldMapping: activeMapping,
         importKey,
         entityType,
+        autoCreateRecords,
       });
     }
   };
@@ -580,10 +587,10 @@ export default function ImportData() {
     const filteredConfigs = savedConfigs.filter(c => c.entityType === entityType);
 
     return (
-      <div className="p-4 space-y-4">
+      <div className="p-6 md:p-8 space-y-6 max-w-6xl mx-auto">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Mappatura Campi</h1>
+            <h1 className="text-3xl font-semibold text-foreground mb-2">Mappatura Campi</h1>
             <p className="text-muted-foreground">
               Associa le colonne {sourceType === "file" ? "del file" : "del foglio Google"} ai campi del database
             </p>
@@ -623,13 +630,13 @@ export default function ImportData() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="members">
-                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Partecipanti</span>
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Clienti</span>
                     </SelectItem>
                     <SelectItem value="courses">
                       <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>
                     </SelectItem>
                     <SelectItem value="instructors">
-                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Staff/Insegnanti</span>
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Insegnanti</span>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -726,6 +733,31 @@ export default function ImportData() {
           </CardContent>
         </Card>
 
+        {/* Import Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Settings2 className="w-5 h-5" />
+              Opzioni Importazione
+            </CardTitle>
+          </CardHeader>
+          <CardContent title="Abilita questa opzione per creare automaticamente nuovi Insegnanti, Sale o Categorie se non vengono trovati nel sistema.">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="autoCreateRecords"
+                checked={autoCreateRecords}
+                onCheckedChange={(checked) => setAutoCreateRecords(checked === true)}
+              />
+              <Label htmlFor="autoCreateRecords" className="cursor-pointer font-medium">
+                Crea automaticamente i record di riferimento mancanti (Insegnanti, Sale, Categorie)
+              </Label>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 ml-6">
+              Se abilitato, il sistema creerà nuovi record se quelli indicati nel file non esistono già nel database.
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Field Mapping */}
         <Card>
           <CardHeader>
@@ -799,8 +831,8 @@ export default function ImportData() {
                 <div className="text-sm text-muted-foreground">
                   Questa configurazione salverà la mappatura campi attuale per {entityType === "members" ? "anagrafiche" : "corsi"}.
                 </div>
-                <Button 
-                  onClick={handleSaveConfig} 
+                <Button
+                  onClick={handleSaveConfig}
                   disabled={saveConfigMutation.isPending}
                   className="w-full"
                   data-testid="button-confirm-save-config"
@@ -815,7 +847,7 @@ export default function ImportData() {
             <Button variant="outline" onClick={handleBackToInput}>
               Annulla
             </Button>
-            <Button 
+            <Button
               onClick={handleMappedImport}
               disabled={isImporting}
               data-testid="button-execute-mapped-import"
@@ -890,23 +922,16 @@ export default function ImportData() {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Importa Dati</h1>
-            <p className="text-muted-foreground text-sm">
-              Importa dati da file CSV/Excel o direttamente da Google Sheets
-            </p>
-          </div>
-        </div>
+    <div className="p-6 md:p-8 space-y-6 max-w-4xl mx-auto">
+      <div>
+        <h1 className="text-3xl font-semibold text-foreground mb-2">Importa Dati</h1>
+        <p className="text-muted-foreground">
+          Importa dati da file CSV/Excel o direttamente da Google Sheets
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card 
+        <Card
           className={`cursor-pointer hover-elevate active-elevate-2 ${importType === 'members' ? 'border-primary' : ''}`}
           onClick={() => setImportType('members')}
           data-testid="card-import-members"
@@ -918,8 +943,8 @@ export default function ImportData() {
           <CardContent>
             <div className="flex items-center justify-between">
               <FileSpreadsheet className="w-8 h-8 text-muted-foreground" />
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -934,7 +959,7 @@ export default function ImportData() {
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className={`cursor-pointer hover-elevate active-elevate-2 ${importType === 'courses' ? 'border-primary' : ''}`}
           onClick={() => setImportType('courses')}
           data-testid="card-import-courses"
@@ -946,8 +971,8 @@ export default function ImportData() {
           <CardContent>
             <div className="flex items-center justify-between">
               <FileSpreadsheet className="w-8 h-8 text-muted-foreground" />
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -962,20 +987,20 @@ export default function ImportData() {
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className={`cursor-pointer hover-elevate active-elevate-2 ${importType === 'instructors' ? 'border-primary' : ''}`}
           onClick={() => setImportType('instructors')}
           data-testid="card-import-instructors"
         >
           <CardHeader>
-            <CardTitle className="text-lg">Staff/Insegnanti</CardTitle>
-            <CardDescription>Importa anagrafica staff/insegnanti</CardDescription>
+            <CardTitle className="text-lg">Insegnanti</CardTitle>
+            <CardDescription>Importa anagrafica insegnanti</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <FileSpreadsheet className="w-8 h-8 text-muted-foreground" />
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1046,7 +1071,7 @@ export default function ImportData() {
 
               <Separator />
 
-              <Button 
+              <Button
                 onClick={handlePreviewHeaders}
                 disabled={!spreadsheetId || previewHeadersMutation.isPending}
                 className="w-full"
@@ -1096,7 +1121,7 @@ export default function ImportData() {
                   <SelectContent>
                     <SelectItem value="members">Iscritti</SelectItem>
                     <SelectItem value="courses">Corsi</SelectItem>
-                    <SelectItem value="instructors">Staff/Insegnanti</SelectItem>
+                    <SelectItem value="instructors">Insegnanti</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1123,7 +1148,7 @@ export default function ImportData() {
                 />
               </div>
 
-              <Button 
+              <Button
                 onClick={handleGoogleSheetsImport}
                 disabled={!spreadsheetId || !sheetRange || !importType || googleSheetsImportMutation.isPending}
                 className="w-full"
@@ -1152,13 +1177,13 @@ export default function ImportData() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="members">
-                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Partecipanti</span>
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Anagrafiche Clienti</span>
                     </SelectItem>
                     <SelectItem value="courses">
                       <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Corsi</span>
                     </SelectItem>
                     <SelectItem value="instructors">
-                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Staff/Insegnanti</span>
+                      <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Insegnanti</span>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -1216,7 +1241,7 @@ export default function ImportData() {
 
               <Separator />
 
-              <Button 
+              <Button
                 onClick={handleFilePreview}
                 disabled={!selectedFile || filePreviewMutation.isPending}
                 className="w-full"
@@ -1312,7 +1337,7 @@ export default function ImportData() {
                 <li>Esegui l'importazione</li>
               </ol>
             </div>
-            
+
             <div>
               <h4 className="font-medium mb-2">Importazione da File:</h4>
               <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">

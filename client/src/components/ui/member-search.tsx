@@ -19,13 +19,13 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export function MemberSearch({ members = [], onSelect, placeholder = "Cerca partecipante (min 3 caratteri)...", useServerSearch = false }: MemberSearchProps) {
+export function MemberSearch({ members = [], onSelect, placeholder = "Cerca cliente/associato (min 3 caratteri)...", useServerSearch = false }: MemberSearchProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [serverResults, setServerResults] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const debouncedQuery = useDebounce(query, 300);
 
   // Server-side search effect
@@ -34,7 +34,7 @@ export function MemberSearch({ members = [], onSelect, placeholder = "Cerca part
       setServerResults([]);
       return;
     }
-    
+
     const searchServer = async () => {
       setIsLoading(true);
       try {
@@ -50,30 +50,30 @@ export function MemberSearch({ members = [], onSelect, placeholder = "Cerca part
         setIsLoading(false);
       }
     };
-    
+
     searchServer();
   }, [debouncedQuery, useServerSearch]);
 
-  const filteredMembers = useServerSearch 
-    ? serverResults 
+  const filteredMembers = useServerSearch
+    ? serverResults
     : (query.length >= 3
       ? members.filter(member => {
-          const searchLower = query.toLowerCase();
-          const searchableFields = [
-            member.firstName,
-            member.lastName,
-            member.fiscalCode,
-            member.email,
-            member.phone,
-            member.mobile,
-            member.cardNumber,
-            (member as any).address,
-            member.placeOfBirth,
-          ];
-          return searchableFields.some(field => 
-            field?.toLowerCase().includes(searchLower)
-          );
-        }).slice(0, 10)
+        const searchLower = query.toLowerCase();
+        const searchableFields = [
+          member.firstName,
+          member.lastName,
+          member.fiscalCode,
+          member.email,
+          member.phone,
+          member.mobile,
+          member.cardNumber,
+          (member as any).address,
+          member.placeOfBirth,
+        ];
+        return searchableFields.some(field =>
+          field?.toLowerCase().includes(searchLower)
+        );
+      }).slice(0, 10)
       : []);
 
   useEffect(() => {

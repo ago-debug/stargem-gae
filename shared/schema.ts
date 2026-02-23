@@ -1,17 +1,19 @@
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import {
-  pgTable,
+  mysqlTable,
   varchar,
   text,
   timestamp,
-  integer,
+  int,
   decimal,
   boolean,
-  jsonb,
+  json,
   index,
   date,
-} from "drizzle-orm/pg-core";
+  datetime,
+  longtext,
+} from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -19,36 +21,97 @@ import { z } from "zod";
 // AUTH TABLES (Required for Replit Auth - from javascript_log_in_with_replit blueprint)
 // ============================================================================
 
-export const sessions = pgTable(
+export const sessions = mysqlTable(
   "sessions",
   {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
+    sid: varchar("sid", { length: 128 }).primaryKey(),
+    sess: json("sess").notNull(),
     expire: timestamp("expire").notNull(),
   },
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+export const users = mysqlTable("users", {
+  id: varchar("id", { length: 255 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+  username: varchar("username", { length: 255 }).unique().notNull(),
+  password: varchar("password", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).unique(),
+  firstName: varchar("first_name", { length: 255 }),
+  lastName: varchar("last_name", { length: 255 }),
+  role: varchar("role", { length: 50 }).notNull().default("operator"),
+  profileImageUrl: varchar("profile_image_url", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
+
+export const userRoles = mysqlTable("user_roles", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  permissions: json("permissions").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertUserRoleSchema = createInsertSchema(userRoles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
+export type UserRole = typeof userRoles.$inferSelect;
+
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertUserSelect = typeof users.$inferSelect;
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+export const messages = mysqlTable("messages", {
+  id: int("id").primaryKey().autoincrement(),
+  senderId: varchar("sender_id", { length: 50 }).notNull(),
+  receiverId: varchar("receiver_id", { length: 50 }).notNull(),
+  content: text("content").notNull(),
+  isRead: boolean("is_read").default(false),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+    relationName: "sentMessages",
+  }),
+  receiver: one(users, {
+    fields: [messages.receiverId],
+    references: [users.id],
+    relationName: "receivedMessages",
+  }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  sentMessages: many(messages, { relationName: "sentMessages" }),
+  receivedMessages: many(messages, { relationName: "receivedMessages" }),
+}));
+
+export const insertMessageSchema = createInsertSchema(messages);
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messages.$inferSelect;
 
 // ============================================================================
 // LOCATION TABLES (Countries, Provinces, Cities with CAP)
 // ============================================================================
 
 // Countries (Stati)
-export const countries = pgTable("countries", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const countries = mysqlTable("countries", {
+  id: int("id").primaryKey().autoincrement(),
   code: varchar("code", { length: 3 }).notNull().unique(), // ISO 3166-1 alpha-2/3 code (IT, DE, FR)
   name: varchar("name", { length: 100 }).notNull(),
   isDefault: boolean("is_default").default(false),
@@ -59,12 +122,12 @@ export type InsertCountry = z.infer<typeof insertCountrySchema>;
 export type Country = typeof countries.$inferSelect;
 
 // Provinces (Province italiane)
-export const provinces = pgTable("provinces", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const provinces = mysqlTable("provinces", {
+  id: int("id").primaryKey().autoincrement(),
   code: varchar("code", { length: 2 }).notNull(), // Sigla provincia (MI, RM, TO)
   name: varchar("name", { length: 100 }).notNull(),
   region: varchar("region", { length: 100 }), // Regione
-  countryId: integer("country_id").references(() => countries.id, { onDelete: "cascade" }),
+  countryId: int("country_id").references(() => countries.id, { onDelete: "cascade" }),
 });
 
 export const provincesRelations = relations(provinces, ({ one, many }) => ({
@@ -80,10 +143,10 @@ export type InsertProvince = z.infer<typeof insertProvinceSchema>;
 export type Province = typeof provinces.$inferSelect;
 
 // Cities (Comuni italiani con CAP)
-export const cities = pgTable("cities", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const cities = mysqlTable("cities", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 100 }).notNull(),
-  provinceId: integer("province_id").references(() => provinces.id, { onDelete: "cascade" }),
+  provinceId: int("province_id").references(() => provinces.id, { onDelete: "cascade" }),
   postalCode: varchar("postal_code", { length: 10 }), // CAP principale
   istatCode: varchar("istat_code", { length: 10 }), // Codice ISTAT
 });
@@ -104,11 +167,11 @@ export type City = typeof cities.$inferSelect;
 // ============================================================================
 
 // Categories (hierarchical structure)
-export const categories = pgTable("categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const categories = mysqlTable("categories", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  parentId: integer("parent_id"),
+  parentId: int("parent_id"),
   color: varchar("color", { length: 7 }), // hex color for UI
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -133,11 +196,11 @@ export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Category = typeof categories.$inferSelect;
 
 // Workshop Categories (separate category system for workshops)
-export const workshopCategories = pgTable("workshop_categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const workshopCategories = mysqlTable("ws_cats", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  parentId: integer("parent_id"),
+  parentId: int("parent_id"),
   color: varchar("color", { length: 7 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -161,11 +224,11 @@ export const insertWorkshopCategorySchema = createInsertSchema(workshopCategorie
 export type InsertWorkshopCategory = z.infer<typeof insertWorkshopCategorySchema>;
 export type WorkshopCategory = typeof workshopCategories.$inferSelect;
 
-export const sundayCategories = pgTable("sunday_categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const sundayCategories = mysqlTable("sun_cats", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  parentId: integer("parent_id"),
+  parentId: int("parent_id"),
   color: varchar("color", { length: 7 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -188,11 +251,11 @@ export const insertSundayCategorySchema = createInsertSchema(sundayCategories).o
 export type InsertSundayCategory = z.infer<typeof insertSundayCategorySchema>;
 export type SundayCategory = typeof sundayCategories.$inferSelect;
 
-export const trainingCategories = pgTable("training_categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const trainingCategories = mysqlTable("trn_cats", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  parentId: integer("parent_id"),
+  parentId: int("parent_id"),
   color: varchar("color", { length: 7 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -215,11 +278,11 @@ export const insertTrainingCategorySchema = createInsertSchema(trainingCategorie
 export type InsertTrainingCategory = z.infer<typeof insertTrainingCategorySchema>;
 export type TrainingCategory = typeof trainingCategories.$inferSelect;
 
-export const individualLessonCategories = pgTable("individual_lesson_categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const individualLessonCategories = mysqlTable("ind_less_cats", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  parentId: integer("parent_id"),
+  parentId: int("parent_id"),
   color: varchar("color", { length: 7 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -242,11 +305,11 @@ export const insertIndividualLessonCategorySchema = createInsertSchema(individua
 export type InsertIndividualLessonCategory = z.infer<typeof insertIndividualLessonCategorySchema>;
 export type IndividualLessonCategory = typeof individualLessonCategories.$inferSelect;
 
-export const campusCategories = pgTable("campus_categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const campusCategories = mysqlTable("cmp_cats", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  parentId: integer("parent_id"),
+  parentId: int("parent_id"),
   color: varchar("color", { length: 7 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -269,11 +332,11 @@ export const insertCampusCategorySchema = createInsertSchema(campusCategories).o
 export type InsertCampusCategory = z.infer<typeof insertCampusCategorySchema>;
 export type CampusCategory = typeof campusCategories.$inferSelect;
 
-export const recitalCategories = pgTable("recital_categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const recitalCategories = mysqlTable("rec_cats", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  parentId: integer("parent_id"),
+  parentId: int("parent_id"),
   color: varchar("color", { length: 7 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -297,11 +360,11 @@ export type InsertRecitalCategory = z.infer<typeof insertRecitalCategorySchema>;
 export type RecitalCategory = typeof recitalCategories.$inferSelect;
 
 // Vacation Study Categories (hierarchical structure for vacation study programs)
-export const vacationCategories = pgTable("vacation_categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const vacationCategories = mysqlTable("vac_cats", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  parentId: integer("parent_id"),
+  parentId: int("parent_id"),
   color: varchar("color", { length: 7 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -325,11 +388,11 @@ export type InsertVacationCategory = z.infer<typeof insertVacationCategorySchema
 export type VacationCategory = typeof vacationCategories.$inferSelect;
 
 // Client Categories (hierarchical structure for client classification)
-export const clientCategories = pgTable("client_categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const clientCategories = mysqlTable("cli_cats", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  parentId: integer("parent_id"),
+  parentId: int("parent_id"),
   color: varchar("color", { length: 7 }), // hex color for UI
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -354,8 +417,8 @@ export type InsertClientCategory = z.infer<typeof insertClientCategorySchema>;
 export type ClientCategory = typeof clientCategories.$inferSelect;
 
 // Subscription Types (Tipo Iscrizione)
-export const subscriptionTypes = pgTable("subscription_types", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const subscriptionTypes = mysqlTable("sub_types", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   active: boolean("active").default(true),
@@ -370,8 +433,8 @@ export type InsertSubscriptionType = z.infer<typeof insertSubscriptionTypeSchema
 export type SubscriptionType = typeof subscriptionTypes.$inferSelect;
 
 // Instructors
-export const instructors = pgTable("instructors", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const instructors = mysqlTable("instructors", {
+  id: int("id").primaryKey().autoincrement(),
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }),
@@ -398,10 +461,10 @@ export type InsertInstructor = z.infer<typeof insertInstructorSchema>;
 export type Instructor = typeof instructors.$inferSelect;
 
 // Instructor Rates (per course type or category)
-export const instructorRates = pgTable("instructor_rates", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  instructorId: integer("instructor_id").notNull().references(() => instructors.id, { onDelete: "cascade" }),
-  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
+export const instructorRates = mysqlTable("instr_rates", {
+  id: int("id").primaryKey().autoincrement(),
+  instructorId: int("instructor_id").notNull().references(() => instructors.id, { onDelete: "cascade" }),
+  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
   rateType: varchar("rate_type", { length: 50 }).notNull(), // 'hourly', 'per_lesson', 'fixed'
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -426,11 +489,11 @@ export type InsertInstructorRate = z.infer<typeof insertInstructorRateSchema>;
 export type InstructorRate = typeof instructorRates.$inferSelect;
 
 // Activity Statuses (Stati attività)
-export const activityStatuses = pgTable("activity_statuses", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const activityStatuses = mysqlTable("act_statuses", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 100 }).notNull(),
   color: varchar("color", { length: 50 }),
-  sortOrder: integer("sort_order").default(0),
+  sortOrder: int("sort_order").default(0),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -443,11 +506,11 @@ export type InsertActivityStatus = z.infer<typeof insertActivityStatusSchema>;
 export type ActivityStatus = typeof activityStatuses.$inferSelect;
 
 // Payment Notes (Note pagamenti)
-export const paymentNotes = pgTable("payment_notes", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const paymentNotes = mysqlTable("pay_notes", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 100 }).notNull(),
   color: varchar("color", { length: 50 }),
-  sortOrder: integer("sort_order").default(0),
+  sortOrder: int("sort_order").default(0),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -460,11 +523,11 @@ export type InsertPaymentNote = z.infer<typeof insertPaymentNoteSchema>;
 export type PaymentNote = typeof paymentNotes.$inferSelect;
 
 // Enrollment Details (dettaglio iscrizione)
-export const enrollmentDetails = pgTable("enrollment_details", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const enrollmentDetails = mysqlTable("enroll_details", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 100 }).notNull(),
   color: varchar("color", { length: 50 }),
-  sortOrder: integer("sort_order").default(0),
+  sortOrder: int("sort_order").default(0),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -477,16 +540,17 @@ export type InsertEnrollmentDetail = z.infer<typeof insertEnrollmentDetailSchema
 export type EnrollmentDetail = typeof enrollmentDetails.$inferSelect;
 
 // Studios (sale/studi)
-export const studios = pgTable("studios", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const studios = mysqlTable("studios", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   floor: varchar("floor", { length: 50 }), // Piano
-  operatingHours: text("operating_hours"), // JSON: {"monday": {"start": "09:00", "end": "21:00"}, ...}
-  operatingDays: text("operating_days"), // JSON: ["monday", "tuesday", ...]
-  capacity: integer("capacity"), // Capienza
+  operatingHours: json("operating_hours"), // JSON: {"monday": {"start": "09:00", "end": "21:00"}, ...}
+  operatingDays: json("operating_days"), // JSON: ["monday", "tuesday", ...]
+  capacity: int("capacity"), // Capienza
   equipment: text("equipment"), // Attrezzature (lista separata da virgole o JSON)
   notes: text("notes"),
   active: boolean("active").default(true),
+  googleCalendarId: varchar("google_calendar_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -500,19 +564,19 @@ export type InsertStudio = z.infer<typeof insertStudioSchema>;
 export type Studio = typeof studios.$inferSelect;
 
 // Courses
-export const courses = pgTable("courses", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const courses = mysqlTable("courses", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }), // SKU univoco (es: 2526-NEMBRI-LUN-15) - unique constraint da aggiungere dopo
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }), // Studio/sala
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante primario
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante secondario 1
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante secondario 2
+  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }), // Studio/sala
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante primario
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante secondario 1
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante secondario 2
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   // Campi orario strutturati (nuovo sistema con dropdown)
   dayOfWeek: varchar("day_of_week", { length: 20 }), // lunedì, martedì, mercoledì, giovedì, venerdì, sabato, domenica
   startTime: varchar("start_time", { length: 10 }), // formato HH:MM (es: "15:00")
@@ -521,8 +585,11 @@ export const courses = pgTable("courses", {
   schedule: text("schedule"), // JSON: {day: "LUN", startTime: "15:00", endTime: "16:30", repeat: "weekly"} - legacy
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
+  googleEventId: varchar("google_event_id", { length: 255 }),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -535,6 +602,10 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
   studio: one(studios, {
     fields: [courses.studioId],
     references: [studios.id],
+  }),
+  quote: one(quotes, {
+    fields: [courses.quoteId],
+    references: [quotes.id],
   }),
   instructor: one(instructors, {
     fields: [courses.instructorId],
@@ -549,15 +620,18 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
     references: [instructors.id],
   }),
   enrollments: many(enrollments),
+  priceItems: many(priceListItems),
 }));
 
 export const studiosRelations = relations(studios, ({ many }) => ({
   courses: many(courses),
 }));
 
-export const insertCourseSchema = createInsertSchema(courses).omit({
+export const insertCourseSchema = createInsertSchema(courses, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
-  currentEnrollment: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -567,19 +641,19 @@ export type Course = typeof courses.$inferSelect;
 // ============================================================================
 // WORKSHOPS (identical structure to courses)
 // ============================================================================
-export const workshops = pgTable("workshops", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const workshops = mysqlTable("workshops", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => workshopCategories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => workshopCategories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -587,13 +661,15 @@ export const workshops = pgTable("workshops", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
+  googleEventId: varchar("google_event_id", { length: 255 }),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const workshopsRelations = relations(workshops, ({ one }) => ({
+export const workshopsRelations = relations(workshops, ({ one, many }) => ({
   category: one(workshopCategories, {
     fields: [workshops.categoryId],
     references: [workshopCategories.id],
@@ -614,11 +690,14 @@ export const workshopsRelations = relations(workshops, ({ one }) => ({
     fields: [workshops.secondaryInstructor2Id],
     references: [instructors.id],
   }),
+  priceItems: many(priceListItems),
 }));
 
-export const insertWorkshopSchema = createInsertSchema(workshops).omit({
+export const insertWorkshopSchema = createInsertSchema(workshops, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
-  currentEnrollment: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -628,19 +707,19 @@ export type Workshop = typeof workshops.$inferSelect;
 // ============================================================================
 // PAID TRIALS (identical structure to workshops, uses categories)
 // ============================================================================
-export const paidTrials = pgTable("paid_trials", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const paidTrials = mysqlTable("paid_trials", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -648,7 +727,7 @@ export const paidTrials = pgTable("paid_trials", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -689,19 +768,19 @@ export type PaidTrial = typeof paidTrials.$inferSelect;
 // ============================================================================
 // FREE TRIALS (identical structure to workshops, uses categories)
 // ============================================================================
-export const freeTrials = pgTable("free_trials", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const freeTrials = mysqlTable("free_trials", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -709,7 +788,7 @@ export const freeTrials = pgTable("free_trials", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -750,19 +829,19 @@ export type FreeTrial = typeof freeTrials.$inferSelect;
 // ============================================================================
 // SINGLE LESSONS (identical structure to workshops, uses categories)
 // ============================================================================
-export const singleLessons = pgTable("single_lessons", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const singleLessons = mysqlTable("single_lessons", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -770,7 +849,7 @@ export const singleLessons = pgTable("single_lessons", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -811,19 +890,19 @@ export type SingleLesson = typeof singleLessons.$inferSelect;
 // ============================================================================
 // SUNDAY ACTIVITIES (identical structure to workshops, uses sundayCategories)
 // ============================================================================
-export const sundayActivities = pgTable("sunday_activities", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const sundayActivities = mysqlTable("sunday_activities", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => sundayCategories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => sundayCategories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -831,7 +910,7 @@ export const sundayActivities = pgTable("sunday_activities", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -872,19 +951,19 @@ export type SundayActivity = typeof sundayActivities.$inferSelect;
 // ============================================================================
 // TRAININGS (identical structure to workshops, uses trainingCategories)
 // ============================================================================
-export const trainings = pgTable("trainings", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const trainings = mysqlTable("trainings", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => trainingCategories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => trainingCategories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -892,7 +971,7 @@ export const trainings = pgTable("trainings", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -933,19 +1012,19 @@ export type Training = typeof trainings.$inferSelect;
 // ============================================================================
 // INDIVIDUAL LESSONS (identical structure to workshops, uses individualLessonCategories)
 // ============================================================================
-export const individualLessons = pgTable("individual_lessons", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const individualLessons = mysqlTable("individual_lessons", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => individualLessonCategories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => individualLessonCategories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -953,7 +1032,7 @@ export const individualLessons = pgTable("individual_lessons", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -994,19 +1073,19 @@ export type IndividualLesson = typeof individualLessons.$inferSelect;
 // ============================================================================
 // CAMPUS ACTIVITIES (identical structure to workshops, uses campusCategories)
 // ============================================================================
-export const campusActivities = pgTable("campus_activities", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const campusActivities = mysqlTable("campus_activities", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => campusCategories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => campusCategories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -1014,7 +1093,7 @@ export const campusActivities = pgTable("campus_activities", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1055,19 +1134,19 @@ export type CampusActivity = typeof campusActivities.$inferSelect;
 // ============================================================================
 // RECITALS (identical structure to workshops, uses recitalCategories)
 // ============================================================================
-export const recitals = pgTable("recitals", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const recitals = mysqlTable("recitals", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => recitalCategories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => recitalCategories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -1075,7 +1154,7 @@ export const recitals = pgTable("recitals", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1116,19 +1195,19 @@ export type Recital = typeof recitals.$inferSelect;
 // ============================================================================
 // VACATION STUDIES (identical structure to workshops, uses vacationCategories)
 // ============================================================================
-export const vacationStudies = pgTable("vacation_studies", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const vacationStudies = mysqlTable("vacation_studies", {
+  id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: integer("category_id").references(() => vacationCategories.id, { onDelete: "set null" }),
-  studioId: integer("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: integer("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: integer("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor2Id: integer("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
+  categoryId: int("category_id").references(() => vacationCategories.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  secondaryInstructor2Id: int("secondary_instructor2_id").references(() => instructors.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: integer("max_capacity"),
-  currentEnrollment: integer("current_enrollment").default(0),
+  maxCapacity: int("max_capacity"),
+  currentEnrollment: int("current_enrollment").default(0),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   startTime: varchar("start_time", { length: 10 }),
   endTime: varchar("end_time", { length: 10 }),
@@ -1136,7 +1215,7 @@ export const vacationStudies = pgTable("vacation_studies", {
   schedule: text("schedule"),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  statusTags: text("status_tags").array(),
+  statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1175,8 +1254,8 @@ export type InsertVacationStudy = z.infer<typeof insertVacationStudySchema>;
 export type VacationStudy = typeof vacationStudies.$inferSelect;
 
 // Members (iscritti)
-export const members = pgTable("members", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const members = mysqlTable("members", {
+  id: int("id").primaryKey().autoincrement(),
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }).notNull(),
   fiscalCode: varchar("fiscal_code", { length: 16 }), // Codice fiscale
@@ -1186,27 +1265,27 @@ export const members = pgTable("members", {
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }), // Telefono fisso
   mobile: varchar("mobile", { length: 50 }), // Cellulare
-  categoryId: integer("category_id").references(() => clientCategories.id, { onDelete: "set null" }), // Categoria partecipante (Tipologia Partecipante)
-  subscriptionTypeId: integer("subscription_type_id").references(() => subscriptionTypes.id, { onDelete: "set null" }), // Tipo Iscrizione
-  
+  categoryId: int("category_id").references(() => clientCategories.id, { onDelete: "set null" }), // Categoria partecipante (Tipologia Partecipante)
+  subscriptionTypeId: int("subscription_type_id").references(() => subscriptionTypes.id, { onDelete: "set null" }), // Tipo Iscrizione
+
   // Dati tessera
   cardNumber: varchar("card_number", { length: 100 }), // Numero tessera
   cardIssueDate: date("card_issue_date"), // Data rilascio tessera
   cardExpiryDate: date("card_expiry_date"), // Scadenza tessera
-  
+
   // Tessera ente (CSEN, ACSI, AICS, etc.)
   entityCardType: varchar("entity_card_type", { length: 50 }), // Tipo ente (CSEN, ACSI, AICS, etc.)
   entityCardNumber: varchar("entity_card_number", { length: 100 }), // Numero tessera ente
   entityCardIssueDate: date("entity_card_issue_date"), // Data rilascio tessera ente
   entityCardExpiryDate: date("entity_card_expiry_date"), // Scadenza tessera ente
-  
+
   // Certificato medico
   hasMedicalCertificate: boolean("has_medical_certificate").default(false), // Flag certificato medico
   medicalCertificateExpiry: date("medical_certificate_expiry"), // Scadenza certificato medico
-  
+
   // Flag minorenne
   isMinor: boolean("is_minor").default(false), // Se il partecipante è minorenne
-  
+
   // Dati genitori (per minorenni)
   motherFirstName: varchar("mother_first_name", { length: 255 }), // Nome madre
   motherLastName: varchar("mother_last_name", { length: 255 }), // Cognome madre
@@ -1214,21 +1293,53 @@ export const members = pgTable("members", {
   motherEmail: varchar("mother_email", { length: 255 }), // Email madre
   motherPhone: varchar("mother_phone", { length: 50 }), // Telefono madre
   motherMobile: varchar("mother_mobile", { length: 50 }), // Cellulare madre
-  
+  motherBirthDate: date("mother_birth_date"),
+  motherBirthPlace: varchar("mother_birth_place", { length: 255 }),
+  motherBirthProvince: varchar("mother_birth_province", { length: 2 }),
+  motherStreetAddress: varchar("mother_street_address", { length: 255 }),
+  motherCity: varchar("mother_city", { length: 100 }),
+  motherProvince: varchar("mother_province", { length: 2 }),
+  motherPostalCode: varchar("mother_postal_code", { length: 10 }),
+
   fatherFirstName: varchar("father_first_name", { length: 255 }), // Nome padre
   fatherLastName: varchar("father_last_name", { length: 255 }), // Cognome padre
   fatherFiscalCode: varchar("father_fiscal_code", { length: 16 }), // Codice fiscale padre
   fatherEmail: varchar("father_email", { length: 255 }), // Email padre
   fatherPhone: varchar("father_phone", { length: 50 }), // Telefono padre
   fatherMobile: varchar("father_mobile", { length: 50 }), // Cellulare padre
-  
+  fatherBirthDate: date("father_birth_date"),
+  fatherBirthPlace: varchar("father_birth_place", { length: 255 }),
+  fatherBirthProvince: varchar("father_birth_province", { length: 2 }),
+  fatherStreetAddress: varchar("father_street_address", { length: 255 }),
+  fatherCity: varchar("father_city", { length: 100 }),
+  fatherProvince: varchar("father_province", { length: 2 }),
+  fatherPostalCode: varchar("father_postal_code", { length: 10 }),
+
+  photoUrl: text("photo_url"),
+
+  // Registration info
+  season: varchar("season", { length: 50 }),
+  internalId: varchar("internal_id", { length: 50 }),
+  insertionDate: date("insertion_date"),
+  participantType: varchar("participant_type", { length: 50 }),
+  fromWhere: varchar("from_where", { length: 255 }),
+  teamSegreteria: varchar("team_segreteria", { length: 255 }),
+
+  // Allegati flags/details
+  detractionModelRequested: boolean("detraction_requested").default(false),
+  detractionModelYear: varchar("detraction_year", { length: 4 }),
+  schoolCreditsRequested: boolean("credits_requested").default(false),
+  schoolCreditsYear: varchar("credits_year", { length: 20 }),
+  tesserinoTecnicoNumber: varchar("tesserino_tecnico_number", { length: 100 }),
+  tesserinoTecnicoIssueDate: date("tesserino_tecnico_date"),
+
   // Indirizzo suddiviso
   streetAddress: varchar("street_address", { length: 255 }), // Via/Piazza e numero civico
   city: varchar("city", { length: 100 }), // Città
   province: varchar("province", { length: 2 }), // Provincia (sigla 2 lettere)
   postalCode: varchar("postal_code", { length: 10 }), // CAP
   country: varchar("country", { length: 100 }).default("Italia"), // Stato/Nazione
-  
+
   address: text("address"), // Mantenuto per retrocompatibilità
   notes: text("notes"),
   active: boolean("active").default(true),
@@ -1246,9 +1357,21 @@ export const membersRelations = relations(members, ({ one, many }) => ({
   medicalCertificates: many(medicalCertificates),
   payments: many(payments),
   accessLogs: many(accessLogs),
+  priceItems: many(priceListItems),
 }));
 
-export const insertMemberSchema = createInsertSchema(members).omit({
+export const insertMemberSchema = createInsertSchema(members, {
+  dateOfBirth: z.coerce.date().nullish(),
+  cardIssueDate: z.coerce.date().nullish(),
+  cardExpiryDate: z.coerce.date().nullish(),
+  entityCardIssueDate: z.coerce.date().nullish(),
+  entityCardExpiryDate: z.coerce.date().nullish(),
+  medicalCertificateExpiry: z.coerce.date().nullish(),
+  motherBirthDate: z.coerce.date().nullish(),
+  fatherBirthDate: z.coerce.date().nullish(),
+  insertionDate: z.coerce.date().nullish(),
+  tesserinoTecnicoIssueDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -1261,10 +1384,10 @@ export type InsertMember = z.infer<typeof insertMemberSchema>;
 export type Member = typeof members.$inferSelect;
 
 // Member Relationships (relazioni tra partecipanti - genitori/figli/tutori)
-export const memberRelationships = pgTable("member_relationships", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }), // Il minorenne
-  relatedMemberId: integer("related_member_id").notNull().references(() => members.id, { onDelete: "cascade" }), // Il genitore/tutore
+export const memberRelationships = mysqlTable("member_relationships", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }), // Il minorenne
+  relatedMemberId: int("related_member_id").notNull().references(() => members.id, { onDelete: "cascade" }), // Il genitore/tutore
   relationshipType: varchar("relationship_type", { length: 50 }).notNull(), // 'mother', 'father', 'guardian'
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -1290,13 +1413,14 @@ export type InsertMemberRelationship = z.infer<typeof insertMemberRelationshipSc
 export type MemberRelationship = typeof memberRelationships.$inferSelect;
 
 // Enrollments (iscrizioni ai corsi)
-export const enrollments = pgTable("enrollments", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  courseId: integer("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
+export const enrollments = mysqlTable("enrollments", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  courseId: int("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
   status: varchar("status", { length: 50 }).notNull().default("active"), // 'active', 'waitlist', 'completed', 'cancelled'
   enrollmentDate: timestamp("enrollment_date").defaultNow(),
   notes: text("notes"),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1321,13 +1445,14 @@ export type InsertEnrollment = z.infer<typeof insertEnrollmentSchema>;
 export type Enrollment = typeof enrollments.$inferSelect;
 
 // Workshop Enrollments (iscrizioni ai workshop)
-export const workshopEnrollments = pgTable("workshop_enrollments", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  workshopId: integer("workshop_id").notNull().references(() => workshops.id, { onDelete: "cascade" }),
+export const workshopEnrollments = mysqlTable("ws_enrollments", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  workshopId: int("workshop_id").notNull().references(() => workshops.id, { onDelete: "cascade" }),
   status: varchar("status", { length: 50 }).notNull().default("active"),
   enrollmentDate: timestamp("enrollment_date").defaultNow(),
   notes: text("notes"),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1351,13 +1476,14 @@ export type InsertWorkshopEnrollment = z.infer<typeof insertWorkshopEnrollmentSc
 export type WorkshopEnrollment = typeof workshopEnrollments.$inferSelect;
 
 // Workshop Attendances (presenze ai workshop)
-export const workshopAttendances = pgTable("workshop_attendances", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  workshopId: integer("workshop_id").notNull().references(() => workshops.id, { onDelete: "cascade" }),
-  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+export const workshopAttendances = mysqlTable("ws_attendances", {
+  id: int("id").primaryKey().autoincrement(),
+  workshopId: int("workshop_id").notNull().references(() => workshops.id, { onDelete: "cascade" }),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   attendanceDate: timestamp("attendance_date").notNull(),
   type: varchar("type", { length: 20 }).default("manual"),
   notes: text("notes"),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1380,9 +1506,9 @@ export type InsertWorkshopAttendance = z.infer<typeof insertWorkshopAttendanceSc
 export type WorkshopAttendance = typeof workshopAttendances.$inferSelect;
 
 // Memberships (tessere associative)
-export const memberships = pgTable("memberships", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+export const memberships = mysqlTable("memberships", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   membershipNumber: varchar("membership_number", { length: 100 }).notNull().unique(),
   previousMembershipNumber: varchar("previous_membership_number", { length: 100 }),
   barcode: varchar("barcode", { length: 100 }).notNull().unique(),
@@ -1414,9 +1540,9 @@ export type InsertMembership = z.infer<typeof insertMembershipSchema>;
 export type Membership = typeof memberships.$inferSelect;
 
 // Medical Certificates
-export const medicalCertificates = pgTable("medical_certificates", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+export const medicalCertificates = mysqlTable("medical_certificates", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   issueDate: date("issue_date").notNull(),
   expiryDate: date("expiry_date").notNull(),
   doctorName: varchar("doctor_name", { length: 255 }),
@@ -1442,9 +1568,9 @@ export type InsertMedicalCertificate = z.infer<typeof insertMedicalCertificateSc
 export type MedicalCertificate = typeof medicalCertificates.$inferSelect;
 
 // Access Logs (controllo accessi con barcode)
-export const accessLogs = pgTable("access_logs", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  memberId: integer("member_id").references(() => members.id, { onDelete: "set null" }),
+export const accessLogs = mysqlTable("access_logs", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").references(() => members.id, { onDelete: "set null" }),
   barcode: varchar("barcode", { length: 100 }).notNull(),
   accessTime: timestamp("access_time").defaultNow().notNull(),
   accessType: varchar("access_type", { length: 50 }).notNull().default("entry"), // 'entry', 'exit'
@@ -1467,8 +1593,8 @@ export type InsertAccessLog = z.infer<typeof insertAccessLogSchema>;
 export type AccessLog = typeof accessLogs.$inferSelect;
 
 // Payment Methods (Tipi di Pagamento)
-export const paymentMethods = pgTable("payment_methods", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const paymentMethods = mysqlTable("payment_methods", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 100 }).notNull().unique(), // Contanti, Carta di Credito, Bonifico, POS, etc.
   description: text("description"),
   active: boolean("active").default(true),
@@ -1485,19 +1611,42 @@ export type InsertPaymentMethod = z.infer<typeof insertPaymentMethodSchema>;
 export type PaymentMethod = typeof paymentMethods.$inferSelect;
 
 // Payments
-export const payments = pgTable("payments", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  memberId: integer("member_id").references(() => members.id, { onDelete: "set null" }),
-  enrollmentId: integer("enrollment_id").references(() => enrollments.id, { onDelete: "cascade" }),
+export const payments = mysqlTable("payments", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").references(() => members.id, { onDelete: "set null" }),
+  enrollmentId: int("enrollment_id").references(() => enrollments.id, { onDelete: "cascade" }),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   type: varchar("type", { length: 100 }).notNull(), // 'course', 'membership', 'other'
   description: text("description"),
   status: varchar("status", { length: 50 }).notNull().default("pending"), // 'pending', 'paid', 'overdue', 'cancelled'
   dueDate: date("due_date"),
   paidDate: date("paid_date"),
-  paymentMethodId: integer("payment_method_id").references(() => paymentMethods.id, { onDelete: "set null" }), // Riferimento a tabella payment_methods
+  paymentMethodId: int("payment_method_id").references(() => paymentMethods.id, { onDelete: "set null" }), // Riferimento a tabella payment_methods
   paymentMethod: varchar("payment_method", { length: 100 }), // Legacy - mantenuto per compatibilità
   notes: text("notes"),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  createdById: varchar("created_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  updatedById: varchar("updated_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  workshopEnrollmentId: int("ws_enroll_id").references(() => workshopEnrollments.id, { onDelete: "cascade" }),
+  bookingId: int("booking_id").references(() => studioBookings.id, { onDelete: "cascade" }),
+  membershipId: int("membership_id").references(() => memberships.id, { onDelete: "cascade" }),
+
+  // Maschera Generale Fields
+  quantity: int("quantity").default(1),
+  quotaDescription: varchar("quota_description", { length: 255 }),
+  period: varchar("period", { length: 255 }),
+  totalQuota: decimal("total_quota", { precision: 10, scale: 2 }),
+  discountCode: varchar("discount_code", { length: 100 }),
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }),
+  discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }),
+  promoCode: varchar("promo_code", { length: 100 }),
+  promoValue: decimal("promo_value", { precision: 10, scale: 2 }),
+  promoPercentage: decimal("promo_percentage", { precision: 5, scale: 2 }),
+  deposit: decimal("deposit", { precision: 10, scale: 2 }),
+  annualBalance: decimal("annual_balance", { precision: 10, scale: 2 }),
+  receiptsCount: int("receipts_count"),
+  transferConfirmationDate: date("transfer_confirmation_date"),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1517,7 +1666,11 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   }),
 }));
 
-export const insertPaymentSchema = createInsertSchema(payments).omit({
+export const insertPaymentSchema = createInsertSchema(payments, {
+  dueDate: z.coerce.date().nullish(),
+  paidDate: z.coerce.date().nullish(),
+  transferConfirmationDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -1526,14 +1679,15 @@ export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
 
 // Attendances (Presenze)
-export const attendances = pgTable("attendances", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  courseId: integer("course_id").references(() => courses.id, { onDelete: "set null" }),
-  enrollmentId: integer("enrollment_id").references(() => enrollments.id, { onDelete: "set null" }),
+export const attendances = mysqlTable("attendances", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  courseId: int("course_id").references(() => courses.id, { onDelete: "set null" }),
+  enrollmentId: int("enrollment_id").references(() => enrollments.id, { onDelete: "set null" }),
   attendanceDate: timestamp("attendance_date").notNull().defaultNow(),
   type: varchar("type", { length: 50 }).notNull().default("manual"), // 'manual', 'barcode', 'auto'
   notes: text("notes"),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1572,13 +1726,13 @@ export type Attendance = typeof attendances.$inferSelect;
 // CUSTOM REPORTS (Report personalizzati)
 // ============================================================================
 
-export const customReports = pgTable("custom_reports", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const customReports = mysqlTable("custom_reports", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   entityType: varchar("entity_type", { length: 100 }).notNull(), // 'members', 'courses', 'payments', 'enrollments', 'workshops', 'attendances', 'instructors'
-  selectedFields: jsonb("selected_fields").notNull().$type<string[]>(), // Array of field names
-  filters: jsonb("filters").$type<{ field: string; operator: string; value: string }[]>(), // Filter conditions
+  selectedFields: json("selected_fields").notNull().$type<string[]>(), // Array of field names
+  filters: json("filters").$type<{ field: string; operator: string; value: string }[]>(), // Filter conditions
   sortField: varchar("sort_field", { length: 100 }),
   sortDirection: varchar("sort_direction", { length: 10 }).default("asc"), // 'asc' or 'desc'
   createdBy: varchar("created_by", { length: 255 }),
@@ -1598,12 +1752,12 @@ export type CustomReport = typeof customReports.$inferSelect;
 // IMPORT CONFIGURATIONS (Configurazioni di importazione salvate)
 // ============================================================================
 
-export const importConfigs = pgTable("import_configs", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const importConfigs = mysqlTable("import_configs", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   entityType: varchar("entity_type", { length: 50 }).notNull(), // 'members' | 'courses'
   sourceType: varchar("source_type", { length: 50 }).notNull(), // 'google_sheets' | 'file'
-  fieldMapping: jsonb("field_mapping").notNull().$type<Record<string, number>>(), // field -> column index
+  fieldMapping: json("field_mapping").notNull().$type<Record<string, number>>(), // field -> column index
   importKey: varchar("import_key", { length: 100 }), // field used for duplicate detection
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -1619,7 +1773,7 @@ export type ImportConfig = typeof importConfigs.$inferSelect;
 // KNOWLEDGE (Descrizioni informative per le sezioni)
 // ============================================================================
 
-export const knowledge = pgTable("knowledge", {
+export const knowledge = mysqlTable("knowledge", {
   id: varchar("id", { length: 100 }).primaryKey(), // es: "corsi", "workshop", "allenamenti"
   sezione: varchar("sezione", { length: 100 }).notNull(), // es: "Attività", "Anagrafica"
   titolo: varchar("titolo", { length: 255 }).notNull(),
@@ -1639,8 +1793,8 @@ export type Knowledge = typeof knowledge.$inferSelect;
 // TEAM COMMENTS (Commenti interni del team)
 // ============================================================================
 
-export const teamComments = pgTable("team_comments", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const teamComments = mysqlTable("team_comments", {
+  id: int("id").primaryKey().autoincrement(),
   authorId: varchar("author_id", { length: 255 }).notNull(),
   authorName: varchar("author_name", { length: 255 }).notNull(),
   content: text("content").notNull(),
@@ -1662,8 +1816,8 @@ export type TeamComment = typeof teamComments.$inferSelect;
 // TEAM NOTES (Note interne del team)
 // ============================================================================
 
-export const teamNotes = pgTable("team_notes", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const teamNotes = mysqlTable("team_notes", {
+  id: int("id").primaryKey().autoincrement(),
   authorId: varchar("author_id", { length: 255 }).notNull(),
   authorName: varchar("author_name", { length: 255 }).notNull(),
   title: varchar("title", { length: 255 }).notNull(),
@@ -1686,10 +1840,10 @@ export type TeamNote = typeof teamNotes.$inferSelect;
 // TEAM NOTIFICATIONS (Notifiche per il team)
 // ============================================================================
 
-export const teamNotifications = pgTable("team_notifications", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const teamNotifications = mysqlTable("team_notifications", {
+  id: int("id").primaryKey().autoincrement(),
   type: varchar("type", { length: 20 }).notNull(),
-  referenceId: integer("reference_id").notNull(),
+  referenceId: int("reference_id").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message"),
   isRead: boolean("is_read").default(false),
@@ -1703,3 +1857,267 @@ export const insertTeamNotificationSchema = createInsertSchema(teamNotifications
 });
 export type InsertTeamNotification = z.infer<typeof insertTeamNotificationSchema>;
 export type TeamNotification = typeof teamNotifications.$inferSelect;
+
+// ============================================================================
+// BOOKING TABLES & ACTIVITY LOGS (From V59)
+// ============================================================================
+
+// Booking Services (Servizi prenotabili, es. Affitto, PT, ecc.)
+export const bookingServices = mysqlTable("booking_services", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  color: varchar("color", { length: 20 }),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertBookingServiceSchema = createInsertSchema(bookingServices).omit({ id: true, createdAt: true });
+export type InsertBookingService = z.infer<typeof insertBookingServiceSchema>;
+export type BookingService = typeof bookingServices.$inferSelect;
+
+export const bookingServicesRelations = relations(bookingServices, ({ many }) => ({
+  priceItems: many(priceListItems),
+}));
+
+// Studio Bookings (Prenotazioni sale)
+export const studioBookings = mysqlTable("studio_bookings", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").references(() => members.id, { onDelete: "set null" }),
+  studioId: int("studio_id").notNull().references(() => studios.id, { onDelete: "cascade" }),
+  serviceId: int("service_id").references(() => bookingServices.id, { onDelete: "set null" }),
+  title: varchar("title", { length: 255 }), // Fallback title if no member or for general notes
+  description: text("description"),
+  bookingDate: date("booking_date").notNull(),
+  startTime: varchar("start_time", { length: 20 }).notNull(),
+  endTime: varchar("end_time", { length: 20 }).notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("confirmed"), // confirmed, pending, cancelled
+  paid: boolean("paid").default(false),
+  amount: decimal("amount", { precision: 10, scale: 2 }),
+  googleEventId: varchar("google_event_id", { length: 255 }),
+  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const studioBookingsRelations = relations(studioBookings, ({ one }) => ({
+  member: one(members, {
+    fields: [studioBookings.memberId],
+    references: [members.id],
+  }),
+  studio: one(studios, {
+    fields: [studioBookings.studioId],
+    references: [studios.id],
+  }),
+  service: one(bookingServices, {
+    fields: [studioBookings.serviceId],
+    references: [bookingServices.id],
+  }),
+  instructor: one(instructors, {
+    fields: [studioBookings.instructorId],
+    references: [instructors.id],
+  }),
+  season: one(seasons, {
+    fields: [studioBookings.seasonId],
+    references: [seasons.id],
+  }),
+}));
+
+export const insertStudioBookingSchema = createInsertSchema(studioBookings, {
+  bookingDate: z.coerce.date().nullish(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  bookingDate: z.coerce.date(),
+  amount: z.string().or(z.number()).transform((val) => val.toString()).nullable().optional(),
+});
+export type InsertStudioBooking = z.infer<typeof insertStudioBookingSchema>;
+export type StudioBooking = typeof studioBookings.$inferSelect;
+
+// System Configs
+export const systemConfigs = mysqlTable("system_configs", {
+  id: int("id").primaryKey().autoincrement(),
+  keyName: varchar("key_name", { length: 255 }).unique().notNull(),
+  value: text("value"),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertSystemConfigSchema = createInsertSchema(systemConfigs).omit({ id: true, updatedAt: true });
+export type SystemConfig = typeof systemConfigs.$inferSelect;
+export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;
+
+// User Activity Logs
+export const userActivityLogs = mysqlTable("user_activity_logs", {
+  id: int("id").primaryKey().autoincrement(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  action: varchar("action", { length: 50 }).notNull(), // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+  entityType: varchar("entity_type", { length: 50 }), // members, courses, etc.
+  entityId: varchar("entity_id", { length: 255 }),
+  details: json("details"), // Store old/new values or extra info
+  ipAddress: varchar("ip_address", { length: 45 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userActivityLogsRelations = relations(userActivityLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [userActivityLogs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertUserActivityLogSchema = createInsertSchema(userActivityLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
+export type UserActivityLog = typeof userActivityLogs.$inferSelect;
+
+// Seasons
+export const seasons = mysqlTable("seasons", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const seasonsRelations = relations(seasons, ({ many }) => ({
+  studioBookings: many(studioBookings),
+}));
+
+export const insertSeasonSchema = createInsertSchema(seasons, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+});
+export type InsertSeason = z.infer<typeof insertSeasonSchema>;
+export type Season = typeof seasons.$inferSelect;
+// ============================================================================
+// PRICE LISTS TABLES
+// ============================================================================
+
+export const priceLists = mysqlTable("price_lists", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull(),
+  validFrom: date("valid_from").notNull(),
+  validTo: date("valid_to").notNull(),
+  active: boolean("active").default(true),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+// Quotes (Quote indipendenti)
+export const quotes = mysqlTable("quotes", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  category: varchar("category", { length: 100 }), // e.g., 'Corsi', 'Workshop', 'Iscrizione'
+  notes: text("notes"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertQuoteSchema = createInsertSchema(quotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+export type Quote = typeof quotes.$inferSelect;
+
+export const priceListItems = mysqlTable("price_list_items", {
+  id: int("id").primaryKey().autoincrement(),
+  priceListId: int("price_list_id").notNull().references(() => priceLists.id, { onDelete: "cascade" }),
+  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }), // Link alla quota standard
+  entityType: varchar("entity_type", { length: 50 }).notNull(), // 'course', 'workshop', 'booking_service', 'paid_trial'
+  entityId: int("entity_id").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const priceListsRelations = relations(priceLists, ({ many }) => ({
+  items: many(priceListItems),
+}));
+
+export const priceListItemsRelations = relations(priceListItems, ({ one }) => ({
+  priceList: one(priceLists, {
+    fields: [priceListItems.priceListId],
+    references: [priceLists.id],
+  }),
+  quote: one(quotes, {
+    fields: [priceListItems.quoteId],
+    references: [quotes.id],
+  }),
+  course: one(courses, {
+    fields: [priceListItems.entityId],
+    references: [courses.id],
+  }),
+  workshop: one(workshops, {
+    fields: [priceListItems.entityId],
+    references: [workshops.id],
+  }),
+  bookingService: one(bookingServices, {
+    fields: [priceListItems.entityId],
+    references: [bookingServices.id],
+  }),
+  paidTrial: one(paidTrials, {
+    fields: [priceListItems.entityId],
+    references: [paidTrials.id],
+  }),
+}));
+
+export const insertPriceListSchema = createInsertSchema(priceLists, {
+  validFrom: z.coerce.date(),
+  validTo: z.coerce.date(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPriceListItemSchema = createInsertSchema(priceListItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const notifications = mysqlTable("notifications", {
+  id: int("id").primaryKey().autoincrement(),
+  userId: varchar("user_id", { length: 50 }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  type: varchar("type", { length: 50 }).notNull().default("system"), // 'message', 'note', 'system'
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertNotificationSchema = createInsertSchema(notifications);
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
+
+export type InsertPriceList = z.infer<typeof insertPriceListSchema>;
+export type PriceList = typeof priceLists.$inferSelect;
+export type InsertPriceListItem = z.infer<typeof insertPriceListItemSchema>;
+export type PriceListItem = typeof priceListItems.$inferSelect;

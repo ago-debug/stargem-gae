@@ -6,19 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  ScanBarcode, 
-  CheckCircle, 
-  XCircle, 
-  Search, 
-  User, 
+import {
+  ScanBarcode,
+  CheckCircle,
+  XCircle,
+  Search,
+  User,
   AlertTriangle,
   CreditCard,
   Calendar,
@@ -31,13 +29,14 @@ import {
   Sparkles,
   ShieldAlert,
   ShieldCheck,
-  ArrowLeft
+  Edit
 } from "lucide-react";
-import type { 
-  AccessLog, 
-  InsertAccessLog, 
-  Member, 
-  Enrollment, 
+import { useLocation } from "wouter";
+import type {
+  AccessLog,
+  InsertAccessLog,
+  Member,
+  Enrollment,
   WorkshopEnrollment,
   Payment,
   Membership,
@@ -64,11 +63,11 @@ interface Anomaly {
 
 export default function AccessControl() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [barcodeInput, setBarcodeInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<MemberSearchResult | null>(null);
   const [activeTab, setActiveTab] = useState("search");
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<AccessLog>("datetime");
 
   const { data: recentAccesses, isLoading: accessesLoading } = useQuery<AccessLog[]>({
     queryKey: ["/api/access-logs"],
@@ -121,16 +120,16 @@ export default function AccessControl() {
     const memberPayments = payments?.filter(p => p.memberId === member.id) || [];
     const memberMemberships = membershipsData?.filter(m => m.memberId === member.id) || [];
     const memberMedicalCerts = medicalCerts?.filter(c => c.memberId === member.id) || [];
-    
+
     const anomalies: Anomaly[] = [];
     const today = new Date();
-    
-    const activeMembership = memberMemberships.find(m => 
+
+    const activeMembership = memberMemberships.find(m =>
       m.expiryDate && new Date(m.expiryDate) >= today
     );
-    
+
     if (!activeMembership) {
-      const expiredMembership = memberMemberships.find(m => 
+      const expiredMembership = memberMemberships.find(m =>
         m.expiryDate && new Date(m.expiryDate) < today
       );
       if (expiredMembership) {
@@ -156,13 +155,13 @@ export default function AccessControl() {
         });
       }
     }
-    
-    const validMedicalCert = memberMedicalCerts.find(c => 
+
+    const validMedicalCert = memberMedicalCerts.find(c =>
       c.expiryDate && new Date(c.expiryDate) >= today
     );
-    
+
     if (!validMedicalCert) {
-      const expiredCert = memberMedicalCerts.find(c => 
+      const expiredCert = memberMedicalCerts.find(c =>
         c.expiryDate && new Date(c.expiryDate) < today
       );
       if (expiredCert) {
@@ -188,8 +187,8 @@ export default function AccessControl() {
         });
       }
     }
-    
-    const unpaidPayments = memberPayments.filter(p => p.status === 'pending' || p.status === 'overdue');
+
+    const unpaidPayments = memberPayments.filter(p => p.status !== 'paid' && p.status !== 'completed');
     if (unpaidPayments.length > 0) {
       const totalUnpaid = unpaidPayments.reduce((sum, p) => sum + Number(p.amount), 0);
       anomalies.push({
@@ -198,7 +197,7 @@ export default function AccessControl() {
         message: `${unpaidPayments.length} pagamento/i in sospeso per €${totalUnpaid.toFixed(2)}`
       });
     }
-    
+
     return {
       member,
       enrollments: memberEnrollments,
@@ -222,11 +221,11 @@ export default function AccessControl() {
       const workshops_ = workshops || [];
       const courseName = data.courseId ? courses_.find(c => c.id === data.courseId)?.name : undefined;
       const workshopName = data.workshopId ? workshops_.find(w => w.id === data.workshopId)?.name : undefined;
-      
+
       let notes = '';
       if (courseName) notes = `Corso: ${courseName}`;
       if (workshopName) notes = `Workshop: ${workshopName}`;
-      
+
       const accessData: InsertAccessLog = {
         barcode: data.barcode || `MANUAL-${data.memberId}`,
         memberId: data.memberId,
@@ -237,7 +236,7 @@ export default function AccessControl() {
     },
     onSuccess: (response: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/access-logs"] });
-      toast({ 
+      toast({
         title: "Accesso Registrato",
         description: response.memberName ? `Registrato accesso per ${response.memberName}` : "Accesso registrato con successo",
       });
@@ -258,7 +257,7 @@ export default function AccessControl() {
 
   const handleRegisterAccess = (courseId?: number, workshopId?: number) => {
     if (!selectedMember) return;
-    scanMutation.mutate({ 
+    scanMutation.mutate({
       memberId: selectedMember.member.id,
       courseId,
       workshopId
@@ -277,17 +276,10 @@ export default function AccessControl() {
   const hasWarnings = selectedMember?.anomalies.some(a => a.type === 'warning');
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Controllo Accessi</h1>
-            <p className="text-muted-foreground text-sm">Registra accessi tramite barcode o ricerca anagrafica</p>
-          </div>
-        </div>
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <div>
+        <h1 className="text-3xl font-semibold text-foreground mb-2">Controllo Accessi</h1>
+        <p className="text-muted-foreground">Registra accessi tramite barcode o ricerca anagrafica</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -308,7 +300,7 @@ export default function AccessControl() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Search className="w-5 h-5" />
-                  Cerca Iscritto
+                  Cerca Cliente/Associato
                 </CardTitle>
                 <CardDescription>
                   Digita almeno 3 caratteri per cercare
@@ -338,16 +330,15 @@ export default function AccessControl() {
                       {filteredMembers.map((member) => {
                         const details = getMemberDetails(member);
                         const hasIssues = details.anomalies.some(a => a.type === 'error');
-                        
+
                         return (
                           <button
                             key={member.id}
                             onClick={() => handleSelectMember(member)}
-                            className={`w-full text-left p-3 rounded-md hover-elevate ${
-                              selectedMember?.member.id === member.id 
-                                ? 'bg-primary/10 border border-primary/20' 
-                                : ''
-                            }`}
+                            className={`w-full text-left p-3 rounded-md hover-elevate ${selectedMember?.member.id === member.id
+                              ? 'bg-primary/10 border border-primary/20'
+                              : ''
+                              }`}
                             data-testid={`member-result-${member.id}`}
                           >
                             <div className="flex items-start justify-between gap-2">
@@ -382,7 +373,7 @@ export default function AccessControl() {
                 {searchQuery.length >= 3 && !searchLoading && filteredMembers.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <User className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                    <p>Nessun iscritto trovato</p>
+                    <p>Nessun cliente/associato trovato</p>
                   </div>
                 )}
               </CardContent>
@@ -406,21 +397,30 @@ export default function AccessControl() {
                       </div>
                       <div className="flex items-center gap-2">
                         {hasErrors ? (
-                          <Badge variant="outline" className="flex items-center gap-1 status-badge-gold">
+                          <Badge variant="destructive" className="flex items-center gap-1">
                             <ShieldAlert className="w-3 h-3" />
                             Anomalie
                           </Badge>
                         ) : hasWarnings ? (
-                          <Badge variant="outline" className="flex items-center gap-1 status-badge-gold">
+                          <Badge variant="secondary" className="flex items-center gap-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                             <AlertTriangle className="w-3 h-3" />
                             Avvisi
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="flex items-center gap-1 status-badge-gold">
+                          <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                             <ShieldCheck className="w-3 h-3" />
                             Regolare
                           </Badge>
                         )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setLocation(`${window.location.pathname}?editMemberId=${selectedMember.member.id}`)}
+                          className="flex items-center gap-1 border-primary/20 hover:bg-primary/5 text-primary"
+                        >
+                          <Edit className="w-3 h-3" />
+                          Modifica
+                        </Button>
                       </div>
                     </div>
                   </CardHeader>
@@ -435,11 +435,10 @@ export default function AccessControl() {
                           {selectedMember.anomalies.map((anomaly, idx) => (
                             <div
                               key={idx}
-                              className={`p-3 rounded-md border ${
-                                anomaly.type === 'error' 
-                                  ? 'bg-destructive/10 border-destructive/20 text-destructive' 
-                                  : 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200'
-                              }`}
+                              className={`p-3 rounded-md border ${anomaly.type === 'error'
+                                ? 'bg-destructive/10 border-destructive/20 text-destructive'
+                                : 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200'
+                                }`}
                               data-testid={`anomaly-${idx}`}
                             >
                               <div className="flex items-center gap-2">
@@ -518,13 +517,13 @@ export default function AccessControl() {
                           ) : (
                             <p className="text-muted-foreground">Nessuna tessera</p>
                           )}
-                          
+
                           <div className="pt-2">
                             <p className="text-muted-foreground">
-                              Pagamenti: {selectedMember.payments.filter(p => p.status === 'completed').length} completati
+                              Pagamenti: {selectedMember.payments.filter(p => p.status === 'paid' || p.status === 'completed').length} completati
                               {selectedMember.payments.filter(p => p.status === 'pending').length > 0 && (
                                 <span className="text-destructive">
-                                  , {selectedMember.payments.filter(p => p.status === 'pending').length} in sospeso
+                                  , {selectedMember.payments.filter(p => p.status !== 'paid' && p.status !== 'completed').length} in sospeso
                                 </span>
                               )}
                             </p>
@@ -612,7 +611,7 @@ export default function AccessControl() {
                       <Button
                         onClick={() => handleRegisterAccess()}
                         disabled={scanMutation.isPending}
-                        className="min-w-[200px] gold-3d-button"
+                        className="min-w-[200px]"
                         data-testid="button-register-general-access"
                       >
                         {scanMutation.isPending ? (
@@ -631,7 +630,7 @@ export default function AccessControl() {
                 <CardContent className="flex items-center justify-center min-h-[500px]">
                   <div className="text-center text-muted-foreground">
                     <User className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium mb-2">Seleziona un iscritto</p>
+                    <p className="text-lg font-medium mb-2">Seleziona un cliente/associato</p>
                     <p className="text-sm">Cerca per nome, cognome o codice fiscale</p>
                   </div>
                 </CardContent>
@@ -667,8 +666,8 @@ export default function AccessControl() {
                     </p>
                   </div>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full"
                     disabled={!barcodeInput.trim() || scanMutation.isPending}
                     data-testid="button-scan"
@@ -724,7 +723,7 @@ export default function AccessControl() {
                   <h4 className="text-sm font-medium mb-3">Ultimi Accessi</h4>
                   <div className="space-y-2 max-h-[300px] overflow-y-auto">
                     {recentAccesses?.slice(0, 10).map((access, index) => (
-                      <div 
+                      <div
                         key={index}
                         className="flex items-center justify-between p-2 rounded-md hover-elevate"
                       >
@@ -769,60 +768,44 @@ export default function AccessControl() {
               <p className="text-sm">Gli accessi verranno visualizzati qui</p>
             </div>
           ) : (
-            (() => {
-              const getSortValue = (item: AccessLog, key: string) => {
-                switch (key) {
-                  case "datetime": return item.accessTime;
-                  case "name": return `${(item as any).memberFirstName || ''} ${(item as any).memberLastName || ''}`.trim();
-                  case "barcode": return item.barcode;
-                  case "type": return item.accessType;
-                  case "cardStatus": return item.membershipStatus || "";
-                  case "notes": return item.notes || "";
-                  default: return "";
-                }
-              };
-              const sortedAccesses = sortItems(recentAccesses, getSortValue);
-              return (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableTableHead sortKey="datetime" currentSort={sortConfig} onSort={handleSort}>Data/Ora</SortableTableHead>
-                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome e Cognome</SortableTableHead>
-                  <SortableTableHead sortKey="barcode" currentSort={sortConfig} onSort={handleSort}>Barcode</SortableTableHead>
-                  <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
-                  <SortableTableHead sortKey="cardStatus" currentSort={sortConfig} onSort={handleSort}>Stato Tessera</SortableTableHead>
-                  <SortableTableHead sortKey="notes" currentSort={sortConfig} onSort={handleSort}>Note</SortableTableHead>
+                  <TableHead>Data/Ora</TableHead>
+                  <TableHead>Nome e Cognome</TableHead>
+                  <TableHead>Barcode</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Stato Tessera</TableHead>
+                  <TableHead>Note</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedAccesses.map((access, index) => (
+                {recentAccesses.map((access, index) => (
                   <TableRow key={index} data-testid={`access-log-${index}`}>
-                    <TableCell className={isSortedColumn("datetime") ? "sorted-column-cell" : undefined}>
+                    <TableCell>
                       {new Date(access.accessTime).toLocaleString('it-IT')}
                     </TableCell>
-                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>
+                    <TableCell className="font-medium">
                       {(access as any).memberFirstName || (access as any).memberLastName
                         ? `${(access as any).memberFirstName || ''} ${(access as any).memberLastName || ''}`.trim()
                         : <span className="text-muted-foreground">-</span>
                       }
                     </TableCell>
-                    <TableCell className={cn("font-mono text-xs", isSortedColumn("barcode") && "sorted-column-cell")}>{access.barcode}</TableCell>
-                    <TableCell className={cn("capitalize", isSortedColumn("type") && "sorted-column-cell")}>{access.accessType}</TableCell>
-                    <TableCell className={isSortedColumn("cardStatus") ? "sorted-column-cell" : undefined}>
+                    <TableCell className="font-mono text-xs">{access.barcode}</TableCell>
+                    <TableCell className="capitalize">{access.accessType}</TableCell>
+                    <TableCell>
                       <Badge variant={access.membershipStatus === 'active' ? 'default' : 'destructive'}>
                         {access.membershipStatus || 'Sconosciuto'}
                       </Badge>
                     </TableCell>
-                    <TableCell className={isSortedColumn("notes") ? "sorted-column-cell" : undefined}>{access.notes || "-"}</TableCell>
+                    <TableCell>{access.notes || "-"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-              );
-            })()
           )}
         </CardContent>
       </Card>
-    </div>
+    </div >
   );
 }

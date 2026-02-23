@@ -1,17 +1,11 @@
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, or, isNotNull } from "drizzle-orm";
+import { alias } from "drizzle-orm/mysql-core";
 import { ilike } from "drizzle-orm";
 import {
   users,
   members,
   categories,
-  workshopCategories,
-  sundayCategories,
-  trainingCategories,
-  individualLessonCategories,
-  campusCategories,
-  recitalCategories,
-  vacationCategories,
   clientCategories,
   subscriptionTypes,
   instructors,
@@ -33,39 +27,21 @@ import {
   memberRelationships,
   customReports,
   importConfigs,
-  knowledge,
-  paidTrials,
-  freeTrials,
-  singleLessons,
-  sundayActivities,
-  trainings,
-  individualLessons,
-  campusActivities,
-  recitals,
-  vacationStudies,
-  activityStatuses,
-  paymentNotes,
-  enrollmentDetails,
+  userRoles,
+  userActivityLogs,
+  bookingServices,
+  studioBookings,
+  systemConfigs,
+  seasons,
+  priceLists,
+  priceListItems,
+  notifications,
   type User,
   type UpsertUser,
   type Member,
   type InsertMember,
   type Category,
   type InsertCategory,
-  type WorkshopCategory,
-  type InsertWorkshopCategory,
-  type SundayCategory,
-  type InsertSundayCategory,
-  type TrainingCategory,
-  type InsertTrainingCategory,
-  type IndividualLessonCategory,
-  type InsertIndividualLessonCategory,
-  type CampusCategory,
-  type InsertCampusCategory,
-  type RecitalCategory,
-  type InsertRecitalCategory,
-  type InsertVacationCategory,
-  type VacationCategory,
   type ClientCategory,
   type InsertClientCategory,
   type SubscriptionType,
@@ -108,47 +84,142 @@ import {
   type InsertCustomReport,
   type ImportConfig,
   type InsertImportConfig,
-  type Knowledge,
-  type InsertKnowledge,
+  type UserRole,
+  type InsertUserRole,
+  type UserActivityLog,
+  type InsertUserActivityLog,
+  type BookingService,
+  type InsertBookingService,
+  type StudioBooking,
+  type InsertStudioBooking,
+  type SystemConfig,
+  type InsertSystemConfig,
+  type Season,
+  type InsertSeason,
+  type PriceList,
+  type InsertPriceList,
+  type PriceListItem,
+  type InsertPriceListItem,
+  type Notification,
+  type InsertNotification,
+  quotes,
+  type Quote,
+  type InsertQuote,
+  paidTrials,
   type PaidTrial,
   type InsertPaidTrial,
+  workshopCategories,
+  type WorkshopCategory,
+  type InsertWorkshopCategory,
+  sundayCategories,
+  type SundayCategory,
+  type InsertSundayCategory,
+  trainingCategories,
+  type TrainingCategory,
+  type InsertTrainingCategory,
+  individualLessonCategories,
+  type IndividualLessonCategory,
+  type InsertIndividualLessonCategory,
+  campusCategories,
+  type CampusCategory,
+  type InsertCampusCategory,
+  recitalCategories,
+  type RecitalCategory,
+  type InsertRecitalCategory,
+  vacationCategories,
+  type VacationCategory,
+  type InsertVacationCategory,
+  freeTrials,
   type FreeTrial,
   type InsertFreeTrial,
+  singleLessons,
   type SingleLesson,
   type InsertSingleLesson,
+  sundayActivities,
   type SundayActivity,
   type InsertSundayActivity,
+  trainings,
   type Training,
   type InsertTraining,
+  individualLessons,
   type IndividualLesson,
   type InsertIndividualLesson,
+  campusActivities,
   type CampusActivity,
   type InsertCampusActivity,
+  recitals,
   type Recital,
   type InsertRecital,
+  vacationStudies,
   type VacationStudy,
   type InsertVacationStudy,
-  type ActivityStatus,
-  type InsertActivityStatus,
-  type PaymentNote,
-  type InsertPaymentNote,
-  type EnrollmentDetail,
-  type InsertEnrollmentDetail,
-  teamComments,
-  teamNotes,
-  teamNotifications,
-  type TeamComment,
-  type InsertTeamComment,
-  type TeamNote,
-  type InsertTeamNote,
-  type TeamNotification,
-  type InsertTeamNotification,
 } from "@shared/schema";
 
 export interface IStorage {
-  // User operations (required for Replit Auth)
+  // User operations
   getUser(id: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, user: Partial<User>): Promise<User>;
+  deleteUser(id: string): Promise<void>;
+
+  // User Role operations
+  getUserRoles(): Promise<UserRole[]>;
+  getUserRole(id: number): Promise<UserRole | undefined>;
+  getUserRoleByName(name: string): Promise<UserRole | undefined>;
+  createUserRole(role: InsertUserRole): Promise<UserRole>;
+  updateUserRole(id: number, role: Partial<InsertUserRole>): Promise<UserRole>;
+  deleteUserRole(id: number): Promise<void>;
+
+  // User Activity Log operations
+  logActivity(log: InsertUserActivityLog): Promise<UserActivityLog>;
+  getUserActivityLogs(limit?: number): Promise<(UserActivityLog & { user: { username: string, firstName: string, lastName: string } })[]>;
+
+  // Booking Service operations
+  getBookingServices(): Promise<BookingService[]>;
+  getBookingService(id: number): Promise<BookingService | undefined>;
+  createBookingService(service: InsertBookingService): Promise<BookingService>;
+  updateBookingService(id: number, service: Partial<InsertBookingService>): Promise<BookingService>;
+  deleteBookingService(id: number): Promise<void>;
+
+  // Studio Booking operations
+  getStudioBookings(startDate?: Date, endDate?: Date, seasonId?: number): Promise<(StudioBooking & {
+    memberFirstName?: string | null;
+    memberLastName?: string | null;
+    studioName?: string | null;
+    serviceName?: string | null;
+    serviceColor?: string | null;
+    instructorFirstName?: string | null;
+    instructorLastName?: string | null;
+    specialization?: string | null;
+  })[]>;
+  getStudioBookingsBySeason(seasonId: number): Promise<(StudioBooking & {
+    memberFirstName?: string | null;
+    memberLastName?: string | null;
+    studioName?: string | null;
+    serviceName?: string | null;
+    serviceColor?: string | null;
+    instructorFirstName?: string | null;
+    instructorLastName?: string | null;
+    specialization?: string | null;
+  })[]>;
+  getStudioBooking(id: number): Promise<StudioBooking | undefined>;
+  createStudioBooking(booking: InsertStudioBooking): Promise<StudioBooking>;
+  updateStudioBooking(id: number, booking: Partial<InsertStudioBooking>): Promise<StudioBooking>;
+  deleteStudioBooking(id: number): Promise<void>;
+
+  // Quote operations
+  getQuotes(): Promise<Quote[]>;
+  createQuote(quote: InsertQuote): Promise<Quote>;
+  updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote>;
+  deleteQuote(id: number): Promise<void>;
+
+  // Paid Trials
+  getPaidTrials(): Promise<PaidTrial[]>;
+  createPaidTrial(trial: InsertPaidTrial): Promise<PaidTrial>;
+  updatePaidTrial(id: number, trial: Partial<InsertPaidTrial>): Promise<PaidTrial>;
+  deletePaidTrial(id: number): Promise<void>;
 
   // Members
   getMembers(): Promise<Member[]>;
@@ -160,6 +231,7 @@ export interface IStorage {
   createMember(member: InsertMember): Promise<Member>;
   updateMember(id: number, member: Partial<InsertMember>): Promise<Member>;
   deleteMember(id: number): Promise<void>;
+  bulkCreateMembers(members: InsertMember[]): Promise<{ imported: number; skipped: number }>;
 
   // Categories
   getCategories(): Promise<Category[]>;
@@ -167,50 +239,6 @@ export interface IStorage {
   createCategory(category: InsertCategory): Promise<Category>;
   updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category>;
   deleteCategory(id: number): Promise<void>;
-
-  // Workshop Categories
-  getWorkshopCategories(): Promise<WorkshopCategory[]>;
-  getWorkshopCategory(id: number): Promise<WorkshopCategory | undefined>;
-  createWorkshopCategory(category: InsertWorkshopCategory): Promise<WorkshopCategory>;
-  updateWorkshopCategory(id: number, category: Partial<InsertWorkshopCategory>): Promise<WorkshopCategory>;
-  deleteWorkshopCategory(id: number): Promise<void>;
-
-  getSundayCategories(): Promise<SundayCategory[]>;
-  getSundayCategory(id: number): Promise<SundayCategory | undefined>;
-  createSundayCategory(category: InsertSundayCategory): Promise<SundayCategory>;
-  updateSundayCategory(id: number, category: Partial<InsertSundayCategory>): Promise<SundayCategory>;
-  deleteSundayCategory(id: number): Promise<void>;
-
-  getTrainingCategories(): Promise<TrainingCategory[]>;
-  getTrainingCategory(id: number): Promise<TrainingCategory | undefined>;
-  createTrainingCategory(category: InsertTrainingCategory): Promise<TrainingCategory>;
-  updateTrainingCategory(id: number, category: Partial<InsertTrainingCategory>): Promise<TrainingCategory>;
-  deleteTrainingCategory(id: number): Promise<void>;
-
-  getIndividualLessonCategories(): Promise<IndividualLessonCategory[]>;
-  getIndividualLessonCategory(id: number): Promise<IndividualLessonCategory | undefined>;
-  createIndividualLessonCategory(category: InsertIndividualLessonCategory): Promise<IndividualLessonCategory>;
-  updateIndividualLessonCategory(id: number, category: Partial<InsertIndividualLessonCategory>): Promise<IndividualLessonCategory>;
-  deleteIndividualLessonCategory(id: number): Promise<void>;
-
-  getCampusCategories(): Promise<CampusCategory[]>;
-  getCampusCategory(id: number): Promise<CampusCategory | undefined>;
-  createCampusCategory(category: InsertCampusCategory): Promise<CampusCategory>;
-  updateCampusCategory(id: number, category: Partial<InsertCampusCategory>): Promise<CampusCategory>;
-  deleteCampusCategory(id: number): Promise<void>;
-
-  getRecitalCategories(): Promise<RecitalCategory[]>;
-  getRecitalCategory(id: number): Promise<RecitalCategory | undefined>;
-  createRecitalCategory(category: InsertRecitalCategory): Promise<RecitalCategory>;
-  updateRecitalCategory(id: number, category: Partial<InsertRecitalCategory>): Promise<RecitalCategory>;
-  deleteRecitalCategory(id: number): Promise<void>;
-
-  // Vacation Study Categories
-  getVacationCategories(): Promise<VacationCategory[]>;
-  getVacationCategory(id: number): Promise<VacationCategory | undefined>;
-  createVacationCategory(category: InsertVacationCategory): Promise<VacationCategory>;
-  updateVacationCategory(id: number, category: Partial<InsertVacationCategory>): Promise<VacationCategory>;
-  deleteVacationCategory(id: number): Promise<void>;
 
   // Client Categories
   getClientCategories(): Promise<ClientCategory[]>;
@@ -246,6 +274,7 @@ export interface IStorage {
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course>;
   deleteCourse(id: number): Promise<void>;
+  getCoursesBySeason(seasonId: number): Promise<Course[]>;
 
   // Workshops
   getWorkshops(): Promise<Workshop[]>;
@@ -253,69 +282,7 @@ export interface IStorage {
   createWorkshop(workshop: InsertWorkshop): Promise<Workshop>;
   updateWorkshop(id: number, workshop: Partial<InsertWorkshop>): Promise<Workshop>;
   deleteWorkshop(id: number): Promise<void>;
-
-  // Paid Trials
-  getPaidTrials(): Promise<PaidTrial[]>;
-  getPaidTrialById(id: number): Promise<PaidTrial | undefined>;
-  createPaidTrial(item: InsertPaidTrial): Promise<PaidTrial>;
-  updatePaidTrial(id: number, item: Partial<InsertPaidTrial>): Promise<PaidTrial>;
-  deletePaidTrial(id: number): Promise<void>;
-
-  // Free Trials
-  getFreeTrials(): Promise<FreeTrial[]>;
-  getFreeTrialById(id: number): Promise<FreeTrial | undefined>;
-  createFreeTrial(item: InsertFreeTrial): Promise<FreeTrial>;
-  updateFreeTrial(id: number, item: Partial<InsertFreeTrial>): Promise<FreeTrial>;
-  deleteFreeTrial(id: number): Promise<void>;
-
-  // Single Lessons
-  getSingleLessons(): Promise<SingleLesson[]>;
-  getSingleLessonById(id: number): Promise<SingleLesson | undefined>;
-  createSingleLesson(item: InsertSingleLesson): Promise<SingleLesson>;
-  updateSingleLesson(id: number, item: Partial<InsertSingleLesson>): Promise<SingleLesson>;
-  deleteSingleLesson(id: number): Promise<void>;
-
-  // Sunday Activities
-  getSundayActivities(): Promise<SundayActivity[]>;
-  getSundayActivityById(id: number): Promise<SundayActivity | undefined>;
-  createSundayActivity(item: InsertSundayActivity): Promise<SundayActivity>;
-  updateSundayActivity(id: number, item: Partial<InsertSundayActivity>): Promise<SundayActivity>;
-  deleteSundayActivity(id: number): Promise<void>;
-
-  // Trainings
-  getTrainings(): Promise<Training[]>;
-  getTrainingById(id: number): Promise<Training | undefined>;
-  createTraining(item: InsertTraining): Promise<Training>;
-  updateTraining(id: number, item: Partial<InsertTraining>): Promise<Training>;
-  deleteTraining(id: number): Promise<void>;
-
-  // Individual Lessons
-  getIndividualLessons(): Promise<IndividualLesson[]>;
-  getIndividualLessonById(id: number): Promise<IndividualLesson | undefined>;
-  createIndividualLesson(item: InsertIndividualLesson): Promise<IndividualLesson>;
-  updateIndividualLesson(id: number, item: Partial<InsertIndividualLesson>): Promise<IndividualLesson>;
-  deleteIndividualLesson(id: number): Promise<void>;
-
-  // Campus Activities
-  getCampusActivities(): Promise<CampusActivity[]>;
-  getCampusActivityById(id: number): Promise<CampusActivity | undefined>;
-  createCampusActivity(item: InsertCampusActivity): Promise<CampusActivity>;
-  updateCampusActivity(id: number, item: Partial<InsertCampusActivity>): Promise<CampusActivity>;
-  deleteCampusActivity(id: number): Promise<void>;
-
-  // Recitals
-  getRecitals(): Promise<Recital[]>;
-  getRecitalById(id: number): Promise<Recital | undefined>;
-  createRecital(item: InsertRecital): Promise<Recital>;
-  updateRecital(id: number, item: Partial<InsertRecital>): Promise<Recital>;
-  deleteRecital(id: number): Promise<void>;
-
-  // Vacation Studies
-  getVacationStudies(): Promise<VacationStudy[]>;
-  getVacationStudyById(id: number): Promise<VacationStudy | undefined>;
-  createVacationStudy(item: InsertVacationStudy): Promise<VacationStudy>;
-  updateVacationStudy(id: number, item: Partial<InsertVacationStudy>): Promise<VacationStudy>;
-  deleteVacationStudy(id: number): Promise<void>;
+  getWorkshopsBySeason(seasonId: number): Promise<Workshop[]>;
 
   // Memberships
   getMemberships(): Promise<Membership[]>;
@@ -347,14 +314,16 @@ export interface IStorage {
   getPayments(): Promise<Payment[]>;
   getPaymentsWithMembers(): Promise<(Payment & { memberFirstName?: string; memberLastName?: string })[]>;
   getPaymentsByMemberId(memberId: number): Promise<Payment[]>;
+  getPaymentsBySeason(seasonId: number): Promise<Payment[]>;
   getPayment(id: number): Promise<Payment | undefined>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment>;
   deletePayment(id: number): Promise<void>;
 
   // Enrollments
-  getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null })[]>;
-  getEnrollmentsByMember(memberId: number): Promise<Enrollment[]>;
+  getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
+  getEnrollmentsByMember(memberId: number): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
+  getEnrollmentsBySeason(seasonId: number): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
   getEnrollment(id: number): Promise<Enrollment | undefined>;
   createEnrollment(enrollment: InsertEnrollment): Promise<Enrollment>;
   updateEnrollment(id: number, enrollment: Partial<InsertEnrollment>): Promise<Enrollment>;
@@ -367,12 +336,13 @@ export interface IStorage {
   // Attendances
   getAttendances(): Promise<(Attendance & { memberFirstName?: string | null; memberLastName?: string | null; memberFiscalCode?: string | null })[]>;
   getAttendance(id: number): Promise<Attendance | undefined>;
+  getAttendancesBySeason(seasonId: number): Promise<Attendance[]>;
   getAttendancesByMember(memberId: number): Promise<Attendance[]>;
   createAttendance(attendance: InsertAttendance): Promise<Attendance>;
   deleteAttendance(id: number): Promise<void>;
 
   // Workshop Enrollments
-  getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null })[]>;
+  getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
   getWorkshopEnrollmentsByMember(memberId: number): Promise<WorkshopEnrollment[]>;
   getWorkshopEnrollment(id: number): Promise<WorkshopEnrollment | undefined>;
   createWorkshopEnrollment(enrollment: InsertWorkshopEnrollment): Promise<WorkshopEnrollment>;
@@ -398,6 +368,7 @@ export interface IStorage {
   createProvince(province: InsertProvince): Promise<Province>;
   searchCities(search: string, limit?: number): Promise<(City & { province?: Province })[]>;
   getCitiesByProvince(provinceId: number): Promise<City[]>;
+  getCityByIstatCode(code: string): Promise<(City & { province?: Province }) | undefined>;
   createCity(city: InsertCity): Promise<City>;
 
   // Custom Reports
@@ -413,69 +384,390 @@ export interface IStorage {
   createImportConfig(config: InsertImportConfig): Promise<ImportConfig>;
   deleteImportConfig(id: number): Promise<void>;
 
-  // Activity Statuses
-  getActivityStatuses(): Promise<ActivityStatus[]>;
-  getActivityStatus(id: number): Promise<ActivityStatus | undefined>;
-  createActivityStatus(status: InsertActivityStatus): Promise<ActivityStatus>;
-  updateActivityStatus(id: number, status: Partial<InsertActivityStatus>): Promise<ActivityStatus>;
-  deleteActivityStatus(id: number): Promise<void>;
+  // Price Lists
+  getPriceLists(): Promise<PriceList[]>;
+  getPriceList(id: number): Promise<PriceList | undefined>;
+  getPriceListItems(priceListId: number): Promise<PriceListItem[]>;
+  createPriceList(priceList: InsertPriceList): Promise<PriceList>;
+  updatePriceList(id: number, priceList: Partial<InsertPriceList>): Promise<PriceList>;
+  deletePriceList(id: number): Promise<void>;
+  upsertPriceListItem(item: InsertPriceListItem): Promise<PriceListItem>;
+  deletePriceListItem(id: number): Promise<void>;
 
-  // Payment Notes
-  getPaymentNotes(): Promise<PaymentNote[]>;
-  getPaymentNote(id: number): Promise<PaymentNote | undefined>;
-  createPaymentNote(note: InsertPaymentNote): Promise<PaymentNote>;
-  updatePaymentNote(id: number, note: Partial<InsertPaymentNote>): Promise<PaymentNote>;
-  deletePaymentNote(id: number): Promise<void>;
-
-  // Enrollment Details
-  getEnrollmentDetails(): Promise<EnrollmentDetail[]>;
-  getEnrollmentDetail(id: number): Promise<EnrollmentDetail | undefined>;
-  createEnrollmentDetail(detail: InsertEnrollmentDetail): Promise<EnrollmentDetail>;
-  updateEnrollmentDetail(id: number, detail: Partial<InsertEnrollmentDetail>): Promise<EnrollmentDetail>;
-  deleteEnrollmentDetail(id: number): Promise<void>;
-
-  // Team Comments
-  getTeamComments(): Promise<TeamComment[]>;
-  getTeamComment(id: number): Promise<TeamComment | undefined>;
-  createTeamComment(comment: InsertTeamComment): Promise<TeamComment>;
-  updateTeamComment(id: number, comment: Partial<InsertTeamComment>): Promise<TeamComment>;
-  deleteTeamComment(id: number): Promise<void>;
-
-  // Team Notes
-  getTeamNotes(): Promise<TeamNote[]>;
-  getTeamNote(id: number): Promise<TeamNote | undefined>;
-  createTeamNote(note: InsertTeamNote): Promise<TeamNote>;
-  updateTeamNote(id: number, note: Partial<InsertTeamNote>): Promise<TeamNote>;
-  deleteTeamNote(id: number): Promise<void>;
-
-  // Team Notifications
-  getTeamNotifications(userId: string): Promise<TeamNotification[]>;
-  getUnreadNotificationCount(userId: string): Promise<number>;
-  createTeamNotification(notification: InsertTeamNotification): Promise<TeamNotification>;
+  // Notifications
+  getNotifications(userId: string): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationRead(id: number): Promise<void>;
   markAllNotificationsRead(userId: string): Promise<void>;
+
+  // Conflict detection
+  checkStudioConflict(studioId: number, bookingDate: Date | string, startTime: string, endTime: string, currentBookingId?: number): Promise<{ type: 'booking' | 'course' | 'workshop' | 'operating_hours', name: string } | null>;
+
+  // System Config operations
+  getSystemConfig(keyName: string): Promise<SystemConfig | undefined>;
+  updateSystemConfig(keyName: string, value: string): Promise<SystemConfig>;
+
+  // Season operations
+  getSeasons(): Promise<Season[]>;
+  getSeason(id: number): Promise<Season | undefined>;
+  getActiveSeason(): Promise<Season | undefined>;
+  createSeason(season: InsertSeason): Promise<Season>;
+  updateSeason(id: number, season: Partial<Season>): Promise<Season>;
+  setActiveSeason(id: number): Promise<void>;
+
+  // WorkshopCategories
+  getWorkshopCategories(): Promise<WorkshopCategory[]>;
+  getWorkshopCategory(id: number): Promise<WorkshopCategory | undefined>;
+  createWorkshopCategory(workshopCategory: InsertWorkshopCategory): Promise<WorkshopCategory>;
+  updateWorkshopCategory(id: number, workshopCategory: Partial<InsertWorkshopCategory>): Promise<WorkshopCategory>;
+  deleteWorkshopCategory(id: number): Promise<void>;
+
+  // SundayCategories
+  getSundayCategories(): Promise<SundayCategory[]>;
+  getSundayCategory(id: number): Promise<SundayCategory | undefined>;
+  createSundayCategory(sundayCategory: InsertSundayCategory): Promise<SundayCategory>;
+  updateSundayCategory(id: number, sundayCategory: Partial<InsertSundayCategory>): Promise<SundayCategory>;
+  deleteSundayCategory(id: number): Promise<void>;
+
+  // TrainingCategories
+  getTrainingCategories(): Promise<TrainingCategory[]>;
+  getTrainingCategory(id: number): Promise<TrainingCategory | undefined>;
+  createTrainingCategory(trainingCategory: InsertTrainingCategory): Promise<TrainingCategory>;
+  updateTrainingCategory(id: number, trainingCategory: Partial<InsertTrainingCategory>): Promise<TrainingCategory>;
+  deleteTrainingCategory(id: number): Promise<void>;
+
+  // IndividualLessonCategories
+  getIndividualLessonCategories(): Promise<IndividualLessonCategory[]>;
+  getIndividualLessonCategory(id: number): Promise<IndividualLessonCategory | undefined>;
+  createIndividualLessonCategory(individualLessonCategory: InsertIndividualLessonCategory): Promise<IndividualLessonCategory>;
+  updateIndividualLessonCategory(id: number, individualLessonCategory: Partial<InsertIndividualLessonCategory>): Promise<IndividualLessonCategory>;
+  deleteIndividualLessonCategory(id: number): Promise<void>;
+
+  // CampusCategories
+  getCampusCategories(): Promise<CampusCategory[]>;
+  getCampusCategory(id: number): Promise<CampusCategory | undefined>;
+  createCampusCategory(campusCategory: InsertCampusCategory): Promise<CampusCategory>;
+  updateCampusCategory(id: number, campusCategory: Partial<InsertCampusCategory>): Promise<CampusCategory>;
+  deleteCampusCategory(id: number): Promise<void>;
+
+  // RecitalCategories
+  getRecitalCategories(): Promise<RecitalCategory[]>;
+  getRecitalCategory(id: number): Promise<RecitalCategory | undefined>;
+  createRecitalCategory(recitalCategory: InsertRecitalCategory): Promise<RecitalCategory>;
+  updateRecitalCategory(id: number, recitalCategory: Partial<InsertRecitalCategory>): Promise<RecitalCategory>;
+  deleteRecitalCategory(id: number): Promise<void>;
+
+  // VacationCategories
+  getVacationCategories(): Promise<VacationCategory[]>;
+  getVacationCategory(id: number): Promise<VacationCategory | undefined>;
+  createVacationCategory(vacationCategory: InsertVacationCategory): Promise<VacationCategory>;
+  updateVacationCategory(id: number, vacationCategory: Partial<InsertVacationCategory>): Promise<VacationCategory>;
+  deleteVacationCategory(id: number): Promise<void>;
+
+  // FreeTrials
+  getFreeTrials(): Promise<FreeTrial[]>;
+  getFreeTrial(id: number): Promise<FreeTrial | undefined>;
+  createFreeTrial(freeTrial: InsertFreeTrial): Promise<FreeTrial>;
+  updateFreeTrial(id: number, freeTrial: Partial<InsertFreeTrial>): Promise<FreeTrial>;
+  deleteFreeTrial(id: number): Promise<void>;
+
+  // SingleLessons
+  getSingleLessons(): Promise<SingleLesson[]>;
+  getSingleLesson(id: number): Promise<SingleLesson | undefined>;
+  createSingleLesson(singleLesson: InsertSingleLesson): Promise<SingleLesson>;
+  updateSingleLesson(id: number, singleLesson: Partial<InsertSingleLesson>): Promise<SingleLesson>;
+  deleteSingleLesson(id: number): Promise<void>;
+
+  // SundayActivities
+  getSundayActivities(): Promise<SundayActivity[]>;
+  getSundayActivity(id: number): Promise<SundayActivity | undefined>;
+  createSundayActivity(sundayActivity: InsertSundayActivity): Promise<SundayActivity>;
+  updateSundayActivity(id: number, sundayActivity: Partial<InsertSundayActivity>): Promise<SundayActivity>;
+  deleteSundayActivity(id: number): Promise<void>;
+
+  // Trainings
+  getTrainings(): Promise<Training[]>;
+  getTraining(id: number): Promise<Training | undefined>;
+  createTraining(training: InsertTraining): Promise<Training>;
+  updateTraining(id: number, training: Partial<InsertTraining>): Promise<Training>;
+  deleteTraining(id: number): Promise<void>;
+
+  // IndividualLessons
+  getIndividualLessons(): Promise<IndividualLesson[]>;
+  getIndividualLesson(id: number): Promise<IndividualLesson | undefined>;
+  createIndividualLesson(individualLesson: InsertIndividualLesson): Promise<IndividualLesson>;
+  updateIndividualLesson(id: number, individualLesson: Partial<InsertIndividualLesson>): Promise<IndividualLesson>;
+  deleteIndividualLesson(id: number): Promise<void>;
+
+  // CampusActivities
+  getCampusActivities(): Promise<CampusActivity[]>;
+  getCampusActivity(id: number): Promise<CampusActivity | undefined>;
+  createCampusActivity(campusActivity: InsertCampusActivity): Promise<CampusActivity>;
+  updateCampusActivity(id: number, campusActivity: Partial<InsertCampusActivity>): Promise<CampusActivity>;
+  deleteCampusActivity(id: number): Promise<void>;
+
+  // Recitals
+  getRecitals(): Promise<Recital[]>;
+  getRecital(id: number): Promise<Recital | undefined>;
+  createRecital(recital: InsertRecital): Promise<Recital>;
+  updateRecital(id: number, recital: Partial<InsertRecital>): Promise<Recital>;
+  deleteRecital(id: number): Promise<void>;
+
+  // VacationStudies
+  getVacationStudies(): Promise<VacationStudy[]>;
+  getVacationStudy(id: number): Promise<VacationStudy | undefined>;
+  createVacationStudy(vacationStudy: InsertVacationStudy): Promise<VacationStudy>;
+  updateVacationStudy(id: number, vacationStudy: Partial<InsertVacationStudy>): Promise<VacationStudy>;
+  deleteVacationStudy(id: number): Promise<void>;
+
 }
 
 export class DatabaseStorage implements IStorage {
-  // ==== User operations (required for Replit Auth) ====
+  // ==== User operations ====
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.username);
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
+    await db
       .insert(users)
       .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
+      .onDuplicateKeyUpdate({
         set: {
           ...userData,
           updatedAt: new Date(),
         },
-      })
-      .returning();
+      });
+
+    if (!userData.username) throw new Error("Username is required for upsert");
+    const [user] = await db.select().from(users).where(eq(users.username, userData.username));
+    if (!user) throw new Error("User not found after upsert");
     return user;
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User> {
+    await db
+      .update(users)
+      .set({ ...userData, updatedAt: new Date() })
+      .where(eq(users.id, id));
+
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    if (!user) throw new Error("User not found");
+    return user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
+  // ==== User Role operations ====
+  async getUserRoles(): Promise<UserRole[]> {
+    return await db.select().from(userRoles).orderBy(userRoles.name);
+  }
+
+  async getUserRole(id: number): Promise<UserRole | undefined> {
+    const [role] = await db.select().from(userRoles).where(eq(userRoles.id, id));
+    return role;
+  }
+
+  async getUserRoleByName(name: string): Promise<UserRole | undefined> {
+    const [role] = await db.select().from(userRoles).where(eq(userRoles.name, name));
+    return role;
+  }
+
+  async createUserRole(roleData: InsertUserRole): Promise<UserRole> {
+    const [result] = await db.insert(userRoles).values(roleData);
+    const insertId = (result as any).insertId;
+    const [role] = await db.select().from(userRoles).where(eq(userRoles.id, insertId));
+    if (!role) throw new Error("Role not found after creation");
+    return role;
+  }
+
+  async updateUserRole(id: number, roleData: Partial<InsertUserRole>): Promise<UserRole> {
+    await db
+      .update(userRoles)
+      .set({ ...roleData, updatedAt: new Date() })
+      .where(eq(userRoles.id, id));
+
+    const [role] = await db.select().from(userRoles).where(eq(userRoles.id, id));
+    if (!role) throw new Error("Role not found");
+    return role;
+  }
+
+  async deleteUserRole(id: number): Promise<void> {
+    await db.delete(userRoles).where(eq(userRoles.id, id));
+  }
+
+  // ==== User Activity Logs ====
+  async logActivity(logData: InsertUserActivityLog): Promise<UserActivityLog> {
+    const [result] = await db.insert(userActivityLogs).values(logData);
+    const [log] = await db.select().from(userActivityLogs).where(eq(userActivityLogs.id, result.insertId));
+    return log;
+  }
+
+  async getUserActivityLogs(limit: number = 100): Promise<(UserActivityLog & { user: { username: string, firstName: string, lastName: string } })[]> {
+    const results = await db
+      .select({
+        log: userActivityLogs,
+        user: {
+          username: users.username,
+          firstName: users.firstName,
+          lastName: users.lastName,
+        }
+      })
+      .from(userActivityLogs)
+      .leftJoin(users, eq(userActivityLogs.userId, users.id))
+      .orderBy(desc(userActivityLogs.createdAt))
+      .limit(limit);
+
+    return results.map(r => ({
+      ...r.log,
+      user: r.user ? {
+        username: r.user.username,
+        firstName: r.user.firstName || '',
+        lastName: r.user.lastName || '',
+      } : { username: 'deleted', firstName: 'Deleted', lastName: 'User' }
+    })) as any;
+  }
+
+  // ==== Booking Services ====
+  async getBookingServices(): Promise<BookingService[]> {
+    return await db.select().from(bookingServices).orderBy(bookingServices.name);
+  }
+
+  async getBookingService(id: number): Promise<BookingService | undefined> {
+    const [service] = await db.select().from(bookingServices).where(eq(bookingServices.id, id));
+    return service;
+  }
+
+  async createBookingService(service: InsertBookingService): Promise<BookingService> {
+    const [result] = await db.insert(bookingServices).values(service);
+    const [newService] = await db.select().from(bookingServices).where(eq(bookingServices.id, result.insertId));
+    return newService;
+  }
+
+  async updateBookingService(id: number, service: Partial<InsertBookingService>): Promise<BookingService> {
+    await db.update(bookingServices).set(service).where(eq(bookingServices.id, id));
+    const updated = await this.getBookingService(id);
+    if (!updated) throw new Error("Booking service not found");
+    return updated;
+  }
+
+  async deleteBookingService(id: number): Promise<void> {
+    await db.delete(bookingServices).where(eq(bookingServices.id, id));
+  }
+
+  // ==== Studio Bookings ====
+  async getStudioBookings(startDate?: Date, endDate?: Date, seasonId?: number): Promise<(StudioBooking & {
+    memberFirstName?: string | null;
+    memberLastName?: string | null;
+    studioName?: string | null;
+    serviceName?: string | null;
+    serviceColor?: string | null;
+    instructorFirstName?: string | null;
+    instructorLastName?: string | null;
+    specialization?: string | null;
+  })[]> {
+    let query = db
+      .select({
+        id: studioBookings.id,
+        memberId: studioBookings.memberId,
+        studioId: studioBookings.studioId,
+        serviceId: studioBookings.serviceId,
+        title: studioBookings.title,
+        description: studioBookings.description,
+        bookingDate: studioBookings.bookingDate,
+        startTime: studioBookings.startTime,
+        endTime: studioBookings.endTime,
+        status: studioBookings.status,
+        paid: studioBookings.paid,
+        amount: studioBookings.amount,
+        googleEventId: studioBookings.googleEventId,
+        createdAt: studioBookings.createdAt,
+        updatedAt: studioBookings.updatedAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberEmail: members.email,
+        memberPhone: members.phone,
+        memberMobile: members.mobile,
+        studioName: studios.name,
+        googleCalendarId: studios.googleCalendarId,
+        serviceName: bookingServices.name,
+        serviceColor: bookingServices.color,
+        instructorId: studioBookings.instructorId,
+        instructorFirstName: instructors.firstName,
+        instructorLastName: instructors.lastName,
+        specialization: instructors.specialization,
+        seasonId: studioBookings.seasonId,
+      })
+      .from(studioBookings)
+      .leftJoin(members, eq(studioBookings.memberId, members.id))
+      .leftJoin(studios, eq(studioBookings.studioId, studios.id))
+      .leftJoin(bookingServices, eq(studioBookings.serviceId, bookingServices.id))
+      .leftJoin(instructors, eq(studioBookings.instructorId, instructors.id));
+
+    const conditions = [];
+    if (startDate && endDate) {
+      conditions.push(gte(sql`DATE(${studioBookings.bookingDate})`, sql`DATE(${startDate.toISOString().split('T')[0]})`));
+      conditions.push(lte(sql`DATE(${studioBookings.bookingDate})`, sql`DATE(${endDate.toISOString().split('T')[0]})`));
+    }
+    if (seasonId) {
+      conditions.push(eq(studioBookings.seasonId, seasonId));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+
+    return await query.orderBy(desc(studioBookings.bookingDate), studioBookings.startTime);
+  }
+
+  async getStudioBooking(id: number): Promise<StudioBooking | undefined> {
+    const [booking] = await db.select().from(studioBookings).where(eq(studioBookings.id, id));
+    return booking;
+  }
+
+  async createStudioBooking(booking: InsertStudioBooking): Promise<StudioBooking> {
+    const activeSeason = await this.getActiveSeason();
+    const dateValue = booking.bookingDate instanceof Date ? booking.bookingDate : new Date(booking.bookingDate);
+    const [result] = await db.insert(studioBookings).values({
+      ...booking,
+      bookingDate: dateValue.toISOString().split('T')[0],
+      seasonId: booking.seasonId || activeSeason?.id || null
+    } as any);
+    const [newBooking] = await db.select().from(studioBookings).where(eq(studioBookings.id, result.insertId));
+    return newBooking;
+  }
+
+  async updateStudioBooking(id: number, booking: Partial<InsertStudioBooking>): Promise<StudioBooking> {
+    const updateData: any = { ...booking };
+    // Remove metadata fields that shouldn't be updated manually
+    delete updateData.id;
+    delete updateData.createdAt;
+    delete updateData.updatedAt;
+
+    if (updateData.bookingDate) {
+      const d = updateData.bookingDate instanceof Date ? updateData.bookingDate : new Date(updateData.bookingDate);
+      updateData.bookingDate = d.toISOString().split('T')[0] as any;
+    }
+    await db.update(studioBookings).set(updateData).where(eq(studioBookings.id, id));
+    const updated = await this.getStudioBooking(id);
+    if (!updated) throw new Error("Studio booking not found");
+    return updated;
+  }
+
+  async deleteStudioBooking(id: number): Promise<void> {
+    await db.delete(studioBookings).where(eq(studioBookings.id, id));
   }
 
   // ==== Members ====
@@ -496,76 +788,107 @@ export class DatabaseStorage implements IStorage {
 
   async getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }> {
     const offset = (page - 1) * pageSize;
-    
-    let searchCondition = sql`1=1`;
+
+    let searchCondition = sql`1 = 1`;
     if (search && search.trim().length >= 2) {
       const searchTerm = `%${search.trim().toLowerCase()}%`;
       searchCondition = sql`(
-        LOWER(first_name) LIKE ${searchTerm} OR 
+  LOWER(first_name) LIKE ${searchTerm} OR 
         LOWER(last_name) LIKE ${searchTerm} OR 
         LOWER(email) LIKE ${searchTerm} OR 
         LOWER(fiscal_code) LIKE ${searchTerm} OR
         LOWER(card_number) LIKE ${searchTerm} OR
-        LOWER(first_name || ' ' || last_name) LIKE ${searchTerm} OR
-        LOWER(last_name || ' ' || first_name) LIKE ${searchTerm}
-      )`;
+        LOWER(CONCAT(first_name, ' ', last_name)) LIKE ${searchTerm} OR
+        LOWER(CONCAT(last_name, ' ', first_name)) LIKE ${searchTerm}
+)`;
     }
-    
+
     // Use raw SQL for the complete query with subquery
-    const result = await db.execute(sql`
-      SELECT 
-        m.*,
-        COALESCE((
-          SELECT COUNT(*)::int 
+    const [rows]: any = await db.execute(searchCondition === sql`1 = 1` ? sql`
+SELECT
+m.*,
+  COALESCE((
+    SELECT COUNT(*) 
           FROM enrollments e 
           WHERE e.member_id = m.id AND e.status = 'active'
-        ), 0) as active_course_count
+  ), 0) as active_course_count
+      FROM members m
+      ORDER BY m.last_name, m.first_name
+      LIMIT ${pageSize}
+      OFFSET ${offset}
+` : sql`
+SELECT
+m.*,
+  COALESCE((
+    SELECT COUNT(*) 
+          FROM enrollments e 
+          WHERE e.member_id = m.id AND e.status = 'active'
+  ), 0) as active_course_count
       FROM members m
       WHERE ${searchCondition}
       ORDER BY m.last_name, m.first_name
       LIMIT ${pageSize}
       OFFSET ${offset}
-    `);
-    
+`);
+
     // Count query
-    const countResult = await db.execute(sql`
-      SELECT COUNT(*)::int as count FROM members WHERE ${searchCondition}
-    `);
-    const total = Number((countResult.rows[0] as any)?.count || 0);
-    
+    const [countRows]: any = await db.execute(searchCondition === sql`1 = 1` ? sql`
+      SELECT COUNT(*) as count FROM members
+  ` : sql`
+      SELECT COUNT(*) as count FROM members WHERE ${searchCondition}
+`);
+    const total = Number(countRows[0]?.count || 0);
+
     // Map snake_case to camelCase
-    const membersList = result.rows.map((row: any) => ({
+    const membersList = rows.map((row: any) => ({
       id: row.id,
       firstName: row.first_name,
       lastName: row.last_name,
+      fiscalCode: row.fiscal_code,
+      dateOfBirth: row.date_of_birth,
+      placeOfBirth: row.place_of_birth,
+      gender: row.gender,
       email: row.email,
       phone: row.phone,
       mobile: row.mobile,
-      fiscalCode: row.fiscal_code,
-      dateOfBirth: row.date_of_birth,
-      gender: row.gender,
-      placeOfBirth: row.place_of_birth,
-      street: row.street,
+      categoryId: row.category_id,
+      subscriptionTypeId: row.subscription_type_id,
+      cardNumber: row.card_number,
+      cardIssueDate: row.card_issue_date,
+      cardExpiryDate: row.card_expiry_date,
+      entityCardType: row.entity_card_type,
+      entityCardNumber: row.entity_card_number,
+      entityCardIssueDate: row.entity_card_issue_date,
+      entityCardExpiryDate: row.entity_card_expiry_date,
+      hasMedicalCertificate: row.has_medical_certificate,
+      medicalCertificateExpiry: row.medical_certificate_expiry,
+      isMinor: row.is_minor,
+      motherFirstName: row.mother_first_name,
+      motherLastName: row.mother_last_name,
+      motherFiscalCode: row.mother_fiscal_code,
+      motherEmail: row.mother_email,
+      motherPhone: row.mother_phone,
+      motherMobile: row.mother_mobile,
+      fatherFirstName: row.father_first_name,
+      fatherLastName: row.father_last_name,
+      fatherFiscalCode: row.father_fiscal_code,
+      fatherEmail: row.father_email,
+      fatherPhone: row.father_phone,
+      fatherMobile: row.father_mobile,
+      streetAddress: row.street_address,
       city: row.city,
       province: row.province,
       postalCode: row.postal_code,
       country: row.country,
+      address: row.address,
       notes: row.notes,
-      parentFirstName: row.parent_first_name,
-      parentLastName: row.parent_last_name,
-      parentFiscalCode: row.parent_fiscal_code,
-      parentPhone: row.parent_phone,
-      parentEmail: row.parent_email,
-      hasMedicalCertificate: row.has_medical_certificate,
-      medicalCertificateExpiry: row.medical_certificate_expiry,
-      cardNumber: row.card_number,
-      cardExpiryDate: row.card_expiry_date,
+      photoUrl: row.photo_url,
       active: row.active,
       createdAt: row.created_at,
-      categoryId: row.category_id,
+      updatedAt: row.updated_at,
       activeCourseCount: row.active_course_count || 0,
     }));
-    
+
     return { members: membersList as (Member & { activeCourseCount: number })[], total };
   }
 
@@ -578,67 +901,94 @@ export class DatabaseStorage implements IStorage {
     if (!fiscalCode) return undefined;
     // Use case-insensitive comparison since existing data may be mixed case
     const [member] = await db.select().from(members).where(
-      sql`UPPER(${members.fiscalCode}) = ${fiscalCode.toUpperCase()}`
+      sql`UPPER(${members.fiscalCode}) = ${fiscalCode.toUpperCase()} `
     );
     return member;
   }
 
   async getDuplicateFiscalCodes(): Promise<{ fiscalCode: string; members: { id: number; firstName: string; lastName: string; }[] }[]> {
     // Find all fiscal codes that appear more than once
-    const duplicates = await db.execute(sql`
-      SELECT UPPER(fiscal_code) as fiscal_code, 
-             json_agg(json_build_object('id', id, 'firstName', first_name, 'lastName', last_name)) as members
+    const [rows]: any = await db.execute(sql`
+      SELECT UPPER(fiscal_code) as fiscal_code,
+  JSON_ARRAYAGG(JSON_OBJECT('id', id, 'firstName', first_name, 'lastName', last_name)) as members
       FROM members 
       WHERE fiscal_code IS NOT NULL AND fiscal_code != ''
       GROUP BY UPPER(fiscal_code)
       HAVING COUNT(*) > 1
       ORDER BY UPPER(fiscal_code)
-    `);
-    
-    return duplicates.rows.map((row: any) => ({
+  `);
+
+    return rows.map((row: any) => ({
       fiscalCode: row.fiscal_code,
-      members: row.members
+      members: typeof row.members === 'string' ? JSON.parse(row.members) : row.members
     }));
   }
 
   async createMember(member: InsertMember): Promise<Member> {
-    const [newMember] = await db.insert(members).values(member).returning();
-    
+    const [result] = await db.insert(members).values(member);
+    const [newMember] = await db.select().from(members).where(eq(members.id, result.insertId));
+
     // Sync membership if card data exists
     if (newMember.cardNumber) {
       await this.syncMembershipFromMember(newMember);
     }
-    
+
     // Sync medical certificate if data exists
     if (newMember.hasMedicalCertificate) {
       await this.syncMedicalCertificateFromMember(newMember);
     }
-    
+
     return newMember;
   }
 
   async updateMember(id: number, member: Partial<InsertMember>): Promise<Member> {
-    const [updated] = await db
+    await db
       .update(members)
       .set({ ...member, updatedAt: new Date() })
-      .where(eq(members.id, id))
-      .returning();
-    
+      .where(eq(members.id, id));
+
+    const [updated] = await db.select().from(members).where(eq(members.id, id));
+
     // Sync membership if card data exists or was updated
     if (member.cardNumber !== undefined || member.cardIssueDate !== undefined || member.cardExpiryDate !== undefined) {
       await this.syncMembershipFromMember(updated);
     }
-    
+
     // Sync medical certificate if data exists or was updated
     if (member.hasMedicalCertificate !== undefined || member.medicalCertificateExpiry !== undefined) {
       await this.syncMedicalCertificateFromMember(updated);
     }
-    
+
     return updated;
   }
 
   async deleteMember(id: number): Promise<void> {
     await db.delete(members).where(eq(members.id, id));
+  }
+
+  async bulkCreateMembers(membersData: InsertMember[]): Promise<{ imported: number; skipped: number }> {
+    let imported = 0;
+    let skipped = 0;
+
+    for (const data of membersData) {
+      try {
+        // Double check for duplicate fiscal code within the bulk process
+        if (data.fiscalCode) {
+          const existing = await this.getMemberByFiscalCode(data.fiscalCode);
+          if (existing) {
+            skipped++;
+            continue;
+          }
+        }
+        await this.createMember(data);
+        imported++;
+      } catch (err) {
+        console.error("Error creating member in bulk:", err);
+        skipped++;
+      }
+    }
+
+    return { imported, skipped };
   }
 
   // ==== Categories ====
@@ -652,212 +1002,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCategory(category: InsertCategory): Promise<Category> {
-    const [newCategory] = await db.insert(categories).values(category).returning();
+    const [result] = await db.insert(categories).values(category);
+    const [newCategory] = await db.select().from(categories).where(eq(categories.id, result.insertId));
     return newCategory;
   }
 
   async updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category> {
-    const [updated] = await db
+    await db
       .update(categories)
       .set({ ...category, updatedAt: new Date() })
-      .where(eq(categories.id, id))
-      .returning();
+      .where(eq(categories.id, id));
+
+    const [updated] = await db.select().from(categories).where(eq(categories.id, id));
     return updated;
   }
 
   async deleteCategory(id: number): Promise<void> {
     await db.delete(categories).where(eq(categories.id, id));
-  }
-
-  // ==== Workshop Categories ====
-  async getWorkshopCategories(): Promise<WorkshopCategory[]> {
-    return await db.select().from(workshopCategories).orderBy(workshopCategories.name);
-  }
-
-  async getWorkshopCategory(id: number): Promise<WorkshopCategory | undefined> {
-    const [category] = await db.select().from(workshopCategories).where(eq(workshopCategories.id, id));
-    return category;
-  }
-
-  async createWorkshopCategory(category: InsertWorkshopCategory): Promise<WorkshopCategory> {
-    const [newCategory] = await db.insert(workshopCategories).values(category).returning();
-    return newCategory;
-  }
-
-  async updateWorkshopCategory(id: number, category: Partial<InsertWorkshopCategory>): Promise<WorkshopCategory> {
-    const [updated] = await db
-      .update(workshopCategories)
-      .set({ ...category, updatedAt: new Date() })
-      .where(eq(workshopCategories.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteWorkshopCategory(id: number): Promise<void> {
-    await db.delete(workshopCategories).where(eq(workshopCategories.id, id));
-  }
-
-  async getSundayCategories(): Promise<SundayCategory[]> {
-    return await db.select().from(sundayCategories).orderBy(sundayCategories.name);
-  }
-
-  async getSundayCategory(id: number): Promise<SundayCategory | undefined> {
-    const [category] = await db.select().from(sundayCategories).where(eq(sundayCategories.id, id));
-    return category;
-  }
-
-  async createSundayCategory(category: InsertSundayCategory): Promise<SundayCategory> {
-    const [newCategory] = await db.insert(sundayCategories).values(category).returning();
-    return newCategory;
-  }
-
-  async updateSundayCategory(id: number, category: Partial<InsertSundayCategory>): Promise<SundayCategory> {
-    const [updated] = await db
-      .update(sundayCategories)
-      .set({ ...category, updatedAt: new Date() })
-      .where(eq(sundayCategories.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteSundayCategory(id: number): Promise<void> {
-    await db.delete(sundayCategories).where(eq(sundayCategories.id, id));
-  }
-
-  async getTrainingCategories(): Promise<TrainingCategory[]> {
-    return await db.select().from(trainingCategories).orderBy(trainingCategories.name);
-  }
-
-  async getTrainingCategory(id: number): Promise<TrainingCategory | undefined> {
-    const [category] = await db.select().from(trainingCategories).where(eq(trainingCategories.id, id));
-    return category;
-  }
-
-  async createTrainingCategory(category: InsertTrainingCategory): Promise<TrainingCategory> {
-    const [newCategory] = await db.insert(trainingCategories).values(category).returning();
-    return newCategory;
-  }
-
-  async updateTrainingCategory(id: number, category: Partial<InsertTrainingCategory>): Promise<TrainingCategory> {
-    const [updated] = await db
-      .update(trainingCategories)
-      .set({ ...category, updatedAt: new Date() })
-      .where(eq(trainingCategories.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteTrainingCategory(id: number): Promise<void> {
-    await db.delete(trainingCategories).where(eq(trainingCategories.id, id));
-  }
-
-  async getIndividualLessonCategories(): Promise<IndividualLessonCategory[]> {
-    return await db.select().from(individualLessonCategories).orderBy(individualLessonCategories.name);
-  }
-
-  async getIndividualLessonCategory(id: number): Promise<IndividualLessonCategory | undefined> {
-    const [category] = await db.select().from(individualLessonCategories).where(eq(individualLessonCategories.id, id));
-    return category;
-  }
-
-  async createIndividualLessonCategory(category: InsertIndividualLessonCategory): Promise<IndividualLessonCategory> {
-    const [newCategory] = await db.insert(individualLessonCategories).values(category).returning();
-    return newCategory;
-  }
-
-  async updateIndividualLessonCategory(id: number, category: Partial<InsertIndividualLessonCategory>): Promise<IndividualLessonCategory> {
-    const [updated] = await db
-      .update(individualLessonCategories)
-      .set({ ...category, updatedAt: new Date() })
-      .where(eq(individualLessonCategories.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteIndividualLessonCategory(id: number): Promise<void> {
-    await db.delete(individualLessonCategories).where(eq(individualLessonCategories.id, id));
-  }
-
-  async getCampusCategories(): Promise<CampusCategory[]> {
-    return await db.select().from(campusCategories).orderBy(campusCategories.name);
-  }
-
-  async getCampusCategory(id: number): Promise<CampusCategory | undefined> {
-    const [category] = await db.select().from(campusCategories).where(eq(campusCategories.id, id));
-    return category;
-  }
-
-  async createCampusCategory(category: InsertCampusCategory): Promise<CampusCategory> {
-    const [newCategory] = await db.insert(campusCategories).values(category).returning();
-    return newCategory;
-  }
-
-  async updateCampusCategory(id: number, category: Partial<InsertCampusCategory>): Promise<CampusCategory> {
-    const [updated] = await db
-      .update(campusCategories)
-      .set({ ...category, updatedAt: new Date() })
-      .where(eq(campusCategories.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteCampusCategory(id: number): Promise<void> {
-    await db.delete(campusCategories).where(eq(campusCategories.id, id));
-  }
-
-  async getRecitalCategories(): Promise<RecitalCategory[]> {
-    return await db.select().from(recitalCategories).orderBy(recitalCategories.name);
-  }
-
-  async getRecitalCategory(id: number): Promise<RecitalCategory | undefined> {
-    const [category] = await db.select().from(recitalCategories).where(eq(recitalCategories.id, id));
-    return category;
-  }
-
-  async createRecitalCategory(category: InsertRecitalCategory): Promise<RecitalCategory> {
-    const [newCategory] = await db.insert(recitalCategories).values(category).returning();
-    return newCategory;
-  }
-
-  async updateRecitalCategory(id: number, category: Partial<InsertRecitalCategory>): Promise<RecitalCategory> {
-    const [updated] = await db
-      .update(recitalCategories)
-      .set({ ...category, updatedAt: new Date() })
-      .where(eq(recitalCategories.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteRecitalCategory(id: number): Promise<void> {
-    await db.delete(recitalCategories).where(eq(recitalCategories.id, id));
-  }
-
-  // ==== Vacation Study Categories ====
-  async getVacationCategories(): Promise<VacationCategory[]> {
-    return await db.select().from(vacationCategories).orderBy(vacationCategories.name);
-  }
-
-  async getVacationCategory(id: number): Promise<VacationCategory | undefined> {
-    const [category] = await db.select().from(vacationCategories).where(eq(vacationCategories.id, id));
-    return category;
-  }
-
-  async createVacationCategory(category: InsertVacationCategory): Promise<VacationCategory> {
-    const [newCategory] = await db.insert(vacationCategories).values(category).returning();
-    return newCategory;
-  }
-
-  async updateVacationCategory(id: number, category: Partial<InsertVacationCategory>): Promise<VacationCategory> {
-    const [updated] = await db
-      .update(vacationCategories)
-      .set({ ...category, updatedAt: new Date() })
-      .where(eq(vacationCategories.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteVacationCategory(id: number): Promise<void> {
-    await db.delete(vacationCategories).where(eq(vacationCategories.id, id));
   }
 
   // ==== Client Categories ====
@@ -871,16 +1032,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createClientCategory(category: InsertClientCategory): Promise<ClientCategory> {
-    const [newCategory] = await db.insert(clientCategories).values(category).returning();
+    const [result] = await db.insert(clientCategories).values(category);
+    const [newCategory] = await db.select().from(clientCategories).where(eq(clientCategories.id, result.insertId));
     return newCategory;
   }
 
   async updateClientCategory(id: number, category: Partial<InsertClientCategory>): Promise<ClientCategory> {
-    const [updated] = await db
+    await db
       .update(clientCategories)
       .set({ ...category, updatedAt: new Date() })
-      .where(eq(clientCategories.id, id))
-      .returning();
+      .where(eq(clientCategories.id, id));
+
+    const [updated] = await db.select().from(clientCategories).where(eq(clientCategories.id, id));
     return updated;
   }
 
@@ -899,16 +1062,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSubscriptionType(subscriptionType: InsertSubscriptionType): Promise<SubscriptionType> {
-    const [newSubscriptionType] = await db.insert(subscriptionTypes).values(subscriptionType).returning();
+    const [result] = await db.insert(subscriptionTypes).values(subscriptionType);
+    const [newSubscriptionType] = await db.select().from(subscriptionTypes).where(eq(subscriptionTypes.id, result.insertId));
     return newSubscriptionType;
   }
 
   async updateSubscriptionType(id: number, data: Partial<InsertSubscriptionType>): Promise<SubscriptionType> {
-    const [updated] = await db
+    await db
       .update(subscriptionTypes)
       .set(data)
-      .where(eq(subscriptionTypes.id, id))
-      .returning();
+      .where(eq(subscriptionTypes.id, id));
+
+    const [updated] = await db.select().from(subscriptionTypes).where(eq(subscriptionTypes.id, id));
     return updated;
   }
 
@@ -927,16 +1092,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createInstructor(instructor: InsertInstructor): Promise<Instructor> {
-    const [newInstructor] = await db.insert(instructors).values(instructor).returning();
+    const [result] = await db.insert(instructors).values(instructor);
+    const [newInstructor] = await db.select().from(instructors).where(eq(instructors.id, result.insertId));
     return newInstructor;
   }
 
   async updateInstructor(id: number, instructor: Partial<InsertInstructor>): Promise<Instructor> {
-    const [updated] = await db
+    await db
       .update(instructors)
       .set({ ...instructor, updatedAt: new Date() })
-      .where(eq(instructors.id, id))
-      .returning();
+      .where(eq(instructors.id, id));
+
+    const [updated] = await db.select().from(instructors).where(eq(instructors.id, id));
     return updated;
   }
 
@@ -955,19 +1122,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createStudio(studioData: InsertStudio): Promise<Studio> {
-    const [studio] = await db
+    // Ensure JSON fields are stringified if they are objects, or passed as is if already handled by driver
+    const dataToSave = {
+      name: studioData.name,
+      floor: studioData.floor ?? null,
+      operatingHours: studioData.operatingHours ?? null,
+      operatingDays: studioData.operatingDays ?? null,
+      capacity: studioData.capacity ?? null,
+      equipment: studioData.equipment ?? null,
+      notes: studioData.notes ?? null,
+      active: studioData.active !== undefined ? studioData.active : true,
+      googleCalendarId: studioData.googleCalendarId ?? null,
+      updatedAt: new Date(),
+    };
+
+    const [result] = await db
       .insert(studios)
-      .values(studioData)
-      .returning();
+      .values(dataToSave as any);
+
+    const insertId = (result as any).insertId;
+    const [studio] = await db.select().from(studios).where(eq(studios.id, insertId));
+    if (!studio) throw new Error("Studio non trovato dopo la creazione");
     return studio;
   }
 
   async updateStudio(id: number, studioData: Partial<InsertStudio>): Promise<Studio> {
-    const [studio] = await db
+    await db
       .update(studios)
       .set(studioData)
-      .where(eq(studios.id, id))
-      .returning();
+      .where(eq(studios.id, id));
+
+    const [studio] = await db.select().from(studios).where(eq(studios.id, id));
     return studio;
   }
 
@@ -985,17 +1170,39 @@ export class DatabaseStorage implements IStorage {
     return course;
   }
 
+
   async createCourse(course: InsertCourse): Promise<Course> {
-    const [newCourse] = await db.insert(courses).values(course).returning();
-    return newCourse;
+    const activeSeason = await this.getActiveSeason();
+    const dataToSave = {
+      ...course,
+      startDate: course.startDate ? (course.startDate instanceof Date ? course.startDate.toISOString().split('T')[0] : course.startDate) : null,
+      endDate: course.endDate ? (course.endDate instanceof Date ? course.endDate.toISOString().split('T')[0] : course.endDate) : null,
+      seasonId: course.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(courses).values(dataToSave as any);
+    const id = (result as any).insertId || (result as any).id;
+    const fetched = await this.getCourse(id);
+    return fetched!;
+  }
+
+  async getCoursesBySeason(seasonId: number): Promise<Course[]> {
+    return await db.select().from(courses).where(eq(courses.seasonId, seasonId)).orderBy(desc(courses.createdAt));
   }
 
   async updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course> {
-    const [updated] = await db
+    const updateData = {
+      ...course,
+      updatedAt: new Date(),
+      startDate: course.startDate ? (course.startDate instanceof Date ? course.startDate.toISOString().split('T')[0] : course.startDate) : course.startDate,
+      endDate: course.endDate ? (course.endDate instanceof Date ? course.endDate.toISOString().split('T')[0] : course.endDate) : course.endDate,
+    };
+
+    await db
       .update(courses)
-      .set({ ...course, updatedAt: new Date() })
-      .where(eq(courses.id, id))
-      .returning();
+      .set(updateData as any)
+      .where(eq(courses.id, id));
+
+    const [updated] = await db.select().from(courses).where(eq(courses.id, id));
     return updated;
   }
 
@@ -1014,201 +1221,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createWorkshop(workshop: InsertWorkshop): Promise<Workshop> {
-    const [newWorkshop] = await db.insert(workshops).values(workshop).returning();
-    return newWorkshop;
+    const activeSeason = await this.getActiveSeason();
+    const dataToSave = {
+      ...workshop,
+      startDate: workshop.startDate ? (workshop.startDate instanceof Date ? workshop.startDate.toISOString().split('T')[0] : workshop.startDate) : null,
+      endDate: workshop.endDate ? (workshop.endDate instanceof Date ? workshop.endDate.toISOString().split('T')[0] : workshop.endDate) : null,
+      seasonId: workshop.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(workshops).values(dataToSave as any);
+    const id = (result as any).insertId || (result as any).id;
+    const fetched = await this.getWorkshop(id);
+    return fetched!;
+  }
+
+  async getWorkshopsBySeason(seasonId: number): Promise<Workshop[]> {
+    return await db.select().from(workshops).where(eq(workshops.seasonId, seasonId));
   }
 
   async updateWorkshop(id: number, workshop: Partial<InsertWorkshop>): Promise<Workshop> {
-    const [updated] = await db
+    await db
       .update(workshops)
       .set({ ...workshop, updatedAt: new Date() })
-      .where(eq(workshops.id, id))
-      .returning();
+      .where(eq(workshops.id, id));
+
+    const [updated] = await db.select().from(workshops).where(eq(workshops.id, id));
     return updated;
   }
 
   async deleteWorkshop(id: number): Promise<void> {
     await db.delete(workshops).where(eq(workshops.id, id));
-  }
-
-  // ==== Paid Trials ====
-  async getPaidTrials(): Promise<PaidTrial[]> {
-    return await db.select().from(paidTrials).orderBy(desc(paidTrials.createdAt));
-  }
-  async getPaidTrialById(id: number): Promise<PaidTrial | undefined> {
-    const [item] = await db.select().from(paidTrials).where(eq(paidTrials.id, id));
-    return item;
-  }
-  async createPaidTrial(item: InsertPaidTrial): Promise<PaidTrial> {
-    const [newItem] = await db.insert(paidTrials).values(item).returning();
-    return newItem;
-  }
-  async updatePaidTrial(id: number, item: Partial<InsertPaidTrial>): Promise<PaidTrial> {
-    const [updated] = await db.update(paidTrials).set({ ...item, updatedAt: new Date() }).where(eq(paidTrials.id, id)).returning();
-    return updated;
-  }
-  async deletePaidTrial(id: number): Promise<void> {
-    await db.delete(paidTrials).where(eq(paidTrials.id, id));
-  }
-
-  // ==== Free Trials ====
-  async getFreeTrials(): Promise<FreeTrial[]> {
-    return await db.select().from(freeTrials).orderBy(desc(freeTrials.createdAt));
-  }
-  async getFreeTrialById(id: number): Promise<FreeTrial | undefined> {
-    const [item] = await db.select().from(freeTrials).where(eq(freeTrials.id, id));
-    return item;
-  }
-  async createFreeTrial(item: InsertFreeTrial): Promise<FreeTrial> {
-    const [newItem] = await db.insert(freeTrials).values(item).returning();
-    return newItem;
-  }
-  async updateFreeTrial(id: number, item: Partial<InsertFreeTrial>): Promise<FreeTrial> {
-    const [updated] = await db.update(freeTrials).set({ ...item, updatedAt: new Date() }).where(eq(freeTrials.id, id)).returning();
-    return updated;
-  }
-  async deleteFreeTrial(id: number): Promise<void> {
-    await db.delete(freeTrials).where(eq(freeTrials.id, id));
-  }
-
-  // ==== Single Lessons ====
-  async getSingleLessons(): Promise<SingleLesson[]> {
-    return await db.select().from(singleLessons).orderBy(desc(singleLessons.createdAt));
-  }
-  async getSingleLessonById(id: number): Promise<SingleLesson | undefined> {
-    const [item] = await db.select().from(singleLessons).where(eq(singleLessons.id, id));
-    return item;
-  }
-  async createSingleLesson(item: InsertSingleLesson): Promise<SingleLesson> {
-    const [newItem] = await db.insert(singleLessons).values(item).returning();
-    return newItem;
-  }
-  async updateSingleLesson(id: number, item: Partial<InsertSingleLesson>): Promise<SingleLesson> {
-    const [updated] = await db.update(singleLessons).set({ ...item, updatedAt: new Date() }).where(eq(singleLessons.id, id)).returning();
-    return updated;
-  }
-  async deleteSingleLesson(id: number): Promise<void> {
-    await db.delete(singleLessons).where(eq(singleLessons.id, id));
-  }
-
-  // ==== Sunday Activities ====
-  async getSundayActivities(): Promise<SundayActivity[]> {
-    return await db.select().from(sundayActivities).orderBy(desc(sundayActivities.createdAt));
-  }
-  async getSundayActivityById(id: number): Promise<SundayActivity | undefined> {
-    const [item] = await db.select().from(sundayActivities).where(eq(sundayActivities.id, id));
-    return item;
-  }
-  async createSundayActivity(item: InsertSundayActivity): Promise<SundayActivity> {
-    const [newItem] = await db.insert(sundayActivities).values(item).returning();
-    return newItem;
-  }
-  async updateSundayActivity(id: number, item: Partial<InsertSundayActivity>): Promise<SundayActivity> {
-    const [updated] = await db.update(sundayActivities).set({ ...item, updatedAt: new Date() }).where(eq(sundayActivities.id, id)).returning();
-    return updated;
-  }
-  async deleteSundayActivity(id: number): Promise<void> {
-    await db.delete(sundayActivities).where(eq(sundayActivities.id, id));
-  }
-
-  // ==== Trainings ====
-  async getTrainings(): Promise<Training[]> {
-    return await db.select().from(trainings).orderBy(desc(trainings.createdAt));
-  }
-  async getTrainingById(id: number): Promise<Training | undefined> {
-    const [item] = await db.select().from(trainings).where(eq(trainings.id, id));
-    return item;
-  }
-  async createTraining(item: InsertTraining): Promise<Training> {
-    const [newItem] = await db.insert(trainings).values(item).returning();
-    return newItem;
-  }
-  async updateTraining(id: number, item: Partial<InsertTraining>): Promise<Training> {
-    const [updated] = await db.update(trainings).set({ ...item, updatedAt: new Date() }).where(eq(trainings.id, id)).returning();
-    return updated;
-  }
-  async deleteTraining(id: number): Promise<void> {
-    await db.delete(trainings).where(eq(trainings.id, id));
-  }
-
-  // ==== Individual Lessons ====
-  async getIndividualLessons(): Promise<IndividualLesson[]> {
-    return await db.select().from(individualLessons).orderBy(desc(individualLessons.createdAt));
-  }
-  async getIndividualLessonById(id: number): Promise<IndividualLesson | undefined> {
-    const [item] = await db.select().from(individualLessons).where(eq(individualLessons.id, id));
-    return item;
-  }
-  async createIndividualLesson(item: InsertIndividualLesson): Promise<IndividualLesson> {
-    const [newItem] = await db.insert(individualLessons).values(item).returning();
-    return newItem;
-  }
-  async updateIndividualLesson(id: number, item: Partial<InsertIndividualLesson>): Promise<IndividualLesson> {
-    const [updated] = await db.update(individualLessons).set({ ...item, updatedAt: new Date() }).where(eq(individualLessons.id, id)).returning();
-    return updated;
-  }
-  async deleteIndividualLesson(id: number): Promise<void> {
-    await db.delete(individualLessons).where(eq(individualLessons.id, id));
-  }
-
-  // ==== Campus Activities ====
-  async getCampusActivities(): Promise<CampusActivity[]> {
-    return await db.select().from(campusActivities).orderBy(desc(campusActivities.createdAt));
-  }
-  async getCampusActivityById(id: number): Promise<CampusActivity | undefined> {
-    const [item] = await db.select().from(campusActivities).where(eq(campusActivities.id, id));
-    return item;
-  }
-  async createCampusActivity(item: InsertCampusActivity): Promise<CampusActivity> {
-    const [newItem] = await db.insert(campusActivities).values(item).returning();
-    return newItem;
-  }
-  async updateCampusActivity(id: number, item: Partial<InsertCampusActivity>): Promise<CampusActivity> {
-    const [updated] = await db.update(campusActivities).set({ ...item, updatedAt: new Date() }).where(eq(campusActivities.id, id)).returning();
-    return updated;
-  }
-  async deleteCampusActivity(id: number): Promise<void> {
-    await db.delete(campusActivities).where(eq(campusActivities.id, id));
-  }
-
-  // ==== Recitals ====
-  async getRecitals(): Promise<Recital[]> {
-    return await db.select().from(recitals).orderBy(desc(recitals.createdAt));
-  }
-  async getRecitalById(id: number): Promise<Recital | undefined> {
-    const [item] = await db.select().from(recitals).where(eq(recitals.id, id));
-    return item;
-  }
-  async createRecital(item: InsertRecital): Promise<Recital> {
-    const [newItem] = await db.insert(recitals).values(item).returning();
-    return newItem;
-  }
-  async updateRecital(id: number, item: Partial<InsertRecital>): Promise<Recital> {
-    const [updated] = await db.update(recitals).set({ ...item, updatedAt: new Date() }).where(eq(recitals.id, id)).returning();
-    return updated;
-  }
-  async deleteRecital(id: number): Promise<void> {
-    await db.delete(recitals).where(eq(recitals.id, id));
-  }
-
-  // ==== Vacation Studies ====
-  async getVacationStudies(): Promise<VacationStudy[]> {
-    return await db.select().from(vacationStudies).orderBy(desc(vacationStudies.createdAt));
-  }
-  async getVacationStudyById(id: number): Promise<VacationStudy | undefined> {
-    const [item] = await db.select().from(vacationStudies).where(eq(vacationStudies.id, id));
-    return item;
-  }
-  async createVacationStudy(item: InsertVacationStudy): Promise<VacationStudy> {
-    const [newItem] = await db.insert(vacationStudies).values(item).returning();
-    return newItem;
-  }
-  async updateVacationStudy(id: number, item: Partial<InsertVacationStudy>): Promise<VacationStudy> {
-    const [updated] = await db.update(vacationStudies).set({ ...item, updatedAt: new Date() }).where(eq(vacationStudies.id, id)).returning();
-    return updated;
-  }
-  async deleteVacationStudy(id: number): Promise<void> {
-    await db.delete(vacationStudies).where(eq(vacationStudies.id, id));
   }
 
   // ==== Memberships ====
@@ -1238,7 +1279,7 @@ export class DatabaseStorage implements IStorage {
       .from(memberships)
       .leftJoin(members, eq(memberships.memberId, members.id))
       .orderBy(desc(memberships.expiryDate));
-    return result;
+    return result as any;
   }
 
   async getMembership(id: number): Promise<Membership | undefined> {
@@ -1256,33 +1297,45 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMembership(membership: InsertMembership): Promise<Membership> {
-    const [newMembership] = await db.insert(memberships).values(membership).returning();
-    
+    const [result] = await db.insert(memberships).values({
+      ...membership,
+      issueDate: membership.issueDate instanceof Date ? membership.issueDate : new Date(membership.issueDate),
+      expiryDate: membership.expiryDate instanceof Date ? membership.expiryDate : new Date(membership.expiryDate),
+    } as any);
+
+    const [newMembership] = await db.select().from(memberships).where(eq(memberships.id, result.insertId));
+
     // Sync member data
     await this.syncMemberFromMembership(newMembership);
-    
+
     return newMembership;
   }
 
   async updateMembership(id: number, membership: Partial<InsertMembership>): Promise<Membership> {
-    const [updated] = await db
+    await db
       .update(memberships)
-      .set({ ...membership, updatedAt: new Date() })
-      .where(eq(memberships.id, id))
-      .returning();
-    
+      .set({
+        ...membership,
+        updatedAt: new Date(),
+        issueDate: membership.issueDate ? (membership.issueDate instanceof Date ? membership.issueDate : new Date(membership.issueDate)) : undefined,
+        expiryDate: membership.expiryDate ? (membership.expiryDate instanceof Date ? membership.expiryDate : new Date(membership.expiryDate)) : undefined,
+      } as any)
+      .where(eq(memberships.id, id));
+
+    const [updated] = await db.select().from(memberships).where(eq(memberships.id, id));
+
     // Sync member data
     await this.syncMemberFromMembership(updated);
-    
+
     return updated;
   }
 
   async deleteMembership(id: number): Promise<void> {
     // Get membership to find memberId before deleting
     const [membership] = await db.select().from(memberships).where(eq(memberships.id, id));
-    
+
     await db.delete(memberships).where(eq(memberships.id, id));
-    
+
     // Clear member card data
     if (membership) {
       await db
@@ -1321,7 +1374,7 @@ export class DatabaseStorage implements IStorage {
       .from(medicalCertificates)
       .leftJoin(members, eq(medicalCertificates.memberId, members.id))
       .orderBy(desc(medicalCertificates.expiryDate));
-    return result;
+    return result as any;
   }
 
   async getMedicalCertificatesByMemberId(memberId: number): Promise<MedicalCertificate[]> {
@@ -1334,33 +1387,45 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMedicalCertificate(cert: InsertMedicalCertificate): Promise<MedicalCertificate> {
-    const [newCert] = await db.insert(medicalCertificates).values(cert).returning();
-    
+    const [result] = await db.insert(medicalCertificates).values({
+      ...cert,
+      issueDate: cert.issueDate instanceof Date ? cert.issueDate : new Date(cert.issueDate),
+      expiryDate: cert.expiryDate instanceof Date ? cert.expiryDate : new Date(cert.expiryDate),
+    } as any);
+
+    const [newCert] = await db.select().from(medicalCertificates).where(eq(medicalCertificates.id, result.insertId));
+
     // Sync member data
     await this.syncMemberFromMedicalCertificate(newCert);
-    
+
     return newCert;
   }
 
   async updateMedicalCertificate(id: number, cert: Partial<InsertMedicalCertificate>): Promise<MedicalCertificate> {
-    const [updated] = await db
+    await db
       .update(medicalCertificates)
-      .set({ ...cert, updatedAt: new Date() })
-      .where(eq(medicalCertificates.id, id))
-      .returning();
-    
+      .set({
+        ...cert,
+        updatedAt: new Date(),
+        issueDate: cert.issueDate ? (cert.issueDate instanceof Date ? cert.issueDate : new Date(cert.issueDate)) : undefined,
+        expiryDate: cert.expiryDate ? (cert.expiryDate instanceof Date ? cert.expiryDate : new Date(cert.expiryDate)) : undefined,
+      } as any)
+      .where(eq(medicalCertificates.id, id));
+
+    const [updated] = await db.select().from(medicalCertificates).where(eq(medicalCertificates.id, id));
+
     // Sync member data
     await this.syncMemberFromMedicalCertificate(updated);
-    
+
     return updated;
   }
 
   async deleteMedicalCertificate(id: number): Promise<void> {
     // Get certificate to find memberId before deleting
     const [cert] = await db.select().from(medicalCertificates).where(eq(medicalCertificates.id, id));
-    
+
     await db.delete(medicalCertificates).where(eq(medicalCertificates.id, id));
-    
+
     // Clear member certificate data
     if (cert) {
       await db
@@ -1385,16 +1450,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPaymentMethod(method: InsertPaymentMethod): Promise<PaymentMethod> {
-    const [newMethod] = await db.insert(paymentMethods).values(method).returning();
+    const [result] = await db.insert(paymentMethods).values(method);
+    const [newMethod] = await db.select().from(paymentMethods).where(eq(paymentMethods.id, result.insertId));
     return newMethod;
   }
 
   async updatePaymentMethod(id: number, method: Partial<InsertPaymentMethod>): Promise<PaymentMethod> {
-    const [updated] = await db
+    await db
       .update(paymentMethods)
       .set({ ...method, updatedAt: new Date() })
-      .where(eq(paymentMethods.id, id))
-      .returning();
+      .where(eq(paymentMethods.id, id));
+
+    const [updated] = await db.select().from(paymentMethods).where(eq(paymentMethods.id, id));
     return updated;
   }
 
@@ -1407,7 +1474,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(payments).orderBy(desc(payments.createdAt));
   }
 
-  async getPaymentsWithMembers(): Promise<(Payment & { memberFirstName?: string; memberLastName?: string })[]> {
+  async getPaymentsWithMembers(): Promise<(Payment & { memberFirstName?: string; memberLastName?: string; createdBy?: string; updatedBy?: string })[]> {
+    const createdUser = alias(users, "createdUser");
+    const updatedUser = alias(users, "updatedUser");
+
     const result = await db
       .select({
         id: payments.id,
@@ -1420,20 +1490,67 @@ export class DatabaseStorage implements IStorage {
         paidDate: payments.paidDate,
         status: payments.status,
         paymentMethod: payments.paymentMethod,
+        paymentMethodId: payments.paymentMethodId,
         notes: payments.notes,
         createdAt: payments.createdAt,
         updatedAt: payments.updatedAt,
         memberFirstName: members.firstName,
         memberLastName: members.lastName,
+        seasonId: payments.seasonId,
+        workshopEnrollmentId: payments.workshopEnrollmentId,
+        bookingId: payments.bookingId,
+        membershipId: payments.membershipId,
+        createdById: payments.createdById,
+        updatedById: payments.updatedById,
+        createdBy: createdUser.username,
+        updatedBy: updatedUser.username,
       })
       .from(payments)
       .leftJoin(members, eq(payments.memberId, members.id))
+      .leftJoin(createdUser, eq(payments.createdById, createdUser.id))
+      .leftJoin(updatedUser, eq(payments.updatedById, updatedUser.id))
       .orderBy(desc(payments.createdAt));
-    return result;
+    return result as any;
   }
 
-  async getPaymentsByMemberId(memberId: number): Promise<Payment[]> {
-    return await db.select().from(payments).where(eq(payments.memberId, memberId)).orderBy(desc(payments.createdAt));
+  async getPaymentsByMemberId(memberId: number): Promise<(Payment & { memberFirstName?: string; memberLastName?: string; createdBy?: string; updatedBy?: string })[]> {
+    const createdUser = alias(users, "createdUser");
+    const updatedUser = alias(users, "updatedUser");
+
+    const result = await db
+      .select({
+        id: payments.id,
+        memberId: payments.memberId,
+        enrollmentId: payments.enrollmentId,
+        amount: payments.amount,
+        type: payments.type,
+        description: payments.description,
+        dueDate: payments.dueDate,
+        paidDate: payments.paidDate,
+        status: payments.status,
+        paymentMethod: payments.paymentMethod,
+        paymentMethodId: payments.paymentMethodId,
+        notes: payments.notes,
+        createdAt: payments.createdAt,
+        updatedAt: payments.updatedAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        seasonId: payments.seasonId,
+        workshopEnrollmentId: payments.workshopEnrollmentId,
+        bookingId: payments.bookingId,
+        membershipId: payments.membershipId,
+        createdById: payments.createdById,
+        updatedById: payments.updatedById,
+        createdBy: createdUser.username,
+        updatedBy: updatedUser.username,
+      })
+      .from(payments)
+      .leftJoin(members, eq(payments.memberId, members.id))
+      .leftJoin(createdUser, eq(payments.createdById, createdUser.id))
+      .leftJoin(updatedUser, eq(payments.updatedById, updatedUser.id))
+      .where(eq(payments.memberId, memberId))
+      .orderBy(desc(payments.createdAt));
+    return result as any;
   }
 
   async getPayment(id: number): Promise<Payment | undefined> {
@@ -1442,16 +1559,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPayment(payment: InsertPayment): Promise<Payment> {
-    const [newPayment] = await db.insert(payments).values(payment).returning();
+    const activeSeason = await this.getActiveSeason();
+    const dataToSave = {
+      ...payment,
+      dueDate: payment.dueDate ? (payment.dueDate instanceof Date ? payment.dueDate.toISOString().split('T')[0] : payment.dueDate) : null,
+      paidDate: payment.paidDate ? (payment.paidDate instanceof Date ? payment.paidDate : new Date(payment.paidDate)) : null,
+      seasonId: payment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(payments).values(dataToSave as any);
+    const [newPayment] = await db.select().from(payments).where(eq(payments.id, result.insertId));
     return newPayment;
   }
 
   async updatePayment(id: number, payment: Partial<InsertPayment>): Promise<Payment> {
-    const [updated] = await db
+    const updateData = {
+      ...payment,
+      updatedAt: new Date(),
+      dueDate: payment.dueDate ? (payment.dueDate instanceof Date ? payment.dueDate.toISOString().split('T')[0] : payment.dueDate) : payment.dueDate,
+      paidDate: payment.paidDate ? (payment.paidDate instanceof Date ? payment.paidDate : new Date(payment.paidDate)) : payment.paidDate,
+    };
+
+    await db
       .update(payments)
-      .set({ ...payment, updatedAt: new Date() })
-      .where(eq(payments.id, id))
-      .returning();
+      .set(updateData as any)
+      .where(eq(payments.id, id));
+
+    const [updated] = await db.select().from(payments).where(eq(payments.id, id));
     return updated;
   }
 
@@ -1460,7 +1593,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Enrollments ====
-  async getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null })[]> {
+  async getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
     const result = await db
       .select({
         id: enrollments.id,
@@ -1474,6 +1607,8 @@ export class DatabaseStorage implements IStorage {
         memberLastName: members.lastName,
         memberEmail: members.email,
         memberFiscalCode: members.fiscalCode,
+        memberGender: members.gender,
+        seasonId: enrollments.seasonId,
       })
       .from(enrollments)
       .leftJoin(members, eq(enrollments.memberId, members.id))
@@ -1481,8 +1616,52 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getEnrollmentsByMember(memberId: number): Promise<Enrollment[]> {
-    return await db.select().from(enrollments).where(eq(enrollments.memberId, memberId)).orderBy(desc(enrollments.enrollmentDate));
+  async getEnrollmentsByMember(memberId: number): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
+    const result = await db
+      .select({
+        id: enrollments.id,
+        memberId: enrollments.memberId,
+        courseId: enrollments.courseId,
+        enrollmentDate: enrollments.enrollmentDate,
+        status: enrollments.status,
+        notes: enrollments.notes,
+        createdAt: enrollments.createdAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberEmail: members.email,
+        memberFiscalCode: members.fiscalCode,
+        memberGender: members.gender,
+        seasonId: enrollments.seasonId,
+      })
+      .from(enrollments)
+      .leftJoin(members, eq(enrollments.memberId, members.id))
+      .where(eq(enrollments.memberId, memberId))
+      .orderBy(desc(enrollments.enrollmentDate));
+    return result;
+  }
+
+  async getEnrollmentsBySeason(seasonId: number): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
+    const result = await db
+      .select({
+        id: enrollments.id,
+        memberId: enrollments.memberId,
+        courseId: enrollments.courseId,
+        enrollmentDate: enrollments.enrollmentDate,
+        status: enrollments.status,
+        notes: enrollments.notes,
+        createdAt: enrollments.createdAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberEmail: members.email,
+        memberFiscalCode: members.fiscalCode,
+        memberGender: members.gender,
+        seasonId: enrollments.seasonId,
+      })
+      .from(enrollments)
+      .leftJoin(members, eq(enrollments.memberId, members.id))
+      .where(eq(enrollments.seasonId, seasonId))
+      .orderBy(desc(enrollments.enrollmentDate));
+    return result;
   }
 
   async getEnrollment(id: number): Promise<Enrollment | undefined> {
@@ -1491,16 +1670,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEnrollment(enrollment: InsertEnrollment): Promise<Enrollment> {
-    const [newEnrollment] = await db.insert(enrollments).values(enrollment).returning();
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(enrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(enrollments).where(eq(enrollments.id, result.insertId));
     return newEnrollment;
   }
 
   async updateEnrollment(id: number, enrollment: Partial<InsertEnrollment>): Promise<Enrollment> {
-    const [updated] = await db
+    await db
       .update(enrollments)
       .set(enrollment)
-      .where(eq(enrollments.id, id))
-      .returning();
+      .where(eq(enrollments.id, id));
+
+    const [updated] = await db.select().from(enrollments).where(eq(enrollments.id, id));
     return updated;
   }
 
@@ -1530,7 +1716,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAccessLog(log: InsertAccessLog): Promise<AccessLog> {
-    const [newLog] = await db.insert(accessLogs).values(log).returning();
+    const [result] = await db.insert(accessLogs).values(log);
+    const [newLog] = await db.select().from(accessLogs).where(eq(accessLogs.id, result.insertId));
     return newLog;
   }
 
@@ -1562,11 +1749,20 @@ export class DatabaseStorage implements IStorage {
       // Update existing membership
       await db
         .update(memberships)
-        .set({ ...membershipData, updatedAt: new Date() })
+        .set({
+          ...membershipData,
+          updatedAt: new Date(),
+          issueDate: (membershipData.issueDate as any) instanceof Date ? membershipData.issueDate : new Date(membershipData.issueDate as any),
+          expiryDate: (membershipData.expiryDate as any) instanceof Date ? membershipData.expiryDate : new Date(membershipData.expiryDate as any),
+        } as any)
         .where(eq(memberships.id, existing.id));
     } else {
       // Create new membership
-      await db.insert(memberships).values(membershipData);
+      await db.insert(memberships).values({
+        ...membershipData,
+        issueDate: (membershipData.issueDate as any) instanceof Date ? membershipData.issueDate : new Date(membershipData.issueDate as any),
+        expiryDate: (membershipData.expiryDate as any) instanceof Date ? membershipData.expiryDate : new Date(membershipData.expiryDate as any),
+      } as any);
     }
   }
 
@@ -1594,11 +1790,20 @@ export class DatabaseStorage implements IStorage {
       // Update existing certificate
       await db
         .update(medicalCertificates)
-        .set({ ...certData, updatedAt: new Date() })
+        .set({
+          ...certData,
+          updatedAt: new Date(),
+          issueDate: (certData.issueDate as any) instanceof Date ? certData.issueDate : new Date(certData.issueDate as any),
+          expiryDate: (certData.expiryDate as any) instanceof Date ? certData.expiryDate : new Date(certData.expiryDate as any),
+        } as any)
         .where(eq(medicalCertificates.id, existing.id));
     } else {
       // Create new certificate
-      await db.insert(medicalCertificates).values(certData);
+      await db.insert(medicalCertificates).values({
+        ...certData,
+        issueDate: (certData.issueDate as any) instanceof Date ? certData.issueDate : new Date(certData.issueDate as any),
+        expiryDate: (certData.expiryDate as any) instanceof Date ? certData.expiryDate : new Date(certData.expiryDate as any),
+      } as any);
     }
   }
 
@@ -1631,7 +1836,7 @@ export class DatabaseStorage implements IStorage {
   private async syncMemberFromMedicalCertificate(cert: MedicalCertificate): Promise<void> {
     // If certificate is expired or invalid, clear member certificate flag
     const isValid = cert.status === 'valid' && cert.expiryDate && new Date(cert.expiryDate) >= new Date();
-    
+
     await db
       .update(members)
       .set({
@@ -1658,6 +1863,7 @@ export class DatabaseStorage implements IStorage {
         memberFirstName: members.firstName,
         memberLastName: members.lastName,
         memberFiscalCode: members.fiscalCode,
+        seasonId: attendances.seasonId,
       })
       .from(attendances)
       .leftJoin(members, eq(attendances.memberId, members.id))
@@ -1679,6 +1885,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAttendance(attendanceData: InsertAttendance): Promise<Attendance> {
+    const activeSeason = await this.getActiveSeason();
     // Validate that if enrollmentId is provided, it belongs to the member
     if (attendanceData.enrollmentId) {
       const enrollment = await this.getEnrollment(attendanceData.enrollmentId);
@@ -1697,8 +1904,13 @@ export class DatabaseStorage implements IStorage {
         attendanceData = { ...attendanceData, courseId: enrollment.courseId };
       }
     }
-    
-    const [attendance] = await db.insert(attendances).values(attendanceData).returning();
+
+    const [result] = await db.insert(attendances).values({
+      ...attendanceData,
+      attendanceDate: attendanceData.attendanceDate instanceof Date ? attendanceData.attendanceDate : new Date(attendanceData.attendanceDate),
+      seasonId: attendanceData.seasonId || activeSeason?.id || null
+    } as any);
+    const [attendance] = await db.select().from(attendances).where(eq(attendances.id, result.insertId));
     return attendance;
   }
 
@@ -1707,7 +1919,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Workshop Enrollments ====
-  async getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null })[]> {
+  async getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
     const result = await db
       .select({
         id: workshopEnrollments.id,
@@ -1721,6 +1933,8 @@ export class DatabaseStorage implements IStorage {
         memberLastName: members.lastName,
         memberEmail: members.email,
         memberFiscalCode: members.fiscalCode,
+        memberGender: members.gender,
+        seasonId: workshopEnrollments.seasonId,
       })
       .from(workshopEnrollments)
       .leftJoin(members, eq(workshopEnrollments.memberId, members.id))
@@ -1742,16 +1956,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createWorkshopEnrollment(enrollment: InsertWorkshopEnrollment): Promise<WorkshopEnrollment> {
-    const [newEnrollment] = await db.insert(workshopEnrollments).values(enrollment).returning();
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(workshopEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(workshopEnrollments).where(eq(workshopEnrollments.id, result.insertId));
     return newEnrollment;
   }
 
   async updateWorkshopEnrollment(id: number, enrollment: Partial<InsertWorkshopEnrollment>): Promise<WorkshopEnrollment> {
-    const [updated] = await db
+    await db
       .update(workshopEnrollments)
       .set(enrollment)
-      .where(eq(workshopEnrollments.id, id))
-      .returning();
+      .where(eq(workshopEnrollments.id, id));
+
+    const [updated] = await db.select().from(workshopEnrollments).where(eq(workshopEnrollments.id, id));
     return updated;
   }
 
@@ -1770,7 +1991,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createWorkshopAttendance(attendance: InsertWorkshopAttendance): Promise<WorkshopAttendance> {
-    const [newAttendance] = await db.insert(workshopAttendances).values(attendance).returning();
+    const activeSeason = await this.getActiveSeason();
+    const [result] = await db.insert(workshopAttendances).values({
+      ...attendance,
+      attendanceDate: attendance.attendanceDate instanceof Date ? attendance.attendanceDate : new Date(attendance.attendanceDate),
+      seasonId: attendance.seasonId || activeSeason?.id || null
+    } as any);
+    const [newAttendance] = await db.select().from(workshopAttendances).where(eq(workshopAttendances.id, result.insertId));
     return newAttendance;
   }
 
@@ -1794,7 +2021,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMemberRelationship(relationship: InsertMemberRelationship): Promise<MemberRelationship> {
-    const [newRelationship] = await db.insert(memberRelationships).values(relationship).returning();
+    const [result] = await db.insert(memberRelationships).values(relationship);
+    const [newRelationship] = await db.select().from(memberRelationships).where(eq(memberRelationships.id, result.insertId));
     return newRelationship;
   }
 
@@ -1808,7 +2036,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCountry(country: InsertCountry): Promise<Country> {
-    const [newCountry] = await db.insert(countries).values(country).returning();
+    const [result] = await db.insert(countries).values(country);
+    const [newCountry] = await db.select().from(countries).where(eq(countries.id, result.insertId));
     return newCountry;
   }
 
@@ -1820,7 +2049,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProvince(province: InsertProvince): Promise<Province> {
-    const [newProvince] = await db.insert(provinces).values(province).returning();
+    const [result] = await db.insert(provinces).values(province);
+    const [newProvince] = await db.select().from(provinces).where(eq(provinces.id, result.insertId));
     return newProvince;
   }
 
@@ -1838,7 +2068,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(cities)
       .leftJoin(provinces, eq(cities.provinceId, provinces.id))
-      .where(ilike(cities.name, `%${search}%`))
+      .where(ilike(cities.name, `% ${search}% `))
       .orderBy(cities.name)
       .limit(limit);
 
@@ -1862,8 +2092,44 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(cities).where(eq(cities.provinceId, provinceId)).orderBy(cities.name);
   }
 
+  async getCityByIstatCode(code: string): Promise<(City & { province?: Province }) | undefined> {
+    const [result] = await db
+      .select({
+        id: cities.id,
+        name: cities.name,
+        provinceId: cities.provinceId,
+        postalCode: cities.postalCode,
+        istatCode: cities.istatCode,
+        provinceName: provinces.name,
+        provinceCode: provinces.code,
+        region: provinces.region,
+      })
+      .from(cities)
+      .leftJoin(provinces, eq(cities.provinceId, provinces.id))
+      .where(eq(cities.istatCode, code.toUpperCase()))
+      .limit(1);
+
+    if (!result) return undefined;
+
+    return {
+      id: result.id,
+      name: result.name,
+      provinceId: result.provinceId,
+      postalCode: result.postalCode,
+      istatCode: result.istatCode,
+      province: result.provinceId ? {
+        id: result.provinceId,
+        code: result.provinceCode || "",
+        name: result.provinceName || "",
+        region: result.region,
+        countryId: null,
+      } : undefined,
+    };
+  }
+
   async createCity(city: InsertCity): Promise<City> {
-    const [newCity] = await db.insert(cities).values(city).returning();
+    const [result] = await db.insert(cities).values(city);
+    const [newCity] = await db.select().from(cities).where(eq(cities.id, result.insertId));
     return newCity;
   }
 
@@ -1878,16 +2144,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCustomReport(report: InsertCustomReport): Promise<CustomReport> {
-    const [newReport] = await db.insert(customReports).values(report).returning();
+    const [result] = await db.insert(customReports).values(report as any);
+    const [newReport] = await db.select().from(customReports).where(eq(customReports.id, result.insertId));
     return newReport;
   }
 
   async updateCustomReport(id: number, report: Partial<InsertCustomReport>): Promise<CustomReport> {
-    const [updated] = await db
+    await db
       .update(customReports)
-      .set({ ...report, updatedAt: new Date() })
-      .where(eq(customReports.id, id))
-      .returning();
+      .set({ ...report, updatedAt: new Date() } as any)
+      .where(eq(customReports.id, id));
+
+    const [updated] = await db.select().from(customReports).where(eq(customReports.id, id));
     return updated;
   }
 
@@ -1900,7 +2168,7 @@ export class DatabaseStorage implements IStorage {
     let conditions = [];
     if (entityType) conditions.push(eq(importConfigs.entityType, entityType));
     if (sourceType) conditions.push(eq(importConfigs.sourceType, sourceType));
-    
+
     if (conditions.length > 0) {
       return await db.select().from(importConfigs)
         .where(and(...conditions))
@@ -1915,181 +2183,783 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createImportConfig(config: InsertImportConfig): Promise<ImportConfig> {
-    const [newConfig] = await db.insert(importConfigs).values(config).returning();
+    const [result] = await db.insert(importConfigs).values(config as any);
+    const [newConfig] = await db.select().from(importConfigs).where(eq(importConfigs.id, result.insertId));
     return newConfig;
   }
-
   async deleteImportConfig(id: number): Promise<void> {
     await db.delete(importConfigs).where(eq(importConfigs.id, id));
   }
 
-  // Knowledge operations
-  async getAllKnowledge(): Promise<Knowledge[]> {
-    return await db.select().from(knowledge).orderBy(knowledge.sezione, knowledge.titolo);
+  // Price Lists
+  async getPriceLists(): Promise<PriceList[]> {
+    return await db.select().from(priceLists).orderBy(desc(priceLists.validFrom));
   }
 
-  async getKnowledgeById(id: string): Promise<Knowledge | undefined> {
-    const [item] = await db.select().from(knowledge).where(eq(knowledge.id, id));
-    return item;
+  async getPriceList(id: number): Promise<PriceList | undefined> {
+    const [result] = await db.select().from(priceLists).where(eq(priceLists.id, id));
+    return result;
   }
 
-  async upsertKnowledge(item: InsertKnowledge): Promise<Knowledge> {
-    const existing = await this.getKnowledgeById(item.id);
-    if (existing) {
-      const [updated] = await db.update(knowledge)
-        .set({ ...item, updatedAt: new Date() })
-        .where(eq(knowledge.id, item.id))
-        .returning();
-      return updated;
+  async getPriceListItems(priceListId: number): Promise<PriceListItem[]> {
+    return await db.select().from(priceListItems).where(eq(priceListItems.priceListId, priceListId));
+  }
+
+  async createPriceList(priceList: InsertPriceList): Promise<PriceList> {
+    console.log("DB: Inserting price list:", JSON.stringify(priceList, null, 2));
+    const [result] = await db.insert(priceLists).values(priceList);
+    console.log("DB: Insert result:", JSON.stringify(result, null, 2));
+
+    const insertId = result.insertId;
+    if (!insertId) {
+      console.warn("DB: Warning - insertId is missing from result. Attempting detailed fetch.");
     }
-    const [newItem] = await db.insert(knowledge).values(item).returning();
-    return newItem;
+
+    const [inserted] = await db.select().from(priceLists).where(eq(priceLists.id, insertId));
+
+    if (!inserted) {
+      console.error("DB: CRITICAL - Could not find inserted price list with ID:", insertId);
+      // Fallback: try to find by name and recent creation if ID lookup fails
+      const [fallback] = await db.select().from(priceLists)
+        .where(eq(priceLists.name, priceList.name))
+        .orderBy(desc(priceLists.createdAt)) // assuming you have createdAt or id
+        .limit(1);
+
+      if (fallback) {
+        console.log("DB: Recovered price list via fallback search:", fallback);
+        return fallback;
+      }
+      throw new Error(`Failed to retrieve created price list with ID ${insertId}`);
+    }
+
+    return inserted;
   }
 
-  async deleteKnowledge(id: string): Promise<void> {
-    await db.delete(knowledge).where(eq(knowledge.id, id));
-  }
-
-  // ==== Activity Statuses ====
-  async getActivityStatuses(): Promise<ActivityStatus[]> {
-    return await db.select().from(activityStatuses).orderBy(activityStatuses.sortOrder);
-  }
-
-  async getActivityStatus(id: number): Promise<ActivityStatus | undefined> {
-    const [status] = await db.select().from(activityStatuses).where(eq(activityStatuses.id, id));
-    return status;
-  }
-
-  async createActivityStatus(status: InsertActivityStatus): Promise<ActivityStatus> {
-    const [newStatus] = await db.insert(activityStatuses).values(status).returning();
-    return newStatus;
-  }
-
-  async updateActivityStatus(id: number, status: Partial<InsertActivityStatus>): Promise<ActivityStatus> {
-    const [updated] = await db.update(activityStatuses).set(status).where(eq(activityStatuses.id, id)).returning();
+  async updatePriceList(id: number, priceList: Partial<InsertPriceList>): Promise<PriceList> {
+    await db.update(priceLists).set(priceList).where(eq(priceLists.id, id));
+    const [updated] = await db.select().from(priceLists).where(eq(priceLists.id, id));
+    if (!updated) throw new Error("Price list not found after update");
     return updated;
   }
 
-  async deleteActivityStatus(id: number): Promise<void> {
-    await db.delete(activityStatuses).where(eq(activityStatuses.id, id));
+  async deletePriceList(id: number): Promise<void> {
+    await db.delete(priceLists).where(eq(priceLists.id, id));
   }
 
-  async getPaymentNotes(): Promise<PaymentNote[]> {
-    return await db.select().from(paymentNotes).orderBy(paymentNotes.sortOrder);
+  async upsertPriceListItem(item: InsertPriceListItem): Promise<PriceListItem> {
+    // Check if item exists
+    const [existing] = await db
+      .select()
+      .from(priceListItems)
+      .where(
+        and(
+          eq(priceListItems.priceListId, item.priceListId),
+          eq(priceListItems.entityType, item.entityType),
+          eq(priceListItems.entityId, item.entityId)
+        )
+      );
+
+    if (existing) {
+      await db.update(priceListItems).set(item).where(eq(priceListItems.id, existing.id));
+      const [updated] = await db.select().from(priceListItems).where(eq(priceListItems.id, existing.id));
+      return updated!;
+    } else {
+      const [result] = await db.insert(priceListItems).values(item);
+      const [inserted] = await db.select().from(priceListItems).where(eq(priceListItems.id, result.insertId));
+      return inserted;
+    }
   }
 
-  async getPaymentNote(id: number): Promise<PaymentNote | undefined> {
-    const [note] = await db.select().from(paymentNotes).where(eq(paymentNotes.id, id));
-    return note;
+  async getQuotes(): Promise<Quote[]> {
+    return await db.select().from(quotes).orderBy(desc(quotes.createdAt));
   }
 
-  async createPaymentNote(note: InsertPaymentNote): Promise<PaymentNote> {
-    const [newNote] = await db.insert(paymentNotes).values(note).returning();
-    return newNote;
+  async createQuote(quote: InsertQuote): Promise<Quote> {
+    const [result] = await db.insert(quotes).values(quote);
+    const [inserted] = await db.select().from(quotes).where(eq(quotes.id, result.insertId));
+    return inserted;
   }
 
-  async updatePaymentNote(id: number, note: Partial<InsertPaymentNote>): Promise<PaymentNote> {
-    const [updated] = await db.update(paymentNotes).set(note).where(eq(paymentNotes.id, id)).returning();
+  async updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote> {
+    await db.update(quotes).set(quote).where(eq(quotes.id, id));
+
+    // Propagate price update to linked items
+    if (quote.amount) {
+      await db.update(priceListItems)
+        .set({ price: quote.amount.toString() })
+        .where(eq(priceListItems.quoteId, id));
+
+      await db.update(courses)
+        .set({ price: quote.amount.toString() })
+        .where(eq(courses.quoteId, id));
+    }
+
+    const [updated] = await db.select().from(quotes).where(eq(quotes.id, id));
+    if (!updated) throw new Error("Quote not found");
     return updated;
   }
 
-  async deletePaymentNote(id: number): Promise<void> {
-    await db.delete(paymentNotes).where(eq(paymentNotes.id, id));
+  async deleteQuote(id: number): Promise<void> {
+    await db.delete(quotes).where(eq(quotes.id, id));
   }
 
-  async getEnrollmentDetails(): Promise<EnrollmentDetail[]> {
-    return await db.select().from(enrollmentDetails).orderBy(enrollmentDetails.sortOrder);
+  async getPaidTrials(): Promise<PaidTrial[]> {
+    return await db.select().from(paidTrials).orderBy(desc(paidTrials.createdAt));
   }
 
-  async getEnrollmentDetail(id: number): Promise<EnrollmentDetail | undefined> {
-    const [detail] = await db.select().from(enrollmentDetails).where(eq(enrollmentDetails.id, id));
-    return detail;
+  async createPaidTrial(trial: InsertPaidTrial): Promise<PaidTrial> {
+    const [result] = await db.insert(paidTrials).values(trial);
+    const [inserted] = await db.select().from(paidTrials).where(eq(paidTrials.id, result.insertId));
+    return inserted;
   }
 
-  async createEnrollmentDetail(detail: InsertEnrollmentDetail): Promise<EnrollmentDetail> {
-    const [newDetail] = await db.insert(enrollmentDetails).values(detail).returning();
-    return newDetail;
-  }
-
-  async updateEnrollmentDetail(id: number, detail: Partial<InsertEnrollmentDetail>): Promise<EnrollmentDetail> {
-    const [updated] = await db.update(enrollmentDetails).set(detail).where(eq(enrollmentDetails.id, id)).returning();
+  async updatePaidTrial(id: number, trial: Partial<InsertPaidTrial>): Promise<PaidTrial> {
+    await db.update(paidTrials).set(trial).where(eq(paidTrials.id, id));
+    const [updated] = await db.select().from(paidTrials).where(eq(paidTrials.id, id));
+    if (!updated) throw new Error("Paid Trial not found");
     return updated;
   }
 
-  async deleteEnrollmentDetail(id: number): Promise<void> {
-    await db.delete(enrollmentDetails).where(eq(enrollmentDetails.id, id));
+  async deletePaidTrial(id: number): Promise<void> {
+    await db.delete(paidTrials).where(eq(paidTrials.id, id));
   }
 
-  // ==== Team Comments ====
-  async getTeamComments(): Promise<TeamComment[]> {
-    return await db.select().from(teamComments).orderBy(desc(teamComments.createdAt));
+  async deletePriceListItem(id: number): Promise<void> {
+    await db.delete(priceListItems).where(eq(priceListItems.id, id));
   }
 
-  async getTeamComment(id: number): Promise<TeamComment | undefined> {
-    const [comment] = await db.select().from(teamComments).where(eq(teamComments.id, id));
-    return comment;
+  // Notifications
+  async getNotifications(userId: string): Promise<Notification[]> {
+    return await db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
   }
 
-  async createTeamComment(comment: InsertTeamComment): Promise<TeamComment> {
-    const [newComment] = await db.insert(teamComments).values(comment).returning();
-    return newComment;
-  }
-
-  async updateTeamComment(id: number, comment: Partial<InsertTeamComment>): Promise<TeamComment> {
-    const [updated] = await db.update(teamComments).set({ ...comment, updatedAt: new Date() }).where(eq(teamComments.id, id)).returning();
-    return updated;
-  }
-
-  async deleteTeamComment(id: number): Promise<void> {
-    await db.delete(teamComments).where(eq(teamComments.id, id));
-  }
-
-  // ==== Team Notes ====
-  async getTeamNotes(): Promise<TeamNote[]> {
-    return await db.select().from(teamNotes).orderBy(desc(teamNotes.isPinned), desc(teamNotes.createdAt));
-  }
-
-  async getTeamNote(id: number): Promise<TeamNote | undefined> {
-    const [note] = await db.select().from(teamNotes).where(eq(teamNotes.id, id));
-    return note;
-  }
-
-  async createTeamNote(note: InsertTeamNote): Promise<TeamNote> {
-    const [newNote] = await db.insert(teamNotes).values(note).returning();
-    return newNote;
-  }
-
-  async updateTeamNote(id: number, note: Partial<InsertTeamNote>): Promise<TeamNote> {
-    const [updated] = await db.update(teamNotes).set({ ...note, updatedAt: new Date() }).where(eq(teamNotes.id, id)).returning();
-    return updated;
-  }
-
-  async deleteTeamNote(id: number): Promise<void> {
-    await db.delete(teamNotes).where(eq(teamNotes.id, id));
-  }
-
-  // ==== Team Notifications ====
-  async getTeamNotifications(userId: string): Promise<TeamNotification[]> {
-    return await db.select().from(teamNotifications).where(eq(teamNotifications.userId, userId)).orderBy(desc(teamNotifications.createdAt));
-  }
-
-  async getUnreadNotificationCount(userId: string): Promise<number> {
-    const [result] = await db.select({ count: sql<number>`count(*)::int` }).from(teamNotifications).where(and(eq(teamNotifications.userId, userId), eq(teamNotifications.isRead, false)));
-    return result?.count || 0;
-  }
-
-  async createTeamNotification(notification: InsertTeamNotification): Promise<TeamNotification> {
-    const [newNotification] = await db.insert(teamNotifications).values(notification).returning();
-    return newNotification;
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [result] = await db.insert(notifications).values(notification);
+    const [inserted] = await db.select().from(notifications).where(eq(notifications.id, result.insertId));
+    return inserted;
   }
 
   async markNotificationRead(id: number): Promise<void> {
-    await db.update(teamNotifications).set({ isRead: true }).where(eq(teamNotifications.id, id));
+    await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id));
   }
 
   async markAllNotificationsRead(userId: string): Promise<void> {
-    await db.update(teamNotifications).set({ isRead: true }).where(eq(teamNotifications.userId, userId));
+    await db.update(notifications).set({ isRead: true }).where(eq(notifications.userId, userId));
   }
+
+  async checkStudioConflict(
+    studioId: number,
+    bookingDateValue: Date | string,
+    startTime: string,
+    endTime: string,
+    currentBookingId?: number
+  ): Promise<{ type: 'booking' | 'course' | 'workshop' | 'operating_hours', name: string } | null> {
+    const bookingDate = bookingDateValue instanceof Date ? bookingDateValue : new Date(bookingDateValue);
+    if (isNaN(bookingDate.getTime())) {
+      console.error("Invalid date passed to checkStudioConflict:", bookingDateValue);
+      return null;
+    }
+    const dateStr = bookingDate.toISOString().split('T')[0];
+
+    // Helper: Convert "HH:MM" to minutes
+    const toMinutes = (time: string) => {
+      if (!time) return 0;
+      const [h, m] = time.split(':').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+
+    const startMin = toMinutes(startTime);
+    const endMin = toMinutes(endTime);
+
+    // 0. Check Operating Hours/Days and Studio Availability
+    const studio = await this.getStudio(studioId);
+    if (studio) {
+      if (!studio.active) {
+        return { type: 'operating_hours', name: "Studio non disponibile (disattivato)" };
+      }
+
+      const daysAbbr = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
+      const dayOfWeek = daysAbbr[bookingDate.getDay()];
+
+      // Parse operating days
+      let opDays: string[] = [];
+      if (typeof studio.operatingDays === 'string') {
+        try { opDays = JSON.parse(studio.operatingDays); } catch { opDays = []; }
+      } else if (Array.isArray(studio.operatingDays)) {
+        opDays = studio.operatingDays as string[];
+      }
+
+      if (opDays.length > 0 && !opDays.includes(dayOfWeek)) {
+        return { type: 'operating_hours', name: `Studio chiuso il ${dayOfWeek}` };
+      }
+
+      // Parse operating hours
+      let opHours: { start: string, end: string } | null = null;
+      if (typeof studio.operatingHours === 'string') {
+        try { opHours = JSON.parse(studio.operatingHours); } catch { opHours = null; }
+      } else if (studio.operatingHours && typeof studio.operatingHours === 'object') {
+        opHours = studio.operatingHours as any;
+      }
+
+      if (opHours?.start && opHours?.end) {
+        const opStart = toMinutes(opHours.start);
+        const opEnd = toMinutes(opHours.end);
+
+        if (startMin < opStart || endMin > opEnd) {
+          return { type: 'operating_hours', name: `Fuori orario apertura (${opHours.start} - ${opHours.end})` };
+        }
+      }
+    }
+
+    const isOverlapping = (itemStart: string, itemEnd: string) => {
+      const s = toMinutes(itemStart);
+      const e = toMinutes(itemEnd);
+      return s < endMin && e > startMin;
+    };
+
+    // Get day of week shorthand (LUN, MAR, etc.)
+    const days = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
+    const dayOfWeek = days[bookingDate.getDay()];
+
+    // 1. Check Studio Bookings (Specific Date)
+    const bookingConditions = [
+      eq(studioBookings.studioId, studioId),
+      sql`DATE(${studioBookings.bookingDate}) = ${dateStr} `
+    ];
+    if (currentBookingId) {
+      bookingConditions.push(sql`${studioBookings.id} != ${currentBookingId} `);
+    }
+
+    const dayBookings = await db
+      .select({
+        id: studioBookings.id,
+        title: studioBookings.title,
+        serviceName: bookingServices.name,
+        startTime: studioBookings.startTime,
+        endTime: studioBookings.endTime,
+        status: studioBookings.status
+      })
+      .from(studioBookings)
+      .leftJoin(bookingServices, eq(studioBookings.serviceId, bookingServices.id))
+      .where(and(...bookingConditions));
+
+    for (const b of dayBookings) {
+      if (b.status !== 'cancelled' && isOverlapping(b.startTime, b.endTime)) {
+        return { type: 'booking', name: b.serviceName || b.title || 'Altra prenotazione' };
+      }
+    }
+
+    // 2. Check Courses (Recurring)
+    // IMPORTANT: Filter by Active Season to avoid conflicts with old courses
+    const activeSeason = await this.getActiveSeason();
+    const courseConditions = [
+      eq(courses.studioId, studioId),
+      eq(courses.active, true),
+      sql`UPPER(${courses.dayOfWeek}) LIKE ${dayOfWeek + '%'} `
+    ];
+
+    if (activeSeason) {
+      courseConditions.push(eq(courses.seasonId, activeSeason.id));
+    }
+
+    const potentialCourses = await db
+      .select({
+        name: courses.name,
+        startTime: courses.startTime,
+        endTime: courses.endTime,
+        startDate: courses.startDate,
+        endDate: courses.endDate
+      })
+      .from(courses)
+      .where(and(...courseConditions));
+
+    for (const c of potentialCourses) {
+      // Check specific date range if set
+      if (c.startDate) {
+        const cStart = new Date(c.startDate).toISOString().split('T')[0];
+        if (cStart > dateStr) continue;
+      }
+      if (c.endDate) {
+        const cEnd = new Date(c.endDate).toISOString().split('T')[0];
+        if (cEnd < dateStr) continue;
+      }
+
+      if (c.startTime && c.endTime && isOverlapping(c.startTime, c.endTime)) {
+        return { type: 'course', name: c.name };
+      }
+    }
+
+    // 3. Check Workshops (Specific Dates)
+    const workshopConditions = [
+      eq(workshops.studioId, studioId),
+      eq(workshops.active, true),
+      // Basic overlap check in SQL to reduce result set, refined in JS
+      sql`DATE(${workshops.startDate}) <= ${dateStr}`,
+      sql`DATE(${workshops.endDate}) >= ${dateStr}`
+    ];
+
+    const potentialWorkshops = await db
+      .select({
+        name: workshops.name,
+        startTime: workshops.startTime,
+        endTime: workshops.endTime,
+        dayOfWeek: workshops.dayOfWeek
+      })
+      .from(workshops)
+      .where(and(...workshopConditions));
+
+    for (const w of potentialWorkshops) {
+      // Verify Day of Week matches
+      if (w.dayOfWeek && !w.dayOfWeek.toUpperCase().startsWith(dayOfWeek)) continue;
+
+      if (w.startTime && w.endTime && isOverlapping(w.startTime, w.endTime)) {
+        return { type: 'workshop', name: w.name };
+      }
+    }
+
+    return null;
+  }
+
+  // System Config operations
+  async getSystemConfig(keyName: string): Promise<SystemConfig | undefined> {
+    const [config] = await db.select().from(systemConfigs).where(eq(systemConfigs.keyName, keyName));
+    return config;
+  }
+
+  async updateSystemConfig(keyName: string, value: string): Promise<SystemConfig> {
+    const existing = await this.getSystemConfig(keyName);
+    if (existing) {
+      await db
+        .update(systemConfigs)
+        .set({ value, updatedAt: new Date() })
+        .where(eq(systemConfigs.keyName, keyName));
+    } else {
+      await db
+        .insert(systemConfigs)
+        .values({ keyName, value });
+    }
+    const refreshed = await this.getSystemConfig(keyName);
+    return refreshed!;
+  }
+
+  // ==== Season operations ====
+  async getSeasons(): Promise<Season[]> {
+    return await db.select().from(seasons).orderBy(desc(seasons.startDate));
+  }
+
+  async getSeason(id: number): Promise<Season | undefined> {
+    const [season] = await db.select().from(seasons).where(eq(seasons.id, id));
+    return season;
+  }
+
+  async getActiveSeason(): Promise<Season | undefined> {
+    const [season] = await db.select().from(seasons).where(eq(seasons.active, true)).limit(1);
+    return season;
+  }
+  async getStudioBookingsBySeason(seasonId: number): Promise<(StudioBooking & { memberFirstName?: string | null; memberLastName?: string | null; studioName?: string | null; serviceName?: string | null; serviceColor?: string | null })[]> {
+    return await this.getStudioBookings(undefined, undefined, seasonId);
+  }
+
+  async getPaymentsBySeason(seasonId: number): Promise<(Payment & { memberFirstName?: string; memberLastName?: string })[]> {
+    const result = await db
+      .select({
+        id: payments.id,
+        memberId: payments.memberId,
+        enrollmentId: payments.enrollmentId,
+        amount: payments.amount,
+        type: payments.type,
+        description: payments.description,
+        dueDate: payments.dueDate,
+        paidDate: payments.paidDate,
+        status: payments.status,
+        paymentMethod: payments.paymentMethod,
+        paymentMethodId: payments.paymentMethodId,
+        notes: payments.notes,
+        createdAt: payments.createdAt,
+        updatedAt: payments.updatedAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        seasonId: payments.seasonId,
+        workshopEnrollmentId: payments.workshopEnrollmentId,
+        bookingId: payments.bookingId,
+        membershipId: payments.membershipId,
+      })
+      .from(payments)
+      .leftJoin(members, eq(payments.memberId, members.id))
+      .where(eq(payments.seasonId, seasonId))
+      .orderBy(desc(payments.paidDate));
+    return result as any;
+  }
+
+  async getAttendancesBySeason(seasonId: number): Promise<Attendance[]> {
+    return await db.select().from(attendances).where(eq(attendances.seasonId, seasonId)).orderBy(desc(attendances.attendanceDate));
+  }
+
+  async createSeason(seasonData: InsertSeason): Promise<Season> {
+    const [newSeason] = await db.insert(seasons).values(seasonData);
+    const id = (newSeason as any).insertId || (newSeason as any).id;
+    const fetched = await this.getSeason(id);
+    return fetched!;
+  }
+
+  async updateSeason(id: number, seasonData: Partial<Season>): Promise<Season> {
+    await db.update(seasons).set({ ...seasonData, updatedAt: new Date() }).where(eq(seasons.id, id));
+    const fetched = await this.getSeason(id);
+    return fetched!;
+  }
+
+  async setActiveSeason(id: number): Promise<void> {
+    // Deactivate all others first
+    await db.update(seasons).set({ active: false, updatedAt: new Date() });
+    // Activate the requested one
+    await db.update(seasons).set({ active: true, updatedAt: new Date() }).where(eq(seasons.id, id));
+  }
+
+  // ==== WorkshopCategories ====
+  async getWorkshopCategories(): Promise<WorkshopCategory[]> {
+    return await db.select().from(workshopCategories);
+  }
+  async getWorkshopCategory(id: number): Promise<WorkshopCategory | undefined> {
+    const [item] = await db.select().from(workshopCategories).where(eq(workshopCategories.id, id));
+    return item;
+  }
+  async createWorkshopCategory(data: InsertWorkshopCategory): Promise<WorkshopCategory> {
+    const [result] = await db.insert(workshopCategories).values(data as any);
+    const [newItem] = await db.select().from(workshopCategories).where(eq(workshopCategories.id, result.insertId));
+    return newItem;
+  }
+  async updateWorkshopCategory(id: number, data: Partial<InsertWorkshopCategory>): Promise<WorkshopCategory> {
+    await db.update(workshopCategories).set({ ...data, updatedAt: new Date() } as any).where(eq(workshopCategories.id, id));
+    const [item] = await db.select().from(workshopCategories).where(eq(workshopCategories.id, id));
+    if (!item) throw new Error("WorkshopCategory not found");
+    return item;
+  }
+  async deleteWorkshopCategory(id: number): Promise<void> {
+    await db.delete(workshopCategories).where(eq(workshopCategories.id, id));
+  }
+
+  // ==== SundayCategories ====
+  async getSundayCategories(): Promise<SundayCategory[]> {
+    return await db.select().from(sundayCategories);
+  }
+  async getSundayCategory(id: number): Promise<SundayCategory | undefined> {
+    const [item] = await db.select().from(sundayCategories).where(eq(sundayCategories.id, id));
+    return item;
+  }
+  async createSundayCategory(data: InsertSundayCategory): Promise<SundayCategory> {
+    const [result] = await db.insert(sundayCategories).values(data as any);
+    const [newItem] = await db.select().from(sundayCategories).where(eq(sundayCategories.id, result.insertId));
+    return newItem;
+  }
+  async updateSundayCategory(id: number, data: Partial<InsertSundayCategory>): Promise<SundayCategory> {
+    await db.update(sundayCategories).set({ ...data, updatedAt: new Date() } as any).where(eq(sundayCategories.id, id));
+    const [item] = await db.select().from(sundayCategories).where(eq(sundayCategories.id, id));
+    if (!item) throw new Error("SundayCategory not found");
+    return item;
+  }
+  async deleteSundayCategory(id: number): Promise<void> {
+    await db.delete(sundayCategories).where(eq(sundayCategories.id, id));
+  }
+
+  // ==== TrainingCategories ====
+  async getTrainingCategories(): Promise<TrainingCategory[]> {
+    return await db.select().from(trainingCategories);
+  }
+  async getTrainingCategory(id: number): Promise<TrainingCategory | undefined> {
+    const [item] = await db.select().from(trainingCategories).where(eq(trainingCategories.id, id));
+    return item;
+  }
+  async createTrainingCategory(data: InsertTrainingCategory): Promise<TrainingCategory> {
+    const [result] = await db.insert(trainingCategories).values(data as any);
+    const [newItem] = await db.select().from(trainingCategories).where(eq(trainingCategories.id, result.insertId));
+    return newItem;
+  }
+  async updateTrainingCategory(id: number, data: Partial<InsertTrainingCategory>): Promise<TrainingCategory> {
+    await db.update(trainingCategories).set({ ...data, updatedAt: new Date() } as any).where(eq(trainingCategories.id, id));
+    const [item] = await db.select().from(trainingCategories).where(eq(trainingCategories.id, id));
+    if (!item) throw new Error("TrainingCategory not found");
+    return item;
+  }
+  async deleteTrainingCategory(id: number): Promise<void> {
+    await db.delete(trainingCategories).where(eq(trainingCategories.id, id));
+  }
+
+  // ==== IndividualLessonCategories ====
+  async getIndividualLessonCategories(): Promise<IndividualLessonCategory[]> {
+    return await db.select().from(individualLessonCategories);
+  }
+  async getIndividualLessonCategory(id: number): Promise<IndividualLessonCategory | undefined> {
+    const [item] = await db.select().from(individualLessonCategories).where(eq(individualLessonCategories.id, id));
+    return item;
+  }
+  async createIndividualLessonCategory(data: InsertIndividualLessonCategory): Promise<IndividualLessonCategory> {
+    const [result] = await db.insert(individualLessonCategories).values(data as any);
+    const [newItem] = await db.select().from(individualLessonCategories).where(eq(individualLessonCategories.id, result.insertId));
+    return newItem;
+  }
+  async updateIndividualLessonCategory(id: number, data: Partial<InsertIndividualLessonCategory>): Promise<IndividualLessonCategory> {
+    await db.update(individualLessonCategories).set({ ...data, updatedAt: new Date() } as any).where(eq(individualLessonCategories.id, id));
+    const [item] = await db.select().from(individualLessonCategories).where(eq(individualLessonCategories.id, id));
+    if (!item) throw new Error("IndividualLessonCategory not found");
+    return item;
+  }
+  async deleteIndividualLessonCategory(id: number): Promise<void> {
+    await db.delete(individualLessonCategories).where(eq(individualLessonCategories.id, id));
+  }
+
+  // ==== CampusCategories ====
+  async getCampusCategories(): Promise<CampusCategory[]> {
+    return await db.select().from(campusCategories);
+  }
+  async getCampusCategory(id: number): Promise<CampusCategory | undefined> {
+    const [item] = await db.select().from(campusCategories).where(eq(campusCategories.id, id));
+    return item;
+  }
+  async createCampusCategory(data: InsertCampusCategory): Promise<CampusCategory> {
+    const [result] = await db.insert(campusCategories).values(data as any);
+    const [newItem] = await db.select().from(campusCategories).where(eq(campusCategories.id, result.insertId));
+    return newItem;
+  }
+  async updateCampusCategory(id: number, data: Partial<InsertCampusCategory>): Promise<CampusCategory> {
+    await db.update(campusCategories).set({ ...data, updatedAt: new Date() } as any).where(eq(campusCategories.id, id));
+    const [item] = await db.select().from(campusCategories).where(eq(campusCategories.id, id));
+    if (!item) throw new Error("CampusCategory not found");
+    return item;
+  }
+  async deleteCampusCategory(id: number): Promise<void> {
+    await db.delete(campusCategories).where(eq(campusCategories.id, id));
+  }
+
+  // ==== RecitalCategories ====
+  async getRecitalCategories(): Promise<RecitalCategory[]> {
+    return await db.select().from(recitalCategories);
+  }
+  async getRecitalCategory(id: number): Promise<RecitalCategory | undefined> {
+    const [item] = await db.select().from(recitalCategories).where(eq(recitalCategories.id, id));
+    return item;
+  }
+  async createRecitalCategory(data: InsertRecitalCategory): Promise<RecitalCategory> {
+    const [result] = await db.insert(recitalCategories).values(data as any);
+    const [newItem] = await db.select().from(recitalCategories).where(eq(recitalCategories.id, result.insertId));
+    return newItem;
+  }
+  async updateRecitalCategory(id: number, data: Partial<InsertRecitalCategory>): Promise<RecitalCategory> {
+    await db.update(recitalCategories).set({ ...data, updatedAt: new Date() } as any).where(eq(recitalCategories.id, id));
+    const [item] = await db.select().from(recitalCategories).where(eq(recitalCategories.id, id));
+    if (!item) throw new Error("RecitalCategory not found");
+    return item;
+  }
+  async deleteRecitalCategory(id: number): Promise<void> {
+    await db.delete(recitalCategories).where(eq(recitalCategories.id, id));
+  }
+
+  // ==== VacationCategories ====
+  async getVacationCategories(): Promise<VacationCategory[]> {
+    return await db.select().from(vacationCategories);
+  }
+  async getVacationCategory(id: number): Promise<VacationCategory | undefined> {
+    const [item] = await db.select().from(vacationCategories).where(eq(vacationCategories.id, id));
+    return item;
+  }
+  async createVacationCategory(data: InsertVacationCategory): Promise<VacationCategory> {
+    const [result] = await db.insert(vacationCategories).values(data as any);
+    const [newItem] = await db.select().from(vacationCategories).where(eq(vacationCategories.id, result.insertId));
+    return newItem;
+  }
+  async updateVacationCategory(id: number, data: Partial<InsertVacationCategory>): Promise<VacationCategory> {
+    await db.update(vacationCategories).set({ ...data, updatedAt: new Date() } as any).where(eq(vacationCategories.id, id));
+    const [item] = await db.select().from(vacationCategories).where(eq(vacationCategories.id, id));
+    if (!item) throw new Error("VacationCategory not found");
+    return item;
+  }
+  async deleteVacationCategory(id: number): Promise<void> {
+    await db.delete(vacationCategories).where(eq(vacationCategories.id, id));
+  }
+
+  // ==== FreeTrials ====
+  async getFreeTrials(): Promise<FreeTrial[]> {
+    return await db.select().from(freeTrials);
+  }
+  async getFreeTrial(id: number): Promise<FreeTrial | undefined> {
+    const [item] = await db.select().from(freeTrials).where(eq(freeTrials.id, id));
+    return item;
+  }
+  async createFreeTrial(data: InsertFreeTrial): Promise<FreeTrial> {
+    const [result] = await db.insert(freeTrials).values(data as any);
+    const [newItem] = await db.select().from(freeTrials).where(eq(freeTrials.id, result.insertId));
+    return newItem;
+  }
+  async updateFreeTrial(id: number, data: Partial<InsertFreeTrial>): Promise<FreeTrial> {
+    await db.update(freeTrials).set({ ...data, updatedAt: new Date() } as any).where(eq(freeTrials.id, id));
+    const [item] = await db.select().from(freeTrials).where(eq(freeTrials.id, id));
+    if (!item) throw new Error("FreeTrial not found");
+    return item;
+  }
+  async deleteFreeTrial(id: number): Promise<void> {
+    await db.delete(freeTrials).where(eq(freeTrials.id, id));
+  }
+
+  // ==== SingleLessons ====
+  async getSingleLessons(): Promise<SingleLesson[]> {
+    return await db.select().from(singleLessons);
+  }
+  async getSingleLesson(id: number): Promise<SingleLesson | undefined> {
+    const [item] = await db.select().from(singleLessons).where(eq(singleLessons.id, id));
+    return item;
+  }
+  async createSingleLesson(data: InsertSingleLesson): Promise<SingleLesson> {
+    const [result] = await db.insert(singleLessons).values(data as any);
+    const [newItem] = await db.select().from(singleLessons).where(eq(singleLessons.id, result.insertId));
+    return newItem;
+  }
+  async updateSingleLesson(id: number, data: Partial<InsertSingleLesson>): Promise<SingleLesson> {
+    await db.update(singleLessons).set({ ...data, updatedAt: new Date() } as any).where(eq(singleLessons.id, id));
+    const [item] = await db.select().from(singleLessons).where(eq(singleLessons.id, id));
+    if (!item) throw new Error("SingleLesson not found");
+    return item;
+  }
+  async deleteSingleLesson(id: number): Promise<void> {
+    await db.delete(singleLessons).where(eq(singleLessons.id, id));
+  }
+
+  // ==== SundayActivities ====
+  async getSundayActivities(): Promise<SundayActivity[]> {
+    return await db.select().from(sundayActivities);
+  }
+  async getSundayActivity(id: number): Promise<SundayActivity | undefined> {
+    const [item] = await db.select().from(sundayActivities).where(eq(sundayActivities.id, id));
+    return item;
+  }
+  async createSundayActivity(data: InsertSundayActivity): Promise<SundayActivity> {
+    const [result] = await db.insert(sundayActivities).values(data as any);
+    const [newItem] = await db.select().from(sundayActivities).where(eq(sundayActivities.id, result.insertId));
+    return newItem;
+  }
+  async updateSundayActivity(id: number, data: Partial<InsertSundayActivity>): Promise<SundayActivity> {
+    await db.update(sundayActivities).set({ ...data, updatedAt: new Date() } as any).where(eq(sundayActivities.id, id));
+    const [item] = await db.select().from(sundayActivities).where(eq(sundayActivities.id, id));
+    if (!item) throw new Error("SundayActivity not found");
+    return item;
+  }
+  async deleteSundayActivity(id: number): Promise<void> {
+    await db.delete(sundayActivities).where(eq(sundayActivities.id, id));
+  }
+
+  // ==== Trainings ====
+  async getTrainings(): Promise<Training[]> {
+    return await db.select().from(trainings);
+  }
+  async getTraining(id: number): Promise<Training | undefined> {
+    const [item] = await db.select().from(trainings).where(eq(trainings.id, id));
+    return item;
+  }
+  async createTraining(data: InsertTraining): Promise<Training> {
+    const [result] = await db.insert(trainings).values(data as any);
+    const [newItem] = await db.select().from(trainings).where(eq(trainings.id, result.insertId));
+    return newItem;
+  }
+  async updateTraining(id: number, data: Partial<InsertTraining>): Promise<Training> {
+    await db.update(trainings).set({ ...data, updatedAt: new Date() } as any).where(eq(trainings.id, id));
+    const [item] = await db.select().from(trainings).where(eq(trainings.id, id));
+    if (!item) throw new Error("Training not found");
+    return item;
+  }
+  async deleteTraining(id: number): Promise<void> {
+    await db.delete(trainings).where(eq(trainings.id, id));
+  }
+
+  // ==== IndividualLessons ====
+  async getIndividualLessons(): Promise<IndividualLesson[]> {
+    return await db.select().from(individualLessons);
+  }
+  async getIndividualLesson(id: number): Promise<IndividualLesson | undefined> {
+    const [item] = await db.select().from(individualLessons).where(eq(individualLessons.id, id));
+    return item;
+  }
+  async createIndividualLesson(data: InsertIndividualLesson): Promise<IndividualLesson> {
+    const [result] = await db.insert(individualLessons).values(data as any);
+    const [newItem] = await db.select().from(individualLessons).where(eq(individualLessons.id, result.insertId));
+    return newItem;
+  }
+  async updateIndividualLesson(id: number, data: Partial<InsertIndividualLesson>): Promise<IndividualLesson> {
+    await db.update(individualLessons).set({ ...data, updatedAt: new Date() } as any).where(eq(individualLessons.id, id));
+    const [item] = await db.select().from(individualLessons).where(eq(individualLessons.id, id));
+    if (!item) throw new Error("IndividualLesson not found");
+    return item;
+  }
+  async deleteIndividualLesson(id: number): Promise<void> {
+    await db.delete(individualLessons).where(eq(individualLessons.id, id));
+  }
+
+  // ==== CampusActivities ====
+  async getCampusActivities(): Promise<CampusActivity[]> {
+    return await db.select().from(campusActivities);
+  }
+  async getCampusActivity(id: number): Promise<CampusActivity | undefined> {
+    const [item] = await db.select().from(campusActivities).where(eq(campusActivities.id, id));
+    return item;
+  }
+  async createCampusActivity(data: InsertCampusActivity): Promise<CampusActivity> {
+    const [result] = await db.insert(campusActivities).values(data as any);
+    const [newItem] = await db.select().from(campusActivities).where(eq(campusActivities.id, result.insertId));
+    return newItem;
+  }
+  async updateCampusActivity(id: number, data: Partial<InsertCampusActivity>): Promise<CampusActivity> {
+    await db.update(campusActivities).set({ ...data, updatedAt: new Date() } as any).where(eq(campusActivities.id, id));
+    const [item] = await db.select().from(campusActivities).where(eq(campusActivities.id, id));
+    if (!item) throw new Error("CampusActivity not found");
+    return item;
+  }
+  async deleteCampusActivity(id: number): Promise<void> {
+    await db.delete(campusActivities).where(eq(campusActivities.id, id));
+  }
+
+  // ==== Recitals ====
+  async getRecitals(): Promise<Recital[]> {
+    return await db.select().from(recitals);
+  }
+  async getRecital(id: number): Promise<Recital | undefined> {
+    const [item] = await db.select().from(recitals).where(eq(recitals.id, id));
+    return item;
+  }
+  async createRecital(data: InsertRecital): Promise<Recital> {
+    const [result] = await db.insert(recitals).values(data as any);
+    const [newItem] = await db.select().from(recitals).where(eq(recitals.id, result.insertId));
+    return newItem;
+  }
+  async updateRecital(id: number, data: Partial<InsertRecital>): Promise<Recital> {
+    await db.update(recitals).set({ ...data, updatedAt: new Date() } as any).where(eq(recitals.id, id));
+    const [item] = await db.select().from(recitals).where(eq(recitals.id, id));
+    if (!item) throw new Error("Recital not found");
+    return item;
+  }
+  async deleteRecital(id: number): Promise<void> {
+    await db.delete(recitals).where(eq(recitals.id, id));
+  }
+
+  // ==== VacationStudies ====
+  async getVacationStudies(): Promise<VacationStudy[]> {
+    return await db.select().from(vacationStudies);
+  }
+  async getVacationStudy(id: number): Promise<VacationStudy | undefined> {
+    const [item] = await db.select().from(vacationStudies).where(eq(vacationStudies.id, id));
+    return item;
+  }
+  async createVacationStudy(data: InsertVacationStudy): Promise<VacationStudy> {
+    const [result] = await db.insert(vacationStudies).values(data as any);
+    const [newItem] = await db.select().from(vacationStudies).where(eq(vacationStudies.id, result.insertId));
+    return newItem;
+  }
+  async updateVacationStudy(id: number, data: Partial<InsertVacationStudy>): Promise<VacationStudy> {
+    await db.update(vacationStudies).set({ ...data, updatedAt: new Date() } as any).where(eq(vacationStudies.id, id));
+    const [item] = await db.select().from(vacationStudies).where(eq(vacationStudies.id, id));
+    if (!item) throw new Error("VacationStudy not found");
+    return item;
+  }
+  async deleteVacationStudy(id: number): Promise<void> {
+    await db.delete(vacationStudies).where(eq(vacationStudies.id, id));
+  }
+
 }
 
 export const storage = new DatabaseStorage();
