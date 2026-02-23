@@ -398,7 +398,7 @@ export default function MascheraInputGenerale() {
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
       const res = await apiRequest("POST", "/api/maschera-generale/save", payload);
-      return res.json();
+      return res;
     },
     onSuccess: (data) => {
       toast({
