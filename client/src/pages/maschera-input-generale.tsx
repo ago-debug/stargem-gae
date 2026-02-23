@@ -1753,8 +1753,9 @@ export default function MascheraInputGenerale() {
                   <div className="space-y-2">
                     <Label>Data di Nascita *</Label>
                     <Input
-                      value={formData.dataNascita ? new Date(formData.dataNascita).toLocaleDateString('it-IT') : ''}
-                      readOnly
+                      type="date"
+                      value={formData.dataNascita}
+                      onChange={(e) => handleChange("dataNascita", e.target.value)}
                       className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -1762,7 +1763,7 @@ export default function MascheraInputGenerale() {
                     <Label>Luogo di Nascita *</Label>
                     <Input
                       value={formData.luogoNascita}
-                      readOnly
+                      onChange={(e) => handleChange("luogoNascita", e.target.value)}
                       className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -1770,23 +1771,28 @@ export default function MascheraInputGenerale() {
                     <Label>Prov. Nascita *</Label>
                     <Input
                       value={formData.provinciaNascita}
-                      readOnly
+                      onChange={(e) => handleChange("provinciaNascita", e.target.value)}
                       className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Sesso *</Label>
-                    <Input
-                      value={formData.sesso === 'M' ? 'Maschio' : formData.sesso === 'F' ? 'Femmina' : ''}
-                      readOnly
-                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                    />
+                    <Select value={formData.sesso} onValueChange={(v) => handleChange("sesso", v)}>
+                      <SelectTrigger className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}>
+                        <SelectValue placeholder="Seleziona..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="M">Maschio</SelectItem>
+                        <SelectItem value="F">Femmina</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Età *</Label>
                     <Input
+                      type="number"
                       value={formData.eta}
-                      readOnly
+                      onChange={(e) => handleChange("eta", e.target.value)}
                       className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -1913,8 +1919,9 @@ export default function MascheraInputGenerale() {
                   <div className="space-y-2">
                     <Label>Data di Nascita</Label>
                     <Input
-                      value={formData.dataNascitaGen1 ? new Date(formData.dataNascitaGen1).toLocaleDateString('it-IT') : ''}
-                      readOnly
+                      type="date"
+                      value={formData.dataNascitaGen1}
+                      onChange={(e) => handleChange("dataNascitaGen1", e.target.value)}
                       className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -1922,7 +1929,7 @@ export default function MascheraInputGenerale() {
                     <Label>Luogo di Nascita</Label>
                     <Input
                       value={formData.luogoNascitaGen1}
-                      readOnly
+                      onChange={(e) => handleChange("luogoNascitaGen1", e.target.value)}
                       className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -1930,23 +1937,28 @@ export default function MascheraInputGenerale() {
                     <Label>Prov. Nascita</Label>
                     <Input
                       value={formData.provinciaNascitaGen1}
-                      readOnly
+                      onChange={(e) => handleChange("provinciaNascitaGen1", e.target.value)}
                       className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Sesso</Label>
-                    <Input
-                      value={formData.sessoGen1 === 'M' ? 'M' : formData.sessoGen1 === 'F' ? 'F' : ''}
-                      readOnly
-                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                    />
+                    <Select value={formData.sessoGen1} onValueChange={(v) => handleChange("sessoGen1", v)}>
+                      <SelectTrigger className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}>
+                        <SelectValue placeholder="Sel..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="M">Maschio</SelectItem>
+                        <SelectItem value="F">Femmina</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Età</Label>
                     <Input
+                      type="number"
                       value={formData.etaGen1}
-                      readOnly
+                      onChange={(e) => handleChange("etaGen1", e.target.value)}
                       className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -2058,8 +2070,9 @@ export default function MascheraInputGenerale() {
                   <div className="space-y-2">
                     <Label>Data di Nascita</Label>
                     <Input
-                      value={formData.dataNascitaGen2 ? new Date(formData.dataNascitaGen2).toLocaleDateString('it-IT') : ''}
-                      readOnly
+                      type="date"
+                      value={formData.dataNascitaGen2}
+                      onChange={(e) => handleChange("dataNascitaGen2", e.target.value)}
                       className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -2067,7 +2080,7 @@ export default function MascheraInputGenerale() {
                     <Label>Luogo di Nascita</Label>
                     <Input
                       value={formData.luogoNascitaGen2}
-                      readOnly
+                      onChange={(e) => handleChange("luogoNascitaGen2", e.target.value)}
                       className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -2075,23 +2088,28 @@ export default function MascheraInputGenerale() {
                     <Label>Prov. Nascita</Label>
                     <Input
                       value={formData.provinciaNascitaGen2}
-                      readOnly
+                      onChange={(e) => handleChange("provinciaNascitaGen2", e.target.value)}
                       className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Sesso</Label>
-                    <Input
-                      value={formData.sessoGen2 === 'M' ? 'M' : formData.sessoGen2 === 'F' ? 'F' : ''}
-                      readOnly
-                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                    />
+                    <Select value={formData.sessoGen2} onValueChange={(v) => handleChange("sessoGen2", v)}>
+                      <SelectTrigger className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}>
+                        <SelectValue placeholder="Sel..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="M">Maschio</SelectItem>
+                        <SelectItem value="F">Femmina</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Età</Label>
                     <Input
+                      type="number"
                       value={formData.etaGen2}
-                      readOnly
+                      onChange={(e) => handleChange("etaGen2", e.target.value)}
                       className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
