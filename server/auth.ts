@@ -102,7 +102,7 @@ export function setupAuth(app: Express) {
                 }
 
                 // Safety: if user is admin string, ensure they have wildcard even if role DB entry is missing
-                if (user.role.toLowerCase() === 'admin') {
+                if (user.role.toLowerCase() === 'admin' || user.role.toLowerCase() === 'admministratore totale') {
                     permissions = { "*": "write", ...((permissions as any) || {}) };
                 }
 
