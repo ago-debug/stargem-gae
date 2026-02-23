@@ -73,6 +73,10 @@ export default function UtentiPermessi() {
   const [editingRole, setEditingRole] = useState<Partial<UserRole> | null>(null);
   const [rolePermissions, setRolePermissions] = useState<Record<string, string>>({});
 
+  // Controlled states for forms
+  const [newUserRole, setNewUserRole] = useState<string>("operator");
+  const [editUserRole, setEditUserRole] = useState<string>("");
+
   // Queries
   const { data: users, isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
@@ -190,6 +194,7 @@ export default function UtentiPermessi() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
+    data.role = newUserRole;
     createUserMutation.mutate(data);
   };
 
@@ -197,6 +202,9 @@ export default function UtentiPermessi() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
+    if (editUserRole) {
+      data.role = editUserRole;
+    }
     if (selectedUser?.id) {
       updateUserMutation.mutate({ id: selectedUser.id, data });
     }
@@ -347,6 +355,7 @@ export default function UtentiPermessi() {
                               title="Modifica Utente"
                               onClick={() => {
                                 setSelectedUser(u);
+                                setEditUserRole(u.role || "operator");
                                 setIsEditUserDialogOpen(true);
                               }}
                             >
@@ -553,7 +562,7 @@ export default function UtentiPermessi() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Ruolo</Label>
-              <Select name="role" defaultValue="operator">
+              <Select value={newUserRole} onValueChange={setNewUserRole}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleziona ruolo" />
                 </SelectTrigger>
@@ -595,7 +604,7 @@ export default function UtentiPermessi() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-role">Ruolo</Label>
-              <Select name="role" defaultValue={selectedUser?.role}>
+              <Select value={editUserRole} onValueChange={setEditUserRole}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleziona ruolo" />
                 </SelectTrigger>
