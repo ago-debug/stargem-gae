@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LayoutDashboard, Users, Calendar, BarChart3 } from "lucide-react";
-import logoStarGem from "@assets/2fded732-6b1d-4121-a9a7-9eae89138609_1770777971616.png";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Landing() {
@@ -58,15 +57,8 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background">
       <div className="container mx-auto px-4 py-16 max-w-6xl">
         <div className="text-center mb-16">
-          <img 
-            src={logoStarGem} 
-            alt="StarGEM Logo" 
-            style={{ width: "300px", height: "auto" }}
-            className="mx-auto mb-6"
-            data-testid="logo-landing"
-          />
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Gestionale StarGEM
+            Sistema Gestione Corsi
           </h1>
           <p className="text-xl text-muted-foreground mb-8">
             Gestisci iscritti, corsi, pagamenti e molto altro in un'unica piattaforma
@@ -128,7 +120,7 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader>
-              <LayoutDashboard className="w-10 h-10 sidebar-icon-gold mb-2" />
+              <LayoutDashboard className="w-10 h-10 text-primary mb-2" />
               <CardTitle>Dashboard</CardTitle>
               <CardDescription>
                 Panoramica completa di corsi, iscritti e scadenze
@@ -138,7 +130,7 @@ export default function Landing() {
 
           <Card>
             <CardHeader>
-              <Users className="w-10 h-10 sidebar-icon-gold mb-2" />
+              <Users className="w-10 h-10 text-primary mb-2" />
               <CardTitle>Gestione Iscritti</CardTitle>
               <CardDescription>
                 Anagrafica completa con tessere e certificati medici
@@ -148,17 +140,17 @@ export default function Landing() {
 
           <Card>
             <CardHeader>
-              <Calendar className="w-10 h-10 sidebar-icon-gold mb-2" />
+              <Calendar className="w-10 h-10 text-primary mb-2" />
               <CardTitle>Corsi & Categorie</CardTitle>
               <CardDescription>
-                Organizza corsi per categoria con staff/insegnanti assegnati
+                Organizza corsi per categoria con insegnanti assegnati
               </CardDescription>
             </CardHeader>
           </Card>
 
           <Card>
             <CardHeader>
-              <BarChart3 className="w-10 h-10 sidebar-icon-gold mb-2" />
+              <BarChart3 className="w-10 h-10 text-primary mb-2" />
               <CardTitle>Report & Statistiche</CardTitle>
               <CardDescription>
                 Analisi dettagliate su iscrizioni, entrate e presenze
@@ -198,7 +190,7 @@ export default function Landing() {
               <ul className="space-y-2">
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  Gestione staff/insegnanti e tariffe
+                  Gestione insegnanti e tariffe
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />

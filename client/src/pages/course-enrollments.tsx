@@ -4,26 +4,16 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Search, Users, GraduationCap, ArrowLeft } from "lucide-react";
+import { Search, Users, GraduationCap, Edit } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import type { Course } from "@shared/schema";
-
-interface CourseEnrollmentItem {
-  enrollmentId: number;
-  memberId: number;
-  firstName: string;
-  lastName: string;
-  email: string | null | undefined;
-  startDate: string | null | undefined;
-}
 
 export default function CourseEnrollments() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<CourseEnrollmentItem>("firstName");
+  const [, setLocation] = useLocation();
 
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -58,7 +48,7 @@ export default function CourseEnrollments() {
       .filter((e): e is NonNullable<typeof e> => e !== null);
   };
 
-  const filteredCourses = courses?.filter(course => 
+  const filteredCourses = courses?.filter(course =>
     course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.sku?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -67,15 +57,10 @@ export default function CourseEnrollments() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Iscritti per Corso</h1>
-            <p className="text-muted-foreground text-sm">Visualizza e gestisci le iscrizioni ai corsi</p>
-          </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Iscritti per Corso</h1>
+          <p className="text-muted-foreground mt-1">Visualizza e gestisci le iscrizioni ai corsi</p>
         </div>
         <div className="flex items-center gap-4">
           <Badge variant="secondary" className="text-lg px-4 py-2">
@@ -91,7 +76,7 @@ export default function CourseEnrollments() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Cerca corso per nome o SKU/Codice..."
+                placeholder="Cerca corso per nome o SKU..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -120,12 +105,12 @@ export default function CourseEnrollments() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3">
                           <div className="p-2 bg-primary/10 rounded-lg">
-                            <GraduationCap className="w-5 h-5 sidebar-icon-gold" />
+                            <GraduationCap className="w-5 h-5 text-primary" />
                           </div>
                           <div>
                             <h3 className="text-lg font-semibold">{course.name}</h3>
                             {course.sku && (
-                              <p className="text-sm text-muted-foreground">SKU/Codice: {course.sku}</p>
+                              <p className="text-sm text-muted-foreground">SKU: {course.sku}</p>
                             )}
                             {course.dayOfWeek && course.startTime && (
                               <p className="text-sm text-muted-foreground mt-1">
@@ -139,9 +124,9 @@ export default function CourseEnrollments() {
                           <Badge variant="secondary">
                             {courseEnrollments.length} {courseEnrollments.length === 1 ? 'iscritto' : 'iscritti'}
                           </Badge>
-                          <Link href={`/courses?search=${encodeURIComponent(course.name)}`}>
+                          <Link href={`/corsi?courseId=${course.id}`}>
                             <Button variant="ghost" size="sm" data-testid={`button-view-course-${course.id}`}>
-                              Dettagli Corso
+                              Scheda Corso
                             </Button>
                           </Link>
                         </div>
@@ -154,43 +139,41 @@ export default function CourseEnrollments() {
                         </p>
                       ) : (
                         <div className="border rounded-lg overflow-hidden">
-                          {(() => {
-                            const getSortValue = (item: CourseEnrollmentItem, key: string) => {
-                              switch (key) {
-                                case "firstName": return item.firstName;
-                                case "lastName": return item.lastName;
-                                case "email": return item.email || "";
-                                case "enrollDate": return item.startDate || "";
-                                default: return "";
-                              }
-                            };
-                            const sortedEnrollments = sortItems(courseEnrollments, getSortValue);
-                            return (
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
-                                <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
-                                <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
-                                <SortableTableHead sortKey="enrollDate" currentSort={sortConfig} onSort={handleSort}>Data Iscrizione</SortableTableHead>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Cognome</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Data Iscrizione</TableHead>
                                 <TableHead className="text-right">Azioni</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {sortedEnrollments.map((enrollment) => (
+                              {courseEnrollments.map((enrollment) => (
                                 <TableRow key={enrollment.enrollmentId}>
-                                  <TableCell className={cn("font-medium", isSortedColumn("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
-                                  <TableCell className={isSortedColumn("lastName") ? "sorted-column-cell" : undefined}>{enrollment.lastName}</TableCell>
-                                  <TableCell className={isSortedColumn("email") ? "sorted-column-cell" : undefined}>{enrollment.email || '-'}</TableCell>
-                                  <TableCell className={isSortedColumn("enrollDate") ? "sorted-column-cell" : undefined}>
-                                    {enrollment.startDate 
+                                  <TableCell className="font-medium">{enrollment.firstName}</TableCell>
+                                  <TableCell>{enrollment.lastName}</TableCell>
+                                  <TableCell>{enrollment.email || '-'}</TableCell>
+                                  <TableCell>
+                                    {enrollment.startDate
                                       ? new Date(enrollment.startDate).toLocaleDateString('it-IT')
                                       : '-'}
                                   </TableCell>
                                   <TableCell className="text-right">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-primary hover:text-primary hover:bg-primary/10"
+                                      onClick={() => setLocation(`${window.location.pathname}?editMemberId=${enrollment.memberId}`)}
+                                      data-testid={`button-edit-member-${enrollment.memberId}`}
+                                    >
+                                      <Edit className="w-4 h-4 mr-1" />
+                                      Modifica Anagrafica
+                                    </Button>
                                     <Link href={`/members?search=${enrollment.lastName}`}>
                                       <Button variant="ghost" size="sm" data-testid={`button-view-member-${enrollment.memberId}`}>
-                                        Visualizza Profilo
+                                        Profilo Completo
                                       </Button>
                                     </Link>
                                   </TableCell>
@@ -198,8 +181,6 @@ export default function CourseEnrollments() {
                               ))}
                             </TableBody>
                           </Table>
-                            );
-                          })()}
                         </div>
                       )}
                     </CardContent>

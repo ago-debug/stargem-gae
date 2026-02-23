@@ -1,0 +1,273 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+11:41:32 AM [express] serving on port 5001
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+11:41:34 AM [express] GET /api/user 401 in 1ms
+11:42:38 AM [express] GET /api/user 401 in 2ms
+11:42:45 AM [express] POST /api/login 200 in 153ms :: {"id":"admin-id","username":"admin","password":…
+11:42:45 AM [express] GET /api/notifications 200 in 260ms :: []
+11:42:45 AM [express] GET /api/price-lists 200 in 263ms :: [{"id":1,"name":"Test Price List 177123333…
+11:42:48 AM [express] GET /api/price-lists/5/items 200 in 141ms :: []
+11:42:48 AM [express] GET /api/courses 200 in 185ms :: []
+11:42:48 AM [express] GET /api/workshops 200 in 190ms :: []
+11:42:48 AM [express] GET /api/booking-services 200 in 277ms :: [{"id":1,"name":"Affitto Sala","descr…
+11:42:51 AM [express] DELETE /api/price-lists/5 204 in 155ms
+11:42:51 AM [express] GET /api/price-lists 200 in 155ms :: [{"id":1,"name":"Test Price List 177123333…
+11:42:52 AM [express] GET /api/price-lists/4/items 200 in 154ms :: []
+11:42:54 AM [express] DELETE /api/price-lists/4 204 in 153ms
+11:42:54 AM [express] GET /api/price-lists 200 in 152ms :: [{"id":1,"name":"Test Price List 177123333…
+11:42:54 AM [express] GET /api/price-lists/1/items 200 in 156ms :: []
+11:42:56 AM [express] DELETE /api/price-lists/1 204 in 157ms
+11:42:56 AM [express] GET /api/price-lists 200 in 150ms :: [{"id":6,"name":"test","validFrom":"2026-0…
+11:42:57 AM [express] GET /api/price-lists/6/items 200 in 158ms :: []
+11:42:58 AM [express] DELETE /api/price-lists/6 204 in 151ms
+11:42:59 AM [express] GET /api/price-lists 200 in 160ms :: [{"id":7,"name":"test","validFrom":"2026-0…
+11:42:59 AM [express] GET /api/price-lists/7/items 200 in 157ms :: []
+11:43:01 AM [express] DELETE /api/price-lists/7 204 in 166ms
+11:43:01 AM [express] GET /api/price-lists 200 in 152ms :: [{"id":8,"name":"test","validFrom":"2026-0…
+11:43:02 AM [express] GET /api/price-lists/8/items 200 in 153ms :: []
+11:43:04 AM [express] DELETE /api/price-lists/8 204 in 157ms
+11:43:04 AM [express] GET /api/price-lists 200 in 150ms :: [{"id":9,"name":"test","validFrom":"2026-0…
+11:43:05 AM [express] GET /api/price-lists/9/items 200 in 156ms :: []
+11:43:07 AM [express] DELETE /api/price-lists/9 204 in 163ms
+11:43:07 AM [express] GET /api/price-lists 200 in 151ms :: []
+DB: Inserting price list: {
+  "name": "TEST new",
+  "validFrom": "2026-02-16T10:43:08.846Z",
+  "validTo": "2027-02-16T10:43:08.846Z",
+  "active": true,
+  "notes": ""
+}
+DB: Insert result: {
+  "fieldCount": 0,
+  "affectedRows": 1,
+  "insertId": 10,
+  "info": "",
+  "serverStatus": 2,
+  "warningStatus": 2,
+  "changedRows": 0
+}
+11:43:14 AM [express] POST /api/price-lists 201 in 210ms :: {"id":10,"name":"TEST new","validFrom":"2…
+DB: Inserting price list: {
+  "name": "TEST new",
+  "validFrom": "2026-02-16T10:43:08.846Z",
+  "validTo": "2027-02-16T10:43:08.846Z",
+  "active": true,
+  "notes": ""
+}
+DB: Insert result: {
+  "fieldCount": 0,
+  "affectedRows": 1,
+  "insertId": 11,
+  "info": "",
+  "serverStatus": 2,
+  "warningStatus": 2,
+  "changedRows": 0
+}
+11:43:16 AM [express] POST /api/price-lists 201 in 191ms :: {"id":11,"name":"TEST new","validFrom":"2…
+11:44:42 AM [vite] hmr update /src/pages/listini.tsx, /src/index.css?v=hBhB1Vj6FrP1qYdOUf0ao
+11:52:50 AM [express] GET /api/user 200 in 119ms :: {"id":"admin-id","username":"admin","password":"8…
+11:52:50 AM [express] GET /api/notifications 200 in 152ms :: []
+11:52:50 AM [express] GET /api/price-lists 200 in 149ms :: [{"id":10,"name":"TEST new","validFrom":"2…
+11:53:01 AM [express] POST /api/logout 200 in 192ms
+11:53:10 AM [express] POST /api/login 200 in 383ms :: {"id":"admin-id","username":"admin","password":…
+11:53:13 AM [express] GET /api/price-lists/11/items 200 in 146ms :: []
+11:53:13 AM [express] GET /api/booking-services 304 in 149ms :: [{"id":1,"name":"Affitto Sala","descr…
+11:53:13 AM [express] GET /api/workshops 304 in 185ms :: []
+11:53:13 AM [express] GET /api/courses 304 in 187ms :: []
+11:53:16 AM [express] DELETE /api/price-lists/11 204 in 149ms
+11:53:16 AM [express] GET /api/price-lists 200 in 147ms :: [{"id":10,"name":"TEST new","validFrom":"2…
+11:53:16 AM [express] GET /api/price-lists/10/items 200 in 146ms :: []
+11:53:18 AM [express] DELETE /api/price-lists/10 204 in 146ms
+11:53:18 AM [express] GET /api/price-lists 200 in 146ms :: []
+DB: Inserting price list: {
+  "name": "Test ago",
+  "validFrom": "2026-02-16T10:53:19.032Z",
+  "validTo": "2027-02-16T10:53:19.032Z",
+  "active": true,
+  "notes": ""
+}
+DB: Insert result: {
+  "fieldCount": 0,
+  "affectedRows": 1,
+  "insertId": 12,
+  "info": "",
+  "serverStatus": 2,
+  "warningStatus": 2,
+  "changedRows": 0
+}
+11:53:23 AM [express] POST /api/price-lists 201 in 195ms :: {"id":12,"name":"Test ago","validFrom":"2…
+11:53:23 AM [express] GET /api/price-lists 200 in 149ms :: [{"id":12,"name":"Test ago","validFrom":"2…
+11:53:26 AM [express] GET /api/price-lists/12/items 200 in 148ms :: []
+11:55:03 AM [vite] hmr update /src/pages/listini.tsx, /src/index.css?v=hBhB1Vj6FrP1qYdOUf0ao
+11:55:27 AM [express] GET /api/user 304 in 107ms :: {"id":"admin-id","username":"admin","password":"8…
+11:55:27 AM [express] GET /api/price-lists 304 in 143ms :: [{"id":12,"name":"Test ago","validFrom":"2…
+11:55:27 AM [express] GET /api/notifications 304 in 148ms :: []
+11:55:29 AM [express] GET /api/booking-services 304 in 152ms :: [{"id":1,"name":"Affitto Sala","descr…
+11:55:29 AM [express] GET /api/price-lists/12/items 304 in 155ms :: []
+11:55:29 AM [express] GET /api/courses 304 in 178ms :: []
+11:55:29 AM [express] GET /api/workshops 304 in 181ms :: []
+11:56:17 AM [express] GET /api/user 304 in 104ms :: {"id":"admin-id","username":"admin","password":"8…
+11:56:17 AM [express] GET /api/notifications 304 in 140ms :: []
+11:56:17 AM [express] GET /api/price-lists 304 in 147ms :: [{"id":12,"name":"Test ago","validFrom":"2…
+11:56:18 AM [express] GET /api/booking-services 304 in 146ms :: [{"id":1,"name":"Affitto Sala","descr…
+11:56:18 AM [express] GET /api/price-lists/12/items 304 in 154ms :: []
+11:56:18 AM [express] GET /api/courses 304 in 184ms :: []
+11:56:18 AM [express] GET /api/workshops 304 in 187ms :: []
+11:56:22 AM [express] POST /api/logout 200 in 190ms
+11:56:27 AM [express] POST /api/login 200 in 165ms :: {"id":"admin-id","username":"admin","password":…
+11:58:20 AM [vite] hmr update /src/pages/studios.tsx, /src/index.css?v=hBhB1Vj6FrP1qYdOUf0ao, /src/pages/listini.tsx
+11:59:23 AM [express] GET /api/user 304 in 106ms :: {"id":"admin-id","username":"admin","password":"8…
+11:59:23 AM [express] GET /api/notifications 304 in 143ms :: []
+11:59:23 AM [express] GET /api/price-lists 304 in 147ms :: [{"id":12,"name":"Test ago","validFrom":"2…
+11:59:24 AM [express] GET /api/booking-services 304 in 142ms :: [{"id":1,"name":"Affitto Sala","descr…
+11:59:24 AM [express] GET /api/price-lists/12/items 304 in 145ms :: []
+11:59:24 AM [express] GET /api/courses 304 in 180ms :: []
+11:59:24 AM [express] GET /api/workshops 304 in 191ms :: []
+12:02:41 PM [vite] hmr update /src/pages/listini.tsx, /src/index.css?v=hBhB1Vj6FrP1qYdOUf0ao
+12:03:17 PM [vite] hmr update /src/pages/listini.tsx, /src/index.css?v=hBhB1Vj6FrP1qYdOUf0ao
+12:03:21 PM [vite] hmr update /src/pages/listini.tsx, /src/index.css?v=hBhB1Vj6FrP1qYdOUf0ao
+12:04:58 PM [vite] hmr update /src/pages/listini.tsx, /src/index.css?v=hBhB1Vj6FrP1qYdOUf0ao
+12:05:35 PM [vite] hmr update /src/pages/listini.tsx, /src/index.css?v=hBhB1Vj6FrP1qYdOUf0ao
+12:08:27 PM [express] GET /api/user 304 in 123ms :: {"id":"admin-id","username":"admin","password":"8…
+12:08:28 PM [express] GET /api/notifications 304 in 167ms :: []
+12:08:28 PM [express] GET /api/price-lists 304 in 168ms :: [{"id":12,"name":"Test ago","validFrom":"2…
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:359:20)
+    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26) {
+  query: 'select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: read ECONNRESET
+      at PromisePool.query (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/query-promise.ts:31:15) {
+    code: 'ECONNRESET',
+    errno: -54,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:359:20)
+    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:359:20)
+    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26) {
+  query: 'select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: read ECONNRESET
+      at PromisePool.query (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/query-promise.ts:31:15) {
+    code: 'ECONNRESET',
+    errno: -54,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:359:20)
+    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26) {
+  query: 'select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: read ECONNRESET
+      at PromisePool.query (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/query-promise.ts:31:15) {
+    code: 'ECONNRESET',
+    errno: -54,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:359:20)
+    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:359:20)
+    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+12:12:41 PM [express] GET /api/user 304 in 112ms :: {"id":"admin-id","username":"admin","password":"8…
+12:12:42 PM [express] GET /api/notifications 304 in 152ms :: []
+12:12:42 PM [express] GET /api/instructors 304 in 146ms :: []
+12:12:42 PM [express] GET /api/members/duplicates 304 in 154ms :: [{"fiscalCode":"TSTGEN00A01H501Z","…
+12:12:42 PM [express] GET /api/client-categories 304 in 154ms :: [{"id":1,"name":"Iscrtito","descript…
+12:12:42 PM [express] GET /api/subscription-types 304 in 154ms :: []
+12:12:42 PM [express] GET /api/courses 304 in 175ms :: []
+12:12:42 PM [express] GET /api/categories 304 in 150ms :: [{"id":3,"name":"Aerial","description":null…
+12:12:42 PM [express] GET /api/studios 304 in 144ms :: [{"id":1,"name":"Studio Test 01","floor":"1","…
+12:12:42 PM [express] GET /api/payment-methods 304 in 149ms :: [{"id":1,"name":"Carta di credito 1","…
+12:12:42 PM [express] GET /api/workshops 304 in 185ms :: []
+12:12:44 PM [express] GET /api/price-lists 304 in 153ms :: [{"id":12,"name":"Test ago","validFrom":"2…
+12:12:46 PM [express] GET /api/paid-trials 200 in 117ms
+12:12:46 PM [express] GET /api/quotes 200 in 117ms
+12:12:46 PM [express] GET /api/booking-services 304 in 158ms :: [{"id":1,"name":"Affitto Sala","descr…
+12:12:46 PM [express] GET /api/price-lists/12/items 304 in 160ms :: []
+12:14:02 PM [express] GET /api/user 304 in 106ms :: {"id":"admin-id","username":"admin","password":"8…
+12:14:03 PM [express] GET /api/price-lists 304 in 150ms :: [{"id":12,"name":"Test ago","validFrom":"2…
+12:14:03 PM [express] GET /api/notifications 304 in 153ms :: []
+12:14:06 PM [express] POST /api/logout 200 in 205ms
+12:14:12 PM [express] POST /api/login 200 in 163ms :: {"id":"admin-id","username":"admin","password":…
+12:14:14 PM [express] GET /api/paid-trials 200 in 110ms
+12:14:14 PM [express] GET /api/quotes 200 in 113ms
+12:14:14 PM [express] GET /api/price-lists/12/items 304 in 153ms :: []
+12:14:14 PM [express] GET /api/booking-services 304 in 153ms :: [{"id":1,"name":"Affitto Sala","descr…
+12:14:14 PM [express] GET /api/workshops 304 in 175ms :: []
+12:14:14 PM [express] GET /api/courses 304 in 187ms :: []
+DB: Inserting price list: {
+  "name": "Test 11",
+  "validFrom": "2026-02-16T11:14:20.291Z",
+  "validTo": "2027-02-16T11:14:20.291Z",
+  "active": true,
+  "notes": ""
+}
+DB: Insert result: {
+  "fieldCount": 0,
+  "affectedRows": 1,
+  "insertId": 13,
+  "info": "",
+  "serverStatus": 2,
+  "warningStatus": 2,
+  "changedRows": 0
+}
+12:14:29 PM [express] POST /api/price-lists 201 in 204ms :: {"id":13,"name":"Test 11","validFrom":"20…
+12:14:30 PM [express] GET /api/price-lists 200 in 161ms :: [{"id":12,"name":"Test ago","validFrom":"2…
+12:14:31 PM [express] GET /api/price-lists/13/items 200 in 154ms :: []

@@ -60,8 +60,7 @@ export function LocationAutocomplete({
     debounceTimer.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const response = await apiRequest("GET", `/api/locations/cities/search?q=${encodeURIComponent(search)}&limit=15`);
-        const data = await response.json();
+        const data = await apiRequest("GET", `/api/locations/cities/search?q=${encodeURIComponent(search)}&limit=15`);
         setCities(data);
         setOpen(data.length > 0);
       } catch (error) {
@@ -113,8 +112,8 @@ export function LocationAutocomplete({
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-[var(--radix-popover-trigger-width)] p-0" 
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >

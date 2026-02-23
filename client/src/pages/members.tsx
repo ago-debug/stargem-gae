@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Link, useSearch, useLocation } from "wouter";
@@ -10,14 +10,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText, ChevronLeft, ChevronRight, Download, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { hasWritePermission } from "@/App";
+import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText, ChevronLeft, ChevronRight, Download, Camera, Smartphone, Coins } from "lucide-react";
+import { MembershipCard } from "@/components/membership-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member, InsertMember, Attendance } from "@shared/schema";
 
@@ -32,11 +33,13 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export default function Members() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const canWrite = hasWritePermission(user, "/iscritti");
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const initialSearch = urlParams.get('search') || "";
-  
+
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -55,20 +58,22 @@ export default function Members() {
   const [attendanceTime, setAttendanceTime] = useState<string>("");
   const [selectedCourseForAttendance, setSelectedCourseForAttendance] = useState<string>("");
   const [memberEnrollments, setMemberEnrollments] = useState<any[]>([]);
-  const [courses, setCourses] = useState<any[]>([]);
   const [attendances, setAttendances] = useState<any[]>([]);
   const [workshops, setWorkshops] = useState<any[]>([]);
   const [memberWorkshopEnrollments, setMemberWorkshopEnrollments] = useState<any[]>([]);
   const [selectedWorkshopToAdd, setSelectedWorkshopToAdd] = useState<string>("");
   const [isMinorChecked, setIsMinorChecked] = useState(false);
-  
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
+  const [selectedMemberForCard, setSelectedMemberForCard] = useState<Member | null>(null);
+
   const dateOfBirthRef = useRef<HTMLInputElement>(null);
   const genderRef = useRef<HTMLSelectElement>(null);
   const placeOfBirthRef = useRef<HTMLInputElement>(null);
 
   const PAGE_SIZE = 50;
   const debouncedSearch = useDebounce(searchQuery, 300);
-  
+
   // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
@@ -92,27 +97,19 @@ export default function Members() {
   const totalMembers = membersData?.total || 0;
   const totalPages = Math.ceil(totalMembers / PAGE_SIZE);
 
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Member>("name");
-
-  const getSortValue = (member: Member, key: string) => {
-    switch (key) {
-      case "name": return `${member.firstName} ${member.lastName}`;
-      case "fiscalCode": return member.fiscalCode;
-      case "email": return member.email;
-      case "phone": return member.phone;
-      case "cardNumber": return member.cardNumber;
-      case "medicalCert": return member.medicalCertificateExpiry;
-      case "status": return member.active;
-      case "courses": return null;
-      default: return null;
-    }
-  };
-
-  const sortedMembers = sortItems(members, getSortValue);
-
   const { data: clientCategories } = useQuery<any[]>({
     queryKey: ["/api/client-categories"],
   });
+
+  const { data: subscriptionTypes } = useQuery<any[]>({
+    queryKey: ["/api/subscription-types"],
+  });
+
+  const { data: coursesData } = useQuery<any[]>({
+    queryKey: ["/api/courses"],
+  });
+
+  const courses = coursesData || [];
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertMember) => {
@@ -121,16 +118,16 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
-      toast({ title: "Partecipante creato con successo" });
+      toast({ title: "Cliente creato con successo" });
       setIsFormOpen(false);
       resetForm();
     },
     onError: (error: any) => {
       if (error.conflictWith) {
-        toast({ 
-          title: "Codice Fiscale Duplicato", 
+        toast({
+          title: "Codice Fiscale Duplicato",
           description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.firstName} ${error.conflictWith.lastName}`,
-          variant: "destructive" 
+          variant: "destructive"
         });
       } else {
         toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -145,16 +142,16 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
-      toast({ title: "Partecipante aggiornato con successo" });
+      toast({ title: "Cliente aggiornato con successo" });
       setIsFormOpen(false);
       resetForm();
     },
     onError: (error: any) => {
       if (error.conflictWith) {
-        toast({ 
-          title: "Codice Fiscale Duplicato", 
+        toast({
+          title: "Codice Fiscale Duplicato",
           description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.firstName} ${error.conflictWith.lastName}`,
-          variant: "destructive" 
+          variant: "destructive"
         });
       } else {
         toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -169,7 +166,7 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
-      toast({ title: "Partecipante eliminato con successo" });
+      toast({ title: "Cliente eliminato con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -178,7 +175,10 @@ export default function Members() {
 
   const addEnrollmentMutation = useMutation({
     mutationFn: async (data: { memberId: number; courseId: number }) => {
-      await apiRequest("POST", "/api/enrollments", data);
+      await apiRequest("POST", "/api/enrollments", {
+        ...data,
+        status: "active"
+      });
       return data.memberId;
     },
     onSuccess: async (memberId) => {
@@ -302,14 +302,17 @@ export default function Members() {
     setMemberWorkshopEnrollments([]);
     setSelectedWorkshopToAdd("");
     setIsMinorChecked(false);
+    setPhotoPreview(null);
   };
 
   useEffect(() => {
     if (editingMember) {
       setHasMedicalCert(editingMember.hasMedicalCertificate || false);
       setIsMinorChecked(editingMember.isMinor || false);
+      setPhotoPreview(editingMember.photoUrl || null);
       if (editingMember.dateOfBirth) {
-        const age = calculateAge(editingMember.dateOfBirth);
+        const dateStr = typeof editingMember.dateOfBirth === 'string' ? editingMember.dateOfBirth : new Date(editingMember.dateOfBirth).toISOString().split('T')[0];
+        const age = calculateAge(dateStr);
         setShowParentFields(age < 18 || editingMember.isMinor || false);
       } else {
         setShowParentFields(editingMember.isMinor || false);
@@ -317,9 +320,24 @@ export default function Members() {
     }
   }, [editingMember]);
 
-  const calculateAge = (dateOfBirth: string): number => {
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) { // 1MB limit for base64
+        toast({ title: "File troppo grande", description: "La foto deve essere inferiore a 1MB", variant: "destructive" });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const calculateAge = (dateOfBirthString: string): number => {
     const today = new Date();
-    const birthDate = new Date(dateOfBirth);
+    const birthDate = new Date(dateOfBirthString);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
@@ -335,30 +353,43 @@ export default function Members() {
     }
   };
 
-  const handleFiscalCodeChange = (value: string) => {
+  const handleFiscalCodeChange = async (value: string) => {
     const normalized = value.toUpperCase().trim();
-    
+
     if (!normalized) {
       setFiscalCodeError("");
       setAutoFilledData({ dateOfBirth: "", gender: "", placeOfBirth: "" });
       return;
     }
-    
+
     if (normalized.length === 16) {
       if (!validateFiscalCode(normalized)) {
         setFiscalCodeError("Codice fiscale non valido");
         return;
       }
-      
+
       const parsed = parseFiscalCode(normalized);
       if (parsed) {
         setFiscalCodeError("");
+
+        // Fetch city details from API
+        let placeName = parsed.placeOfBirth || "";
+        try {
+          const response = await fetch(`/api/comuni/by-code/${parsed.placeOfBirth}`);
+          if (response.ok) {
+            const cityData = await response.json();
+            placeName = cityData.name;
+          }
+        } catch (e) {
+          console.error("Errore fetch comune:", e);
+        }
+
         setAutoFilledData({
           dateOfBirth: parsed.dateOfBirth,
           gender: parsed.gender,
-          placeOfBirth: getPlaceName(parsed.placeOfBirth || "") || parsed.placeOfBirth || ""
+          placeOfBirth: placeName
         });
-        
+
         // Auto-compila i campi
         if (dateOfBirthRef.current && !dateOfBirthRef.current.value) {
           dateOfBirthRef.current.value = parsed.dateOfBirth;
@@ -368,12 +399,12 @@ export default function Members() {
           genderRef.current.value = parsed.gender;
         }
         if (placeOfBirthRef.current && !placeOfBirthRef.current.value) {
-          placeOfBirthRef.current.value = getPlaceName(parsed.placeOfBirth || "") || parsed.placeOfBirth || "";
+          placeOfBirthRef.current.value = placeName;
         }
-        
+
         toast({
           title: "Dati estratti dal CF",
-          description: `Data: ${new Date(parsed.dateOfBirth).toLocaleDateString('it-IT')}, Sesso: ${parsed.gender === 'M' ? 'Maschio' : 'Femmina'}`,
+          description: `Data: ${new Date(parsed.dateOfBirth).toLocaleDateString('it-IT')}, Sesso: ${parsed.gender === 'M' ? 'Maschio' : 'Femmina'}, Luogo: ${placeName}`,
         });
       } else {
         setFiscalCodeError("Impossibile estrarre i dati dal codice fiscale");
@@ -398,19 +429,19 @@ export default function Members() {
       email: formData.get("email") as string || null,
       phone: formData.get("phone") as string || null,
       mobile: formData.get("mobile") as string || null,
-      
+
       // Dati tessera
       cardNumber: formData.get("cardNumber") as string || null,
       cardIssueDate: formData.get("cardIssueDate") as string || null,
       cardExpiryDate: formData.get("cardExpiryDate") as string || null,
-      
+
       // Certificato medico
       hasMedicalCertificate: hasMedicalCert,
       medicalCertificateExpiry: hasMedicalCert ? (formData.get("medicalCertificateExpiry") as string || null) : null,
-      
+
       // Flag minorenne
       isMinor: isMinorChecked,
-      
+
       // Dati genitori
       motherFirstName: showParentFields ? (formData.get("motherFirstName") as string || null) : null,
       motherLastName: showParentFields ? (formData.get("motherLastName") as string || null) : null,
@@ -418,18 +449,29 @@ export default function Members() {
       motherEmail: showParentFields ? (formData.get("motherEmail") as string || null) : null,
       motherPhone: showParentFields ? (formData.get("motherPhone") as string || null) : null,
       motherMobile: showParentFields ? (formData.get("motherMobile") as string || null) : null,
-      
+
       fatherFirstName: showParentFields ? (formData.get("fatherFirstName") as string || null) : null,
       fatherLastName: showParentFields ? (formData.get("fatherLastName") as string || null) : null,
       fatherFiscalCode: showParentFields ? (formData.get("fatherFiscalCode") as string || null) : null,
       fatherEmail: showParentFields ? (formData.get("fatherEmail") as string || null) : null,
       fatherPhone: showParentFields ? (formData.get("fatherPhone") as string || null) : null,
       fatherMobile: showParentFields ? (formData.get("fatherMobile") as string || null) : null,
-      
+
       address: formData.get("address") as string || null,
       notes: formData.get("notes") as string || null,
+      photoUrl: photoPreview,
       active: true,
-    };
+      subscriptionTypeId: (formData.get("subscriptionTypeId") && formData.get("subscriptionTypeId") !== "none") ? parseInt(formData.get("subscriptionTypeId") as string) : null,
+      entityCardType: (formData.get("entityCardType") && formData.get("entityCardType") !== "none") ? formData.get("entityCardType") as string : null,
+      entityCardNumber: formData.get("entityCardNumber") as string || null,
+      entityCardIssueDate: formData.get("entityCardIssueDate") as string || null,
+      entityCardExpiryDate: formData.get("entityCardExpiryDate") as string || null,
+      streetAddress: formData.get("streetAddress") as string || null,
+      city: formData.get("city") as string || null,
+      province: formData.get("province") as string || null,
+      postalCode: formData.get("postalCode") as string || null,
+      country: formData.get("country") as string || "Italia",
+    } as any;
 
     if (editingMember) {
       updateMutation.mutate({ id: editingMember.id, data });
@@ -443,9 +485,9 @@ export default function Members() {
       toast({ title: "Nessun dato da esportare", variant: "destructive" });
       return;
     }
-    
+
     const headers = ["ID", "Nome", "Cognome", "Codice Fiscale", "Data Nascita", "Luogo Nascita", "Sesso", "Email", "Telefono", "Cellulare", "Indirizzo", "Città", "Provincia", "CAP", "N. Tessera", "Scadenza Tessera", "Certificato Medico", "Scadenza Certificato", "Note", "Stato"];
-    
+
     const rows = members.map(member => [
       member.id,
       member.firstName || "",
@@ -468,7 +510,7 @@ export default function Members() {
       member.notes || "",
       member.active ? "Attivo" : "Inattivo"
     ]);
-    
+
     const escapeCSV = (value: unknown) => {
       const str = String(value ?? "");
       if (str.includes(",") || str.includes('"') || str.includes("\n")) {
@@ -476,29 +518,24 @@ export default function Members() {
       }
       return str;
     };
-    
+
     const csvContent = "\ufeff" + [headers.map(escapeCSV).join(","), ...rows.map(row => row.map(escapeCSV).join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `partecipanti_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `clienti_export_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     toast({ title: "Esportazione completata" });
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Partecipanti/Anagrafiche</h1>
-            <p className="text-muted-foreground text-sm">Anagrafica completa degli iscritti</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Clienti/Anagrafiche</h1>
+          <p className="text-muted-foreground">Anagrafica completa degli iscritti</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button
@@ -509,16 +546,16 @@ export default function Members() {
             <Download className="w-4 h-4 mr-2" />
             Esporta CSV
           </Button>
-          <Button 
-            className="gold-3d-button"
+          <Button
             onClick={() => {
               resetForm();
               setIsFormOpen(true);
             }}
             data-testid="button-add-member"
+            disabled={!canWrite}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Nuovo Partecipante
+            Nuovo Cliente/Associato
           </Button>
         </div>
       </div>
@@ -560,7 +597,7 @@ export default function Members() {
           ) : (
             <div className="overflow-x-auto">
               <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
-                <span>Totale: {totalMembers} partecipanti</span>
+                <span>Totale: {totalMembers} clienti</span>
                 {totalPages > 1 && (
                   <div className="flex items-center gap-2">
                     <Button
@@ -588,68 +625,34 @@ export default function Members() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome e Cognome</SortableTableHead>
-                    <SortableTableHead sortKey="fiscalCode" currentSort={sortConfig} onSort={handleSort}>Codice Fiscale</SortableTableHead>
-                    <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
-                    <SortableTableHead sortKey="phone" currentSort={sortConfig} onSort={handleSort}>Mobile</SortableTableHead>
-                    <SortableTableHead sortKey="cardNumber" currentSort={sortConfig} onSort={handleSort}>Tessera</SortableTableHead>
-                    <SortableTableHead sortKey="medicalCert" currentSort={sortConfig} onSort={handleSort}>Cert. Medico</SortableTableHead>
-                    <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
-                    <SortableTableHead sortKey="courses" currentSort={sortConfig} onSort={() => {}} className="text-right">Corsi Attivi</SortableTableHead>
-                    <TableHead className="text-right">Azioni</TableHead>
+                    <TableHead>Nome e Cognome</TableHead>
+                    <TableHead>Codice Fiscale</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Mobile</TableHead>
+                    <TableHead>Tessera</TableHead>
+                    <TableHead>Cert. Medico</TableHead>
+                    <TableHead>Stato</TableHead>
+                    <TableHead className="text-right">Corsi Attivi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedMembers.map((member) => (
-                      <TableRow key={member.id} data-testid={`member-row-${member.id}`}>
-                        <TableCell className={isSortedColumn("name") ? "sorted-column-cell" : undefined}>
-                          <span 
-                            className="font-bold hover:underline cursor-pointer"
-                            onClick={async () => {
-                              try {
-                                const [memberRes, enrollmentsRes, coursesRes, attendancesRes, workshopsRes, workshopEnrollmentsRes] = await Promise.all([
-                                  fetch(`/api/members/${member.id}`, { credentials: "include" }),
-                                  fetch(`/api/enrollments?memberId=${member.id}`, { credentials: "include" }),
-                                  fetch(`/api/courses`, { credentials: "include" }),
-                                  fetch(`/api/attendances/member/${member.id}`, { credentials: "include" }),
-                                  fetch(`/api/workshops`, { credentials: "include" }),
-                                  fetch(`/api/workshop-enrollments?memberId=${member.id}`, { credentials: "include" }),
-                                ]);
-                                if (memberRes.ok) {
-                                  const fullMember = await memberRes.json();
-                                  setEditingMember(fullMember);
-                                  setHasMedicalCert(fullMember.hasMedicalCertificate || false);
-                                  setIsMinorChecked(fullMember.isMinor || false);
-                                  if (enrollmentsRes.ok) {
-                                    setMemberEnrollments(await enrollmentsRes.json());
-                                  }
-                                  if (coursesRes.ok) {
-                                    setCourses(await coursesRes.json());
-                                  }
-                                  if (attendancesRes.ok) {
-                                    setAttendances(await attendancesRes.json());
-                                  }
-                                  if (workshopsRes.ok) {
-                                    setWorkshops(await workshopsRes.json());
-                                  }
-                                  if (workshopEnrollmentsRes.ok) {
-                                    setMemberWorkshopEnrollments(await workshopEnrollmentsRes.json());
-                                  }
-                                  setIsFormOpen(true);
-                                }
-                              } catch (e) {
-                                console.error("Error loading member:", e);
-                              }
-                            }}
-                            data-testid={`link-member-${member.id}`}
-                          >
-                            {member.firstName} {member.lastName}
-                          </span>
+                  {members.map((member) => (
+                    <Fragment key={member.id}>
+                      <TableRow data-testid={`member-row-${member.id}`} className="border-b-0 hover:bg-muted/10">
+                        <TableCell>
+                          <Link href={`/?memberId=${member.id}`}>
+                            <span
+                              className="font-bold hover:underline cursor-pointer"
+                              data-testid={`link-member-${member.id}`}
+                            >
+                              {member.firstName} {member.lastName}
+                            </span>
+                          </Link>
                         </TableCell>
-                        <TableCell className={cn("font-mono text-sm", isSortedColumn("fiscalCode") && "sorted-column-cell")}>{member.fiscalCode || "-"}</TableCell>
-                        <TableCell className={isSortedColumn("email") ? "sorted-column-cell" : undefined}>{member.email || "-"}</TableCell>
-                        <TableCell className={isSortedColumn("phone") ? "sorted-column-cell" : undefined}>{member.mobile || member.phone || "-"}</TableCell>
-                        <TableCell className={isSortedColumn("cardNumber") ? "sorted-column-cell" : undefined}>
+                        <TableCell className="font-mono text-sm">{member.fiscalCode || "-"}</TableCell>
+                        <TableCell>{member.email || "-"}</TableCell>
+                        <TableCell>{member.mobile || member.phone || "-"}</TableCell>
+                        <TableCell>
                           {member.cardNumber ? (
                             <div className="text-sm">
                               <div>{member.cardNumber}</div>
@@ -661,14 +664,14 @@ export default function Members() {
                             </div>
                           ) : "-"}
                         </TableCell>
-                        <TableCell className={isSortedColumn("medicalCert") ? "sorted-column-cell" : undefined}>
+                        <TableCell>
                           {member.hasMedicalCertificate ? (
                             <Badge variant={
-                              member.medicalCertificateExpiry && new Date(member.medicalCertificateExpiry) < new Date() 
-                                ? "destructive" 
+                              member.medicalCertificateExpiry && new Date(member.medicalCertificateExpiry) < new Date()
+                                ? "destructive"
                                 : "default"
                             }>
-                              {member.medicalCertificateExpiry 
+                              {member.medicalCertificateExpiry
                                 ? new Date(member.medicalCertificateExpiry).toLocaleDateString('it-IT')
                                 : "Presente"
                               }
@@ -677,12 +680,12 @@ export default function Members() {
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
-                        <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                          <Badge variant="outline" className="status-badge-gold">
+                        <TableCell>
+                          <Badge variant={member.active ? "default" : "secondary"}>
                             {member.active ? "Attivo" : "Inattivo"}
                           </Badge>
                         </TableCell>
-                        <TableCell className={isSortedColumn("courses") ? "sorted-column-cell" : undefined}>
+                        <TableCell className="text-right">
                           {(member as any).activeCourseCount > 0 ? (
                             <Badge variant="outline" className="text-xs">
                               {(member as any).activeCourseCount} {(member as any).activeCourseCount === 1 ? "corso" : "corsi"}
@@ -691,8 +694,11 @@ export default function Members() {
                             <span className="text-xs text-muted-foreground">Nessun corso</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
+                      </TableRow>
+                      <TableRow className="bg-muted/30 border-t-0 hover:bg-muted/40">
+                        <TableCell colSpan={8} className="py-2 pl-4 md:pl-10">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className="text-[10px] font-bold uppercase text-muted-foreground mr-2">Azioni rapide:</span>
                             <Button
                               variant="outline"
                               size="sm"
@@ -700,9 +706,10 @@ export default function Members() {
                                 setSelectedMemberForEnrollment(member);
                                 setIsEnrollmentDialogOpen(true);
                               }}
-                              data-testid={`button-enroll-member-${member.id}`}
+                              className="h-8 px-3"
+                              disabled={!canWrite}
                             >
-                              <GraduationCap className="w-4 h-4 mr-2" />
+                              <GraduationCap className="w-3.5 h-3.5 mr-2" />
                               Iscrizioni
                             </Button>
                             <Button
@@ -712,36 +719,66 @@ export default function Members() {
                                 setSelectedMemberForMembership(member);
                                 setIsMembershipDialogOpen(true);
                               }}
-                              data-testid={`button-manage-membership-${member.id}`}
+                              className="h-8 px-3"
+                              disabled={!canWrite}
                             >
-                              <CreditCard className="w-4 h-4 mr-2" />
+                              <CreditCard className="w-3.5 h-3.5 mr-2" />
                               Tessere
                             </Button>
                             <Button
-                              size="icon"
-                              className="gold-3d-button"
-                              onClick={() => setLocation(`/?memberId=${member.id}`)}
-                              title="Apri in Anagrafica"
-                              data-testid={`button-edit-member-${member.id}`}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setLocation(`/scheda-contabile?memberId=${member.id}`)}
+                              className="h-8 px-3 text-orange-700 border-orange-200 hover:bg-orange-50"
+                              disabled={!canWrite}
+                              title="Scheda Contabile"
                             >
-                              <Edit className="w-4 h-4" />
+                              <Coins className="w-3.5 h-3.5 mr-2" />
+                              Contabilità
                             </Button>
                             <Button
                               variant="outline"
-                              size="icon"
-                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedMemberForCard(member);
+                                setIsCardDialogOpen(true);
+                              }}
+                              className="h-8 px-3"
+                              disabled={!canWrite}
+                            >
+                              <Smartphone className="w-3.5 h-3.5 mr-2" />
+                              Card
+                            </Button>
+
+                            <div className="h-4 w-px bg-border mx-2 hidden md:block" />
+
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setLocation(`/?memberId=${member.id}`)}
+                              className="h-8"
+                              disabled={!canWrite}
+                            >
+                              <Edit className="w-3.5 h-3.5 mr-2" />
+                              Modifica Completa
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                               onClick={() => {
                                 if (confirm("Sei sicuro di voler eliminare questo iscritto?")) {
                                   deleteMutation.mutate(member.id);
                                 }
                               }}
-                              data-testid={`button-delete-member-${member.id}`}
+                              disabled={!canWrite}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           </div>
                         </TableCell>
                       </TableRow>
+                    </Fragment>
                   ))}
                 </TableBody>
               </Table>
@@ -757,12 +794,64 @@ export default function Members() {
       }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingMember ? "Modifica Partecipante" : "Nuovo Partecipante"}</DialogTitle>
+            <DialogTitle>{editingMember ? "Modifica Cliente" : "Nuovo Cliente"}</DialogTitle>
             <DialogDescription>
               Inserisci i dati anagrafici completi dell'iscritto
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Foto Profilo */}
+            <div className="flex flex-col items-center space-y-4 bg-muted/20 p-6 rounded-xl border-2 border-dashed border-muted">
+              <div className="relative w-32 h-32 rounded-full overflow-hidden bg-muted border-4 border-white shadow-lg">
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
+                    <Camera className="w-10 h-10 mb-1 opacity-40" />
+                    <span className="text-[10px] uppercase font-bold tracking-tighter">Fototessera</span>
+                  </div>
+                )}
+                {photoPreview && (
+                  <button
+                    type="button"
+                    onClick={() => setPhotoPreview(null)}
+                    className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity text-white text-xs font-bold"
+                  >
+                    Rimuovi
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-col items-center space-y-1">
+                <Label htmlFor="photo-upload" className="cursor-pointer bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors">
+                  Carica Foto
+                </Label>
+                <Input
+                  id="photo-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                />
+                <p className="text-[10px] text-muted-foreground italic">Max 1MB, formato fototessera</p>
+
+                {editingMember && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 border-primary/20 hover:bg-primary/5"
+                    onClick={() => {
+                      setSelectedMemberForCard(editingMember);
+                      setIsCardDialogOpen(true);
+                    }}
+                  >
+                    <Smartphone className="w-4 h-4 mr-2 text-primary" />
+                    Tessera Digitale
+                  </Button>
+                )}
+              </div>
+            </div>
+
             {/* Dati Anagrafici */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Dati Anagrafici</h3>
@@ -790,9 +879,9 @@ export default function Members() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="categoryId">Categoria Partecipante (opzionale)</Label>
+                <Label htmlFor="categoryId">Categoria Cliente (opzionale)</Label>
                 <input type="hidden" name="categoryId" value={selectedCategoryId === "none" ? "" : selectedCategoryId} />
-                <Select 
+                <Select
                   value={selectedCategoryId}
                   onValueChange={setSelectedCategoryId}
                 >
@@ -802,17 +891,34 @@ export default function Members() {
                   <SelectContent>
                     <SelectItem value="none">Nessuna categoria</SelectItem>
                     {(() => {
-                      const renderCategories = (parentId: number | null = null, level: number = 0): any[] => {
+                      const renderCategories = (parentId: number | null = null, level: number = 0, visitied = new Set()): any[] => {
                         const categories = clientCategories?.filter(cat => cat.parentId === parentId) || [];
-                        return categories.flatMap((cat) => [
-                          <SelectItem key={cat.id} value={cat.id.toString()}>
-                            {'\u00A0'.repeat(level * 4)}{cat.name}
-                          </SelectItem>,
-                          ...renderCategories(cat.id, level + 1)
-                        ]);
+                        return categories.flatMap((cat) => {
+                          if (visitied.has(cat.id)) return []; // Safety against circular refs
+                          visitied.add(cat.id);
+                          return [
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                              {'\u00A0'.repeat(level * 4)}{cat.name}
+                            </SelectItem>,
+                            ...renderCategories(cat.id, level + 1, visitied)
+                          ];
+                        });
                       };
                       return renderCategories();
                     })()}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="subscriptionTypeId">Tipo Iscrizione</Label>
+                <Select name="subscriptionTypeId" defaultValue={editingMember?.subscriptionTypeId?.toString() || "none"}>
+                  <SelectTrigger><SelectValue placeholder="Seleziona tipo iscrizione" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nessuno</SelectItem>
+                    {subscriptionTypes?.map(st => (
+                      <SelectItem key={st.id} value={st.id.toString()}>{st.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -841,7 +947,7 @@ export default function Members() {
                     id="dateOfBirth"
                     name="dateOfBirth"
                     type="date"
-                    defaultValue={editingMember?.dateOfBirth || ""}
+                    defaultValue={(editingMember?.dateOfBirth ? (typeof editingMember.dateOfBirth === 'string' ? editingMember.dateOfBirth : new Date(editingMember.dateOfBirth).toISOString().split('T')[0]) : "") as any}
                     onChange={(e) => handleDateOfBirthChange(e.target.value)}
                     data-testid="input-dateOfBirth"
                   />
@@ -912,13 +1018,40 @@ export default function Members() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="address">Indirizzo</Label>
+                  <Label htmlFor="address">Indirizzo Note</Label>
                   <Input
                     id="address"
                     name="address"
                     defaultValue={editingMember?.address || ""}
                     data-testid="input-address"
+                    placeholder="Note aggiuntive indirizzo"
                   />
+                </div>
+              </div>
+
+              {/* Indirizzo Dettagliato */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="streetAddress">Via/Piazza</Label>
+                  <Input id="streetAddress" name="streetAddress" defaultValue={editingMember?.streetAddress || ""} placeholder="Es: Via Roma 1" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">Città</Label>
+                  <Input id="city" name="city" defaultValue={editingMember?.city || ""} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="province">Provincia</Label>
+                  <Input id="province" name="province" defaultValue={editingMember?.province || ""} maxLength={2} className="uppercase" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="postalCode">CAP</Label>
+                  <Input id="postalCode" name="postalCode" defaultValue={editingMember?.postalCode || ""} maxLength={5} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="country">Stato</Label>
+                  <Input id="country" name="country" defaultValue={editingMember?.country || "Italia"} />
                 </div>
               </div>
             </div>
@@ -944,7 +1077,7 @@ export default function Members() {
                     id="cardIssueDate"
                     name="cardIssueDate"
                     type="date"
-                    defaultValue={editingMember?.cardIssueDate || ""}
+                    defaultValue={(editingMember?.cardIssueDate ? (typeof editingMember.cardIssueDate === 'string' ? editingMember.cardIssueDate : new Date(editingMember.cardIssueDate).toISOString().split('T')[0]) : "") as any}
                     data-testid="input-cardIssueDate"
                   />
                 </div>
@@ -954,7 +1087,7 @@ export default function Members() {
                     id="cardExpiryDate"
                     name="cardExpiryDate"
                     type="date"
-                    defaultValue={editingMember?.cardExpiryDate || ""}
+                    defaultValue={(editingMember?.cardExpiryDate ? (typeof editingMember.cardExpiryDate === 'string' ? editingMember.cardExpiryDate : new Date(editingMember.cardExpiryDate).toISOString().split('T')[0]) : "") as any}
                     data-testid="input-cardExpiryDate"
                   />
                 </div>
@@ -966,7 +1099,7 @@ export default function Members() {
             {/* Minorenne */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Checkbox 
+                <Checkbox
                   id="isMinor"
                   checked={isMinorChecked}
                   onCheckedChange={(checked) => {
@@ -986,7 +1119,7 @@ export default function Members() {
             {/* Certificato Medico */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Checkbox 
+                <Checkbox
                   id="hasMedicalCertificate"
                   checked={hasMedicalCert}
                   onCheckedChange={(checked) => setHasMedicalCert(checked as boolean)}
@@ -996,7 +1129,7 @@ export default function Members() {
                   Certificato Medico
                 </Label>
               </div>
-              
+
               {hasMedicalCert && (
                 <div className="space-y-2 pl-6">
                   <Label htmlFor="medicalCertificateExpiry">Scadenza Certificato Medico</Label>
@@ -1004,11 +1137,46 @@ export default function Members() {
                     id="medicalCertificateExpiry"
                     name="medicalCertificateExpiry"
                     type="date"
-                    defaultValue={editingMember?.medicalCertificateExpiry || ""}
+                    defaultValue={(editingMember?.medicalCertificateExpiry ? (typeof editingMember.medicalCertificateExpiry === 'string' ? editingMember.medicalCertificateExpiry : new Date(editingMember.medicalCertificateExpiry).toISOString().split('T')[0]) : "") as any}
                     data-testid="input-medicalCertificateExpiry"
                   />
                 </div>
               )}
+            </div>
+
+            <Separator />
+
+            {/* Tessera Ente */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Tessera Ente</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="entityCardType">Tipo Ente</Label>
+                  <Select name="entityCardType" defaultValue={editingMember?.entityCardType || "none"}>
+                    <SelectTrigger><SelectValue placeholder="Scegli Ente" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nessuno / Altro</SelectItem>
+                      <SelectItem value="CSEN">CSEN</SelectItem>
+                      <SelectItem value="ACSI">ACSI</SelectItem>
+                      <SelectItem value="AICS">AICS</SelectItem>
+                      <SelectItem value="UISP">UISP</SelectItem>
+                      <SelectItem value="ALTRO">Altro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="entityCardNumber">Numero Tessera Ente</Label>
+                  <Input id="entityCardNumber" name="entityCardNumber" defaultValue={editingMember?.entityCardNumber || ""} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="entityCardIssueDate">Data Rilascio</Label>
+                  <Input id="entityCardIssueDate" name="entityCardIssueDate" type="date" defaultValue={editingMember?.entityCardIssueDate ? (typeof editingMember.entityCardIssueDate === 'string' ? editingMember.entityCardIssueDate : new Date(editingMember.entityCardIssueDate).toISOString().split('T')[0]) : ""} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="entityCardExpiryDate">Data Scadenza</Label>
+                  <Input id="entityCardExpiryDate" name="entityCardExpiryDate" type="date" defaultValue={editingMember?.entityCardExpiryDate ? (typeof editingMember.entityCardExpiryDate === 'string' ? editingMember.entityCardExpiryDate : new Date(editingMember.entityCardExpiryDate).toISOString().split('T')[0]) : ""} />
+                </div>
+              </div>
             </div>
 
             {/* Dati Genitori (se minorenne) */}
@@ -1017,7 +1185,7 @@ export default function Members() {
                 <Separator />
                 <div className="space-y-4 bg-muted/50 p-4 rounded-lg">
                   <h3 className="text-lg font-semibold">Dati Genitori (Minorenne)</h3>
-                  
+
                   {/* Madre */}
                   <div className="space-y-4">
                     <h4 className="font-medium text-foreground">Madre</h4>
@@ -1163,7 +1331,7 @@ export default function Members() {
               </>
             )}
 
-            {/* Corsi Iscritti - Solo per partecipanti esistenti */}
+            {/* Corsi Iscritti - Solo per membri esistenti */}
             {editingMember && (
               <>
                 <Separator />
@@ -1207,13 +1375,12 @@ export default function Members() {
                                 <Button
                                   type="button"
                                   size="sm"
-                                  variant="outline"
-                                  className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                                  variant="ghost"
                                   onClick={() => {
                                     if (confirm(`Rimuovere l'iscrizione al corso "${course.name}"?`)) {
-                                      removeEnrollmentMutation.mutate({ 
-                                        enrollmentId: enrollment.id, 
-                                        memberId: editingMember!.id 
+                                      removeEnrollmentMutation.mutate({
+                                        enrollmentId: enrollment.id,
+                                        memberId: editingMember!.id
                                       });
                                     }
                                   }}
@@ -1245,8 +1412,8 @@ export default function Members() {
                         </SelectTrigger>
                         <SelectContent>
                           {courses
-                            ?.filter(c => 
-                              c.active && 
+                            ?.filter(c =>
+                              c.active &&
                               !memberEnrollments.some(e => e.courseId === c.id)
                             )
                             .map(course => (
@@ -1281,7 +1448,7 @@ export default function Members() {
               </>
             )}
 
-            {/* Workshop Iscritti - Solo per partecipanti esistenti */}
+            {/* Workshop Iscritti - Solo per membri esistenti */}
             {editingMember && (
               <>
                 <Separator />
@@ -1324,13 +1491,12 @@ export default function Members() {
                               <Button
                                 type="button"
                                 size="sm"
-                                variant="outline"
-                                className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                                variant="ghost"
                                 onClick={() => {
                                   if (confirm(`Rimuovere l'iscrizione al workshop "${workshop.name}"?`)) {
-                                    removeWorkshopEnrollmentMutation.mutate({ 
-                                      enrollmentId: enrollment.id, 
-                                      memberId: editingMember!.id 
+                                    removeWorkshopEnrollmentMutation.mutate({
+                                      enrollmentId: enrollment.id,
+                                      memberId: editingMember!.id
                                     });
                                   }
                                 }}
@@ -1362,8 +1528,8 @@ export default function Members() {
                         </SelectTrigger>
                         <SelectContent>
                           {workshops
-                            ?.filter(w => 
-                              w.active && 
+                            ?.filter(w =>
+                              w.active &&
                               !memberWorkshopEnrollments.some(e => e.workshopId === w.id)
                             )
                             .map(workshop => (
@@ -1398,7 +1564,7 @@ export default function Members() {
               </>
             )}
 
-            {/* Presenze - Solo per partecipanti esistenti */}
+            {/* Presenze - Solo per membri esistenti */}
             {editingMember && (
               <>
                 <Separator />
@@ -1466,21 +1632,21 @@ export default function Members() {
                           toast({ title: "Errore", description: "Inserisci data e ora", variant: "destructive" });
                           return;
                         }
-                        
-                        const enrollment = (selectedCourseForAttendance && selectedCourseForAttendance !== "none") ? 
+
+                        const enrollment = (selectedCourseForAttendance && selectedCourseForAttendance !== "none") ?
                           memberEnrollments.find(e => e.id === parseInt(selectedCourseForAttendance)) : undefined;
-                        
+
                         const attendanceData: any = {
                           memberId: editingMember.id,
                           attendanceDate: `${attendanceDate}T${attendanceTime}:00`,
                         };
-                        
+
                         // Only include courseId and enrollmentId if a valid enrollment is selected
                         if (enrollment) {
                           attendanceData.courseId = enrollment.courseId;
                           attendanceData.enrollmentId = enrollment.id;
                         }
-                        
+
                         addAttendanceMutation.mutate(attendanceData);
                         setAttendanceDate("");
                         setAttendanceTime("");
@@ -1518,15 +1684,15 @@ export default function Members() {
                                   <FileText className="h-4 w-4 text-muted-foreground" />
                                   <div>
                                     <p className="font-medium">
-                                      {attendanceDateTime.toLocaleDateString('it-IT', { 
-                                        day: '2-digit', 
-                                        month: '2-digit', 
-                                        year: 'numeric' 
+                                      {attendanceDateTime.toLocaleDateString('it-IT', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric'
                                       })}
                                       {' '}
-                                      {attendanceDateTime.toLocaleTimeString('it-IT', { 
-                                        hour: '2-digit', 
-                                        minute: '2-digit' 
+                                      {attendanceDateTime.toLocaleTimeString('it-IT', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
                                       })}
                                     </p>
                                     {course && (
@@ -1539,8 +1705,7 @@ export default function Members() {
                                 <Button
                                   type="button"
                                   size="sm"
-                                  variant="outline"
-                                  className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                                  variant="ghost"
                                   onClick={() => {
                                     if (confirm("Eliminare questa presenza?")) {
                                       deleteAttendanceMutation.mutate({
@@ -1587,13 +1752,12 @@ export default function Members() {
               >
                 Annulla
               </Button>
-              <Button 
-                type="submit" 
-                className="gold-3d-button"
+              <Button
+                type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-member"
               >
-                {editingMember ? "Salva Modifiche" : "Crea Partecipante"}
+                {editingMember ? "Salva Modifiche" : "Crea Cliente/Associato"}
               </Button>
             </DialogFooter>
           </form>
@@ -1601,7 +1765,7 @@ export default function Members() {
       </Dialog>
 
       {/* Enrollment Management Dialog */}
-      <EnrollmentDialog 
+      <EnrollmentDialog
         member={selectedMemberForEnrollment}
         open={isEnrollmentDialogOpen}
         onOpenChange={setIsEnrollmentDialogOpen}
@@ -1613,18 +1777,25 @@ export default function Members() {
         open={isMembershipDialogOpen}
         onOpenChange={setIsMembershipDialogOpen}
       />
+
+      {/* Digital card dialog */}
+      <MembershipCardDialog
+        member={selectedMemberForCard}
+        isOpen={isCardDialogOpen}
+        onOpenChange={setIsCardDialogOpen}
+      />
     </div>
   );
 }
 
 // Enrollment Management Component
-function EnrollmentDialog({ 
-  member, 
-  open, 
-  onOpenChange 
-}: { 
-  member: Member | null; 
-  open: boolean; 
+function EnrollmentDialog({
+  member,
+  open,
+  onOpenChange
+}: {
+  member: Member | null;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const { toast } = useToast();
@@ -1647,13 +1818,16 @@ function EnrollmentDialog({
 
   const createEnrollmentMutation = useMutation({
     mutationFn: async (data: { memberId: number; courseId: number }) => {
-      const result = await apiRequest("POST", "/api/enrollments", data);
+      const result = await apiRequest("POST", "/api/enrollments", {
+        ...data,
+        status: "active"
+      });
       return result;
     },
     onSuccess: async (enrollment: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
-      
+
       // Create course payment
       if (courseFee && parseFloat(courseFee) > 0) {
         const course = courses?.find(c => c.id === enrollment.courseId);
@@ -1667,7 +1841,7 @@ function EnrollmentDialog({
           dueDate: new Date().toISOString().split('T')[0],
         });
       }
-      
+
       // Create membership payment
       if (includeMembership && membershipFee && parseFloat(membershipFee) > 0) {
         await apiRequest("POST", "/api/payments", {
@@ -1680,7 +1854,7 @@ function EnrollmentDialog({
           dueDate: new Date().toISOString().split('T')[0],
         });
       }
-      
+
       queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
       toast({ title: "Iscrizione creata con successo" });
       setSelectedCourseId("");
@@ -1708,7 +1882,7 @@ function EnrollmentDialog({
 
   const handleEnroll = () => {
     if (!member || !selectedCourseId) return;
-    
+
     createEnrollmentMutation.mutate({
       memberId: member.id,
       courseId: parseInt(selectedCourseId),
@@ -1725,7 +1899,7 @@ function EnrollmentDialog({
   }, [selectedCourseId, courses]);
 
   const memberEnrollments = enrollments?.filter(e => e.memberId === member?.id) || [];
-  const availableCourses = courses?.filter(c => 
+  const availableCourses = courses?.filter(c =>
     c.active && !memberEnrollments.some(e => e.courseId === c.id)
   ) || [];
 
@@ -1757,7 +1931,7 @@ function EnrollmentDialog({
                     .reduce((sum, p) => sum + parseFloat(p.amount), 0);
                   const totalDue = enrollmentPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
                   const isPaid = totalPaid >= totalDue && totalDue > 0;
-                  
+
                   return (
                     <div
                       key={enrollment.id}
@@ -1769,11 +1943,11 @@ function EnrollmentDialog({
                           <div className="flex items-center gap-2">
                             <div className="font-medium">{course?.name || "Corso sconosciuto"}</div>
                             {isPaid ? (
-                              <Badge variant="outline" className="text-xs status-badge-gold">Pagato</Badge>
+                              <Badge variant="default" className="text-xs">Pagato</Badge>
                             ) : enrollmentPayments.some(p => p.status === "overdue") ? (
-                              <Badge variant="outline" className="text-xs status-badge-gold">Scaduto</Badge>
+                              <Badge variant="destructive" className="text-xs">Scaduto</Badge>
                             ) : (
-                              <Badge variant="outline" className="text-xs status-badge-gold">In sospeso</Badge>
+                              <Badge variant="secondary" className="text-xs">In sospeso</Badge>
                             )}
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
@@ -1786,9 +1960,8 @@ function EnrollmentDialog({
                           </div>
                         </div>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => {
                             if (confirm("Vuoi eliminare questa iscrizione?")) {
                               deleteEnrollmentMutation.mutate(enrollment.id);
@@ -1799,7 +1972,7 @@ function EnrollmentDialog({
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                      
+
                       {enrollmentPayments.length > 0 && (
                         <div className="p-3 pt-2 space-y-2">
                           <div className="text-xs font-medium text-muted-foreground mb-2">Pagamenti:</div>
@@ -1819,17 +1992,17 @@ function EnrollmentDialog({
                                 <div className="text-right">
                                   <div className="font-medium">€{parseFloat(payment.amount).toFixed(2)}</div>
                                 </div>
-                                <Badge 
+                                <Badge
                                   variant={
-                                    payment.status === "paid" ? "default" : 
-                                    payment.status === "overdue" ? "destructive" : 
-                                    "secondary"
+                                    payment.status === "paid" ? "default" :
+                                      payment.status === "overdue" ? "destructive" :
+                                        "secondary"
                                   }
                                   className="text-xs"
                                 >
-                                  {payment.status === "paid" ? "Pagato" : 
-                                   payment.status === "overdue" ? "Scaduto" : 
-                                   "In sospeso"}
+                                  {payment.status === "paid" ? "Pagato" :
+                                    payment.status === "overdue" ? "Scaduto" :
+                                      "In sospeso"}
                                 </Badge>
                               </div>
                             </div>
@@ -1934,13 +2107,13 @@ function EnrollmentDialog({
 }
 
 // Membership and Medical Certificates Management Component
-function MembershipManagementDialog({ 
-  member, 
-  open, 
-  onOpenChange 
-}: { 
-  member: Member | null; 
-  open: boolean; 
+function MembershipManagementDialog({
+  member,
+  open,
+  onOpenChange
+}: {
+  member: Member | null;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const { toast } = useToast();
@@ -2136,12 +2309,12 @@ function MembershipManagementDialog({
                           <span className="font-mono font-medium">{membership.membershipNumber}</span>
                           <Badge variant={
                             membership.status === "active" ? "default" :
-                            membership.status === "expired" ? "destructive" :
-                            "secondary"
+                              membership.status === "expired" ? "destructive" :
+                                "secondary"
                           } className="text-xs">
                             {membership.status === "active" ? "Attiva" :
-                             membership.status === "expired" ? "Scaduta" :
-                             "Sospesa"}
+                              membership.status === "expired" ? "Scaduta" :
+                                "Sospesa"}
                           </Badge>
                         </div>
                         <div className="text-sm text-muted-foreground">
@@ -2160,17 +2333,16 @@ function MembershipManagementDialog({
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
+                          variant="ghost"
                           size="icon"
-                          className="gold-3d-button"
                           onClick={() => setEditingMembership(membership)}
                           data-testid={`button-edit-membership-${membership.id}`}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
-                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => {
                             if (confirm("Sei sicuro di voler eliminare questa tessera?")) {
                               deleteMembershipMutation.mutate(membership.id);
@@ -2191,7 +2363,7 @@ function MembershipManagementDialog({
             {(isAddingMembership || editingMembership) && (
               <form onSubmit={handleSubmitMembership} className="mt-4 border rounded-md p-4 bg-muted/30 space-y-4">
                 <h4 className="font-medium">{editingMembership ? "Modifica Tessera" : "Nuova Tessera"}</h4>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="previousMembershipNumber">Tessera Precedente (opzionale)</Label>
@@ -2282,9 +2454,8 @@ function MembershipManagementDialog({
                   >
                     Annulla
                   </Button>
-                  <Button 
+                  <Button
                     type="submit"
-                    className="gold-3d-button"
                     disabled={createMembershipMutation.isPending || updateMembershipMutation.isPending}
                     data-testid="button-submit-membership"
                   >
@@ -2333,12 +2504,12 @@ function MembershipManagementDialog({
                           <span className="font-medium">Certificato Medico</span>
                           <Badge variant={
                             cert.status === "valid" ? "default" :
-                            cert.status === "expired" ? "destructive" :
-                            "secondary"
+                              cert.status === "expired" ? "destructive" :
+                                "secondary"
                           } className="text-xs">
                             {cert.status === "valid" ? "Valido" :
-                             cert.status === "expired" ? "Scaduto" :
-                             "In attesa"}
+                              cert.status === "expired" ? "Scaduto" :
+                                "In attesa"}
                           </Badge>
                         </div>
                         <div className="text-sm text-muted-foreground">
@@ -2357,17 +2528,16 @@ function MembershipManagementDialog({
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
+                          variant="ghost"
                           size="icon"
-                          className="gold-3d-button"
                           onClick={() => setEditingCertificate(cert)}
                           data-testid={`button-edit-certificate-${cert.id}`}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
-                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => {
                             if (confirm("Sei sicuro di voler eliminare questo certificato?")) {
                               deleteCertificateMutation.mutate(cert.id);
@@ -2388,7 +2558,7 @@ function MembershipManagementDialog({
             {(isAddingCertificate || editingCertificate) && (
               <form onSubmit={handleSubmitCertificate} className="mt-4 border rounded-md p-4 bg-muted/30 space-y-4">
                 <h4 className="font-medium">{editingCertificate ? "Modifica Certificato" : "Nuovo Certificato"}</h4>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="cert-issueDate">Data Rilascio *</Label>
@@ -2464,9 +2634,8 @@ function MembershipManagementDialog({
                   >
                     Annulla
                   </Button>
-                  <Button 
+                  <Button
                     type="submit"
-                    className="gold-3d-button"
                     disabled={createCertificateMutation.isPending || updateCertificateMutation.isPending}
                     data-testid="button-submit-certificate"
                   >
@@ -2492,4 +2661,37 @@ function MembershipManagementDialog({
   );
 }
 
-export { MembershipManagementDialog };
+function MembershipCardDialog({
+  isOpen,
+  onOpenChange,
+  member
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  member: Member | null;
+}) {
+  if (!member) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[95vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Tessera Digitale</DialogTitle>
+          <DialogDescription>
+            Tessera di iscrizione per {member.firstName} {member.lastName}
+          </DialogDescription>
+        </DialogHeader>
+
+        <MembershipCard member={member} />
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Chiudi
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export { MembershipManagementDialog, MembershipCardDialog };

@@ -11,12 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, IdCard, FileText, Building2, Check, ChevronsUpDown, UserPlus, ArrowLeft } from "lucide-react";
+import { Plus, Search, Edit, Trash2, IdCard, FileText, Building2, Check, ChevronsUpDown, UserPlus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { Membership, InsertMembership, MedicalCertificate, InsertMedicalCertificate, Member } from "@shared/schema";
@@ -31,18 +30,14 @@ export default function Memberships() {
   const [isCertificateFormOpen, setIsCertificateFormOpen] = useState(false);
   const [editingMembership, setEditingMembership] = useState<Membership | null>(null);
   const [editingCertificate, setEditingCertificate] = useState<MedicalCertificate | null>(null);
-  
+
   const [membershipMemberOpen, setMembershipMemberOpen] = useState(false);
   const [membershipMemberSearch, setMembershipMemberSearch] = useState("");
   const [selectedMembershipMember, setSelectedMembershipMember] = useState<Member | null>(null);
-  
+
   const [certMemberOpen, setCertMemberOpen] = useState(false);
   const [certMemberSearch, setCertMemberSearch] = useState("");
   const [selectedCertMember, setSelectedCertMember] = useState<Member | null>(null);
-
-  const { sortConfig: sortConfig1, handleSort: handleSort1, sortItems: sortItems1, isSortedColumn: isSortedColumn1 } = useSortableTable<Membership>("member");
-  const { sortConfig: sortConfig2, handleSort: handleSort2, sortItems: sortItems2, isSortedColumn: isSortedColumn2 } = useSortableTable<MedicalCertificate>("member");
-  const { sortConfig: sortConfig3, handleSort: handleSort3, sortItems: sortItems3, isSortedColumn: isSortedColumn3 } = useSortableTable<Member>("member");
 
   const { data: memberships, isLoading: membershipsLoading } = useQuery<Membership[]>({
     queryKey: ["/api/memberships"],
@@ -116,7 +111,7 @@ export default function Memberships() {
   const handleMembershipSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedMembershipMember) {
-      toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
+      toast({ title: "Errore", description: "Seleziona un cliente/associato", variant: "destructive" });
       return;
     }
     const formData = new FormData(e.currentTarget);
@@ -124,8 +119,8 @@ export default function Memberships() {
       memberId: selectedMembershipMember.id,
       membershipNumber: formData.get("membershipNumber") as string,
       barcode: formData.get("barcode") as string,
-      issueDate: formData.get("issueDate") as string,
-      expiryDate: formData.get("expiryDate") as string,
+      issueDate: new Date(formData.get("issueDate") as string),
+      expiryDate: new Date(formData.get("expiryDate") as string),
       type: formData.get("type") as string || null,
       fee: formData.get("fee") ? formData.get("fee") as string : null,
       status: "active",
@@ -137,14 +132,14 @@ export default function Memberships() {
   const handleCertificateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedCertMember) {
-      toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
+      toast({ title: "Errore", description: "Seleziona un cliente/associato", variant: "destructive" });
       return;
     }
     const formData = new FormData(e.currentTarget);
     const data: InsertMedicalCertificate = {
       memberId: selectedCertMember.id,
-      issueDate: formData.get("issueDate") as string,
-      expiryDate: formData.get("expiryDate") as string,
+      issueDate: new Date(formData.get("issueDate") as string),
+      expiryDate: new Date(formData.get("expiryDate") as string),
       doctorName: formData.get("doctorName") as string || null,
       notes: formData.get("notes") as string || null,
       status: "valid",
@@ -162,28 +157,22 @@ export default function Memberships() {
     return member ? `${member.firstName} ${member.lastName}` : "Sconosciuto";
   };
 
-  const getExpiryStatus = (expiryDate: string) => {
+  const getExpiryStatus = (expiryDate: string | Date | null | undefined) => {
+    if (!expiryDate) return { status: "unknown", label: "N/D", variant: "secondary" as const };
     const today = new Date();
     const expiry = new Date(expiryDate);
     const daysUntilExpiry = Math.floor((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (daysUntilExpiry < 0) return { status: "expired", label: "Scaduto", variant: "outline" as const };
-    if (daysUntilExpiry <= 7) return { status: "expiring", label: "In Scadenza", variant: "outline" as const };
-    return { status: "active", label: "Attivo", variant: "outline" as const };
+
+    if (daysUntilExpiry < 0) return { status: "expired", label: "Scaduto", variant: "destructive" as const };
+    if (daysUntilExpiry <= 7) return { status: "expiring", label: "In Scadenza", variant: "secondary" as const };
+    return { status: "active", label: "Attivo", variant: "default" as const };
   };
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Tessere & Certificati Medici</h1>
-            <p className="text-muted-foreground text-sm">Gestisci tessere associative e certificati medici</p>
-          </div>
-        </div>
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <div>
+        <h1 className="text-3xl font-semibold text-foreground mb-2">Tessere & Certificati Medici</h1>
+        <p className="text-muted-foreground">Gestisci tessere associative e certificati medici</p>
       </div>
 
       <Tabs defaultValue="memberships" className="space-y-6">
@@ -204,8 +193,7 @@ export default function Memberships() {
 
         <TabsContent value="memberships" className="space-y-6">
           <div className="flex items-center justify-end">
-            <Button 
-              className="gold-3d-button"
+            <Button
               onClick={() => {
                 setEditingMembership(null);
                 setIsMembershipFormOpen(true);
@@ -262,69 +250,55 @@ export default function Memberships() {
                   );
                 }
 
-                const getSortValue1 = (item: Membership, key: string) => {
-                  switch (key) {
-                    case "member": return getMemberName(item);
-                    case "cardNumber": return item.membershipNumber;
-                    case "barcode": return item.barcode;
-                    case "type": return item.type || "";
-                    case "expiry": return item.expiryDate;
-                    case "status": return getExpiryStatus(item.expiryDate).label;
-                    default: return "";
-                  }
-                };
-                const sortedMemberships = sortItems1(filteredMemberships, getSortValue1);
-
                 return (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <SortableTableHead sortKey="member" currentSort={sortConfig1} onSort={handleSort1}>Partecipante</SortableTableHead>
-                      <SortableTableHead sortKey="cardNumber" currentSort={sortConfig1} onSort={handleSort1}>N. Tessera</SortableTableHead>
-                      <SortableTableHead sortKey="barcode" currentSort={sortConfig1} onSort={handleSort1}>Barcode</SortableTableHead>
-                      <SortableTableHead sortKey="type" currentSort={sortConfig1} onSort={handleSort1}>Tipo</SortableTableHead>
-                      <SortableTableHead sortKey="expiry" currentSort={sortConfig1} onSort={handleSort1}>Scadenza</SortableTableHead>
-                      <SortableTableHead sortKey="status" currentSort={sortConfig1} onSort={handleSort1}>Stato</SortableTableHead>
-                      <TableHead className="text-right">Azioni</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedMemberships.map((membership) => {
-                      const expiryInfo = getExpiryStatus(membership.expiryDate);
-                      return (
-                        <TableRow key={membership.id} data-testid={`membership-row-${membership.id}`}>
-                          <TableCell className={cn("font-medium", isSortedColumn1("member") && "sorted-column-cell")}>
-                            {getMemberName(membership)}
-                          </TableCell>
-                          <TableCell className={isSortedColumn1("number") ? "sorted-column-cell" : undefined}>{membership.membershipNumber}</TableCell>
-                          <TableCell className={cn("font-mono text-xs", isSortedColumn1("barcode") && "sorted-column-cell")}>{membership.barcode}</TableCell>
-                          <TableCell className={isSortedColumn1("type") ? "sorted-column-cell" : undefined}>{membership.type || "-"}</TableCell>
-                          <TableCell className={isSortedColumn1("expiry") ? "sorted-column-cell" : undefined}>{new Date(membership.expiryDate).toLocaleDateString('it-IT')}</TableCell>
-                          <TableCell className={isSortedColumn1("status") ? "sorted-column-cell" : undefined}>
-                            <Badge variant={expiryInfo.variant} className="status-badge-gold">
-                              {expiryInfo.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                              onClick={() => {
-                                if (confirm("Sei sicuro di voler eliminare questa tessera?")) {
-                                  // Delete mutation here
-                                }
-                              }}
-                              data-testid={`button-delete-membership-${membership.id}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Cliente/Associato</TableHead>
+                        <TableHead>N. Tessera</TableHead>
+                        <TableHead>Barcode</TableHead>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead>Scadenza</TableHead>
+                        <TableHead>Stato</TableHead>
+                        <TableHead className="text-right">Azioni</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredMemberships.map((membership) => {
+                        const expiryInfo = getExpiryStatus(membership.expiryDate);
+                        return (
+                          <TableRow key={membership.id} data-testid={`membership-row-${membership.id}`}>
+                            <TableCell className="font-medium">
+                              {getMemberName(membership)}
+                            </TableCell>
+                            <TableCell>{membership.membershipNumber}</TableCell>
+                            <TableCell className="font-mono text-xs">{membership.barcode}</TableCell>
+                            <TableCell>{membership.type || "-"}</TableCell>
+                            <TableCell>{new Date(membership.expiryDate).toLocaleDateString('it-IT')}</TableCell>
+                            <TableCell>
+                              <Badge variant={expiryInfo.variant}>
+                                {expiryInfo.label}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  if (confirm("Sei sicuro di voler eliminare questa tessera?")) {
+                                    // Delete mutation here
+                                  }
+                                }}
+                                data-testid={`button-delete-membership-${membership.id}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 );
               })()}
             </CardContent>
@@ -333,8 +307,7 @@ export default function Memberships() {
 
         <TabsContent value="certificates" className="space-y-6">
           <div className="flex items-center justify-end">
-            <Button 
-              className="gold-3d-button"
+            <Button
               onClick={() => {
                 setEditingCertificate(null);
                 setIsCertificateFormOpen(true);
@@ -391,66 +364,53 @@ export default function Memberships() {
                   );
                 }
 
-                const getSortValue2 = (item: MedicalCertificate, key: string) => {
-                  switch (key) {
-                    case "member": return getMemberName(item);
-                    case "doctor": return item.doctorName || "";
-                    case "issueDate": return item.issueDate;
-                    case "expiry": return item.expiryDate;
-                    case "status": return getExpiryStatus(item.expiryDate).label;
-                    default: return "";
-                  }
-                };
-                const sortedCertificates = sortItems2(filteredCertificates, getSortValue2);
-
                 return (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <SortableTableHead sortKey="member" currentSort={sortConfig2} onSort={handleSort2}>Partecipante</SortableTableHead>
-                      <SortableTableHead sortKey="doctor" currentSort={sortConfig2} onSort={handleSort2}>Medico</SortableTableHead>
-                      <SortableTableHead sortKey="issueDate" currentSort={sortConfig2} onSort={handleSort2}>Data Rilascio</SortableTableHead>
-                      <SortableTableHead sortKey="expiry" currentSort={sortConfig2} onSort={handleSort2}>Scadenza</SortableTableHead>
-                      <SortableTableHead sortKey="status" currentSort={sortConfig2} onSort={handleSort2}>Stato</SortableTableHead>
-                      <TableHead className="text-right">Azioni</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedCertificates.map((cert) => {
-                      const expiryInfo = getExpiryStatus(cert.expiryDate);
-                      return (
-                        <TableRow key={cert.id} data-testid={`certificate-row-${cert.id}`}>
-                          <TableCell className={cn("font-medium", isSortedColumn2("member") && "sorted-column-cell")}>
-                            {getMemberName(cert)}
-                          </TableCell>
-                          <TableCell className={isSortedColumn2("doctor") ? "sorted-column-cell" : undefined}>{cert.doctorName || "-"}</TableCell>
-                          <TableCell className={isSortedColumn2("issueDate") ? "sorted-column-cell" : undefined}>{new Date(cert.issueDate).toLocaleDateString('it-IT')}</TableCell>
-                          <TableCell className={isSortedColumn2("expiry") ? "sorted-column-cell" : undefined}>{new Date(cert.expiryDate).toLocaleDateString('it-IT')}</TableCell>
-                          <TableCell className={isSortedColumn2("status") ? "sorted-column-cell" : undefined}>
-                            <Badge variant={expiryInfo.variant} className="status-badge-gold">
-                              {expiryInfo.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                              onClick={() => {
-                                if (confirm("Sei sicuro di voler eliminare questo certificato?")) {
-                                  // Delete mutation here
-                                }
-                              }}
-                              data-testid={`button-delete-certificate-${cert.id}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Cliente/Associato</TableHead>
+                        <TableHead>Medico</TableHead>
+                        <TableHead>Data Rilascio</TableHead>
+                        <TableHead>Scadenza</TableHead>
+                        <TableHead>Stato</TableHead>
+                        <TableHead className="text-right">Azioni</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredCertificates.map((cert) => {
+                        const expiryInfo = getExpiryStatus(cert.expiryDate);
+                        return (
+                          <TableRow key={cert.id} data-testid={`certificate-row-${cert.id}`}>
+                            <TableCell className="font-medium">
+                              {getMemberName(cert)}
+                            </TableCell>
+                            <TableCell>{cert.doctorName || "-"}</TableCell>
+                            <TableCell>{new Date(cert.issueDate).toLocaleDateString('it-IT')}</TableCell>
+                            <TableCell>{new Date(cert.expiryDate).toLocaleDateString('it-IT')}</TableCell>
+                            <TableCell>
+                              <Badge variant={expiryInfo.variant}>
+                                {expiryInfo.label}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  if (confirm("Sei sicuro di voler eliminare questo certificato?")) {
+                                    // Delete mutation here
+                                  }
+                                }}
+                                data-testid={`button-delete-certificate-${cert.id}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 );
               })()}
             </CardContent>
@@ -495,61 +455,48 @@ export default function Memberships() {
                     <div className="text-center py-12 text-muted-foreground">
                       <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="text-lg font-medium mb-2">Nessuna tessera ente trovata</p>
-                      <p className="text-sm">Le tessere ente vengono gestite nella scheda Anagrafica del partecipante</p>
+                      <p className="text-sm">Le tessere ente vengono gestite nella scheda Anagrafica del cliente/associato</p>
                     </div>
                   );
                 }
-
-                const getSortValue3 = (item: Member, key: string) => {
-                  switch (key) {
-                    case "member": return `${item.firstName} ${item.lastName}`;
-                    case "entityType": return item.entityCardType || "";
-                    case "cardNumber": return item.entityCardNumber || "";
-                    case "issueDate": return item.entityCardIssueDate || "";
-                    case "expiry": return item.entityCardExpiryDate || "";
-                    case "status": return item.entityCardExpiryDate ? getExpiryStatus(item.entityCardExpiryDate).label : "N/D";
-                    default: return "";
-                  }
-                };
-                const sortedEntityCards = sortItems3(filteredEntityCards, getSortValue3);
 
                 return (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <SortableTableHead sortKey="member" currentSort={sortConfig3} onSort={handleSort3}>Partecipante</SortableTableHead>
-                        <SortableTableHead sortKey="entityType" currentSort={sortConfig3} onSort={handleSort3}>Tipo Ente</SortableTableHead>
-                        <SortableTableHead sortKey="cardNumber" currentSort={sortConfig3} onSort={handleSort3}>Numero Tessera</SortableTableHead>
-                        <SortableTableHead sortKey="issueDate" currentSort={sortConfig3} onSort={handleSort3}>Data Rilascio</SortableTableHead>
-                        <SortableTableHead sortKey="expiry" currentSort={sortConfig3} onSort={handleSort3}>Scadenza</SortableTableHead>
-                        <SortableTableHead sortKey="status" currentSort={sortConfig3} onSort={handleSort3}>Stato</SortableTableHead>
+                        <TableHead>Cliente/Associato</TableHead>
+                        <TableHead>Tipo Ente</TableHead>
+                        <TableHead>Numero Tessera</TableHead>
+                        <TableHead>Data Rilascio</TableHead>
+                        <TableHead>Scadenza</TableHead>
+                        <TableHead>Stato</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {sortedEntityCards.map((member) => {
-                        const expiryInfo = member.entityCardExpiryDate 
-                          ? getExpiryStatus(member.entityCardExpiryDate) 
+                      {filteredEntityCards.map((member) => {
+                        const expiryInfo = member.entityCardExpiryDate
+                          ? getExpiryStatus(member.entityCardExpiryDate)
                           : { status: "unknown", label: "N/D", variant: "secondary" as const };
                         return (
                           <TableRow key={member.id} data-testid={`entity-card-row-${member.id}`}>
-                            <TableCell className={cn("font-medium", isSortedColumn3("member") && "sorted-column-cell")}>
+                            <TableCell className="font-medium">
                               {member.firstName} {member.lastName}
                             </TableCell>
-                            <TableCell className={isSortedColumn3("type") ? "sorted-column-cell" : undefined}>
+                            <TableCell>
                               <Badge variant="outline">{member.entityCardType || "-"}</Badge>
                             </TableCell>
-                            <TableCell className={cn("font-mono text-xs", isSortedColumn3("number") && "sorted-column-cell")}>{member.entityCardNumber || "-"}</TableCell>
-                            <TableCell className={isSortedColumn3("issueDate") ? "sorted-column-cell" : undefined}>
-                              {member.entityCardIssueDate 
-                                ? new Date(member.entityCardIssueDate).toLocaleDateString('it-IT') 
+                            <TableCell className="font-mono text-xs">{member.entityCardNumber || "-"}</TableCell>
+                            <TableCell>
+                              {member.entityCardIssueDate
+                                ? new Date(member.entityCardIssueDate).toLocaleDateString('it-IT')
                                 : "-"}
                             </TableCell>
-                            <TableCell className={isSortedColumn3("expiry") ? "sorted-column-cell" : undefined}>
-                              {member.entityCardExpiryDate 
-                                ? new Date(member.entityCardExpiryDate).toLocaleDateString('it-IT') 
+                            <TableCell>
+                              {member.entityCardExpiryDate
+                                ? new Date(member.entityCardExpiryDate).toLocaleDateString('it-IT')
                                 : "-"}
                             </TableCell>
-                            <TableCell className={isSortedColumn3("status") ? "sorted-column-cell" : undefined}>
+                            <TableCell>
                               <Badge variant={expiryInfo.variant}>
                                 {expiryInfo.label}
                               </Badge>
@@ -576,7 +523,7 @@ export default function Memberships() {
           <form onSubmit={handleMembershipSubmit} className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Partecipante *</Label>
+                <Label>Cliente/Associato *</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -588,7 +535,7 @@ export default function Memberships() {
                   data-testid="button-new-member-membership"
                 >
                   <UserPlus className="w-4 h-4 mr-1" />
-                  Nuovo Partecipante
+                  Nuovo Cliente/Associato
                 </Button>
               </div>
               <Popover open={membershipMemberOpen} onOpenChange={setMembershipMemberOpen}>
@@ -600,17 +547,17 @@ export default function Memberships() {
                     className="w-full justify-between"
                     data-testid="select-member"
                   >
-                    {selectedMembershipMember 
+                    {selectedMembershipMember
                       ? `${selectedMembershipMember.firstName} ${selectedMembershipMember.lastName}`
-                      : "Cerca partecipante (min. 3 caratteri)..."
+                      : "Cerca cliente/associato (min. 3 caratteri)..."
                     }
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[400px] p-0" align="start">
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[300px] p-0" align="start">
                   <Command shouldFilter={false}>
-                    <CommandInput 
-                      placeholder="Cerca per nome, cognome o codice fiscale..." 
+                    <CommandInput
+                      placeholder="Cerca per nome, cognome o codice fiscale..."
                       value={membershipMemberSearch}
                       onValueChange={setMembershipMemberSearch}
                       data-testid="input-search-member-membership"
@@ -619,7 +566,7 @@ export default function Memberships() {
                       {membershipMemberSearch.length < 3 ? (
                         <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                       ) : !membershipSearchResults?.members?.length ? (
-                        <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
+                        <CommandEmpty>Nessun cliente/associato trovato</CommandEmpty>
                       ) : (
                         <CommandGroup>
                           {membershipSearchResults.members.map((member) => (
@@ -738,9 +685,8 @@ export default function Memberships() {
               >
                 Annulla
               </Button>
-              <Button 
-                type="submit" 
-                className="gold-3d-button"
+              <Button
+                type="submit"
                 disabled={createMembershipMutation.isPending}
                 data-testid="button-submit-membership"
               >
@@ -761,7 +707,7 @@ export default function Memberships() {
           <form onSubmit={handleCertificateSubmit} className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Partecipante *</Label>
+                <Label>Cliente/Associato *</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -773,7 +719,7 @@ export default function Memberships() {
                   data-testid="button-new-member-certificate"
                 >
                   <UserPlus className="w-4 h-4 mr-1" />
-                  Nuovo Partecipante
+                  Nuovo Cliente/Associato
                 </Button>
               </div>
               <Popover open={certMemberOpen} onOpenChange={setCertMemberOpen}>
@@ -785,17 +731,17 @@ export default function Memberships() {
                     className="w-full justify-between"
                     data-testid="select-cert-member"
                   >
-                    {selectedCertMember 
+                    {selectedCertMember
                       ? `${selectedCertMember.firstName} ${selectedCertMember.lastName}`
-                      : "Cerca partecipante (min. 3 caratteri)..."
+                      : "Cerca cliente/associato (min. 3 caratteri)..."
                     }
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[400px] p-0" align="start">
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[300px] p-0" align="start">
                   <Command shouldFilter={false}>
-                    <CommandInput 
-                      placeholder="Cerca per nome, cognome o codice fiscale..." 
+                    <CommandInput
+                      placeholder="Cerca per nome, cognome o codice fiscale..."
                       value={certMemberSearch}
                       onValueChange={setCertMemberSearch}
                       data-testid="input-search-member-certificate"
@@ -804,7 +750,7 @@ export default function Memberships() {
                       {certMemberSearch.length < 3 ? (
                         <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                       ) : !certSearchResults?.members?.length ? (
-                        <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
+                        <CommandEmpty>Nessun cliente/associato trovato</CommandEmpty>
                       ) : (
                         <CommandGroup>
                           {certSearchResults.members.map((member) => (
@@ -891,9 +837,8 @@ export default function Memberships() {
               >
                 Annulla
               </Button>
-              <Button 
-                type="submit" 
-                className="gold-3d-button"
+              <Button
+                type="submit"
                 disabled={createCertificateMutation.isPending}
                 data-testid="button-submit-certificate"
               >

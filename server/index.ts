@@ -1,7 +1,9 @@
+import "dotenv/config";
 import * as nodeCrypto from "node:crypto";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import fs from 'fs';
 
 // Ensure crypto is available globally for dependencies that expect browser-like crypto
 if (typeof globalThis.crypto === 'undefined') {
@@ -28,6 +30,17 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+
+// GLOBAL DEBUG LOG
+app.use((req, res, next) => {
+  const msg = `[${new Date().toISOString()}] PID:${process.pid} ${req.method} ${req.url}\n`;
+  try {
+    fs.appendFileSync('DEBUG_ALL_REQUESTS.txt', msg);
+  } catch (e) {
+    console.error("Failed to write global debug log", e);
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -66,7 +79,15 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
+    // Log unexpected errors
+    if (status === 500) {
+      console.error("GLOBAL ERROR HANDLER CAUGHT:", err);
+      try {
+        fs.appendFileSync('DEBUG_GLOBAL_ERROR.txt', `[${new Date().toISOString()}] ${err.stack || err}\n---\n`);
+      } catch (e) { }
+    }
+
+    res.status(status).json({ message, details: err.message });
     throw err;
   });
 
@@ -87,7 +108,6 @@ app.use((req, res, next) => {
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
   });

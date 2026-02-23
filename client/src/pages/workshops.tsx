@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Link, useSearch } from "wouter";
+import { Link, useSearch, useLocation } from "wouter";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,20 +10,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, ArrowLeft } from "lucide-react";
-import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
+import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import type { Workshop, InsertWorkshop, WorkshopCategory, Instructor, Studio, Member, ActivityStatus } from "@shared/schema";
+import type { Workshop, InsertWorkshop, Category, Instructor, Studio, Member } from "@shared/schema";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -75,6 +71,7 @@ interface EnrollmentsTabProps {
 
 function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isAddingEnrollment, setIsAddingEnrollment] = useState(false);
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
 
@@ -155,8 +152,8 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
           </PopoverTrigger>
           <PopoverContent className="w-80 p-0" align="end">
             <Command shouldFilter={false}>
-              <CommandInput 
-                placeholder="Cerca per nome, cognome o CF (min. 3 caratteri)..." 
+              <CommandInput
+                placeholder="Cerca per nome, cognome o CF (min. 3 caratteri)..."
                 value={memberSearchQuery}
                 onValueChange={setMemberSearchQuery}
               />
@@ -164,7 +161,7 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
                 {memberSearchQuery.length < 3 ? (
                   <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                 ) : !searchResults?.members?.length ? (
-                  <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
+                  <CommandEmpty>Nessun membro trovato</CommandEmpty>
                 ) : (
                   <CommandGroup>
                     {searchResults.members
@@ -194,7 +191,7 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
           </PopoverContent>
         </Popover>
       </div>
-      
+
       {workshopEnrollments.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-8">Nessun partecipante iscritto a questo workshop</p>
       ) : (
@@ -216,15 +213,21 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
                   <TableCell>{enrollment.email || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setLocation(`${window.location.pathname}?editMemberId=${enrollment.memberId}`)}
+                        className="text-xs text-primary hover:underline"
+                        title="Modifica Rapida"
+                      >
+                        Modifica
+                      </button>
                       <Link href={`/iscritti?search=${enrollment.lastName}`}>
                         <Button variant="ghost" size="sm" data-testid={`button-view-workshop-member-${enrollment.memberId}`}>
-                          Visualizza
+                          Profilo
                         </Button>
                       </Link>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                         onClick={() => {
                           if (confirm("Sei sicuro di voler rimuovere questa iscrizione?")) {
                             deleteEnrollmentMutation.mutate(enrollment.enrollmentId);
@@ -393,7 +396,7 @@ function AttendancesTab({ workshopId }: AttendancesTabProps) {
           </DialogContent>
         </Dialog>
       </div>
-      
+
       {workshopAttendances.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-8">Nessuna presenza registrata per questo workshop</p>
       ) : (
@@ -416,15 +419,14 @@ function AttendancesTab({ workshopId }: AttendancesTabProps) {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {attendance.type === 'manual' ? 'Manuale' : 
-                       attendance.type === 'barcode' ? 'Badge' : 'Auto'}
+                      {attendance.type === 'manual' ? 'Manuale' :
+                        attendance.type === 'barcode' ? 'Badge' : 'Auto'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="icon"
-                      className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                       onClick={() => {
                         if (confirm("Sei sicuro di voler eliminare questa presenza?")) {
                           deleteAttendanceMutation.mutate(attendance.id);
@@ -447,10 +449,11 @@ function AttendancesTab({ workshopId }: AttendancesTabProps) {
 
 export default function Workshops() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const initialSearch = urlParams.get('search') || "";
-  
+
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
@@ -458,15 +461,16 @@ export default function Workshops() {
   const [selectedStartTime, setSelectedStartTime] = useState<string>("");
   const [selectedEndTime, setSelectedEndTime] = useState<string>("");
   const [selectedRecurrence, setSelectedRecurrence] = useState<string>("");
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedStartDate, setSelectedStartDate] = useState<string>("");
+  const [selectedEndDate, setSelectedEndDate] = useState<string>("");
   const [activeTab, setActiveTab] = useState("details");
 
   const { data: workshops, isLoading } = useQuery<Workshop[]>({
     queryKey: ["/api/workshops"],
   });
 
-  const { data: categories } = useQuery<WorkshopCategory[]>({
-    queryKey: ["/api/workshop-categories"],
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
   });
 
   const { data: instructors } = useQuery<Instructor[]>({
@@ -475,10 +479,6 @@ export default function Workshops() {
 
   const { data: studios } = useQuery<Studio[]>({
     queryKey: ["/api/studios"],
-  });
-
-  const { data: activityStatuses } = useQuery<ActivityStatus[]>({
-    queryKey: ["/api/activity-statuses"],
   });
 
   const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
@@ -494,9 +494,22 @@ export default function Workshops() {
     queryKey: ["/api/workshop-attendances"],
   });
 
+  const getWorkshopStats = (workshopId: number) => {
+    if (!enrollments) return { men: 0, women: 0, total: 0 };
+    const enrolls = enrollments.filter(e => e.workshopId === workshopId && e.status === 'active');
+    const men = enrolls.filter(e => {
+      const g = (e as any).memberGender?.toUpperCase();
+      return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
+    }).length;
+    const women = enrolls.filter(e => {
+      const g = (e as any).memberGender?.toUpperCase();
+      return g === 'D' || g === 'F' || g === 'DONNA' || g === 'FEMMINA';
+    }).length;
+    return { men, women, total: enrolls.length };
+  };
+
   const getWorkshopEnrollmentCount = (workshopId: number): number => {
-    if (!enrollments) return 0;
-    return enrollments.filter(e => e.workshopId === workshopId && e.status === 'active').length;
+    return getWorkshopStats(workshopId).total;
   };
 
   const getWorkshopEnrollmentsList = (workshopId: number): Array<{ id: number; firstName: string; lastName: string }> => {
@@ -568,7 +581,7 @@ export default function Workshops() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data: InsertWorkshop = {
@@ -579,6 +592,7 @@ export default function Workshops() {
       studioId: formData.get("studioId") ? parseInt(formData.get("studioId") as string) : null,
       instructorId: formData.get("instructorId") ? parseInt(formData.get("instructorId") as string) : null,
       secondaryInstructor1Id: formData.get("secondaryInstructor1Id") ? parseInt(formData.get("secondaryInstructor1Id") as string) : null,
+      secondaryInstructor2Id: formData.get("secondaryInstructor2Id") ? parseInt(formData.get("secondaryInstructor2Id") as string) : null,
       price: formData.get("price") ? formData.get("price") as string : null,
       maxCapacity: formData.get("maxCapacity") ? parseInt(formData.get("maxCapacity") as string) : null,
       dayOfWeek: selectedDayOfWeek || null,
@@ -586,17 +600,35 @@ export default function Workshops() {
       endTime: selectedEndTime || null,
       recurrenceType: selectedRecurrence || null,
       schedule: formData.get("schedule") as string || null,
-      startDate: formData.get("startDate") as string || null,
-      endDate: formData.get("endDate") as string || null,
-      statusTags: selectedStatuses.length > 0 ? selectedStatuses : null,
+      startDate: selectedStartDate as any || null,
+      endDate: selectedEndDate as any || null,
       active: true,
     };
 
-    if (editingWorkshop) {
-      updateMutation.mutate({ id: editingWorkshop.id, data });
-    } else {
-      createMutation.mutate(data);
-    }
+    const performSave = async (force = false) => {
+      try {
+        if (editingWorkshop) {
+          await apiRequest("PATCH", `/api/workshops/${editingWorkshop.id}${force ? '?force=true' : ''}`, data);
+        } else {
+          await apiRequest("POST", `/api/workshops${force ? '?force=true' : ''}`, data);
+        }
+        queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+        toast({ title: editingWorkshop ? "Workshop aggiornato" : "Workshop creato" });
+        setIsFormOpen(false);
+        setEditingWorkshop(null);
+      } catch (err: any) {
+        if (err.message?.includes("Conflitto rilevato") || (err.status === 409)) {
+          const msg = typeof err === 'string' ? err : (err.message || "Conflitto rilevato");
+          if (confirm(msg + "\n\nVuoi forzare il salvataggio comunque?")) {
+            await performSave(true);
+          }
+        } else {
+          toast({ title: "Errore", description: err.message, variant: "destructive" });
+        }
+      }
+    };
+
+    await performSave();
   };
 
   const openEditDialog = (workshop: Workshop) => {
@@ -605,7 +637,13 @@ export default function Workshops() {
     setSelectedStartTime(workshop.startTime || "");
     setSelectedEndTime(workshop.endTime || "");
     setSelectedRecurrence(workshop.recurrenceType || "");
-    setSelectedStatuses(workshop.statusTags || []);
+
+    // Format dates for input type="date"
+    const startD = workshop.startDate ? (workshop.startDate instanceof Date ? workshop.startDate.toISOString().split('T')[0] : new Date(workshop.startDate).toISOString().split('T')[0]) : "";
+    const endD = workshop.endDate ? (workshop.endDate instanceof Date ? workshop.endDate.toISOString().split('T')[0] : new Date(workshop.endDate).toISOString().split('T')[0]) : "";
+
+    setSelectedStartDate(startD);
+    setSelectedEndDate(endD);
     setActiveTab("details");
     setIsFormOpen(true);
   };
@@ -617,47 +655,40 @@ export default function Workshops() {
     setSelectedStartTime("");
     setSelectedEndTime("");
     setSelectedRecurrence("");
-    setSelectedStatuses([]);
+    setSelectedStartDate("");
+    setSelectedEndDate("");
     setActiveTab("details");
+  };
+
+  const handleDateChange = (val: string, type: 'start' | 'end') => {
+    if (type === 'start') {
+      setSelectedStartDate(val);
+      if (val) {
+        const date = new Date(val);
+        const dayIdx = date.getDay(); // 0 (Sun) to 6 (Sat)
+        const daysMap = ["DOM", "LUN", "MAR", "MER", "GIO", "VEN", "SAB"];
+        setSelectedDayOfWeek(daysMap[dayIdx]);
+      }
+    } else {
+      setSelectedEndDate(val);
+    }
   };
 
   const filteredWorkshops = workshops?.filter((workshop) =>
     workshop.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<typeof filteredWorkshops[0]>("sku");
-
-  const getSortValue = (workshop: typeof filteredWorkshops[0], key: string) => {
-    switch (key) {
-      case "sku": return workshop.sku;
-      case "name": return workshop.name;
-      case "category": return categories?.find(c => c.id === workshop.categoryId)?.name;
-      case "instructor": {
-        const inst = instructors?.find(i => i.id === workshop.instructorId);
-        return inst ? `${inst.firstName} ${inst.lastName}` : null;
-      }
-      case "price": return Number(workshop.price) || 0;
-      case "capacity": return workshop.maxCapacity || 0;
-      case "enrollments": return getWorkshopEnrollmentCount(workshop.id);
-      case "period": return workshop.startDate;
-      case "status": return workshop.statusTags?.join(", ") || "";
-      default: return null;
-    }
-  };
-
-  const sortedWorkshops = sortItems(filteredWorkshops, getSortValue);
-
   const exportToCSV = () => {
     if (!filteredWorkshops.length) return;
-    
-    const headers = ["Nome", "Descrizione", "Categoria", "Staff/Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
-    
+
+    const headers = ["Nome", "Descrizione", "Categoria", "Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
+
     const rows = filteredWorkshops.map(workshop => {
       const category = categories?.find(c => c.id === workshop.categoryId);
       const instructor = instructors?.find(i => i.id === workshop.instructorId);
       const dayLabel = WEEKDAYS.find(d => d.id === workshop.dayOfWeek)?.label || "";
       const recurrenceLabel = RECURRENCE_TYPES.find(r => r.id === workshop.recurrenceType)?.label || "";
-      
+
       return [
         workshop.name,
         workshop.description || "",
@@ -671,10 +702,10 @@ export default function Workshops() {
         recurrenceLabel,
         workshop.startDate ? new Date(workshop.startDate).toLocaleDateString('it-IT') : "",
         workshop.endDate ? new Date(workshop.endDate).toLocaleDateString('it-IT') : "",
-        workshop.statusTags?.join(", ") || ""
+        workshop.active ? "Attivo" : "Inattivo"
       ];
     });
-    
+
     const escapeCSV = (value: unknown) => {
       const str = String(value ?? "");
       if (str.includes(",") || str.includes('"') || str.includes("\n")) {
@@ -682,7 +713,7 @@ export default function Workshops() {
       }
       return str;
     };
-    
+
     const csvContent = "\ufeff" + [headers.map(escapeCSV).join(","), ...rows.map(row => row.map(escapeCSV).join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -694,46 +725,34 @@ export default function Workshops() {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="border-b bg-muted/30 sticky top-0 z-10">
-        <div className="p-4 space-y-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-                <ArrowLeft className="w-4 h-4 text-white" />
-              </Button>
-              <div>
-                <h1 className="text-2xl font-semibold text-foreground">Riepilogo Workshop</h1>
-                <p className="text-muted-foreground text-sm">Organizza e gestisci i workshop disponibili</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant="outline"
-                onClick={exportToCSV}
-                data-testid="button-export-csv"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Esporta CSV
-              </Button>
-              <Button 
-                className="gold-3d-button"
-                onClick={() => {
-                  closeDialog();
-                  setIsFormOpen(true);
-                }}
-                data-testid="button-add-workshop"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuovo Workshop
-              </Button>
-            </div>
-          </div>
-          <ActivityNavMenu />
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Workshop</h1>
+          <p className="text-muted-foreground">Organizza e gestisci i workshop disponibili</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={exportToCSV}
+            data-testid="button-export-csv"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Esporta CSV
+          </Button>
+          <Button
+            onClick={() => {
+              closeDialog();
+              setIsFormOpen(true);
+            }}
+            data-testid="button-add-workshop"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuovo Workshop
+          </Button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
@@ -765,112 +784,116 @@ export default function Workshops() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
-                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Workshop</SortableTableHead>
-                  <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
-                  <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
-                  <SortableTableHead sortKey="price" currentSort={sortConfig} onSort={handleSort}>Prezzo</SortableTableHead>
-                  <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Posti</SortableTableHead>
-                  <SortableTableHead sortKey="enrollments" currentSort={sortConfig} onSort={handleSort}>Iscritti</SortableTableHead>
-                  <SortableTableHead sortKey="period" currentSort={sortConfig} onSort={handleSort}>Periodo</SortableTableHead>
-                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
+                  <TableHead>Nome Workshop</TableHead>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead>Insegnante</TableHead>
+                  <TableHead>Prezzo</TableHead>
+                  <TableHead>Posti</TableHead>
+                  <TableHead>Iscritti</TableHead>
+                  <TableHead>Periodo</TableHead>
+                  <TableHead>Stato</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedWorkshops.map((workshop) => {
+                {filteredWorkshops.map((workshop) => {
                   const enrollmentCount = getWorkshopEnrollmentCount(workshop.id);
                   const enrollmentsList = getWorkshopEnrollmentsList(workshop.id);
                   return (
-                  <TableRow key={workshop.id} data-testid={`workshop-row-${workshop.id}`}>
-                    <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("sku") && "sorted-column-cell")} data-testid={`text-workshop-sku-${workshop.id}`}>
-                      {workshop.sku || "-"}
-                    </TableCell>
-                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{workshop.name}</TableCell>
-                    <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : undefined}>
-                      {categories?.find(c => c.id === workshop.categoryId)?.name || "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : undefined}>
-                      {instructors?.find(i => i.id === workshop.instructorId) 
-                        ? `${instructors.find(i => i.id === workshop.instructorId)?.firstName} ${instructors.find(i => i.id === workshop.instructorId)?.lastName}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : undefined}>€{workshop.price || "0.00"}</TableCell>
-                    <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{enrollmentCount}/{workshop.maxCapacity || "∞"}</TableCell>
-                    <TableCell className={isSortedColumn("enrollments") ? "sorted-column-cell" : undefined}>
-                      {enrollmentsList.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {enrollmentsList.slice(0, 2).map((member) => (
-                            <Link key={member.id} href={`/members?search=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`}>
-                              <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-workshop-member-${member.id}`}>
-                                {member.firstName} {member.lastName}
-                              </Badge>
-                            </Link>
-                          ))}
-                          {enrollmentsList.length > 2 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{enrollmentsList.length - 2} altri
-                            </Badge>
-                          )}
+                    <TableRow key={workshop.id} data-testid={`workshop-row-${workshop.id}`}>
+                      <TableCell className="font-medium">{workshop.name}</TableCell>
+                      {(() => {
+                        const stats = getWorkshopStats(workshop.id);
+                        return (
+                          <>
+                            <TableCell>
+                              {categories?.find(c => c.id === workshop.categoryId)?.name || "-"}
+                            </TableCell>
+                            <TableCell>
+                              {instructors?.find(i => i.id === workshop.instructorId)
+                                ? `${instructors.find(i => i.id === workshop.instructorId)?.firstName} ${instructors.find(i => i.id === workshop.instructorId)?.lastName}`
+                                : "-"}
+                            </TableCell>
+                            <TableCell>€{workshop.price || "0.00"}</TableCell>
+                            <TableCell>{workshop.maxCapacity || "∞"}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                <span className="font-bold">{stats.total} Totali</span>
+                                <div className="flex gap-2 text-[10px] whitespace-nowrap">
+                                  <span className="text-blue-600">U:{stats.men}</span>
+                                  <span className="text-pink-600">D:{stats.women}</span>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {enrollmentsList.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {enrollmentsList.slice(0, 2).map((member) => (
+                                    <button
+                                      key={member.id}
+                                      onClick={() => setLocation(`${window.location.pathname}?editMemberId=${member.id}`)}
+                                      title="Modifica Rapida"
+                                    >
+                                      <Badge variant="outline" className="text-xs cursor-pointer hover:bg-primary/10 border-primary/20 text-primary" data-testid={`badge-workshop-member-${member.id}`}>
+                                        {member.firstName} {member.lastName}
+                                      </Badge>
+                                    </button>
+                                  ))}
+                                  {enrollmentsList.length > 2 && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      +{enrollmentsList.length - 2} altri
+                                    </Badge>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">Nessun iscritto</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {workshop.startDate && workshop.endDate
+                                ? `${new Date(workshop.startDate).toLocaleDateString('it-IT')} - ${new Date(workshop.endDate).toLocaleDateString('it-IT')}`
+                                : "-"}
+                            </TableCell>
+                          </>
+                        );
+                      })()}
+                      <TableCell>
+                        <Badge variant={workshop.active ? "default" : "secondary"}>
+                          {workshop.active ? "Attivo" : "Inattivo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditDialog(workshop)}
+                            data-testid={`button-edit-workshop-${workshop.id}`}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              if (confirm("Sei sicuro di voler eliminare questo workshop?")) {
+                                deleteMutation.mutate(workshop.id);
+                              }
+                            }}
+                            data-testid={`button-delete-workshop-${workshop.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Nessun iscritto</span>
-                      )}
-                    </TableCell>
-                    <TableCell className={cn("text-sm", isSortedColumn("period") && "sorted-column-cell")}>
-                      {workshop.startDate && workshop.endDate 
-                        ? `${new Date(workshop.startDate).toLocaleDateString('it-IT')} - ${new Date(workshop.endDate).toLocaleDateString('it-IT')}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                      <div className="flex flex-wrap gap-1">
-                        {workshop.statusTags && workshop.statusTags.length > 0 ? (
-                          workshop.statusTags.map((tag: string) => (
-                            <StatusBadge
-                              key={tag}
-                              name={tag}
-                              color={getStatusColor(tag, activityStatuses)}
-                            />
-                          ))
-                        ) : (
-                          <span className="text-xs text-muted-foreground">-</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="icon"
-                          className="gold-3d-button"
-                          onClick={() => openEditDialog(workshop)}
-                          data-testid={`button-edit-workshop-${workshop.id}`}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                          onClick={() => {
-                            if (confirm("Sei sicuro di voler eliminare questo workshop?")) {
-                              deleteMutation.mutate(workshop.id);
-                            }
-                          }}
-                          data-testid={`button-delete-workshop-${workshop.id}`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
+                      </TableCell>
+                    </TableRow>
+                  );
                 })}
               </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
-      </div>
 
       <Dialog open={isFormOpen} onOpenChange={(open) => {
         if (!open) closeDialog();
@@ -882,7 +905,7 @@ export default function Workshops() {
               {editingWorkshop ? "Gestisci i dettagli del workshop, visualizza iscritti e presenze" : "Inserisci i dettagli del workshop"}
             </DialogDescription>
           </DialogHeader>
-          
+
           {editingWorkshop ? (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
@@ -912,7 +935,7 @@ export default function Workshops() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="sku">SKU/Codice</Label>
+                      <Label htmlFor="sku">SKU</Label>
                       <Input
                         id="sku"
                         name="sku"
@@ -922,12 +945,6 @@ export default function Workshops() {
                       />
                     </div>
                   </div>
-
-                  <MultiSelectStatus
-                    selectedStatuses={selectedStatuses}
-                    onChange={setSelectedStatuses}
-                    testIdPrefix="workshop"
-                  />
 
                   <div className="space-y-2">
                     <Label htmlFor="description">Descrizione</Label>
@@ -975,8 +992,8 @@ export default function Workshops() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Staff/Insegnanti</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Label>Insegnanti</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
                         <Select name="instructorId" defaultValue={editingWorkshop.instructorId?.toString()}>
@@ -997,6 +1014,22 @@ export default function Workshops() {
                         <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
                         <Select name="secondaryInstructor1Id" defaultValue={editingWorkshop.secondaryInstructor1Id?.toString()}>
                           <SelectTrigger data-testid="select-secondary-instructor-1">
+                            <SelectValue placeholder="Nessuno" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {instructors?.map((instructor) => (
+                              <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                                {instructor.firstName} {instructor.lastName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2</Label>
+                        <Select name="secondaryInstructor2Id" defaultValue={editingWorkshop.secondaryInstructor2Id?.toString()}>
+                          <SelectTrigger data-testid="select-secondary-instructor-2">
                             <SelectValue placeholder="Nessuno" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1045,7 +1078,8 @@ export default function Workshops() {
                         id="startDate"
                         name="startDate"
                         type="date"
-                        defaultValue={editingWorkshop.startDate || ""}
+                        value={selectedStartDate}
+                        onChange={(e) => handleDateChange(e.target.value, 'start')}
                         data-testid="input-startDate"
                       />
                     </div>
@@ -1056,7 +1090,8 @@ export default function Workshops() {
                         id="endDate"
                         name="endDate"
                         type="date"
-                        defaultValue={editingWorkshop.endDate || ""}
+                        value={selectedEndDate}
+                        onChange={(e) => handleDateChange(e.target.value, 'end')}
                         data-testid="input-endDate"
                       />
                     </div>
@@ -1149,9 +1184,8 @@ export default function Workshops() {
                     >
                       Annulla
                     </Button>
-                    <Button 
+                    <Button
                       type="submit"
-                      className="gold-3d-button"
                       disabled={updateMutation.isPending}
                       data-testid="button-submit-workshop"
                     >
@@ -1183,7 +1217,7 @@ export default function Workshops() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sku">SKU/Codice</Label>
+                  <Label htmlFor="sku">SKU</Label>
                   <Input
                     id="sku"
                     name="sku"
@@ -1192,12 +1226,6 @@ export default function Workshops() {
                   />
                 </div>
               </div>
-
-              <MultiSelectStatus
-                selectedStatuses={selectedStatuses}
-                onChange={setSelectedStatuses}
-                testIdPrefix="workshop"
-              />
 
               <div className="space-y-2">
                 <Label htmlFor="description">Descrizione</Label>
@@ -1244,8 +1272,8 @@ export default function Workshops() {
               </div>
 
               <div className="space-y-2">
-                <Label>Staff/Insegnanti</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Label>Insegnanti</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
                     <Select name="instructorId">
@@ -1266,6 +1294,22 @@ export default function Workshops() {
                     <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1 (opzionale)</Label>
                     <Select name="secondaryInstructor1Id">
                       <SelectTrigger data-testid="select-secondary-instructor-1">
+                        <SelectValue placeholder="Nessuno" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {instructors?.map((instructor) => (
+                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                            {instructor.firstName} {instructor.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2 (opzionale)</Label>
+                    <Select name="secondaryInstructor2Id">
+                      <SelectTrigger data-testid="select-secondary-instructor-2">
                         <SelectValue placeholder="Nessuno" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1312,6 +1356,8 @@ export default function Workshops() {
                     id="startDate"
                     name="startDate"
                     type="date"
+                    value={selectedStartDate}
+                    onChange={(e) => handleDateChange(e.target.value, 'start')}
                     data-testid="input-startDate"
                   />
                 </div>
@@ -1322,6 +1368,8 @@ export default function Workshops() {
                     id="endDate"
                     name="endDate"
                     type="date"
+                    value={selectedEndDate}
+                    onChange={(e) => handleDateChange(e.target.value, 'end')}
                     data-testid="input-endDate"
                   />
                 </div>
@@ -1413,9 +1461,8 @@ export default function Workshops() {
                 >
                   Annulla
                 </Button>
-                <Button 
-                  type="submit" 
-                  className="gold-3d-button"
+                <Button
+                  type="submit"
                   disabled={createMutation.isPending}
                   data-testid="button-submit-workshop"
                 >

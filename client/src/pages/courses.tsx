@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Link, useSearch } from "wouter";
@@ -10,20 +10,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, ArrowLeft } from "lucide-react";
-import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
+import { useAuth } from "@/hooks/use-auth";
+import { hasWritePermission } from "@/App";
+import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, Tag } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import type { Course, InsertCourse, Category, Instructor, Studio, Attendance, Member, ActivityStatus } from "@shared/schema";
+import type { Course, InsertCourse, Category, Instructor, Studio, Attendance, Member, Quote } from "@shared/schema";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -48,12 +46,27 @@ const RECURRENCE_TYPES = [
   { id: "custom", label: "Personalizzato" },
 ];
 
+const normalizeDay = (day?: string | null) => {
+  if (!day) return "";
+  const d = day.toUpperCase().trim();
+  if (d.startsWith("LUN")) return "LUN";
+  if (d.startsWith("MAR")) return "MAR";
+  if (d.startsWith("MER")) return "MER";
+  if (d.startsWith("GIO")) return "GIO";
+  if (d.startsWith("VEN")) return "VEN";
+  if (d.startsWith("SAB")) return "SAB";
+  if (d.startsWith("DOM")) return "DOM";
+  return d;
+};
+
 interface EnrollmentsTabProps {
   courseId: number;
 }
 
 function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const canWrite = hasWritePermission(user, "/iscritti-corsi");
   const [isAddingEnrollment, setIsAddingEnrollment] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
@@ -81,7 +94,6 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
       await apiRequest("POST", "/api/enrollments", {
         memberId: data.memberId,
         courseId: data.courseId,
-        startDate: new Date().toISOString().split('T')[0],
         status: 'active',
       });
     },
@@ -123,19 +135,19 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">
-          Partecipanti Iscritti ({courseEnrollments.length})
+          Membri Iscritti ({courseEnrollments.length})
         </h3>
         <Popover open={isAddingEnrollment} onOpenChange={setIsAddingEnrollment}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" data-testid="button-add-enrollment">
+            <Button variant="outline" size="sm" data-testid="button-add-enrollment" disabled={!canWrite}>
               <UserPlus className="w-4 h-4 mr-2" />
               Aggiungi Iscritto
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-0" align="end">
             <Command shouldFilter={false}>
-              <CommandInput 
-                placeholder="Cerca per nome, cognome o CF (min. 3 caratteri)..." 
+              <CommandInput
+                placeholder="Cerca per nome, cognome o CF (min. 3 caratteri)..."
                 value={memberSearchQuery}
                 onValueChange={setMemberSearchQuery}
               />
@@ -143,7 +155,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
                 {memberSearchQuery.length < 3 ? (
                   <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                 ) : !searchResults?.members?.length ? (
-                  <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
+                  <CommandEmpty>Nessun membro trovato</CommandEmpty>
                 ) : (
                   <CommandGroup>
                     {searchResults.members
@@ -174,9 +186,9 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
           </PopoverContent>
         </Popover>
       </div>
-      
+
       {courseEnrollments.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">Nessun partecipante iscritto a questo corso</p>
+        <p className="text-sm text-muted-foreground text-center py-8">Nessun membro iscritto a questo corso</p>
       ) : (
         <div className="border rounded-lg">
           <Table>
@@ -202,14 +214,14 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
                         </Button>
                       </Link>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                         onClick={() => {
                           if (confirm("Sei sicuro di voler rimuovere questa iscrizione?")) {
                             deleteEnrollmentMutation.mutate(enrollment.enrollmentId);
                           }
                         }}
+                        disabled={!canWrite}
                         data-testid={`button-remove-enrollment-${enrollment.enrollmentId}`}
                       >
                         <X className="w-4 h-4" />
@@ -232,6 +244,8 @@ interface AttendancesTabProps {
 
 function AttendancesTab({ courseId }: AttendancesTabProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const canWrite = hasWritePermission(user, "/iscritti-corsi");
   const [isAddingAttendance, setIsAddingAttendance] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
@@ -312,6 +326,7 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
             size="sm"
             onClick={() => setIsAddingAttendance(true)}
             data-testid="button-add-attendance"
+            disabled={!canWrite}
           >
             <CalendarPlus className="w-4 h-4 mr-2" />
             Registra Presenza
@@ -319,14 +334,14 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Registra Presenza</DialogTitle>
-              <DialogDescription>Seleziona il partecipante e la data della presenza</DialogDescription>
+              <DialogDescription>Seleziona il membro e la data della presenza</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="member">Partecipante *</Label>
+                <Label htmlFor="member">Membro *</Label>
                 <Select value={selectedMemberId?.toString() || ""} onValueChange={(v) => setSelectedMemberId(parseInt(v))}>
                   <SelectTrigger data-testid="select-attendance-member">
-                    <SelectValue placeholder="Seleziona partecipante" />
+                    <SelectValue placeholder="Seleziona membro" />
                   </SelectTrigger>
                   <SelectContent>
                     {enrolledMembers.map(member => (
@@ -355,7 +370,7 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
               <Button
                 onClick={() => {
                   if (!selectedMemberId) {
-                    toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
+                    toast({ title: "Errore", description: "Seleziona un membro", variant: "destructive" });
                     return;
                   }
                   createAttendanceMutation.mutate({
@@ -373,7 +388,7 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
           </DialogContent>
         </Dialog>
       </div>
-      
+
       {courseAttendances.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-8">Nessuna presenza registrata per questo corso</p>
       ) : (
@@ -381,7 +396,7 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Partecipante</TableHead>
+                <TableHead>Membro</TableHead>
                 <TableHead>Data e Ora</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead className="text-right">Azioni</TableHead>
@@ -396,20 +411,20 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {attendance.type === 'manual' ? 'Manuale' : 
-                       attendance.type === 'barcode' ? 'Badge' : 'Auto'}
+                      {attendance.type === 'manual' ? 'Manuale' :
+                        attendance.type === 'barcode' ? 'Badge' : 'Auto'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="icon"
-                      className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                       onClick={() => {
                         if (confirm("Sei sicuro di voler eliminare questa presenza?")) {
                           deleteAttendanceMutation.mutate(attendance.id);
                         }
                       }}
+                      disabled={!canWrite}
                       data-testid={`button-delete-attendance-${attendance.id}`}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -427,10 +442,12 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
 
 export default function Courses() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const canWrite = hasWritePermission(user, "/corsi");
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const initialSearch = urlParams.get('search') || "";
-  
+
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -439,12 +456,34 @@ export default function Courses() {
   const [selectedStartTime, setSelectedStartTime] = useState<string>("");
   const [selectedEndTime, setSelectedEndTime] = useState<string>("");
   const [selectedRecurrence, setSelectedRecurrence] = useState<string>("");
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string>("");
   const [activeTab, setActiveTab] = useState("details");
+  const [price, setPrice] = useState<string>("");
+
+  const { data: quotes } = useQuery<Quote[]>({
+    queryKey: ["/api/quotes"],
+  });
 
   const { data: courses, isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
+
+  const urlCourseId = urlParams.get('courseId');
+
+  useEffect(() => {
+    if (courses && urlCourseId) {
+      const course = courses.find(c => c.id === parseInt(urlCourseId));
+      if (course) {
+        setEditingCourse(course);
+        setSelectedDayOfWeek(course.dayOfWeek || "");
+        setSelectedStartTime(course.startTime || "");
+        setSelectedEndTime(course.endTime || "");
+        setSelectedRecurrence(course.recurrenceType || "");
+        setActiveTab("details");
+        setIsFormOpen(true);
+      }
+    }
+  }, [courses, urlCourseId]);
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -456,10 +495,6 @@ export default function Courses() {
 
   const { data: studios } = useQuery<Studio[]>({
     queryKey: ["/api/studios"],
-  });
-
-  const { data: activityStatuses } = useQuery<ActivityStatus[]>({
-    queryKey: ["/api/activity-statuses"],
   });
 
   interface EnrollmentWithMember {
@@ -509,8 +544,8 @@ export default function Courses() {
       .filter(a => a.courseId === courseId)
       .map(a => ({
         ...a,
-        memberName: (a.memberFirstName || a.memberLastName) 
-          ? `${a.memberFirstName || ''} ${a.memberLastName || ''}`.trim() 
+        memberName: (a.memberFirstName || a.memberLastName)
+          ? `${a.memberFirstName || ''} ${a.memberLastName || ''}`.trim()
           : "Sconosciuto",
       }))
       .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
@@ -519,7 +554,18 @@ export default function Courses() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertCourse) => {
-      await apiRequest("POST", "/api/courses", data);
+      try {
+        await apiRequest("POST", "/api/courses", data);
+      } catch (err: any) {
+        if (err.status === 409) {
+          if (confirm(err.message)) {
+            await apiRequest("POST", "/api/courses", { ...data, force: true });
+            return;
+          }
+          throw new Error("Operazione annullata");
+        }
+        throw err;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
@@ -528,13 +574,26 @@ export default function Courses() {
       setEditingCourse(null);
     },
     onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      if (error.message !== "Operazione annullata") {
+        toast({ title: "Errore", description: error.message, variant: "destructive" });
+      }
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: InsertCourse }) => {
-      await apiRequest("PATCH", `/api/courses/${id}`, data);
+      try {
+        await apiRequest("PATCH", `/api/courses/${id}`, data);
+      } catch (err: any) {
+        if (err.status === 409) {
+          if (confirm(err.message)) {
+            await apiRequest("PATCH", `/api/courses/${id}`, { ...data, force: true });
+            return;
+          }
+          throw new Error("Operazione annullata");
+        }
+        throw err;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
@@ -543,7 +602,9 @@ export default function Courses() {
       setEditingCourse(null);
     },
     onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      if (error.message !== "Operazione annullata") {
+        toast({ title: "Errore", description: error.message, variant: "destructive" });
+      }
     },
   });
 
@@ -571,6 +632,7 @@ export default function Courses() {
       studioId: formData.get("studioId") ? parseInt(formData.get("studioId") as string) : null,
       instructorId: formData.get("instructorId") ? parseInt(formData.get("instructorId") as string) : null,
       secondaryInstructor1Id: formData.get("secondaryInstructor1Id") ? parseInt(formData.get("secondaryInstructor1Id") as string) : null,
+      secondaryInstructor2Id: formData.get("secondaryInstructor2Id") ? parseInt(formData.get("secondaryInstructor2Id") as string) : null,
       price: formData.get("price") ? formData.get("price") as string : null,
       maxCapacity: formData.get("maxCapacity") ? parseInt(formData.get("maxCapacity") as string) : null,
       dayOfWeek: selectedDayOfWeek || null,
@@ -578,10 +640,10 @@ export default function Courses() {
       endTime: selectedEndTime || null,
       recurrenceType: selectedRecurrence || null,
       schedule: formData.get("schedule") as string || null,
-      startDate: formData.get("startDate") as string || null,
-      endDate: formData.get("endDate") as string || null,
-      statusTags: selectedStatuses.length > 0 ? selectedStatuses : null,
+      startDate: formData.get("startDate") ? new Date(formData.get("startDate") as string) : null,
+      endDate: formData.get("endDate") ? new Date(formData.get("endDate") as string) : null,
       active: true,
+      quoteId: selectedQuoteId ? parseInt(selectedQuoteId) : null,
     };
 
     if (editingCourse) {
@@ -593,40 +655,42 @@ export default function Courses() {
 
   const openEditDialog = (course: Course) => {
     setEditingCourse(course);
-    setSelectedDayOfWeek(course.dayOfWeek || "");
+    setPrice(course.price?.toString() || "");
+    setSelectedQuoteId(course.quoteId?.toString() || "");
+    setSelectedDayOfWeek(normalizeDay(course.dayOfWeek));
     setSelectedStartTime(course.startTime || "");
     setSelectedEndTime(course.endTime || "");
     setSelectedRecurrence(course.recurrenceType || "");
-    setSelectedStatuses(course.statusTags || []);
     setIsFormOpen(true);
   };
 
   const closeDialog = () => {
     setIsFormOpen(false);
     setEditingCourse(null);
+    setPrice("");
+    setSelectedQuoteId("");
     setSelectedDayOfWeek("");
     setSelectedStartTime("");
     setSelectedEndTime("");
     setSelectedRecurrence("");
-    setSelectedStatuses([]);
   };
 
   const filteredCourses = courses?.filter((course) => {
     const query = searchQuery.toLowerCase().trim();
-    
+
     if (categoryFilter !== "all" && course.categoryId?.toString() !== categoryFilter) {
       return false;
     }
-    
+
     if (!query) return true;
-    
+
     const category = categories?.find(c => c.id === course.categoryId);
     const instructor = instructors?.find(i => i.id === course.instructorId);
     const secondaryInstructor1 = instructors?.find(i => i.id === course.secondaryInstructor1Id);
     const secondaryInstructor2 = instructors?.find(i => i.id === course.secondaryInstructor2Id);
     const studio = studios?.find(s => s.id === course.studioId);
     const dayLabel = WEEKDAYS.find(d => d.id === course.dayOfWeek)?.label || "";
-    
+
     return (
       course.name?.toLowerCase().includes(query) ||
       course.sku?.toLowerCase().includes(query) ||
@@ -645,39 +709,17 @@ export default function Courses() {
     );
   }) || [];
 
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<typeof filteredCourses[0]>("sku");
-
-  const getSortValue = (course: typeof filteredCourses[0], key: string) => {
-    switch (key) {
-      case "sku": return course.sku;
-      case "name": return course.name;
-      case "category": return categories?.find(c => c.id === course.categoryId)?.name;
-      case "instructor": {
-        const inst = instructors?.find(i => i.id === course.instructorId);
-        return inst ? `${inst.firstName} ${inst.lastName}` : null;
-      }
-      case "price": return Number(course.price) || 0;
-      case "capacity": return course.maxCapacity || 0;
-      case "enrollments": return getCourseEnrollmentCount(course.id);
-      case "period": return course.startDate;
-      case "status": return course.statusTags?.join(", ") || "";
-      default: return null;
-    }
-  };
-
-  const sortedCourses = sortItems(filteredCourses, getSortValue);
-
   const exportToCSV = () => {
     if (!filteredCourses.length) return;
-    
-    const headers = ["SKU/Codice", "Nome", "Descrizione", "Categoria", "Staff/Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
-    
+
+    const headers = ["SKU", "Nome", "Descrizione", "Categoria", "Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
+
     const rows = filteredCourses.map(course => {
       const category = categories?.find(c => c.id === course.categoryId);
       const instructor = instructors?.find(i => i.id === course.instructorId);
       const dayLabel = WEEKDAYS.find(d => d.id === course.dayOfWeek)?.label || "";
       const recurrenceLabel = RECURRENCE_TYPES.find(r => r.id === course.recurrenceType)?.label || "";
-      
+
       return [
         course.sku || "",
         course.name,
@@ -692,10 +734,10 @@ export default function Courses() {
         recurrenceLabel,
         course.startDate ? new Date(course.startDate).toLocaleDateString('it-IT') : "",
         course.endDate ? new Date(course.endDate).toLocaleDateString('it-IT') : "",
-        course.statusTags?.join(", ") || ""
+        course.active ? "Attivo" : "Inattivo"
       ];
     });
-    
+
     const escapeCSV = (value: unknown) => {
       const str = String(value ?? "");
       if (str.includes(",") || str.includes('"') || str.includes("\n")) {
@@ -703,7 +745,7 @@ export default function Courses() {
       }
       return str;
     };
-    
+
     const csvContent = "\ufeff" + [headers.map(escapeCSV).join(","), ...rows.map(row => row.map(escapeCSV).join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -715,46 +757,35 @@ export default function Courses() {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="border-b bg-muted/30 sticky top-0 z-10">
-        <div className="p-4 space-y-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-                <ArrowLeft className="w-4 h-4 text-white" />
-              </Button>
-              <div>
-                <h1 className="text-2xl font-semibold text-foreground">Riepilogo Corsi</h1>
-                <p className="text-muted-foreground text-sm">Organizza e gestisci i corsi disponibili</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant="outline"
-                onClick={exportToCSV}
-                data-testid="button-export-csv"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Esporta CSV
-              </Button>
-              <Button 
-                className="gold-3d-button"
-                onClick={() => {
-                  closeDialog();
-                  setIsFormOpen(true);
-                }}
-                data-testid="button-add-course"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuovo Corso
-              </Button>
-            </div>
-          </div>
-          <ActivityNavMenu />
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Corsi</h1>
+          <p className="text-muted-foreground">Organizza e gestisci i corsi disponibili</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={exportToCSV}
+            data-testid="button-export-csv"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Esporta CSV
+          </Button>
+          <Button
+            onClick={() => {
+              closeDialog();
+              setIsFormOpen(true);
+            }}
+            data-testid="button-add-course"
+            disabled={!canWrite}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuovo Corso
+          </Button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4 flex-wrap">
@@ -813,136 +844,130 @@ export default function Courses() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
-                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Corso</SortableTableHead>
-                  <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
-                  <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
-                  <SortableTableHead sortKey="price" currentSort={sortConfig} onSort={handleSort}>Prezzo</SortableTableHead>
-                  <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Posti</SortableTableHead>
-                  <SortableTableHead sortKey="enrollments" currentSort={sortConfig} onSort={handleSort}>Iscritti</SortableTableHead>
-                  <SortableTableHead sortKey="period" currentSort={sortConfig} onSort={handleSort}>Periodo</SortableTableHead>
-                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
+                  <TableHead>Corso</TableHead>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead>Insegnante</TableHead>
+                  <TableHead>Prezzo</TableHead>
+                  <TableHead>Posti</TableHead>
+                  <TableHead>Iscritti</TableHead>
+                  <TableHead>Giorno/Ora</TableHead>
+                  <TableHead>Periodo</TableHead>
+                  <TableHead>Stato</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedCourses.map((course) => {
+                {filteredCourses.map((course) => {
                   const enrollmentCount = getCourseEnrollmentCount(course.id);
                   const enrollmentsList = getCourseEnrollmentsList(course.id);
                   return (
-                  <TableRow key={course.id} data-testid={`course-row-${course.id}`}>
-                    <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("sku") && "sorted-column-cell")} data-testid={`text-course-sku-${course.id}`}>
-                      {course.sku ? (
-                        <button
-                          onClick={() => openEditDialog(course)}
-                          className="hover:text-primary hover:underline text-left"
-                          data-testid={`link-course-sku-${course.id}`}
-                        >
-                          {course.sku}
-                        </button>
-                      ) : "-"}
-                    </TableCell>
-                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>
-                      <button
-                        onClick={() => {
-                          setEditingCourse(course);
-                          setSelectedDayOfWeek(course.dayOfWeek || "");
-                          setSelectedStartTime(course.startTime || "");
-                          setSelectedEndTime(course.endTime || "");
-                          setSelectedRecurrence(course.recurrenceType || "");
-                          setActiveTab("enrollments");
-                          setIsFormOpen(true);
-                        }}
-                        className="hover:text-primary hover:underline text-left"
-                        data-testid={`link-course-name-${course.id}`}
-                      >
-                        {course.name}
-                      </button>
-                    </TableCell>
-                    <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : undefined}>
-                      {categories?.find(c => c.id === course.categoryId)?.name || "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : undefined}>
-                      {instructors?.find(i => i.id === course.instructorId) 
-                        ? `${instructors.find(i => i.id === course.instructorId)?.firstName} ${instructors.find(i => i.id === course.instructorId)?.lastName}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : undefined}>€{course.price || "0.00"}</TableCell>
-                    <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{enrollmentCount}/{course.maxCapacity || "∞"}</TableCell>
-                    <TableCell className={isSortedColumn("enrollments") ? "sorted-column-cell" : undefined}>
-                      {enrollmentsList.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {enrollmentsList.slice(0, 2).map((member) => (
-                            <Link key={member.id} href={`/iscritti?search=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`}>
-                              <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-member-${member.id}`}>
-                                {member.firstName} {member.lastName}
-                              </Badge>
-                            </Link>
-                          ))}
-                          {enrollmentsList.length > 2 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{enrollmentsList.length - 2} altri
-                            </Badge>
+                    <TableRow key={course.id} data-testid={`course-row-${course.id}`}>
+                      <TableCell className="font-medium">
+                        <div className="flex flex-col">
+                          {course.sku && (
+                            <button
+                              onClick={() => openEditDialog(course)}
+                              className="text-xs text-muted-foreground hover:text-primary hover:underline text-left"
+                              data-testid={`link-course-sku-${course.id}`}
+                            >
+                              {course.sku}
+                            </button>
                           )}
+                          <button
+                            onClick={() => {
+                              setEditingCourse(course);
+                              setSelectedDayOfWeek(course.dayOfWeek || "");
+                              setSelectedStartTime(course.startTime || "");
+                              setSelectedEndTime(course.endTime || "");
+                              setSelectedRecurrence(course.recurrenceType || "");
+                              setActiveTab("enrollments");
+                              setIsFormOpen(true);
+                            }}
+                            className="hover:text-primary hover:underline text-left"
+                            data-testid={`link-course-name-${course.id}`}
+                          >
+                            {course.name}
+                          </button>
                         </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Nessun iscritto</span>
-                      )}
-                    </TableCell>
-                    <TableCell className={cn("text-sm", isSortedColumn("period") && "sorted-column-cell")}>
-                      {course.startDate && course.endDate 
-                        ? `${new Date(course.startDate).toLocaleDateString('it-IT')} - ${new Date(course.endDate).toLocaleDateString('it-IT')}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                      <div className="flex flex-wrap gap-1">
-                        {course.statusTags && course.statusTags.length > 0 ? (
-                          course.statusTags.map((tag: string) => (
-                            <StatusBadge
-                              key={tag}
-                              name={tag}
-                              color={getStatusColor(tag, activityStatuses)}
-                            />
-                          ))
+                      </TableCell>
+                      <TableCell>
+                        {categories?.find(c => c.id === course.categoryId)?.name || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {instructors?.find(i => i.id === course.instructorId)
+                          ? `${instructors.find(i => i.id === course.instructorId)?.firstName} ${instructors.find(i => i.id === course.instructorId)?.lastName}`
+                          : "-"}
+                      </TableCell>
+                      <TableCell>€{course.price || "0.00"}</TableCell>
+                      <TableCell>{enrollmentCount}/{course.maxCapacity || "∞"}</TableCell>
+                      <TableCell>
+                        {enrollmentsList.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {enrollmentsList.slice(0, 2).map((member) => (
+                              <Link key={member.id} href={`/iscritti?search=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`}>
+                                <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-member-${member.id}`}>
+                                  {member.firstName} {member.lastName}
+                                </Badge>
+                              </Link>
+                            ))}
+                            {enrollmentsList.length > 2 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{enrollmentsList.length - 2} altri
+                              </Badge>
+                            )}
+                          </div>
                         ) : (
-                          <span className="text-xs text-muted-foreground">-</span>
+                          <span className="text-xs text-muted-foreground">Nessun iscritto</span>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="icon"
-                          className="gold-3d-button"
-                          onClick={() => openEditDialog(course)}
-                          data-testid={`button-edit-course-${course.id}`}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                          onClick={() => {
-                            if (confirm("Sei sicuro di voler eliminare questo corso?")) {
-                              deleteMutation.mutate(course.id);
-                            }
-                          }}
-                          data-testid={`button-delete-course-${course.id}`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col text-xs">
+                          <span className="font-semibold text-primary">{normalizeDay(course.dayOfWeek)}</span>
+                          <span>{course.startTime && course.endTime ? `${course.startTime} - ${course.endTime}` : "-"}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {course.startDate && course.endDate
+                          ? `${new Date(course.startDate).toLocaleDateString('it-IT')} - ${new Date(course.endDate).toLocaleDateString('it-IT')}`
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={course.active ? "default" : "secondary"}>
+                          {course.active ? "Attivo" : "Inattivo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditDialog(course)}
+                            data-testid={`button-edit-course-${course.id}`}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              if (confirm("Sei sicuro di voler eliminare questo corso?")) {
+                                deleteMutation.mutate(course.id);
+                              }
+                            }}
+                            data-testid={`button-delete-course-${course.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
                 })}
               </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
-      </div>
 
       <Dialog open={isFormOpen} onOpenChange={(open) => {
         if (!open) closeDialog();
@@ -954,7 +979,7 @@ export default function Courses() {
               {editingCourse ? "Gestisci i dettagli del corso, visualizza iscritti e presenze" : "Inserisci i dettagli del corso"}
             </DialogDescription>
           </DialogHeader>
-          
+
           {editingCourse ? (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
@@ -984,22 +1009,16 @@ export default function Courses() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="sku">SKU/Codice</Label>
+                      <Label htmlFor="sku">SKU</Label>
                       <Input
                         id="sku"
                         name="sku"
                         placeholder="es: 2526-NEMBRI-LUN-15"
-                        defaultValue={editingCourse.sku || ""}
+                        defaultValue={editingCourse?.sku || ""}
                         data-testid="input-sku"
                       />
                     </div>
                   </div>
-
-                  <MultiSelectStatus
-                    selectedStatuses={selectedStatuses}
-                    onChange={setSelectedStatuses}
-                    testIdPrefix="course"
-                  />
 
                   <div className="space-y-2">
                     <Label htmlFor="description">Descrizione</Label>
@@ -1007,7 +1026,7 @@ export default function Courses() {
                       id="description"
                       name="description"
                       rows={3}
-                      defaultValue={editingCourse.description || ""}
+                      defaultValue={editingCourse?.description || ""}
                       data-testid="input-description"
                     />
                   </div>
@@ -1015,7 +1034,7 @@ export default function Courses() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="categoryId">Categoria</Label>
-                      <Select name="categoryId" defaultValue={editingCourse.categoryId?.toString()}>
+                      <Select name="categoryId" defaultValue={editingCourse?.categoryId?.toString()}>
                         <SelectTrigger data-testid="select-category">
                           <SelectValue placeholder="Seleziona categoria" />
                         </SelectTrigger>
@@ -1047,8 +1066,8 @@ export default function Courses() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Staff/Insegnanti</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Label>Insegnanti</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
                         <Select name="instructorId" defaultValue={editingCourse.instructorId?.toString()}>
@@ -1080,10 +1099,26 @@ export default function Courses() {
                           </SelectContent>
                         </Select>
                       </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2</Label>
+                        <Select name="secondaryInstructor2Id" defaultValue={editingCourse.secondaryInstructor2Id?.toString()}>
+                          <SelectTrigger data-testid="select-secondary-instructor-2">
+                            <SelectValue placeholder="Nessuno" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {instructors?.map((instructor) => (
+                              <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                                {instructor.firstName} {instructor.lastName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="price">Prezzo (€)</Label>
                       <Input
@@ -1092,9 +1127,31 @@ export default function Courses() {
                         type="number"
                         step="0.01"
                         min="0"
-                        defaultValue={editingCourse.price || ""}
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
                         data-testid="input-price"
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Quota Base</Label>
+                      <Select value={selectedQuoteId} onValueChange={(val) => {
+                        setSelectedQuoteId(val === "_none" ? "" : val);
+                        const quote = quotes?.find(q => q.id.toString() === val);
+                        if (quote) setPrice(Number(quote.amount).toFixed(2));
+                      }}>
+                        <SelectTrigger title="Seleziona Quota">
+                          <SelectValue placeholder="Seleziona Quota" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="_none">Nessuna Quota</SelectItem>
+                          {quotes?.map((q) => (
+                            <SelectItem key={q.id} value={q.id.toString()}>
+                              {q.name} (€{q.amount})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="space-y-2">
@@ -1117,7 +1174,7 @@ export default function Courses() {
                         id="startDate"
                         name="startDate"
                         type="date"
-                        defaultValue={editingCourse.startDate || ""}
+                        defaultValue={editingCourse?.startDate ? new Date(editingCourse.startDate).toISOString().split('T')[0] : ""}
                         data-testid="input-startDate"
                       />
                     </div>
@@ -1128,7 +1185,7 @@ export default function Courses() {
                         id="endDate"
                         name="endDate"
                         type="date"
-                        defaultValue={editingCourse.endDate || ""}
+                        defaultValue={editingCourse?.endDate ? new Date(editingCourse.endDate).toISOString().split('T')[0] : ""}
                         data-testid="input-endDate"
                       />
                     </div>
@@ -1221,9 +1278,8 @@ export default function Courses() {
                     >
                       Annulla
                     </Button>
-                    <Button 
+                    <Button
                       type="submit"
-                      className="gold-3d-button"
                       disabled={updateMutation.isPending}
                       data-testid="button-submit-course"
                     >
@@ -1255,7 +1311,7 @@ export default function Courses() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sku">SKU/Codice</Label>
+                  <Label htmlFor="sku">SKU</Label>
                   <Input
                     id="sku"
                     name="sku"
@@ -1264,12 +1320,6 @@ export default function Courses() {
                   />
                 </div>
               </div>
-
-              <MultiSelectStatus
-                selectedStatuses={selectedStatuses}
-                onChange={setSelectedStatuses}
-                testIdPrefix="course"
-              />
 
               <div className="space-y-2">
                 <Label htmlFor="description">Descrizione</Label>
@@ -1316,8 +1366,8 @@ export default function Courses() {
               </div>
 
               <div className="space-y-2">
-                <Label>Staff/Insegnanti</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Label>Insegnanti</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
                     <Select name="instructorId">
@@ -1349,10 +1399,26 @@ export default function Courses() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryInstructor2Id" className="text-sm text-muted-foreground">Secondario 2 (opzionale)</Label>
+                    <Select name="secondaryInstructor2Id">
+                      <SelectTrigger data-testid="select-secondary-instructor-2">
+                        <SelectValue placeholder="Nessuno" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {instructors?.map((instructor) => (
+                          <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                            {instructor.firstName} {instructor.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Prezzo (€)</Label>
                   <Input
@@ -1361,8 +1427,31 @@ export default function Courses() {
                     type="number"
                     step="0.01"
                     min="0"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
                     data-testid="input-price"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Quota Base</Label>
+                  <Select value={selectedQuoteId} onValueChange={(val) => {
+                    setSelectedQuoteId(val === "_none" ? "" : val);
+                    const quote = quotes?.find(q => q.id.toString() === val);
+                    if (quote) setPrice(Number(quote.amount).toFixed(2));
+                  }}>
+                    <SelectTrigger title="Seleziona Quota">
+                      <SelectValue placeholder="Seleziona Quota" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_none">Nessuna Quota</SelectItem>
+                      {quotes?.map((q) => (
+                        <SelectItem key={q.id} value={q.id.toString()}>
+                          {q.name} (€{q.amount})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -1485,9 +1574,8 @@ export default function Courses() {
                 >
                   Annulla
                 </Button>
-                <Button 
-                  type="submit" 
-                  className="gold-3d-button"
+                <Button
+                  type="submit"
                   disabled={createMutation.isPending}
                   data-testid="button-submit-course"
                 >

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -9,20 +9,37 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Briefcase, ArrowLeft } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Briefcase, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Instructor, InsertInstructor, Course } from "@shared/schema";
+
+const DAY_MAP: Record<string, string> = {
+  "LUN": "Lunedì",
+  "MAR": "Martedì",
+  "MER": "Mercoledì",
+  "GIO": "Giovedì",
+  "VEN": "Venerdì",
+  "SAB": "Sabato",
+  "DOM": "Domenica"
+};
 
 export default function Instructors() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInstructor, setEditingInstructor] = useState<Instructor | null>(null);
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Instructor>("name");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"firstName" | "lastName">("firstName");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const { data: instructors, isLoading } = useQuery<Instructor[]>({
     queryKey: ["/api/instructors"],
@@ -35,7 +52,7 @@ export default function Instructors() {
   const getInstructorCourses = (instructorId: number) => {
     if (!courses) return [];
     return courses.filter(
-      course => 
+      course =>
         course.instructorId === instructorId ||
         course.secondaryInstructor1Id === instructorId ||
         course.secondaryInstructor2Id === instructorId
@@ -48,7 +65,7 @@ export default function Instructors() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
-      toast({ title: "Staff/insegnante creato con successo" });
+      toast({ title: "Insegnante creato con successo" });
       setIsFormOpen(false);
       setEditingInstructor(null);
     },
@@ -63,7 +80,7 @@ export default function Instructors() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
-      toast({ title: "Staff/insegnante aggiornato con successo" });
+      toast({ title: "Insegnante aggiornato con successo" });
       setIsFormOpen(false);
       setEditingInstructor(null);
     },
@@ -78,7 +95,7 @@ export default function Instructors() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
-      toast({ title: "Staff/insegnante eliminato con successo" });
+      toast({ title: "Insegnante eliminato con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -106,39 +123,39 @@ export default function Instructors() {
     }
   };
 
-  const getSortValue = (instructor: Instructor, key: string): any => {
-    switch (key) {
-      case "name": return `${instructor.firstName} ${instructor.lastName}`;
-      case "specialization": return instructor.specialization;
-      case "courses": return null;
-      case "email": return instructor.email;
-      case "phone": return instructor.phone;
-      case "rate": return instructor.hourlyRate ? parseFloat(instructor.hourlyRate) : null;
-      case "status": return instructor.active;
-      default: return null;
+  const filteredInstructors = useMemo(() => {
+    let result = instructors?.filter((instructor) => {
+      const matchesSearch = `${instructor.firstName} ${instructor.lastName} ${instructor.specialization}`.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" ? true : (statusFilter === "active" ? instructor.active : !instructor.active);
+      return matchesSearch && matchesStatus;
+    }) || [];
+
+    return result.sort((a, b) => {
+      const aVal = (a[sortBy] || "").toLowerCase();
+      const bVal = (b[sortBy] || "").toLowerCase();
+      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [instructors, searchQuery, statusFilter, sortBy, sortOrder]);
+
+  const toggleSort = (field: "firstName" | "lastName") => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
     }
   };
 
-  const filteredInstructors = instructors?.filter((instructor) =>
-    `${instructor.firstName} ${instructor.lastName} ${instructor.specialization}`.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
-
-  const sortedInstructors = sortItems(filteredInstructors, getSortValue);
-
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Gestione Staff/Insegnanti</h1>
-            <p className="text-muted-foreground text-sm">Gestisci il team di staff/insegnanti e le loro tariffe</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Insegnanti</h1>
+          <p className="text-muted-foreground">Gestisci il team di insegnanti e le loro tariffe</p>
         </div>
-        <Button 
-          className="gold-3d-button"
+        <Button
           onClick={() => {
             setEditingInstructor(null);
             setIsFormOpen(true);
@@ -146,22 +163,35 @@ export default function Instructors() {
           data-testid="button-add-instructor"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Nuovo Staff/Insegnante
+          Nuovo Insegnante
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Cerca staff/insegnante..."
+                placeholder="Cerca insegnante..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
                 data-testid="input-search-instructors"
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="statusFilter" className="shrink-0 text-sm">Stato:</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger id="statusFilter" className="w-[150px]">
+                  <SelectValue placeholder="Tutti" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tutti</SelectItem>
+                  <SelectItem value="active">Attivo</SelectItem>
+                  <SelectItem value="inactive">Inattivo</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
@@ -175,99 +205,112 @@ export default function Instructors() {
           ) : filteredInstructors.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Briefcase className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">Nessun staff/insegnante trovato</p>
-              <p className="text-sm">Inizia aggiungendo il primo staff/insegnante</p>
+              <p className="text-lg font-medium mb-2">Nessun insegnante trovato</p>
+              <p className="text-sm">Inizia aggiungendo il primo insegnante</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
-                  <SortableTableHead sortKey="specialization" currentSort={sortConfig} onSort={handleSort}>Specializzazione</SortableTableHead>
-                  <SortableTableHead sortKey="courses" currentSort={sortConfig} onSort={handleSort}>Corsi Assegnati</SortableTableHead>
-                  <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
-                  <SortableTableHead sortKey="phone" currentSort={sortConfig} onSort={handleSort}>Telefono</SortableTableHead>
-                  <SortableTableHead sortKey="rate" currentSort={sortConfig} onSort={handleSort}>Tariffa Oraria</SortableTableHead>
-                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
+                  <TableHead className="cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort("firstName")}>
+                    <div className="flex items-center gap-1">
+                      Nome
+                      {sortBy === "firstName" ? (sortOrder === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
+                    </div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort("lastName")}>
+                    <div className="flex items-center gap-1">
+                      Cognome
+                      {sortBy === "lastName" ? (sortOrder === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
+                    </div>
+                  </TableHead>
+                  <TableHead>Specializzazione</TableHead>
+                  <TableHead>Corsi Assegnati</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Telefono</TableHead>
+                  <TableHead>Tariffa Oraria</TableHead>
+                  <TableHead>Stato</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedInstructors.map((instructor) => {
+                {filteredInstructors.map((instructor) => {
                   const assignedCourses = getInstructorCourses(instructor.id);
                   return (
-                  <TableRow key={instructor.id} data-testid={`instructor-row-${instructor.id}`}>
-                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>
-                      {instructor.firstName} {instructor.lastName}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("specialization") ? "sorted-column-cell" : undefined}>{instructor.specialization || "-"}</TableCell>
-                    <TableCell className={isSortedColumn("courses") ? "sorted-column-cell" : undefined}>
-                      <div className="flex flex-wrap gap-1">
-                        {assignedCourses.length === 0 ? (
-                          <span className="text-sm text-muted-foreground">Nessun corso</span>
-                        ) : assignedCourses.length <= 2 ? (
-                          assignedCourses.map((course) => (
-                            <Link key={course.id} href="/courses">
-                              <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-course-${course.id}`}>
-                                {course.name}
-                              </Badge>
-                            </Link>
-                          ))
-                        ) : (
-                          <>
-                            {assignedCourses.slice(0, 2).map((course) => (
-                              <Link key={course.id} href="/courses">
+                    <TableRow key={instructor.id} data-testid={`instructor-row-${instructor.id}`}>
+                      <TableCell className="font-medium">
+                        {instructor.firstName}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {instructor.lastName}
+                      </TableCell>
+                      <TableCell>{instructor.specialization || "-"}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {assignedCourses.length === 0 ? (
+                            <span className="text-sm text-muted-foreground">Nessun corso</span>
+                          ) : assignedCourses.length <= 2 ? (
+                            assignedCourses.map((course) => (
+                              <Link key={course.id} href={`/corsi?courseId=${course.id}`}>
                                 <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-course-${course.id}`}>
                                   {course.name}
                                 </Badge>
                               </Link>
-                            ))}
-                            <Badge variant="secondary" className="text-xs">
-                              +{assignedCourses.length - 2} altri
-                            </Badge>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className={isSortedColumn("email") ? "sorted-column-cell" : undefined}>{instructor.email || "-"}</TableCell>
-                    <TableCell className={isSortedColumn("phone") ? "sorted-column-cell" : undefined}>{instructor.phone || "-"}</TableCell>
-                    <TableCell className={isSortedColumn("rate") ? "sorted-column-cell" : undefined}>
-                      {instructor.hourlyRate ? `€${instructor.hourlyRate}/h` : "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                      <Badge variant="outline" className="status-badge-gold">
-                        {instructor.active ? "Attivo" : "Inattivo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="icon"
-                          className="gold-3d-button"
-                          onClick={() => {
-                            setEditingInstructor(instructor);
-                            setIsFormOpen(true);
-                          }}
-                          data-testid={`button-edit-instructor-${instructor.id}`}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                          onClick={() => {
-                            if (confirm("Sei sicuro di voler eliminare questo staff/insegnante?")) {
-                              deleteMutation.mutate(instructor.id);
-                            }
-                          }}
-                          data-testid={`button-delete-instructor-${instructor.id}`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                            ))
+                          ) : (
+                            <>
+                              {assignedCourses.slice(0, 2).map((course) => (
+                                <Link key={course.id} href={`/corsi?courseId=${course.id}`}>
+                                  <Badge variant="outline" className="text-xs cursor-pointer hover-elevate" data-testid={`badge-course-${course.id}`}>
+                                    {course.name}
+                                  </Badge>
+                                </Link>
+                              ))}
+                              <Badge variant="secondary" className="text-xs">
+                                +{assignedCourses.length - 2} altri
+                              </Badge>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>{instructor.email || "-"}</TableCell>
+                      <TableCell>{instructor.phone || "-"}</TableCell>
+                      <TableCell>
+                        {instructor.hourlyRate ? `€${instructor.hourlyRate}/h` : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={instructor.active ? "default" : "secondary"}>
+                          {instructor.active ? "Attivo" : "Inattivo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setEditingInstructor(instructor);
+                              setIsFormOpen(true);
+                            }}
+                            data-testid={`button-edit-instructor-${instructor.id}`}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              if (confirm("Sei sicuro di voler eliminare questo insegnante?")) {
+                                deleteMutation.mutate(instructor.id);
+                              }
+                            }}
+                            data-testid={`button-delete-instructor-${instructor.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
               </TableBody>
@@ -279,9 +322,9 @@ export default function Instructors() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingInstructor ? "Modifica Staff/Insegnante" : "Nuovo Staff/Insegnante"}</DialogTitle>
+            <DialogTitle>{editingInstructor ? "Modifica Insegnante" : "Nuovo Insegnante"}</DialogTitle>
             <DialogDescription>
-              Inserisci i dati dello staff/insegnante
+              Inserisci i dati dell'insegnante
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -365,6 +408,36 @@ export default function Instructors() {
               />
             </div>
 
+            {editingInstructor && (
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Briefcase className="w-4 h-4 text-primary" />
+                  Corsi già assegnati ({getInstructorCourses(editingInstructor.id).length})
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {getInstructorCourses(editingInstructor.id).length > 0 ? (
+                    getInstructorCourses(editingInstructor.id).map(course => (
+                      <div key={course.id} className="flex flex-col p-3 rounded-lg border bg-muted/30 text-xs">
+                        <span className="font-bold text-foreground mb-1">{course.name}</span>
+                        <div className="text-muted-foreground space-y-0.5">
+                          <p>
+                            {course.dayOfWeek ? (DAY_MAP[course.dayOfWeek] || course.dayOfWeek) : "N/D"} • {course.startTime} - {course.endTime}
+                          </p>
+                          <p className="opacity-70">
+                            {course.instructorId === editingInstructor.id && "[Primario]"}
+                            {course.secondaryInstructor1Id === editingInstructor.id && "[Secondario 1]"}
+                            {course.secondaryInstructor2Id === editingInstructor.id && "[Secondario 2]"}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic col-span-2">Nessun corso assegnato a questo insegnante.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
             <DialogFooter>
               <Button
                 type="button"
@@ -374,13 +447,12 @@ export default function Instructors() {
               >
                 Annulla
               </Button>
-              <Button 
-                type="submit" 
-                className="gold-3d-button"
+              <Button
+                type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-instructor"
               >
-                {editingInstructor ? "Salva Modifiche" : "Crea Staff/Insegnante"}
+                {editingInstructor ? "Salva Modifiche" : "Crea Insegnante"}
               </Button>
             </DialogFooter>
           </form>

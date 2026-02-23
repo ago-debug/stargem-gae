@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { BarChart3, TrendingUp, Users, Calendar, Plus, Play, Trash2, Edit, Download, FileText, Save, ArrowLeft } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Calendar, Plus, Play, Trash2, Edit, Download, FileText, Save } from "lucide-react";
 import type { CustomReport } from "@shared/schema";
 
 interface FieldDefinition {
@@ -29,14 +29,26 @@ interface ReportFilter {
   value: string;
 }
 
+interface ReportStats {
+  totalMembers: number;
+  newMembersThisMonth: number;
+  activeCourses: number;
+  totalEnrollments: number;
+  monthlyRevenue: number;
+  revenueGrowth: number;
+  attendanceRate: number;
+  enrollmentsByCategory: { category: string; count: number }[];
+  upcomingExpiries: { memberName: string; type: string; expiryDate: string }[];
+}
+
 const ENTITY_TYPES = [
-  { id: "members", label: "Partecipanti/Anagrafiche" },
+  { id: "members", label: "Clienti/Anagrafiche" },
   { id: "courses", label: "Corsi" },
   { id: "workshops", label: "Workshop" },
   { id: "payments", label: "Pagamenti" },
   { id: "enrollments", label: "Iscrizioni" },
   { id: "attendances", label: "Presenze" },
-  { id: "instructors", label: "Staff/Insegnanti" },
+  { id: "instructors", label: "Insegnanti" },
 ];
 
 const OPERATORS = [
@@ -68,7 +80,7 @@ export default function Reports() {
   const [reportResult, setReportResult] = useState<{ data: any[]; total: number } | null>(null);
   const [executingReportId, setExecutingReportId] = useState<number | null>(null);
 
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery<ReportStats>({
     queryKey: ["/api/stats/reports"],
   });
 
@@ -211,7 +223,7 @@ export default function Reports() {
     if (!reportResult || !reportResult.data.length) return;
 
     const headers = Object.keys(reportResult.data[0]);
-    const rows = reportResult.data.map(row => 
+    const rows = reportResult.data.map(row =>
       headers.map(h => {
         const val = row[h];
         if (val === null || val === undefined) return "";
@@ -227,11 +239,12 @@ export default function Reports() {
       })
     );
 
-    const escapeCSV = (value: string) => {
-      if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-        return `"${value.replace(/"/g, '""')}"`;
+    const escapeCSV = (value: any): string => {
+      const stringValue = String(value);
+      if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\n")) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
       }
-      return value;
+      return stringValue;
     };
 
     const csvContent = "\ufeff" + [
@@ -250,16 +263,11 @@ export default function Reports() {
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Report & Statistiche</h1>
-            <p className="text-muted-foreground text-sm">Analisi dettagliate e report personalizzati</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Report & Statistiche</h1>
+          <p className="text-muted-foreground">Analisi dettagliate e report personalizzati</p>
         </div>
       </div>
 
@@ -373,8 +381,8 @@ export default function Reports() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{item.category}</p>
                           <div className="w-full bg-muted rounded-full h-2 mt-1">
-                            <div 
-                              className="bg-primary h-2 rounded-full" 
+                            <div
+                              className="bg-primary h-2 rounded-full"
                               style={{ width: `${(item.count / stats.totalEnrollments) * 100}%` }}
                             />
                           </div>
@@ -428,7 +436,7 @@ export default function Reports() {
         <TabsContent value="custom-reports" className="space-y-6">
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground">Crea e gestisci report personalizzati</p>
-            <Button className="gold-3d-button" onClick={() => { resetForm(); setIsCreateDialogOpen(true); }} data-testid="button-create-report">
+            <Button onClick={() => { resetForm(); setIsCreateDialogOpen(true); }} data-testid="button-create-report">
               <Plus className="w-4 h-4 mr-2" />
               Nuovo Report
             </Button>
@@ -485,8 +493,8 @@ export default function Reports() {
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Button
+                              variant="default"
                               size="sm"
-                              className="gold-3d-button"
                               onClick={() => {
                                 setExecutingReportId(report.id);
                                 executeReportMutation.mutate(report.id);
@@ -498,17 +506,16 @@ export default function Reports() {
                               Esegui
                             </Button>
                             <Button
+                              variant="ghost"
                               size="icon"
-                              className="gold-3d-button"
                               onClick={() => openEditDialog(report)}
                               data-testid={`button-edit-report-${report.id}`}
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="icon"
-                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                               onClick={() => deleteReportMutation.mutate(report.id)}
                               data-testid={`button-delete-report-${report.id}`}
                             >
@@ -544,7 +551,7 @@ export default function Reports() {
                   id="reportName"
                   value={reportName}
                   onChange={(e) => setReportName(e.target.value)}
-                  placeholder="Es: Partecipanti attivi con certificato"
+                  placeholder="Es: Clienti attivi con certificato"
                   data-testid="input-report-name"
                 />
               </div>
@@ -635,7 +642,7 @@ export default function Reports() {
                             placeholder="Valore"
                             className="flex-1"
                           />
-                          <Button variant="outline" size="icon" className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100" onClick={() => removeFilter(index)}>
+                          <Button variant="ghost" size="icon" onClick={() => removeFilter(index)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -680,9 +687,8 @@ export default function Reports() {
             <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
               Annulla
             </Button>
-            <Button 
-              className="gold-3d-button"
-              onClick={handleSubmit} 
+            <Button
+              onClick={handleSubmit}
               disabled={createReportMutation.isPending || updateReportMutation.isPending}
               data-testid="button-save-report"
             >
@@ -719,10 +725,10 @@ export default function Reports() {
                       {Object.values(row).map((value: any, colIndex) => (
                         <TableCell key={colIndex}>
                           {value === null || value === undefined ? "-" :
-                           typeof value === "boolean" ? (value ? "Sì" : "No") :
-                           typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}/) ?
-                             new Date(value).toLocaleDateString('it-IT') :
-                             String(value)}
+                            typeof value === "boolean" ? (value ? "Sì" : "No") :
+                              typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}/) ?
+                                new Date(value).toLocaleDateString('it-IT') :
+                                String(value)}
                         </TableCell>
                       ))}
                     </TableRow>

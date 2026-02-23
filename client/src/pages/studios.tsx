@@ -13,8 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -30,12 +28,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Pencil, Trash2, Building2, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -58,7 +57,6 @@ const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => {
 export default function Studios() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingStudio, setEditingStudio] = useState<Studio | null>(null);
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Studio>("name");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [openTime, setOpenTime] = useState<string>("09:00");
   const [closeTime, setCloseTime] = useState<string>("21:00");
@@ -78,6 +76,7 @@ export default function Studios() {
       capacity: undefined,
       equipment: "",
       notes: "",
+      googleCalendarId: "",
       active: true,
     },
   });
@@ -90,10 +89,10 @@ export default function Studios() {
       closeDialog();
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Errore nella creazione dello studio", 
+      toast({
+        title: "Errore nella creazione dello studio",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive"
       });
     },
   });
@@ -107,10 +106,10 @@ export default function Studios() {
       closeDialog();
     },
     onError: (error: Error) => {
-      toast({ 
+      toast({
         title: "Errore nell'aggiornamento dello studio",
-        description: error.message, 
-        variant: "destructive" 
+        description: error.message,
+        variant: "destructive"
       });
     },
   });
@@ -128,15 +127,15 @@ export default function Studios() {
 
   const onSubmit = (data: InsertStudio) => {
     // Build operating hours and days from state
-    const operatingHours = JSON.stringify({ start: openTime, end: closeTime });
-    const operatingDays = JSON.stringify(selectedDays);
-    
+    const operatingHours = { start: openTime, end: closeTime };
+    const operatingDays = selectedDays;
+
     const submitData = {
       ...data,
       operatingHours,
       operatingDays,
     };
-    
+
     if (editingStudio) {
       updateMutation.mutate({ id: editingStudio.id, data: submitData });
     } else {
@@ -146,28 +145,36 @@ export default function Studios() {
 
   const openEditDialog = (studio: Studio) => {
     setEditingStudio(studio);
-    
+
     // Parse existing data
     const existingDays = parseOperatingDays(studio.operatingDays);
     setSelectedDays(existingDays);
-    
+
     // Parse existing hours if in JSON format
     let existingOpenTime = "09:00";
     let existingCloseTime = "21:00";
     if (studio.operatingHours) {
-      try {
-        const hours = JSON.parse(studio.operatingHours);
+      if (typeof studio.operatingHours === 'object') {
+        const hours = studio.operatingHours as any;
         if (hours.start && hours.end) {
           existingOpenTime = hours.start;
           existingCloseTime = hours.end;
         }
-      } catch {
-        // Keep defaults
+      } else {
+        try {
+          const hours = JSON.parse(studio.operatingHours as string);
+          if (hours.start && hours.end) {
+            existingOpenTime = hours.start;
+            existingCloseTime = hours.end;
+          }
+        } catch {
+          // Keep defaults
+        }
       }
     }
     setOpenTime(existingOpenTime);
     setCloseTime(existingCloseTime);
-    
+
     form.reset({
       name: studio.name,
       floor: studio.floor || "",
@@ -176,6 +183,7 @@ export default function Studios() {
       capacity: studio.capacity || undefined,
       equipment: studio.equipment || "",
       notes: studio.notes || "",
+      googleCalendarId: studio.googleCalendarId || "",
       active: studio.active,
     });
   };
@@ -189,48 +197,34 @@ export default function Studios() {
     form.reset();
   };
 
-  const getSortValue = (studio: Studio, key: string): any => {
-    switch (key) {
-      case "name": return studio.name;
-      case "floor": return studio.floor;
-      case "capacity": return studio.capacity ? Number(studio.capacity) : null;
-      case "days": return studio.operatingDays;
-      case "status": return studio.active;
-      default: return null;
+  const parseOperatingDays = (days: any): string[] => {
+    if (!days) return [];
+    if (Array.isArray(days)) return days;
+    if (typeof days === 'string') {
+      try {
+        return JSON.parse(days);
+      } catch {
+        return days.split(",").map(d => d.trim()).filter(Boolean);
+      }
     }
-  };
-
-  const sortedStudios = sortItems(studios, getSortValue);
-
-  const parseOperatingDays = (daysStr: string | null): string[] => {
-    if (!daysStr) return [];
-    try {
-      return JSON.parse(daysStr);
-    } catch {
-      return daysStr.split(",").map(d => d.trim()).filter(Boolean);
-    }
+    return [];
   };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Studios/Sale</h1>
-            <p className="text-muted-foreground text-sm">
-              Gestisci le sale e gli studi per i corsi
-            </p>
-          </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Studios/Sale</h1>
+          <p className="text-muted-foreground">
+            Gestisci le sale e gli studi per i corsi
+          </p>
         </div>
         <Dialog open={isCreateOpen || !!editingStudio} onOpenChange={(open) => {
           if (!open) closeDialog();
           else setIsCreateOpen(true);
         }}>
           <DialogTrigger asChild>
-            <Button className="gold-3d-button" data-testid="button-create-studio">
+            <Button data-testid="button-create-studio">
               <Plus className="mr-2 h-4 w-4" />
               Nuovo Studio
             </Button>
@@ -376,6 +370,28 @@ export default function Studios() {
 
                 <FormField
                   control={form.control}
+                  name="googleCalendarId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Google Calendar ID</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value ?? ""}
+                          placeholder="primary o ID calendario specifico"
+                          data-testid="input-google-calendar-id"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Lascia vuoto per usare il calendario principale o "primary".
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
@@ -403,7 +419,6 @@ export default function Studios() {
                   </Button>
                   <Button
                     type="submit"
-                    className="gold-3d-button"
                     disabled={createMutation.isPending || updateMutation.isPending}
                     data-testid="button-submit"
                   >
@@ -437,21 +452,22 @@ export default function Studios() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
-                  <SortableTableHead sortKey="floor" currentSort={sortConfig} onSort={handleSort}>Piano</SortableTableHead>
-                  <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Capienza</SortableTableHead>
-                  <SortableTableHead sortKey="days" currentSort={sortConfig} onSort={handleSort}>Giorni Operativi</SortableTableHead>
-                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Piano</TableHead>
+                  <TableHead>Capienza</TableHead>
+                  <TableHead>Giorni Operativi</TableHead>
+                  <TableHead>Calendar</TableHead>
+                  <TableHead>Stato</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedStudios.map((studio) => (
+                {studios.map((studio) => (
                   <TableRow key={studio.id} data-testid={`row-studio-${studio.id}`}>
-                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{studio.name}</TableCell>
-                    <TableCell className={isSortedColumn("floor") ? "sorted-column-cell" : undefined}>{studio.floor || "-"}</TableCell>
-                    <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{studio.capacity || "-"}</TableCell>
-                    <TableCell className={isSortedColumn("days") ? "sorted-column-cell" : undefined}>
+                    <TableCell className="font-medium">{studio.name}</TableCell>
+                    <TableCell>{studio.floor || "-"}</TableCell>
+                    <TableCell>{studio.capacity || "-"}</TableCell>
+                    <TableCell>
                       {parseOperatingDays(studio.operatingDays).length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {parseOperatingDays(studio.operatingDays).map((day, idx) => (
@@ -464,25 +480,33 @@ export default function Studios() {
                         "-"
                       )}
                     </TableCell>
-                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                      <Badge variant="outline" className="status-badge-gold">
+                    <TableCell>
+                      {studio.googleCalendarId ? (
+                        <Badge variant="outline" className="font-mono text-[10px]">
+                          {studio.googleCalendarId}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-xs italic">Default</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={studio.active ? "default" : "secondary"}>
                         {studio.active ? "Attivo" : "Inattivo"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
+                          variant="ghost"
                           size="icon"
-                          className="gold-3d-button"
                           onClick={() => openEditDialog(studio)}
                           data-testid={`button-edit-studio-${studio.id}`}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
-                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                           onClick={() => deleteMutation.mutate(studio.id)}
                           disabled={deleteMutation.isPending}
                           data-testid={`button-delete-studio-${studio.id}`}

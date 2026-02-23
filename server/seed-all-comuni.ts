@@ -11,10 +11,10 @@ interface ComuneData {
 
 async function seedAllComuni() {
   console.log("Fetching all Italian comuni from GitHub...");
-  
+
   const response = await fetch("https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json");
   const comuni: ComuneData[] = await response.json();
-  
+
   console.log(`Found ${comuni.length} comuni`);
 
   const existingProvinces = await db.select().from(provinces);
@@ -22,7 +22,7 @@ async function seedAllComuni() {
   existingProvinces.forEach(p => {
     provinceMap.set(p.code, p.id);
   });
-  
+
   console.log(`Found ${existingProvinces.length} provinces in database`);
 
   console.log("Deleting existing cities...");
@@ -35,7 +35,7 @@ async function seedAllComuni() {
 
   for (const comune of comuni) {
     const provinceId = provinceMap.get(comune.sigla);
-    
+
     if (!provinceId) {
       skipped++;
       continue;
@@ -54,7 +54,7 @@ async function seedAllComuni() {
       await db.insert(cities).values(batch);
       inserted += batch.length;
       batch = [];
-      
+
       if (inserted % 500 === 0) {
         console.log(`  Inserted ${inserted} comuni...`);
       }

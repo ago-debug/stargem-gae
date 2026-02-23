@@ -1,45 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
-
-interface ConfigResponse {
-  isExternalDeploy: boolean;
-  authType: string;
-}
+import { useEffect } from "react";
 
 export function useAuth() {
-  const { data: config, isLoading: configLoading } = useQuery<ConfigResponse>({
-    queryKey: ["/api/config"],
-    retry: false,
-  });
-
-  const { data: user, isLoading: userLoading } = useQuery<User>({
+  const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     retry: false,
-    enabled: config !== undefined && !config.isExternalDeploy,
   });
 
-  // Still loading config
-  if (configLoading) {
-    return {
-      user: undefined,
-      isLoading: true,
-      isAuthenticated: false,
-    };
-  }
+  const isAuthenticated = !!user;
 
-  // External deploy - bypass auth completely
-  if (config?.isExternalDeploy) {
-    return {
-      user: { id: "external-user", email: "admin@studio", firstName: "Admin", lastName: "User" } as User,
-      isLoading: false,
-      isAuthenticated: true,
-    };
-  }
+  useEffect(() => {
+    // Auto-redirect to login only if we are trying to access a protected route
+    // (i.e., not root, not login page)
+    const isPublicRoute = window.location.pathname === "/" || window.location.pathname.startsWith("/api/login");
 
-  // Normal Replit auth
+    if (!isLoading && !isAuthenticated && !isPublicRoute) {
+      window.location.href = "/api/login"; // Or redirect to "/" to show landing page
+    }
+  }, [isLoading, isAuthenticated]);
+
   return {
     user,
-    isLoading: userLoading,
-    isAuthenticated: !!user,
+    isLoading,
+    isAuthenticated,
   };
 }

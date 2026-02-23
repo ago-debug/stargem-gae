@@ -5,15 +5,23 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X, Camera } from "lucide-react";
-import { 
+import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X, Camera, Edit, Trash2 } from "lucide-react";
+import {
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
   User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music
 } from "lucide-react";
 import { Link } from "wouter";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { KnowledgeInfo } from "@/components/knowledge-info";
 import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
 import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollment-details";
+import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CourseSelector } from "@/components/course-selector";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Course, Instructor, Category, Studio } from "@shared/schema";
 
 interface AllegatoState {
   hasFile: boolean;
@@ -165,20 +173,318 @@ export default function MascheraInputGenerale() {
   });
 
   // Stato attività selezionata nei pagamenti e corsi dal DB
-  const [pagamentoAttivita, setPagamentoAttivita] = useState("");
-  const [pagamentoDettaglio, setPagamentoDettaglio] = useState("");
-  const [corsiDB, setCorsiDB] = useState<{id: number; name: string; sku: string}[]>([]);
-  const [categorieDB, setCategorieDB] = useState<{id: number; name: string}[]>([]);
-  const [workshopCategorieDB, setWorkshopCategorieDB] = useState<{id: number; name: string}[]>([]);
-  const [domenicheCategorieDB, setDomenicheCategorieDB] = useState<{id: number; name: string}[]>([]);
-  const [allenamentiCategorieDB, setAllenamentiCategorieDB] = useState<{id: number; name: string}[]>([]);
-  const [lezioniIndCategorieDB, setLezioniIndCategorieDB] = useState<{id: number; name: string}[]>([]);
-  const [campusCategorieDB, setCampusCategorieDB] = useState<{id: number; name: string}[]>([]);
-  const [saggiCategorieDB, setSaggiCategorieDB] = useState<{id: number; name: string}[]>([]);
-  const [vacanzeCategorieDB, setVacanzeCategorieDB] = useState<{id: number; name: string}[]>([]);
-  const [partecipanteCategorieDB, setPartecipanteCategorieDB] = useState<{id: number; name: string}[]>([]);
-  const [selectedPaymentNotes, setSelectedPaymentNotes] = useState<string[]>([]);
-  const [selectedEnrollmentDetails, setSelectedEnrollmentDetails] = useState<string[]>([]);
+  // NEW: Payment List State
+  const [payments, setPayments] = useState<PaymentData[]>([]);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
+
+  // OLD: Single payment state (commented out or removed if not used elsewhere)
+  // const [pagamentoAttivita, setPagamentoAttivita] = useState("");
+  // const [pagamentoDettaglio, setPagamentoDettaglio] = useState("");
+
+  const [corsiDB, setCorsiDB] = useState<{ id: number; name: string; sku: string }[]>([]);
+  const [categorieDB, setCategorieDB] = useState<{ id: number; name: string }[]>([]);
+  const [workshopCategorieDB, setWorkshopCategorieDB] = useState<{ id: number; name: string }[]>([]);
+  const [domenicheCategorieDB, setDomenicheCategorieDB] = useState<{ id: number; name: string }[]>([]);
+  const [allenamentiCategorieDB, setAllenamentiCategorieDB] = useState<{ id: number; name: string }[]>([]);
+  const [lezioniIndCategorieDB, setLezioniIndCategorieDB] = useState<{ id: number; name: string }[]>([]);
+  const [campusCategorieDB, setCampusCategorieDB] = useState<{ id: number; name: string }[]>([]);
+  const [saggiCategorieDB, setSaggiCategorieDB] = useState<{ id: number; name: string }[]>([]);
+  const [vacanzeCategorieDB, setVacanzeCategorieDB] = useState<{ id: number; name: string }[]>([]);
+  const [partecipanteCategorieDB, setPartecipanteCategorieDB] = useState<{ id: number; name: string }[]>([]);
+  // const [selectedPaymentNotes, setSelectedPaymentNotes] = useState<string[]>([]);
+  // const [selectedEnrollmentDetails, setSelectedEnrollmentDetails] = useState<string[]>([]);
+
+  // Search State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+
+  // Active Member State for Enrollments
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+  const [selectedCourseToAdd, setSelectedCourseToAdd] = useState<string>("");
+  const [selectedWorkshopToAdd, setSelectedWorkshopToAdd] = useState<string>("");
+
+  // Queries for Selectors (replaces simple useEffect fetches)
+  const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
+  const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
+  const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
+  const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
+  const { data: workshops } = useQuery<any[]>({ queryKey: ["/api/workshops"] });
+
+  // Member Enrollments Queries
+  const { data: memberEnrollments, isLoading: loadingEnrollments } = useQuery<any[]>({
+    queryKey: ["/api/enrollments", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/enrollments?memberId=${selectedMemberId}`);
+      if (!res.ok) {
+        if (res.status === 404) return [];
+        throw new Error("Errore caricamento iscrizioni");
+      }
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
+
+  const { data: memberWorkshopEnrollments } = useQuery<any[]>({
+    queryKey: ["/api/workshop-enrollments", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/workshop-enrollments?memberId=${selectedMemberId}`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
+
+  // Enrollment Mutations
+  const addEnrollmentMutation = useMutation({
+    mutationFn: async (courseId: number) => {
+      await apiRequest("POST", "/api/enrollments", {
+        memberId: selectedMemberId,
+        courseId,
+        status: "active"
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments", "member", selectedMemberId] });
+      toast({ title: "Iscrizione corso aggiunta" });
+      setSelectedCourseToAdd("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore iscrizione corso", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const removeEnrollmentMutation = useMutation({
+    mutationFn: async (enrollmentId: number) => {
+      await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments", "member", selectedMemberId] });
+      toast({ title: "Iscrizione corso rimossa" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore rimozione corso", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const addWorkshopEnrollmentMutation = useMutation({
+    mutationFn: async (workshopId: number) => {
+      await apiRequest("POST", "/api/workshop-enrollments", { memberId: selectedMemberId, workshopId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments", "member", selectedMemberId] });
+      toast({ title: "Iscrizione workshop aggiunta" });
+      setSelectedWorkshopToAdd("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore iscrizione workshop", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const removeWorkshopEnrollmentMutation = useMutation({
+    mutationFn: async (enrollmentId: number) => {
+      await apiRequest("DELETE", `/api/workshop-enrollments/${enrollmentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments", "member", selectedMemberId] });
+      toast({ title: "Iscrizione workshop rimossa" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore rimozione workshop", description: error.message, variant: "destructive" });
+    }
+  });
+
+  // Debounced Search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchTerm.length >= 2) {
+        setIsSearching(true);
+        fetch(`/api/members?page=1&pageSize=10&search=${encodeURIComponent(searchTerm)}`)
+          .then(res => res.json())
+          .then(data => {
+            setSearchResults(data.members || []);
+            setShowResults(true);
+          })
+          .catch(err => console.error(err))
+          .finally(() => setIsSearching(false));
+      } else {
+        setSearchResults([]);
+        setShowResults(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const handleSelectMember = (member: any) => {
+    // Calculate age
+    let eta = "";
+    if (member.dateOfBirth) {
+      const birthDate = new Date(member.dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      eta = age.toString();
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      // Anagrafica
+      nome: member.firstName || "",
+      cognome: member.lastName || "",
+      codiceFiscale: member.fiscalCode || "",
+      telefono: member.mobile || member.phone || "",
+      email: member.email || "",
+      indirizzo: member.streetAddress || "",
+      cap: member.postalCode || "",
+      citta: member.city || "",
+      provincia: member.province || "",
+      dataNascita: member.dateOfBirth || "",
+      luogoNascita: member.placeOfBirth || "",
+      provinciaNascita: member.birthProvince || "",
+      sesso: member.gender || "",
+      eta: eta,
+      allievo: member.categoryId ? member.categoryId.toString() : "",
+
+      // Genitori
+      nomeGen1: member.motherFirstName || "",
+      cognomeGen1: member.motherLastName || "",
+      cfGen1: member.motherFiscalCode || "",
+      telGen1: member.motherPhone || "",
+      emailGen1: member.motherEmail || "",
+
+      nomeGen2: member.fatherFirstName || "",
+      cognomeGen2: member.fatherLastName || "",
+      cfGen2: member.fatherFiscalCode || "",
+      telGen2: member.fatherPhone || "",
+      emailGen2: member.fatherEmail || "",
+
+      // Intestazione defaults
+      tipoPartecipante: "tesserato", // Assuming active member is tesserato
+      tessera: member.cardNumber || "",
+      scadenzaTessera: member.cardExpiryDate || "",
+    }));
+
+    // Populate simple allegati flags (complex logic omitted for brevity, just basic mapping)
+    setAllegati(prev => ({
+      ...prev,
+      modelloDetrazione: { ...prev.modelloDetrazione, richiesto: member.detractionModelRequested ? "si" : "no", anno: member.detractionModelYear || "2026" },
+      creditiScolastici: { ...prev.creditiScolastici, richiesto: member.schoolCreditsRequested ? "si" : "no", annoScolastico: member.schoolCreditsYear || "2025/2026" },
+      tesserinoTecnico: { ...prev.tesserinoTecnico, numero: member.tesserinoTecnicoNumber || "" },
+    }));
+
+    // Set selected member ID for queries
+    setSelectedMemberId(member.id);
+
+    // Update photo
+    if (member.photoUrl) {
+      setPhotoFile({ file: null, preview: member.photoUrl });
+    } else {
+      setPhotoFile({ file: null, preview: null });
+    }
+
+    setShowResults(false);
+    setSearchTerm(`${member.firstName} ${member.lastName}`);
+  };
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const saveMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const res = await apiRequest("POST", "/api/maschera-generale/save", payload);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Salvataggio completato",
+        description: `Dati salvati con successo per ${formData.nome} ${formData.cognome}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Errore nel salvataggio",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleSave = async () => {
+    // Collect all data
+    const memberData = {
+      firstName: formData.nome,
+      lastName: formData.cognome,
+      fiscalCode: formData.codiceFiscale,
+      email: formData.email,
+      mobile: formData.telefono,
+      streetAddress: formData.indirizzo,
+      city: formData.citta,
+      province: formData.provincia,
+      postalCode: formData.cap,
+      dateOfBirth: formData.dataNascita,
+      placeOfBirth: formData.luogoNascita,
+      birthProvince: formData.provinciaNascita,
+      gender: formData.sesso,
+      isMinor: parseInt(formData.eta) < 18,
+      categoryId: parseInt(formData.allievo) || undefined,
+
+      // Genitori
+      motherFirstName: formData.nomeGen1 || null,
+      motherLastName: formData.cognomeGen1 || null,
+      motherFiscalCode: formData.cfGen1 || null,
+      motherEmail: formData.emailGen1 || null,
+      motherPhone: formData.telGen1 || null,
+
+      fatherFirstName: formData.nomeGen2 || null,
+      fatherLastName: formData.cognomeGen2 || null,
+      fatherFiscalCode: formData.cfGen2 || null,
+      fatherEmail: formData.emailGen2 || null,
+      fatherPhone: formData.telGen2 || null,
+
+      // Allegati Flags (from allegati state)
+      detractionModelRequested: allegati.modelloDetrazione.richiesto === "si",
+      detractionModelYear: allegati.modelloDetrazione.anno,
+      schoolCreditsRequested: allegati.creditiScolastici.richiesto === "si",
+      schoolCreditsYear: allegati.creditiScolastici.annoScolastico,
+      tesserinoTecnicoNumber: allegati.tesserinoTecnico.numero,
+
+      active: true,
+      photoUrl: photoFile.preview || null,
+    };
+
+    // Collect Enrollments from Attività sections
+    const enrollments: any[] = [];
+    Object.entries(attivitaCorso).forEach(([key, courseId]) => {
+      if (courseId) {
+        enrollments.push({
+          courseId: parseInt(courseId),
+          status: "active",
+          seasonId: 1, // Default or selected season
+          tempId: key // For matching with payments
+        });
+      }
+    });
+
+    // Collect Payments (from list)
+    const paymentsPayload: any[] = payments.map(p => ({
+      courseId: parseInt(p.dettaglioId),
+      amount: p.totaleQuota?.toString() || "0.00",
+      type: p.attivita,
+      status: "paid",
+      tempId: p.attivita, // keeping this for matching with enrollment logic in backend if needed
+      // Adding extra fields for backend to potentially use or ignore
+      details: p
+    }));
+
+    saveMutation.mutate({ memberData, enrollments, payments: paymentsPayload });
+  };
 
   const isFormValid = !!(
     formData.cognome.trim() &&
@@ -211,27 +517,55 @@ export default function MascheraInputGenerale() {
     "campus": "", "saggi": "",
   });
 
-  const handlePagamentoDettaglio = (corsoId: string) => {
-    setPagamentoDettaglio(corsoId);
-    if (pagamentoAttivita && corsoId) {
-      const corso = corsiDB.find(c => String(c.id) === corsoId);
+
+  const handleSavePayment = (payment: PaymentData) => {
+    let updatedPayments = [...payments];
+    if (editingPaymentId) {
+      updatedPayments = updatedPayments.map(p => p.id === editingPaymentId ? { ...payment, id: editingPaymentId } : p);
+    } else {
+      updatedPayments.push({ ...payment, id: Date.now().toString() });
+    }
+    setPayments(updatedPayments);
+
+    // Auto-fill Attività section
+    if (payment.attivita && payment.dettaglioId) {
+      const corso = corsiDB.find(c => String(c.id) === payment.dettaglioId);
       if (corso) {
-        const key = pagamentoAttivita as AttivitaKey;
-        setAttivitaCorso(prev => ({ ...prev, [key]: String(corso.id) }));
-        setAttivitaCodice(prev => ({ ...prev, [key]: corso.sku }));
+        // This assumes payment.attivita is a valid key. If not, it won't update.
+        // We cast to string for index access, but should be careful.
+        if (Object.keys(attivitaCorso).includes(payment.attivita)) {
+          const key = payment.attivita as AttivitaKey;
+          setAttivitaCorso(prev => ({ ...prev, [key]: String(corso.id) }));
+          setAttivitaCodice(prev => ({ ...prev, [key]: corso.sku }));
+        }
       }
+    }
+    setEditingPaymentId(null);
+  };
+
+  const handleDeletePayment = (id: string) => {
+    if (confirm("Sei sicuro di voler eliminare questo pagamento?")) {
+      setPayments(payments.filter(p => p.id !== id));
     }
   };
 
   useEffect(() => {
+    // Legacy fetches replaced by useQuery, except for specific categories not covered by main queries
+    // Keeping simple categories fetching if needed for other parts of the form
+    /*
     fetch("/api/courses")
       .then(res => res.ok ? res.json() : [])
       .then(data => setCorsiDB(data))
       .catch(() => setCorsiDB([]));
-    fetch("/api/categories")
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setCategorieDB(data))
-      .catch(() => setCategorieDB([]));
+    */
+    // Manually setting CorsiDB from useQuery data for backward compatibility if needed
+    if (courses) {
+      setCorsiDB(courses.map(c => ({ id: c.id, name: c.name, sku: c.sku || "" })));
+    }
+    if (categories) {
+      setCategorieDB(categories.map(c => ({ id: c.id, name: c.name })));
+    }
+
     fetch("/api/workshop-categories")
       .then(res => res.ok ? res.json() : [])
       .then(data => setWorkshopCategorieDB(data))
@@ -282,22 +616,22 @@ export default function MascheraInputGenerale() {
 
   // Funzione per avviare la verifica (simulata per ora, poi collegheremo Twilio/SMTP)
   const avviaVerifica = (campo: keyof typeof verificaStato, tipo: 'telefono' | 'email') => {
-    const valore = tipo === 'telefono' 
+    const valore = tipo === 'telefono'
       ? (campo === 'telefono' ? formData.telefono : campo === 'telGen1' ? formData.telGen1 : formData.telGen2)
       : (campo === 'email' ? formData.email : campo === 'emailGen1' ? formData.emailGen1 : formData.emailGen2);
-    
+
     if (!valore) {
       alert(`Inserisci prima ${tipo === 'telefono' ? 'il numero di telefono' : "l'indirizzo email"}`);
       return;
     }
-    
+
     // Simulazione verifica (in futuro: Twilio per SMS/WhatsApp, SMTP per email)
     const conferma = window.confirm(
-      tipo === 'telefono' 
+      tipo === 'telefono'
         ? `Inviare SMS di verifica a ${valore}?\n\n(Funzionalità da collegare con Twilio)`
         : `Inviare email di verifica a ${valore}?\n\n(Funzionalità da collegare con SMTP)`
     );
-    
+
     if (conferma) {
       // Per ora simuliamo il successo della verifica
       setTimeout(() => {
@@ -310,34 +644,34 @@ export default function MascheraInputGenerale() {
   // Funzione per decodificare il codice fiscale italiano
   const decodeFiscalCode = (cf: string) => {
     if (!cf || cf.length !== 16) return null;
-    
+
     const monthMap: { [key: string]: number } = {
       'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'H': 6,
       'L': 7, 'M': 8, 'P': 9, 'R': 10, 'S': 11, 'T': 12
     };
-    
+
     try {
       // Anno (caratteri 6-7)
       const yearCode = parseInt(cf.substring(6, 8));
       const currentYear = new Date().getFullYear();
       const century = yearCode > (currentYear % 100) + 10 ? 1900 : 2000;
       const year = century + yearCode;
-      
+
       // Mese (carattere 8)
       const monthChar = cf.charAt(8).toUpperCase();
       const month = monthMap[monthChar] || 1;
-      
+
       // Giorno e sesso (caratteri 9-10)
       let day = parseInt(cf.substring(9, 11));
       const sesso = day > 40 ? 'F' : 'M';
       if (day > 40) day -= 40;
-      
+
       // Data di nascita formattata
       const dataNascita = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-      
+
       // Codice comune (caratteri 11-15)
       const codiceComune = cf.substring(11, 15).toUpperCase();
-      
+
       // Calcola età
       const birthDate = new Date(dataNascita);
       const today = new Date();
@@ -346,7 +680,7 @@ export default function MascheraInputGenerale() {
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         eta--;
       }
-      
+
       return { dataNascita, sesso, eta: eta.toString(), codiceComune };
     } catch (e) {
       return null;
@@ -369,7 +703,7 @@ export default function MascheraInputGenerale() {
 
   const handleChange = async (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    
+
     // Auto-popola i campi quando viene inserito il codice fiscale
     if (field === "codiceFiscale") {
       if (value.length === 16) {
@@ -381,8 +715,9 @@ export default function MascheraInputGenerale() {
             dataNascita: decoded.dataNascita,
             sesso: decoded.sesso,
             eta: decoded.eta,
-            luogoNascita: comuneData?.nome || "",
-            provinciaNascita: comuneData?.provincia || "",
+            codComune: decoded.codiceComune,
+            luogoNascita: comuneData?.name || "",
+            provinciaNascita: comuneData?.province?.code || comuneData?.provinceCode || "",
           }));
         }
       } else {
@@ -397,7 +732,7 @@ export default function MascheraInputGenerale() {
         }));
       }
     }
-    
+
     if (field === "cfGen1") {
       if (value.length === 16) {
         const decoded = decodeFiscalCode(value);
@@ -408,8 +743,8 @@ export default function MascheraInputGenerale() {
             dataNascitaGen1: decoded.dataNascita,
             sessoGen1: decoded.sesso,
             etaGen1: decoded.eta,
-            luogoNascitaGen1: comuneData?.nome || "",
-            provinciaNascitaGen1: comuneData?.provincia || "",
+            luogoNascitaGen1: comuneData?.name || "",
+            provinciaNascitaGen1: comuneData?.province?.code || "",
           }));
         }
       } else {
@@ -424,7 +759,7 @@ export default function MascheraInputGenerale() {
         }));
       }
     }
-    
+
     if (field === "cfGen2") {
       if (value.length === 16) {
         const decoded = decodeFiscalCode(value);
@@ -435,8 +770,8 @@ export default function MascheraInputGenerale() {
             dataNascitaGen2: decoded.dataNascita,
             sessoGen2: decoded.sesso,
             etaGen2: decoded.eta,
-            luogoNascitaGen2: comuneData?.nome || "",
-            provinciaNascitaGen2: comuneData?.provincia || "",
+            luogoNascitaGen2: comuneData?.name || "",
+            provinciaNascitaGen2: comuneData?.province?.code || "",
           }));
         }
       } else {
@@ -460,6 +795,23 @@ export default function MascheraInputGenerale() {
     }
   };
 
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        // Short timeout to ensure DOM is ready
+        setTimeout(() => scrollToSection(hash), 100);
+      }
+    };
+
+    // Check on mount
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   const navItems = [
     { id: "intestazione", label: "Intestazione", icon: FileText },
     { id: "anagrafica", label: "Anagrafica", icon: Users },
@@ -469,6 +821,70 @@ export default function MascheraInputGenerale() {
     { id: "certificato", label: "Certificato Medico", icon: Stethoscope },
     { id: "attivita", label: "Attività", icon: Activity },
   ];
+
+  // Button Handlers
+  const handleReset = () => {
+    if (window.confirm("Sei sicuro di voler pulire tutti i campi?")) {
+      setFormData(prev => ({
+        ...prev,
+        // Reset fields but keep some defaults like season
+        anagrafica: "",
+        codiceId: prev.codiceId, // Keep generated ID? Or reset? Assuming keep for now or logic needed
+        // Anagrafica
+        cognome: "", nome: "", codiceFiscale: "", telefono: "", email: "",
+        indirizzo: "", cap: "", citta: "", provincia: "", codComune: "",
+        dataNascita: "", luogoNascita: "", provinciaNascita: "", sesso: "", eta: "", allievo: "",
+        // Genitori
+        cognomeGen1: "", nomeGen1: "", cfGen1: "", telGen1: "", emailGen1: "",
+        cognomeGen2: "", nomeGen2: "", cfGen2: "", telGen2: "", emailGen2: "",
+        indirizzoGen1: "", capGen1: "", cittaGen1: "", provinciaGen1: "", codComuneGen1: "",
+        dataNascitaGen1: "", luogoNascitaGen1: "", provinciaNascitaGen1: "", sessoGen1: "", etaGen1: "",
+        indirizzoGen2: "", capGen2: "", cittaGen2: "", provinciaGen2: "", codComuneGen2: "",
+        dataNascitaGen2: "", luogoNascitaGen2: "", provinciaNascitaGen2: "", sessoGen2: "", etaGen2: "",
+        // Other
+        tesserinoTecnico: "", tesseraEnte: "", scadenzaTesseraEnte: "", ente: "",
+        tipoPartecipante: "tesserato",
+        tessera: "", scadenzaTessera: "", daDoveArriva: "",
+      }));
+      setAllegati({
+        regolamento: { hasFile: false, data: "", accettato: "" },
+        privacy: { hasFile: false, data: "", accettata: "" },
+        certificatoMedico: { hasFile: false, dataRilascio: "", scadenza: "", tipo: "" },
+        ricevutePagamenti: { hasFile: false, numeroRicevute: 0, note: "" },
+        modelloDetrazione: { hasFile: false, anno: "2026", richiesto: "" },
+        creditiScolastici: { hasFile: false, annoScolastico: "2025/2026", richiesto: "" },
+        tesserinoTecnico: { hasFile: false, numero: "", dataRilascio: "" },
+        tesseraEnte: { hasFile: false, numero: "", ente: "" },
+      });
+      setPhotoFile({ file: null, preview: null });
+      setSearchTerm("");
+      setSelectedMemberId(null);
+      toast({ title: "Form pulito", description: "Tutti i campi sono stati resettati." });
+    }
+  };
+
+  const handleExport = () => {
+    const dataStr = JSON.stringify(formData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `anagrafica_${formData.cognome || "export"}_${formData.nome || ""}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: "Esportazione completata", description: "File JSON scaricato." });
+  };
+
+  const handleImport = () => {
+    // Basic placeholder for import
+    toast({ title: "Importazione", description: "Funzionalità di importazione da file non ancora implementata.", variant: "default" });
+  };
+
+  const handleGSheets = () => {
+    toast({ title: "Google Sheets", description: "Integrazione Google Sheets non configurata.", variant: "default" });
+  };
 
   return (
     <div className="flex flex-col h-full" data-testid="page-maschera-input-generale">
@@ -482,50 +898,73 @@ export default function MascheraInputGenerale() {
               <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-gsheets">
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-gsheets" onClick={handleGSheets}>
                 <FileSpreadsheet className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 GSheets
               </Button>
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-pulisci">
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-pulisci" onClick={handleReset}>
                 <RotateCcw className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Pulisci
               </Button>
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-esporta">
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-esporta" onClick={handleExport}>
                 <Upload className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Esporta
               </Button>
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-importa">
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-importa" onClick={handleImport}>
                 <Download className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Importa
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-xs h-8 bg-background" 
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8 bg-background"
                 data-testid="button-salva"
-                disabled={!isFormValid}
+                disabled={!isFormValid || saveMutation.isPending}
                 title={!isFormValid ? "Compila tutti i campi obbligatori (*) per salvare" : ""}
+                onClick={handleSave}
               >
-                <Save className="w-3 h-3 mr-1 sidebar-icon-gold" />
-                Salva
+                <Save className={`w-3 h-3 mr-1 sidebar-icon-gold ${saveMutation.isPending ? 'animate-spin' : ''}`} />
+                {saveMutation.isPending ? 'Salvataggio...' : 'Salva'}
               </Button>
-              <Button size="sm" className="gold-3d-button" data-testid="button-nuovo">
+              <Button size="sm" className="gold-3d-button" data-testid="button-nuovo" onClick={handleReset}>
                 <Plus className="w-4 h-4 mr-1" />
                 Nuovo
               </Button>
             </div>
           </div>
-          
+
           {/* Barra di ricerca */}
-          <div className="relative max-w-md">
+          <div className="relative max-w-md z-50">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              placeholder="Cerca partecipante..." 
+            <Input
+              placeholder="Cerca partecipante..."
               className="pl-10 bg-background"
               data-testid="input-search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => { if (searchResults.length > 0) setShowResults(true); }}
             />
+            {/* Search Results Dropdown */}
+            {showResults && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                {searchResults.length > 0 ? (
+                  searchResults.map((member) => (
+                    <div
+                      key={member.id}
+                      className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+                      onClick={() => handleSelectMember(member)}
+                    >
+                      <div className="font-bold">{member.firstName} {member.lastName}</div>
+                      <div className="text-xs text-muted-foreground">{member.fiscalCode} - {member.email}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-2 text-sm text-muted-foreground">Nessun risultato trovato</div>
+                )}
+              </div>
+            )}
           </div>
-          
+
           {/* Tab di navigazione */}
           <div className="flex items-center gap-2 flex-wrap">
             {navItems.map((item) => (
@@ -547,7 +986,7 @@ export default function MascheraInputGenerale() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-4 space-y-6">
-        
+
         {/* INTESTAZIONE */}
         <Card id="intestazione" className="scroll-mt-32">
           <CardHeader className="pb-4">
@@ -573,7 +1012,7 @@ export default function MascheraInputGenerale() {
               </div>
               <div className="space-y-2">
                 <Label>&nbsp;</Label>
-                <Input 
+                <Input
                   value={formData.anagrafica}
                   onChange={(e) => handleChange("anagrafica", e.target.value)}
                 />
@@ -582,8 +1021,8 @@ export default function MascheraInputGenerale() {
                 <Label>Codice ID (C)</Label>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Auto</Badge>
-                  <Input 
-                    value={formData.codiceId} 
+                  <Input
+                    value={formData.codiceId}
                     onChange={(e) => handleChange("codiceId", e.target.value)}
                     className="bg-yellow-50 border-yellow-200 font-mono"
                   />
@@ -610,9 +1049,9 @@ export default function MascheraInputGenerale() {
               </div>
               <div className="space-y-2">
                 <Label>Tessera</Label>
-                <Input 
-                  value={formData.tessera} 
-                  onChange={(e) => handleChange("tessera", e.target.value)} 
+                <Input
+                  value={formData.tessera}
+                  onChange={(e) => handleChange("tessera", e.target.value)}
                   className="bg-yellow-50 border-yellow-200"
                 />
               </div>
@@ -681,517 +1120,517 @@ export default function MascheraInputGenerale() {
         <div id="anagrafica" className="scroll-mt-32 flex flex-col lg:flex-row gap-4">
           {/* FOTO + ALLEGATI DA INSERIRE - Colonna sinistra */}
           <div className="lg:w-72 shrink-0 space-y-4">
-          {/* FOTO PARTECIPANTE */}
-          <Card>
-            <CardHeader className="pb-2 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg">
-              <CardTitle className="flex items-center gap-2 text-sm font-bold text-amber-800 dark:text-amber-200">
-                <Camera className="w-4 h-4" />
-                FOTO
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3">
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png,.heic,.heif,.webp,.avif,.tiff,.tif"
-                className="hidden"
-                id="upload-photo"
-                onChange={(e) => handlePhotoUpload(e.target.files?.[0] || null)}
-                data-testid="input-upload-photo"
-              />
-              {photoFile.preview ? (
-                <div className="relative">
-                  <img
-                    src={photoFile.preview}
-                    alt="Foto partecipante"
-                    className="w-full aspect-[3/4] object-cover rounded-md border border-input"
-                    data-testid="img-photo-preview"
-                  />
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="absolute top-1 right-1 bg-background/80 text-destructive"
-                    onClick={removePhoto}
-                    data-testid="button-remove-photo"
+            {/* FOTO PARTECIPANTE */}
+            <Card>
+              <CardHeader className="pb-2 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg">
+                <CardTitle className="flex items-center gap-2 text-sm font-bold text-amber-800 dark:text-amber-200">
+                  <Camera className="w-4 h-4" />
+                  FOTO
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3">
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.heic,.heif,.webp,.avif,.tiff,.tif"
+                  className="hidden"
+                  id="upload-photo"
+                  onChange={(e) => handlePhotoUpload(e.target.files?.[0] || null)}
+                  data-testid="input-upload-photo"
+                />
+                {photoFile.preview ? (
+                  <div className="relative">
+                    <img
+                      src={photoFile.preview}
+                      alt="Foto partecipante"
+                      className="w-full aspect-[3/4] object-cover rounded-md border border-input"
+                      data-testid="img-photo-preview"
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="absolute top-1 right-1 bg-background/80 text-destructive"
+                      onClick={removePhoto}
+                      data-testid="button-remove-photo"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1 truncate text-center" data-testid="text-photo-filename">{photoFile.file?.name}</p>
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="upload-photo"
+                    className="cursor-pointer flex flex-col items-center justify-center gap-2 border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-md aspect-[3/4] transition-colors hover:bg-muted/50"
+                    data-testid="label-upload-photo"
                   >
-                    <X className="w-4 h-4" />
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-1 truncate text-center" data-testid="text-photo-filename">{photoFile.file?.name}</p>
-                </div>
-              ) : (
-                <label
-                  htmlFor="upload-photo"
-                  className="cursor-pointer flex flex-col items-center justify-center gap-2 border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-md aspect-[3/4] transition-colors hover:bg-muted/50"
-                  data-testid="label-upload-photo"
-                >
-                  <Camera className="w-10 h-10 text-amber-400" />
-                  <span className="text-xs text-muted-foreground text-center px-2">Carica foto<br />JPG, PNG, HEIC, WebP</span>
-                </label>
-              )}
-            </CardContent>
-          </Card>
+                    <Camera className="w-10 h-10 text-amber-400" />
+                    <span className="text-xs text-muted-foreground text-center px-2">Carica foto<br />JPG, PNG, HEIC, WebP</span>
+                  </label>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* ALLEGATI DA INSERIRE */}
-          <Card>
-            <CardHeader className="pb-2 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg">
-              <CardTitle className="flex items-center gap-2 text-sm font-bold text-amber-800 dark:text-amber-200">
-                <Paperclip className="w-4 h-4" />
-                ALLEGATI DA INSERIRE
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {/* REGOLAMENTO */}
-              <div className="border-b">
-                <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.regolamento.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'}`}
-                  onClick={() => toggleAllegatoSection('regolamento')}
-                  data-testid="button-toggle-regolamento"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-sm font-medium ${allegati.regolamento.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>REGOLAMENTO</span>
-                    {allegati.regolamento.hasFile ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </div>
-                  {allegati.regolamento.hasFile && (
-                    <div className="flex items-center gap-2 mt-1 text-xs text-green-600 dark:text-green-400">
-                      <Check className="w-3 h-3" />
-                      <span className="truncate">{allegati.regolamento.fileName || 'File caricato'}</span>
-                    </div>
-                  )}
-                </div>
-                {openAllegatoSections.regolamento && (
-                  <div className="p-3 pt-0 space-y-3">
-                    <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.regolamento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        className="hidden"
-                        id="upload-regolamento"
-                        onChange={(e) => handleFileUpload('regolamento', e.target.files?.[0] || null)}
-                        data-testid="input-upload-regolamento"
-                      />
+            {/* ALLEGATI DA INSERIRE */}
+            <Card>
+              <CardHeader className="pb-2 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg">
+                <CardTitle className="flex items-center gap-2 text-sm font-bold text-amber-800 dark:text-amber-200">
+                  <Paperclip className="w-4 h-4" />
+                  ALLEGATI DA INSERIRE
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {/* REGOLAMENTO */}
+                <div className="border-b">
+                  <div
+                    className={`p-3 cursor-pointer transition-colors ${allegati.regolamento.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'}`}
+                    onClick={() => toggleAllegatoSection('regolamento')}
+                    data-testid="button-toggle-regolamento"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm font-medium ${allegati.regolamento.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>REGOLAMENTO</span>
                       {allegati.regolamento.hasFile ? (
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-                            <Check className="w-4 h-4" />
-                            <span className="truncate">{allegati.regolamento.fileName || 'File caricato'}</span>
-                          </div>
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            className="text-destructive"
-                            onClick={(e) => { e.stopPropagation(); removeAllegatoFile('regolamento'); }}
-                            data-testid="button-remove-regolamento"
-                          >
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </div>
+                        <Check className="w-4 h-4 text-green-600" />
                       ) : (
-                        <label htmlFor="upload-regolamento" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-regolamento">
-                          <FileUp className="w-6 h-6 text-amber-500" />
-                          <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                        </label>
+                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Data Inserimento</Label>
-                        <Input 
-                          type="date" 
-                          className="h-7 text-xs"
-                          value={allegati.regolamento.data || ''}
-                          onChange={(e) => updateAllegato('regolamento', 'data', e.target.value)}
-                        />
+                    {allegati.regolamento.hasFile && (
+                      <div className="flex items-center gap-2 mt-1 text-xs text-green-600 dark:text-green-400">
+                        <Check className="w-3 h-3" />
+                        <span className="truncate">{allegati.regolamento.fileName || 'File caricato'}</span>
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Accettato</Label>
-                        <Select 
-                          value={allegati.regolamento.accettato || ''} 
-                          onValueChange={(v) => updateAllegato('regolamento', 'accettato', v)}
-                        >
-                          <SelectTrigger className={`h-7 text-xs ${allegati.regolamento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.regolamento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
-                            <SelectValue placeholder="Seleziona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="si">Si</SelectItem>
-                            <SelectItem value="no">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* PRIVACY */}
-              <div className="border-b">
-                <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.privacy.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'}`}
-                  onClick={() => toggleAllegatoSection('privacy')}
-                  data-testid="button-toggle-privacy"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-sm font-medium ${allegati.privacy.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>PRIVACY</span>
-                    {allegati.privacy.hasFile ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
                     )}
                   </div>
-                  {allegati.privacy.hasFile && (
-                    <div className="flex items-center gap-2 mt-1 text-xs text-green-600 dark:text-green-400">
-                      <Check className="w-3 h-3" />
-                      <span className="truncate">{allegati.privacy.fileName || 'File caricato'}</span>
+                  {openAllegatoSections.regolamento && (
+                    <div className="p-3 pt-0 space-y-3">
+                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.regolamento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          className="hidden"
+                          id="upload-regolamento"
+                          onChange={(e) => handleFileUpload('regolamento', e.target.files?.[0] || null)}
+                          data-testid="input-upload-regolamento"
+                        />
+                        {allegati.regolamento.hasFile ? (
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                              <Check className="w-4 h-4" />
+                              <span className="truncate">{allegati.regolamento.fileName || 'File caricato'}</span>
+                            </div>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              className="text-destructive"
+                              onClick={(e) => { e.stopPropagation(); removeAllegatoFile('regolamento'); }}
+                              data-testid="button-remove-regolamento"
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <label htmlFor="upload-regolamento" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-regolamento">
+                            <FileUp className="w-6 h-6 text-amber-500" />
+                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
+                          </label>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Data Inserimento</Label>
+                          <Input
+                            type="date"
+                            className="h-7 text-xs"
+                            value={allegati.regolamento.data || ''}
+                            onChange={(e) => updateAllegato('regolamento', 'data', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Accettato</Label>
+                          <Select
+                            value={allegati.regolamento.accettato || ''}
+                            onValueChange={(v) => updateAllegato('regolamento', 'accettato', v)}
+                          >
+                            <SelectTrigger className={`h-7 text-xs ${allegati.regolamento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.regolamento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
+                              <SelectValue placeholder="Seleziona" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="si">Si</SelectItem>
+                              <SelectItem value="no">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
-                {openAllegatoSections.privacy && (
-                  <div className="p-3 pt-0 space-y-3">
-                    <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.privacy.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        className="hidden"
-                        id="upload-privacy"
-                        onChange={(e) => handleFileUpload('privacy', e.target.files?.[0] || null)}
-                        data-testid="input-upload-privacy"
-                      />
+
+                {/* PRIVACY */}
+                <div className="border-b">
+                  <div
+                    className={`p-3 cursor-pointer transition-colors ${allegati.privacy.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'}`}
+                    onClick={() => toggleAllegatoSection('privacy')}
+                    data-testid="button-toggle-privacy"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm font-medium ${allegati.privacy.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>PRIVACY</span>
                       {allegati.privacy.hasFile ? (
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-                            <Check className="w-4 h-4" />
-                            <span className="truncate">{allegati.privacy.fileName || 'File caricato'}</span>
-                          </div>
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            className="text-destructive"
-                            onClick={(e) => { e.stopPropagation(); removeAllegatoFile('privacy'); }}
-                            data-testid="button-remove-privacy"
-                          >
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </div>
+                        <Check className="w-4 h-4 text-green-600" />
                       ) : (
-                        <label htmlFor="upload-privacy" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-privacy">
-                          <FileUp className="w-6 h-6 text-amber-500" />
-                          <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                        </label>
+                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Data Inserimento</Label>
-                        <Input 
-                          type="date" 
-                          className="h-7 text-xs"
-                          value={allegati.privacy.data || ''}
-                          onChange={(e) => updateAllegato('privacy', 'data', e.target.value)}
-                        />
+                    {allegati.privacy.hasFile && (
+                      <div className="flex items-center gap-2 mt-1 text-xs text-green-600 dark:text-green-400">
+                        <Check className="w-3 h-3" />
+                        <span className="truncate">{allegati.privacy.fileName || 'File caricato'}</span>
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Accettata</Label>
-                        <Select 
-                          value={allegati.privacy.accettata || ''} 
-                          onValueChange={(v) => updateAllegato('privacy', 'accettata', v)}
-                        >
-                          <SelectTrigger className={`h-7 text-xs ${allegati.privacy.accettata === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.privacy.accettata === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
-                            <SelectValue placeholder="Seleziona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="si">Si</SelectItem>
-                            <SelectItem value="no">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* CERTIFICATO MEDICO */}
-              <div className="border-b">
-                <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.certificatoMedico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                  onClick={() => toggleAllegatoSection('certificatoMedico')}
-                  data-testid="button-toggle-certificato-medico"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CERTIFICATO MEDICO</span>
-                    {allegati.certificatoMedico.hasFile ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
                     )}
                   </div>
+                  {openAllegatoSections.privacy && (
+                    <div className="p-3 pt-0 space-y-3">
+                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.privacy.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          className="hidden"
+                          id="upload-privacy"
+                          onChange={(e) => handleFileUpload('privacy', e.target.files?.[0] || null)}
+                          data-testid="input-upload-privacy"
+                        />
+                        {allegati.privacy.hasFile ? (
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                              <Check className="w-4 h-4" />
+                              <span className="truncate">{allegati.privacy.fileName || 'File caricato'}</span>
+                            </div>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              className="text-destructive"
+                              onClick={(e) => { e.stopPropagation(); removeAllegatoFile('privacy'); }}
+                              data-testid="button-remove-privacy"
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <label htmlFor="upload-privacy" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-privacy">
+                            <FileUp className="w-6 h-6 text-amber-500" />
+                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
+                          </label>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Data Inserimento</Label>
+                          <Input
+                            type="date"
+                            className="h-7 text-xs"
+                            value={allegati.privacy.data || ''}
+                            onChange={(e) => updateAllegato('privacy', 'data', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Accettata</Label>
+                          <Select
+                            value={allegati.privacy.accettata || ''}
+                            onValueChange={(v) => updateAllegato('privacy', 'accettata', v)}
+                          >
+                            <SelectTrigger className={`h-7 text-xs ${allegati.privacy.accettata === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.privacy.accettata === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
+                              <SelectValue placeholder="Seleziona" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="si">Si</SelectItem>
+                              <SelectItem value="no">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {openAllegatoSections.certificatoMedico && (
-                  <div className="p-3 pt-0 space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Data Rilascio</Label>
-                        <Input 
-                          type="date" 
-                          className="h-7 text-xs"
-                          value={allegati.certificatoMedico.dataRilascio || ''}
-                          onChange={(e) => updateAllegato('certificatoMedico', 'dataRilascio', e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Scadenza</Label>
-                        <Input 
-                          type="date" 
-                          className="h-7 text-xs"
-                          value={allegati.certificatoMedico.scadenza || ''}
-                          onChange={(e) => updateAllegato('certificatoMedico', 'scadenza', e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Tipo</Label>
-                      <Select 
-                        value={allegati.certificatoMedico.tipo || ''} 
-                        onValueChange={(v) => updateAllegato('certificatoMedico', 'tipo', v)}
-                      >
-                        <SelectTrigger className="h-7 text-xs">
-                          <SelectValue placeholder="Tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="non_agonistico">Non Agonistico</SelectItem>
-                          <SelectItem value="agonistico">Agonistico</SelectItem>
-                          <SelectItem value="base">Base</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
-              </div>
 
-              {/* RICEVUTE PAGAMENTI */}
-              <div className="border-b">
-                <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.ricevutePagamenti.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                  onClick={() => toggleAllegatoSection('ricevutePagamenti')}
-                  data-testid="button-toggle-ricevute-pagamenti"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">RICEVUTE PAGAMENTI</span>
-                    {allegati.ricevutePagamenti.hasFile ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </div>
-                </div>
-                {openAllegatoSections.ricevutePagamenti && (
-                  <div className="p-3 pt-0">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">N° Ricevute</Label>
-                        <Input 
-                          type="number" 
-                          className="h-7 text-xs"
-                          value={allegati.ricevutePagamenti.numeroRicevute || 0}
-                          onChange={(e) => updateAllegato('ricevutePagamenti', 'numeroRicevute', parseInt(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Note</Label>
-                        <Input 
-                          className="h-7 text-xs"
-                          value={allegati.ricevutePagamenti.note || ''}
-                          onChange={(e) => updateAllegato('ricevutePagamenti', 'note', e.target.value)}
-                        />
-                      </div>
+                {/* CERTIFICATO MEDICO */}
+                <div className="border-b">
+                  <div
+                    className={`p-3 cursor-pointer transition-colors ${allegati.certificatoMedico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    onClick={() => toggleAllegatoSection('certificatoMedico')}
+                    data-testid="button-toggle-certificato-medico"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CERTIFICATO MEDICO</span>
+                      {allegati.certificatoMedico.hasFile ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* MODELLO DETRAZIONE */}
-              <div className="border-b">
-                <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.modelloDetrazione.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                  onClick={() => toggleAllegatoSection('modelloDetrazione')}
-                  data-testid="button-toggle-modello-detrazione"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">MODELLO DETRAZIONE</span>
-                    {allegati.modelloDetrazione.hasFile ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </div>
-                </div>
-                {openAllegatoSections.modelloDetrazione && (
-                  <div className="p-3 pt-0">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Anno</Label>
-                        <Input 
-                          className="h-7 text-xs"
-                          value={allegati.modelloDetrazione.anno || ''}
-                          onChange={(e) => updateAllegato('modelloDetrazione', 'anno', e.target.value)}
-                        />
+                  {openAllegatoSections.certificatoMedico && (
+                    <div className="p-3 pt-0 space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Data Rilascio</Label>
+                          <Input
+                            type="date"
+                            className="h-7 text-xs"
+                            value={allegati.certificatoMedico.dataRilascio || ''}
+                            onChange={(e) => updateAllegato('certificatoMedico', 'dataRilascio', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Scadenza</Label>
+                          <Input
+                            type="date"
+                            className="h-7 text-xs"
+                            value={allegati.certificatoMedico.scadenza || ''}
+                            onChange={(e) => updateAllegato('certificatoMedico', 'scadenza', e.target.value)}
+                          />
+                        </div>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Richiesto</Label>
-                        <Select 
-                          value={allegati.modelloDetrazione.richiesto || ''} 
-                          onValueChange={(v) => updateAllegato('modelloDetrazione', 'richiesto', v)}
+                        <Label className="text-xs">Tipo</Label>
+                        <Select
+                          value={allegati.certificatoMedico.tipo || ''}
+                          onValueChange={(v) => updateAllegato('certificatoMedico', 'tipo', v)}
                         >
                           <SelectTrigger className="h-7 text-xs">
-                            <SelectValue placeholder="Seleziona" />
+                            <SelectValue placeholder="Tipo" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="si">Sì</SelectItem>
-                            <SelectItem value="no">No</SelectItem>
+                            <SelectItem value="non_agonistico">Non Agonistico</SelectItem>
+                            <SelectItem value="agonistico">Agonistico</SelectItem>
+                            <SelectItem value="base">Base</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* CREDITI SCOLASTICI */}
-              <div className="border-b">
-                <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.creditiScolastici.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                  onClick={() => toggleAllegatoSection('creditiScolastici')}
-                  data-testid="button-toggle-crediti-scolastici"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CREDITI SCOLASTICI</span>
-                    {allegati.creditiScolastici.hasFile ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </div>
+                  )}
                 </div>
-                {openAllegatoSections.creditiScolastici && (
-                  <div className="p-3 pt-0">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Anno Scolastico</Label>
-                        <Input 
-                          className="h-7 text-xs"
-                          value={allegati.creditiScolastici.annoScolastico || ''}
-                          onChange={(e) => updateAllegato('creditiScolastici', 'annoScolastico', e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Richiesto</Label>
-                        <Select 
-                          value={allegati.creditiScolastici.richiesto || ''} 
-                          onValueChange={(v) => updateAllegato('creditiScolastici', 'richiesto', v)}
-                        >
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue placeholder="Seleziona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="si">Sì</SelectItem>
-                            <SelectItem value="no">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+
+                {/* RICEVUTE PAGAMENTI */}
+                <div className="border-b">
+                  <div
+                    className={`p-3 cursor-pointer transition-colors ${allegati.ricevutePagamenti.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    onClick={() => toggleAllegatoSection('ricevutePagamenti')}
+                    data-testid="button-toggle-ricevute-pagamenti"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">RICEVUTE PAGAMENTI</span>
+                      {allegati.ricevutePagamenti.hasFile ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* TESSERINO TECNICO */}
-              <div className="border-b">
-                <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.tesserinoTecnico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                  onClick={() => toggleAllegatoSection('tesserinoTecnico')}
-                  data-testid="button-toggle-tesserino-tecnico"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERINO TECNICO</span>
-                    {allegati.tesserinoTecnico.hasFile ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </div>
-                </div>
-                {openAllegatoSections.tesserinoTecnico && (
-                  <div className="p-3 pt-0">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Numero</Label>
-                        <Input 
-                          className="h-7 text-xs"
-                          placeholder="N° Tesserino"
-                          value={allegati.tesserinoTecnico.numero || ''}
-                          onChange={(e) => updateAllegato('tesserinoTecnico', 'numero', e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Data Rilascio</Label>
-                        <Input 
-                          type="date" 
-                          className="h-7 text-xs"
-                          value={allegati.tesserinoTecnico.dataRilascio || ''}
-                          onChange={(e) => updateAllegato('tesserinoTecnico', 'dataRilascio', e.target.value)}
-                        />
+                  {openAllegatoSections.ricevutePagamenti && (
+                    <div className="p-3 pt-0">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">N° Ricevute</Label>
+                          <Input
+                            type="number"
+                            className="h-7 text-xs"
+                            value={allegati.ricevutePagamenti.numeroRicevute || 0}
+                            onChange={(e) => updateAllegato('ricevutePagamenti', 'numeroRicevute', parseInt(e.target.value) || 0)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Note</Label>
+                          <Input
+                            className="h-7 text-xs"
+                            value={allegati.ricevutePagamenti.note || ''}
+                            onChange={(e) => updateAllegato('ricevutePagamenti', 'note', e.target.value)}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* TESSERA ENTE */}
-              <div>
-                <div 
-                  className={`p-3 cursor-pointer transition-colors ${allegati.tesseraEnte.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
-                  onClick={() => toggleAllegatoSection('tesseraEnte')}
-                  data-testid="button-toggle-tessera-ente"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERA ENTE</span>
-                    {allegati.tesseraEnte.hasFile ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </div>
+                  )}
                 </div>
-                {openAllegatoSections.tesseraEnte && (
-                  <div className="p-3 pt-0">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Numero</Label>
-                        <Input 
-                          className="h-7 text-xs"
-                          placeholder="N° Tessera"
-                          value={allegati.tesseraEnte.numero || ''}
-                          onChange={(e) => updateAllegato('tesseraEnte', 'numero', e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Ente</Label>
-                        <Input 
-                          className="h-7 text-xs"
-                          placeholder="Ente"
-                          value={allegati.tesseraEnte.ente || ''}
-                          onChange={(e) => updateAllegato('tesseraEnte', 'ente', e.target.value)}
-                        />
-                      </div>
+
+                {/* MODELLO DETRAZIONE */}
+                <div className="border-b">
+                  <div
+                    className={`p-3 cursor-pointer transition-colors ${allegati.modelloDetrazione.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    onClick={() => toggleAllegatoSection('modelloDetrazione')}
+                    data-testid="button-toggle-modello-detrazione"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">MODELLO DETRAZIONE</span>
+                      {allegati.modelloDetrazione.hasFile ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  {openAllegatoSections.modelloDetrazione && (
+                    <div className="p-3 pt-0">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Anno</Label>
+                          <Input
+                            className="h-7 text-xs"
+                            value={allegati.modelloDetrazione.anno || ''}
+                            onChange={(e) => updateAllegato('modelloDetrazione', 'anno', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Richiesto</Label>
+                          <Select
+                            value={allegati.modelloDetrazione.richiesto || ''}
+                            onValueChange={(v) => updateAllegato('modelloDetrazione', 'richiesto', v)}
+                          >
+                            <SelectTrigger className="h-7 text-xs">
+                              <SelectValue placeholder="Seleziona" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="si">Sì</SelectItem>
+                              <SelectItem value="no">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* CREDITI SCOLASTICI */}
+                <div className="border-b">
+                  <div
+                    className={`p-3 cursor-pointer transition-colors ${allegati.creditiScolastici.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    onClick={() => toggleAllegatoSection('creditiScolastici')}
+                    data-testid="button-toggle-crediti-scolastici"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CREDITI SCOLASTICI</span>
+                      {allegati.creditiScolastici.hasFile ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
+                  {openAllegatoSections.creditiScolastici && (
+                    <div className="p-3 pt-0">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Anno Scolastico</Label>
+                          <Input
+                            className="h-7 text-xs"
+                            value={allegati.creditiScolastici.annoScolastico || ''}
+                            onChange={(e) => updateAllegato('creditiScolastici', 'annoScolastico', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Richiesto</Label>
+                          <Select
+                            value={allegati.creditiScolastici.richiesto || ''}
+                            onValueChange={(v) => updateAllegato('creditiScolastici', 'richiesto', v)}
+                          >
+                            <SelectTrigger className="h-7 text-xs">
+                              <SelectValue placeholder="Seleziona" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="si">Sì</SelectItem>
+                              <SelectItem value="no">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* TESSERINO TECNICO */}
+                <div className="border-b">
+                  <div
+                    className={`p-3 cursor-pointer transition-colors ${allegati.tesserinoTecnico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    onClick={() => toggleAllegatoSection('tesserinoTecnico')}
+                    data-testid="button-toggle-tesserino-tecnico"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERINO TECNICO</span>
+                      {allegati.tesserinoTecnico.hasFile ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
+                  {openAllegatoSections.tesserinoTecnico && (
+                    <div className="p-3 pt-0">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Numero</Label>
+                          <Input
+                            className="h-7 text-xs"
+                            placeholder="N° Tesserino"
+                            value={allegati.tesserinoTecnico.numero || ''}
+                            onChange={(e) => updateAllegato('tesserinoTecnico', 'numero', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Data Rilascio</Label>
+                          <Input
+                            type="date"
+                            className="h-7 text-xs"
+                            value={allegati.tesserinoTecnico.dataRilascio || ''}
+                            onChange={(e) => updateAllegato('tesserinoTecnico', 'dataRilascio', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* TESSERA ENTE */}
+                <div>
+                  <div
+                    className={`p-3 cursor-pointer transition-colors ${allegati.tesseraEnte.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    onClick={() => toggleAllegatoSection('tesseraEnte')}
+                    data-testid="button-toggle-tessera-ente"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERA ENTE</span>
+                      {allegati.tesseraEnte.hasFile ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
+                  {openAllegatoSections.tesseraEnte && (
+                    <div className="p-3 pt-0">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Numero</Label>
+                          <Input
+                            className="h-7 text-xs"
+                            placeholder="N° Tessera"
+                            value={allegati.tesseraEnte.numero || ''}
+                            onChange={(e) => updateAllegato('tesseraEnte', 'numero', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Ente</Label>
+                          <Input
+                            className="h-7 text-xs"
+                            placeholder="Ente"
+                            value={allegati.tesseraEnte.ente || ''}
+                            onChange={(e) => updateAllegato('tesseraEnte', 'ente', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
           </div>
 
@@ -1207,457 +1646,457 @@ export default function MascheraInputGenerale() {
               {/* Dati Personali */}
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Dati Personali</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label>Cognome *</Label>
-                  <Input value={formData.cognome} onChange={(e) => handleChange("cognome", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Nome *</Label>
-                  <Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice Fiscale (J) *</Label>
-                  <Input 
-                    value={formData.codiceFiscale} 
-                    onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())} 
-                    className="bg-yellow-50 border-yellow-200"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1">
-                    <Label>Telefono *</Label>
-                    <span 
-                      className="ml-1 cursor-help"
-                      title={verificaStato.telefono ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
-                    >
-                      {verificaStato.telefono ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-orange-400" />
-                      )}
-                    </span>
-                    {!verificaStato.telefono && (
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-5 px-2 text-xs ml-1"
-                        onClick={() => avviaVerifica('telefono', 'telefono')}
-                      >
-                        Verifica
-                      </Button>
-                    )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div className="space-y-2">
+                    <Label>Cognome *</Label>
+                    <Input value={formData.cognome} onChange={(e) => handleChange("cognome", e.target.value)} />
                   </div>
-                  <Input 
-                    value={formData.telefono} 
-                    onChange={(e) => handleChange("telefono", e.target.value)} 
-                    className={verificaStato.telefono ? "bg-green-50 border-green-300" : ""}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1">
-                    <Label>Email *</Label>
-                    <span 
-                      className="ml-1 cursor-help"
-                      title={verificaStato.email ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
-                    >
-                      {verificaStato.email ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-orange-400" />
-                      )}
-                    </span>
-                    {!verificaStato.email && (
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-5 px-2 text-xs ml-1"
-                        onClick={() => avviaVerifica('email', 'email')}
-                      >
-                        Verifica
-                      </Button>
-                    )}
+                  <div className="space-y-2">
+                    <Label>Nome *</Label>
+                    <Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} />
                   </div>
-                  <Input 
-                    type="email" 
-                    value={formData.email} 
-                    onChange={(e) => handleChange("email", e.target.value)} 
-                    className={verificaStato.email ? "bg-green-50 border-green-300" : ""}
-                  />
+                  <div className="space-y-2">
+                    <Label>Codice Fiscale (J) *</Label>
+                    <Input
+                      value={formData.codiceFiscale}
+                      onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())}
+                      className="bg-yellow-50 border-yellow-200"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1">
+                      <Label>Telefono *</Label>
+                      <span
+                        className="ml-1 cursor-help"
+                        title={verificaStato.telefono ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
+                      >
+                        {verificaStato.telefono ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-orange-400" />
+                        )}
+                      </span>
+                      {!verificaStato.telefono && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-5 px-2 text-xs ml-1"
+                          onClick={() => avviaVerifica('telefono', 'telefono')}
+                        >
+                          Verifica
+                        </Button>
+                      )}
+                    </div>
+                    <Input
+                      value={formData.telefono}
+                      onChange={(e) => handleChange("telefono", e.target.value)}
+                      className={verificaStato.telefono ? "bg-green-50 border-green-300" : ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1">
+                      <Label>Email *</Label>
+                      <span
+                        className="ml-1 cursor-help"
+                        title={verificaStato.email ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
+                      >
+                        {verificaStato.email ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-orange-400" />
+                        )}
+                      </span>
+                      {!verificaStato.email && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-5 px-2 text-xs ml-1"
+                          onClick={() => avviaVerifica('email', 'email')}
+                        >
+                          Verifica
+                        </Button>
+                      )}
+                    </div>
+                    <Input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleChange("email", e.target.value)}
+                      className={verificaStato.email ? "bg-green-50 border-green-300" : ""}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <Label>Indirizzo residenza *</Label>
+                    <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} data-testid="input-indirizzo" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>CAP *</Label>
+                    <Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} data-testid="input-cap" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Città *</Label>
+                    <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} data-testid="input-citta" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Provincia</Label>
+                    <Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} data-testid="input-provincia" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Cod. Comune</Label>
+                    <Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} data-testid="input-cod-comune" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <Label>Data di Nascita *</Label>
+                    <Input
+                      value={formData.dataNascita ? new Date(formData.dataNascita).toLocaleDateString('it-IT') : ''}
+                      readOnly
+                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Luogo di Nascita *</Label>
+                    <Input
+                      value={formData.luogoNascita}
+                      readOnly
+                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Prov. Nascita *</Label>
+                    <Input
+                      value={formData.provinciaNascita}
+                      readOnly
+                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sesso *</Label>
+                    <Input
+                      value={formData.sesso === 'M' ? 'Maschio' : formData.sesso === 'F' ? 'Femmina' : ''}
+                      readOnly
+                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Età *</Label>
+                    <Input
+                      value={formData.eta}
+                      readOnly
+                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Partecipante *</Label>
+                    <Select value={formData.allievo} onValueChange={(v) => handleChange("allievo", v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleziona..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {partecipanteCategorieDB.map((cat) => (
+                          <SelectItem key={cat.id} value={String(cat.id)}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Indirizzo residenza *</Label>
-                  <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} data-testid="input-indirizzo" />
-                </div>
-                <div className="space-y-2">
-                  <Label>CAP *</Label>
-                  <Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} data-testid="input-cap" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Città *</Label>
-                  <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} data-testid="input-citta" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Provincia</Label>
-                  <Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} data-testid="input-provincia" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Cod. Comune</Label>
-                  <Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} data-testid="input-cod-comune" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Data di Nascita *</Label>
-                  <Input 
-                    value={formData.dataNascita ? new Date(formData.dataNascita).toLocaleDateString('it-IT') : ''} 
-                    readOnly
-                    className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Luogo di Nascita *</Label>
-                  <Input 
-                    value={formData.luogoNascita} 
-                    readOnly
-                    className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Prov. Nascita *</Label>
-                  <Input 
-                    value={formData.provinciaNascita} 
-                    readOnly
-                    className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Sesso *</Label>
-                  <Input 
-                    value={formData.sesso === 'M' ? 'Maschio' : formData.sesso === 'F' ? 'Femmina' : ''} 
-                    readOnly
-                    className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Età *</Label>
-                  <Input 
-                    value={formData.eta} 
-                    readOnly 
-                    className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Partecipante *</Label>
-                  <Select value={formData.allievo} onValueChange={(v) => handleChange("allievo", v)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {partecipanteCategorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
 
-            {/* Genitore 1 */}
-            <div>
-              <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-4 border-b pb-2 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">Genitore 1</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label>Cognome</Label>
-                  <Input value={formData.cognomeGen1} onChange={(e) => handleChange("cognomeGen1", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Nome</Label>
-                  <Input value={formData.nomeGen1} onChange={(e) => handleChange("nomeGen1", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice Fiscale</Label>
-                  <Input value={formData.cfGen1} onChange={(e) => handleChange("cfGen1", e.target.value.toUpperCase())} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1">
-                    <Label>Telefono</Label>
-                    <span 
-                      className="ml-1 cursor-help"
-                      title={verificaStato.telGen1 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
-                    >
-                      {verificaStato.telGen1 ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-orange-400" />
-                      )}
-                    </span>
-                    {!verificaStato.telGen1 && (
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-5 px-2 text-xs ml-1"
-                        onClick={() => avviaVerifica('telGen1', 'telefono')}
-                      >
-                        Verifica
-                      </Button>
-                    )}
+              {/* Genitore 1 */}
+              <div>
+                <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-4 border-b pb-2 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">Genitore 1</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div className="space-y-2">
+                    <Label>Cognome</Label>
+                    <Input value={formData.cognomeGen1} onChange={(e) => handleChange("cognomeGen1", e.target.value)} />
                   </div>
-                  <Input 
-                    value={formData.telGen1} 
-                    onChange={(e) => handleChange("telGen1", e.target.value)} 
-                    className={verificaStato.telGen1 ? "bg-green-50 border-green-300" : ""}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1">
-                    <Label>Email</Label>
-                    <span 
-                      className="ml-1 cursor-help"
-                      title={verificaStato.emailGen1 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
-                    >
-                      {verificaStato.emailGen1 ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-orange-400" />
-                      )}
-                    </span>
-                    {!verificaStato.emailGen1 && (
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-5 px-2 text-xs ml-1"
-                        onClick={() => avviaVerifica('emailGen1', 'email')}
-                      >
-                        Verifica
-                      </Button>
-                    )}
+                  <div className="space-y-2">
+                    <Label>Nome</Label>
+                    <Input value={formData.nomeGen1} onChange={(e) => handleChange("nomeGen1", e.target.value)} />
                   </div>
-                  <Input 
-                    value={formData.emailGen1} 
-                    onChange={(e) => handleChange("emailGen1", e.target.value)} 
-                    className={verificaStato.emailGen1 ? "bg-green-50 border-green-300" : ""}
-                  />
+                  <div className="space-y-2">
+                    <Label>Codice Fiscale</Label>
+                    <Input value={formData.cfGen1} onChange={(e) => handleChange("cfGen1", e.target.value.toUpperCase())} />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1">
+                      <Label>Telefono</Label>
+                      <span
+                        className="ml-1 cursor-help"
+                        title={verificaStato.telGen1 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
+                      >
+                        {verificaStato.telGen1 ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-orange-400" />
+                        )}
+                      </span>
+                      {!verificaStato.telGen1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-5 px-2 text-xs ml-1"
+                          onClick={() => avviaVerifica('telGen1', 'telefono')}
+                        >
+                          Verifica
+                        </Button>
+                      )}
+                    </div>
+                    <Input
+                      value={formData.telGen1}
+                      onChange={(e) => handleChange("telGen1", e.target.value)}
+                      className={verificaStato.telGen1 ? "bg-green-50 border-green-300" : ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1">
+                      <Label>Email</Label>
+                      <span
+                        className="ml-1 cursor-help"
+                        title={verificaStato.emailGen1 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
+                      >
+                        {verificaStato.emailGen1 ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-orange-400" />
+                        )}
+                      </span>
+                      {!verificaStato.emailGen1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-5 px-2 text-xs ml-1"
+                          onClick={() => avviaVerifica('emailGen1', 'email')}
+                        >
+                          Verifica
+                        </Button>
+                      )}
+                    </div>
+                    <Input
+                      value={formData.emailGen1}
+                      onChange={(e) => handleChange("emailGen1", e.target.value)}
+                      className={verificaStato.emailGen1 ? "bg-green-50 border-green-300" : ""}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <Label>Indirizzo residenza</Label>
+                    <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzoGen1} onChange={(e) => handleChange("indirizzoGen1", e.target.value)} data-testid="input-indirizzo-gen1" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>CAP</Label>
+                    <Input value={formData.capGen1} onChange={(e) => handleChange("capGen1", e.target.value)} data-testid="input-cap-gen1" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Città</Label>
+                    <Input value={formData.cittaGen1} onChange={(e) => handleChange("cittaGen1", e.target.value)} data-testid="input-citta-gen1" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Provincia</Label>
+                    <Input value={formData.provinciaGen1} onChange={(e) => handleChange("provinciaGen1", e.target.value)} data-testid="input-provincia-gen1" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Cod. Comune</Label>
+                    <Input value={formData.codComuneGen1} onChange={(e) => handleChange("codComuneGen1", e.target.value)} data-testid="input-cod-comune-gen1" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <Label>Data di Nascita</Label>
+                    <Input
+                      value={formData.dataNascitaGen1 ? new Date(formData.dataNascitaGen1).toLocaleDateString('it-IT') : ''}
+                      readOnly
+                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Luogo di Nascita</Label>
+                    <Input
+                      value={formData.luogoNascitaGen1}
+                      readOnly
+                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Prov. Nascita</Label>
+                    <Input
+                      value={formData.provinciaNascitaGen1}
+                      readOnly
+                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sesso</Label>
+                    <Input
+                      value={formData.sessoGen1 === 'M' ? 'M' : formData.sessoGen1 === 'F' ? 'F' : ''}
+                      readOnly
+                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Età</Label>
+                    <Input
+                      value={formData.etaGen1}
+                      readOnly
+                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Indirizzo residenza</Label>
-                  <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzoGen1} onChange={(e) => handleChange("indirizzoGen1", e.target.value)} data-testid="input-indirizzo-gen1" />
-                </div>
-                <div className="space-y-2">
-                  <Label>CAP</Label>
-                  <Input value={formData.capGen1} onChange={(e) => handleChange("capGen1", e.target.value)} data-testid="input-cap-gen1" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Città</Label>
-                  <Input value={formData.cittaGen1} onChange={(e) => handleChange("cittaGen1", e.target.value)} data-testid="input-citta-gen1" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Provincia</Label>
-                  <Input value={formData.provinciaGen1} onChange={(e) => handleChange("provinciaGen1", e.target.value)} data-testid="input-provincia-gen1" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Cod. Comune</Label>
-                  <Input value={formData.codComuneGen1} onChange={(e) => handleChange("codComuneGen1", e.target.value)} data-testid="input-cod-comune-gen1" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Data di Nascita</Label>
-                  <Input 
-                    value={formData.dataNascitaGen1 ? new Date(formData.dataNascitaGen1).toLocaleDateString('it-IT') : ''} 
-                    readOnly
-                    className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Luogo di Nascita</Label>
-                  <Input 
-                    value={formData.luogoNascitaGen1} 
-                    readOnly
-                    className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Prov. Nascita</Label>
-                  <Input 
-                    value={formData.provinciaNascitaGen1} 
-                    readOnly
-                    className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Sesso</Label>
-                  <Input 
-                    value={formData.sessoGen1 === 'M' ? 'M' : formData.sessoGen1 === 'F' ? 'F' : ''} 
-                    readOnly
-                    className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Età</Label>
-                  <Input 
-                    value={formData.etaGen1} 
-                    readOnly 
-                    className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-              </div>
-            </div>
 
-            {/* Genitore 2 */}
-            <div>
-              <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-4 border-b pb-2 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">Genitore 2</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label>Cognome</Label>
-                  <Input value={formData.cognomeGen2} onChange={(e) => handleChange("cognomeGen2", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Nome</Label>
-                  <Input value={formData.nomeGen2} onChange={(e) => handleChange("nomeGen2", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice Fiscale</Label>
-                  <Input value={formData.cfGen2} onChange={(e) => handleChange("cfGen2", e.target.value.toUpperCase())} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1">
-                    <Label>Telefono</Label>
-                    <span 
-                      className="ml-1 cursor-help"
-                      title={verificaStato.telGen2 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
-                    >
-                      {verificaStato.telGen2 ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-orange-400" />
-                      )}
-                    </span>
-                    {!verificaStato.telGen2 && (
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-5 px-2 text-xs ml-1"
-                        onClick={() => avviaVerifica('telGen2', 'telefono')}
-                      >
-                        Verifica
-                      </Button>
-                    )}
+              {/* Genitore 2 */}
+              <div>
+                <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-4 border-b pb-2 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">Genitore 2</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div className="space-y-2">
+                    <Label>Cognome</Label>
+                    <Input value={formData.cognomeGen2} onChange={(e) => handleChange("cognomeGen2", e.target.value)} />
                   </div>
-                  <Input 
-                    value={formData.telGen2} 
-                    onChange={(e) => handleChange("telGen2", e.target.value)} 
-                    className={verificaStato.telGen2 ? "bg-green-50 border-green-300" : ""}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1">
-                    <Label>Email</Label>
-                    <span 
-                      className="ml-1 cursor-help"
-                      title={verificaStato.emailGen2 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
-                    >
-                      {verificaStato.emailGen2 ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-orange-400" />
-                      )}
-                    </span>
-                    {!verificaStato.emailGen2 && (
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-5 px-2 text-xs ml-1"
-                        onClick={() => avviaVerifica('emailGen2', 'email')}
-                      >
-                        Verifica
-                      </Button>
-                    )}
+                  <div className="space-y-2">
+                    <Label>Nome</Label>
+                    <Input value={formData.nomeGen2} onChange={(e) => handleChange("nomeGen2", e.target.value)} />
                   </div>
-                  <Input 
-                    value={formData.emailGen2} 
-                    onChange={(e) => handleChange("emailGen2", e.target.value)} 
-                    className={verificaStato.emailGen2 ? "bg-green-50 border-green-300" : ""}
-                  />
+                  <div className="space-y-2">
+                    <Label>Codice Fiscale</Label>
+                    <Input value={formData.cfGen2} onChange={(e) => handleChange("cfGen2", e.target.value.toUpperCase())} />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1">
+                      <Label>Telefono</Label>
+                      <span
+                        className="ml-1 cursor-help"
+                        title={verificaStato.telGen2 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
+                      >
+                        {verificaStato.telGen2 ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-orange-400" />
+                        )}
+                      </span>
+                      {!verificaStato.telGen2 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-5 px-2 text-xs ml-1"
+                          onClick={() => avviaVerifica('telGen2', 'telefono')}
+                        >
+                          Verifica
+                        </Button>
+                      )}
+                    </div>
+                    <Input
+                      value={formData.telGen2}
+                      onChange={(e) => handleChange("telGen2", e.target.value)}
+                      className={verificaStato.telGen2 ? "bg-green-50 border-green-300" : ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1">
+                      <Label>Email</Label>
+                      <span
+                        className="ml-1 cursor-help"
+                        title={verificaStato.emailGen2 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
+                      >
+                        {verificaStato.emailGen2 ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-orange-400" />
+                        )}
+                      </span>
+                      {!verificaStato.emailGen2 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-5 px-2 text-xs ml-1"
+                          onClick={() => avviaVerifica('emailGen2', 'email')}
+                        >
+                          Verifica
+                        </Button>
+                      )}
+                    </div>
+                    <Input
+                      value={formData.emailGen2}
+                      onChange={(e) => handleChange("emailGen2", e.target.value)}
+                      className={verificaStato.emailGen2 ? "bg-green-50 border-green-300" : ""}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <Label>Indirizzo residenza</Label>
+                    <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzoGen2} onChange={(e) => handleChange("indirizzoGen2", e.target.value)} data-testid="input-indirizzo-gen2" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>CAP</Label>
+                    <Input value={formData.capGen2} onChange={(e) => handleChange("capGen2", e.target.value)} data-testid="input-cap-gen2" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Città</Label>
+                    <Input value={formData.cittaGen2} onChange={(e) => handleChange("cittaGen2", e.target.value)} data-testid="input-citta-gen2" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Provincia</Label>
+                    <Input value={formData.provinciaGen2} onChange={(e) => handleChange("provinciaGen2", e.target.value)} data-testid="input-provincia-gen2" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Cod. Comune</Label>
+                    <Input value={formData.codComuneGen2} onChange={(e) => handleChange("codComuneGen2", e.target.value)} data-testid="input-cod-comune-gen2" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <Label>Data di Nascita</Label>
+                    <Input
+                      value={formData.dataNascitaGen2 ? new Date(formData.dataNascitaGen2).toLocaleDateString('it-IT') : ''}
+                      readOnly
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Luogo di Nascita</Label>
+                    <Input
+                      value={formData.luogoNascitaGen2}
+                      readOnly
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Prov. Nascita</Label>
+                    <Input
+                      value={formData.provinciaNascitaGen2}
+                      readOnly
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sesso</Label>
+                    <Input
+                      value={formData.sessoGen2 === 'M' ? 'M' : formData.sessoGen2 === 'F' ? 'F' : ''}
+                      readOnly
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Età</Label>
+                    <Input
+                      value={formData.etaGen2}
+                      readOnly
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Indirizzo residenza</Label>
-                  <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzoGen2} onChange={(e) => handleChange("indirizzoGen2", e.target.value)} data-testid="input-indirizzo-gen2" />
-                </div>
-                <div className="space-y-2">
-                  <Label>CAP</Label>
-                  <Input value={formData.capGen2} onChange={(e) => handleChange("capGen2", e.target.value)} data-testid="input-cap-gen2" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Città</Label>
-                  <Input value={formData.cittaGen2} onChange={(e) => handleChange("cittaGen2", e.target.value)} data-testid="input-citta-gen2" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Provincia</Label>
-                  <Input value={formData.provinciaGen2} onChange={(e) => handleChange("provinciaGen2", e.target.value)} data-testid="input-provincia-gen2" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Cod. Comune</Label>
-                  <Input value={formData.codComuneGen2} onChange={(e) => handleChange("codComuneGen2", e.target.value)} data-testid="input-cod-comune-gen2" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Data di Nascita</Label>
-                  <Input 
-                    value={formData.dataNascitaGen2 ? new Date(formData.dataNascitaGen2).toLocaleDateString('it-IT') : ''} 
-                    readOnly
-                    className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Luogo di Nascita</Label>
-                  <Input 
-                    value={formData.luogoNascitaGen2} 
-                    readOnly
-                    className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Prov. Nascita</Label>
-                  <Input 
-                    value={formData.provinciaNascitaGen2} 
-                    readOnly
-                    className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Sesso</Label>
-                  <Input 
-                    value={formData.sessoGen2 === 'M' ? 'M' : formData.sessoGen2 === 'F' ? 'F' : ''} 
-                    readOnly
-                    className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Età</Label>
-                  <Input 
-                    value={formData.etaGen2} 
-                    readOnly 
-                    className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
-                  />
-                </div>
-              </div>
-            </div>
             </CardContent>
           </Card>
         </div>
@@ -1670,141 +2109,79 @@ export default function MascheraInputGenerale() {
                 <CreditCard className="w-5 h-5 sidebar-icon-gold" />
                 Pagamenti
               </span>
-              <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-pagamento">
+              <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-pagamento" onClick={() => {
+                setEditingPaymentId(null);
+                setIsPaymentDialogOpen(true);
+              }}>
                 <Plus className="w-4 h-4" />
                 Aggiungi
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-              <div className="space-y-2">
-                <Label>Attività</Label>
-                <Select value={pagamentoAttivita} onValueChange={setPagamentoAttivita}>
-                  <SelectTrigger data-testid="select-attivita-pagamenti">
-                    <SelectValue placeholder="Seleziona attività" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="corsi">Corsi</SelectItem>
-                    <SelectItem value="prove-pagamento">Prove a Pagamento</SelectItem>
-                    <SelectItem value="prove-gratuite">Prove Gratuite</SelectItem>
-                    <SelectItem value="lezioni-singole">Lezioni Singole</SelectItem>
-                    <SelectItem value="workshop">Workshop</SelectItem>
-                    <SelectItem value="domeniche-movimento">Domeniche in Movimento</SelectItem>
-                    <SelectItem value="allenamenti">Allenamenti/Affitti</SelectItem>
-                    <SelectItem value="lezioni-individuali">Lezioni Individuali</SelectItem>
-                    <SelectItem value="campus">Campus</SelectItem>
-                    <SelectItem value="saggi">Saggi</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Dettaglio Attività e codice</Label>
-                <Select value={pagamentoDettaglio} onValueChange={handlePagamentoDettaglio}>
-                  <SelectTrigger data-testid="select-dettaglio-attivita-pagamenti">
-                    <SelectValue placeholder="Seleziona dettaglio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {corsiDB.length > 0 ? (
-                      corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.id.toString()}>
-                          {corso.name} - {corso.sku}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="nessuno" disabled>Nessuna attività disponibile</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <MultiSelectEnrollmentDetails
-                  selectedDetails={selectedEnrollmentDetails}
-                  onChange={setSelectedEnrollmentDetails}
-                  testIdPrefix="enrollment-detail"
-                />
-              </div>
-              <div className="space-y-2">
-                <MultiSelectPaymentNotes
-                  selectedNotes={selectedPaymentNotes}
-                  onChange={setSelectedPaymentNotes}
-                  testIdPrefix="payment-note"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Quantità</Label>
-                <Input type="number" defaultValue={1} />
-              </div>
-              <div className="space-y-2">
-                <Label>Descrizione Quota (Q)</Label>
-                <Input />
-              </div>
-              <div className="space-y-2">
-                <Label>Periodo (R)</Label>
-                <Input />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-              <div className="space-y-2">
-                <Label>Totale Quota (S)</Label>
-                <Input type="number" />
-              </div>
-              <div className="space-y-2">
-                <Label>Codice Sconto (T)</Label>
-                <Input className="bg-yellow-50 border-yellow-200" />
-              </div>
-              <div className="space-y-2">
-                <Label>Valore Sconto (U)</Label>
-                <Input type="number" className="bg-yellow-50 border-yellow-200" />
-              </div>
-              <div className="space-y-2">
-                <Label>% Sconto (V)</Label>
-                <Input type="number" className="bg-yellow-50 border-yellow-200" />
-              </div>
-              <div className="space-y-2">
-                <Label>Codici Promo (W)</Label>
-                <Input className="bg-yellow-50 border-yellow-200" />
-              </div>
-              <div className="space-y-2">
-                <Label>Valore Promo (X)</Label>
-                <Input type="number" className="bg-yellow-50 border-yellow-200" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-              <div className="space-y-2">
-                <Label>% Promo</Label>
-                <Input type="number" className="bg-yellow-50 border-yellow-200" />
-              </div>
-              <div className="space-y-2">
-                <Label>Acconto/Credito (Y)</Label>
-                <Input type="number" />
-              </div>
-              <div className="space-y-2">
-                <Label>Data Pagamento (Z)</Label>
-                <Input type="date" />
-              </div>
-              <div className="space-y-2">
-                <Label>Saldo Annuale (AA)</Label>
-                <Input type="number" />
-              </div>
-              <div className="space-y-2">
-                <Label>N. Ricevute</Label>
-                <Input type="number" />
-              </div>
-              <div className="space-y-2">
-                <Label>Conferma Bonifico</Label>
-                <Input type="date" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2 lg:col-span-4">
-                <Label>Saldo Totale (BO)</Label>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Totale</Badge>
-                  <Input value="€ 0,00" readOnly className="bg-yellow-50 border-yellow-200 font-bold text-lg max-w-xs" />
+            <div className="space-y-4">
+              {payments.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground border rounded bg-muted/20">
+                  Nessun pagamento registrato. Clicca su "Aggiungi" per inserirne uno.
                 </div>
-              </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Attività</TableHead>
+                        <TableHead>Dettaglio</TableHead>
+                        <TableHead className="text-right">Importo</TableHead>
+                        <TableHead className="w-[100px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {payments.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell>{payment.dataPagamento ? new Date(payment.dataPagamento).toLocaleDateString() : "-"}</TableCell>
+                          <TableCell className="capitalize">{payment.attivita?.replace("-", " ")}</TableCell>
+                          <TableCell>{payment.dettaglioNome || "-"}</TableCell>
+                          <TableCell className="text-right">€ {payment.totaleQuota?.toFixed(2) || "0.00"}</TableCell>
+                          <TableCell className="flex items-center gap-2 justify-end">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingPaymentId(payment.id || null);
+                                setIsPaymentDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => payment.id && handleDeletePayment(payment.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
+
+            <PaymentDialog
+              open={isPaymentDialogOpen}
+              onOpenChange={(open) => {
+                setIsPaymentDialogOpen(open);
+                if (!open) setEditingPaymentId(null);
+              }}
+              onSave={handleSavePayment}
+              initialData={editingPaymentId ? payments.find(p => p.id === editingPaymentId) : null}
+              corsiDB={corsiDB}
+              categorieDB={categorieDB}
+            />
           </CardContent>
         </Card>
 
@@ -1995,76 +2372,89 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/corsi" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-corsi">Corsi</Link>
                 <KnowledgeInfo id="corsi" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+
+              {!selectedMemberId ? (
+                <div className="text-center p-4 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
+                  Seleziona un membro per gestire le iscrizioni ai corsi
                 </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["corsi"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "corsi": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              ) : (
+                <div className="space-y-6">
+                  {/* Active Enrollments List */}
+                  {loadingEnrollments ? (
+                    <div className="space-y-2">
+                      <Skeleton className="h-12 w-full" />
+                      <Skeleton className="h-12 w-full" />
+                    </div>
+                  ) : memberEnrollments && memberEnrollments.length > 0 ? (
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Iscrizioni Attive</Label>
+                      {memberEnrollments.map((e: any) => {
+                        const course = courses?.find((c: any) => c.id === e.courseId);
+                        return (
+                          <div key={e.id} className="flex items-center justify-between p-3 bg-muted/40 border rounded-lg group hover:bg-muted/60 transition-colors">
+                            <div>
+                              <div className="font-medium flex items-center gap-2">
+                                {course?.name || 'Corso sconosciuto'}
+                                <Badge variant="outline" className="text-[10px] h-5 px-1">{course?.sku}</Badge>
+                              </div>
+                              <div className="text-xs text-muted-foreground flex gap-3 mt-1">
+                                <span>Iscritto il: {new Date(e.enrollmentDate).toLocaleDateString('it-IT')}</span>
+                                {course?.dayOfWeek && <span>• {course.dayOfWeek} {course.startTime}</span>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200' : ''}>
+                                {e.status === 'active' ? 'Attivo' : e.status}
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => {
+                                  if (confirm("Rimuovere l'iscrizione a questo corso?")) {
+                                    removeEnrollmentMutation.mutate(e.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic p-2">Nessuna iscrizione attiva.</p>
+                  )}
+
+                  {/* Add New Enrollment */}
+                  <div className="space-y-2 border-t pt-4">
+                    <Label>Aggiungi Corso</Label>
+                    <div className="flex gap-2 items-start sm:items-center flex-col sm:flex-row">
+                      <div className="flex-1 w-full">
+                        <CourseSelector
+                          courses={courses || []}
+                          instructors={instructors || []}
+                          categories={categories || []}
+                          studios={studios || []}
+                          selectedCourseId={selectedCourseToAdd}
+                          onSelect={setSelectedCourseToAdd}
+                          excludeCourseIds={memberEnrollments?.map((e: any) => e.courseId) || []}
+                        />
+                      </div>
+                      <Button
+                        className="w-full sm:w-auto"
+                        onClick={() => {
+                          if (selectedCourseToAdd) addEnrollmentMutation.mutate(parseInt(selectedCourseToAdd));
+                        }}
+                        disabled={!selectedCourseToAdd || addEnrollmentMutation.isPending}
+                      >
+                        <Plus className="w-4 h-4 mr-2" /> Aggiungi
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Codice Corso</Label>
-                  <Select value={attivitaCodice["corsi"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "corsi": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Provenienza</Label>
-                  <Input />
-                </div>
-                <div className="space-y-2">
-                  <Label>Iscritti</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Limite</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3 text-orange-600" />
-                    Attenzione
-                  </Label>
-                  <Input className="bg-orange-50 border-orange-200" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Importo</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              )}
             </div>
 
             {/* PROVE A PAGAMENTO */}
@@ -2280,65 +2670,87 @@ export default function MascheraInputGenerale() {
             {/* WORKSHOP */}
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Sparkles className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/workshops" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-workshop">Workshop</Link>
+                <Calendar className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/workshop" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-workshop">Workshop</Link>
                 <KnowledgeInfo id="workshop" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {workshopCategorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+
+              {!selectedMemberId ? (
+                <div className="text-center p-4 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
+                  Seleziona un membro per gestire i workshop
                 </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["workshop"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "workshop": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              ) : (
+                <div className="space-y-6">
+                  {/* Workshop List */}
+                  {memberWorkshopEnrollments && memberWorkshopEnrollments.length > 0 ? (
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Workshop Iscritti</Label>
+                      {memberWorkshopEnrollments.map((e: any) => {
+                        const workshop = workshops?.find((w: any) => w.id === e.workshopId);
+                        return (
+                          <div key={e.id} className="flex items-center justify-between p-3 bg-muted/40 border rounded-lg group hover:bg-muted/60 transition-colors">
+                            <div>
+                              <p className="font-medium">{workshop?.name || 'Workshop sconosciuto'}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Data: {workshop?.startDate ? new Date(workshop.startDate).toLocaleDateString('it-IT') : '-'}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
+                                Iscritto
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => {
+                                  if (confirm("Rimuovere l'iscrizione a questo workshop?")) {
+                                    removeWorkshopEnrollmentMutation.mutate(e.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic p-2">Nessun workshop registrato.</p>
+                  )}
+
+                  {/* Add Workshop */}
+                  <div className="space-y-2 border-t pt-4">
+                    <Label>Aggiungi Workshop</Label>
+                    <div className="flex gap-2 items-start sm:items-center flex-col sm:flex-row">
+                      <div className="flex-1 w-full">
+                        <Select value={selectedWorkshopToAdd} onValueChange={setSelectedWorkshopToAdd}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleziona workshop da aggiungere..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {workshops?.filter(w => w.active && !memberWorkshopEnrollments?.some((e: any) => e.workshopId === w.id)).map((workshop: any) => (
+                              <SelectItem key={workshop.id} value={workshop.id.toString()}>
+                                {workshop.name} ({new Date(workshop.startDate).toLocaleDateString('it-IT')})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button
+                        className="w-full sm:w-auto"
+                        onClick={() => {
+                          if (selectedWorkshopToAdd) addWorkshopEnrollmentMutation.mutate(parseInt(selectedWorkshopToAdd));
+                        }}
+                        disabled={!selectedWorkshopToAdd || addWorkshopEnrollmentMutation.isPending}
+                      >
+                        <Plus className="w-4 h-4 mr-2" /> Aggiungi
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Codice</Label>
-                  <Select value={attivitaCodice["workshop"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "workshop": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Data</Label>
-                  <Input type="date" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Importo</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              )}
             </div>
 
             {/* DOMENICHE IN MOVIMENTO */}
@@ -2772,6 +3184,6 @@ export default function MascheraInputGenerale() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div >
   );
 }
