@@ -736,15 +736,19 @@ export default function MascheraInputGenerale() {
         const decoded = decodeFiscalCode(value);
         if (decoded) {
           const comuneData = await fetchComuneFromCode(decoded.codiceComune);
-          setFormData((prev) => ({
-            ...prev,
-            dataNascita: decoded.dataNascita,
-            sesso: decoded.sesso,
-            eta: decoded.eta,
-            codComune: decoded.codiceComune,
-            luogoNascita: comuneData?.name || "",
-            provinciaNascita: comuneData?.province?.code || comuneData?.provinceCode || "",
-          }));
+          setFormData((prev) => {
+            const cityName = comuneData?.name ? comuneData.name.toUpperCase() : prev.luogoNascita;
+            const provCode = (comuneData?.province?.code || comuneData?.provinceCode || prev.provinciaNascita || "").toUpperCase();
+            return {
+              ...prev,
+              dataNascita: decoded.dataNascita,
+              sesso: decoded.sesso,
+              eta: decoded.eta,
+              codComune: decoded.codiceComune,
+              luogoNascita: cityName,
+              provinciaNascita: provCode,
+            };
+          });
         }
       } else {
         // Svuota i campi se il CF viene cancellato o non è completo
@@ -764,14 +768,18 @@ export default function MascheraInputGenerale() {
         const decoded = decodeFiscalCode(value);
         if (decoded) {
           const comuneData = await fetchComuneFromCode(decoded.codiceComune);
-          setFormData((prev) => ({
-            ...prev,
-            dataNascitaGen1: decoded.dataNascita,
-            sessoGen1: decoded.sesso,
-            etaGen1: decoded.eta,
-            luogoNascitaGen1: comuneData?.name || "",
-            provinciaNascitaGen1: comuneData?.province?.code || "",
-          }));
+          setFormData((prev) => {
+            const cityName = comuneData?.name ? comuneData.name.toUpperCase() : prev.luogoNascitaGen1;
+            const provCode = (comuneData?.province?.code || comuneData?.provinceCode || prev.provinciaNascitaGen1 || "").toUpperCase();
+            return {
+              ...prev,
+              dataNascitaGen1: decoded.dataNascita,
+              sessoGen1: decoded.sesso,
+              etaGen1: decoded.eta,
+              luogoNascitaGen1: cityName,
+              provinciaNascitaGen1: provCode,
+            };
+          });
         }
       } else {
         // Svuota i campi se il CF viene cancellato o non è completo
@@ -791,14 +799,18 @@ export default function MascheraInputGenerale() {
         const decoded = decodeFiscalCode(value);
         if (decoded) {
           const comuneData = await fetchComuneFromCode(decoded.codiceComune);
-          setFormData((prev) => ({
-            ...prev,
-            dataNascitaGen2: decoded.dataNascita,
-            sessoGen2: decoded.sesso,
-            etaGen2: decoded.eta,
-            luogoNascitaGen2: comuneData?.name || "",
-            provinciaNascitaGen2: comuneData?.province?.code || "",
-          }));
+          setFormData((prev) => {
+            const cityName = comuneData?.name ? comuneData.name.toUpperCase() : prev.luogoNascitaGen2;
+            const provCode = (comuneData?.province?.code || comuneData?.provinceCode || prev.provinciaNascitaGen2 || "").toUpperCase();
+            return {
+              ...prev,
+              dataNascitaGen2: decoded.dataNascita,
+              sessoGen2: decoded.sesso,
+              etaGen2: decoded.eta,
+              luogoNascitaGen2: cityName,
+              provinciaNascitaGen2: provCode,
+            };
+          });
         }
       } else {
         // Svuota i campi se il CF viene cancellato o non è completo
