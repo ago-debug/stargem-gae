@@ -1536,7 +1536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+
   // WorkshopCategories Routes
   app.get("/api/workshop-categories", isAuthenticated, async (req, res) => {
     try {
@@ -2122,7 +2122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-// ==== Categories Routes ====
+  // ==== Categories Routes ====
   app.get("/api/categories", isAuthenticated, async (req, res) => {
     try {
       const categories = await storage.getCategories();
@@ -2986,17 +2986,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Dati anagrafica mancanti" });
       }
 
+      // Normalize empty fields to null
+      const normalizeEmpty = (val: any): any => {
+        if (val === "" || val === undefined) return null;
+        if (typeof val === "string" && val.trim() === "") return null;
+        return val;
+      };
+      const normalizedData: any = {};
+      for (const [key, value] of Object.entries(memberData)) {
+        if (key === 'photoUrl') {
+          normalizedData[key] = value;
+        } else {
+          normalizedData[key] = normalizeEmpty(value);
+        }
+      }
+
+      if (normalizedData.fiscalCode) {
+        normalizedData.fiscalCode = normalizedData.fiscalCode.toUpperCase().trim();
+      }
+
       // 1. Upsert Member
       let member;
-      if (memberData.fiscalCode) {
-        const existingMember = await storage.getMemberByFiscalCode(memberData.fiscalCode);
+      if (normalizedData.id) {
+        member = await storage.updateMember(normalizedData.id, normalizedData);
+      } else if (normalizedData.fiscalCode) {
+        const existingMember = await storage.getMemberByFiscalCode(normalizedData.fiscalCode);
         if (existingMember) {
-          member = await storage.updateMember(existingMember.id, memberData);
+          member = await storage.updateMember(existingMember.id, normalizedData);
         } else {
-          member = await storage.createMember(memberData);
+          member = await storage.createMember(normalizedData);
         }
       } else {
-        member = await storage.createMember(memberData);
+        member = await storage.createMember(normalizedData);
       }
 
       // 2. Process Enrollments and Payments

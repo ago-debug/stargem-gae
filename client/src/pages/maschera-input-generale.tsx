@@ -344,7 +344,7 @@ export default function MascheraInputGenerale() {
       cap: member.postalCode || "",
       citta: member.city || "",
       provincia: member.province || "",
-      dataNascita: member.dateOfBirth || "",
+      dataNascita: member.dateOfBirth ? member.dateOfBirth.split('T')[0] : "",
       luogoNascita: member.placeOfBirth || "",
       provinciaNascita: member.birthProvince || "",
       sesso: member.gender || "",
@@ -364,18 +364,27 @@ export default function MascheraInputGenerale() {
       telGen2: member.fatherPhone || "",
       emailGen2: member.fatherEmail || "",
 
-      // Intestazione defaults
-      tipoPartecipante: "tesserato", // Assuming active member is tesserato
+      // Intestazione
+      stagione: member.season || "2025-2026",
+      codiceId: member.internalId || "2526-000001",
+      dataInserimento: member.insertionDate ? member.insertionDate.split('T')[0] : new Date().toLocaleDateString("it-IT"),
+      tipoPartecipante: member.participantType || "tesserato",
       tessera: member.cardNumber || "",
-      scadenzaTessera: member.cardExpiryDate || "",
+      scadenzaTessera: member.cardExpiryDate ? member.cardExpiryDate.split('T')[0] : "",
+      daDoveArriva: member.fromWhere || "",
+      teamSegreteria: member.teamSegreteria || "",
+      tesseraEnte: member.entityCardNumber || "",
+      scadenzaTesseraEnte: member.entityCardExpiryDate ? member.entityCardExpiryDate.split('T')[0] : "",
+      ente: member.entityCardType || "",
     }));
 
     // Populate simple allegati flags (complex logic omitted for brevity, just basic mapping)
     setAllegati(prev => ({
       ...prev,
+      certificatoMedico: { ...prev.certificatoMedico, hasFile: member.hasMedicalCertificate || false, scadenza: member.medicalCertificateExpiry ? member.medicalCertificateExpiry.split('T')[0] : "" },
       modelloDetrazione: { ...prev.modelloDetrazione, richiesto: member.detractionModelRequested ? "si" : "no", anno: member.detractionModelYear || "2026" },
       creditiScolastici: { ...prev.creditiScolastici, richiesto: member.schoolCreditsRequested ? "si" : "no", annoScolastico: member.schoolCreditsYear || "2025/2026" },
-      tesserinoTecnico: { ...prev.tesserinoTecnico, numero: member.tesserinoTecnicoNumber || "" },
+      tesserinoTecnico: { ...prev.tesserinoTecnico, numero: member.tesserinoTecnicoNumber || "", dataRilascio: member.tesserinoTecnicoIssueDate ? member.tesserinoTecnicoIssueDate.split('T')[0] : "" },
     }));
 
     // Set selected member ID for queries
@@ -419,6 +428,7 @@ export default function MascheraInputGenerale() {
   const handleSave = async () => {
     // Collect all data
     const memberData = {
+      id: selectedMemberId || undefined,
       firstName: formData.nome,
       lastName: formData.cognome,
       fiscalCode: formData.codiceFiscale,
@@ -448,12 +458,28 @@ export default function MascheraInputGenerale() {
       fatherEmail: formData.emailGen2 || null,
       fatherPhone: formData.telGen2 || null,
 
+      // Intestazione
+      season: formData.stagione || null,
+      internalId: formData.codiceId || null,
+      insertionDate: formData.dataInserimento && formData.dataInserimento.includes('/') ? formData.dataInserimento.split('/').reverse().join('-') : formData.dataInserimento,
+      participantType: formData.tipoPartecipante || null,
+      cardNumber: formData.tessera || null,
+      cardExpiryDate: formData.scadenzaTessera || null,
+      fromWhere: formData.daDoveArriva || null,
+      teamSegreteria: formData.teamSegreteria || null,
+      entityCardNumber: formData.tesseraEnte || null,
+      entityCardExpiryDate: formData.scadenzaTesseraEnte || null,
+      entityCardType: formData.ente || null,
+
       // Allegati Flags (from allegati state)
+      hasMedicalCertificate: allegati.certificatoMedico.hasFile || false,
+      medicalCertificateExpiry: allegati.certificatoMedico.scadenza || null,
       detractionModelRequested: allegati.modelloDetrazione.richiesto === "si",
       detractionModelYear: allegati.modelloDetrazione.anno,
       schoolCreditsRequested: allegati.creditiScolastici.richiesto === "si",
       schoolCreditsYear: allegati.creditiScolastici.annoScolastico,
       tesserinoTecnicoNumber: allegati.tesserinoTecnico.numero,
+      tesserinoTecnicoIssueDate: allegati.tesserinoTecnico.dataRilascio || null,
 
       active: true,
       photoUrl: photoFile.preview || null,
