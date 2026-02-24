@@ -380,7 +380,7 @@ export function AppSidebar() {
                 </p>
                 <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium flex items-center gap-2">
                   <span>{user.role}</span>
-                  <span className="text-[9px] opacity-70 bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">v1.2.4</span>
+                  <span className="text-[9px] opacity-70 bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">v1.2.5</span>
                 </p>
               </div>
             </div>

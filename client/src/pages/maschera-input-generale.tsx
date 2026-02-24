@@ -999,9 +999,9 @@ export default function MascheraInputGenerale() {
               </Button>
               {hasDuplicates && (
                 <Button
-                  variant="destructive"
+                  variant="default"
                   size="sm"
-                  className="text-xs h-8 shadow-sm flex items-center bg-red-600 hover:bg-red-700 text-white border-none animate-pulse"
+                  className="text-xs h-8 shadow-sm flex items-center bg-black hover:bg-neutral-800 text-white border-none animate-pulse"
                   title="Attenzione: Multipli Codici Fiscali Trovati"
                   onClick={() => setIsDuplicateModalOpen(true)}
                 >
