@@ -1342,3 +1342,27 @@ params: admin-id
     at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
     at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
 ---
+[2026-02-24T07:22:36.384Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
+    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+---
+[2026-02-24T07:24:34.748Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
+    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+---
+[2026-02-24T07:24:53.709Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
+    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+---
