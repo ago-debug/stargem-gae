@@ -39,10 +39,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
-const mainMenuItems = [
+const registrationItems = [
   {
     title: "Maschera Input",
     url: "/maschera-generale",
+    icon: Users,
+  },
+  {
+    title: "Anagrafica",
+    url: "/",
+    icon: Users,
+  },
+  {
+    title: "Lista Iscritti",
+    url: "/iscritti",
     icon: Users,
   },
   {
@@ -50,11 +60,9 @@ const mainMenuItems = [
     url: "/attivita",
     icon: Activity,
   },
-  {
-    title: "Lista Iscritti",
-    url: "/iscritti",
-    icon: Users,
-  },
+];
+
+const teachingItems = [
   {
     title: "Corsi",
     url: "/corsi",
@@ -66,15 +74,23 @@ const mainMenuItems = [
     icon: CalendarFold,
   },
   {
-    title: "Prenotazioni Sale",
-    url: "/prenotazioni-sale",
-    icon: CalendarFold,
-  },
-  {
     title: "Workshops",
     url: "/workshops",
     icon: Sparkles,
   },
+  {
+    title: "Studios/Sale",
+    url: "/studios",
+    icon: Building2,
+  },
+  {
+    title: "Prenotazioni Sale",
+    url: "/prenotazioni-sale",
+    icon: CalendarFold,
+  },
+];
+
+const secretariatItems = [
   {
     title: "Iscritti per Corso",
     url: "/iscritti-corsi",
@@ -84,11 +100,6 @@ const mainMenuItems = [
     title: "Insegnanti",
     url: "/insegnanti",
     icon: Briefcase,
-  },
-  {
-    title: "Studios/Sale",
-    url: "/studios",
-    icon: Building2,
   },
   {
     title: "Tessere & Certificati",
@@ -105,6 +116,19 @@ const mainMenuItems = [
     url: "/accessi",
     icon: ScanBarcode,
   },
+];
+
+const analysisItems = [
+  {
+    title: "Dashboard Statistiche",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Report & Statistiche",
+    url: "/report",
+    icon: BarChart3,
+  },
   {
     title: "test Gae",
     url: "/test-gae",
@@ -112,7 +136,20 @@ const mainMenuItems = [
   },
 ];
 
-const commonTablesItems = [
+const accountingItems = [
+  {
+    title: "Scheda Contabile",
+    url: "/scheda-contabile",
+    icon: Wallet,
+  },
+  {
+    title: "Lista Pagamenti",
+    url: "/pagamenti",
+    icon: CreditCard,
+  },
+];
+
+const configItems = [
   {
     title: "Categorie Corsi",
     url: "/categorie",
@@ -133,33 +170,13 @@ const commonTablesItems = [
     url: "/booking-services",
     icon: Sparkles,
   },
-];
-
-const analysisItems = [
   {
-    title: "Dashboard Statistiche",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Report & Statistiche",
-    url: "/report",
-    icon: BarChart3,
+    title: "Quote/Listini",
+    url: "/listini",
+    icon: Database,
   },
 ];
 
-const accountingItems = [
-  {
-    title: "Scheda Contabile",
-    url: "/scheda-contabile",
-    icon: Wallet,
-  },
-  {
-    title: "Lista Pagamenti",
-    url: "/pagamenti",
-    icon: CreditCard,
-  },
-];
 
 const adminItems = [
   {
@@ -190,10 +207,13 @@ export function AppSidebar() {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
 
-  const filteredMainMenu = mainMenuItems.filter(item => hasPermission(user, item.url));
-  const filteredCommonTables = commonTablesItems.filter(item => hasPermission(user, item.url));
+  const filteredRegistration = registrationItems.filter(item => hasPermission(user, item.url));
+  const filteredTeaching = teachingItems.filter(item => hasPermission(user, item.url));
+  const filteredSecretariat = secretariatItems.filter(item => hasPermission(user, item.url));
+  const filteredAnalysis = analysisItems.filter(item => hasPermission(user, item.url));
+  const filteredAccounting = accountingItems.filter(item => hasPermission(user, item.url));
+  const filteredConfig = configItems.filter(item => hasPermission(user, item.url));
   const filteredAdminItems = adminItems.filter(item => hasPermission(user, item.url));
-  const filteredAnalysisItems = analysisItems.filter(item => hasPermission(user, item.url));
 
   return (
     <Sidebar>
@@ -205,19 +225,19 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {filteredMainMenu.length > 0 && (
+        {filteredRegistration.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel>Menu Principale</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Gestione Anagrafica</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {filteredMainMenu.map((item) => {
+                {filteredRegistration.map((item) => {
                   const isActive = location === item.url;
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
                         isActive={isActive}
-                        data-testid={`nav-${item.url.slice(1) || 'dashboard'}`}
+                        data-testid={`nav-${item.url.slice(1) || 'anagrafica'}`}
                       >
                         <Link href={item.url}>
                           <item.icon className="w-4 h-4" />
@@ -232,39 +252,12 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {accountingItems.length > 0 && (
+        {filteredTeaching.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold">Contabilità</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Didattica e Sale</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {accountingItems.filter(item => hasPermission(user, item.url)).map((item) => {
-                  const isActive = location === item.url;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        data-testid={`nav-${item.url.slice(1)}`}
-                      >
-                        <Link href={item.url}>
-                          <item.icon className="w-4 h-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {filteredAnalysisItems.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold">Analisi e Report</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {filteredAnalysisItems.map((item) => {
+                {filteredTeaching.map((item) => {
                   const isActive = location === item.url;
                   return (
                     <SidebarMenuItem key={item.title}>
@@ -286,12 +279,93 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {filteredCommonTables.length > 0 && (
+        {filteredSecretariat.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold">Configurazione</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Segreteria</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {filteredCommonTables.map((item) => {
+                {filteredSecretariat.map((item) => {
+                  const isActive = location === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        data-testid={`nav-${item.url.slice(1)}`}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {filteredAnalysis.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Analisi e Report</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filteredAnalysis.map((item) => {
+                  const isActive = location === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        data-testid={`nav-${item.url.slice(1)}`}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {filteredAccounting.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Contabilità</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filteredAccounting.map((item) => {
+                  const isActive = location === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        data-testid={`nav-${item.url.slice(1)}`}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {filteredConfig.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Configurazione</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filteredConfig.map((item) => {
                   const isActive = location === item.url;
                   return (
                     <SidebarMenuItem key={item.title}>
@@ -315,7 +389,7 @@ export function AppSidebar() {
 
         {filteredAdminItems.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-bold">ADMIN / TECNICO</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">ADMIN / TECNICO</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredAdminItems.map((item) => {
@@ -340,26 +414,6 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-primary font-bold">Comuni</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location === "/listini"}
-                  data-testid="nav-listini"
-                >
-                  <Link href="/listini">
-                    <Database className="w-4 h-4" />
-                    <span>Quote/Listini</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-sidebar-border">
@@ -378,9 +432,8 @@ export function AppSidebar() {
                     ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
                     : user.username}
                 </p>
-                <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium flex items-center gap-2">
-                  <span>{user.role}</span>
-                  <span className="text-[9px] opacity-70 bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">v1.2.5</span>
+                <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium">
+                  {user.role}
                 </p>
               </div>
             </div>

@@ -18,7 +18,6 @@ import { KnowledgeInfo } from "@/components/knowledge-info";
 import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
 import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollment-details";
 import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CourseSelector } from "@/components/course-selector";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -214,34 +213,6 @@ export default function MascheraInputGenerale() {
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: workshops } = useQuery<any[]>({ queryKey: ["/api/workshops"] });
 
-  // Duplicate CFs
-  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
-  const { data: duplicateFiscalCodes } = useQuery<any[]>({
-    queryKey: ["/api/members/duplicates"],
-    queryFn: async () => {
-      const res = await fetch("/api/members/duplicates");
-      if (!res.ok) return [];
-      return res.json();
-    }
-  });
-  const hasDuplicates = duplicateFiscalCodes && duplicateFiscalCodes.length > 0;
-
-  const handleEditDuplicate = async (id: number) => {
-    try {
-      const res = await fetch(`/api/members/${id}`);
-      if (res.ok) {
-        const fullMember = await res.json();
-        handleSelectMember(fullMember);
-        setIsDuplicateModalOpen(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        toast({ title: "Errore", description: "Impossibile caricare l'anagrafica", variant: "destructive" });
-      }
-    } catch (e) {
-      toast({ title: "Errore", description: "Impossibile caricare l'anagrafica", variant: "destructive" });
-    }
-  };
-
   // Member Enrollments Queries
   const { data: memberEnrollments, isLoading: loadingEnrollments } = useQuery<any[]>({
     queryKey: ["/api/enrollments", "member", selectedMemberId],
@@ -373,7 +344,7 @@ export default function MascheraInputGenerale() {
       cap: member.postalCode || "",
       citta: member.city || "",
       provincia: member.province || "",
-      dataNascita: member.dateOfBirth ? member.dateOfBirth.split('T')[0] : "",
+      dataNascita: member.dateOfBirth || "",
       luogoNascita: member.placeOfBirth || "",
       provinciaNascita: member.birthProvince || "",
       sesso: member.gender || "",
@@ -393,27 +364,18 @@ export default function MascheraInputGenerale() {
       telGen2: member.fatherPhone || "",
       emailGen2: member.fatherEmail || "",
 
-      // Intestazione
-      stagione: member.season || "2025-2026",
-      codiceId: member.internalId || "2526-000001",
-      dataInserimento: member.insertionDate ? member.insertionDate.split('T')[0] : new Date().toLocaleDateString("it-IT"),
-      tipoPartecipante: member.participantType || "tesserato",
+      // Intestazione defaults
+      tipoPartecipante: "tesserato", // Assuming active member is tesserato
       tessera: member.cardNumber || "",
-      scadenzaTessera: member.cardExpiryDate ? member.cardExpiryDate.split('T')[0] : "",
-      daDoveArriva: member.fromWhere || "",
-      teamSegreteria: member.teamSegreteria || "",
-      tesseraEnte: member.entityCardNumber || "",
-      scadenzaTesseraEnte: member.entityCardExpiryDate ? member.entityCardExpiryDate.split('T')[0] : "",
-      ente: member.entityCardType || "",
+      scadenzaTessera: member.cardExpiryDate || "",
     }));
 
     // Populate simple allegati flags (complex logic omitted for brevity, just basic mapping)
     setAllegati(prev => ({
       ...prev,
-      certificatoMedico: { ...prev.certificatoMedico, hasFile: member.hasMedicalCertificate || false, scadenza: member.medicalCertificateExpiry ? member.medicalCertificateExpiry.split('T')[0] : "" },
       modelloDetrazione: { ...prev.modelloDetrazione, richiesto: member.detractionModelRequested ? "si" : "no", anno: member.detractionModelYear || "2026" },
       creditiScolastici: { ...prev.creditiScolastici, richiesto: member.schoolCreditsRequested ? "si" : "no", annoScolastico: member.schoolCreditsYear || "2025/2026" },
-      tesserinoTecnico: { ...prev.tesserinoTecnico, numero: member.tesserinoTecnicoNumber || "", dataRilascio: member.tesserinoTecnicoIssueDate ? member.tesserinoTecnicoIssueDate.split('T')[0] : "" },
+      tesserinoTecnico: { ...prev.tesserinoTecnico, numero: member.tesserinoTecnicoNumber || "" },
     }));
 
     // Set selected member ID for queries
@@ -436,7 +398,7 @@ export default function MascheraInputGenerale() {
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
       const res = await apiRequest("POST", "/api/maschera-generale/save", payload);
-      return res;
+      return res.json();
     },
     onSuccess: (data) => {
       toast({
@@ -457,7 +419,6 @@ export default function MascheraInputGenerale() {
   const handleSave = async () => {
     // Collect all data
     const memberData = {
-      id: selectedMemberId || undefined,
       firstName: formData.nome,
       lastName: formData.cognome,
       fiscalCode: formData.codiceFiscale,
@@ -487,28 +448,12 @@ export default function MascheraInputGenerale() {
       fatherEmail: formData.emailGen2 || null,
       fatherPhone: formData.telGen2 || null,
 
-      // Intestazione
-      season: formData.stagione || null,
-      internalId: formData.codiceId || null,
-      insertionDate: formData.dataInserimento && formData.dataInserimento.includes('/') ? formData.dataInserimento.split('/').reverse().join('-') : formData.dataInserimento,
-      participantType: formData.tipoPartecipante || null,
-      cardNumber: formData.tessera || null,
-      cardExpiryDate: formData.scadenzaTessera || null,
-      fromWhere: formData.daDoveArriva || null,
-      teamSegreteria: formData.teamSegreteria || null,
-      entityCardNumber: formData.tesseraEnte || null,
-      entityCardExpiryDate: formData.scadenzaTesseraEnte || null,
-      entityCardType: formData.ente || null,
-
       // Allegati Flags (from allegati state)
-      hasMedicalCertificate: allegati.certificatoMedico.hasFile || false,
-      medicalCertificateExpiry: allegati.certificatoMedico.scadenza || null,
       detractionModelRequested: allegati.modelloDetrazione.richiesto === "si",
       detractionModelYear: allegati.modelloDetrazione.anno,
       schoolCreditsRequested: allegati.creditiScolastici.richiesto === "si",
       schoolCreditsYear: allegati.creditiScolastici.annoScolastico,
       tesserinoTecnicoNumber: allegati.tesserinoTecnico.numero,
-      tesserinoTecnicoIssueDate: allegati.tesserinoTecnico.dataRilascio || null,
 
       active: true,
       photoUrl: photoFile.preview || null,
@@ -765,19 +710,15 @@ export default function MascheraInputGenerale() {
         const decoded = decodeFiscalCode(value);
         if (decoded) {
           const comuneData = await fetchComuneFromCode(decoded.codiceComune);
-          setFormData((prev) => {
-            const cityName = comuneData?.name ? comuneData.name.toUpperCase() : prev.luogoNascita;
-            const provCode = (comuneData?.province?.code || comuneData?.provinceCode || prev.provinciaNascita || "").toUpperCase();
-            return {
-              ...prev,
-              dataNascita: decoded.dataNascita,
-              sesso: decoded.sesso,
-              eta: decoded.eta,
-              codComune: decoded.codiceComune,
-              luogoNascita: cityName,
-              provinciaNascita: provCode,
-            };
-          });
+          setFormData((prev) => ({
+            ...prev,
+            dataNascita: decoded.dataNascita,
+            sesso: decoded.sesso,
+            eta: decoded.eta,
+            codComune: decoded.codiceComune,
+            luogoNascita: comuneData?.name || "",
+            provinciaNascita: comuneData?.province?.code || comuneData?.provinceCode || "",
+          }));
         }
       } else {
         // Svuota i campi se il CF viene cancellato o non è completo
@@ -797,18 +738,14 @@ export default function MascheraInputGenerale() {
         const decoded = decodeFiscalCode(value);
         if (decoded) {
           const comuneData = await fetchComuneFromCode(decoded.codiceComune);
-          setFormData((prev) => {
-            const cityName = comuneData?.name ? comuneData.name.toUpperCase() : prev.luogoNascitaGen1;
-            const provCode = (comuneData?.province?.code || comuneData?.provinceCode || prev.provinciaNascitaGen1 || "").toUpperCase();
-            return {
-              ...prev,
-              dataNascitaGen1: decoded.dataNascita,
-              sessoGen1: decoded.sesso,
-              etaGen1: decoded.eta,
-              luogoNascitaGen1: cityName,
-              provinciaNascitaGen1: provCode,
-            };
-          });
+          setFormData((prev) => ({
+            ...prev,
+            dataNascitaGen1: decoded.dataNascita,
+            sessoGen1: decoded.sesso,
+            etaGen1: decoded.eta,
+            luogoNascitaGen1: comuneData?.name || "",
+            provinciaNascitaGen1: comuneData?.province?.code || "",
+          }));
         }
       } else {
         // Svuota i campi se il CF viene cancellato o non è completo
@@ -828,18 +765,14 @@ export default function MascheraInputGenerale() {
         const decoded = decodeFiscalCode(value);
         if (decoded) {
           const comuneData = await fetchComuneFromCode(decoded.codiceComune);
-          setFormData((prev) => {
-            const cityName = comuneData?.name ? comuneData.name.toUpperCase() : prev.luogoNascitaGen2;
-            const provCode = (comuneData?.province?.code || comuneData?.provinceCode || prev.provinciaNascitaGen2 || "").toUpperCase();
-            return {
-              ...prev,
-              dataNascitaGen2: decoded.dataNascita,
-              sessoGen2: decoded.sesso,
-              etaGen2: decoded.eta,
-              luogoNascitaGen2: cityName,
-              provinciaNascitaGen2: provCode,
-            };
-          });
+          setFormData((prev) => ({
+            ...prev,
+            dataNascitaGen2: decoded.dataNascita,
+            sessoGen2: decoded.sesso,
+            etaGen2: decoded.eta,
+            luogoNascitaGen2: comuneData?.name || "",
+            provinciaNascitaGen2: comuneData?.province?.code || "",
+          }));
         }
       } else {
         // Svuota i campi se il CF viene cancellato o non è completo
@@ -997,18 +930,6 @@ export default function MascheraInputGenerale() {
                 <Plus className="w-4 h-4 mr-1" />
                 Nuovo
               </Button>
-              {hasDuplicates && (
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="text-xs h-8 shadow-sm flex items-center bg-black hover:bg-neutral-800 text-white border-none animate-pulse"
-                  title="Attenzione: Multipli Codici Fiscali Trovati"
-                  onClick={() => setIsDuplicateModalOpen(true)}
-                >
-                  <AlertTriangle className="w-4 h-4 mr-1" />
-                  Duplicati ({duplicateFiscalCodes.length})
-                </Button>
-              )}
             </div>
           </div>
 
@@ -1832,9 +1753,8 @@ export default function MascheraInputGenerale() {
                   <div className="space-y-2">
                     <Label>Data di Nascita *</Label>
                     <Input
-                      type="date"
-                      value={formData.dataNascita}
-                      onChange={(e) => handleChange("dataNascita", e.target.value)}
+                      value={formData.dataNascita ? new Date(formData.dataNascita).toLocaleDateString('it-IT') : ''}
+                      readOnly
                       className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -1842,7 +1762,7 @@ export default function MascheraInputGenerale() {
                     <Label>Luogo di Nascita *</Label>
                     <Input
                       value={formData.luogoNascita}
-                      onChange={(e) => handleChange("luogoNascita", e.target.value)}
+                      readOnly
                       className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -1850,28 +1770,23 @@ export default function MascheraInputGenerale() {
                     <Label>Prov. Nascita *</Label>
                     <Input
                       value={formData.provinciaNascita}
-                      onChange={(e) => handleChange("provinciaNascita", e.target.value)}
+                      readOnly
                       className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Sesso *</Label>
-                    <Select value={formData.sesso} onValueChange={(v) => handleChange("sesso", v)}>
-                      <SelectTrigger className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}>
-                        <SelectValue placeholder="Seleziona..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="M">Maschio</SelectItem>
-                        <SelectItem value="F">Femmina</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      value={formData.sesso === 'M' ? 'Maschio' : formData.sesso === 'F' ? 'Femmina' : ''}
+                      readOnly
+                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Età *</Label>
                     <Input
-                      type="number"
                       value={formData.eta}
-                      onChange={(e) => handleChange("eta", e.target.value)}
+                      readOnly
                       className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -1998,9 +1913,8 @@ export default function MascheraInputGenerale() {
                   <div className="space-y-2">
                     <Label>Data di Nascita</Label>
                     <Input
-                      type="date"
-                      value={formData.dataNascitaGen1}
-                      onChange={(e) => handleChange("dataNascitaGen1", e.target.value)}
+                      value={formData.dataNascitaGen1 ? new Date(formData.dataNascitaGen1).toLocaleDateString('it-IT') : ''}
+                      readOnly
                       className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -2008,7 +1922,7 @@ export default function MascheraInputGenerale() {
                     <Label>Luogo di Nascita</Label>
                     <Input
                       value={formData.luogoNascitaGen1}
-                      onChange={(e) => handleChange("luogoNascitaGen1", e.target.value)}
+                      readOnly
                       className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -2016,28 +1930,23 @@ export default function MascheraInputGenerale() {
                     <Label>Prov. Nascita</Label>
                     <Input
                       value={formData.provinciaNascitaGen1}
-                      onChange={(e) => handleChange("provinciaNascitaGen1", e.target.value)}
+                      readOnly
                       className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Sesso</Label>
-                    <Select value={formData.sessoGen1} onValueChange={(v) => handleChange("sessoGen1", v)}>
-                      <SelectTrigger className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}>
-                        <SelectValue placeholder="Sel..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="M">Maschio</SelectItem>
-                        <SelectItem value="F">Femmina</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      value={formData.sessoGen1 === 'M' ? 'M' : formData.sessoGen1 === 'F' ? 'F' : ''}
+                      readOnly
+                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Età</Label>
                     <Input
-                      type="number"
                       value={formData.etaGen1}
-                      onChange={(e) => handleChange("etaGen1", e.target.value)}
+                      readOnly
                       className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -2149,9 +2058,8 @@ export default function MascheraInputGenerale() {
                   <div className="space-y-2">
                     <Label>Data di Nascita</Label>
                     <Input
-                      type="date"
-                      value={formData.dataNascitaGen2}
-                      onChange={(e) => handleChange("dataNascitaGen2", e.target.value)}
+                      value={formData.dataNascitaGen2 ? new Date(formData.dataNascitaGen2).toLocaleDateString('it-IT') : ''}
+                      readOnly
                       className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -2159,7 +2067,7 @@ export default function MascheraInputGenerale() {
                     <Label>Luogo di Nascita</Label>
                     <Input
                       value={formData.luogoNascitaGen2}
-                      onChange={(e) => handleChange("luogoNascitaGen2", e.target.value)}
+                      readOnly
                       className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -2167,28 +2075,23 @@ export default function MascheraInputGenerale() {
                     <Label>Prov. Nascita</Label>
                     <Input
                       value={formData.provinciaNascitaGen2}
-                      onChange={(e) => handleChange("provinciaNascitaGen2", e.target.value)}
+                      readOnly
                       className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Sesso</Label>
-                    <Select value={formData.sessoGen2} onValueChange={(v) => handleChange("sessoGen2", v)}>
-                      <SelectTrigger className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}>
-                        <SelectValue placeholder="Sel..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="M">Maschio</SelectItem>
-                        <SelectItem value="F">Femmina</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      value={formData.sessoGen2 === 'M' ? 'M' : formData.sessoGen2 === 'F' ? 'F' : ''}
+                      readOnly
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Età</Label>
                     <Input
-                      type="number"
                       value={formData.etaGen2}
-                      onChange={(e) => handleChange("etaGen2", e.target.value)}
+                      readOnly
                       className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
                     />
                   </div>
@@ -3281,51 +3184,6 @@ export default function MascheraInputGenerale() {
           </CardContent>
         </Card>
       </div>
-
-      <Dialog open={isDuplicateModalOpen} onOpenChange={setIsDuplicateModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto w-[95vw]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive text-xl">
-              <AlertTriangle className="w-6 h-6" />
-              Anagrafiche con Codice Fiscale Duplicato
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 space-y-4">
-            {duplicateFiscalCodes?.map((dup: any) => (
-              <div key={dup.fiscalCode} className="border border-destructive/20 bg-destructive/5 rounded-md p-4">
-                <h4 className="font-semibold text-sm mb-2 text-foreground flex items-center justify-between">
-                  <span>CF/P.IVA: <span className="text-destructive">{dup.fiscalCode}</span></span>
-                  <Badge variant="destructive">{dup.members.length} Trovati</Badge>
-                </h4>
-                <div className="space-y-2">
-                  {dup.members.map((member: any) => (
-                    <div key={member.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-background rounded-md border shadow-sm">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-sm text-foreground">
-                          {member.firstName} {member.lastName}
-                        </span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-[10px] uppercase font-mono tracking-widest">{member.season}</Badge>
-                          <span className="text-[10px] text-muted-foreground">ID: {member.id}</span>
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleEditDuplicate(member.id)}
-                        className="sm:w-auto w-full border-primary/20 hover:bg-primary/10 transition-colors"
-                      >
-                        <Edit className="w-3 h-3 mr-2" />
-                        Modifica Anagrafica
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+    </div >
   );
 }
