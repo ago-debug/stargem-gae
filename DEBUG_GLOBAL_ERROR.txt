@@ -982,387 +982,59 @@ params: admin-id
     at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
     at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
 ---
-[2026-02-23T09:53:21.252Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+[2026-02-23T18:13:13.971Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
 params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:528:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:85:26)
 ---
-[2026-02-23T09:53:21.307Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+[2026-02-23T18:13:20.157Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
 params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:528:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:85:26)
 ---
-[2026-02-23T09:53:21.412Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+[2026-02-23T18:13:27.930Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
 params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:528:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:85:26)
 ---
-[2026-02-23T10:13:29.419Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+[2026-02-23T18:13:31.028Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
 params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:528:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:85:26)
 ---
-[2026-02-23T10:13:29.487Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+[2026-02-23T18:13:41.858Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
 params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:528:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:85:26)
 ---
-[2026-02-23T10:13:34.043Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+[2026-02-23T18:13:53.686Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
 params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:528:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:85:26)
 ---
-[2026-02-23T10:38:58.385Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+[2026-02-23T18:21:16.787Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
 params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T10:38:58.394Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T10:38:58.394Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T10:40:26.602Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T10:40:26.718Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T10:40:26.841Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:10:57.327Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:10:57.381Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:10:57.485Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:25:41.171Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:25:41.257Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:25:44.178Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:59:50.891Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:59:51.012Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:59:53.414Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:59:53.637Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:59:55.152Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T11:59:55.307Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T12:14:04.263Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T12:14:04.335Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T12:14:04.471Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T15:28:35.986Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T15:28:36.071Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T15:28:38.354Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T16:23:12.739Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T16:23:12.828Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T16:23:12.930Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T17:06:54.133Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T17:06:54.226Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T17:06:56.267Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T17:28:56.913Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T17:28:56.982Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T17:28:57.127Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T22:20:12.091Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T22:20:12.171Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T22:20:15.495Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T22:20:15.642Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T22:20:15.703Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-23T22:20:17.657Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-24T07:22:36.384Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-24T07:24:34.748Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
----
-[2026-02-24T07:24:53.709Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
-params: admin-id
-    at MySql2PreparedQuery.queryWithCache (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async MySql2PreparedQuery.execute (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUser (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/storage.ts:528:20)
-    at async <anonymous> (/Users/augustogenca/Documents/Sviluppo/SG-Gestionale/CourseManager/server/auth.ts:85:26)
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:528:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:85:26)
 ---

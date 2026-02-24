@@ -1261,7 +1261,6 @@ export const members = mysqlTable("members", {
   fiscalCode: varchar("fiscal_code", { length: 16 }), // Codice fiscale
   dateOfBirth: date("date_of_birth"),
   placeOfBirth: varchar("place_of_birth", { length: 255 }), // Luogo di nascita
-  birthProvince: varchar("birth_province", { length: 2 }), // Provincia di nascita
   gender: varchar("gender", { length: 1 }), // M = Maschio, F = Femmina
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }), // Telefono fisso
