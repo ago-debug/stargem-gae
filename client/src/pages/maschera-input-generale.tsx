@@ -18,6 +18,7 @@ import { KnowledgeInfo } from "@/components/knowledge-info";
 import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
 import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollment-details";
 import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CourseSelector } from "@/components/course-selector";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -212,6 +213,34 @@ export default function MascheraInputGenerale() {
   const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: workshops } = useQuery<any[]>({ queryKey: ["/api/workshops"] });
+
+  // Duplicate CFs
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+  const { data: duplicateFiscalCodes } = useQuery<any[]>({
+    queryKey: ["/api/members/duplicates"],
+    queryFn: async () => {
+      const res = await fetch("/api/members/duplicates");
+      if (!res.ok) return [];
+      return res.json();
+    }
+  });
+  const hasDuplicates = duplicateFiscalCodes && duplicateFiscalCodes.length > 0;
+
+  const handleEditDuplicate = async (id: number) => {
+    try {
+      const res = await fetch(`/api/members/${id}`);
+      if (res.ok) {
+        const fullMember = await res.json();
+        handleSelectMember(fullMember);
+        setIsDuplicateModalOpen(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        toast({ title: "Errore", description: "Impossibile caricare l'anagrafica", variant: "destructive" });
+      }
+    } catch (e) {
+      toast({ title: "Errore", description: "Impossibile caricare l'anagrafica", variant: "destructive" });
+    }
+  };
 
   // Member Enrollments Queries
   const { data: memberEnrollments, isLoading: loadingEnrollments } = useQuery<any[]>({
@@ -968,6 +997,18 @@ export default function MascheraInputGenerale() {
                 <Plus className="w-4 h-4 mr-1" />
                 Nuovo
               </Button>
+              {hasDuplicates && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="text-xs h-8 shadow-sm flex items-center bg-red-600 hover:bg-red-700 text-white border-none animate-pulse"
+                  title="Attenzione: Multipli Codici Fiscali Trovati"
+                  onClick={() => setIsDuplicateModalOpen(true)}
+                >
+                  <AlertTriangle className="w-4 h-4 mr-1" />
+                  Duplicati ({duplicateFiscalCodes.length})
+                </Button>
+              )}
             </div>
           </div>
 
@@ -3240,6 +3281,51 @@ export default function MascheraInputGenerale() {
           </CardContent>
         </Card>
       </div>
-    </div >
+
+      <Dialog open={isDuplicateModalOpen} onOpenChange={setIsDuplicateModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto w-[95vw]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive text-xl">
+              <AlertTriangle className="w-6 h-6" />
+              Anagrafiche con Codice Fiscale Duplicato
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            {duplicateFiscalCodes?.map((dup: any) => (
+              <div key={dup.fiscalCode} className="border border-destructive/20 bg-destructive/5 rounded-md p-4">
+                <h4 className="font-semibold text-sm mb-2 text-foreground flex items-center justify-between">
+                  <span>CF/P.IVA: <span className="text-destructive">{dup.fiscalCode}</span></span>
+                  <Badge variant="destructive">{dup.members.length} Trovati</Badge>
+                </h4>
+                <div className="space-y-2">
+                  {dup.members.map((member: any) => (
+                    <div key={member.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-background rounded-md border shadow-sm">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm text-foreground">
+                          {member.firstName} {member.lastName}
+                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-[10px] uppercase font-mono tracking-widest">{member.season}</Badge>
+                          <span className="text-[10px] text-muted-foreground">ID: {member.id}</span>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleEditDuplicate(member.id)}
+                        className="sm:w-auto w-full border-primary/20 hover:bg-primary/10 transition-colors"
+                      >
+                        <Edit className="w-3 h-3 mr-2" />
+                        Modifica Anagrafica
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
