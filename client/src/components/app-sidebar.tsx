@@ -51,11 +51,6 @@ const mainMenuItems = [
     icon: Activity,
   },
   {
-    title: "Dashboard Statistiche",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
     title: "Lista Iscritti",
     url: "/iscritti",
     icon: Users,
@@ -111,11 +106,6 @@ const mainMenuItems = [
     icon: ScanBarcode,
   },
   {
-    title: "Report & Statistiche",
-    url: "/report",
-    icon: BarChart3,
-  },
-  {
     title: "test Gae",
     url: "/test-gae",
     icon: Settings,
@@ -142,6 +132,19 @@ const commonTablesItems = [
     title: "Servizi Prenotabili",
     url: "/booking-services",
     icon: Sparkles,
+  },
+];
+
+const analysisItems = [
+  {
+    title: "Dashboard Statistiche",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Report & Statistiche",
+    url: "/report",
+    icon: BarChart3,
   },
 ];
 
@@ -190,6 +193,7 @@ export function AppSidebar() {
   const filteredMainMenu = mainMenuItems.filter(item => hasPermission(user, item.url));
   const filteredCommonTables = commonTablesItems.filter(item => hasPermission(user, item.url));
   const filteredAdminItems = adminItems.filter(item => hasPermission(user, item.url));
+  const filteredAnalysisItems = analysisItems.filter(item => hasPermission(user, item.url));
 
   return (
     <Sidebar>
@@ -255,9 +259,36 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
+        {filteredAnalysisItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-primary font-semibold">Analisi e Report</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filteredAnalysisItems.map((item) => {
+                  const isActive = location === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        data-testid={`nav-${item.url.slice(1)}`}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         {filteredCommonTables.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel>Tabelle Comuni</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-semibold">Configurazione</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredCommonTables.map((item) => {
@@ -349,7 +380,7 @@ export function AppSidebar() {
                 </p>
                 <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium flex items-center gap-2">
                   <span>{user.role}</span>
-                  <span className="text-[9px] opacity-70 bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">v1.2.3</span>
+                  <span className="text-[9px] opacity-70 bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">v1.2.4</span>
                 </p>
               </div>
             </div>
