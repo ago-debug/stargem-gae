@@ -886,7 +886,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==== Members Routes ====
-  app.get("/api/members", isAuthenticated, checkPermission("/iscritti", "read"), async (req, res) => {
+  app.get("/api/members", isAuthenticated, checkPermission("/anagrafica_a_lista", "read"), async (req, res) => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const pageSize = parseInt(req.query.pageSize as string) || 50;
@@ -934,7 +934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/members", isAuthenticated, checkPermission("/iscritti", "write"), async (req, res) => {
+  app.post("/api/members", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
     try {
       const normalizeEmpty = (val: any): any => {
         if (val === "" || val === undefined) return null;
@@ -981,7 +981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/members/:id", isAuthenticated, checkPermission("/iscritti", "write"), async (req, res) => {
+  app.patch("/api/members/:id", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const normalizeEmpty = (val: any): any => {
@@ -1028,7 +1028,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/members/:id", isAuthenticated, checkPermission("/iscritti", "write"), async (req, res) => {
+  app.delete("/api/members/:id", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const memberToDelete = await storage.getMember(id);
@@ -1536,7 +1536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+
   // WorkshopCategories Routes
   app.get("/api/workshop-categories", isAuthenticated, async (req, res) => {
     try {
@@ -2122,7 +2122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-// ==== Categories Routes ====
+  // ==== Categories Routes ====
   app.get("/api/categories", isAuthenticated, async (req, res) => {
     try {
       const categories = await storage.getCategories();

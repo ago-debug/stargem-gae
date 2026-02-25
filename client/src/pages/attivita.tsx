@@ -51,7 +51,7 @@ interface ActivitySection {
 }
 
 const activitySections: ActivitySection[] = [
-  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", type: "corsi", color: "icon-gold-bg", categoryApiEndpoint: "/api/categories", categoryManagementUrl: "/categorie", managementUrl: "/attivita/corsi" },
+  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", type: "corsi", color: "icon-gold-bg", categoryApiEndpoint: "/api/categories", categoryManagementUrl: "/categorie-corsi", managementUrl: "/attivita/corsi" },
   { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", type: "workshop", color: "icon-gold-bg", categoryApiEndpoint: "/api/workshop-categories", categoryManagementUrl: "/categorie-workshop", managementUrl: "/attivita/workshops" },
   { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, description: "Lezioni di prova a pagamento", type: "other", color: "icon-gold-bg", managementUrl: "/attivita/prove-pagamento" },
   { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", type: "other", color: "icon-gold-bg", managementUrl: "/attivita/prove-gratuite" },
@@ -335,259 +335,259 @@ export default function Attivita() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      <Tabs value={activeTab} onValueChange={(value) => {
-        const section = activitySections.find(s => s.id === value);
-        if (section?.managementUrl) {
-          navigate(section.managementUrl);
-          return;
-        }
-        setActiveTab(value);
-      }} className="w-full">
-        <TabsContent value="panoramica" className="space-y-6 mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card data-testid="card-stats-corsi">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Corsi</CardTitle>
+        <Tabs value={activeTab} onValueChange={(value) => {
+          const section = activitySections.find(s => s.id === value);
+          if (section?.managementUrl) {
+            navigate(section.managementUrl);
+            return;
+          }
+          setActiveTab(value);
+        }} className="w-full">
+          <TabsContent value="panoramica" className="space-y-6 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Card data-testid="card-stats-corsi">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Corsi</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold">{courses?.length || 0}</span>
+                    <span className="text-sm text-muted-foreground">totali</span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-2">
+                    <Badge variant="outline" className="status-badge-gold">{activeCourses.length} attivi</Badge>
+                    {inactiveCourses.length > 0 && (
+                      <Badge variant="outline" className="status-badge-gold">{inactiveCourses.length} inattivi</Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card data-testid="card-stats-workshop">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Workshop</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold">{workshops?.length || 0}</span>
+                    <span className="text-sm text-muted-foreground">totali</span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-2">
+                    <Badge variant="outline" className="status-badge-gold">{activeWorkshops.length} attivi</Badge>
+                    {inactiveWorkshops.length > 0 && (
+                      <Badge variant="outline" className="status-badge-gold">{inactiveWorkshops.length} inattivi</Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card data-testid="card-stats-categorie">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Categorie</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold">{categories?.length || 0}</span>
+                    <span className="text-sm text-muted-foreground">configurate</span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-2">
+                    <Badge variant="outline">{instructors?.length || 0} staff/insegnanti</Badge>
+                    <Badge variant="outline">{studios?.length || 0} sale</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Riepilogo Attivit&agrave;</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold">{courses?.length || 0}</span>
-                  <span className="text-sm text-muted-foreground">totali</span>
-                </div>
-                <div className="flex items-center gap-3 mt-2">
-                  <Badge variant="outline" className="status-badge-gold">{activeCourses.length} attivi</Badge>
-                  {inactiveCourses.length > 0 && (
-                    <Badge variant="outline" className="status-badge-gold">{inactiveCourses.length} inattivi</Badge>
-                  )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {activitySections.map((section) => {
+                    let count = 0;
+                    let active = 0;
+                    if (section.type === "corsi") {
+                      count = courses?.length || 0;
+                      active = activeCourses.length;
+                    } else if (section.type === "workshop") {
+                      count = workshops?.length || 0;
+                      active = activeWorkshops.length;
+                    }
+                    return (
+                      <button
+                        key={section.id}
+                        onClick={() => {
+                          if (section.managementUrl) {
+                            navigate(section.managementUrl);
+                          } else {
+                            setActiveTab(section.id);
+                          }
+                        }}
+                        className="text-left hover-elevate rounded-md p-3 transition-colors"
+                        data-testid={`button-goto-${section.id}`}
+                      >
+                        <SummaryStats
+                          label={section.label}
+                          count={count}
+                          active={active}
+                          icon={section.icon}
+                          color={section.color}
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            <Card data-testid="card-stats-workshop">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Workshop</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold">{workshops?.length || 0}</span>
-                  <span className="text-sm text-muted-foreground">totali</span>
-                </div>
-                <div className="flex items-center gap-3 mt-2">
-                  <Badge variant="outline" className="status-badge-gold">{activeWorkshops.length} attivi</Badge>
-                  {inactiveWorkshops.length > 0 && (
-                    <Badge variant="outline" className="status-badge-gold">{inactiveWorkshops.length} inattivi</Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card data-testid="card-stats-categorie">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Categorie</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold">{categories?.length || 0}</span>
-                  <span className="text-sm text-muted-foreground">configurate</span>
-                </div>
-                <div className="flex items-center gap-3 mt-2">
-                  <Badge variant="outline">{instructors?.length || 0} staff/insegnanti</Badge>
-                  <Badge variant="outline">{studios?.length || 0} sale</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Riepilogo Attivit&agrave;</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {activitySections.map((section) => {
-                  let count = 0;
-                  let active = 0;
-                  if (section.type === "corsi") {
-                    count = courses?.length || 0;
-                    active = activeCourses.length;
-                  } else if (section.type === "workshop") {
-                    count = workshops?.length || 0;
-                    active = activeWorkshops.length;
-                  }
-                  return (
-                    <button
-                      key={section.id}
-                      onClick={() => {
-                        if (section.managementUrl) {
-                          navigate(section.managementUrl);
-                        } else {
-                          setActiveTab(section.id);
-                        }
-                      }}
-                      className="text-left hover-elevate rounded-md p-3 transition-colors"
-                      data-testid={`button-goto-${section.id}`}
-                    >
-                      <SummaryStats
-                        label={section.label}
-                        count={count}
-                        active={active}
-                        icon={section.icon}
-                        color={section.color}
-                      />
-                    </button>
-                  );
-                })}
+          <TabsContent value="corsi" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <h2 className="text-xl font-semibold" data-testid="text-corsi-title">Corsi</h2>
+                <p className="text-sm text-muted-foreground">
+                  {courses?.length || 0} corsi totali &middot; {activeCourses.length} attivi
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="corsi" className="space-y-6 mt-6">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h2 className="text-xl font-semibold" data-testid="text-corsi-title">Corsi</h2>
-              <p className="text-sm text-muted-foreground">
-                {courses?.length || 0} corsi totali &middot; {activeCourses.length} attivi
-              </p>
+              <Link href="/attivita/corsi">
+                <Button variant="outline" data-testid="button-goto-corsi-page">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Gestione Completa Corsi
+                </Button>
+              </Link>
             </div>
-            <Link href="/attivita/corsi">
-              <Button variant="outline" data-testid="button-goto-corsi-page">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Gestione Completa Corsi
-              </Button>
-            </Link>
-          </div>
 
-          {coursesByCategory.length > 0 || uncategorizedCourses.length > 0 ? (
-            <div className="space-y-6">
-              {coursesByCategory.map(({ category, courses: catCourses }) => (
-                <div key={category.id}>
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                    {category.name}
-                    <Badge variant="secondary" className="text-xs">{catCourses.length}</Badge>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {catCourses.map((course) => (
-                      <CourseCard
-                        key={course.id}
-                        course={course}
-                        categories={categories}
-                        instructors={instructors}
-                      />
-                    ))}
+            {coursesByCategory.length > 0 || uncategorizedCourses.length > 0 ? (
+              <div className="space-y-6">
+                {coursesByCategory.map(({ category, courses: catCourses }) => (
+                  <div key={category.id}>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                      {category.name}
+                      <Badge variant="secondary" className="text-xs">{catCourses.length}</Badge>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {catCourses.map((course) => (
+                        <CourseCard
+                          key={course.id}
+                          course={course}
+                          categories={categories}
+                          instructors={instructors}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {uncategorizedCourses.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground" />
-                    Senza Categoria
-                    <Badge variant="secondary" className="text-xs">{uncategorizedCourses.length}</Badge>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {uncategorizedCourses.map((course) => (
-                      <CourseCard
-                        key={course.id}
-                        course={course}
-                        categories={categories}
-                        instructors={instructors}
-                      />
-                    ))}
+                ))}
+                {uncategorizedCourses.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground" />
+                      Senza Categoria
+                      <Badge variant="secondary" className="text-xs">{uncategorizedCourses.length}</Badge>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {uncategorizedCourses.map((course) => (
+                        <CourseCard
+                          key={course.id}
+                          course={course}
+                          categories={categories}
+                          instructors={instructors}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium mb-2">Nessun corso configurato</p>
+                  <p className="text-sm mb-4">Vai alla pagina Corsi per aggiungerne uno</p>
+                  <Link href="/attivita/corsi">
+                    <Button data-testid="button-add-first-course">Vai a Riepilogo Corsi</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="workshop" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <h2 className="text-xl font-semibold" data-testid="text-workshop-title">Workshop</h2>
+                <p className="text-sm text-muted-foreground">
+                  {workshops?.length || 0} workshop totali &middot; {activeWorkshops.length} attivi
+                </p>
+              </div>
+              <Link href="/attivita/workshops">
+                <Button variant="outline" data-testid="button-goto-workshop-page">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Gestione Completa Workshop
+                </Button>
+              </Link>
             </div>
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium mb-2">Nessun corso configurato</p>
-                <p className="text-sm mb-4">Vai alla pagina Corsi per aggiungerne uno</p>
-                <Link href="/attivita/corsi">
-                  <Button data-testid="button-add-first-course">Vai a Riepilogo Corsi</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
 
-        <TabsContent value="workshop" className="space-y-6 mt-6">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h2 className="text-xl font-semibold" data-testid="text-workshop-title">Workshop</h2>
-              <p className="text-sm text-muted-foreground">
-                {workshops?.length || 0} workshop totali &middot; {activeWorkshops.length} attivi
-              </p>
-            </div>
-            <Link href="/attivita/workshops">
-              <Button variant="outline" data-testid="button-goto-workshop-page">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Gestione Completa Workshop
-              </Button>
-            </Link>
-          </div>
-
-          {workshopsByCategory.length > 0 || uncategorizedWorkshops.length > 0 ? (
-            <div className="space-y-6">
-              {workshopsByCategory.map(({ category, workshops: catWorkshops }) => (
-                <div key={category.id}>
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                    {category.name}
-                    <Badge variant="secondary" className="text-xs">{catWorkshops.length}</Badge>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {catWorkshops.map((workshop) => (
-                      <WorkshopCard
-                        key={workshop.id}
-                        workshop={workshop}
-                        categories={workshopCategories}
-                        instructors={instructors}
-                      />
-                    ))}
+            {workshopsByCategory.length > 0 || uncategorizedWorkshops.length > 0 ? (
+              <div className="space-y-6">
+                {workshopsByCategory.map(({ category, workshops: catWorkshops }) => (
+                  <div key={category.id}>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                      {category.name}
+                      <Badge variant="secondary" className="text-xs">{catWorkshops.length}</Badge>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {catWorkshops.map((workshop) => (
+                        <WorkshopCard
+                          key={workshop.id}
+                          workshop={workshop}
+                          categories={workshopCategories}
+                          instructors={instructors}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {uncategorizedWorkshops.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground" />
-                    Senza Categoria
-                    <Badge variant="secondary" className="text-xs">{uncategorizedWorkshops.length}</Badge>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {uncategorizedWorkshops.map((workshop) => (
-                      <WorkshopCard
-                        key={workshop.id}
-                        workshop={workshop}
-                        categories={workshopCategories}
-                        instructors={instructors}
-                      />
-                    ))}
+                ))}
+                {uncategorizedWorkshops.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground" />
+                      Senza Categoria
+                      <Badge variant="secondary" className="text-xs">{uncategorizedWorkshops.length}</Badge>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {uncategorizedWorkshops.map((workshop) => (
+                        <WorkshopCard
+                          key={workshop.id}
+                          workshop={workshop}
+                          categories={workshopCategories}
+                          instructors={instructors}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium mb-2">Nessun workshop configurato</p>
-                <p className="text-sm mb-4">Vai alla pagina Workshop per aggiungerne uno</p>
-                <Link href="/attivita/workshops">
-                  <Button data-testid="button-add-first-workshop">Vai a Riepilogo Workshop</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+                )}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium mb-2">Nessun workshop configurato</p>
+                  <p className="text-sm mb-4">Vai alla pagina Workshop per aggiungerne uno</p>
+                  <Link href="/attivita/workshops">
+                    <Button data-testid="button-add-first-workshop">Vai a Riepilogo Workshop</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
-        {activitySections.filter(s => s.type === "other").map((section) => (
-          <ActivitySectionTab key={section.id} section={section} />
-        ))}
-      </Tabs>
+          {activitySections.filter(s => s.type === "other").map((section) => (
+            <ActivitySectionTab key={section.id} section={section} />
+          ))}
+        </Tabs>
       </div>
     </div>
   );

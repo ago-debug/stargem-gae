@@ -94,7 +94,7 @@ export default function TrainingCategories() {
   const categoryTree = getCategoryTree();
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
@@ -105,11 +105,12 @@ export default function TrainingCategories() {
             <p className="text-muted-foreground text-sm">Organizza gli allenamenti e affitti per categorie e sottocategorie</p>
           </div>
         </div>
-        <Button 
+        <Button
           onClick={() => {
             setEditingCategory(null);
             setIsFormOpen(true);
           }}
+          className="gold-3d-button px-4"
           data-testid="button-add-training-category"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -117,14 +118,14 @@ export default function TrainingCategories() {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="border-border/60 shadow-sm">
+        <CardHeader className="border-b border-border/40 pb-4">
           <div className="flex items-center gap-2">
             <FolderTree className="w-5 h-5 text-muted-foreground" />
-            <h2 className="text-lg font-medium">Struttura Categorie Allenamenti/Affitti</h2>
+            <h2 className="text-lg font-bold">Struttura Categorie Allenamenti/Affitti</h2>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {isLoading ? (
             <p className="text-center py-8 text-muted-foreground">Caricamento...</p>
           ) : categoryTree.length === 0 ? (
@@ -133,31 +134,32 @@ export default function TrainingCategories() {
               <p className="text-sm">Inizia aggiungendo la prima categoria</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {categoryTree.map((category) => (
-                <div key={category.id} className="space-y-1">
-                  <div className="flex items-center justify-between p-3 rounded-md hover-elevate active-elevate-2 border border-border">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div key={category.id} className="space-y-2">
+                  <div className="flex items-center justify-between p-3 rounded-md border border-border/50 hover:bg-muted/40 transition-colors">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
                       {category.color && (
-                        <div 
-                          className="w-3 h-3 rounded-full flex-shrink-0" 
+                        <div
+                          className="w-2 h-2 rounded-full flex-shrink-0 shadow-sm"
                           style={{ backgroundColor: category.color }}
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate" data-testid={`text-category-name-${category.id}`}>{category.name}</p>
+                        <p className="text-[15px] font-bold text-foreground truncate" data-testid={`text-category-name-${category.id}`}>{category.name}</p>
                         {category.description && (
-                          <p className="text-sm text-muted-foreground truncate">{category.description}</p>
+                          <p className="text-xs text-muted-foreground truncate italic">{category.description}</p>
                         )}
                       </div>
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" className="bg-muted-foreground/10 text-muted-foreground border-none text-[10px] font-bold h-5">
                         {category.children?.length || 0} sottocategorie
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                       <Button
                         size="icon"
-                        className="gold-3d-button"
+                        variant="ghost"
+                        className="h-8 w-8 bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
                         onClick={() => {
                           setEditingCategory(category);
                           setIsFormOpen(true);
@@ -169,7 +171,7 @@ export default function TrainingCategories() {
                       <Button
                         variant="outline"
                         size="icon"
-                        className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                        className="h-8 w-8 bg-white text-muted-foreground border-border/50 hover:bg-gray-50 hover:text-destructive transition-colors shadow-sm"
                         onClick={() => {
                           if (confirm("Sei sicuro di voler eliminare questa categoria?")) {
                             deleteMutation.mutate(category.id);
@@ -183,42 +185,40 @@ export default function TrainingCategories() {
                   </div>
 
                   {category.children && category.children.length > 0 && (
-                    <div className="ml-8 space-y-1">
+                    <div className="ml-10 space-y-2 border-l-2 border-muted/30 pl-4 py-1">
                       {category.children.map((child) => (
-                        <div 
-                          key={child.id} 
-                          className="flex items-center justify-between p-3 rounded-md hover-elevate active-elevate-2 border border-border"
+                        <div
+                          key={child.id}
+                          className="flex items-center justify-between p-3 rounded-md border border-border/40 hover:bg-muted/30 transition-colors"
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             {child.color && (
-                              <div 
-                                className="w-3 h-3 rounded-full flex-shrink-0" 
+                              <div
+                                className="w-2 h-2 rounded-full flex-shrink-0 opacity-80"
                                 style={{ backgroundColor: child.color }}
                               />
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium truncate" data-testid={`text-category-name-${child.id}`}>{child.name}</p>
-                              {child.description && (
-                                <p className="text-sm text-muted-foreground truncate">{child.description}</p>
-                              )}
+                              <p className="text-sm font-semibold truncate" data-testid={`text-category-name-${child.id}`}>{child.name}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                             <Button
+                              variant="ghost"
                               size="icon"
-                              className="gold-3d-button"
+                              className="h-7 w-7 bg-amber-500/90 hover:bg-amber-600 text-white"
                               onClick={() => {
                                 setEditingCategory(child);
                                 setIsFormOpen(true);
                               }}
                               data-testid={`button-edit-training-category-${child.id}`}
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-3.5 h-3.5" />
                             </Button>
                             <Button
                               variant="outline"
                               size="icon"
-                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                              className="h-7 w-7 bg-white text-muted-foreground border-border/50 hover:text-destructive"
                               onClick={() => {
                                 if (confirm("Sei sicuro di voler eliminare questa categoria?")) {
                                   deleteMutation.mutate(child.id);
@@ -226,7 +226,7 @@ export default function TrainingCategories() {
                               }}
                               data-testid={`button-delete-training-category-${child.id}`}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           </div>
                         </div>
@@ -308,8 +308,8 @@ export default function TrainingCategories() {
               >
                 Annulla
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-training-category"
               >

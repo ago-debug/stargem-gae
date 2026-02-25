@@ -34,7 +34,7 @@ function useDebounce<T>(value: T, delay: number): T {
 export default function Members() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const canWrite = hasWritePermission(user, "/iscritti");
+  const canWrite = hasWritePermission(user, "/anagrafica_a_lista");
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
@@ -534,8 +534,8 @@ export default function Members() {
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Clienti/Anagrafiche</h1>
-          <p className="text-muted-foreground">Anagrafica completa degli iscritti</p>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Anagrafica a Lista</h1>
+          <p className="text-muted-foreground">Anagrafica completa</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button
@@ -555,7 +555,7 @@ export default function Members() {
             disabled={!canWrite}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Nuovo Cliente/Associato
+            Nuovo
           </Button>
         </div>
       </div>

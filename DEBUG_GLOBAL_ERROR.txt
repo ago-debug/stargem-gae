@@ -1038,3 +1038,11 @@ params: admin-id
     at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:528:20)
     at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:85:26)
 ---
+[2026-02-24T14:56:53.835Z] Error: Failed query: select `id`, `username`, `password`, `email`, `first_name`, `last_name`, `role`, `profile_image_url`, `created_at`, `updated_at` from `users` where `users`.`username` = ?
+params: admin
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUserByUsername (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:533:20)
+    at async Strategy._verify (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:70:30)
+---

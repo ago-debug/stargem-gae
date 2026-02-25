@@ -15,7 +15,6 @@ import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
 import Courses from "@/pages/courses";
 import Workshops from "@/pages/workshops";
-import CourseEnrollments from "@/pages/course-enrollments";
 import Categories from "@/pages/categories";
 import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
@@ -40,6 +39,10 @@ import AccountingSheet from "@/pages/accounting-sheet";
 import MascheraInputGenerale from "@/pages/maschera-input-generale";
 import PriceLists from "@/pages/listini";
 import Attivita from "@/pages/attivita";
+import IscrittiPerAttivita from "@/pages/iscritti_per_attivita";
+import ActivityCategories from "@/pages/activity-categories";
+import Elenchi from "@/pages/elenchi";
+import SchedaCorso from "@/pages/scheda-corso";
 
 import FreeTrials from "@/pages/free-trials";
 import PaidTrials from "@/pages/paid-trials";
@@ -113,13 +116,11 @@ function Router() {
     <Switch>
       <ProtectedRoute path="/" component={AnagraficaHome} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
-      <ProtectedRoute path="/iscritti" component={Members} />
+      <ProtectedRoute path="/anagrafica_a_lista" component={Members} />
       <ProtectedRoute path="/corsi" component={Courses} />
       <ProtectedRoute path="/workshops" component={Workshops} />
-      <ProtectedRoute path="/iscritti-corsi" component={CourseEnrollments} />
       <ProtectedRoute path="/calendario" component={CalendarPage} />
-      <ProtectedRoute path="/categorie" component={Categories} />
-      <ProtectedRoute path="/categorie-clienti" component={ClientCategories} />
+      <ProtectedRoute path="/categorie-corsi" component={Categories} />
       <ProtectedRoute path="/metodi-pagamento" component={PaymentMethods} />
       <ProtectedRoute path="/insegnanti" component={Instructors} />
       <ProtectedRoute path="/studios" component={Studios} />
@@ -138,7 +139,11 @@ function Router() {
       <ProtectedRoute path="/prenotazioni-sale" component={StudioBookings} />
       <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
       <ProtectedRoute path="/maschera-generale" component={MascheraInputGenerale} />
+      <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
       <ProtectedRoute path="/attivita" component={Attivita} />
+      <ProtectedRoute path="/categorie-attivita" component={ActivityCategories} />
+      <ProtectedRoute path="/categoria-partecipante" component={ClientCategories} />
+      <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
       <ProtectedRoute path="/attivita/corsi" component={Courses} />
       <ProtectedRoute path="/attivita/workshops" component={Workshops} />
       <ProtectedRoute path="/attivita/prove-pagamento" component={PaidTrials} />
@@ -159,6 +164,7 @@ function Router() {
       <ProtectedRoute path="/categorie-saggi" component={RecitalCategories} />
       <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
       <ProtectedRoute path="/listini" component={PriceLists} />
+      <ProtectedRoute path="/elenchi" component={Elenchi} />
       <Route component={NotFound} />
     </Switch>
   );

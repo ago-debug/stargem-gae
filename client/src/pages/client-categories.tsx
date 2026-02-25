@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, FolderTree } from "lucide-react";
+import { Plus, Edit, Trash2, FolderTree, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { ClientCategory, InsertClientCategory } from "@shared/schema";
 
@@ -28,7 +28,7 @@ export default function ClientCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/client-categories"] });
-      toast({ title: "Categoria cliente creata con successo" });
+      toast({ title: "Categoria partecipante creata con successo" });
       setIsFormOpen(false);
       setEditingCategory(null);
     },
@@ -43,7 +43,7 @@ export default function ClientCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/client-categories"] });
-      toast({ title: "Categoria cliente aggiornata con successo" });
+      toast({ title: "Categoria partecipante aggiornata con successo" });
       setIsFormOpen(false);
       setEditingCategory(null);
     },
@@ -58,7 +58,7 @@ export default function ClientCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/client-categories"] });
-      toast({ title: "Categoria cliente eliminata con successo" });
+      toast({ title: "Categoria partecipante eliminata con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -71,7 +71,7 @@ export default function ClientCategories() {
     const data: InsertClientCategory = {
       name: formData.get("name") as string,
       description: formData.get("description") as string || null,
-      parentId: formData.get("parentId") ? parseInt(formData.get("parentId") as string) : null,
+      parentId: formData.get("parentId") && formData.get("parentId") !== "none" ? parseInt(formData.get("parentId") as string) : null,
       color: formData.get("color") as string || null,
     };
 
@@ -94,32 +94,44 @@ export default function ClientCategories() {
   const categoryTree = getCategoryTree();
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Categorie Clienti</h1>
-          <p className="text-muted-foreground">Organizza i clienti per categorie e sottocategorie</p>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => window.history.back()}
+            className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0"
+            data-testid="button-back"
+          >
+            <ArrowLeft className="w-4 h-4 text-white" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categoria Partecipante</h1>
+            <p className="text-muted-foreground text-sm">Organizza i partecipanti per categorie e sottocategorie</p>
+          </div>
         </div>
-        <Button 
+        <Button
           onClick={() => {
             setEditingCategory(null);
             setIsFormOpen(true);
           }}
-          data-testid="button-add-client-category"
+          className="gold-3d-button px-4"
+          data-testid="button-add-participant-category"
         >
           <Plus className="w-4 h-4 mr-2" />
           Nuova Categoria
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="border-border/60 shadow-sm">
+        <CardHeader className="border-b border-border/40 pb-4">
           <div className="flex items-center gap-2">
             <FolderTree className="w-5 h-5 text-muted-foreground" />
-            <h2 className="text-lg font-medium">Struttura Categorie Clienti</h2>
+            <h2 className="text-lg font-bold">Struttura Categoria Partecipante</h2>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {isLoading ? (
             <p className="text-center py-8 text-muted-foreground">Caricamento...</p>
           ) : categoryTree.length === 0 ? (
@@ -128,24 +140,24 @@ export default function ClientCategories() {
               <p className="text-sm">Inizia aggiungendo la prima categoria</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {categoryTree.map((category) => (
-                <div key={category.id} className="space-y-1">
-                  <div className="flex items-center justify-between p-3 rounded-md hover-elevate active-elevate-2 border border-border">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div key={category.id} className="space-y-2">
+                  <div className="flex items-center justify-between p-3 rounded-md border border-border/50 hover:bg-muted/40 transition-colors">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
                       {category.color && (
-                        <div 
-                          className="w-3 h-3 rounded-full flex-shrink-0" 
+                        <div
+                          className="w-2 h-2 rounded-full flex-shrink-0 shadow-sm"
                           style={{ backgroundColor: category.color }}
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{category.name}</p>
+                        <p className="text-[15px] font-bold text-foreground truncate">{category.name}</p>
                         {category.description && (
-                          <p className="text-sm text-muted-foreground truncate">{category.description}</p>
+                          <p className="text-xs text-muted-foreground truncate italic">{category.description}</p>
                         )}
                       </div>
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" className="bg-muted-foreground/10 text-muted-foreground border-none text-[10px] font-bold h-5">
                         {category.children?.length || 0} sottocategorie
                       </Badge>
                     </div>
@@ -153,46 +165,48 @@ export default function ClientCategories() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-8 w-8 bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
                         onClick={() => {
                           setEditingCategory(category);
                           setIsFormOpen(true);
                         }}
-                        data-testid={`button-edit-client-category-${category.id}`}
+                        data-testid={`button-edit-participant-category-${category.id}`}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
+                        className="h-8 w-8 bg-white text-muted-foreground border-border/50 hover:bg-gray-50 hover:text-destructive transition-colors shadow-sm"
                         onClick={() => {
                           if (confirm("Sei sicuro di voler eliminare questa categoria?")) {
                             deleteMutation.mutate(category.id);
                           }
                         }}
-                        data-testid={`button-delete-client-category-${category.id}`}
+                        data-testid={`button-delete-participant-category-${category.id}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
                   {category.children && category.children.length > 0 && (
-                    <div className="ml-8 space-y-1">
+                    <div className="ml-10 space-y-2 border-l-2 border-muted/30 pl-4 py-1">
                       {category.children.map((child) => (
-                        <div 
+                        <div
                           key={child.id}
-                          className="flex items-center justify-between p-2 rounded-md hover-elevate active-elevate-2 border border-border"
+                          className="flex items-center justify-between p-3 rounded-md border border-border/40 hover:bg-muted/30 transition-colors"
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             {child.color && (
-                              <div 
-                                className="w-2 h-2 rounded-full flex-shrink-0" 
+                              <div
+                                className="w-2 h-2 rounded-full flex-shrink-0 opacity-80"
                                 style={{ backgroundColor: child.color }}
                               />
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm truncate">{child.name}</p>
+                              <p className="text-sm font-semibold truncate">{child.name}</p>
                               {child.description && (
-                                <p className="text-xs text-muted-foreground truncate">{child.description}</p>
+                                <p className="text-xs text-muted-foreground truncate italic">{child.description}</p>
                               )}
                             </div>
                           </div>
@@ -200,25 +214,27 @@ export default function ClientCategories() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="h-7 w-7 bg-amber-500/90 hover:bg-amber-600 text-white"
                               onClick={() => {
                                 setEditingCategory(child);
                                 setIsFormOpen(true);
                               }}
-                              data-testid={`button-edit-client-category-${child.id}`}
+                              data-testid={`button-edit-participant-category-${child.id}`}
                             >
-                              <Edit className="w-3 h-3" />
+                              <Edit className="w-3.5 h-3.5" />
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
+                              className="h-7 w-7 bg-white text-muted-foreground border-border/50 hover:text-destructive"
                               onClick={() => {
                                 if (confirm("Sei sicuro di voler eliminare questa sottocategoria?")) {
                                   deleteMutation.mutate(child.id);
                                 }
                               }}
-                              data-testid={`button-delete-client-category-${child.id}`}
+                              data-testid={`button-delete-participant-category-${child.id}`}
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           </div>
                         </div>
@@ -233,11 +249,11 @@ export default function ClientCategories() {
       </Card>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{editingCategory ? "Modifica Categoria" : "Nuova Categoria"}</DialogTitle>
             <DialogDescription>
-              Inserisci i dettagli della categoria cliente
+              Inserisci i dettagli della categoria partecipante
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -265,14 +281,12 @@ export default function ClientCategories() {
 
             <div className="space-y-2">
               <Label htmlFor="parentId">Categoria Padre (opzionale)</Label>
-              <Select 
-                name="parentId" 
-                defaultValue={editingCategory?.parentId?.toString()}
-              >
+              <Select name="parentId" defaultValue={editingCategory?.parentId?.toString() || "none"}>
                 <SelectTrigger data-testid="select-parent">
                   <SelectValue placeholder="Nessuna (categoria principale)" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">Nessuna (categoria principale)</SelectItem>
                   {categories
                     ?.filter(cat => cat.id !== editingCategory?.id && !cat.parentId)
                     .map((cat) => (
@@ -290,7 +304,7 @@ export default function ClientCategories() {
                 id="color"
                 name="color"
                 type="color"
-                defaultValue={editingCategory?.color || "#6366f1"}
+                defaultValue={editingCategory?.color || "#3b82f6"}
                 data-testid="input-color"
               />
             </div>
@@ -303,10 +317,11 @@ export default function ClientCategories() {
               >
                 Annulla
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
+                className="gold-3d-button px-6"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                data-testid="button-submit-client-category"
+                data-testid="button-submit-participant-category"
               >
                 {editingCategory ? "Salva Modifiche" : "Crea Categoria"}
               </Button>

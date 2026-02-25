@@ -22,6 +22,18 @@ import {
   Database,
   CalendarFold,
   Activity,
+  ClipboardList,
+  BookOpen,
+  MessageSquare,
+  StickyNote,
+  Ticket,
+  CalendarRange,
+  Clock,
+  FileText,
+  Stethoscope,
+  List,
+  Layers,
+  UserPlus,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -46,13 +58,8 @@ const registrationItems = [
     icon: Users,
   },
   {
-    title: "Anagrafica",
-    url: "/",
-    icon: Users,
-  },
-  {
-    title: "Lista Iscritti",
-    url: "/iscritti",
+    title: "Anagrafica a Lista",
+    url: "/anagrafica_a_lista",
     icon: Users,
   },
   {
@@ -88,16 +95,21 @@ const teachingItems = [
     url: "/prenotazioni-sale",
     icon: CalendarFold,
   },
+  {
+    title: "Planning",
+    url: "/planning",
+    icon: CalendarRange,
+  },
+  {
+    title: "Date/Programmazione",
+    url: "/programmazione",
+    icon: Clock,
+  },
 ];
 
 const secretariatItems = [
   {
-    title: "Iscritti per Corso",
-    url: "/iscritti-corsi",
-    icon: GraduationCap,
-  },
-  {
-    title: "Insegnanti",
+    title: "Staff/Insegnanti",
     url: "/insegnanti",
     icon: Briefcase,
   },
@@ -116,6 +128,16 @@ const secretariatItems = [
     url: "/accessi",
     icon: ScanBarcode,
   },
+  {
+    title: "Affitto Studio Medico",
+    url: "/affitto-studio",
+    icon: Stethoscope,
+  },
+  {
+    title: "Iscritti per Attività",
+    url: "/iscritti_per_attivita",
+    icon: Activity,
+  },
 ];
 
 const analysisItems = [
@@ -128,6 +150,21 @@ const analysisItems = [
     title: "Report & Statistiche",
     url: "/report",
     icon: BarChart3,
+  },
+  {
+    title: "Elenchi",
+    url: "/elenchi",
+    icon: List,
+  },
+  {
+    title: "Commento",
+    url: "/commento",
+    icon: MessageSquare,
+  },
+  {
+    title: "Inserisci Nota",
+    url: "/inserisci-nota",
+    icon: StickyNote,
   },
   {
     title: "test Gae",
@@ -151,17 +188,7 @@ const accountingItems = [
 
 const configItems = [
   {
-    title: "Categorie Corsi",
-    url: "/categorie",
-    icon: FolderTree,
-  },
-  {
-    title: "Categorie Clienti",
-    url: "/categorie-clienti",
-    icon: Tags,
-  },
-  {
-    title: "Metodi di Pagamento",
+    title: "Tipi di Pagamento",
     url: "/metodi-pagamento",
     icon: Wallet,
   },
@@ -174,6 +201,31 @@ const configItems = [
     title: "Quote/Listini",
     url: "/listini",
     icon: Database,
+  },
+  {
+    title: "Categorie Attività",
+    url: "/categorie-attivita",
+    icon: Layers,
+  },
+  {
+    title: "Categoria Partecipante",
+    url: "/categoria-partecipante",
+    icon: UserPlus,
+  },
+  {
+    title: "Promo/Codici Sconto",
+    url: "/promo-sconti",
+    icon: Ticket,
+  },
+  {
+    title: "Knowledge",
+    url: "/knowledge-base",
+    icon: BookOpen,
+  },
+  {
+    title: "Cose da Fare",
+    url: "/cose-da-fare",
+    icon: FileText,
   },
 ];
 
