@@ -208,7 +208,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
                   <TableCell>{enrollment.email || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link href={`/iscritti?search=${enrollment.lastName}`}>
+                      <Link href={`/anagrafica_a_lista?search=${encodeURIComponent(`${enrollment.firstName} ${enrollment.lastName}`)}`}>
                         <Button variant="ghost" size="sm" data-testid={`button-view-member-${enrollment.memberId}`}>
                           Visualizza
                         </Button>

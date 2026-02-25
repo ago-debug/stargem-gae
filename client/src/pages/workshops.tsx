@@ -220,7 +220,7 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
                       >
                         Modifica
                       </button>
-                      <Link href={`/iscritti?search=${enrollment.lastName}`}>
+                      <Link href={`/anagrafica_a_lista?search=${enrollment.lastName}`}>
                         <Button variant="ghost" size="sm" data-testid={`button-view-workshop-member-${enrollment.memberId}`}>
                           Profilo
                         </Button>

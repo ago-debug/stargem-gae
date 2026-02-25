@@ -26,7 +26,7 @@ interface CategoryInfo {
 }
 
 const categoryPages: CategoryInfo[] = [
-  { id: "corsi", label: "Categorie Corsi", icon: Calendar, color: "icon-gold-bg", url: "/categorie", apiEndpoint: "/api/categories" },
+  { id: "corsi", label: "Categorie Corsi", icon: Calendar, color: "icon-gold-bg", url: "/categorie-corsi", apiEndpoint: "/api/categories" },
   { id: "workshop", label: "Categorie Workshop", icon: Sparkles, color: "icon-gold-bg", url: "/categorie-workshop", apiEndpoint: "/api/workshop-categories" },
   { id: "domeniche", label: "Categorie Domeniche in Movimento", icon: Sun, color: "icon-gold-bg", url: "/categorie-domeniche", apiEndpoint: "/api/sunday-categories" },
   { id: "allenamenti", label: "Categorie Allenamenti/Affitti", icon: Dumbbell, color: "icon-gold-bg", url: "/categorie-allenamenti", apiEndpoint: "/api/training-categories" },
@@ -49,21 +49,22 @@ function CategoryCard({ info }: { info: CategoryInfo }) {
 
   return (
     <Link href={info.url}>
-      <Card className="hover-elevate cursor-pointer h-full" data-testid={`card-category-${info.id}`}>
-        <CardContent className="p-5">
-          <div className="flex items-start gap-3">
-            <div className={`w-10 h-10 rounded-md ${info.color} flex items-center justify-center flex-shrink-0`}>
-              <info.icon className="w-5 h-5 text-white" />
+      <Card className="hover-elevate cursor-pointer h-full border-border/60 shadow-sm" data-testid={`card-category-${info.id}`}>
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className={`w-12 h-12 rounded-lg ${info.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+              <info.icon className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold truncate">{info.label}</h3>
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <Badge variant="secondary" className="text-xs">{total} totali</Badge>
+              <h3 className="text-[15px] font-bold text-foreground leading-tight mb-2">{info.label}</h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="secondary" className="text-[10px] h-5 px-2 font-bold bg-muted/60">
+                  {total} totali
+                </Badge>
                 {parents > 0 && (
-                  <Badge variant="outline" className="text-xs">{parents} principali</Badge>
-                )}
-                {subs > 0 && (
-                  <Badge variant="outline" className="text-xs">{subs} sotto</Badge>
+                  <Badge variant="outline" className="text-[10px] h-5 px-2 font-bold border-muted-foreground/30">
+                    {parents} principali
+                  </Badge>
                 )}
               </div>
             </div>
@@ -76,7 +77,7 @@ function CategoryCard({ info }: { info: CategoryInfo }) {
 
 export default function ActivityCategories() {
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
@@ -93,7 +94,7 @@ export default function ActivityCategories() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {categoryPages.map((info) => (
           <CategoryCard key={info.id} info={info} />
         ))}

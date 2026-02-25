@@ -61,7 +61,7 @@ interface EditableListSectionProps {
 function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPrefix }: EditableListSectionProps) {
   const { toast } = useToast();
   const [newName, setNewName] = useState("");
-  const [newColor, setNewColor] = useState("");
+  const [newColor, setNewColor] = useState("#9ca3af");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState("");
   const [editingColor, setEditingColor] = useState("");
@@ -78,7 +78,7 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKey] });
       setNewName("");
-      setNewColor("");
+      setNewColor("#9ca3af");
       toast({ title: `${title}: voce creata con successo` });
     },
     onError: (error: Error) => {
@@ -116,14 +116,16 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
   });
 
   return (
-    <Card data-testid={`card-elenchi-${testIdPrefix}`}>
-      <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-4">
-        <CardTitle className="text-base" data-testid={`text-elenchi-title-${testIdPrefix}`}>{title}</CardTitle>
-        <Badge variant="secondary" className="text-xs" data-testid={`badge-elenchi-count-${testIdPrefix}`}>
+    <Card className="border-border/60 shadow-sm bg-card/30" data-testid={`card-elenchi-${testIdPrefix}`}>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-6">
+        <CardTitle className="text-base font-bold text-foreground" data-testid={`text-elenchi-title-${testIdPrefix}`}>
+          {title}
+        </CardTitle>
+        <Badge variant="secondary" className="text-[10px] font-bold bg-muted/60 h-5" data-testid={`badge-elenchi-count-${testIdPrefix}`}>
           {items?.length || 0} voci
         </Badge>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="flex items-center gap-2">
           <Input
             placeholder="Nuova voce..."
@@ -135,21 +137,23 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
                 createMutation.mutate({ name: newName.trim(), color: newColor });
               }
             }}
-            className="flex-1"
+            className="flex-1 h-10 bg-white shadow-sm border-border/50 text-[13px]"
             data-testid={`input-elenchi-new-${testIdPrefix}`}
           />
-          <input
-            type="color"
-            value={newColor || "#9ca3af"}
-            onChange={(e) => setNewColor(e.target.value)}
-            className="w-9 h-9 rounded cursor-pointer border border-input flex-shrink-0"
-            title="Colore"
-            data-testid={`input-elenchi-new-color-${testIdPrefix}`}
-          />
+          <div className="relative flex-shrink-0">
+            <input
+              type="color"
+              value={newColor}
+              onChange={(e) => setNewColor(e.target.value)}
+              className="w-10 h-10 rounded border border-border/50 cursor-pointer shadow-sm p-0 m-0 overflow-hidden"
+              title="Colore"
+              data-testid={`input-elenchi-new-color-${testIdPrefix}`}
+            />
+          </div>
           <Button
             type="button"
             size="icon"
-            className="gold-3d-button flex-shrink-0"
+            className="gold-3d-button flex-shrink-0 w-10 h-10"
             onClick={() => {
               if (newName.trim()) {
                 createMutation.mutate({ name: newName.trim(), color: newColor });
@@ -158,14 +162,18 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
             disabled={createMutation.isPending}
             data-testid={`button-elenchi-add-${testIdPrefix}`}
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
           </Button>
         </div>
 
-        <div className="space-y-1 max-h-80 overflow-y-auto">
+        <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
           {items?.map((item) => (
-            <div key={item.id} className="flex items-center gap-2 py-1.5 px-2 rounded hover-elevate group" data-testid={`row-elenchi-${testIdPrefix}-${item.id}`}>
-              <GripVertical className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+            <div
+              key={item.id}
+              className="flex items-center gap-2 py-2 px-3 rounded-md border border-border/40 bg-white hover:bg-muted/30 transition-all group shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+              data-testid={`row-elenchi-${testIdPrefix}-${item.id}`}
+            >
+              <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0 cursor-grab active:cursor-grabbing" />
               {editingId === item.id ? (
                 <div className="flex items-center gap-2 flex-1">
                   <Input
@@ -197,7 +205,7 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
                   <Button
                     type="button"
                     size="icon"
-                    className="gold-3d-button flex-shrink-0"
+                    className="gold-3d-button flex-shrink-0 h-8 w-8"
                     onClick={() => {
                       if (editingName.trim()) {
                         updateMutation.mutate({ id: item.id, name: editingName.trim(), color: editingColor });
@@ -205,47 +213,50 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
                     }}
                     data-testid={`button-elenchi-save-${testIdPrefix}-${item.id}`}
                   >
-                    <Edit className="w-3 h-3" />
+                    <Edit className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               ) : (
                 <>
-                  <ColorBadge name={item.name} color={item.color} />
-                  <span className="flex-1" />
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => {
-                      setEditingId(item.id);
-                      setEditingName(item.name);
-                      setEditingColor(item.color || "");
-                    }}
-                    data-testid={`button-elenchi-edit-${testIdPrefix}-${item.id}`}
-                  >
-                    <Edit className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive"
-                    onClick={() => {
-                      if (confirm(`Eliminare "${item.name}"?`)) {
-                        deleteMutation.mutate(item.id);
-                      }
-                    }}
-                    data-testid={`button-elenchi-delete-${testIdPrefix}-${item.id}`}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  <div className="flex-1 min-w-0">
+                    <ColorBadge name={item.name} color={item.color} className="uppercase font-bold tracking-tight px-3 py-1 rounded-sm text-[10px] h-auto border-none" />
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-muted-foreground hover:bg-amber-100 hover:text-amber-600"
+                      onClick={() => {
+                        setEditingId(item.id);
+                        setEditingName(item.name);
+                        setEditingColor(item.color || "");
+                      }}
+                      data-testid={`button-elenchi-edit-${testIdPrefix}-${item.id}`}
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-muted-foreground hover:bg-red-50 hover:text-destructive"
+                      onClick={() => {
+                        if (confirm(`Eliminare "${item.name}"?`)) {
+                          deleteMutation.mutate(item.id);
+                        }
+                      }}
+                      data-testid={`button-elenchi-delete-${testIdPrefix}-${item.id}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </>
               )}
             </div>
           ))}
           {(!items || items.length === 0) && (
-            <p className="text-sm text-muted-foreground text-center py-4">{emptyMessage}</p>
+            <p className="text-sm text-muted-foreground text-center py-8 bg-muted/10 rounded-md border border-dashed border-border/50">{emptyMessage}</p>
           )}
         </div>
       </CardContent>
@@ -255,16 +266,24 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
 
 export default function Elenchi() {
   return (
-    <div className="p-6 space-y-6 overflow-y-auto h-full">
-      <div className="flex items-center gap-3">
-        <ListChecks className="w-6 h-6 sidebar-icon-gold" />
-        <h1 className="text-2xl font-bold" data-testid="text-elenchi-page-title">Elenchi</h1>
+    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg icon-gold-bg flex items-center justify-center shadow-sm">
+            <ListChecks className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight" data-testid="text-elenchi-page-title">
+              Elenchi
+            </h1>
+            <p className="text-sm text-muted-foreground" data-testid="text-elenchi-description">
+              Gestisci le voci delle tendine personalizzabili utilizzate nelle schede attività e iscrizioni.
+            </p>
+          </div>
+        </div>
       </div>
-      <p className="text-sm text-muted-foreground" data-testid="text-elenchi-description">
-        Gestisci le voci delle tendine personalizzabili utilizzate nelle schede attivit&agrave; e iscrizioni.
-      </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <EditableListSection
           title="Stato"
           queryKey="/api/activity-statuses"

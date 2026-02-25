@@ -218,7 +218,7 @@ export function setupAuth(app: Express) {
                                 description: "Operatore base",
                                 permissions: {
                                     "/": "write",
-                                    "/iscritti": "write",
+                                    "/anagrafica_a_lista": "write",
                                     "/corsi": "write",
                                     "/pagamenti": "write",
                                     "/dashboard": "read"
