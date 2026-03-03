@@ -57,7 +57,7 @@ export default function MemberDashboard() {
   });
 
   const { data: enrollments } = useQuery<Enrollment[]>({
-    queryKey: ["/api/enrollments"],
+    queryKey: ["/api/enrollments?type=corsi"],
   });
 
   const { data: courses } = useQuery<any[]>({

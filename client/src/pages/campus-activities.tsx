@@ -7,8 +7,9 @@ export default function CampusActivities() {
       subtitle="Gestisci campus e programmi intensivi"
       apiEndpoint="/api/campus-activities"
       categoryApiEndpoint="/api/campus-categories"
-      itemLabel="campus"
-      itemLabelPlural="campus"
+      itemLabel="campus/centro estivo"
+      itemLabelPlural="campus e centri estivi"
+      baseRoute="/scheda-campus"
       testIdPrefix="campus-activity"
     />
   );

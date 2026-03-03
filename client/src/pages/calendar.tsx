@@ -115,7 +115,7 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
     const [memberSearchQuery, setMemberSearchQuery] = useState("");
 
     const { data: enrollments } = useQuery<any[]>({
-        queryKey: ["/api/enrollments"],
+        queryKey: ["/api/enrollments?type=corsi"],
     });
 
     const { data: searchResults } = useQuery<{ members: Member[], total: number }>({
@@ -137,7 +137,7 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
             });
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
             toast({ title: "Iscrizione aggiunta con successo" });
             setIsAddingEnrollment(false);
             setMemberSearchQuery("");
@@ -152,7 +152,7 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
             await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`, undefined);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
             toast({ title: "Iscrizione rimossa con successo" });
         },
         onError: (error: Error) => {
@@ -161,7 +161,7 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
     });
 
     const courseEnrollments = enrollments
-        ?.filter(e => e.courseId === courseId && e.status === 'active')
+        ?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status))
         .map(e => ({
             enrollmentId: e.id,
             memberId: e.memberId,
@@ -245,7 +245,7 @@ function AttendancesTab({ courseId }: { courseId: number }) {
     const { toast } = useToast();
     const { data: attendances } = useQuery<Attendance[]>({ queryKey: ["/api/attendances"] });
     const { data: membersData } = useQuery<{ members: Member[] }>({ queryKey: ["/api/members"] });
-    const { data: enrollments } = useQuery<any[]>({ queryKey: ["/api/enrollments"] });
+    const { data: enrollments } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=corsi"] });
 
     const deleteAttendanceMutation = useMutation({
         mutationFn: async (id: number) => apiRequest("DELETE", `/api/attendances/${id}`, undefined),
@@ -367,7 +367,7 @@ export default function CalendarPage() {
     });
 
     const { data: enrollments } = useQuery<any[]>({
-        queryKey: ["/api/enrollments"],
+        queryKey: ["/api/enrollments?type=corsi"],
     });
 
     const { data: quotes } = useQuery<Quote[]>({ // Fetch quotes
@@ -640,7 +640,7 @@ export default function CalendarPage() {
     const isLoading = coursesLoading || studiosLoading || instructorsLoading || categoriesLoading;
 
     const getCourseStats = (courseId: number) => {
-        const courseEnrollments = enrollments?.filter(e => e.courseId === courseId && e.status === 'active') || [];
+        const courseEnrollments = enrollments?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status)) || [];
         const men = courseEnrollments.filter(e => {
             const g = e.memberGender?.toUpperCase();
             return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
@@ -653,7 +653,7 @@ export default function CalendarPage() {
     };
 
     const getWorkshopStats = (workshopId: number) => {
-        const enrolls = workshopEnrollments?.filter(e => e.workshopId === workshopId && e.status === 'active') || [];
+        const enrolls = workshopEnrollments?.filter(e => e.workshopId === workshopId && (e.status === 'active' || !e.status)) || [];
         const men = enrolls.filter(e => {
             const g = e.memberGender?.toUpperCase();
             return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
@@ -1755,23 +1755,6 @@ export default function CalendarPage() {
                                             <Select
                                                 value={editForm.secondaryInstructor1Id?.toString() || "none"}
                                                 onValueChange={val => setEditForm((prev: any) => ({ ...prev, secondaryInstructor1Id: val === "none" ? null : parseInt(val) }))}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Nessuno" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="none">Nessuno</SelectItem>
-                                                    {instructors?.map(i => (
-                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.firstName} {i.lastName}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-sm text-muted-foreground">Secondario 2 (opzionale)</Label>
-                                            <Select
-                                                value={editForm.secondaryInstructor2Id?.toString() || "none"}
-                                                onValueChange={val => setEditForm((prev: any) => ({ ...prev, secondaryInstructor2Id: val === "none" ? null : parseInt(val) }))}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Nessuno" />

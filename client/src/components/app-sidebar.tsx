@@ -24,7 +24,7 @@ import {
   Activity,
   ClipboardList,
   BookOpen,
-  MessageSquare,
+  MessageSquarePlus,
   StickyNote,
   Ticket,
   CalendarRange,
@@ -49,12 +49,14 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { StarGemCopilot } from "@/components/star-gem-copilot";
 import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
 
 const registrationItems = [
   {
     title: "Maschera Input",
-    url: "/maschera-generale",
+    url: "/",
     icon: Users,
   },
   {
@@ -67,28 +69,42 @@ const registrationItems = [
     url: "/attivita",
     icon: Activity,
   },
+  {
+    title: "Iscritti per Attività",
+    url: "/iscritti_per_attivita",
+    icon: Activity,
+  },
 ];
 
 const teachingItems = [
+  /*
   {
     title: "Corsi",
     url: "/corsi",
     icon: Calendar,
   },
+  */
   {
     title: "Calendario Corsi",
     url: "/calendario",
     icon: CalendarFold,
   },
+  /*
   {
     title: "Workshops",
     url: "/workshops",
     icon: Sparkles,
   },
+  */
   {
     title: "Studios/Sale",
     url: "/studios",
     icon: Building2,
+  },
+  {
+    title: "Affitto Studio Medico",
+    url: "/affitto-studio",
+    icon: Stethoscope,
   },
   {
     title: "Prenotazioni Sale",
@@ -104,6 +120,11 @@ const teachingItems = [
     title: "Date/Programmazione",
     url: "/programmazione",
     icon: Clock,
+  },
+  {
+    title: "Servizi Prenotabili",
+    url: "/booking-services",
+    icon: Sparkles,
   },
 ];
 
@@ -129,14 +150,24 @@ const secretariatItems = [
     icon: ScanBarcode,
   },
   {
-    title: "Affitto Studio Medico",
-    url: "/affitto-studio",
-    icon: Stethoscope,
+    title: "Commenti Team",
+    url: "/commenti",
+    icon: MessageSquarePlus,
   },
   {
-    title: "Iscritti per Attività",
-    url: "/iscritti_per_attivita",
-    icon: Activity,
+    title: "Inserisci Nota",
+    url: "/inserisci-nota",
+    icon: StickyNote,
+  },
+  {
+    title: "Knowledge",
+    url: "/knowledge-base",
+    icon: BookOpen,
+  },
+  {
+    title: "ToDoList",
+    url: "/todo-list",
+    icon: FileText,
   },
 ];
 
@@ -150,26 +181,6 @@ const analysisItems = [
     title: "Report & Statistiche",
     url: "/report",
     icon: BarChart3,
-  },
-  {
-    title: "Elenchi",
-    url: "/elenchi",
-    icon: List,
-  },
-  {
-    title: "Commento",
-    url: "/commento",
-    icon: MessageSquare,
-  },
-  {
-    title: "Inserisci Nota",
-    url: "/inserisci-nota",
-    icon: StickyNote,
-  },
-  {
-    title: "test Gae",
-    url: "/test-gae",
-    icon: Settings,
   },
 ];
 
@@ -188,17 +199,17 @@ const accountingItems = [
 
 const configItems = [
   {
-    title: "Tipi di Pagamento",
-    url: "/metodi-pagamento",
-    icon: Wallet,
-  },
-  {
-    title: "Servizi Prenotabili",
-    url: "/booking-services",
-    icon: Sparkles,
+    title: "Elenchi",
+    url: "/elenchi",
+    icon: List, // Si potrebbe usare una matitina ma la list va bene. O custom class.
   },
   {
     title: "Quote/Listini",
+    url: "/listini-old",
+    icon: Database,
+  },
+  {
+    title: "Listini (V. Precedente)",
     url: "/listini",
     icon: Database,
   },
@@ -216,16 +227,6 @@ const configItems = [
     title: "Promo/Codici Sconto",
     url: "/promo-sconti",
     icon: Ticket,
-  },
-  {
-    title: "Knowledge",
-    url: "/knowledge-base",
-    icon: BookOpen,
-  },
-  {
-    title: "Cose da Fare",
-    url: "/cose-da-fare",
-    icon: FileText,
   },
 ];
 
@@ -259,6 +260,17 @@ export function AppSidebar() {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
 
+  const { data: latestActivity } = useQuery<{
+    action: string;
+    entityType: string;
+    entityId: string;
+    createdAt: string;
+    details: any;
+    user: { firstName: string; lastName: string; username: string };
+  }>({
+    queryKey: ["/api/latest-activity"],
+  });
+
   const filteredRegistration = registrationItems.filter(item => hasPermission(user, item.url));
   const filteredTeaching = teachingItems.filter(item => hasPermission(user, item.url));
   const filteredSecretariat = secretariatItems.filter(item => hasPermission(user, item.url));
@@ -269,17 +281,20 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="p-4 border-b border-sidebar-border flex flex-row items-center gap-3">
-        <img src="/logo_stargem.png" alt="StarGem" className="w-8 h-8 object-contain" />
-        <h1 className="text-lg font-bold text-sidebar-foreground tracking-tight">
-          StarGem
-        </h1>
+      <SidebarHeader className="p-0 border-b border-sidebar-border flex items-center justify-center h-10 overflow-hidden">
+        <Link href="/maschera-input" className="cursor-pointer block flex items-center justify-center h-full">
+          <img
+            src="/logo_stargem.png"
+            alt="StarGem"
+            className="h-16 w-auto object-contain mix-blend-multiply hover:opacity-90 transition-transform scale-125"
+          />
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>
         {filteredRegistration.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Gestione Anagrafica</SidebarGroupLabel>
+            {/* <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Gestione Anagrafica</SidebarGroupLabel> */}
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredRegistration.map((item) => {
@@ -336,6 +351,17 @@ export function AppSidebar() {
             <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Segreteria</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <div className="flex items-center gap-2 px-2 py-1.5 w-full justify-start cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
+                      <StarGemCopilot className="h-4 w-4 bg-transparent outline-none ring-0 shadow-none border-0 p-0" />
+                      {/* The StarGemCopilot component itself contains the dropdown structure. 
+                           It defaults to just showing the icon. To make "StarGem CoPilot" text visible and clickable alongside it,
+                           we apply some styling. */}
+                      <span className="text-sm font-medium">StarGem CoPilot</span>
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 {filteredSecretariat.map((item) => {
                   const isActive = location === item.url;
                   return (
@@ -499,6 +525,28 @@ export function AppSidebar() {
             >
               <LogOut className="w-4 h-4" />
             </Button>
+          </div>
+        )}
+        {latestActivity && (
+          <div className="mt-4 pt-4 border-t border-sidebar-border text-[10px] text-muted-foreground/80 leading-tight space-y-1 select-none">
+            <p className="flex justify-between">
+              <span>Aggiornato:</span>
+              <span className="font-medium">{new Date(latestActivity.createdAt).toLocaleString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Da chi:</span>
+              <span className="font-medium truncate max-w-[100px] text-right">
+                {latestActivity.user?.firstName || latestActivity.user?.lastName
+                  ? `${latestActivity.user.firstName || ""} ${latestActivity.user.lastName || ""}`.trim()
+                  : latestActivity.user?.username || "Sistema"}
+              </span>
+            </p>
+            <p className="flex justify-between">
+              <span>Versione:</span>
+              <span className="font-medium truncate max-w-[100px] text-right" title={`${latestActivity.action} ${latestActivity.entityType} #${latestActivity.entityId}`}>
+                {latestActivity.action} {latestActivity.entityType}
+              </span>
+            </p>
           </div>
         )}
       </SidebarFooter>

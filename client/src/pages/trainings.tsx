@@ -9,6 +9,7 @@ export default function Trainings() {
       categoryApiEndpoint="/api/training-categories"
       itemLabel="allenamento"
       itemLabelPlural="allenamenti"
+      baseRoute="/scheda-allenamento"
       testIdPrefix="training"
     />
   );

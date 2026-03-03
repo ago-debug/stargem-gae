@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useLocation } from "wouter";
+import { EnrollmentDetailBadge } from "@/components/multi-select-enrollment-details";
 import {
   Calendar,
   Sparkles,
@@ -25,13 +26,15 @@ import {
   Search,
   GraduationCap,
   Edit,
+  Database,
 } from "lucide-react";
-import type { Course, Workshop, Member } from "@shared/schema";
+import type { Course, Workshop, Member, PaidTrial, FreeTrial, SingleLesson, SundayActivity, Training, IndividualLesson, CampusActivity, Recital, VacationStudy, BookingService } from "@shared/schema";
 
 const activityMenuItems = [
   { id: "panoramica", label: "Panoramica", icon: Activity },
   { id: "corsi", label: "Corsi", icon: Calendar },
   { id: "workshop", label: "Workshop", icon: Sparkles },
+  { id: "servizi", label: "Servizi Extra", icon: Database },
   { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard },
   { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift },
   { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen },
@@ -51,24 +54,83 @@ export default function IscrittiPerAttivita() {
 
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
   const { data: workshops, isLoading: workshopsLoading } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
-  const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments"] });
+  const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=corsi"] });
   const { data: wsEnrollments, isLoading: wsEnrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/workshop-enrollments"] });
 
-  const isLoading = coursesLoading || workshopsLoading || enrollmentsLoading || wsEnrollmentsLoading;
+  const { data: bookingServices, isLoading: servLoading } = useQuery<BookingService[]>({ queryKey: ["/api/booking-services"] });
+  const { data: paidTrials, isLoading: ptLoading } = useQuery<PaidTrial[]>({ queryKey: ["/api/paid-trials"] });
+  const { data: freeTrials, isLoading: ftLoading } = useQuery<FreeTrial[]>({ queryKey: ["/api/free-trials"] });
+  const { data: singleLessons, isLoading: slLoading } = useQuery<SingleLesson[]>({ queryKey: ["/api/single-lessons"] });
+  const { data: sundayActivities, isLoading: saLoading } = useQuery<SundayActivity[]>({ queryKey: ["/api/sunday-activities"] });
+  const { data: trainings, isLoading: trLoading } = useQuery<Training[]>({ queryKey: ["/api/trainings"] });
+  const { data: individualLessons, isLoading: ilLoading } = useQuery<IndividualLesson[]>({ queryKey: ["/api/individual-lessons"] });
+  const { data: campusActivities, isLoading: caLoading } = useQuery<CampusActivity[]>({ queryKey: ["/api/campus-activities"] });
+  const { data: recitals, isLoading: recLoading } = useQuery<Recital[]>({ queryKey: ["/api/recitals"] });
+  const { data: vacationStudies, isLoading: vsLoading } = useQuery<VacationStudy[]>({ queryKey: ["/api/vacation-studies"] });
+
+  const { data: servEnrollments, isLoading: servEnrLoading } = useQuery<any[]>({ queryKey: ["/api/booking-service-enrollments"] });
+  const { data: ptEnrollments, isLoading: ptEnrLoading } = useQuery<any[]>({ queryKey: ["/api/paid-trial-enrollments"] });
+  const { data: ftEnrollments, isLoading: ftEnrLoading } = useQuery<any[]>({ queryKey: ["/api/free-trial-enrollments"] });
+  const { data: slEnrollments, isLoading: slEnrLoading } = useQuery<any[]>({ queryKey: ["/api/single-lesson-enrollments"] });
+  const { data: saEnrollments, isLoading: saEnrLoading } = useQuery<any[]>({ queryKey: ["/api/sunday-activity-enrollments"] });
+  const { data: trEnrollments, isLoading: trEnrLoading } = useQuery<any[]>({ queryKey: ["/api/training-enrollments"] });
+  const { data: ilEnrollments, isLoading: ilEnrLoading } = useQuery<any[]>({ queryKey: ["/api/individual-lesson-enrollments"] });
+  const { data: caEnrollments, isLoading: caEnrLoading } = useQuery<any[]>({ queryKey: ["/api/campus-enrollments"] });
+  const { data: recEnrollments, isLoading: recEnrLoading } = useQuery<any[]>({ queryKey: ["/api/recital-enrollments"] });
+  const { data: vsEnrollments, isLoading: vsEnrLoading } = useQuery<any[]>({ queryKey: ["/api/vacation-study-enrollments"] });
+
+  interface ExtraDataConfig {
+    data: any[] | undefined;
+    loading: boolean;
+    link: string;
+    enrollments: any[] | undefined;
+    enrollLoading: boolean;
+    foreignKey: string;
+  }
+
+  const extraActivitiesMap: Record<string, ExtraDataConfig> = {
+    "servizi": { data: bookingServices, loading: servLoading, link: "/scheda-servizio", enrollments: servEnrollments, enrollLoading: servEnrLoading, foreignKey: "serviceId" },
+    "prove-pagamento": { data: paidTrials, loading: ptLoading, link: "/scheda-prova-pagamento", enrollments: ptEnrollments, enrollLoading: ptEnrLoading, foreignKey: "paidTrialId" },
+    "prove-gratuite": { data: freeTrials, loading: ftLoading, link: "/scheda-prova-gratuita", enrollments: ftEnrollments, enrollLoading: ftEnrLoading, foreignKey: "freeTrialId" },
+    "lezioni-singole": { data: singleLessons, loading: slLoading, link: "/scheda-lezione-singola", enrollments: slEnrollments, enrollLoading: slEnrLoading, foreignKey: "singleLessonId" },
+    "domeniche-movimento": { data: sundayActivities, loading: saLoading, link: "/scheda-domenica", enrollments: saEnrollments, enrollLoading: saEnrLoading, foreignKey: "sundayActivityId" },
+    "allenamenti": { data: trainings, loading: trLoading, link: "/scheda-allenamento", enrollments: trEnrollments, enrollLoading: trEnrLoading, foreignKey: "trainingId" },
+    "lezioni-individuali": { data: individualLessons, loading: ilLoading, link: "/scheda-lezione-individuale", enrollments: ilEnrollments, enrollLoading: ilEnrLoading, foreignKey: "individualLessonId" },
+    "campus": { data: campusActivities, loading: caLoading, link: "/scheda-campus", enrollments: caEnrollments, enrollLoading: caEnrLoading, foreignKey: "campusActivityId" },
+    "saggi": { data: recitals, loading: recLoading, link: "/scheda-saggio", enrollments: recEnrollments, enrollLoading: recEnrLoading, foreignKey: "recitalId" },
+    "vacanze-studio": { data: vacationStudies, loading: vsLoading, link: "/scheda-vacanza-studio", enrollments: vsEnrollments, enrollLoading: vsEnrLoading, foreignKey: "vacationStudyId" },
+  };
+
+  const isExtraLoading = Object.values(extraActivitiesMap).some(config => config.loading || config.enrollLoading);
+  const isLoading = coursesLoading || workshopsLoading || enrollmentsLoading || wsEnrollmentsLoading || isExtraLoading;
 
   const activeCourses = courses?.filter(c => c.active) || [];
   const activeWorkshops = workshops?.filter(w => w.active) || [];
 
-  const totalCourseEnrollments = enrollments?.filter(e => e.status === 'active').length || 0;
-  const totalWsEnrollments = wsEnrollments?.filter(e => e.status === 'active').length || 0;
+  const activeEnrollments = enrollments?.filter(e => e.status === 'active' || !e.status) || [];
+  const totalCourseEnrollments = activeEnrollments.filter(e => e.courseId && courses?.some(c => c.id === e.courseId && c.active)).length;
+  // Calculate specific workshop enrollments by checking the workshop-enrollments endpoint specifically
+  const totalWsEnrollments = Array.isArray(wsEnrollments) ? wsEnrollments.filter(e => (e.status === 'active' || !e.status) && workshops?.some(w => w.id === e.workshopId && w.active)).length : 0;
+
   const totalActiveEnrollmentsCount = totalCourseEnrollments + totalWsEnrollments;
+
+  let dynamicEnrollmentsCount = 0;
+  if (activeTab === 'panoramica') {
+    dynamicEnrollmentsCount = totalActiveEnrollmentsCount;
+  } else if (activeTab === 'corsi') {
+    dynamicEnrollmentsCount = totalCourseEnrollments;
+  } else if (activeTab === 'workshop') {
+    dynamicEnrollmentsCount = totalWsEnrollments;
+  } else {
+    dynamicEnrollmentsCount = 0; // Other tabs have no enrollments mapped by the universal backend endpoint yet
+  }
 
   const getEnrollmentsForActivity = (activityId: number, isWorkshop: boolean = false) => {
     const relevantEnrollments = isWorkshop ? wsEnrollments : enrollments;
     if (!relevantEnrollments) return [];
 
     return relevantEnrollments
-      .filter(e => e.status === 'active')
+      .filter(e => e.status === 'active' || !e.status)
       .filter(e => isWorkshop ? e.workshopId === activityId : e.courseId === activityId)
       .map(e => ({
         enrollmentId: e.id,
@@ -77,6 +139,7 @@ export default function IscrittiPerAttivita() {
         lastName: e.memberLastName || "N/A",
         email: e.memberEmail,
         startDate: e.startDate || e.enrollmentDate,
+        details: e.details || [],
       }));
   };
 
@@ -122,13 +185,13 @@ export default function IscrittiPerAttivita() {
             </div>
             <div className="flex items-center gap-4">
               <Button
-                variant={showOnlyWithEnrollments ? "default" : "secondary"}
+                variant={showOnlyWithEnrollments ? "default" : "outline"}
                 onClick={() => setShowOnlyWithEnrollments(!showOnlyWithEnrollments)}
                 className={`text-lg px-4 py-2 h-auto flex items-center gap-2 transition-all ${showOnlyWithEnrollments ? "bg-amber-600 hover:bg-amber-700 text-white border-amber-700 shadow-md scale-105" : "hover:bg-amber-100"}`}
                 data-testid="button-toggle-active-enrollments"
               >
                 <Users className={`w-4 h-4 ${showOnlyWithEnrollments ? "text-white" : "sidebar-icon-gold"}`} />
-                {totalActiveEnrollmentsCount} iscrizioni attive
+                {dynamicEnrollmentsCount} iscrizioni attive
               </Button>
             </div>
           </div>
@@ -283,8 +346,8 @@ export default function IscrittiPerAttivita() {
                                   {courseEnrollments.length} {courseEnrollments.length === 1 ? 'iscritto' : 'iscritti'}
                                 </Badge>
                                 <Link href={`/scheda-corso?courseId=${course.id}`}>
-                                  <Button variant="ghost" size="sm">
-                                    Scheda Corso
+                                  <Button size="sm" className="bg-[#2c3e50] text-[#e0e0e0] hover:bg-[#34495e]" data-testid={`button-scheda-corso-${course.id}`}>
+                                    Scheda
                                   </Button>
                                 </Link>
                               </div>
@@ -303,6 +366,7 @@ export default function IscrittiPerAttivita() {
                                       <TableHead>Nome</TableHead>
                                       <TableHead>Cognome</TableHead>
                                       <TableHead>Email</TableHead>
+                                      <TableHead>Dettagli</TableHead>
                                       <TableHead>Data Iscrizione</TableHead>
                                       <TableHead className="text-right">Azioni</TableHead>
                                     </TableRow>
@@ -313,6 +377,13 @@ export default function IscrittiPerAttivita() {
                                         <TableCell className="font-medium">{enrollment.firstName}</TableCell>
                                         <TableCell>{enrollment.lastName}</TableCell>
                                         <TableCell>{enrollment.email || '-'}</TableCell>
+                                        <TableCell>
+                                          <div className="flex flex-wrap gap-1">
+                                            {enrollment.details?.map((detail: string) => (
+                                              <EnrollmentDetailBadge key={detail} name={detail} />
+                                            ))}
+                                          </div>
+                                        </TableCell>
                                         <TableCell>
                                           {enrollment.startDate
                                             ? new Date(enrollment.startDate).toLocaleDateString('it-IT')
@@ -412,9 +483,9 @@ export default function IscrittiPerAttivita() {
                                 <Badge variant="secondary">
                                   {workshopEnrollments.length} {workshopEnrollments.length === 1 ? 'iscritto' : 'iscritti'}
                                 </Badge>
-                                <Link href={`/workshops?workshopId=${workshop.id}`}>
-                                  <Button variant="ghost" size="sm">
-                                    Scheda Workshop
+                                <Link href={`/scheda-workshop?workshopId=${workshop.id}`}>
+                                  <Button size="sm" className="bg-[#2c3e50] text-[#e0e0e0] hover:bg-[#34495e]" data-testid={`button-scheda-workshop-${workshop.id}`}>
+                                    Scheda
                                   </Button>
                                 </Link>
                               </div>
@@ -482,17 +553,149 @@ export default function IscrittiPerAttivita() {
             </Card>
           </TabsContent>
 
-          {activityMenuItems.filter(i => i.id !== "panoramica" && i.id !== "corsi" && i.id !== "workshop").map((item) => (
-            <TabsContent key={item.id} value={item.id} className="space-y-6 mt-0">
-              <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
-                  <item.icon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-2">Sezione in allestimento</p>
-                  <p className="text-sm mb-4">La visualizzazione degli iscritti per {item.label.toLowerCase()} sarà disponibile a breve.</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
+          {activityMenuItems.filter(i => i.id !== "panoramica" && i.id !== "corsi" && i.id !== "workshop").map((item) => {
+            const config = extraActivitiesMap[item.id];
+
+            // Applichiamo filtro ricerca per lo SKU / Nome
+            const filteredData = config?.data?.filter(activity => {
+              const matchesSearch = activity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (activity.sku && activity.sku.toLowerCase().includes(searchQuery.toLowerCase()));
+              if (!matchesSearch) return false;
+              return true;
+            });
+
+            const activityDataWithEnrollments = filteredData?.map(activity => {
+              const activityEnrollments = config.enrollments?.filter(e => e[config.foreignKey] === activity.id && (e.status === 'active' || !e.status)) || [];
+              return { ...activity, activityEnrollments };
+            }).filter(activity => {
+              if (showOnlyWithEnrollments && activity.activityEnrollments.length === 0) return false;
+              return true;
+            });
+
+            return (
+              <TabsContent key={item.id} value={item.id} className="space-y-6 mt-0">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                          placeholder={`Cerca ${item.label.toLowerCase()} per nome o SKU...`}
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {config?.loading ? (
+                      <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="space-y-2">
+                            <Skeleton className="h-8 w-full" />
+                            <Skeleton className="h-24 w-full" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : activityDataWithEnrollments && activityDataWithEnrollments.length > 0 ? (
+                      <div className="space-y-6">
+                        {activityDataWithEnrollments.map(({ activityEnrollments, ...activity }) => (
+                          <Card key={activity.id} className="overflow-hidden">
+                            <CardHeader className="bg-muted/50">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-3">
+                                  <div className="p-2 bg-primary/10 rounded-lg">
+                                    <item.icon className="w-5 h-5 text-primary" />
+                                  </div>
+                                  <div>
+                                    <h3 className="text-lg font-semibold">{activity.name}</h3>
+                                    {activity.sku && (
+                                      <p className="text-sm text-muted-foreground">SKU: {activity.sku}</p>
+                                    )}
+                                    {activity.dayOfWeek && activity.startTime && (
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {activity.dayOfWeek} • {activity.startTime}
+                                        {activity.endTime && ` - ${activity.endTime}`}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary">
+                                    {activityEnrollments.length} iscritti
+                                  </Badge>
+                                  <Link href={`${config.link}?activityId=${activity.id}`}>
+                                    <Button size="sm" className="bg-[#2c3e50] text-[#e0e0e0] hover:bg-[#34495e]" data-testid={`button-scheda-attivita-${activity.id}`}>
+                                      Scheda
+                                    </Button>
+                                  </Link>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="pt-4">
+                              {activityEnrollments.length === 0 ? (
+                                <p className="text-sm text-muted-foreground text-center py-4">
+                                  Nessun iscritto per quest'attività
+                                </p>
+                              ) : (
+                                <div className="border rounded-lg overflow-hidden">
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead>Nome</TableHead>
+                                        <TableHead>Cognome</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Dettagli</TableHead>
+                                        <TableHead>Data Iscrizione</TableHead>
+                                        <TableHead className="text-right">Azioni</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {activityEnrollments.map((enroll: any) => (
+                                        <TableRow key={enroll.id}>
+                                          <TableCell className="font-medium">{enroll.memberFirstName || '-'}</TableCell>
+                                          <TableCell>{enroll.memberLastName || '-'}</TableCell>
+                                          <TableCell>{enroll.memberEmail || '-'}</TableCell>
+                                          <TableCell>
+                                            <span className="text-xs text-muted-foreground">-</span>
+                                          </TableCell>
+                                          <TableCell>
+                                            {enroll.enrollmentDate
+                                              ? new Date(enroll.enrollmentDate).toLocaleDateString('it-IT')
+                                              : '-'}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            <Link href={`/anagrafica_a_lista?search=${enroll.memberLastName || ''}`}>
+                                              <Button variant="ghost" size="sm">
+                                                Profilo Completo
+                                              </Button>
+                                            </Link>
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <item.icon className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                        <p className="text-muted-foreground">
+                          {searchQuery ? `Nessuna ${item.label.toLowerCase()} trovata` : `Nessuna ${item.label.toLowerCase()} disponibile`}
+                          {showOnlyWithEnrollments && " con iscrizioni attive"}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            )
+          })}
         </Tabs>
       </div>
     </div>

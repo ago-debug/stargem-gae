@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Bell, MessageSquarePlus, StickyNote, Check, CheckCheck } from "lucide-react";
 import { useLocation } from "wouter";
-import type { TeamNotification } from "@shared/schema";
+import type { Notification } from "@shared/schema";
 
 export function NotificationBell() {
   const [, setLocation] = useLocation();
@@ -16,7 +16,7 @@ export function NotificationBell() {
     refetchInterval: 30000,
   });
 
-  const { data: notifications = [] } = useQuery<TeamNotification[]>({
+  const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ["/api/team-notifications"],
     enabled: isOpen,
   });
@@ -43,7 +43,7 @@ export function NotificationBell() {
 
   const unreadCount = countData?.count || 0;
 
-  const handleNotificationClick = (notification: TeamNotification) => {
+  const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
       markReadMutation.mutate(notification.id);
     }
@@ -116,9 +116,8 @@ export function NotificationBell() {
               <button
                 key={n.id}
                 onClick={() => handleNotificationClick(n)}
-                className={`w-full text-left px-3 py-2.5 border-b last:border-b-0 hover-elevate flex items-start gap-2.5 ${
-                  !n.isRead ? "bg-amber-50 dark:bg-amber-950/20" : ""
-                }`}
+                className={`w-full text-left px-3 py-2.5 border-b last:border-b-0 hover-elevate flex items-start gap-2.5 ${!n.isRead ? "bg-amber-50 dark:bg-amber-950/20" : ""
+                  }`}
                 data-testid={`notification-item-${n.id}`}
               >
                 <div className="shrink-0 mt-0.5">

@@ -9,6 +9,7 @@ export default function SundayActivities() {
       categoryApiEndpoint="/api/sunday-categories"
       itemLabel="attività domenicale"
       itemLabelPlural="attività domenicali"
+      baseRoute="/scheda-domenica"
       testIdPrefix="sunday-activity"
     />
   );

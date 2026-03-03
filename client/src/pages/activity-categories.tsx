@@ -13,6 +13,7 @@ import {
   Music,
   FolderTree,
   ArrowLeft,
+  Database,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -34,6 +35,7 @@ const categoryPages: CategoryInfo[] = [
   { id: "campus", label: "Categorie Campus", icon: Users, color: "icon-gold-bg", url: "/categorie-campus", apiEndpoint: "/api/campus-categories" },
   { id: "saggi", label: "Categorie Saggi", icon: Award, color: "icon-gold-bg", url: "/categorie-saggi", apiEndpoint: "/api/recital-categories" },
   { id: "vacanze", label: "Categorie Vacanze Studio", icon: Music, color: "icon-gold-bg", url: "/categorie-vacanze-studio", apiEndpoint: "/api/vacation-categories" },
+  { id: "servizi", label: "Categorie Servizi Extra", icon: Database, color: "icon-gold-bg", url: "/categorie-servizi", apiEndpoint: "/api/booking-service-categories" },
 ];
 
 type AnyCategory = { id: number; name: string; parentId?: number | null };

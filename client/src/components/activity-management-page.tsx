@@ -11,14 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { cn } from "@/lib/utils";
+import { cn, parseStatusTags } from "@/lib/utils";
+import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Download, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
-import type { Instructor, Studio, ActivityStatus } from "@shared/schema";
+import type { Instructor, Studio, ActivityStatus, Quote } from "@shared/schema";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -49,6 +50,7 @@ export interface ActivityItem {
   name: string;
   description: string | null;
   categoryId: number | null;
+  quoteId: number | null;
   studioId: number | null;
   instructorId: number | null;
   secondaryInstructor1Id: number | null;
@@ -75,6 +77,7 @@ interface ActivityManagementPageProps {
   categoryApiEndpoint: string;
   itemLabel: string;
   itemLabelPlural: string;
+  baseRoute: string; // The route prefix for the detail page
   testIdPrefix: string;
 }
 
@@ -85,9 +88,11 @@ export default function ActivityManagementPage({
   categoryApiEndpoint,
   itemLabel,
   itemLabelPlural,
+  baseRoute,
   testIdPrefix,
 }: ActivityManagementPageProps) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const initialSearch = urlParams.get('search') || "";
@@ -100,6 +105,12 @@ export default function ActivityManagementPage({
   const [selectedEndTime, setSelectedEndTime] = useState<string>("");
   const [selectedRecurrence, setSelectedRecurrence] = useState<string>("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string>("");
+  const [price, setPrice] = useState<string>("");
+
+  const { data: quotes } = useQuery<Quote[]>({
+    queryKey: ["/api/quotes"],
+  });
 
   const { data: items, isLoading } = useQuery<ActivityItem[]>({
     queryKey: [apiEndpoint],
@@ -175,7 +186,8 @@ export default function ActivityManagementPage({
       studioId: formData.get("studioId") ? parseInt(formData.get("studioId") as string) : null,
       instructorId: formData.get("instructorId") ? parseInt(formData.get("instructorId") as string) : null,
       secondaryInstructor1Id: formData.get("secondaryInstructor1Id") ? parseInt(formData.get("secondaryInstructor1Id") as string) : null,
-      price: formData.get("price") ? formData.get("price") as string : null,
+      quoteId: selectedQuoteId ? parseInt(selectedQuoteId) : null,
+      price: price || null,
       maxCapacity: formData.get("maxCapacity") ? parseInt(formData.get("maxCapacity") as string) : null,
       dayOfWeek: selectedDayOfWeek || null,
       startTime: selectedStartTime || null,
@@ -201,7 +213,9 @@ export default function ActivityManagementPage({
     setSelectedStartTime(item.startTime || "");
     setSelectedEndTime(item.endTime || "");
     setSelectedRecurrence(item.recurrenceType || "");
-    setSelectedStatuses(item.statusTags || []);
+    setSelectedStatuses(parseStatusTags(item.statusTags));
+    setSelectedQuoteId(item.quoteId?.toString() || "");
+    setPrice(item.price || "");
     setIsFormOpen(true);
   };
 
@@ -213,6 +227,8 @@ export default function ActivityManagementPage({
     setSelectedEndTime("");
     setSelectedRecurrence("");
     setSelectedStatuses([]);
+    setSelectedQuoteId("");
+    setPrice("");
   };
 
   const filteredItems = items?.filter((item) =>
@@ -232,8 +248,9 @@ export default function ActivityManagementPage({
       }
       case "price": return Number(item.price) || 0;
       case "capacity": return item.maxCapacity || 0;
+      case "enrollment": return item.currentEnrollment || 0;
       case "period": return item.startDate;
-      case "status": return item.statusTags?.join(", ") || "";
+      case "status": return parseStatusTags(item.statusTags).join(", ");
       default: return null;
     }
   };
@@ -243,7 +260,7 @@ export default function ActivityManagementPage({
   const exportToCSV = () => {
     if (!filteredItems.length) return;
 
-    const headers = ["Nome", "Descrizione", "Categoria", "Staff/Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
+    const headers = ["Nome", "Descrizione", "Categoria", "Staff/Insegnante", "Prezzo", "Iscritti", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
 
     const rows = filteredItems.map(item => {
       const category = categories?.find(c => c.id === item.categoryId);
@@ -257,6 +274,7 @@ export default function ActivityManagementPage({
         category?.name || "",
         instructor ? `${instructor.firstName} ${instructor.lastName}` : "",
         item.price || "",
+        item.currentEnrollment?.toString() || "0",
         item.maxCapacity || "",
         dayLabel,
         item.startTime || "",
@@ -409,9 +427,31 @@ export default function ActivityManagementPage({
             type="number"
             step="0.01"
             min="0"
-            defaultValue={defaultItem?.price || ""}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
             data-testid={`input-${testIdPrefix}-price`}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Quota Base</Label>
+          <Select value={selectedQuoteId} onValueChange={(val) => {
+            setSelectedQuoteId(val === "_none" ? "" : val);
+            const quote = quotes?.find(q => q.id.toString() === val);
+            if (quote) setPrice(Number(quote.amount).toFixed(2));
+          }}>
+            <SelectTrigger title="Seleziona Quota">
+              <SelectValue placeholder="Seleziona Quota" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_none">Nessuna Quota</SelectItem>
+              {quotes?.map((q) => (
+                <SelectItem key={q.id} value={q.id.toString()}>
+                  {q.name} (€{q.amount})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
@@ -591,117 +631,130 @@ export default function ActivityManagementPage({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder={`Cerca ${itemLabelPlural}...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-                data-testid={`input-${testIdPrefix}-search`}
-              />
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder={`Cerca ${itemLabelPlural}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                  data-testid={`input-${testIdPrefix}-search`}
+                />
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
-          ) : filteredItems.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="text-lg font-medium mb-2" data-testid={`text-${testIdPrefix}-empty`}>Nessun {itemLabel} trovato</p>
-              <p className="text-sm">Inizia aggiungendo il primo {itemLabel}</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
-                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
-                  <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
-                  <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
-                  <SortableTableHead sortKey="price" currentSort={sortConfig} onSort={handleSort}>Prezzo</SortableTableHead>
-                  <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Posti</SortableTableHead>
-                  <SortableTableHead sortKey="period" currentSort={sortConfig} onSort={handleSort}>Periodo</SortableTableHead>
-                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
-                  <TableHead className="text-right">Azioni</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedItems.map((item) => (
-                  <TableRow key={item.id} data-testid={`${testIdPrefix}-row-${item.id}`}>
-                    <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("sku") && "sorted-column-cell")} data-testid={`text-${testIdPrefix}-sku-${item.id}`}>
-                      {item.sku || "-"}
-                    </TableCell>
-                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{item.name}</TableCell>
-                    <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : undefined}>
-                      {categories?.find(c => c.id === item.categoryId)?.name || "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : undefined}>
-                      {instructors?.find(i => i.id === item.instructorId)
-                        ? `${instructors.find(i => i.id === item.instructorId)?.firstName} ${instructors.find(i => i.id === item.instructorId)?.lastName}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : undefined}>{item.price ? `€${item.price}` : "€0.00"}</TableCell>
-                    <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{item.maxCapacity || "∞"}</TableCell>
-                    <TableCell className={cn("text-sm", isSortedColumn("period") && "sorted-column-cell")}>
-                      {item.startDate && item.endDate
-                        ? `${new Date(item.startDate).toLocaleDateString('it-IT')} - ${new Date(item.endDate).toLocaleDateString('it-IT')}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
-                      <div className="flex flex-wrap gap-1">
-                        {item.statusTags && item.statusTags.length > 0 ? (
-                          item.statusTags.map((tag) => (
-                            <StatusBadge
-                              key={tag}
-                              name={tag}
-                              color={getStatusColor(tag, activityStatuses)}
-                            />
-                          ))
-                        ) : (
-                          <span className="text-xs text-muted-foreground">-</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="icon"
-                          className="gold-3d-button"
-                          onClick={() => openEditDialog(item)}
-                          data-testid={`button-${testIdPrefix}-edit-${item.id}`}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                          onClick={() => {
-                            if (confirm(`Sei sicuro di voler eliminare questo ${itemLabel}?`)) {
-                              deleteMutation.mutate(item.id);
-                            }
-                          }}
-                          data-testid={`button-${testIdPrefix}-delete-${item.id}`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
                 ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+              </div>
+            ) : filteredItems.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="text-lg font-medium mb-2" data-testid={`text-${testIdPrefix}-empty`}>Nessun {itemLabel} trovato</p>
+                <p className="text-sm">Inizia aggiungendo il primo {itemLabel}</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
+                    <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                    <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
+                    <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
+                    <SortableTableHead sortKey="price" currentSort={sortConfig} onSort={handleSort}>Prezzo</SortableTableHead>
+                    <SortableTableHead sortKey="enrollment" currentSort={sortConfig} onSort={handleSort}>Iscritti</SortableTableHead>
+                    <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Posti Max</SortableTableHead>
+                    <SortableTableHead sortKey="period" currentSort={sortConfig} onSort={handleSort}>Periodo</SortableTableHead>
+                    <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
+                    <TableHead className="text-right">Azioni</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedItems.map((item) => (
+                    <TableRow key={item.id} data-testid={`${testIdPrefix}-row-${item.id}`}>
+                      <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("sku") && "sorted-column-cell")} data-testid={`text-${testIdPrefix}-sku-${item.id}`}>
+                        {item.sku || "-"}
+                      </TableCell>
+                      <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{item.name}</TableCell>
+                      <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : undefined}>
+                        {categories?.find(c => c.id === item.categoryId)?.name || "-"}
+                      </TableCell>
+                      <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : undefined}>
+                        {instructors?.find(i => i.id === item.instructorId)
+                          ? `${instructors.find(i => i.id === item.instructorId)?.firstName} ${instructors.find(i => i.id === item.instructorId)?.lastName}`
+                          : "-"}
+                      </TableCell>
+                      <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : undefined}>{item.price ? `€${item.price}` : "€0.00"}</TableCell>
+                      <TableCell className={cn("text-center", isSortedColumn("enrollment") && "sorted-column-cell")}>
+                        <Badge variant="secondary">{item.currentEnrollment || 0}</Badge>
+                      </TableCell>
+                      <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{item.maxCapacity || "∞"}</TableCell>
+                      <TableCell className={cn("text-sm", isSortedColumn("period") && "sorted-column-cell")}>
+                        {item.startDate && item.endDate
+                          ? `${new Date(item.startDate).toLocaleDateString('it-IT')} - ${new Date(item.endDate).toLocaleDateString('it-IT')}`
+                          : "-"}
+                      </TableCell>
+                      <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
+                        <div className="flex flex-wrap gap-1">
+                          {parseStatusTags(item.statusTags).length > 0 ? (
+                            parseStatusTags(item.statusTags).map((tag) => (
+                              <StatusBadge
+                                key={tag}
+                                name={tag}
+                                color={getStatusColor(tag, activityStatuses)}
+                              />
+                            ))
+                          ) : (
+                            <span className="text-xs italic text-muted-foreground">(Nessuno stato)</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            size="sm"
+                            className="bg-[#2c3e50] text-[#e0e0e0] hover:bg-[#34495e]"
+                            onClick={() => setLocation(`${baseRoute}?activityId=${item.id}`)}
+                            data-testid={`button-${testIdPrefix}-scheda-${item.id}`}
+                          >
+                            Scheda
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="gold-3d-button text-black"
+                            onClick={() => openEditDialog(item)}
+                            data-testid={`button-${testIdPrefix}-edit-${item.id}`}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                            onClick={() => {
+                              if (confirm(`Sei sicuro di voler eliminare questo ${itemLabel}?`)) {
+                                deleteMutation.mutate(item.id);
+                              }
+                            }}
+                            data-testid={`button-${testIdPrefix}-delete-${item.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={(open) => {

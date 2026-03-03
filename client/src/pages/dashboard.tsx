@@ -40,14 +40,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
-      <div className="flex flex-col items-center gap-4 mb-6">
-        <img
-          src={logoStarGem}
-          alt="StarGem Logo"
-          className="h-32 md:h-40 object-contain mix-blend-multiply"
-          data-testid="logo-dashboard"
-        />
-      </div>
+      {/* Removed Logo */}
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Panoramica del sistema di gestione corsi</p>

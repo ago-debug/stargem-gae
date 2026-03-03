@@ -68,12 +68,7 @@ export default function AdminPanel() {
 
     const googleLoginMutation = useMutation({
         mutationFn: async () => {
-            const res = await apiRequest("GET", "/api/auth/google/url");
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.message || "Failed to get auth URL");
-            }
-            return await res.json();
+            return await apiRequest("GET", "/api/auth/google/url");
         },
         onSuccess: (data) => {
             if (data.url) {

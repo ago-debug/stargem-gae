@@ -9,6 +9,7 @@ export default function SingleLessons() {
       categoryApiEndpoint="/api/categories"
       itemLabel="lezione singola"
       itemLabelPlural="lezioni singole"
+      baseRoute="/scheda-lezione-singola"
       testIdPrefix="single-lesson"
     />
   );

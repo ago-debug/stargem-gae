@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 app.use((req, res, next) => {
   const msg = `[${new Date().toISOString()}] PID:${process.pid} ${req.method} ${req.url}\n`;
   try {
-    fs.appendFileSync('DEBUG_ALL_REQUESTS.txt', msg);
+    // DEBUG_ALL_REQUESTS disabled
   } catch (e) {
     console.error("Failed to write global debug log", e);
   }
@@ -83,7 +83,7 @@ app.use((req, res, next) => {
     if (status === 500) {
       console.error("GLOBAL ERROR HANDLER CAUGHT:", err);
       try {
-        fs.appendFileSync('DEBUG_GLOBAL_ERROR.txt', `[${new Date().toISOString()}] ${err.stack || err}\n---\n`);
+        // DEBUG_GLOBAL_ERROR disabled
       } catch (e) { }
     }
 
@@ -107,7 +107,7 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || '5000', 10);
   server.listen({
     port,
-    host: "0.0.0.0",
+    host: "::",
   }, () => {
     log(`serving on port ${port}`);
   });

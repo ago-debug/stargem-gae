@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { PriceList, PriceListItem, InsertPriceList, InsertPriceListItem, Course, Workshop, BookingService, Quote, InsertQuote, insertQuoteSchema, PaidTrial } from "@shared/schema";
+import { PriceList, PriceListItem, InsertPriceList, InsertPriceListItem, Course, Workshop, BookingService, Quote, InsertQuote, insertQuoteSchema, PaidTrial, FreeTrial, SingleLesson, SundayActivity, Training, IndividualLesson, CampusActivity, Recital, VacationStudy } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertPriceListSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Calendar, Database, Search, Coins, Tag } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, Database, Search, Coins, Tag, Star, User, Users, Sun, Music, Plane, Dumbbell, PlayCircle } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,10 @@ export default function PriceLists() {
     const [selectedList, setSelectedList] = useState<PriceList | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isQuotesOpen, setIsQuotesOpen] = useState(false);
+
+    const [, params] = useRoute("/listini-base/:activityType");
+    const [, baseParams] = useRoute("/listini");
+    const activityType = params?.activityType || "corsi"; // fallback for general view
 
     const { data: priceLists, isLoading: isLoadingLists } = useQuery<PriceList[]>({
         queryKey: ["/api/price-lists"],
@@ -243,6 +248,14 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
     const { data: workshops } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
     const { data: services } = useQuery<BookingService[]>({ queryKey: ["/api/booking-services"] });
     const { data: paidTrials } = useQuery<PaidTrial[]>({ queryKey: ["/api/paid-trials"] });
+    const { data: freeTrials } = useQuery<FreeTrial[]>({ queryKey: ["/api/free-trials"] });
+    const { data: singleLessons } = useQuery<SingleLesson[]>({ queryKey: ["/api/single-lessons"] });
+    const { data: sundayActivities } = useQuery<SundayActivity[]>({ queryKey: ["/api/sunday-activities"] });
+    const { data: trainings } = useQuery<Training[]>({ queryKey: ["/api/trainings"] });
+    const { data: individualLessons } = useQuery<IndividualLesson[]>({ queryKey: ["/api/individual-lessons"] });
+    const { data: campusActivities } = useQuery<CampusActivity[]>({ queryKey: ["/api/campus-activities"] });
+    const { data: recitals } = useQuery<Recital[]>({ queryKey: ["/api/recitals"] });
+    const { data: vacationStudies } = useQuery<VacationStudy[]>({ queryKey: ["/api/vacation-studies"] });
     const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
 
     const upsertItemMutation = useMutation({
@@ -296,20 +309,46 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
 
             <CardContent className="flex-1 p-6">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <TabsList className="bg-muted w-full justify-start p-1 h-12">
-                        <TabsTrigger value="courses" className="flex-1 h-full gap-2">
-                            <Calendar className="w-4 h-4" /> Corsi
-                        </TabsTrigger>
-                        <TabsTrigger value="workshops" className="flex-1 h-full gap-2">
-                            <Sparkles className="w-4 h-4" /> Workshops
-                        </TabsTrigger>
-                        <TabsTrigger value="services" className="flex-1 h-full gap-2">
-                            <Database className="w-4 h-4" /> Servizi Extra
-                        </TabsTrigger>
-                        <TabsTrigger value="paid_trials" className="flex-1 h-full gap-2">
-                            <Tag className="w-4 h-4" /> Prove a Pagamento
-                        </TabsTrigger>
-                    </TabsList>
+                    <div className="w-full relative">
+                        <TabsList className="bg-muted w-full flex justify-start p-1 h-12 overflow-x-auto scrollbar-hide shrink-0 pb-1 touch-pan-x">
+                            <TabsTrigger value="courses" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <Calendar className="w-4 h-4" /> Corsi
+                            </TabsTrigger>
+                            <TabsTrigger value="workshops" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <Star className="w-4 h-4" /> Workshops
+                            </TabsTrigger>
+                            <TabsTrigger value="services" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <Database className="w-4 h-4" /> Servizi Extra
+                            </TabsTrigger>
+                            <TabsTrigger value="paid_trials" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <Tag className="w-4 h-4" /> Prove a Pagamento
+                            </TabsTrigger>
+                            <TabsTrigger value="free_trials" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <PlayCircle className="w-4 h-4" /> Prove Gratuite
+                            </TabsTrigger>
+                            <TabsTrigger value="single_lessons" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <User className="w-4 h-4" /> Lezioni Singole
+                            </TabsTrigger>
+                            <TabsTrigger value="sunday_activities" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <Sun className="w-4 h-4" /> Domeniche in M.
+                            </TabsTrigger>
+                            <TabsTrigger value="trainings" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <Dumbbell className="w-4 h-4" /> Allenamenti
+                            </TabsTrigger>
+                            <TabsTrigger value="individual_lessons" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <User className="w-4 h-4" /> Lez. Individuali
+                            </TabsTrigger>
+                            <TabsTrigger value="campus" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <Users className="w-4 h-4" /> Campus
+                            </TabsTrigger>
+                            <TabsTrigger value="recitals" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <Music className="w-4 h-4" /> Saggi
+                            </TabsTrigger>
+                            <TabsTrigger value="vacation_studies" className="h-full gap-2 whitespace-nowrap min-w-max">
+                                <Plane className="w-4 h-4" /> Vacanze Studio
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
 
                     <TabsContent value="courses" className="space-y-4">
                         <PriceItemManager
@@ -351,6 +390,94 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                             activeItems={getItemsByType("paid_trial")}
                             quotes={quotes || []}
                             onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "paid_trial", entityId: id, price: price.toString(), quoteId })}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="free_trials" className="space-y-4">
+                        <PriceItemManager
+                            type="free_trial"
+                            entities={freeTrials || []}
+                            activeItems={getItemsByType("free_trial")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "free_trial", entityId: id, price: price.toString(), quoteId })}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="single_lessons" className="space-y-4">
+                        <PriceItemManager
+                            type="single_lesson"
+                            entities={singleLessons || []}
+                            activeItems={getItemsByType("single_lesson")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "single_lesson", entityId: id, price: price.toString(), quoteId })}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="sunday_activities" className="space-y-4">
+                        <PriceItemManager
+                            type="sunday_activity"
+                            entities={sundayActivities || []}
+                            activeItems={getItemsByType("sunday_activity")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "sunday_activity", entityId: id, price: price.toString(), quoteId })}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="trainings" className="space-y-4">
+                        <PriceItemManager
+                            type="training"
+                            entities={trainings || []}
+                            activeItems={getItemsByType("training")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "training", entityId: id, price: price.toString(), quoteId })}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="individual_lessons" className="space-y-4">
+                        <PriceItemManager
+                            type="individual_lesson"
+                            entities={individualLessons || []}
+                            activeItems={getItemsByType("individual_lesson")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "individual_lesson", entityId: id, price: price.toString(), quoteId })}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="campus" className="space-y-4">
+                        <PriceItemManager
+                            type="campus_activity"
+                            entities={campusActivities || []}
+                            activeItems={getItemsByType("campus_activity")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "campus_activity", entityId: id, price: price.toString(), quoteId })}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="recitals" className="space-y-4">
+                        <PriceItemManager
+                            type="recital"
+                            entities={recitals || []}
+                            activeItems={getItemsByType("recital")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "recital", entityId: id, price: price.toString(), quoteId })}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="vacation_studies" className="space-y-4">
+                        <PriceItemManager
+                            type="vacation_study"
+                            entities={vacationStudies || []}
+                            activeItems={getItemsByType("vacation_study")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "vacation_study", entityId: id, price: price.toString(), quoteId })}
                             onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
                         />
                     </TabsContent>

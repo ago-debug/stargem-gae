@@ -182,10 +182,10 @@ export default function Members() {
       return data.memberId;
     },
     onSuccess: async (memberId) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       // Ricarica le iscrizioni locali
-      const res = await fetch(`/api/enrollments?memberId=${memberId}`, { credentials: "include" });
+      const res = await fetch(`/api/enrollments?type=corsi&memberId=${memberId}`, { credentials: "include" });
       if (res.ok) {
         setMemberEnrollments(await res.json());
       }
@@ -203,10 +203,10 @@ export default function Members() {
       return data.memberId;
     },
     onSuccess: async (memberId) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       // Ricarica le iscrizioni locali
-      const res = await fetch(`/api/enrollments?memberId=${memberId}`, { credentials: "include" });
+      const res = await fetch(`/api/enrollments?type=corsi&memberId=${memberId}`, { credentials: "include" });
       if (res.ok) {
         setMemberEnrollments(await res.json());
       }
@@ -1809,7 +1809,7 @@ function EnrollmentDialog({
   });
 
   const { data: enrollments } = useQuery<any[]>({
-    queryKey: ["/api/enrollments"],
+    queryKey: ["/api/enrollments?type=corsi"],
   });
 
   const { data: payments } = useQuery<any[]>({
@@ -1825,7 +1825,7 @@ function EnrollmentDialog({
       return result;
     },
     onSuccess: async (enrollment: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
 
       // Create course payment
@@ -1870,7 +1870,7 @@ function EnrollmentDialog({
       await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
       queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
       toast({ title: "Iscrizione eliminata" });

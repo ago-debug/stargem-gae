@@ -9,6 +9,7 @@ export default function IndividualLessons() {
       categoryApiEndpoint="/api/individual-lesson-categories"
       itemLabel="lezione individuale"
       itemLabelPlural="lezioni individuali"
+      baseRoute="/scheda-lezione-individuale"
       testIdPrefix="individual-lesson"
     />
   );

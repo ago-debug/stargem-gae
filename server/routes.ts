@@ -14,6 +14,8 @@ import {
   getGoogleOAuth2Client
 } from "./google-calendar";
 import { log } from "./vite";
+import { db } from "./db";
+import { eq, desc, and, isNull, isNotNull } from "drizzle-orm";
 import {
   insertMemberSchema,
   insertCategorySchema,
@@ -40,6 +42,14 @@ import {
   insertPriceListItemSchema,
   insertQuoteSchema,
   insertPaidTrialSchema,
+  insertActivityStatusSchema,
+  insertPaymentNoteSchema,
+  insertEnrollmentDetailSchema,
+  teamComments,
+  insertTeamCommentSchema,
+  teamNotes,
+  insertTeamNoteSchema,
+  insertBookingServiceCategorySchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -319,6 +329,7 @@ async function importCoursesFromRows(
         imported++;
       }
     } catch (err: any) {
+      console.error("[API Error] Caught explicitly:", err);
       errors.push({ row: i + 2, message: err.message });
       skipped++;
     }
@@ -423,6 +434,7 @@ async function importInstructorsFromRows(
         imported++;
       }
     } catch (err: any) {
+      console.error("[API Error] Caught explicitly:", err);
       errors.push({ row: i + 2, message: err.message });
       skipped++;
     }
@@ -436,7 +448,29 @@ import { promisify } from "util";
 
 const execPromise = promisify(exec);
 
+// ==== SEEDING CATEGORIE PARTECIPANTI ====
+async function seedParticipantCategories() {
+  try {
+    const existingCats = await storage.getClientCategories();
+    // Default categories requested by the user
+    const requiredCats = ["Non Tesserato", "Staff/Insegnanti", "Team", "Tesserato"];
+
+    for (const name of requiredCats) {
+      const exists = existingCats.some(c => c.name.toLowerCase() === name.toLowerCase());
+      if (!exists) {
+        log(`Seeding Participant Category: ${name}`);
+        await storage.createClientCategory({ name });
+      }
+    }
+  } catch (err) {
+    console.error("Failed to seed participant categories:", err);
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Seed database
+  await seedParticipantCategories();
+
   // Setup authentication
   setupAuth(app);
 
@@ -626,6 +660,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const url = await getGoogleAuthUrl();
       res.json({ url });
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -645,6 +680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.send("<h1>Attenzione</h1><p>Non è stato ricevuto un Refresh Token. Se avevi già collegato l'account, prova a disconnettere l'app dalle impostazioni Google e riprova.</p>");
       }
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -657,6 +693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         method: refreshToken?.value ? 'Direct' : (process.env.REPLIT_CONNECTORS_HOSTNAME ? 'Connector' : 'None')
       });
     } catch (e: any) {
+      console.error("[API Error] Caught explicitly:", e);
       res.status(500).json({ message: e.message });
     }
   });
@@ -667,6 +704,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const logs = await storage.getUserActivityLogs(200);
       res.json(logs);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).send(error.message);
+    }
+  });
+
+  // Latest Activity Route (for Sidebar Metadata)
+  app.get("/api/latest-activity", isAuthenticated, async (req, res) => {
+    try {
+      const logs = await storage.getUserActivityLogs(1);
+      res.json(logs[0] || null);
+    } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -727,6 +776,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       res.json(safeUsers);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -758,6 +808,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password: _, ...safeUser } = newUser;
       res.status(201).json(safeUser);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -775,6 +826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password: _, ...safeUser } = updatedUser;
       res.json(safeUser);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -792,6 +844,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUser(req.params.id, { password: hashedPassword });
       res.json({ success: true, message: "Password updated successfully" });
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -806,6 +859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteUser(req.params.id);
       res.json({ success: true });
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -816,6 +870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const roles = await storage.getUserRoles();
       res.json(roles);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -839,6 +894,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       res.status(201).json(newRole);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -852,6 +908,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "UPDATE", "roles", id.toString(), { name: role.name });
       res.json(role);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -867,6 +924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "DELETE", "roles", id.toString(), { name: role?.name });
       res.sendStatus(204);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).send(error.message);
     }
   });
@@ -901,6 +959,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/test-member/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const member = await storage.getMember(id);
+      res.json(member);
+    } catch (error) {
+      res.status(500).json({ error: String(error) });
+    }
+  });
+
   app.get("/api/members/duplicates", isAuthenticated, async (req, res) => {
     try {
       const duplicates = await storage.getDuplicateFiscalCodes();
@@ -930,6 +998,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(member);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch member" });
     }
   });
@@ -973,10 +1042,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      if (req.user) {
+        normalizedData.createdBy = req.user.username || 'System';
+        normalizedData.updatedBy = req.user.username || 'System'; // Initialize updatedBy on creation as well
+      }
+
       const member = await storage.createMember(normalizedData);
       await logUserActivity(req, "CREATE", "members", member.id.toString(), { name: `${member.firstName} ${member.lastName}` });
       res.status(201).json(member);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create member" });
     }
   });
@@ -1020,10 +1095,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      if (req.user) {
+        normalizedData.updatedBy = req.user.username || 'System';
+      }
+
       const updatedMember = await storage.updateMember(id, normalizedData);
       await logUserActivity(req, "UPDATE", "members", id.toString(), { name: `${updatedMember.firstName} ${updatedMember.lastName}` });
       res.json(updatedMember);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update member" });
     }
   });
@@ -1036,6 +1116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "DELETE", "members", id.toString(), { name: `${memberToDelete?.firstName} ${memberToDelete?.lastName}` });
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete member" });
     }
   });
@@ -1047,6 +1128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const relationships = await storage.getMemberRelationships(memberId);
       res.json(relationships);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch member relationships" });
     }
   });
@@ -1057,6 +1139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const children = await storage.getMemberChildren(memberId);
       res.json(children);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch member children" });
     }
   });
@@ -1067,6 +1150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "CREATE", "member_relationships", relationship.id.toString(), { member1: relationship.memberId, member2: relationship.relatedMemberId, type: relationship.relationshipType });
       res.status(201).json(relationship);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create member relationship" });
     }
   });
@@ -1078,6 +1162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "DELETE", "member_relationships", id.toString());
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete member relationship" });
     }
   });
@@ -1215,6 +1300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             imported++;
           }
         } catch (err: any) {
+          console.error("[API Error] Caught explicitly:", err);
           errors.push(`Row ${i + 2}: ${err.message}`);
           skipped++;
         }
@@ -1516,6 +1602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             imported++;
           }
         } catch (err: any) {
+          console.error("[API Error] Caught explicitly:", err);
           errors.push({ row: i + 2, message: err.message });
           skipped++;
         }
@@ -1543,6 +1630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getWorkshopCategories();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1552,6 +1640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createWorkshopCategory(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1562,6 +1651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateWorkshopCategory(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1572,6 +1662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteWorkshopCategory(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1582,6 +1673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getSundayCategories();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1591,6 +1683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createSundayCategory(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1601,6 +1694,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateSundayCategory(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1611,6 +1705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteSundayCategory(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1621,6 +1716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getTrainingCategories();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1630,6 +1726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createTrainingCategory(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1640,6 +1737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateTrainingCategory(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1650,6 +1748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteTrainingCategory(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1660,6 +1759,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getIndividualLessonCategories();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1669,6 +1769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createIndividualLessonCategory(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1679,6 +1780,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateIndividualLessonCategory(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1689,6 +1791,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteIndividualLessonCategory(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1699,6 +1802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getCampusCategories();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1708,6 +1812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createCampusCategory(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1718,6 +1823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateCampusCategory(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1728,6 +1834,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteCampusCategory(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1738,6 +1845,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getRecitalCategories();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1747,6 +1855,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createRecitalCategory(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1757,6 +1866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateRecitalCategory(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1767,6 +1877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteRecitalCategory(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1777,6 +1888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getVacationCategories();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1786,6 +1898,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createVacationCategory(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1796,6 +1909,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateVacationCategory(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1806,6 +1920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteVacationCategory(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1816,6 +1931,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getFreeTrials();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1825,6 +1941,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createFreeTrial(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1835,6 +1952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateFreeTrial(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1845,6 +1963,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteFreeTrial(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1855,6 +1974,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getSingleLessons();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1864,6 +1984,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createSingleLesson(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1874,6 +1995,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateSingleLesson(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1884,6 +2006,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteSingleLesson(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1894,6 +2017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getSundayActivities();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1903,6 +2027,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createSundayActivity(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1913,6 +2038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateSundayActivity(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1923,6 +2049,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteSundayActivity(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1933,6 +2060,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getTrainings();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1942,6 +2070,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createTraining(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1952,6 +2081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateTraining(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1962,6 +2092,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteTraining(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1972,6 +2103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getIndividualLessons();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -1981,6 +2113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createIndividualLesson(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -1991,6 +2124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateIndividualLesson(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2001,6 +2135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteIndividualLesson(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2011,6 +2146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getCampusActivities();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -2020,6 +2156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createCampusActivity(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2030,6 +2167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateCampusActivity(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2040,6 +2178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteCampusActivity(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2050,6 +2189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getRecitals();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -2059,6 +2199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createRecital(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2069,6 +2210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateRecital(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2079,6 +2221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteRecital(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2089,6 +2232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getVacationStudies();
       res.json(results);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message });
     }
   });
@@ -2098,6 +2242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createVacationStudy(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2108,6 +2253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.updateVacationStudy(id, req.body);
       res.json(result);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -2118,7 +2264,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteVacationStudy(id);
       res.status(204).end();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message });
+    }
+  });
+
+  // ==== Activity Statuses Routes ====
+  app.get("/api/activity-statuses", isAuthenticated, async (req, res) => {
+    try {
+      const statuses = await storage.getActivityStatuses();
+      res.json(statuses);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to fetch activity statuses" });
+    }
+  });
+
+  app.post("/api/activity-statuses", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertActivityStatusSchema.parse(req.body);
+      const status = await storage.createActivityStatus(validatedData);
+      await logUserActivity(req, "CREATE", "activity_statuses", status.id.toString(), { name: status.name });
+      res.status(201).json(status);
+    } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(400).json({ message: error.message || "Failed to create activity status" });
+    }
+  });
+
+  app.patch("/api/activity-statuses/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const status = await storage.updateActivityStatus(id, req.body);
+      await logUserActivity(req, "UPDATE", "activity_statuses", id.toString(), { name: status.name });
+      res.json(status);
+    } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(400).json({ message: error.message || "Failed to update activity status" });
+    }
+  });
+
+  app.delete("/api/activity-statuses/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const statusToDelete = await storage.getActivityStatus(id);
+      if (statusToDelete) {
+        await logUserActivity(req, "DELETE", "activity_statuses", id.toString(), { name: statusToDelete.name });
+      }
+      await storage.deleteActivityStatus(id);
+      res.status(204).end();
+    } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(400).json({ message: error.message || "Failed to delete activity status" });
     }
   });
 
@@ -2128,6 +2325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const categories = await storage.getCategories();
       res.json(categories);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch categories" });
     }
   });
@@ -2139,6 +2337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "CREATE", "categories", category.id.toString(), { name: category.name });
       res.status(201).json(category);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create category" });
     }
   });
@@ -2150,6 +2349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "UPDATE", "categories", id.toString(), { name: category.name });
       res.json(category);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update category" });
     }
   });
@@ -2162,6 +2362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "DELETE", "categories", id.toString(), { name: categoryToDelete?.name });
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete category" });
     }
   });
@@ -2172,6 +2373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const categories = await storage.getClientCategories();
       res.json(categories);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch client categories" });
     }
   });
@@ -2183,6 +2385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "CREATE", "client_categories", category.id.toString(), { name: category.name });
       res.status(201).json(category);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create client category" });
     }
   });
@@ -2194,6 +2397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "UPDATE", "client_categories", id.toString(), { name: category.name });
       res.json(category);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update client category" });
     }
   });
@@ -2206,6 +2410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "DELETE", "client_categories", id.toString(), { name: categoryToDelete?.name });
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete client category" });
     }
   });
@@ -2216,6 +2421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const types = await storage.getSubscriptionTypes();
       res.json(types);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch subscription types" });
     }
   });
@@ -2227,6 +2433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "CREATE", "subscription_types", subscriptionType.id.toString(), { name: subscriptionType.name });
       res.status(201).json(subscriptionType);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create subscription type" });
     }
   });
@@ -2238,6 +2445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "UPDATE", "subscription_types", id.toString(), { name: subscriptionType.name });
       res.json(subscriptionType);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update subscription type" });
     }
   });
@@ -2250,6 +2458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "DELETE", "subscription_types", id.toString(), { name: subscriptionTypeToDelete?.name });
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete subscription type" });
     }
   });
@@ -2260,6 +2469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const instructors = await storage.getInstructors();
       res.json(instructors);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch instructors" });
     }
   });
@@ -2271,6 +2481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "CREATE", "instructors", instructor.id.toString(), { name: instructor.firstName + " " + instructor.lastName });
       res.status(201).json(instructor);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create instructor" });
     }
   });
@@ -2282,6 +2493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "UPDATE", "instructors", id.toString(), { name: instructor.firstName + " " + instructor.lastName });
       res.json(instructor);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update instructor" });
     }
   });
@@ -2294,6 +2506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "DELETE", "instructors", id.toString(), { name: instructorToDelete?.firstName + " " + instructorToDelete?.lastName });
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete instructor" });
     }
   });
@@ -2304,6 +2517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const studios = await storage.getStudios();
       res.json(studios);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch studios" });
     }
   });
@@ -2315,6 +2529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "CREATE", "studios", studio.id.toString(), { name: studio.name });
       res.status(201).json(studio);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create studio" });
     }
   });
@@ -2325,6 +2540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const studio = await storage.updateStudio(id, req.body);
       res.json(studio);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update studio" });
     }
   });
@@ -2335,6 +2551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteStudio(id);
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete studio" });
     }
   });
@@ -2356,6 +2573,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(coursesList);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch courses" });
     }
   });
@@ -2397,6 +2615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "CREATE", "courses", course.id.toString(), { name: course.name });
       res.status(201).json(course);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create course" });
     }
   });
@@ -2448,6 +2667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "UPDATE", "courses", id.toString(), { name: course.name });
       res.json(course);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update course" });
     }
   });
@@ -2463,6 +2683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "DELETE", "courses", id.toString());
       res.sendStatus(204);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete course" });
     }
   });
@@ -2484,6 +2705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(workshopsList);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch workshops" });
     }
   });
@@ -2522,6 +2744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "CREATE", "workshops", workshop.id.toString(), { name: workshop.name });
       res.status(201).json(workshop);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create workshop" });
     }
   });
@@ -2552,6 +2775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "UPDATE", "workshops", id.toString(), { name: workshop.name });
       res.json(workshop);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update workshop" });
     }
   });
@@ -2563,6 +2787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logUserActivity(req, "DELETE", "workshops", id.toString());
       res.status(204).end();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete workshop" });
     }
   });
@@ -2576,6 +2801,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : await storage.getWorkshopEnrollments();
       res.json(enrollments);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch workshop enrollments" });
     }
   });
@@ -2607,6 +2833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(enrollment);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create workshop enrollment" });
     }
   });
@@ -2617,6 +2844,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const enrollment = await storage.updateWorkshopEnrollment(id, req.body);
       res.json(enrollment);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update workshop enrollment" });
     }
   });
@@ -2638,6 +2866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteWorkshopEnrollment(id);
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete workshop enrollment" });
     }
   });
@@ -2648,6 +2877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const attendances = await storage.getWorkshopAttendances();
       res.json(attendances);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch workshop attendances" });
     }
   });
@@ -2658,6 +2888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const attendance = await storage.createWorkshopAttendance(validatedData);
       res.status(201).json(attendance);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create workshop attendance" });
     }
   });
@@ -2668,6 +2899,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteWorkshopAttendance(id);
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete workshop attendance" });
     }
   });
@@ -2677,8 +2909,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
+      const type = req.query.type as string; // E.g. 'corsi', 'workshop', 'campus', etc.
 
-      let enrollments;
+      let enrollments: any[] = [];
+
+      // Handle unsupported category types cleanly by returning empty arrays
+      if (type && type !== 'corsi' && type !== 'workshop') {
+        return res.json([]);
+      }
+
+      // Handle workshops specifically for backward compatibility or unified querying
+      if (type === 'workshop') {
+        if (memberId) {
+          enrollments = await storage.getWorkshopEnrollmentsByMember(memberId);
+        } else if (seasonId) {
+          enrollments = await storage.getWorkshopEnrollmentsBySeason(seasonId);
+        } else {
+          const activeSeason = await storage.getActiveSeason();
+          if (activeSeason) {
+            enrollments = await storage.getWorkshopEnrollmentsBySeason(activeSeason.id);
+          } else {
+            // We fallback to getWorkshopEnrollments assuming it exists or similar fallback.
+            // Default behavior without a season
+            enrollments = [];
+          }
+        }
+        return res.json(enrollments);
+      }
+
+      // Fallback: Default to classical courses behavior
       if (memberId) {
         enrollments = await storage.getEnrollmentsByMember(memberId);
       } else if (seasonId) {
@@ -2691,8 +2950,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           enrollments = await storage.getEnrollments();
         }
       }
+      console.log(`[DEBUG] /api/enrollments type=${type} seasonId=${seasonId} memberId=${memberId} returning ${enrollments.length} enrollments`);
       res.json(enrollments);
     } catch (error) {
+      console.error("[ERROR] Failed to fetch enrollments:", error);
       res.status(500).json({ message: "Failed to fetch enrollments" });
     }
   });
@@ -2726,6 +2987,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(enrollment);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create enrollment" });
     }
   });
@@ -2736,6 +2998,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const enrollment = await storage.updateEnrollment(id, req.body);
       res.json(enrollment);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update enrollment" });
     }
   });
@@ -2758,6 +3021,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteEnrollment(id);
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete enrollment" });
     }
   });
@@ -2771,6 +3035,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : await storage.getMembershipsWithMembers();
       res.json(memberships);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch memberships" });
     }
   });
@@ -2816,6 +3081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(membership);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create membership" });
     }
   });
@@ -2826,6 +3092,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const membership = await storage.updateMembership(id, req.body);
       res.json(membership);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update membership" });
     }
   });
@@ -2836,6 +3103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteMembership(id);
       res.status(204).send();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to delete membership" });
     }
   });
@@ -2849,6 +3117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : await storage.getMedicalCertificatesWithMembers();
       res.json(certificates);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch medical certificates" });
     }
   });
@@ -2859,6 +3128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certificate = await storage.createMedicalCertificate(validatedData);
       res.status(201).json(certificate);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create medical certificate" });
     }
   });
@@ -2869,6 +3139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certificate = await storage.updateMedicalCertificate(id, req.body);
       res.json(certificate);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update medical certificate" });
     }
   });
@@ -2879,6 +3150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteMedicalCertificate(id);
       res.status(204).send();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to delete medical certificate" });
     }
   });
@@ -2889,6 +3161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const methods = await storage.getPaymentMethods();
       res.json(methods);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch payment methods" });
     }
   });
@@ -2899,6 +3172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const method = await storage.createPaymentMethod(validatedData);
       res.status(201).json(method);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create payment method" });
     }
   });
@@ -2909,6 +3183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const method = await storage.updatePaymentMethod(id, req.body);
       res.json(method);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update payment method" });
     }
   });
@@ -2919,6 +3194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deletePaymentMethod(id);
       res.status(204).send();
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to delete payment method" });
     }
   });
@@ -2944,6 +3220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(paymentsList);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch payments" });
     }
   });
@@ -2957,6 +3234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       res.status(201).json(payment);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create payment" });
     }
   });
@@ -2976,6 +3254,393 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: error.message || "Failed to update payment" });
     }
   });
+  // ==== EXTRA ENROLLMENTS ENDPOINTS ==== 
+  // PaidTrial Enrollments
+  app.get("/api/paid-trial-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      if (memberId && !isNaN(memberId)) {
+        const enrollments = await storage.getPaidTrialEnrollmentsByMember(memberId);
+        res.json(enrollments);
+      } else {
+        const enrollments = await storage.getPaidTrialEnrollments();
+        res.json(enrollments);
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/paid-trial-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createPaidTrialEnrollment(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/paid-trial-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.updatePaidTrialEnrollment(parseInt(req.params.id), req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/paid-trial-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deletePaidTrialEnrollment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // FreeTrial Enrollments
+  app.get("/api/free-trial-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      if (memberId && !isNaN(memberId)) {
+        const enrollments = await storage.getFreeTrialEnrollmentsByMember(memberId);
+        res.json(enrollments);
+      } else {
+        const enrollments = await storage.getFreeTrialEnrollments();
+        res.json(enrollments);
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/free-trial-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createFreeTrialEnrollment(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/free-trial-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.updateFreeTrialEnrollment(parseInt(req.params.id), req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/free-trial-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteFreeTrialEnrollment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // SingleLesson Enrollments
+  app.get("/api/single-lesson-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      if (memberId && !isNaN(memberId)) {
+        const enrollments = await storage.getSingleLessonEnrollmentsByMember(memberId);
+        res.json(enrollments);
+      } else {
+        const enrollments = await storage.getSingleLessonEnrollments();
+        res.json(enrollments);
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/single-lesson-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createSingleLessonEnrollment(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/single-lesson-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.updateSingleLessonEnrollment(parseInt(req.params.id), req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/single-lesson-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteSingleLessonEnrollment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // SundayActivity Enrollments
+  app.get("/api/sunday-activity-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      if (memberId && !isNaN(memberId)) {
+        const enrollments = await storage.getSundayActivityEnrollmentsByMember(memberId);
+        res.json(enrollments);
+      } else {
+        const enrollments = await storage.getSundayActivityEnrollments();
+        res.json(enrollments);
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/sunday-activity-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createSundayActivityEnrollment(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/sunday-activity-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.updateSundayActivityEnrollment(parseInt(req.params.id), req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/sunday-activity-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteSundayActivityEnrollment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Training Enrollments
+  app.get("/api/training-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      if (memberId && !isNaN(memberId)) {
+        const enrollments = await storage.getTrainingEnrollmentsByMember(memberId);
+        res.json(enrollments);
+      } else {
+        const enrollments = await storage.getTrainingEnrollments();
+        res.json(enrollments);
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/training-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createTrainingEnrollment(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/training-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.updateTrainingEnrollment(parseInt(req.params.id), req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/training-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteTrainingEnrollment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // IndividualLesson Enrollments
+  app.get("/api/individual-lesson-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      if (memberId && !isNaN(memberId)) {
+        const enrollments = await storage.getIndividualLessonEnrollmentsByMember(memberId);
+        res.json(enrollments);
+      } else {
+        const enrollments = await storage.getIndividualLessonEnrollments();
+        res.json(enrollments);
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/individual-lesson-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createIndividualLessonEnrollment(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/individual-lesson-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.updateIndividualLessonEnrollment(parseInt(req.params.id), req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/individual-lesson-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteIndividualLessonEnrollment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Campus Enrollments
+  app.get("/api/campus-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      if (memberId && !isNaN(memberId)) {
+        const enrollments = await storage.getCampusEnrollmentsByMember(memberId);
+        res.json(enrollments);
+      } else {
+        const enrollments = await storage.getCampusEnrollments();
+        res.json(enrollments);
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/campus-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createCampusEnrollment(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/campus-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.updateCampusEnrollment(parseInt(req.params.id), req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/campus-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteCampusEnrollment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Recital Enrollments
+  app.get("/api/recital-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      if (memberId && !isNaN(memberId)) {
+        const enrollments = await storage.getRecitalEnrollmentsByMember(memberId);
+        res.json(enrollments);
+      } else {
+        const enrollments = await storage.getRecitalEnrollments();
+        res.json(enrollments);
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/recital-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createRecitalEnrollment(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/recital-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.updateRecitalEnrollment(parseInt(req.params.id), req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/recital-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteRecitalEnrollment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // VacationStudy Enrollments
+  app.get("/api/vacation-study-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      if (memberId && !isNaN(memberId)) {
+        const enrollments = await storage.getVacationStudyEnrollmentsByMember(memberId);
+        res.json(enrollments);
+      } else {
+        const enrollments = await storage.getVacationStudyEnrollments();
+        res.json(enrollments);
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/vacation-study-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.createVacationStudyEnrollment(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/vacation-study-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.updateVacationStudyEnrollment(parseInt(req.params.id), req.body);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/vacation-study-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteVacationStudyEnrollment(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
 
   // ==== Maschera Generale Save Endpoint ====
   app.post("/api/maschera-generale/save", isAuthenticated, async (req, res) => {
@@ -2991,16 +3656,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (memberData.fiscalCode) {
         const existingMember = await storage.getMemberByFiscalCode(memberData.fiscalCode);
         if (existingMember) {
+          memberData.updatedBy = (req.user as any)?.username || 'System';
+          memberData.updatedAt = new Date();
           member = await storage.updateMember(existingMember.id, memberData);
         } else {
+          memberData.createdBy = (req.user as any)?.username || 'System';
           member = await storage.createMember(memberData);
         }
       } else {
+        memberData.createdBy = (req.user as any)?.username || 'System';
         member = await storage.createMember(memberData);
       }
 
       // 2. Process Enrollments and Payments
       const results = {
+        member: member, // Return full member details for frontend audit updates
         memberId: member.id,
         enrollments: [] as any[],
         payments: [] as any[]
@@ -3009,27 +3679,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (enrollmentItems && Array.isArray(enrollmentItems)) {
         for (const enrData of enrollmentItems) {
           try {
-            const enrollment = await storage.createEnrollment({
-              ...enrData,
-              memberId: member.id
-            });
+            let enrollment;
+            let paymentLinkField = "enrollmentId";
+            let createPayload = { ...enrData, memberId: member.id, details: enrData.details || [] };
+
+            switch (enrData.tempId) {
+              case "corsi":
+                enrollment = await storage.createEnrollment(createPayload);
+                paymentLinkField = "enrollmentId";
+                break;
+              case "workshop":
+                enrollment = await storage.createWorkshopEnrollment({ ...createPayload, workshopId: enrData.courseId });
+                paymentLinkField = "workshopEnrollmentId";
+                break;
+              case "prove-pagamento":
+                enrollment = await storage.createPaidTrialEnrollment({ ...createPayload, paidTrialId: enrData.courseId });
+                paymentLinkField = "paidTrialEnrollmentId";
+                break;
+              case "prove-gratuite":
+                enrollment = await storage.createFreeTrialEnrollment({ ...createPayload, freeTrialId: enrData.courseId });
+                paymentLinkField = "freeTrialEnrollmentId";
+                break;
+              case "lezioni-singole":
+                enrollment = await storage.createSingleLessonEnrollment({ ...createPayload, singleLessonId: enrData.courseId });
+                paymentLinkField = "singleLessonEnrollmentId";
+                break;
+              case "domeniche-movimento":
+                enrollment = await storage.createSundayActivityEnrollment({ ...createPayload, sundayActivityId: enrData.courseId });
+                paymentLinkField = "sundayActivityEnrollmentId";
+                break;
+              case "allenamenti":
+                enrollment = await storage.createTrainingEnrollment({ ...createPayload, trainingId: enrData.courseId });
+                paymentLinkField = "trainingEnrollmentId";
+                break;
+              case "lezioni-individuali":
+                enrollment = await storage.createIndividualLessonEnrollment({ ...createPayload, individualLessonId: enrData.courseId });
+                paymentLinkField = "individualLessonEnrollmentId";
+                break;
+              case "campus":
+                enrollment = await storage.createCampusEnrollment({ ...createPayload, campusActivityId: enrData.courseId });
+                paymentLinkField = "campusEnrollmentId";
+                break;
+              case "saggi":
+                enrollment = await storage.createRecitalEnrollment({ ...createPayload, recitalId: enrData.courseId });
+                paymentLinkField = "recitalEnrollmentId";
+                break;
+              case "vacanze-studio":
+                enrollment = await storage.createVacationStudyEnrollment({ ...createPayload, vacationStudyId: enrData.courseId });
+                paymentLinkField = "vacationStudyEnrollmentId";
+                break;
+              default:
+                enrollment = await storage.createEnrollment(createPayload);
+                paymentLinkField = "enrollmentId";
+            }
             results.enrollments.push(enrollment);
 
             // Find matching payment for this enrollment
             if (paymentItems && Array.isArray(paymentItems)) {
-              const matchingPayment = paymentItems.find(p => p.courseId === enrData.courseId || p.tempId === enrData.tempId);
-              if (matchingPayment) {
+              // Note: enrData.tempId usually matches p.type (attivita)
+              const matchingPaymentIndex = paymentItems.findIndex(p => p.courseId === enrData.courseId || p.tempId === enrData.tempId);
+              if (matchingPaymentIndex !== -1 && !paymentItems[matchingPaymentIndex].processed) {
+                const matchingPayment = paymentItems[matchingPaymentIndex];
                 const payment = await storage.createPayment({
                   ...matchingPayment,
                   memberId: member.id,
-                  enrollmentId: enrollment.id,
-                  createdById: (req.user as any).id
+                  [paymentLinkField]: enrollment.id,
+                  createdById: (req.user as any).id,
+                  paymentNoteLabels: matchingPayment.details?.paymentNotes || [],
+                  enrollmentDetailLabels: matchingPayment.details?.enrollmentDetails || [],
+                  quotaDescription: matchingPayment.details?.descrizioneQuota,
+                  period: matchingPayment.details?.periodo,
                 });
                 results.payments.push(payment);
+                paymentItems[matchingPaymentIndex].processed = true;
               }
             }
           } catch (e) {
             console.error("Error creating enrollment/payment in bulk save:", e);
+          }
+        }
+      }
+
+      // 3. Process standalone payments (without matching enrollments in this request)
+      if (paymentItems && Array.isArray(paymentItems)) {
+        for (const paymentData of paymentItems) {
+          if (!paymentData.processed) {
+            try {
+              const payment = await storage.createPayment({
+                ...paymentData,
+                memberId: member.id,
+                createdById: (req.user as any).id,
+                paymentNoteLabels: paymentData.details?.paymentNotes || [],
+                enrollmentDetailLabels: paymentData.details?.enrollmentDetails || [],
+                quotaDescription: paymentData.details?.descrizioneQuota,
+                period: paymentData.details?.periodo,
+              });
+              results.payments.push(payment);
+              paymentData.processed = true;
+            } catch (e) {
+              console.error("Error creating standalone payment:", e);
+            }
           }
         }
       }
@@ -3048,6 +3797,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const logs = await storage.getAccessLogs();
       res.json(logs);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch access logs" });
     }
   });
@@ -3133,6 +3883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         reason: clientNotes || logData.notes,
       });
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create access log" });
     }
   });
@@ -3190,6 +3941,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pendingPayments,
       });
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch dashboard stats" });
     }
   });
@@ -3214,6 +3966,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         overduePayments: payments.filter(p => p.status === "overdue").length,
       });
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch alerts" });
     }
   });
@@ -3257,6 +4010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       activity.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       res.json(activity.slice(0, 10));
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch recent activity" });
     }
   });
@@ -3285,6 +4039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pendingPayments: payments.filter(p => p.status === "pending").slice(0, 10),
       });
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch reports" });
     }
   });
@@ -3388,6 +4143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               imported++;
             }
           } catch (error: any) {
+            console.error("[API Error] Caught explicitly:", error);
             skipped++;
             errors.push({
               row: i + 2,
@@ -3403,6 +4159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         errors: errors.slice(0, 50),
       });
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message || "Failed to import data" });
     }
   });
@@ -3515,6 +4272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             imported++;
           }
         } catch (error: any) {
+          console.error("[API Error] Caught explicitly:", error);
           skipped++;
           errors.push({
             row: i + 2, // +2 because header is row 1 and array is 0-indexed
@@ -3555,6 +4313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(attendancesList);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch attendances" });
     }
   });
@@ -3565,6 +4324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const attendances = await storage.getAttendancesByMember(memberId);
       res.json(attendances);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch member attendances" });
     }
   });
@@ -3575,6 +4335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const attendance = await storage.createAttendance(validatedData);
       res.status(201).json(attendance);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create attendance" });
     }
   });
@@ -3585,7 +4346,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteAttendance(id);
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete attendance" });
+    }
+  });
+
+  // ==== Payment Notes Routes ====
+  app.get("/api/payment-notes", isAuthenticated, async (req, res) => {
+    try {
+      const notes = await storage.getPaymentNotes();
+      res.json(notes);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to fetch payment notes" });
+    }
+  });
+
+  app.post("/api/payment-notes", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertPaymentNoteSchema.parse(req.body);
+      const note = await storage.createPaymentNote(validatedData);
+      await logUserActivity(req, "CREATE", "payment_notes", note.id.toString(), { name: note.name });
+      res.status(201).json(note);
+    } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(400).json({ message: error.message || "Failed to create payment note" });
+    }
+  });
+
+  app.patch("/api/payment-notes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const note = await storage.updatePaymentNote(id, req.body);
+      await logUserActivity(req, "UPDATE", "payment_notes", id.toString(), { name: note.name });
+      res.json(note);
+    } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(400).json({ message: error.message || "Failed to update payment note" });
+    }
+  });
+
+  app.delete("/api/payment-notes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const noteToDelete = await storage.getPaymentNote(id);
+      if (noteToDelete) {
+        await logUserActivity(req, "DELETE", "payment_notes", id.toString(), { name: noteToDelete.name });
+      }
+      await storage.deletePaymentNote(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to delete payment note" });
+    }
+  });
+
+  // ==== Enrollment Details Routes ====
+  app.get("/api/enrollment-details", isAuthenticated, async (req, res) => {
+    try {
+      const details = await storage.getEnrollmentDetails();
+      res.json(details);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to fetch enrollment details" });
+    }
+  });
+
+  app.post("/api/enrollment-details", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertEnrollmentDetailSchema.parse(req.body);
+      const detail = await storage.createEnrollmentDetail(validatedData);
+      await logUserActivity(req, "CREATE", "enrollment_details", detail.id.toString(), { name: detail.name });
+      res.status(201).json(detail);
+    } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(400).json({ message: error.message || "Failed to create enrollment detail" });
+    }
+  });
+
+  app.patch("/api/enrollment-details/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const detail = await storage.updateEnrollmentDetail(id, req.body);
+      await logUserActivity(req, "UPDATE", "enrollment_details", id.toString(), { name: detail.name });
+      res.json(detail);
+    } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(400).json({ message: error.message || "Failed to update enrollment detail" });
+    }
+  });
+
+  app.delete("/api/enrollment-details/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const detailToDelete = await storage.getEnrollmentDetail(id);
+      if (detailToDelete) {
+        await logUserActivity(req, "DELETE", "enrollment_details", id.toString(), { name: detailToDelete.name });
+      }
+      await storage.deleteEnrollmentDetail(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to delete enrollment detail" });
     }
   });
 
@@ -3595,6 +4457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const countries = await storage.getCountries();
       res.json(countries);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch countries" });
     }
   });
@@ -3605,6 +4468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const provinces = await storage.getProvinces(countryId);
       res.json(provinces);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch provinces" });
     }
   });
@@ -3619,6 +4483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cities = await storage.searchCities(search, limit);
       res.json(cities);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to search cities" });
     }
   });
@@ -3629,6 +4494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cities = await storage.getCitiesByProvince(provinceId);
       res.json(cities);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch cities" });
     }
   });
@@ -3641,7 +4507,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!city) return res.status(404).json({ message: "City not found" });
       res.json(city);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch city by code" });
+    }
+  });
+
+  // ==== Course Quotes Grid Q1C ====
+  app.get("/api/course-quotes-grid", isAuthenticated, async (req, res) => {
+    try {
+      const { activityType } = req.query;
+      const gridItems = await storage.getCourseQuotesGrid(activityType as string);
+      res.json(gridItems);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to fetch course quotes grid" });
+    }
+  });
+
+  app.post("/api/course-quotes-grid/bulk", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const items = req.body;
+      const { activityType } = req.query;
+      if (!Array.isArray(items)) {
+        return res.status(400).json({ message: "Expected an array of grid items" });
+      }
+
+      console.log(`[API Bulk Insert] ActivityType: ${activityType}, Items count: ${items.length}`);
+      console.log(`[API Bulk Insert] Items payload: ${JSON.stringify(items.map(i => i.category), null, 2)}`);
+
+      await storage.upsertCourseQuotesGridBulk(items, activityType as string);
+
+      const verification = await storage.getCourseQuotesGrid(activityType as string);
+      console.log(`[API Bulk Insert] Post-insert verification, DB has ${verification.length} rows for this activityType.`);
+
+      res.json({ success: true, message: "Grid updated successfully" });
+    } catch (error: any) {
+      console.error("[API Error] Bulk Insert Failed:", error);
+      if (error.issues) {
+        console.error("Validation issues:", JSON.stringify(error.issues, null, 2));
+      }
+      res.status(500).json({ message: "Failed to update course quotes grid", error: error.message });
     }
   });
 
@@ -3651,6 +4556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const priceLists = await storage.getPriceLists();
       res.json(priceLists);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch price lists" });
     }
   });
@@ -3664,6 +4570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(priceList);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch price list" });
     }
   });
@@ -3674,6 +4581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const items = await storage.getPriceListItems(id);
       res.json(items);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch price list items" });
     }
   });
@@ -3690,6 +4598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const priceList = await storage.createPriceList(data);
       res.status(201).json(priceList);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       const fs = await import('fs');
       try {
         fs.writeFileSync('DEBUG_ERROR_PRICE_LIST.txt', String(error) + '\n' + (error instanceof Error ? error.stack : ''));
@@ -3713,6 +4622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const priceList = await storage.updatePriceList(id, req.body);
       res.json(priceList);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to update price list" });
     }
   });
@@ -3723,6 +4633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deletePriceList(id);
       res.sendStatus(204);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete price list" });
     }
   });
@@ -3745,6 +4656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const quotes = await storage.getQuotes();
       res.json(quotes);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch quotes" });
     }
   });
@@ -3766,6 +4678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const quote = await storage.updateQuote(id, req.body);
       res.json(quote);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to update quote" });
     }
   });
@@ -3776,6 +4689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteQuote(id);
       res.sendStatus(204);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete quote" });
     }
   });
@@ -3786,6 +4700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.getPaidTrials();
       res.json(results);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch paid trials" });
     }
   });
@@ -3796,6 +4711,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const trial = await storage.createPaidTrial(data);
       res.status(201).json(trial);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to create paid trial" });
     }
   });
@@ -3806,6 +4722,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const trial = await storage.updatePaidTrial(id, req.body);
       res.json(trial);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to update paid trial" });
     }
   });
@@ -3816,6 +4733,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deletePaidTrial(id);
       res.sendStatus(204);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete paid trial" });
     }
   });
@@ -3826,6 +4744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deletePriceListItem(id);
       res.sendStatus(204);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete price list item" });
     }
   });
@@ -3836,6 +4755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const notifications = await storage.getNotifications(req.user!.id);
       res.json(notifications);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch notifications" });
     }
   });
@@ -3846,6 +4766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.markNotificationRead(id);
       res.sendStatus(204);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to mark notification as read" });
     }
   });
@@ -3855,6 +4776,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.markAllNotificationsRead(req.user!.id);
       res.sendStatus(204);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to mark all notifications as read" });
     }
   });
@@ -3865,6 +4787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reports = await storage.getCustomReports();
       res.json(reports);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch custom reports" });
     }
   });
@@ -3878,6 +4801,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(report);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch custom report" });
     }
   });
@@ -3888,6 +4812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const report = await storage.createCustomReport(validatedData);
       res.status(201).json(report);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create custom report" });
     }
   });
@@ -3898,6 +4823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const report = await storage.updateCustomReport(id, req.body);
       res.json(report);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update custom report" });
     }
   });
@@ -3908,6 +4834,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteCustomReport(id);
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete custom report" });
     }
   });
@@ -4008,6 +4935,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ data, total: data.length });
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message || "Failed to execute report" });
     }
   });
@@ -4103,6 +5031,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fields = fieldDefinitions[entityType] || [];
       res.json(fields);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to get report fields" });
     }
   });
@@ -4117,6 +5046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(configs);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message || "Errore caricamento configurazioni" });
     }
   });
@@ -4147,6 +5077,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const config = await storage.createImportConfig(req.body);
       res.json(config);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message || "Errore salvataggio configurazione" });
     }
   });
@@ -4157,6 +5088,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteImportConfig(id);
       res.json({ success: true });
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message || "Errore eliminazione configurazione" });
     }
   });
@@ -4214,6 +5146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         delimiter: delimiter // Return used delimiter for confirmation
       });
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message || "Errore lettura file" });
     }
   });
@@ -4377,6 +5310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               toInsert.push(memberData);
             }
           } catch (err: any) {
+            console.error("[API Error] Caught explicitly:", err);
             errors.push({ row: rowNum, message: err.message || "Errore sconosciuto" });
             skipped++;
           }
@@ -4391,6 +5325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               await storage.createMember(memberData);
               imported++;
             } catch (err: any) {
+              console.error("[API Error] Caught explicitly:", err);
               errors.push({ row: 0, message: err.message || "Errore inserimento" });
               skipped++;
             }
@@ -4405,6 +5340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               await storage.updateMember(id, data);
               updated++;
             } catch (err: any) {
+              console.error("[API Error] Caught explicitly:", err);
               errors.push({ row: 0, message: err.message || "Errore aggiornamento" });
               skipped++;
             }
@@ -4435,6 +5371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         errors: errors.slice(0, 10)
       });
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: error.message || "Errore importazione file" });
     }
   });
@@ -4446,6 +5383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const services = await storage.getBookingServices();
       res.json(services);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch booking services" });
     }
   });
@@ -4459,6 +5397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const service = await storage.createBookingService(result.data);
       res.status(201).json(service);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to create booking service" });
     }
   });
@@ -4469,6 +5408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const service = await storage.updateBookingService(id, req.body);
       res.json(service);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to update booking service" });
     }
   });
@@ -4479,7 +5419,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteBookingService(id);
       res.status(204).end();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete booking service" });
+    }
+  });
+
+  // ==== Booking Service Categories ====
+  app.get("/api/booking-service-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getBookingServiceCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to fetch booking service categories" });
+    }
+  });
+
+  app.post("/api/booking-service-categories", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertBookingServiceCategorySchema.parse(req.body);
+      const category = await storage.createBookingServiceCategory(data);
+      res.status(201).json(category);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to create booking service category" });
+    }
+  });
+
+  app.patch("/api/booking-service-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateBookingServiceCategory(id, req.body);
+      res.json(category);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to update booking service category" });
+    }
+  });
+
+  app.delete("/api/booking-service-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteBookingServiceCategory(id);
+      res.status(204).end();
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to delete booking service category" });
     }
   });
 
@@ -4505,7 +5490,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(bookings);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch studio bookings" });
+    }
+  });
+
+  // ==== Booking Service Enrollments (Servizi Extra mapped to UI) ====
+  app.get("/api/booking-service-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const activeSeason = await storage.getActiveSeason();
+      let bookings = activeSeason
+        ? await storage.getStudioBookingsBySeason(activeSeason.id)
+        : await storage.getStudioBookings();
+
+      const enrollments = bookings
+        .filter(b => b.serviceId != null)
+        .map(b => ({
+          id: b.id,
+          memberId: b.memberId,
+          serviceId: b.serviceId,
+          memberFirstName: b.memberFirstName,
+          memberLastName: b.memberLastName,
+          status: b.status === "cancelled" ? "cancelled" : "active",
+          enrollmentDate: b.bookingDate,
+        }));
+
+      res.json(enrollments);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to fetch booking service enrollments" });
     }
   });
 
@@ -4663,6 +5676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteStudioBooking(id);
       res.status(204).end();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete studio booking" });
     }
   });
@@ -4673,6 +5687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allSeasons = await storage.getSeasons();
       res.json(allSeasons);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch seasons" });
     }
   });
@@ -4682,6 +5697,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const season = await storage.getActiveSeason();
       res.json(season || null);
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch active season" });
     }
   });
@@ -4692,6 +5708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const season = await storage.createSeason(validatedData);
       res.status(201).json(season);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to create season" });
     }
   });
@@ -4702,6 +5719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const season = await storage.updateSeason(id, req.body);
       res.json(season);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to update season" });
     }
   });
@@ -4712,6 +5730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.setActiveSeason(id);
       res.status(204).send();
     } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to activate season" });
     }
   });
@@ -4740,7 +5759,333 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(newSeason);
     } catch (error: any) {
+      console.error("[API Error] Caught explicitly:", error);
       res.status(400).json({ message: error.message || "Failed to reset season" });
+    }
+  });
+
+  // ==========================================
+  // TODOS API
+  // ==========================================
+  app.get("/api/todos", isAuthenticated, async (req, res) => {
+    try {
+      const allTodos = await storage.getTodos();
+      res.json(allTodos);
+    } catch (error) {
+      console.error("Error fetching todos:", error);
+      res.status(500).json({ error: "Failed to fetch todos" });
+    }
+  });
+
+  app.post("/api/todos", isAuthenticated, async (req, res) => {
+    try {
+      const u = req.user as any;
+      const creatorName = u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : (u.username || 'System');
+      const todoData = {
+        text: req.body.text,
+        createdBy: creatorName,
+        completed: false
+      };
+      const newTodo = await storage.createTodo(todoData);
+      res.status(201).json(newTodo);
+    } catch (error) {
+      console.error("Error creating todo:", error);
+      res.status(500).json({ error: "Failed to create todo" });
+    }
+  });
+
+  app.patch("/api/todos/:id", isAuthenticated, async (req, res) => {
+    try {
+      const todoId = parseInt(req.params.id);
+      if (isNaN(todoId)) {
+        return res.status(400).json({ error: "Invalid todo ID" });
+      }
+      const u = req.user as any;
+      const completerName = u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : (u.username || 'System');
+
+      const updateData: any = {};
+      if (req.body.text !== undefined) updateData.text = req.body.text;
+      if (req.body.completed !== undefined) {
+        updateData.completed = req.body.completed;
+        if (req.body.completed) {
+          updateData.completedBy = completerName;
+          updateData.completedAt = new Date();
+        } else {
+          updateData.completedBy = null;
+          updateData.completedAt = null;
+        }
+      }
+
+      const updatedTodo = await storage.updateTodo(todoId, updateData);
+      res.json(updatedTodo);
+    } catch (error) {
+      console.error("Error updating todo:", error);
+      res.status(500).json({ error: "Failed to update todo" });
+    }
+  });
+
+  app.delete("/api/todos/:id", isAuthenticated, async (req, res) => {
+    try {
+      const todoId = parseInt(req.params.id);
+      if (isNaN(todoId)) {
+        return res.status(400).json({ error: "Invalid todo ID" });
+      }
+      await storage.deleteTodo(todoId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+      res.status(500).json({ error: "Failed to delete todo" });
+    }
+  });
+
+  // ==========================================
+  // TEAM COMMENTS API
+  // ==========================================
+  app.get("/api/team-comments", isAuthenticated, async (req, res) => {
+    try {
+      const u = req.user as any;
+      const currentUserId = String(u.id);
+
+      const comments = await db.select()
+        .from(teamComments)
+        .orderBy(desc(teamComments.createdAt));
+
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching team comments:", error);
+      res.status(500).json({ error: "Failed to fetch team comments" });
+    }
+  });
+
+  app.get("/api/team-notifications/unread-count", isAuthenticated, async (req, res) => {
+    try {
+      const u = req.user as any;
+      const currentUserId = String(u.id);
+
+      // Conta i commenti attivi che sono assegnati a "Tutti" o all'utente corrente
+      const userComments = await db.select()
+        .from(teamComments)
+        .where(eq(teamComments.isResolved, false));
+
+      const unreadCount = userComments.filter(c => c.assignedTo === 'Tutti' || c.assignedTo === currentUserId).length;
+
+      res.json({ count: unreadCount });
+    } catch (error) {
+      console.error("Error fetching unread team notifications:", error);
+      res.status(500).json({ error: "Failed to fetch notifications count" });
+    }
+  });
+
+  app.post("/api/team-comments", isAuthenticated, async (req, res) => {
+    try {
+      const u = req.user as any;
+      const creatorName = u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : (u.username || 'System');
+
+      const payload = { ...req.body, authorId: String(u.id), authorName: creatorName };
+      const parsed = insertTeamCommentSchema.safeParse(payload);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid team comment data", details: parsed.error });
+      }
+
+      const dataToInsert = {
+        ...parsed.data,
+        assignedTo: payload.assignedTo || "Tutti"
+      };
+
+      const [insertResult] = await db.insert(teamComments).values(dataToInsert);
+      const newComment = await db.select().from(teamComments).where(eq(teamComments.id, insertResult.insertId));
+
+      res.status(201).json(newComment[0] || {});
+    } catch (error) {
+      console.error("Error creating team comment:", error);
+      res.status(500).json({ error: "Failed to create team comment" });
+    }
+  });
+
+  app.patch("/api/team-comments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      if (isNaN(commentId)) {
+        return res.status(400).json({ error: "Invalid comment ID" });
+      }
+
+      await db.update(teamComments).set({
+        ...req.body,
+        updatedAt: new Date()
+      }).where(eq(teamComments.id, commentId));
+
+      const updatedComment = await db.select().from(teamComments).where(eq(teamComments.id, commentId));
+      res.json(updatedComment[0] || {});
+    } catch (error) {
+      console.error("Error updating team comment:", error);
+      res.status(500).json({ error: "Failed to update team comment" });
+    }
+  });
+
+  app.delete("/api/team-comments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      if (isNaN(commentId)) {
+        return res.status(400).json({ error: "Invalid comment ID" });
+      }
+
+      await db.delete(teamComments).where(eq(teamComments.id, commentId));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting team comment:", error);
+      res.status(500).json({ error: "Failed to delete team comment" });
+    }
+  });
+
+  // ==========================================
+  // TEAM NOTES API
+  // ==========================================
+  app.get("/api/team-notes", isAuthenticated, async (req, res) => {
+    try {
+      const { targetUrl } = req.query;
+      let conditions: any[] = [];
+      if (targetUrl) {
+        conditions.push(eq(teamNotes.targetUrl, targetUrl as string));
+      }
+
+      const notes = await db.select()
+        .from(teamNotes)
+        .where(and(isNull(teamNotes.deletedAt), conditions.length > 0 ? and(...conditions) : undefined))
+        .orderBy(desc(teamNotes.isPinned), desc(teamNotes.createdAt));
+
+      res.json(notes);
+    } catch (error) {
+      console.error("Error fetching team notes:", error);
+      res.status(500).json({ error: "Failed to fetch team notes" });
+    }
+  });
+
+  app.post("/api/team-notes", isAuthenticated, async (req, res) => {
+    try {
+      const u = req.user as any;
+      const creatorName = u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : (u.username || 'System');
+
+      const payload = { ...req.body, authorId: String(u.id), authorName: creatorName };
+      const parsed = insertTeamNoteSchema.safeParse(payload);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid team note data", details: parsed.error });
+      }
+
+      // Handle the targetUrl explicitly as the schema might not include it yet fully depending on version
+      const dataToInsert = {
+        ...parsed.data,
+        targetUrl: req.body.targetUrl || null
+      };
+
+      const [insertResult] = await db.insert(teamNotes).values(dataToInsert);
+      const newNote = await db.select().from(teamNotes).where(eq(teamNotes.id, insertResult.insertId));
+
+      res.status(201).json(newNote[0] || {});
+    } catch (error) {
+      console.error("Error creating team note:", error);
+      res.status(500).json({ error: "Failed to create team note" });
+    }
+  });
+
+  app.patch("/api/team-notes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const noteId = parseInt(req.params.id);
+      if (isNaN(noteId)) {
+        return res.status(400).json({ error: "Invalid note ID" });
+      }
+
+      await db.update(teamNotes).set({
+        ...req.body,
+        updatedAt: new Date()
+      }).where(eq(teamNotes.id, noteId));
+
+      const updatedNote = await db.select().from(teamNotes).where(eq(teamNotes.id, noteId));
+      res.json(updatedNote[0] || {});
+    } catch (error) {
+      console.error("Error updating team note:", error);
+      res.status(500).json({ error: "Failed to update team note" });
+    }
+  });
+
+  app.delete("/api/team-notes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const noteId = parseInt(req.params.id);
+      if (isNaN(noteId)) {
+        return res.status(400).json({ error: "Invalid note ID" });
+      }
+
+      const u = req.user as any;
+      const deleterName = u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : (u.username || 'System');
+
+      await db.update(teamNotes)
+        .set({ deletedAt: new Date(), deletedBy: deleterName })
+        .where(eq(teamNotes.id, noteId));
+
+      res.status(200).json({ message: "Note archived successfully" });
+    } catch (error) {
+      console.error("Error deleting team note:", error);
+      res.status(500).json({ error: "Failed to delete team note" });
+    }
+  });
+
+  // GET ARCHIVED NOTES
+  app.get("/api/team-notes/archived", isAuthenticated, async (req, res) => {
+    try {
+      const notes = await db.select()
+        .from(teamNotes)
+        .where(isNotNull(teamNotes.deletedAt))
+        .orderBy(desc(teamNotes.deletedAt));
+      res.json(notes);
+    } catch (error) {
+      console.error("Error fetching archived team notes:", error);
+      res.status(500).json({ error: "Failed to fetch archived notes" });
+    }
+  });
+
+  // RESTORE ARCHIVED NOTE
+  app.post("/api/team-notes/:id/restore", isAuthenticated, async (req, res) => {
+    try {
+      const noteId = parseInt(req.params.id);
+      if (isNaN(noteId)) return res.status(400).json({ error: "Invalid note ID" });
+
+      await db.update(teamNotes)
+        .set({ deletedAt: null, deletedBy: null })
+        .where(eq(teamNotes.id, noteId));
+
+      res.status(200).json({ message: "Note restored successfully" });
+    } catch (error) {
+      console.error("Error restoring team note:", error);
+      res.status(500).json({ error: "Failed to restore note" });
+    }
+  });
+
+  // ==========================================
+  // COPILOT AI STUB
+  // ==========================================
+  app.post("/api/copilot/generate-note", isAuthenticated, async (req, res) => {
+    try {
+      const { targetUrl, pageContext } = req.body;
+      // In un sistema reale, qui avverrebbe la chiamata all'API reale dell'AI
+      // Usiamo uno stub contestuale
+
+      let suggestedText = "Questa è una nota generata dall'AI.";
+
+      if (targetUrl?.includes('/corsi') || pageContext?.includes('corso')) {
+        suggestedText = "Verificare gli iscritti al corso. Ricordare di inviare le comunicazioni per le scadenze imminenti dei pagamenti.";
+      } else if (targetUrl?.includes('/pagamenti')) {
+        suggestedText = "Controllare le fatture in sospeso e riconciliare con l'estratto conto di fine mese.";
+      } else if (targetUrl?.includes('/membro/')) {
+        suggestedText = "Aggiornare il certificato medico e verificare la data di scadenza della tessera associativa.";
+      } else {
+        suggestedText = `Promemoria per la sezione: ${targetUrl || 'Generale'}. Completare la revisione dei dati presenti in questa schermata entro domani.`;
+      }
+
+      setTimeout(() => {
+        res.json({ suggestion: suggestedText });
+      }, 800); // Simuliamo un po' di latenza AI
+    } catch (error) {
+      console.error("Error generating Copilot note:", error);
+      res.status(500).json({ error: "Failed to generate note" });
     }
   });
 

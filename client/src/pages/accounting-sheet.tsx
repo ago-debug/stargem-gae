@@ -52,10 +52,10 @@ export default function AccountingSheet() {
     });
 
     const { data: enrollments } = useQuery<any[]>({
-        queryKey: ["/api/enrollments", { memberId: selectedMember?.id }],
+        queryKey: ["/api/enrollments?type=corsi", { memberId: selectedMember?.id }],
         enabled: !!selectedMember?.id,
         queryFn: async () => {
-            const res = await fetch(`/api/enrollments?memberId=${selectedMember?.id}`);
+            const res = await fetch(`/api/enrollments?type=corsi&memberId=${selectedMember?.id}`);
             if (!res.ok) throw new Error("Failed to fetch enrollments");
             return res.json();
         }
@@ -323,7 +323,7 @@ export default function AccountingSheet() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
             queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
             queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments"] });
             queryClient.invalidateQueries({ queryKey: ["/api/memberships"] });
             queryClient.invalidateQueries({ queryKey: ["/api/studio-bookings"] });
@@ -340,7 +340,7 @@ export default function AccountingSheet() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
             queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
             queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments"] });
             queryClient.invalidateQueries({ queryKey: ["/api/memberships"] });
             queryClient.invalidateQueries({ queryKey: ["/api/studio-bookings"] });

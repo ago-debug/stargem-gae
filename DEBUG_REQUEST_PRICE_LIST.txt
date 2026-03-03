@@ -78,3 +78,59 @@
   "notes": ""
 }
 ---
+{
+  "name": "quote ballo",
+  "validFrom": "2026-03-02T13:14:54.060Z",
+  "validTo": "2027-03-02T13:14:54.060Z",
+  "active": true,
+  "notes": ""
+}
+---
+{
+  "name": "prova gae",
+  "validFrom": "2026-03-02T13:17:04.619Z",
+  "validTo": "2027-03-02T13:17:04.619Z",
+  "active": true,
+  "notes": ""
+}
+---
+{
+  "name": "danza",
+  "validFrom": "2026-03-02T15:42:07.599Z",
+  "validTo": "2027-03-02T15:42:07.599Z",
+  "active": true,
+  "notes": ""
+}
+---
+{
+  "name": "listino ballo di coppia",
+  "validFrom": "2026-02-02T00:00:00.000Z",
+  "validTo": "2027-03-02T16:19:37.724Z",
+  "active": true,
+  "notes": "prova"
+}
+---
+{
+  "name": "prova",
+  "validFrom": "2026-03-02T18:00:12.112Z",
+  "validTo": "2027-03-02T18:00:12.112Z",
+  "active": true,
+  "notes": ""
+}
+---
+{
+  "name": "provaxxxxxxxxxx",
+  "validFrom": "2026-03-02T18:01:38.651Z",
+  "validTo": "2027-03-02T18:01:38.651Z",
+  "active": true,
+  "notes": ""
+}
+---
+{
+  "name": "ottobre test",
+  "validFrom": "2026-03-03T10:46:41.098Z",
+  "validTo": "2027-03-03T10:46:41.098Z",
+  "active": true,
+  "notes": ""
+}
+---

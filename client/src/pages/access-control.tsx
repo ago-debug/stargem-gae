@@ -87,7 +87,7 @@ export default function AccessControl() {
   const filteredMembers = searchMembersData?.members?.slice(0, 10) || [];
 
   const { data: enrollments } = useQuery<Enrollment[]>({
-    queryKey: ["/api/enrollments"],
+    queryKey: ["/api/enrollments?type=corsi"],
   });
 
   const { data: workshopEnrollments } = useQuery<WorkshopEnrollment[]>({

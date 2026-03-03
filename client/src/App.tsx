@@ -18,7 +18,6 @@ import Workshops from "@/pages/workshops";
 import Categories from "@/pages/categories";
 import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
-import PaymentMethods from "@/pages/payment-methods";
 import Studios from "@/pages/studios";
 import Memberships from "@/pages/memberships";
 import Payments from "@/pages/payments";
@@ -33,16 +32,32 @@ import TestGae from "@/pages/test-gae";
 import CardGenerator from "@/pages/card-generator";
 import AdminPanel from "@/pages/admin-panel";
 import CalendarPage from "@/pages/calendar";
+import BookingServiceCategories from "@/pages/booking-service-categories";
 import BookingServices from "@/pages/booking-services";
 import StudioBookings from "@/pages/studio-bookings";
 import AccountingSheet from "@/pages/accounting-sheet";
 import MascheraInputGenerale from "@/pages/maschera-input-generale";
 import PriceLists from "@/pages/listini";
+import ListiniHome from "@/pages/listini-home";
+import QuoteListini from "@/pages/quote-listini";
 import Attivita from "@/pages/attivita";
 import IscrittiPerAttivita from "@/pages/iscritti_per_attivita";
 import ActivityCategories from "@/pages/activity-categories";
 import Elenchi from "@/pages/elenchi";
+import TodoList from "@/pages/todo-list";
+import Commenti from "@/pages/commenti";
+import NoteTeam from "@/pages/note-team";
 import SchedaCorso from "@/pages/scheda-corso";
+import SchedaWorkshop from "@/pages/scheda-workshop";
+import SchedaProvaPagamento from "@/pages/scheda-prova-pagamento";
+import SchedaProvaGratuita from "@/pages/scheda-prova-gratuita";
+import SchedaLezioneSingola from "@/pages/scheda-lezione-singola";
+import SchedaDomenica from "@/pages/scheda-domenica";
+import SchedaAllenamento from "@/pages/scheda-allenamento";
+import SchedaLezioneIndividuale from "@/pages/scheda-lezione-individuale";
+import SchedaCampus from "@/pages/scheda-campus";
+import SchedaSaggio from "@/pages/scheda-saggio";
+import SchedaVacanzaStudio from "@/pages/scheda-vacanza-studio";
 
 import FreeTrials from "@/pages/free-trials";
 import PaidTrials from "@/pages/paid-trials";
@@ -63,6 +78,9 @@ import RecitalCategories from "@/pages/recital-categories";
 import VacationCategories from "@/pages/vacation-categories";
 
 import { NotificationCenter } from "@/components/notification-center";
+import { TodoNotification } from "@/components/todo-notification";
+import { PageNotesIndicator } from "@/components/page-notes-indicator";
+import { PageNotesOverlay } from "@/components/page-notes-overlay";
 const logoStarGem = "/logo_stargem.png";
 
 export function hasPermission(user: SelectUser | null, path: string) {
@@ -114,14 +132,13 @@ function ProtectedRoute({ path, component: Component }: { path: string, componen
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={AnagraficaHome} />
+      <ProtectedRoute path="/" component={MascheraInputGenerale} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/anagrafica_a_lista" component={Members} />
       <ProtectedRoute path="/corsi" component={Courses} />
       <ProtectedRoute path="/workshops" component={Workshops} />
       <ProtectedRoute path="/calendario" component={CalendarPage} />
       <ProtectedRoute path="/categorie-corsi" component={Categories} />
-      <ProtectedRoute path="/metodi-pagamento" component={PaymentMethods} />
       <ProtectedRoute path="/insegnanti" component={Instructors} />
       <ProtectedRoute path="/studios" component={Studios} />
       <ProtectedRoute path="/tessere" component={Memberships} />
@@ -139,11 +156,22 @@ function Router() {
       <ProtectedRoute path="/prenotazioni-sale" component={StudioBookings} />
       <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
       <ProtectedRoute path="/maschera-generale" component={MascheraInputGenerale} />
+      <ProtectedRoute path="/maschera-input" component={MascheraInputGenerale} />
       <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
       <ProtectedRoute path="/attivita" component={Attivita} />
       <ProtectedRoute path="/categorie-attivita" component={ActivityCategories} />
       <ProtectedRoute path="/categoria-partecipante" component={ClientCategories} />
       <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
+      <ProtectedRoute path="/scheda-workshop" component={SchedaWorkshop} />
+      <ProtectedRoute path="/scheda-prova-pagamento" component={SchedaProvaPagamento} />
+      <ProtectedRoute path="/scheda-prova-gratuita" component={SchedaProvaGratuita} />
+      <ProtectedRoute path="/scheda-lezione-singola" component={SchedaLezioneSingola} />
+      <ProtectedRoute path="/scheda-domenica" component={SchedaDomenica} />
+      <ProtectedRoute path="/scheda-allenamento" component={SchedaAllenamento} />
+      <ProtectedRoute path="/scheda-lezione-individuale" component={SchedaLezioneIndividuale} />
+      <ProtectedRoute path="/scheda-campus" component={SchedaCampus} />
+      <ProtectedRoute path="/scheda-saggio" component={SchedaSaggio} />
+      <ProtectedRoute path="/scheda-vacanza-studio" component={SchedaVacanzaStudio} />
       <ProtectedRoute path="/attivita/corsi" component={Courses} />
       <ProtectedRoute path="/attivita/workshops" component={Workshops} />
       <ProtectedRoute path="/attivita/prove-pagamento" component={PaidTrials} />
@@ -163,8 +191,16 @@ function Router() {
       <ProtectedRoute path="/categorie-campus" component={CampusCategories} />
       <ProtectedRoute path="/categorie-saggi" component={RecitalCategories} />
       <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
+      <ProtectedRoute path="/categorie-servizi" component={BookingServiceCategories} />
+      <ProtectedRoute path="/quote-listini/:activityType" component={QuoteListini} />
+      <ProtectedRoute path="/listini-old" component={ListiniHome} />
       <ProtectedRoute path="/listini" component={PriceLists} />
+      <ProtectedRoute path="/listini-base/:activityType" component={PriceLists} />
       <ProtectedRoute path="/elenchi" component={Elenchi} />
+      <ProtectedRoute path="/todo-list" component={TodoList} />
+      <ProtectedRoute path="/note-team" component={NoteTeam} />
+      <ProtectedRoute path="/inserisci-nota" component={NoteTeam} />
+      <ProtectedRoute path="/commenti" component={Commenti} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -197,19 +233,18 @@ function AppContent() {
       <div className="flex h-screen w-full">
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
-          <header className="flex items-center justify-between h-14 px-4 border-b border-border bg-background flex-shrink-0">
+          <header className="flex items-center justify-between h-10 px-4 border-b border-border bg-background flex-shrink-0">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
-            <div className="flex items-center gap-4 h-full">
-              <NotificationCenter />
-              <img
-                src={logoStarGem}
-                alt="StarGem Logo"
-                className="h-full py-2 object-contain mix-blend-multiply"
-                data-testid="logo-header"
-              />
+            <div className="flex items-center gap-12 h-full">
+              <div className="flex items-center gap-4">
+                <PageNotesIndicator />
+                <TodoNotification />
+                <NotificationCenter />
+              </div>
             </div>
           </header>
-          <main className="flex-1 overflow-auto bg-background">
+          <main className="flex-1 overflow-auto bg-background relative">
+            <PageNotesOverlay />
             <Router />
           </main>
         </div>

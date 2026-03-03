@@ -6,13 +6,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
 import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollment-details";
+import { StarGemCopilot } from "@/components/star-gem-copilot";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { useQuery } from "@tanstack/react-query";
+
+const getEndpoint = (attivita: string) => {
+    switch (attivita) {
+        case "corsi": return "/api/courses";
+        case "prove-pagamento": return "/api/paid-trials";
+        case "prove-gratuite": return "/api/free-trials";
+        case "lezioni-singole": return "/api/single-lessons";
+        case "workshop": return "/api/workshops";
+        case "domeniche-movimento": return "/api/sunday-activities";
+        case "allenamenti": return "/api/trainings";
+        case "lezioni-individuali": return "/api/individual-lessons";
+        case "campus": return "/api/campus-activities";
+        case "saggi": return "/api/recitals";
+        case "vacanze-studio": return "/api/vacation-studies";
+        default: return null;
+    }
+};
 
 export interface PaymentData {
     id?: string; // temporary id for list key
@@ -81,11 +101,22 @@ export function PaymentDialog({
     corsiDB,
 }: PaymentDialogProps) {
     const [formData, setFormData] = useState<PaymentData>(defaultPayment);
+    const [isGratuito, setIsGratuito] = useState(false);
+    const [adminCode, setAdminCode] = useState("");
+    const [error, setError] = useState("");
+    const [touched, setTouched] = useState(false);
 
     useEffect(() => {
         if (open) {
+            setIsGratuito(false);
+            setAdminCode("");
+            setError("");
             if (initialData) {
                 setFormData({ ...initialData });
+                if (initialData.totaleQuota === 0 && initialData.quantita > 0) {
+                    setIsGratuito(true);
+                    setAdminCode("000zzz");
+                }
             } else {
                 setFormData({ ...defaultPayment, dataPagamento: new Date().toISOString().split('T')[0] });
             }
@@ -96,26 +127,66 @@ export function PaymentDialog({
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+    const { data: dynamicActivities } = useQuery<any[]>({
+        queryKey: [getEndpoint(formData.attivita)],
+        queryFn: async () => {
+            const endpoint = getEndpoint(formData.attivita);
+            if (!endpoint) return [];
+            const res = await fetch(endpoint);
+            if (!res.ok) return [];
+            return res.json();
+        },
+        enabled: !!getEndpoint(formData.attivita)
+    });
+
+    const optionsToRender = formData.attivita === "corsi" && corsiDB && corsiDB.length > 0
+        ? corsiDB
+        : (dynamicActivities || []).map(item => ({
+            id: item.id,
+            name: item.name || item.title || `${item.firstName} ${item.lastName}` || `Item ${item.id}`,
+            sku: item.sku || item.code || ""
+        }));
+
     const handleAttivitaChange = (value: string) => {
         handleChange("attivita", value);
-        // Reset dettaglio if attivita changes? Maybe not strictly required but good practice
-        // handleChange("dettaglioId", "");
-        // handleChange("dettaglioNome", "");
+        handleChange("dettaglioId", "");
+        handleChange("dettaglioNome", "");
     };
 
     const handleDettaglioChange = (id: string) => {
         handleChange("dettaglioId", id);
-        const corso = corsiDB.find(c => c.id.toString() === id);
+        const corso = optionsToRender.find(c => c.id.toString() === id);
         if (corso) {
-            handleChange("dettaglioNome", `${corso.name} - ${corso.sku}`);
+            handleChange("dettaglioNome", corso.sku ? `${corso.name} - ${corso.sku}` : corso.name);
         } else {
             handleChange("dettaglioNome", "");
         }
     };
 
+    const isMissingFields = !formData.attivita || !formData.dettaglioId || formData.totaleQuota === undefined || !formData.dataPagamento || formData.totaleQuota === null || Number.isNaN(formData.totaleQuota);
+
     const handleSave = () => {
-        // Simple validation
-        onSave(formData);
+        setTouched(true);
+
+        if (isMissingFields && !isGratuito) {
+            setError("Attività, Dettaglio, Data Pagamento e Totale Quota sono obbligatori.");
+            return;
+        }
+
+        if (isGratuito && adminCode !== "000zzz") {
+            setError("Codice Admin non valido per la gratuità.");
+            return;
+        }
+
+        setError("");
+        const finalData = { ...formData };
+        if (isGratuito) {
+            finalData.totaleQuota = 0;
+            finalData.saldoTotale = 0;
+            finalData.acconto = 0;
+        }
+
+        onSave(finalData);
         onOpenChange(false);
     };
 
@@ -151,7 +222,7 @@ export function PaymentDialog({
                         <div className="space-y-2">
                             <Label>Attività</Label>
                             <Select value={formData.attivita} onValueChange={handleAttivitaChange}>
-                                <SelectTrigger>
+                                <SelectTrigger className={cn(touched && !formData.attivita ? "border-red-500" : "")}>
                                     <SelectValue placeholder="Seleziona attività" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -165,27 +236,30 @@ export function PaymentDialog({
                                     <SelectItem value="lezioni-individuali">Lezioni Individuali</SelectItem>
                                     <SelectItem value="campus">Campus</SelectItem>
                                     <SelectItem value="saggi">Saggi</SelectItem>
+                                    <SelectItem value="vacanze-studio">Vacanze Studio</SelectItem>
                                 </SelectContent>
                             </Select>
+                            {touched && !formData.attivita && <p className="text-red-500 text-xs mt-1">Obbligatorio</p>}
                         </div>
                         <div className="space-y-2">
                             <Label>Dettaglio Attività e codice</Label>
                             <Select value={formData.dettaglioId} onValueChange={handleDettaglioChange}>
-                                <SelectTrigger>
+                                <SelectTrigger className={cn(touched && !formData.dettaglioId ? "border-red-500" : "")}>
                                     <SelectValue placeholder="Seleziona dettaglio" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {corsiDB.length > 0 ? (
-                                        corsiDB.map((corso) => (
+                                    {optionsToRender.length > 0 ? (
+                                        optionsToRender.map((corso) => (
                                             <SelectItem key={corso.id} value={corso.id.toString()}>
-                                                {corso.name} - {corso.sku}
+                                                {corso.sku ? `${corso.name} - ${corso.sku}` : corso.name}
                                             </SelectItem>
                                         ))
                                     ) : (
-                                        <SelectItem value="nessuno" disabled>Nessuna attività disponibile</SelectItem>
+                                        <SelectItem value="nessuno" disabled>Seleziona un'attività valida prima</SelectItem>
                                     )}
                                 </SelectContent>
                             </Select>
+                            {touched && !formData.dettaglioId && <p className="text-red-500 text-xs mt-1">Obbligatorio</p>}
                         </div>
                         <div className="space-y-2">
                             <MultiSelectEnrollmentDetails
@@ -210,7 +284,10 @@ export function PaymentDialog({
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Descrizione Quota (Q)</Label>
+                            <div className="flex items-center justify-between">
+                                <Label>Descrizione Quota (Q)</Label>
+                                <StarGemCopilot onSelect={(ai) => console.log(`AI help for quota using ${ai}`)} />
+                            </div>
                             <Input
                                 value={formData.descrizioneQuota}
                                 onChange={(e) => handleChange("descrizioneQuota", e.target.value)}
@@ -220,7 +297,10 @@ export function PaymentDialog({
                             {/* Periodo span could be wider or as requested */}
                         </div>
                         <div className="space-y-2">
-                            <Label>Periodo (R)</Label>
+                            <div className="flex items-center justify-between">
+                                <Label>Periodo (R)</Label>
+                                <StarGemCopilot onSelect={(ai) => console.log(`AI help for period using ${ai}`)} />
+                            </div>
                             <Input
                                 value={formData.periodo}
                                 onChange={(e) => handleChange("periodo", e.target.value)}
@@ -230,12 +310,14 @@ export function PaymentDialog({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                         <div className="space-y-2">
-                            <Label>Totale Quota (S)</Label>
+                            <Label>Totale Quota (S) *</Label>
                             <Input
                                 type="number"
-                                value={formData.totaleQuota || ''}
-                                onChange={(e) => handleChange("totaleQuota", parseFloat(e.target.value) || 0)}
+                                className={cn(touched && (formData.totaleQuota === undefined || formData.totaleQuota === null || Number.isNaN(formData.totaleQuota)) ? "border-red-500" : "")}
+                                value={formData.totaleQuota ?? ''}
+                                onChange={(e) => handleChange("totaleQuota", e.target.value === '' ? undefined : parseFloat(e.target.value))}
                             />
+                            {touched && (formData.totaleQuota === undefined || formData.totaleQuota === null || Number.isNaN(formData.totaleQuota)) && <p className="text-red-500 text-xs mt-1">Obbligatorio</p>}
                         </div>
                         <div className="space-y-2">
                             <Label>Codice Sconto (T)</Label>
@@ -301,12 +383,14 @@ export function PaymentDialog({
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Data Pagamento (Z)</Label>
+                            <Label>Data Pagamento (Z) *</Label>
                             <Input
                                 type="date"
+                                className={cn(touched && !formData.dataPagamento ? "border-red-500" : "")}
                                 value={formData.dataPagamento}
                                 onChange={(e) => handleChange("dataPagamento", e.target.value)}
                             />
+                            {touched && !formData.dataPagamento && <p className="text-red-500 text-xs mt-1">Obbligatorio</p>}
                         </div>
                         <div className="space-y-2">
                             <Label>Saldo Annuale (AA)</Label>
@@ -340,18 +424,57 @@ export function PaymentDialog({
                             <div className="flex items-center gap-2">
                                 <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Totale</Badge>
                                 <Input
-                                    value={`€ ${formData.saldoTotale.toFixed(2)}`}
+                                    value={`€ ${(isGratuito ? 0 : formData.saldoTotale).toFixed(2)}`}
                                     readOnly
                                     className="bg-yellow-50 border-yellow-200 font-bold text-lg max-w-xs"
                                 />
                             </div>
                         </div>
                     </div>
+
+                    <div className="flex flex-col space-y-4 border-t pt-4">
+                        <div className="flex items-center gap-2 border p-3 rounded-md bg-red-50/50">
+                            <Checkbox
+                                id="gratuita"
+                                checked={isGratuito}
+                                disabled={!formData.attivita || !formData.dettaglioId}
+                                onCheckedChange={(c) => setIsGratuito(c === true)}
+                            />
+                            <Label htmlFor="gratuita" className={cn("font-bold uppercase tracking-wider cursor-pointer", !formData.attivita || !formData.dettaglioId ? "text-muted-foreground" : "text-red-600")}>
+                                Gratuità (Richiede Codice Admin){!formData.attivita || !formData.dettaglioId ? " - Seleziona attività" : ""}
+                            </Label>
+                        </div>
+                        {isGratuito && (
+                            <div className="space-y-2 max-w-sm p-4 border border-red-200 rounded-md bg-red-50">
+                                <Label className="text-red-700">Codice Admin per autorizzazione</Label>
+                                <Input
+                                    type="password"
+                                    value={adminCode}
+                                    onChange={(e) => {
+                                        setAdminCode(e.target.value);
+                                        setError("");
+                                    }}
+                                    placeholder="Inserisci codice admin (es. 000zzz)..."
+                                    className="border-red-300 focus-visible:ring-red-400"
+                                />
+                                {error && error.includes("Codice Admin") && <p className="text-red-600 font-medium text-sm mt-1">{error}</p>}
+                            </div>
+                        )}
+                        {error && !error.includes("Codice Admin") && (
+                            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm font-medium">
+                                {error}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <DialogFooter>
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Annulla</Button>
-                    <Button className="gold-3d-button" onClick={handleSave}>
+                    <Button
+                        className={cn("gold-3d-button", isMissingFields && !isGratuito ? "opacity-50 cursor-not-allowed" : "")}
+                        onClick={handleSave}
+                        disabled={isMissingFields && !isGratuito && touched}
+                    >
                         {initialData ? "Salva Modifiche" : "Aggiungi Pagamento"}
                     </Button>
                 </DialogFooter>
