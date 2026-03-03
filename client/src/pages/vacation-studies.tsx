@@ -9,6 +9,7 @@ export default function VacationStudies() {
       categoryApiEndpoint="/api/vacation-categories"
       itemLabel="vacanza studio"
       itemLabelPlural="vacanze studio"
+      baseRoute="/scheda-vacanza-studio"
       testIdPrefix="vacation-study"
     />
   );

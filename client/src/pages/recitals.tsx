@@ -7,8 +7,9 @@ export default function Recitals() {
       subtitle="Gestisci saggi e spettacoli"
       apiEndpoint="/api/recitals"
       categoryApiEndpoint="/api/recital-categories"
-      itemLabel="saggio"
-      itemLabelPlural="saggi"
+      itemLabel="saggio/spettacolo"
+      itemLabelPlural="saggi e spettacoli"
+      baseRoute="/scheda-saggio"
       testIdPrefix="recital"
     />
   );

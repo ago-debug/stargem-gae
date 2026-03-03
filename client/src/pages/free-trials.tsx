@@ -9,6 +9,7 @@ export default function FreeTrials() {
       categoryApiEndpoint="/api/categories"
       itemLabel="prova gratuita"
       itemLabelPlural="prove gratuite"
+      baseRoute="/scheda-prova-gratuita"
       testIdPrefix="free-trial"
     />
   );

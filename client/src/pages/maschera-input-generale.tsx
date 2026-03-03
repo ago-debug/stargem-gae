@@ -10,19 +10,25 @@ import {
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
   User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music
 } from "lucide-react";
-import { Link } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { Link, useSearch, useLocation } from "wouter";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { KnowledgeInfo } from "@/components/knowledge-info";
 import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
-import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollment-details";
+import { MultiSelectEnrollmentDetails, EnrollmentDetailBadge } from "@/components/multi-select-enrollment-details";
 import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CourseSelector } from "@/components/course-selector";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Course, Instructor, Category, Studio } from "@shared/schema";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+interface DuplicateFiscalCode {
+  fiscalCode: string;
+  members: { id: number; firstName: string; lastName: string; }[];
+}
 interface AllegatoState {
   hasFile: boolean;
   data?: string;
@@ -41,8 +47,47 @@ interface AllegatiState {
   tesseraEnte: AllegatoState & { numero?: string; ente?: string };
 }
 
+const attivitaKeys = ["corsi", "prove-pagamento", "prove-gratuite", "lezioni-singole", "workshop", "domeniche-movimento", "allenamenti", "lezioni-individuali", "campus", "saggi", "vacanze-studio"] as const;
+type AttivitaKey = typeof attivitaKeys[number];
+
+const defaultAttivitaText: Record<AttivitaKey, string> = {
+  "corsi": "", "prove-pagamento": "", "prove-gratuite": "", "lezioni-singole": "",
+  "workshop": "", "domeniche-movimento": "", "allenamenti": "", "lezioni-individuali": "",
+  "campus": "", "saggi": "", "vacanze-studio": "",
+};
+
+const defaultAttivitaArray: Record<AttivitaKey, string[]> = {
+  "corsi": [], "prove-pagamento": [], "prove-gratuite": [], "lezioni-singole": [],
+  "workshop": [], "domeniche-movimento": [], "allenamenti": [], "lezioni-individuali": [],
+  "campus": [], "saggi": [], "vacanze-studio": [],
+};
+
+export interface BottomSectionsState {
+  gift: { tipo: string; valore: string; numero: string; dataEmissione: string; dataScadenza: string; motivazione: string; dataUtilizzo: string; iban: string };
+  tessere: { quota: string; pagamento: string; nuovoRinnovo: string; dataScad: string; numero: string; tesseraEnte: string; domanda: string };
+  certificatoMedico: { dataScadenza: string; dataRinnovo: string; rilasciatoDa: string; pagamento: string; aNoi: string; tipo: string };
+}
+
+export const defaultBottomSectionsState: BottomSectionsState = {
+  gift: { tipo: "", valore: "", numero: "", dataEmissione: "", dataScadenza: "", motivazione: "", dataUtilizzo: "", iban: "" },
+  tessere: { quota: "", pagamento: "", nuovoRinnovo: "", dataScad: "", numero: "", tesseraEnte: "", domanda: "" },
+  certificatoMedico: { dataScadenza: "", dataRinnovo: "", rilasciatoDa: "", pagamento: "", aNoi: "", tipo: "" }
+};
+
 export default function MascheraInputGenerale() {
-  const [allegati, setAllegati] = useState<AllegatiState>({
+  const [, setLocation] = useLocation();
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const memberIdFromUrl = urlParams.get('memberId');
+  const { user } = useAuth();
+
+  const formatAuditDate = (dateString?: string | Date | null) => {
+    if (!dateString) return "";
+    const d = new Date(dateString);
+    return d.toLocaleString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  };
+
+  const defaultAllegatiState: AllegatiState = {
     regolamento: { hasFile: false, data: "", accettato: "" },
     privacy: { hasFile: false, data: "", accettata: "" },
     certificatoMedico: { hasFile: false, dataRilascio: "", scadenza: "", tipo: "" },
@@ -51,7 +96,39 @@ export default function MascheraInputGenerale() {
     creditiScolastici: { hasFile: false, annoScolastico: "2025/2026", richiesto: "" },
     tesserinoTecnico: { hasFile: false, numero: "", dataRilascio: "" },
     tesseraEnte: { hasFile: false, numero: "", ente: "" },
+  };
+
+  const [allegati, setAllegati] = useState<AllegatiState>(() => {
+    const saved = sessionStorage.getItem("mascheraInputAllegati");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved allegati", e);
+      }
+    }
+    return defaultAllegatiState;
   });
+
+  const [bottomSectionsData, setBottomSectionsData] = useState<BottomSectionsState>(() => {
+    const saved = sessionStorage.getItem("mascheraInputBottomSections");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved bottomSections", e);
+      }
+    }
+    return defaultBottomSectionsState;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("mascheraInputBottomSections", JSON.stringify(bottomSectionsData));
+  }, [bottomSectionsData]);
+
+  useEffect(() => {
+    sessionStorage.setItem("mascheraInputAllegati", JSON.stringify(allegati));
+  }, [allegati]);
 
   const [photoFile, setPhotoFile] = useState<{ file: File | null; preview: string | null }>({ file: null, preview: null });
 
@@ -107,17 +184,17 @@ export default function MascheraInputGenerale() {
     }));
   };
 
-  const [formData, setFormData] = useState({
+  const defaultFormData = {
     // Intestazione
     stagione: "2025-2026",
-    anagrafica: "",
     codiceId: "2526-000001",
     dataInserimento: new Date().toLocaleDateString("it-IT"),
+    teamInserito: "",
+    teamAggiornato: "",
     tipoPartecipante: "tesserato",
     tessera: "",
     scadenzaTessera: "",
     daDoveArriva: "",
-    teamSegreteria: "",
     tesseraEnte: "",
     scadenzaTesseraEnte: "",
     ente: "",
@@ -170,11 +247,99 @@ export default function MascheraInputGenerale() {
     provinciaNascitaGen2: "",
     sessoGen2: "",
     etaGen2: "",
+  };
+
+  const [formData, setFormData] = useState(() => {
+    const saved = sessionStorage.getItem("mascheraInputFormData");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved formData", e);
+      }
+    }
+    return defaultFormData;
   });
+
+  // Track modified fields for Color Coding
+  const [dirtyFields, setDirtyFields] = useState<Record<string, boolean>>(() => {
+    const saved = sessionStorage.getItem("mascheraInputDirtyFields");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved dirtyFields", e);
+      }
+    }
+    return {};
+  });
+
+  // Save to sessionStorage whenever formData or dirtyFields change
+  useEffect(() => {
+    sessionStorage.setItem("mascheraInputFormData", JSON.stringify(formData));
+  }, [formData]);
+
+  useEffect(() => {
+    sessionStorage.setItem("mascheraInputDirtyFields", JSON.stringify(dirtyFields));
+  }, [dirtyFields]);
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Helper for input color coding based on user requirements
+  const getInputClassName = (fieldName: string, required: boolean = false, isAutoPopulated: boolean = false) => {
+    const value = (formData as any)[fieldName];
+    const isDirty = dirtyFields[fieldName];
+
+    // Priority 1: Red for fields that *will* be auto-populated
+    if (isAutoPopulated && !formData.codiceFiscale && !value && !isSaved) {
+      return 'bg-red-50 border-red-400 transition-colors text-red-900';
+    }
+
+    // Priority 2: Giallino if user is actively writing/editing (isDirty)
+    if (isDirty) {
+      return 'bg-yellow-50 border-yellow-300 transition-colors text-yellow-900';
+    }
+
+    // Priority 3: Verdino if field is populated and NOT being actively edited
+    // (This covers both "just saved" because saving clears isDirty, and "loaded from DB")
+    if (value && !isDirty) {
+      // Per la sezione Intestazione, vogliamo che diventi verde SOLO se è stato inserito un partecipante
+      const isIntestazioneField = ['stagione', 'anagrafica', 'codiceId', 'dataInserimento', 'tipoPartecipante', 'tessera', 'scadenzaTessera', 'daDoveArriva', 'tesseraEnte', 'scadenzaTesseraEnte', 'ente'].includes(fieldName);
+      const hasParticipant = formData.nome.trim() !== "" || formData.cognome.trim() !== "";
+
+      if (isIntestazioneField && !hasParticipant && !isSaved) {
+        // Se è un campo dell'intestazione (es. con un valore di default come Stagione) 
+        // ma non c'è ancora un partecipante, lascialo del colore di base.
+      } else {
+        return 'bg-green-50 border-green-300 transition-colors text-green-900';
+      }
+    }
+
+    // Priority 4: Grigio for empty mandatory fields
+    if (required && !value) {
+      return 'bg-muted/50 border-muted-foreground/30 transition-colors';
+    }
+
+    // Default
+    return 'transition-colors';
+  };
 
   // Stato attività selezionata nei pagamenti e corsi dal DB
   // NEW: Payment List State
-  const [payments, setPayments] = useState<PaymentData[]>([]);
+  const [payments, setPayments] = useState<PaymentData[]>(() => {
+    const saved = sessionStorage.getItem("mascheraInputPayments");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved payments", e);
+      }
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("mascheraInputPayments", JSON.stringify(payments));
+  }, [payments]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
 
@@ -205,6 +370,291 @@ export default function MascheraInputGenerale() {
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [selectedCourseToAdd, setSelectedCourseToAdd] = useState<string>("");
   const [selectedWorkshopToAdd, setSelectedWorkshopToAdd] = useState<string>("");
+  const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
+
+  const [verificaStato, setVerificaStato] = useState({
+    telefono: false,
+    email: false,
+    telGen1: false,
+    emailGen1: false,
+    telGen2: false,
+    emailGen2: false,
+  });
+
+  const toggleVerifica = (campo: keyof typeof verificaStato) => {
+    setVerificaStato(prev => ({ ...prev, [campo]: !prev[campo] }));
+  };
+
+  const avviaVerifica = (campo: keyof typeof verificaStato, tipo: 'telefono' | 'email') => {
+    const valore = tipo === 'telefono'
+      ? (campo === 'telefono' ? formData.telefono : campo === 'telGen1' ? formData.telGen1 : formData.telGen2)
+      : (campo === 'email' ? formData.email : campo === 'emailGen1' ? formData.emailGen1 : formData.emailGen2);
+
+    if (!valore) {
+      alert(`Inserisci prima ${tipo === 'telefono' ? 'il numero di telefono' : "l'indirizzo email"} `);
+      return;
+    }
+
+    const conferma = window.confirm(
+      tipo === 'telefono'
+        ? `Inviare SMS di verifica a ${valore}?\n\n(Funzionalità da collegare con Twilio)`
+        : `Inviare email di verifica a ${valore}?\n\n(Funzionalità da collegare con SMTP)`
+    );
+
+    if (conferma) {
+      setTimeout(() => {
+        setVerificaStato(prev => ({ ...prev, [campo]: true }));
+        alert(`${tipo === 'telefono' ? 'Telefono' : 'Email'} verificato con successo!`);
+      }, 500);
+    }
+  };
+
+  const decodeFiscalCode = (cf: string) => {
+    if (!cf || cf.length !== 16) return null;
+
+    const monthMap: { [key: string]: number } = {
+      'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'H': 6,
+      'L': 7, 'M': 8, 'P': 9, 'R': 10, 'S': 11, 'T': 12
+    };
+
+    try {
+      const yearCode = parseInt(cf.substring(6, 8));
+      const currentYear = new Date().getFullYear();
+      const century = yearCode > (currentYear % 100) + 10 ? 1900 : 2000;
+      const year = century + yearCode;
+
+      const monthChar = cf.charAt(8).toUpperCase();
+      const month = monthMap[monthChar] || 1;
+
+      let day = parseInt(cf.substring(9, 11));
+      const sesso = day > 40 ? 'F' : 'M';
+      if (day > 40) day -= 40;
+
+      const dataNascita = `${year} -${month.toString().padStart(2, '0')} -${day.toString().padStart(2, '0')} `;
+      const codiceComune = cf.substring(11, 15).toUpperCase();
+
+      const birthDate = new Date(dataNascita);
+      const today = new Date();
+      let eta = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        eta--;
+      }
+
+      return { dataNascita, sesso, eta: eta.toString(), codiceComune };
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const fetchComuneFromCode = async (codice: string) => {
+    try {
+      const response = await fetch(`/api/comuni/by-code/${codice}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      }
+    } catch (e) {
+      console.error("Errore nel recupero del comune:", e);
+    }
+    return null;
+  };
+
+  const handleChange = async (field: string, value: string) => {
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+    setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, [field]: true }));
+
+    if (field === "codiceFiscale") {
+      // Set the dependent fields dirty immediately so they turn yellow while typing
+      setDirtyFields((prev: Record<string, boolean>) => ({
+        ...prev,
+        dataNascita: true,
+        sesso: true,
+        eta: true,
+        luogoNascita: true,
+        provinciaNascita: true,
+        codComune: true,
+      }));
+
+      if (value.length === 16) {
+        const decoded = decodeFiscalCode(value);
+        if (decoded) {
+          fetchComuneFromCode(decoded.codiceComune).then(comuneData => {
+            setFormData((prev: any) => ({
+              ...prev,
+              dataNascita: decoded.dataNascita,
+              sesso: decoded.sesso,
+              eta: decoded.eta,
+              codComune: decoded.codiceComune,
+              luogoNascita: comuneData?.name || "",
+              provinciaNascita: comuneData?.province?.code || comuneData?.provinceCode || "",
+            }));
+          });
+        }
+      } else {
+        setFormData((prev: any) => ({
+          ...prev,
+          dataNascita: "",
+          sesso: "",
+          eta: "",
+          luogoNascita: "",
+          provinciaNascita: "",
+          codComune: "",
+        }));
+      }
+    }
+
+    if (field === "cfGen1") {
+      // Set the dependent fields dirty immediately so they turn yellow while typing
+      setDirtyFields((prev: Record<string, boolean>) => ({
+        ...prev,
+        dataNascitaGen1: true,
+        sessoGen1: true,
+        etaGen1: true,
+        luogoNascitaGen1: true,
+        provinciaNascitaGen1: true,
+      }));
+
+      if (value.length === 16) {
+        const decoded = decodeFiscalCode(value);
+        if (decoded) {
+          fetchComuneFromCode(decoded.codiceComune).then(comuneData => {
+            setFormData((prev: any) => ({
+              ...prev,
+              dataNascitaGen1: decoded.dataNascita,
+              sessoGen1: decoded.sesso,
+              etaGen1: decoded.eta,
+              luogoNascitaGen1: comuneData?.name || "",
+              provinciaNascitaGen1: comuneData?.province?.code || "",
+            }));
+          });
+        }
+      } else {
+        setFormData((prev: any) => ({
+          ...prev,
+          dataNascitaGen1: "",
+          sessoGen1: "",
+          etaGen1: "",
+          luogoNascitaGen1: "",
+          provinciaNascitaGen1: "",
+        }));
+      }
+    }
+
+    if (field === "cfGen2") {
+      // Set the dependent fields dirty immediately so they turn yellow while typing
+      setDirtyFields((prev: Record<string, boolean>) => ({
+        ...prev,
+        dataNascitaGen2: true,
+        sessoGen2: true,
+        etaGen2: true,
+        luogoNascitaGen2: true,
+        provinciaNascitaGen2: true,
+      }));
+
+      if (value.length === 16) {
+        const decoded = decodeFiscalCode(value);
+        if (decoded) {
+          fetchComuneFromCode(decoded.codiceComune).then(comuneData => {
+            setFormData((prev: any) => ({
+              ...prev,
+              dataNascitaGen2: decoded.dataNascita,
+              sessoGen2: decoded.sesso,
+              etaGen2: decoded.eta,
+              luogoNascitaGen2: comuneData?.name || "",
+              provinciaNascitaGen2: comuneData?.province?.code || "",
+            }));
+          });
+        }
+      } else {
+        setFormData((prev: any) => ({
+          ...prev,
+          dataNascitaGen2: "",
+          sessoGen2: "",
+          etaGen2: "",
+          luogoNascitaGen2: "",
+          provinciaNascitaGen2: "",
+        }));
+      }
+    }
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleReset = () => {
+    const hasData = formData.nome.trim() !== "" || formData.cognome.trim() !== "" || formData.codiceFiscale.trim() !== "";
+    if (!hasData || window.confirm("Sei sicuro di voler pulire tutti i campi?")) {
+      sessionStorage.removeItem("mascheraInputFormData");
+      sessionStorage.removeItem("mascheraInputDirtyFields");
+      sessionStorage.removeItem("mascheraInputAllegati");
+      sessionStorage.removeItem("mascheraInputPayments");
+      sessionStorage.removeItem("mascheraInputAttivitaCorso");
+      sessionStorage.removeItem("mascheraInputAttivitaCodice");
+      sessionStorage.removeItem("mascheraInputAttivitaEnrollmentDetails");
+      sessionStorage.removeItem("mascheraInputBottomSections");
+
+      setPayments([]);
+      setAttivitaCorso(defaultAttivitaText);
+      setAttivitaCodice(defaultAttivitaText);
+      setAttivitaEnrollmentDetails(defaultAttivitaArray);
+      setBottomSectionsData(defaultBottomSectionsState);
+
+      setFormData((prev: any) => ({
+        ...prev,
+        stagione: "",
+        codiceId: "",
+        dataInserimento: "",
+        teamInserito: "",
+        teamAggiornato: "",
+        cognome: "", nome: "", codiceFiscale: "", telefono: "", email: "",
+        indirizzo: "", cap: "", citta: "", provincia: "", codComune: "",
+        dataNascita: "", luogoNascita: "", provinciaNascita: "", sesso: "", eta: "", allievo: "",
+        cognomeGen1: "", nomeGen1: "", cfGen1: "", telGen1: "", emailGen1: "",
+        cognomeGen2: "", nomeGen2: "", cfGen2: "", telGen2: "", emailGen2: "",
+        indirizzoGen1: "", capGen1: "", cittaGen1: "", provinciaGen1: "", codComuneGen1: "",
+        dataNascitaGen1: "", luogoNascitaGen1: "", provinciaNascitaGen1: "", sessoGen1: "", etaGen1: "",
+        indirizzoGen2: "", capGen2: "", cittaGen2: "", provinciaGen2: "", codComuneGen2: "",
+        dataNascitaGen2: "", luogoNascitaGen2: "", provinciaNascitaGen2: "", sessoGen2: "", etaGen2: "",
+        tesserinoTecnico: "", tesseraEnte: "", scadenzaTesseraEnte: "", ente: "",
+        tipoPartecipante: "",
+        tessera: "", scadenzaTessera: "", daDoveArriva: "",
+        teamSegreteria: "",
+      }));
+      setDirtyFields({});
+      setIsSaved(false);
+      setAllegati(defaultAllegatiState);
+      setPhotoFile({ file: null, preview: null });
+      setSearchTerm("");
+      setSelectedMemberId(null);
+      toast({ title: "Form pulito", description: "Tutti i campi sono stati resettati." });
+    }
+  };
+
+  const handleExport = () => {
+    const dataStr = JSON.stringify(formData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `anagrafica_${formData.cognome || "export"}_${formData.nome || ""}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: "Esportazione completata", description: "File JSON scaricato." });
+  };
+
+  // React Query hooks can now use the functions below
+
+  // Query for duplicate fiscal codes
+  const { data: duplicateFiscalCodes } = useQuery<DuplicateFiscalCode[]>({
+    queryKey: ["/api/members/duplicates"],
+  });
 
   // Queries for Selectors (replaces simple useEffect fetches)
   const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
@@ -212,12 +662,13 @@ export default function MascheraInputGenerale() {
   const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: workshops } = useQuery<any[]>({ queryKey: ["/api/workshops"] });
+  const { data: enrollmentDetails } = useQuery<any[]>({ queryKey: ["/api/enrollment-details"] });
 
   // Member Enrollments Queries
   const { data: memberEnrollments, isLoading: loadingEnrollments } = useQuery<any[]>({
-    queryKey: ["/api/enrollments", "member", selectedMemberId],
+    queryKey: ["/api/enrollments?type=corsi", "member", selectedMemberId],
     queryFn: async () => {
-      const res = await fetch(`/api/enrollments?memberId=${selectedMemberId}`);
+      const res = await fetch(`/api/enrollments?type=corsi&memberId=${selectedMemberId}`);
       if (!res.ok) {
         if (res.status === 404) return [];
         throw new Error("Errore caricamento iscrizioni");
@@ -237,6 +688,19 @@ export default function MascheraInputGenerale() {
     enabled: !!selectedMemberId,
   });
 
+  const { data: memberPayments, isLoading: loadingPayments } = useQuery<any[]>({
+    queryKey: ["/api/payments", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/payments?memberId=${selectedMemberId}`);
+      if (!res.ok) {
+        if (res.status === 404) return [];
+        throw new Error("Errore caricamento pagamenti");
+      }
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
+
   // Enrollment Mutations
   const addEnrollmentMutation = useMutation({
     mutationFn: async (courseId: number) => {
@@ -247,7 +711,7 @@ export default function MascheraInputGenerale() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments", "member", selectedMemberId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi", "member", selectedMemberId] });
       toast({ title: "Iscrizione corso aggiunta" });
       setSelectedCourseToAdd("");
     },
@@ -256,12 +720,25 @@ export default function MascheraInputGenerale() {
     }
   });
 
+  const updateEnrollmentMutation = useMutation({
+    mutationFn: async ({ enrollmentId, details }: { enrollmentId: number, details: string[] }) => {
+      await apiRequest("PATCH", `/api/enrollments/${enrollmentId}`, { details });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi", "member", selectedMemberId] });
+      toast({ title: "Dettagli iscrizione aggiornati" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore aggiornamento dettagli", description: error.message, variant: "destructive" });
+    }
+  });
+
   const removeEnrollmentMutation = useMutation({
     mutationFn: async (enrollmentId: number) => {
       await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments", "member", selectedMemberId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi", "member", selectedMemberId] });
       toast({ title: "Iscrizione corso rimossa" });
     },
     onError: (error: Error) => {
@@ -295,6 +772,24 @@ export default function MascheraInputGenerale() {
       toast({ title: "Errore rimozione workshop", description: error.message, variant: "destructive" });
     }
   });
+
+  // Intercept memberId from URL and auto-load Profile
+  useEffect(() => {
+    if (memberIdFromUrl) {
+      const id = parseInt(memberIdFromUrl);
+      if (!isNaN(id)) {
+        fetch(`/api/members/${id}`)
+          .then(res => {
+            if (res.ok) return res.json();
+            throw new Error('Membro non trovato');
+          })
+          .then(member => {
+            handleSelectMember(member);
+          })
+          .catch(err => console.error("Errore auto-loading membro da URL", err));
+      }
+    }
+  }, [memberIdFromUrl]);
 
   // Debounced Search
   useEffect(() => {
@@ -332,7 +827,7 @@ export default function MascheraInputGenerale() {
       eta = age.toString();
     }
 
-    setFormData(prev => ({
+    setFormData((prev: any) => ({
       ...prev,
       // Anagrafica
       nome: member.firstName || "",
@@ -365,7 +860,13 @@ export default function MascheraInputGenerale() {
       emailGen2: member.fatherEmail || "",
 
       // Intestazione defaults
-      tipoPartecipante: "tesserato", // Assuming active member is tesserato
+      stagione: member.season || "2025-2026",
+      codiceId: member.internalId || "2526-000001",
+      dataInserimento: member.insertionDate || new Date().toLocaleDateString("it-IT"),
+      teamInserito: member.createdAt ? `${member.createdBy || 'Sistema'}, ${formatAuditDate(member.createdAt)}` : "",
+      teamAggiornato: member.updatedAt ? `${member.updatedBy || 'Sistema'}, ${formatAuditDate(member.updatedAt)}` : "",
+      daDoveArriva: member.fromWhere || "",
+      tipoPartecipante: member.participantType || "tesserato", // Updated to map participantType
       tessera: member.cardNumber || "",
       scadenzaTessera: member.cardExpiryDate || "",
     }));
@@ -389,7 +890,10 @@ export default function MascheraInputGenerale() {
     }
 
     setShowResults(false);
-    setSearchTerm(`${member.firstName} ${member.lastName}`);
+    setSearchTerm(`${member.firstName} ${member.lastName} `);
+    setDirtyFields({});
+    sessionStorage.removeItem("mascheraInputDirtyFields");
+    setIsSaved(true);
   };
 
   const { toast } = useToast();
@@ -398,13 +902,27 @@ export default function MascheraInputGenerale() {
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
       const res = await apiRequest("POST", "/api/maschera-generale/save", payload);
-      return res.json();
+      return res;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data: any) => {
+      const responseData = data.member ? data : (typeof data.json === 'function' ? await data.json() : data);
+
+      if (responseData && responseData.member) {
+        const m = responseData.member;
+        setFormData((prev: any) => ({
+          ...prev,
+          teamInserito: m.createdAt ? `${m.createdBy || 'Sistema'}, ${formatAuditDate(m.createdAt)}` : prev.teamInserito,
+          teamAggiornato: m.updatedAt ? `${m.updatedBy || 'Sistema'}, ${formatAuditDate(m.updatedAt)}` : prev.teamAggiornato,
+        }));
+      }
+
       toast({
         title: "Salvataggio completato",
-        description: `Dati salvati con successo per ${formData.nome} ${formData.cognome}`,
+        description: `Dati salvati con successo per ${formData.nome} ${formData.cognome} `,
       });
+      setDirtyFields({});
+      sessionStorage.removeItem("mascheraInputDirtyFields");
+      setIsSaved(true);
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
     },
     onError: (error: Error) => {
@@ -467,7 +985,8 @@ export default function MascheraInputGenerale() {
           courseId: parseInt(courseId),
           status: "active",
           seasonId: 1, // Default or selected season
-          tempId: key // For matching with payments
+          tempId: key, // For matching with payments
+          details: attivitaEnrollmentDetails[key as AttivitaKey] || []
         });
       }
     });
@@ -504,18 +1023,41 @@ export default function MascheraInputGenerale() {
   );
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
-  const attivitaKeys = ["corsi", "prove-pagamento", "prove-gratuite", "lezioni-singole", "workshop", "domeniche-movimento", "allenamenti", "lezioni-individuali", "campus", "saggi"] as const;
-  type AttivitaKey = typeof attivitaKeys[number];
-  const [attivitaCorso, setAttivitaCorso] = useState<Record<AttivitaKey, string>>({
-    "corsi": "", "prove-pagamento": "", "prove-gratuite": "", "lezioni-singole": "",
-    "workshop": "", "domeniche-movimento": "", "allenamenti": "", "lezioni-individuali": "",
-    "campus": "", "saggi": "",
+  const [attivitaCorso, setAttivitaCorso] = useState<Record<AttivitaKey, string>>(() => {
+    const saved = sessionStorage.getItem("mascheraInputAttivitaCorso");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error("Failed to parse saved attivitaCorso", e); }
+    }
+    return defaultAttivitaText;
   });
-  const [attivitaCodice, setAttivitaCodice] = useState<Record<AttivitaKey, string>>({
-    "corsi": "", "prove-pagamento": "", "prove-gratuite": "", "lezioni-singole": "",
-    "workshop": "", "domeniche-movimento": "", "allenamenti": "", "lezioni-individuali": "",
-    "campus": "", "saggi": "",
+
+  const [attivitaCodice, setAttivitaCodice] = useState<Record<AttivitaKey, string>>(() => {
+    const saved = sessionStorage.getItem("mascheraInputAttivitaCodice");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error("Failed to parse saved attivitaCodice", e); }
+    }
+    return defaultAttivitaText;
   });
+
+  const [attivitaEnrollmentDetails, setAttivitaEnrollmentDetails] = useState<Record<AttivitaKey, string[]>>(() => {
+    const saved = sessionStorage.getItem("mascheraInputAttivitaEnrollmentDetails");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error("Failed to parse saved attivitaEnrollmentDetails", e); }
+    }
+    return defaultAttivitaArray;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("mascheraInputAttivitaCorso", JSON.stringify(attivitaCorso));
+  }, [attivitaCorso]);
+
+  useEffect(() => {
+    sessionStorage.setItem("mascheraInputAttivitaCodice", JSON.stringify(attivitaCodice));
+  }, [attivitaCodice]);
+
+  useEffect(() => {
+    sessionStorage.setItem("mascheraInputAttivitaEnrollmentDetails", JSON.stringify(attivitaEnrollmentDetails));
+  }, [attivitaEnrollmentDetails]);
 
 
   const handleSavePayment = (payment: PaymentData) => {
@@ -550,22 +1092,20 @@ export default function MascheraInputGenerale() {
   };
 
   useEffect(() => {
-    // Legacy fetches replaced by useQuery, except for specific categories not covered by main queries
-    // Keeping simple categories fetching if needed for other parts of the form
-    /*
-    fetch("/api/courses")
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setCorsiDB(data))
-      .catch(() => setCorsiDB([]));
-    */
-    // Manually setting CorsiDB from useQuery data for backward compatibility if needed
     if (courses) {
       setCorsiDB(courses.map(c => ({ id: c.id, name: c.name, sku: c.sku || "" })));
     }
+  }, [courses]);
+
+  useEffect(() => {
     if (categories) {
       setCategorieDB(categories.map(c => ({ id: c.id, name: c.name })));
     }
+  }, [categories]);
 
+  useEffect(() => {
+    // Legacy fetches replaced by useQuery, except for specific categories not covered by main queries
+    // Keeping simple categories fetching if needed for other parts of the form
     fetch("/api/workshop-categories")
       .then(res => res.ok ? res.json() : [])
       .then(data => setWorkshopCategorieDB(data))
@@ -600,282 +1140,7 @@ export default function MascheraInputGenerale() {
       .catch(() => setPartecipanteCategorieDB([]));
   }, []);
 
-  // Stato verifica telefoni ed email
-  const [verificaStato, setVerificaStato] = useState({
-    telefono: false,
-    email: false,
-    telGen1: false,
-    emailGen1: false,
-    telGen2: false,
-    emailGen2: false,
-  });
-
-  const toggleVerifica = (campo: keyof typeof verificaStato) => {
-    setVerificaStato(prev => ({ ...prev, [campo]: !prev[campo] }));
-  };
-
-  // Funzione per avviare la verifica (simulata per ora, poi collegheremo Twilio/SMTP)
-  const avviaVerifica = (campo: keyof typeof verificaStato, tipo: 'telefono' | 'email') => {
-    const valore = tipo === 'telefono'
-      ? (campo === 'telefono' ? formData.telefono : campo === 'telGen1' ? formData.telGen1 : formData.telGen2)
-      : (campo === 'email' ? formData.email : campo === 'emailGen1' ? formData.emailGen1 : formData.emailGen2);
-
-    if (!valore) {
-      alert(`Inserisci prima ${tipo === 'telefono' ? 'il numero di telefono' : "l'indirizzo email"}`);
-      return;
-    }
-
-    // Simulazione verifica (in futuro: Twilio per SMS/WhatsApp, SMTP per email)
-    const conferma = window.confirm(
-      tipo === 'telefono'
-        ? `Inviare SMS di verifica a ${valore}?\n\n(Funzionalità da collegare con Twilio)`
-        : `Inviare email di verifica a ${valore}?\n\n(Funzionalità da collegare con SMTP)`
-    );
-
-    if (conferma) {
-      // Per ora simuliamo il successo della verifica
-      setTimeout(() => {
-        setVerificaStato(prev => ({ ...prev, [campo]: true }));
-        alert(`${tipo === 'telefono' ? 'Telefono' : 'Email'} verificato con successo!`);
-      }, 500);
-    }
-  };
-
-  // Funzione per decodificare il codice fiscale italiano
-  const decodeFiscalCode = (cf: string) => {
-    if (!cf || cf.length !== 16) return null;
-
-    const monthMap: { [key: string]: number } = {
-      'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'H': 6,
-      'L': 7, 'M': 8, 'P': 9, 'R': 10, 'S': 11, 'T': 12
-    };
-
-    try {
-      // Anno (caratteri 6-7)
-      const yearCode = parseInt(cf.substring(6, 8));
-      const currentYear = new Date().getFullYear();
-      const century = yearCode > (currentYear % 100) + 10 ? 1900 : 2000;
-      const year = century + yearCode;
-
-      // Mese (carattere 8)
-      const monthChar = cf.charAt(8).toUpperCase();
-      const month = monthMap[monthChar] || 1;
-
-      // Giorno e sesso (caratteri 9-10)
-      let day = parseInt(cf.substring(9, 11));
-      const sesso = day > 40 ? 'F' : 'M';
-      if (day > 40) day -= 40;
-
-      // Data di nascita formattata
-      const dataNascita = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-
-      // Codice comune (caratteri 11-15)
-      const codiceComune = cf.substring(11, 15).toUpperCase();
-
-      // Calcola età
-      const birthDate = new Date(dataNascita);
-      const today = new Date();
-      let eta = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        eta--;
-      }
-
-      return { dataNascita, sesso, eta: eta.toString(), codiceComune };
-    } catch (e) {
-      return null;
-    }
-  };
-
-  // Funzione per cercare il comune dal codice catastale
-  const fetchComuneFromCode = async (codice: string) => {
-    try {
-      const response = await fetch(`/api/comuni/by-code/${codice}`);
-      if (response.ok) {
-        const data = await response.json();
-        return data;
-      }
-    } catch (e) {
-      console.error("Errore nel recupero del comune:", e);
-    }
-    return null;
-  };
-
-  const handleChange = async (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-
-    // Auto-popola i campi quando viene inserito il codice fiscale
-    if (field === "codiceFiscale") {
-      if (value.length === 16) {
-        const decoded = decodeFiscalCode(value);
-        if (decoded) {
-          const comuneData = await fetchComuneFromCode(decoded.codiceComune);
-          setFormData((prev) => ({
-            ...prev,
-            dataNascita: decoded.dataNascita,
-            sesso: decoded.sesso,
-            eta: decoded.eta,
-            codComune: decoded.codiceComune,
-            luogoNascita: comuneData?.name || "",
-            provinciaNascita: comuneData?.province?.code || comuneData?.provinceCode || "",
-          }));
-        }
-      } else {
-        // Svuota i campi se il CF viene cancellato o non è completo
-        setFormData((prev) => ({
-          ...prev,
-          dataNascita: "",
-          sesso: "",
-          eta: "",
-          luogoNascita: "",
-          provinciaNascita: "",
-        }));
-      }
-    }
-
-    if (field === "cfGen1") {
-      if (value.length === 16) {
-        const decoded = decodeFiscalCode(value);
-        if (decoded) {
-          const comuneData = await fetchComuneFromCode(decoded.codiceComune);
-          setFormData((prev) => ({
-            ...prev,
-            dataNascitaGen1: decoded.dataNascita,
-            sessoGen1: decoded.sesso,
-            etaGen1: decoded.eta,
-            luogoNascitaGen1: comuneData?.name || "",
-            provinciaNascitaGen1: comuneData?.province?.code || "",
-          }));
-        }
-      } else {
-        // Svuota i campi se il CF viene cancellato o non è completo
-        setFormData((prev) => ({
-          ...prev,
-          dataNascitaGen1: "",
-          sessoGen1: "",
-          etaGen1: "",
-          luogoNascitaGen1: "",
-          provinciaNascitaGen1: "",
-        }));
-      }
-    }
-
-    if (field === "cfGen2") {
-      if (value.length === 16) {
-        const decoded = decodeFiscalCode(value);
-        if (decoded) {
-          const comuneData = await fetchComuneFromCode(decoded.codiceComune);
-          setFormData((prev) => ({
-            ...prev,
-            dataNascitaGen2: decoded.dataNascita,
-            sessoGen2: decoded.sesso,
-            etaGen2: decoded.eta,
-            luogoNascitaGen2: comuneData?.name || "",
-            provinciaNascitaGen2: comuneData?.province?.code || "",
-          }));
-        }
-      } else {
-        // Svuota i campi se il CF viene cancellato o non è completo
-        setFormData((prev) => ({
-          ...prev,
-          dataNascitaGen2: "",
-          sessoGen2: "",
-          etaGen2: "",
-          luogoNascitaGen2: "",
-          provinciaNascitaGen2: "",
-        }));
-      }
-    }
-  };
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash) {
-        // Short timeout to ensure DOM is ready
-        setTimeout(() => scrollToSection(hash), 100);
-      }
-    };
-
-    // Check on mount
-    handleHashChange();
-
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const navItems = [
-    { id: "intestazione", label: "Intestazione", icon: FileText },
-    { id: "anagrafica", label: "Anagrafica", icon: Users },
-    { id: "pagamenti", label: "Pagamenti", icon: CreditCard },
-    { id: "gift", label: "Gift/Buono", icon: Gift },
-    { id: "tessere", label: "Tessere", icon: IdCard },
-    { id: "certificato", label: "Certificato Medico", icon: Stethoscope },
-    { id: "attivita", label: "Attività", icon: Activity },
-  ];
-
-  // Button Handlers
-  const handleReset = () => {
-    if (window.confirm("Sei sicuro di voler pulire tutti i campi?")) {
-      setFormData(prev => ({
-        ...prev,
-        // Reset fields but keep some defaults like season
-        anagrafica: "",
-        codiceId: prev.codiceId, // Keep generated ID? Or reset? Assuming keep for now or logic needed
-        // Anagrafica
-        cognome: "", nome: "", codiceFiscale: "", telefono: "", email: "",
-        indirizzo: "", cap: "", citta: "", provincia: "", codComune: "",
-        dataNascita: "", luogoNascita: "", provinciaNascita: "", sesso: "", eta: "", allievo: "",
-        // Genitori
-        cognomeGen1: "", nomeGen1: "", cfGen1: "", telGen1: "", emailGen1: "",
-        cognomeGen2: "", nomeGen2: "", cfGen2: "", telGen2: "", emailGen2: "",
-        indirizzoGen1: "", capGen1: "", cittaGen1: "", provinciaGen1: "", codComuneGen1: "",
-        dataNascitaGen1: "", luogoNascitaGen1: "", provinciaNascitaGen1: "", sessoGen1: "", etaGen1: "",
-        indirizzoGen2: "", capGen2: "", cittaGen2: "", provinciaGen2: "", codComuneGen2: "",
-        dataNascitaGen2: "", luogoNascitaGen2: "", provinciaNascitaGen2: "", sessoGen2: "", etaGen2: "",
-        // Other
-        tesserinoTecnico: "", tesseraEnte: "", scadenzaTesseraEnte: "", ente: "",
-        tipoPartecipante: "tesserato",
-        tessera: "", scadenzaTessera: "", daDoveArriva: "",
-      }));
-      setAllegati({
-        regolamento: { hasFile: false, data: "", accettato: "" },
-        privacy: { hasFile: false, data: "", accettata: "" },
-        certificatoMedico: { hasFile: false, dataRilascio: "", scadenza: "", tipo: "" },
-        ricevutePagamenti: { hasFile: false, numeroRicevute: 0, note: "" },
-        modelloDetrazione: { hasFile: false, anno: "2026", richiesto: "" },
-        creditiScolastici: { hasFile: false, annoScolastico: "2025/2026", richiesto: "" },
-        tesserinoTecnico: { hasFile: false, numero: "", dataRilascio: "" },
-        tesseraEnte: { hasFile: false, numero: "", ente: "" },
-      });
-      setPhotoFile({ file: null, preview: null });
-      setSearchTerm("");
-      setSelectedMemberId(null);
-      toast({ title: "Form pulito", description: "Tutti i campi sono stati resettati." });
-    }
-  };
-
-  const handleExport = () => {
-    const dataStr = JSON.stringify(formData, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `anagrafica_${formData.cognome || "export"}_${formData.nome || ""}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast({ title: "Esportazione completata", description: "File JSON scaricato." });
-  };
+  // Duplicate functions have been moved up
 
   const handleImport = () => {
     // Basic placeholder for import
@@ -894,7 +1159,7 @@ export default function MascheraInputGenerale() {
           {/* Riga titolo e pulsanti azioni */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold">Maschera Input Generale</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">Maschera Input</h1>
               <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -917,16 +1182,28 @@ export default function MascheraInputGenerale() {
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs h-8 bg-background"
+                className={`text-xs h-8 ${Object.keys(dirtyFields).length > 0 && isFormValid ? 'gold-3d-button' : 'bg-background'} `}
                 data-testid="button-salva"
-                disabled={!isFormValid || saveMutation.isPending}
-                title={!isFormValid ? "Compila tutti i campi obbligatori (*) per salvare" : ""}
+                disabled={(!isFormValid || saveMutation.isPending) && Object.keys(dirtyFields).length === 0}
+                title={!isFormValid ? "Compila tutti i campi obbligatori (*) per salvare" : Object.keys(dirtyFields).length === 0 ? "Nessuna modifica da salvare" : ""}
                 onClick={handleSave}
               >
-                <Save className={`w-3 h-3 mr-1 sidebar-icon-gold ${saveMutation.isPending ? 'animate-spin' : ''}`} />
+                <Save className={`w-3 h-3 mr-1 sidebar-icon-gold ${saveMutation.isPending ? 'animate-spin' : ''} `} />
                 {saveMutation.isPending ? 'Salvataggio...' : 'Salva'}
               </Button>
-              <Button size="sm" className="gold-3d-button" data-testid="button-nuovo" onClick={handleReset}>
+              {duplicateFiscalCodes && duplicateFiscalCodes.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-8 bg-black hover:bg-black/80 text-white"
+                  onClick={() => setShowDuplicatesModal(true)}
+                  data-testid="button-duplicate-warning"
+                >
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Duplicati ({duplicateFiscalCodes.length})
+                </Button>
+              )}
+              <Button size="sm" className="gold-3d-button h-8" data-testid="button-nuovo" onClick={handleReset}>
                 <Plus className="w-4 h-4 mr-1" />
                 Nuovo
               </Button>
@@ -967,14 +1244,22 @@ export default function MascheraInputGenerale() {
 
           {/* Tab di navigazione */}
           <div className="flex items-center gap-2 flex-wrap">
-            {navItems.map((item) => (
+            {[
+              { id: "intestazione", label: "Intestazione", icon: FileText },
+              { id: "anagrafica", label: "Anagrafica", icon: Users },
+              { id: "pagamenti", label: "Pagamenti", icon: CreditCard },
+              { id: "gift", label: "Gift/Buono", icon: Gift },
+              { id: "tessere", label: "Tessere", icon: IdCard },
+              { id: "certificato", label: "Certificato Medico", icon: Stethoscope },
+              { id: "attivita", label: "Attività", icon: Activity },
+            ].map((item: any) => (
               <Button
                 key={item.id}
                 variant="outline"
                 size="sm"
                 onClick={() => scrollToSection(item.id)}
                 className="text-xs h-8 bg-background"
-                data-testid={`nav-${item.id}`}
+                data-testid={`nav - ${item.id} `}
               >
                 <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 {item.label}
@@ -996,12 +1281,13 @@ export default function MascheraInputGenerale() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* ROW 1 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Stagione</Label>
                 <Select value={formData.stagione} onValueChange={(v) => handleChange("stagione", v)}>
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className={getInputClassName("stagione", false)}>
+                    <SelectValue placeholder="Seleziona..." />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="2024-2025">2024-2025</SelectItem>
@@ -1011,58 +1297,45 @@ export default function MascheraInputGenerale() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>&nbsp;</Label>
-                <Input
-                  value={formData.anagrafica}
-                  onChange={(e) => handleChange("anagrafica", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
                 <Label>Codice ID (C)</Label>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Auto</Badge>
                   <Input
                     value={formData.codiceId}
-                    onChange={(e) => handleChange("codiceId", e.target.value)}
-                    className="bg-yellow-50 border-yellow-200 font-mono"
+                    readOnly
+                    disabled
+                    className={`${getInputClassName("codiceId", false)} font-mono opacity-100 cursor-not-allowed`}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Data Inserimento</Label>
-                <Input value={formData.dataInserimento} readOnly className="bg-muted" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label>Tipo Partecipante</Label>
-                <Select value={formData.tipoPartecipante} onValueChange={(v) => handleChange("tipoPartecipante", v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tesserato">Tesserato</SelectItem>
-                    <SelectItem value="non_tesserato">Non Tesserato</SelectItem>
-                    <SelectItem value="prova">Prova</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Tessera</Label>
+                <Label>Team - inserito</Label>
                 <Input
-                  value={formData.tessera}
-                  onChange={(e) => handleChange("tessera", e.target.value)}
-                  className="bg-yellow-50 border-yellow-200"
+                  value={formData.teamInserito}
+                  readOnly
+                  className={`${getInputClassName("teamInserito", false)} bg-transparent opacity-80 cursor-default`}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Scadenza Tessera</Label>
-                <Input type="date" value={formData.scadenzaTessera} onChange={(e) => handleChange("scadenzaTessera", e.target.value)} />
+                <Label>Team - aggiornato</Label>
+                <Input
+                  value={formData.teamAggiornato}
+                  readOnly
+                  className={`${getInputClassName("teamAggiornato", false)} bg-transparent opacity-80 cursor-default`}
+                />
+              </div>
+            </div>
+
+            {/* ROW 2 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Data Inserimento</Label>
+                <Input value={formData.dataInserimento} readOnly className={getInputClassName("dataInserimento", false)} />
               </div>
               <div className="space-y-2">
                 <Label>Da Dove Arriva</Label>
                 <Select value={formData.daDoveArriva} onValueChange={(v) => handleChange("daDoveArriva", v)}>
-                  <SelectTrigger>
+                  <SelectTrigger className={getInputClassName("daDoveArriva", false)}>
                     <SelectValue placeholder="Seleziona..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -1073,35 +1346,23 @@ export default function MascheraInputGenerale() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label>Team Segreteria</Label>
-                <Select value={formData.teamSegreteria} onValueChange={(v) => handleChange("teamSegreteria", v)}>
-                  <SelectTrigger>
+                <Label>Tipo Partecipante</Label>
+                <Select value={formData.tipoPartecipante} onValueChange={(v) => handleChange("tipoPartecipante", v)}>
+                  <SelectTrigger className={getInputClassName("tipoPartecipante", false)}>
                     <SelectValue placeholder="Seleziona..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="mario">Mario</SelectItem>
-                    <SelectItem value="giovanni">Giovanni</SelectItem>
-                    <SelectItem value="laura">Laura</SelectItem>
-                    <SelectItem value="anna">Anna</SelectItem>
-                    <SelectItem value="marco">Marco</SelectItem>
+                    <SelectItem value="tesserato">Tesserato</SelectItem>
+                    <SelectItem value="non_tesserato">Non Tesserato</SelectItem>
+                    <SelectItem value="prova">Prova</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Tessera Ente</Label>
-                <Input value={formData.tesseraEnte} onChange={(e) => handleChange("tesseraEnte", e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Scadenza Tessera Ente</Label>
-                <Input type="date" value={formData.scadenzaTesseraEnte} onChange={(e) => handleChange("scadenzaTesseraEnte", e.target.value)} />
-              </div>
-              <div className="space-y-2">
                 <Label>Ente</Label>
                 <Select value={formData.ente} onValueChange={(v) => handleChange("ente", v)}>
-                  <SelectTrigger>
+                  <SelectTrigger className={getInputClassName("ente", false)}>
                     <SelectValue placeholder="Seleziona..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -1113,13 +1374,37 @@ export default function MascheraInputGenerale() {
                 </Select>
               </div>
             </div>
+
+            {/* ROW 3 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Tessera</Label>
+                <Input
+                  value={formData.tessera}
+                  onChange={(e) => handleChange("tessera", e.target.value)}
+                  className={getInputClassName("tessera", false)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Scadenza Tessera</Label>
+                <Input type="date" value={formData.scadenzaTessera} onChange={(e) => handleChange("scadenzaTessera", e.target.value)} className={getInputClassName("scadenzaTessera", false)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Tessera Ente</Label>
+                <Input value={formData.tesseraEnte} onChange={(e) => handleChange("tesseraEnte", e.target.value)} className={getInputClassName("tesseraEnte", false)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Scadenza Tessera Ente</Label>
+                <Input type="date" value={formData.scadenzaTesseraEnte} onChange={(e) => handleChange("scadenzaTesseraEnte", e.target.value)} className={getInputClassName("scadenzaTesseraEnte", false)} />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* ANAGRAFICA con ALLEGATI */}
         <div id="anagrafica" className="scroll-mt-32 flex flex-col lg:flex-row gap-4">
           {/* FOTO + ALLEGATI DA INSERIRE - Colonna sinistra */}
-          <div className="lg:w-72 shrink-0 space-y-4">
+          <div className="lg:w-40 shrink-0 space-y-4">
             {/* FOTO PARTECIPANTE */}
             <Card>
               <CardHeader className="pb-2 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg">
@@ -1182,12 +1467,12 @@ export default function MascheraInputGenerale() {
                 {/* REGOLAMENTO */}
                 <div className="border-b">
                   <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.regolamento.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'}`}
+                    className={`p - 3 cursor - pointer transition - colors ${allegati.regolamento.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'} `}
                     onClick={() => toggleAllegatoSection('regolamento')}
                     data-testid="button-toggle-regolamento"
                   >
                     <div className="flex items-center justify-between">
-                      <span className={`text-sm font-medium ${allegati.regolamento.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>REGOLAMENTO</span>
+                      <span className={`text - sm font - medium ${allegati.regolamento.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'} `}>REGOLAMENTO</span>
                       {allegati.regolamento.hasFile ? (
                         <Check className="w-4 h-4 text-green-600" />
                       ) : (
@@ -1203,7 +1488,7 @@ export default function MascheraInputGenerale() {
                   </div>
                   {openAllegatoSections.regolamento && (
                     <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.regolamento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
+                      <div className={`border - 2 border - dashed rounded - md p - 3 text - center ${allegati.regolamento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'} `}>
                         <input
                           type="file"
                           accept=".pdf,.jpg,.jpeg,.png"
@@ -1252,7 +1537,7 @@ export default function MascheraInputGenerale() {
                             value={allegati.regolamento.accettato || ''}
                             onValueChange={(v) => updateAllegato('regolamento', 'accettato', v)}
                           >
-                            <SelectTrigger className={`h-7 text-xs ${allegati.regolamento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.regolamento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
+                            <SelectTrigger className={`h - 7 text - xs ${allegati.regolamento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.regolamento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''} `}>
                               <SelectValue placeholder="Seleziona" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1269,12 +1554,12 @@ export default function MascheraInputGenerale() {
                 {/* PRIVACY */}
                 <div className="border-b">
                   <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.privacy.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'}`}
+                    className={`p - 3 cursor - pointer transition - colors ${allegati.privacy.hasFile ? 'bg-green-100 dark:bg-green-900/30' : 'hover:bg-muted/50'} `}
                     onClick={() => toggleAllegatoSection('privacy')}
                     data-testid="button-toggle-privacy"
                   >
                     <div className="flex items-center justify-between">
-                      <span className={`text-sm font-medium ${allegati.privacy.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>PRIVACY</span>
+                      <span className={`text - sm font - medium ${allegati.privacy.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'} `}>PRIVACY</span>
                       {allegati.privacy.hasFile ? (
                         <Check className="w-4 h-4 text-green-600" />
                       ) : (
@@ -1290,7 +1575,7 @@ export default function MascheraInputGenerale() {
                   </div>
                   {openAllegatoSections.privacy && (
                     <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.privacy.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
+                      <div className={`border - 2 border - dashed rounded - md p - 3 text - center ${allegati.privacy.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'} `}>
                         <input
                           type="file"
                           accept=".pdf,.jpg,.jpeg,.png"
@@ -1339,7 +1624,7 @@ export default function MascheraInputGenerale() {
                             value={allegati.privacy.accettata || ''}
                             onValueChange={(v) => updateAllegato('privacy', 'accettata', v)}
                           >
-                            <SelectTrigger className={`h-7 text-xs ${allegati.privacy.accettata === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.privacy.accettata === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
+                            <SelectTrigger className={`h - 7 text - xs ${allegati.privacy.accettata === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.privacy.accettata === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''} `}>
                               <SelectValue placeholder="Seleziona" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1356,7 +1641,7 @@ export default function MascheraInputGenerale() {
                 {/* CERTIFICATO MEDICO */}
                 <div className="border-b">
                   <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.certificatoMedico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    className={`p - 3 cursor - pointer transition - colors ${allegati.certificatoMedico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'} `}
                     onClick={() => toggleAllegatoSection('certificatoMedico')}
                     data-testid="button-toggle-certificato-medico"
                   >
@@ -1414,7 +1699,7 @@ export default function MascheraInputGenerale() {
                 {/* RICEVUTE PAGAMENTI */}
                 <div className="border-b">
                   <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.ricevutePagamenti.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    className={`p - 3 cursor - pointer transition - colors ${allegati.ricevutePagamenti.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'} `}
                     onClick={() => toggleAllegatoSection('ricevutePagamenti')}
                     data-testid="button-toggle-ricevute-pagamenti"
                   >
@@ -1455,7 +1740,7 @@ export default function MascheraInputGenerale() {
                 {/* MODELLO DETRAZIONE */}
                 <div className="border-b">
                   <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.modelloDetrazione.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    className={`p - 3 cursor - pointer transition - colors ${allegati.modelloDetrazione.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'} `}
                     onClick={() => toggleAllegatoSection('modelloDetrazione')}
                     data-testid="button-toggle-modello-detrazione"
                   >
@@ -1502,7 +1787,7 @@ export default function MascheraInputGenerale() {
                 {/* CREDITI SCOLASTICI */}
                 <div className="border-b">
                   <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.creditiScolastici.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    className={`p - 3 cursor - pointer transition - colors ${allegati.creditiScolastici.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'} `}
                     onClick={() => toggleAllegatoSection('creditiScolastici')}
                     data-testid="button-toggle-crediti-scolastici"
                   >
@@ -1549,7 +1834,7 @@ export default function MascheraInputGenerale() {
                 {/* TESSERINO TECNICO */}
                 <div className="border-b">
                   <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.tesserinoTecnico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    className={`p - 3 cursor - pointer transition - colors ${allegati.tesserinoTecnico.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'} `}
                     onClick={() => toggleAllegatoSection('tesserinoTecnico')}
                     data-testid="button-toggle-tesserino-tecnico"
                   >
@@ -1591,7 +1876,7 @@ export default function MascheraInputGenerale() {
                 {/* TESSERA ENTE */}
                 <div>
                   <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.tesseraEnte.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'}`}
+                    className={`p - 3 cursor - pointer transition - colors ${allegati.tesseraEnte.hasFile ? 'bg-green-50 dark:bg-green-900/20' : 'hover:bg-muted/50'} `}
                     onClick={() => toggleAllegatoSection('tesseraEnte')}
                     data-testid="button-toggle-tessera-ente"
                   >
@@ -1637,30 +1922,38 @@ export default function MascheraInputGenerale() {
           {/* ANAGRAFICA - Colonna destra */}
           <Card className="flex-1">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <User className="w-5 h-5 sidebar-icon-gold" />
-                Anagrafica
+              <CardTitle className="flex items-center justify-between text-lg">
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 sidebar-icon-gold" />
+                  Anagrafica
+                </div>
+                <span className="text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-800/60">Dati Personali</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Dati Personali */}
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2">Dati Personali</h3>
+                {/* L'heading "Dati Personali" è stato spostato nel CardTitle per risparmiare spazio */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   <div className="space-y-2">
                     <Label>Cognome *</Label>
-                    <Input value={formData.cognome} onChange={(e) => handleChange("cognome", e.target.value)} />
+                    <Input value={formData.cognome} onChange={(e) => handleChange("cognome", e.target.value)} className={getInputClassName("cognome", true)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Nome *</Label>
-                    <Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} />
+                    <Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} className={getInputClassName("nome", true)} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Codice Fiscale (J) *</Label>
+                    <Label className="flex items-center gap-2">
+                      Codice Fiscale (J) *
+                      <a href="/generatore-cf-stranieri" target="_blank" rel="noopener noreferrer" title="Attenzione, per gli stranieri senza codice fiscale clicca qui" className="text-destructive hover:text-red-700 transition-colors" data-testid="link-generatore-cf">
+                        <AlertTriangle className="w-4 h-4 cursor-pointer" />
+                      </a>
+                    </Label>
                     <Input
                       value={formData.codiceFiscale}
                       onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())}
-                      className="bg-yellow-50 border-yellow-200"
+                      className={getInputClassName("codiceFiscale", true)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1691,7 +1984,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.telefono}
                       onChange={(e) => handleChange("telefono", e.target.value)}
-                      className={verificaStato.telefono ? "bg-green-50 border-green-300" : ""}
+                      className={`${getInputClassName("telefono", true)} ${verificaStato.telefono ? "bg-green-50 border-green-300" : ""}`}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1723,30 +2016,30 @@ export default function MascheraInputGenerale() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleChange("email", e.target.value)}
-                      className={verificaStato.email ? "bg-green-50 border-green-300" : ""}
+                      className={`${getInputClassName("email", true)} ${verificaStato.email ? "bg-green-50 border-green-300" : ""}`}
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                   <div className="space-y-2">
                     <Label>Indirizzo residenza *</Label>
-                    <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} data-testid="input-indirizzo" />
+                    <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} data-testid="input-indirizzo" className={getInputClassName("indirizzo", true)} />
                   </div>
                   <div className="space-y-2">
                     <Label>CAP *</Label>
-                    <Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} data-testid="input-cap" />
+                    <Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} data-testid="input-cap" className={getInputClassName("cap", true)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Città *</Label>
-                    <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} data-testid="input-citta" />
+                    <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} data-testid="input-citta" className={getInputClassName("citta", true)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Provincia</Label>
-                    <Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} data-testid="input-provincia" />
+                    <Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} data-testid="input-provincia" className={getInputClassName("provincia", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Cod. Comune</Label>
-                    <Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} data-testid="input-cod-comune" />
+                    <Input value={formData.codComune} onChange={(e) => handleChange("codComune", e.target.value)} data-testid="input-cod-comune" className={getInputClassName("codComune", false)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
@@ -1755,7 +2048,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.dataNascita ? new Date(formData.dataNascita).toLocaleDateString('it-IT') : ''}
                       readOnly
-                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={getInputClassName("dataNascita", true, true)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1763,7 +2056,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.luogoNascita}
                       readOnly
-                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={getInputClassName("luogoNascita", true, true)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1771,7 +2064,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.provinciaNascita}
                       readOnly
-                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={getInputClassName("provinciaNascita", true, true)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1779,7 +2072,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.sesso === 'M' ? 'Maschio' : formData.sesso === 'F' ? 'Femmina' : ''}
                       readOnly
-                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={getInputClassName("sesso", true, true)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1787,17 +2080,17 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.eta}
                       readOnly
-                      className={`${formData.codiceFiscale ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={getInputClassName("eta", true, true)}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Partecipante *</Label>
                     <Select value={formData.allievo} onValueChange={(v) => handleChange("allievo", v)}>
-                      <SelectTrigger>
+                      <SelectTrigger className={getInputClassName("allievo", true)}>
                         <SelectValue placeholder="Seleziona..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {partecipanteCategorieDB.map((cat) => (
+                        {partecipanteCategorieDB.filter((cat) => cat.id).map((cat) => (
                           <SelectItem key={cat.id} value={String(cat.id)}>
                             {cat.name}
                           </SelectItem>
@@ -1809,20 +2102,25 @@ export default function MascheraInputGenerale() {
               </div>
 
               {/* Genitore 1 */}
-              <div>
-                <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-4 border-b pb-2 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">Genitore 1</h3>
+              <div className="pt-6 mt-6 border-t border-border">
+                <h3 className="inline-block text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-800/60 mb-4">Genitore 1</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   <div className="space-y-2">
                     <Label>Cognome</Label>
-                    <Input value={formData.cognomeGen1} onChange={(e) => handleChange("cognomeGen1", e.target.value)} />
+                    <Input value={formData.cognomeGen1} onChange={(e) => handleChange("cognomeGen1", e.target.value)} className={getInputClassName("cognomeGen1", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Nome</Label>
-                    <Input value={formData.nomeGen1} onChange={(e) => handleChange("nomeGen1", e.target.value)} />
+                    <Input value={formData.nomeGen1} onChange={(e) => handleChange("nomeGen1", e.target.value)} className={getInputClassName("nomeGen1", false)} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Codice Fiscale</Label>
-                    <Input value={formData.cfGen1} onChange={(e) => handleChange("cfGen1", e.target.value.toUpperCase())} />
+                    <Label className="flex items-center gap-2">
+                      Codice Fiscale
+                      <a href="/generatore-cf-stranieri" target="_blank" rel="noopener noreferrer" title="Attenzione, per gli stranieri senza codice fiscale clicca qui" className="text-destructive hover:text-red-700 transition-colors" data-testid="link-generatore-cf-gen1">
+                        <AlertTriangle className="w-4 h-4 cursor-pointer" />
+                      </a>
+                    </Label>
+                    <Input value={formData.cfGen1} onChange={(e) => handleChange("cfGen1", e.target.value.toUpperCase())} className={getInputClassName("cfGen1", false)} />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-1">
@@ -1852,7 +2150,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.telGen1}
                       onChange={(e) => handleChange("telGen1", e.target.value)}
-                      className={verificaStato.telGen1 ? "bg-green-50 border-green-300" : ""}
+                      className={`${getInputClassName("telGen1", false)} ${verificaStato.telGen1 ? "bg-green-50 border-green-300" : ""}`}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1883,30 +2181,30 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.emailGen1}
                       onChange={(e) => handleChange("emailGen1", e.target.value)}
-                      className={verificaStato.emailGen1 ? "bg-green-50 border-green-300" : ""}
+                      className={`${getInputClassName("emailGen1", false)} ${verificaStato.emailGen1 ? "bg-green-50 border-green-300" : ""}`}
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                   <div className="space-y-2">
                     <Label>Indirizzo residenza</Label>
-                    <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzoGen1} onChange={(e) => handleChange("indirizzoGen1", e.target.value)} data-testid="input-indirizzo-gen1" />
+                    <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzoGen1} onChange={(e) => handleChange("indirizzoGen1", e.target.value)} data-testid="input-indirizzo-gen1" className={getInputClassName("indirizzoGen1", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>CAP</Label>
-                    <Input value={formData.capGen1} onChange={(e) => handleChange("capGen1", e.target.value)} data-testid="input-cap-gen1" />
+                    <Input value={formData.capGen1} onChange={(e) => handleChange("capGen1", e.target.value)} data-testid="input-cap-gen1" className={getInputClassName("capGen1", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Città</Label>
-                    <Input value={formData.cittaGen1} onChange={(e) => handleChange("cittaGen1", e.target.value)} data-testid="input-citta-gen1" />
+                    <Input value={formData.cittaGen1} onChange={(e) => handleChange("cittaGen1", e.target.value)} data-testid="input-citta-gen1" className={getInputClassName("cittaGen1", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Provincia</Label>
-                    <Input value={formData.provinciaGen1} onChange={(e) => handleChange("provinciaGen1", e.target.value)} data-testid="input-provincia-gen1" />
+                    <Input value={formData.provinciaGen1} onChange={(e) => handleChange("provinciaGen1", e.target.value)} data-testid="input-provincia-gen1" className={getInputClassName("provinciaGen1", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Cod. Comune</Label>
-                    <Input value={formData.codComuneGen1} onChange={(e) => handleChange("codComuneGen1", e.target.value)} data-testid="input-cod-comune-gen1" />
+                    <Input value={formData.codComuneGen1} onChange={(e) => handleChange("codComuneGen1", e.target.value)} data-testid="input-cod-comune-gen1" className={getInputClassName("codComuneGen1", false)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
@@ -1915,7 +2213,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.dataNascitaGen1 ? new Date(formData.dataNascitaGen1).toLocaleDateString('it-IT') : ''}
                       readOnly
-                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${getInputClassName("dataNascitaGen1", false, true)} ${!formData.cfGen1 && 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1923,7 +2221,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.luogoNascitaGen1}
                       readOnly
-                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${getInputClassName("luogoNascitaGen1", false, true)} ${!formData.cfGen1 && 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1931,7 +2229,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.provinciaNascitaGen1}
                       readOnly
-                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${getInputClassName("provinciaNascitaGen1", false, true)} ${!formData.cfGen1 && 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1939,7 +2237,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.sessoGen1 === 'M' ? 'M' : formData.sessoGen1 === 'F' ? 'F' : ''}
                       readOnly
-                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${getInputClassName("sessoGen1", false, true)} ${!formData.cfGen1 && 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                   <div className="space-y-2">
@@ -1947,27 +2245,32 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.etaGen1}
                       readOnly
-                      className={`${formData.cfGen1 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${getInputClassName("etaGen1", false, true)} ${!formData.cfGen1 && 'border-red-400 bg-red-50'}`}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Genitore 2 */}
-              <div>
-                <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-4 border-b pb-2 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">Genitore 2</h3>
+              <div className="pt-6 mt-6 border-t border-border">
+                <h3 className="inline-block text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-800/60 mb-4">Genitore 2</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   <div className="space-y-2">
                     <Label>Cognome</Label>
-                    <Input value={formData.cognomeGen2} onChange={(e) => handleChange("cognomeGen2", e.target.value)} />
+                    <Input value={formData.cognomeGen2} onChange={(e) => handleChange("cognomeGen2", e.target.value)} className={getInputClassName("cognomeGen2", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Nome</Label>
-                    <Input value={formData.nomeGen2} onChange={(e) => handleChange("nomeGen2", e.target.value)} />
+                    <Input value={formData.nomeGen2} onChange={(e) => handleChange("nomeGen2", e.target.value)} className={getInputClassName("nomeGen2", false)} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Codice Fiscale</Label>
-                    <Input value={formData.cfGen2} onChange={(e) => handleChange("cfGen2", e.target.value.toUpperCase())} />
+                    <Label className="flex items-center gap-2">
+                      Codice Fiscale
+                      <a href="/generatore-cf-stranieri" target="_blank" rel="noopener noreferrer" title="Attenzione, per gli stranieri senza codice fiscale clicca qui" className="text-destructive hover:text-red-700 transition-colors" data-testid="link-generatore-cf-gen2">
+                        <AlertTriangle className="w-4 h-4 cursor-pointer" />
+                      </a>
+                    </Label>
+                    <Input value={formData.cfGen2} onChange={(e) => handleChange("cfGen2", e.target.value.toUpperCase())} className={getInputClassName("cfGen2", false)} />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-1">
@@ -1997,7 +2300,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.telGen2}
                       onChange={(e) => handleChange("telGen2", e.target.value)}
-                      className={verificaStato.telGen2 ? "bg-green-50 border-green-300" : ""}
+                      className={`${getInputClassName("telGen2", false)} ${verificaStato.telGen2 ? "bg-green-50 border-green-300" : ""}`}
                     />
                   </div>
                   <div className="space-y-2">
@@ -2060,7 +2363,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.dataNascitaGen2 ? new Date(formData.dataNascitaGen2).toLocaleDateString('it-IT') : ''}
                       readOnly
-                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'} `}
                     />
                   </div>
                   <div className="space-y-2">
@@ -2068,7 +2371,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.luogoNascitaGen2}
                       readOnly
-                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'} `}
                     />
                   </div>
                   <div className="space-y-2">
@@ -2076,7 +2379,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.provinciaNascitaGen2}
                       readOnly
-                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'} `}
                     />
                   </div>
                   <div className="space-y-2">
@@ -2084,7 +2387,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.sessoGen2 === 'M' ? 'M' : formData.sessoGen2 === 'F' ? 'F' : ''}
                       readOnly
-                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'} `}
                     />
                   </div>
                   <div className="space-y-2">
@@ -2092,7 +2395,7 @@ export default function MascheraInputGenerale() {
                     <Input
                       value={formData.etaGen2}
                       readOnly
-                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'}`}
+                      className={`${formData.cfGen2 ? 'bg-yellow-50 border-yellow-300' : 'border-red-400 bg-red-50'} `}
                     />
                   </div>
                 </div>
@@ -2120,7 +2423,7 @@ export default function MascheraInputGenerale() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
-              {payments.length === 0 ? (
+              {(payments.length === 0 && (!memberPayments || memberPayments.length === 0)) ? (
                 <div className="text-center py-8 text-muted-foreground border rounded bg-muted/20">
                   Nessun pagamento registrato. Clicca su "Aggiungi" per inserirne uno.
                 </div>
@@ -2129,42 +2432,61 @@ export default function MascheraInputGenerale() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Data</TableHead>
+                        <TableHead>Data Ins.</TableHead>
                         <TableHead>Attività</TableHead>
                         <TableHead>Dettaglio</TableHead>
+                        <TableHead>Data Pagamento</TableHead>
+                        <TableHead>Note Pagamenti</TableHead>
                         <TableHead className="text-right">Importo</TableHead>
                         <TableHead className="w-[100px]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {payments.map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell>{payment.dataPagamento ? new Date(payment.dataPagamento).toLocaleDateString() : "-"}</TableCell>
-                          <TableCell className="capitalize">{payment.attivita?.replace("-", " ")}</TableCell>
-                          <TableCell>{payment.dettaglioNome || "-"}</TableCell>
-                          <TableCell className="text-right">€ {payment.totaleQuota?.toFixed(2) || "0.00"}</TableCell>
-                          <TableCell className="flex items-center gap-2 justify-end">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setEditingPaymentId(payment.id || null);
-                                setIsPaymentDialogOpen(true);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => payment.id && handleDeletePayment(payment.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {[...(memberPayments || []), ...payments].map((payment, idx) => {
+                        const isExistingDBPayment = !!payment.createdAt || !!payment.amount;
+                        // For Data Inserimento, use createdAt or similar if available, otherwise fallback
+                        const pDataInserimento = payment.createdAt || payment.paidDate || payment.date;
+                        const pDataPagamento = payment.dataPagamento || payment.paidDate || payment.date;
+                        const pAttivita = payment.attivita || payment.type;
+                        const pDettaglio = payment.dettaglioNome || payment.description || payment.quotaDescription;
+                        const pNote = payment.nota || payment.notes || payment.notePagamento || payment.notaPagamento || "";
+                        const pImporto = payment.totaleQuota || payment.totalQuota || payment.amount || 0;
+
+                        return (
+                          <TableRow key={payment.id || `db-pay-${idx}`}>
+                            <TableCell>{pDataInserimento ? new Date(pDataInserimento).toLocaleDateString('it-IT') : "-"}</TableCell>
+                            <TableCell className="capitalize">{pAttivita ? pAttivita.replace("-", " ") : "-"}</TableCell>
+                            <TableCell>{pDettaglio || "-"}</TableCell>
+                            <TableCell>{pDataPagamento ? new Date(pDataPagamento).toLocaleDateString('it-IT') : "-"}</TableCell>
+                            <TableCell>{pNote || "-"}</TableCell>
+                            <TableCell className="text-right">€ {Number(pImporto).toFixed(2)}</TableCell>
+                            <TableCell className="flex items-center gap-2 justify-end">
+                              {!isExistingDBPayment && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      setEditingPaymentId(payment.id || null);
+                                      setIsPaymentDialogOpen(true);
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-destructive hover:text-destructive"
+                                    onClick={() => payment.id && handleDeletePayment(payment.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
@@ -2203,7 +2525,7 @@ export default function MascheraInputGenerale() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Tipo</Label>
-                <Select>
+                <Select value={bottomSectionsData.gift.tipo} onValueChange={(v) => setBottomSectionsData(prev => ({ ...prev, gift: { ...prev.gift, tipo: v } }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleziona tipo" />
                   </SelectTrigger>
@@ -2217,33 +2539,33 @@ export default function MascheraInputGenerale() {
               </div>
               <div className="space-y-2">
                 <Label>Valore/Importo</Label>
-                <Input type="number" />
+                <Input type="number" value={bottomSectionsData.gift.valore} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, gift: { ...prev.gift, valore: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Numero</Label>
-                <Input />
+                <Input value={bottomSectionsData.gift.numero} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, gift: { ...prev.gift, numero: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Data Emissione</Label>
-                <Input type="date" />
+                <Input type="date" value={bottomSectionsData.gift.dataEmissione} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, gift: { ...prev.gift, dataEmissione: e.target.value } }))} />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Data Scadenza</Label>
-                <Input type="date" />
+                <Input type="date" value={bottomSectionsData.gift.dataScadenza} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, gift: { ...prev.gift, dataScadenza: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Acquistato/Utilizzato per - Motivazione</Label>
-                <Input />
+                <Input value={bottomSectionsData.gift.motivazione} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, gift: { ...prev.gift, motivazione: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Data Utilizzo/Reso (Convalida)</Label>
-                <Input type="date" />
+                <Input type="date" value={bottomSectionsData.gift.dataUtilizzo} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, gift: { ...prev.gift, dataUtilizzo: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>IBAN</Label>
-                <Input />
+                <Input value={bottomSectionsData.gift.iban} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, gift: { ...prev.gift, iban: e.target.value } }))} />
               </div>
             </div>
           </CardContent>
@@ -2261,15 +2583,15 @@ export default function MascheraInputGenerale() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Quota Tessera (BY)</Label>
-                <Input type="number" />
+                <Input type="number" value={bottomSectionsData.tessere.quota} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, tessere: { ...prev.tessere, quota: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Pagamento Tessera (BZ)</Label>
-                <Input type="date" />
+                <Input type="date" value={bottomSectionsData.tessere.pagamento} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, tessere: { ...prev.tessere, pagamento: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Nuovo o Rinnovo (CA)</Label>
-                <Select>
+                <Select value={bottomSectionsData.tessere.nuovoRinnovo} onValueChange={(v) => setBottomSectionsData(prev => ({ ...prev, tessere: { ...prev.tessere, nuovoRinnovo: v } }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleziona" />
                   </SelectTrigger>
@@ -2281,21 +2603,21 @@ export default function MascheraInputGenerale() {
               </div>
               <div className="space-y-2">
                 <Label>Data Scad. Quota Tessera (CB)</Label>
-                <Input />
+                <Input value={bottomSectionsData.tessere.dataScad} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, tessere: { ...prev.tessere, dataScad: e.target.value } }))} />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>N. Tessera (CC)</Label>
-                <Input />
+                <Input value={bottomSectionsData.tessere.numero} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, tessere: { ...prev.tessere, numero: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Tessera Ente (CD)</Label>
-                <Input />
+                <Input value={bottomSectionsData.tessere.tesseraEnte} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, tessere: { ...prev.tessere, tesseraEnte: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Domanda di Tesseramento (CE)</Label>
-                <Select>
+                <Select value={bottomSectionsData.tessere.domanda} onValueChange={(v) => setBottomSectionsData(prev => ({ ...prev, tessere: { ...prev.tessere, domanda: v } }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleziona" />
                   </SelectTrigger>
@@ -2321,27 +2643,27 @@ export default function MascheraInputGenerale() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
               <div className="space-y-2">
                 <Label>Data Scadenza Certificato</Label>
-                <Input type="date" />
+                <Input type="date" value={bottomSectionsData.certificatoMedico.dataScadenza} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, certificatoMedico: { ...prev.certificatoMedico, dataScadenza: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Data di Rinnovo</Label>
-                <Input type="date" />
+                <Input type="date" value={bottomSectionsData.certificatoMedico.dataRinnovo} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, certificatoMedico: { ...prev.certificatoMedico, dataRinnovo: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Rilasciato Da</Label>
-                <Input />
+                <Input value={bottomSectionsData.certificatoMedico.rilasciatoDa} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, certificatoMedico: { ...prev.certificatoMedico, rilasciatoDa: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Pagamento</Label>
-                <Input type="number" placeholder="€ 40" />
+                <Input type="number" placeholder="€ 40" value={bottomSectionsData.certificatoMedico.pagamento} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, certificatoMedico: { ...prev.certificatoMedico, pagamento: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>A Noi</Label>
-                <Input type="number" placeholder="12,5" />
+                <Input type="number" placeholder="12,5" value={bottomSectionsData.certificatoMedico.aNoi} onChange={(e) => setBottomSectionsData(prev => ({ ...prev, certificatoMedico: { ...prev.certificatoMedico, aNoi: e.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <Label>Tipo Certificato</Label>
-                <Select>
+                <Select value={bottomSectionsData.certificatoMedico.tipo} onValueChange={(v) => setBottomSectionsData(prev => ({ ...prev, certificatoMedico: { ...prev.certificatoMedico, tipo: v } }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleziona tipo" />
                   </SelectTrigger>
@@ -2390,35 +2712,60 @@ export default function MascheraInputGenerale() {
                       <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Iscrizioni Attive</Label>
                       {memberEnrollments.map((e: any) => {
                         const course = courses?.find((c: any) => c.id === e.courseId);
+                        const hasDetails = e.details && e.details.length > 0;
                         return (
-                          <div key={e.id} className="flex items-center justify-between p-3 bg-muted/40 border rounded-lg group hover:bg-muted/60 transition-colors">
-                            <div>
-                              <div className="font-medium flex items-center gap-2">
-                                {course?.name || 'Corso sconosciuto'}
-                                <Badge variant="outline" className="text-[10px] h-5 px-1">{course?.sku}</Badge>
-                              </div>
-                              <div className="text-xs text-muted-foreground flex gap-3 mt-1">
-                                <span>Iscritto il: {new Date(e.enrollmentDate).toLocaleDateString('it-IT')}</span>
-                                {course?.dayOfWeek && <span>• {course.dayOfWeek} {course.startTime}</span>}
-                              </div>
+                          <div key={e.id} className="grid grid-cols-[140px_180px_240px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
+
+                            {/* Nome Corso */}
+                            <div className="font-bold text-sm truncate" title={course?.name}>
+                              {course?.name || 'Corso sconosciuto'}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200' : ''}>
+
+                            {/* Codice Corso (SKU) */}
+                            <div className="font-medium text-[11px] text-slate-900 truncate" title={course?.sku || undefined}>
+                              {course?.sku}
+                            </div>
+
+                            {/* Info Temporali */}
+                            <div className="text-xs text-muted-foreground flex items-center gap-2 truncate">
+                              <span>Iscritto il: {new Date(e.enrollmentDate).toLocaleDateString('it-IT')}</span>
+                              {course?.dayOfWeek && <span>• {course.dayOfWeek} {course.startTime}</span>}
+                            </div>
+
+                            {/* Dettagli Iscrizione (Solo Lettura) */}
+                            <div className="flex items-center gap-1 overflow-hidden flex-1">
+                              {hasDetails && e.details.map((detStr: string, idx: number) => {
+                                const color = enrollmentDetails?.find(d => d.name === detStr)?.color;
+                                return (
+                                  <EnrollmentDetailBadge
+                                    key={idx}
+                                    name={detStr}
+                                    color={color}
+                                    className="h-5 py-0.5 px-2 text-[10px] truncate max-w-[120px]"
+                                  />
+                                );
+                              })}
+                            </div>
+
+                            {/* Stato e Azioni */}
+                            <div className="flex items-center justify-end gap-3 pl-2">
+                              <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200 text-[10px] h-5' : 'text-[10px] h-5'}>
                                 {e.status === 'active' ? 'Attivo' : e.status}
                               </Badge>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                 onClick={() => {
                                   if (confirm("Rimuovere l'iscrizione a questo corso?")) {
                                     removeEnrollmentMutation.mutate(e.id);
                                   }
                                 }}
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </Button>
                             </div>
+
                           </div>
                         );
                       })}
@@ -2427,32 +2774,7 @@ export default function MascheraInputGenerale() {
                     <p className="text-sm text-muted-foreground italic p-2">Nessuna iscrizione attiva.</p>
                   )}
 
-                  {/* Add New Enrollment */}
-                  <div className="space-y-2 border-t pt-4">
-                    <Label>Aggiungi Corso</Label>
-                    <div className="flex gap-2 items-start sm:items-center flex-col sm:flex-row">
-                      <div className="flex-1 w-full">
-                        <CourseSelector
-                          courses={courses || []}
-                          instructors={instructors || []}
-                          categories={categories || []}
-                          studios={studios || []}
-                          selectedCourseId={selectedCourseToAdd}
-                          onSelect={setSelectedCourseToAdd}
-                          excludeCourseIds={memberEnrollments?.map((e: any) => e.courseId) || []}
-                        />
-                      </div>
-                      <Button
-                        className="w-full sm:w-auto"
-                        onClick={() => {
-                          if (selectedCourseToAdd) addEnrollmentMutation.mutate(parseInt(selectedCourseToAdd));
-                        }}
-                        disabled={!selectedCourseToAdd || addEnrollmentMutation.isPending}
-                      >
-                        <Plus className="w-4 h-4 mr-2" /> Aggiungi
-                      </Button>
-                    </div>
-                  </div>
+
                 </div>
               )}
             </div>
@@ -2464,9 +2786,10 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/prove-pagamento" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-prove-pagamento">Prove a Pagamento</Link>
                 <KnowledgeInfo id="prove-a-pagamento" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
+                  {/* ... existing Select ... */}
                   <Select>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona categoria" />
@@ -2503,23 +2826,22 @@ export default function MascheraInputGenerale() {
                     </SelectTrigger>
                     <SelectContent>
                       {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
+                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
                           {corso.sku}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="lg:col-span-2">
+                  <MultiSelectEnrollmentDetails
+                    selectedDetails={attivitaEnrollmentDetails["prove-pagamento"]}
+                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "prove-pagamento": details }))}
+                    testIdPrefix="prove-pag"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label>Iscritti</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Posti Disp.</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Presenze</Label>
                   <Input type="number" />
                 </div>
               </div>
@@ -2532,7 +2854,7 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/prove-gratuite" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-prove-gratuite">Prove Gratuite</Link>
                 <KnowledgeInfo id="prove-gratuite" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Select>
@@ -2571,12 +2893,19 @@ export default function MascheraInputGenerale() {
                     </SelectTrigger>
                     <SelectContent>
                       {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
+                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
                           {corso.sku}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="lg:col-span-2">
+                  <MultiSelectEnrollmentDetails
+                    selectedDetails={attivitaEnrollmentDetails["prove-gratuite"]}
+                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "prove-gratuite": details }))}
+                    testIdPrefix="prove-grat"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Iscritti</Label>
@@ -2600,7 +2929,7 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/lezioni-singole" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-lezioni-singole">Lezioni Singole</Link>
                 <KnowledgeInfo id="lezioni-singole" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Select>
@@ -2639,12 +2968,19 @@ export default function MascheraInputGenerale() {
                     </SelectTrigger>
                     <SelectContent>
                       {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
+                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
                           {corso.sku}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="lg:col-span-2">
+                  <MultiSelectEnrollmentDetails
+                    selectedDetails={attivitaEnrollmentDetails["lezioni-singole"]}
+                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "lezioni-singole": details }))}
+                    testIdPrefix="lez-sing"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Iscritti</Label>
@@ -2658,8 +2994,6 @@ export default function MascheraInputGenerale() {
                   <Label>Welfare</Label>
                   <Input type="number" />
                 </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                 <div className="space-y-2">
                   <Label>Presenze</Label>
                   <Input type="number" />
@@ -2720,35 +3054,7 @@ export default function MascheraInputGenerale() {
                     <p className="text-sm text-muted-foreground italic p-2">Nessun workshop registrato.</p>
                   )}
 
-                  {/* Add Workshop */}
-                  <div className="space-y-2 border-t pt-4">
-                    <Label>Aggiungi Workshop</Label>
-                    <div className="flex gap-2 items-start sm:items-center flex-col sm:flex-row">
-                      <div className="flex-1 w-full">
-                        <Select value={selectedWorkshopToAdd} onValueChange={setSelectedWorkshopToAdd}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleziona workshop da aggiungere..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {workshops?.filter(w => w.active && !memberWorkshopEnrollments?.some((e: any) => e.workshopId === w.id)).map((workshop: any) => (
-                              <SelectItem key={workshop.id} value={workshop.id.toString()}>
-                                {workshop.name} ({new Date(workshop.startDate).toLocaleDateString('it-IT')})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Button
-                        className="w-full sm:w-auto"
-                        onClick={() => {
-                          if (selectedWorkshopToAdd) addWorkshopEnrollmentMutation.mutate(parseInt(selectedWorkshopToAdd));
-                        }}
-                        disabled={!selectedWorkshopToAdd || addWorkshopEnrollmentMutation.isPending}
-                      >
-                        <Plus className="w-4 h-4 mr-2" /> Aggiungi
-                      </Button>
-                    </div>
-                  </div>
+
                 </div>
               )}
             </div>
@@ -2760,7 +3066,7 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/domeniche-movimento" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-domeniche-movimento">Domeniche in Movimento</Link>
                 <KnowledgeInfo id="domeniche-in-movimento" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Select>
@@ -2799,12 +3105,19 @@ export default function MascheraInputGenerale() {
                     </SelectTrigger>
                     <SelectContent>
                       {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
+                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
                           {corso.sku}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="lg:col-span-2">
+                  <MultiSelectEnrollmentDetails
+                    selectedDetails={attivitaEnrollmentDetails["domeniche-movimento"]}
+                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "domeniche-movimento": details }))}
+                    testIdPrefix="dom-mov"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Data</Label>
@@ -2824,7 +3137,7 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/allenamenti" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-allenamenti">Allenamenti/Affitti</Link>
                 <KnowledgeInfo id="allenamenti" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Select>
@@ -2863,12 +3176,19 @@ export default function MascheraInputGenerale() {
                     </SelectTrigger>
                     <SelectContent>
                       {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
+                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
                           {corso.sku}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="lg:col-span-2">
+                  <MultiSelectEnrollmentDetails
+                    selectedDetails={attivitaEnrollmentDetails["allenamenti"]}
+                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "allenamenti": details }))}
+                    testIdPrefix="allen"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Presenze</Label>
@@ -2888,7 +3208,7 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/lezioni-individuali" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-lezioni-individuali">Lezioni Individuali</Link>
                 <KnowledgeInfo id="lezioni-individuali" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Select>
@@ -2927,12 +3247,19 @@ export default function MascheraInputGenerale() {
                     </SelectTrigger>
                     <SelectContent>
                       {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
+                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
                           {corso.sku}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="lg:col-span-2">
+                  <MultiSelectEnrollmentDetails
+                    selectedDetails={attivitaEnrollmentDetails["lezioni-individuali"]}
+                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "lezioni-individuali": details }))}
+                    testIdPrefix="lez-ind"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Presenze</Label>
@@ -2952,7 +3279,7 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/campus" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-campus">Campus</Link>
                 <KnowledgeInfo id="campus" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Select>
@@ -2985,18 +3312,25 @@ export default function MascheraInputGenerale() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice</Label>
-                  <Select value={attivitaCodice["campus"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "campus": v }))}>
+                  <Select value={attivitaCodice["campus"]} onValueChange={(v) => setAttivitaCodice(prevTarget => ({ ...prevTarget, "campus": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
                     <SelectContent>
                       {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
+                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
                           {corso.sku}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="lg:col-span-2">
+                  <MultiSelectEnrollmentDetails
+                    selectedDetails={attivitaEnrollmentDetails["campus"]}
+                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "campus": details }))}
+                    testIdPrefix="camp"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Periodo</Label>
@@ -3016,7 +3350,7 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/saggi" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-saggi">Saggi</Link>
                 <KnowledgeInfo id="saggi" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Select>
@@ -3055,12 +3389,19 @@ export default function MascheraInputGenerale() {
                     </SelectTrigger>
                     <SelectContent>
                       {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
+                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
                           {corso.sku}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="lg:col-span-2">
+                  <MultiSelectEnrollmentDetails
+                    selectedDetails={attivitaEnrollmentDetails["saggi"]}
+                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "saggi": details }))}
+                    testIdPrefix="saggi"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Data</Label>
@@ -3080,7 +3421,7 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/vacanze-studio" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-vacanze-studio">Vacanze Studio</Link>
                 <KnowledgeInfo id="vacanze-studio" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label>Categorie</Label>
                   <Select>
@@ -3098,7 +3439,7 @@ export default function MascheraInputGenerale() {
                 </div>
                 <div className="space-y-2">
                   <Label>Corso</Label>
-                  <Select>
+                  <Select value={attivitaCorso["vacanze-studio"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "vacanze-studio": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona corso" />
                     </SelectTrigger>
@@ -3113,18 +3454,25 @@ export default function MascheraInputGenerale() {
                 </div>
                 <div className="space-y-2">
                   <Label>Codice</Label>
-                  <Select>
+                  <Select value={attivitaCodice["vacanze-studio"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "vacanze-studio": v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleziona codice" />
                     </SelectTrigger>
                     <SelectContent>
                       {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku}>
+                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
                           {corso.sku}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="lg:col-span-2">
+                  <MultiSelectEnrollmentDetails
+                    selectedDetails={attivitaEnrollmentDetails["vacanze-studio"]}
+                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "vacanze-studio": details }))}
+                    testIdPrefix="vac-stu"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Periodo</Label>
@@ -3184,6 +3532,48 @@ export default function MascheraInputGenerale() {
           </CardContent>
         </Card>
       </div>
-    </div >
+
+      {/* Duplicate Fiscal Codes Modal */}
+      <Dialog open={showDuplicatesModal} onOpenChange={setShowDuplicatesModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              Codici Fiscali Duplicati
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              I seguenti codici fiscali sono presenti in più di un membro. Clicca sul nome per visualizzare e modificare il membro.
+            </p>
+            {duplicateFiscalCodes?.map((duplicate) => (
+              <Card key={duplicate.fiscalCode} className="p-4">
+                <div className="space-y-2">
+                  <div className="font-mono text-sm font-medium bg-muted px-2 py-1 rounded inline-block">
+                    {duplicate.fiscalCode}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {duplicate.members.map((member) => (
+                      <Button
+                        key={member.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowDuplicatesModal(false);
+                          handleSelectMember(member);
+                        }}
+                        data-testid={`button - duplicate - member - ${member.id} `}
+                      >
+                        {member.firstName} {member.lastName}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

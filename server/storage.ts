@@ -153,6 +153,33 @@ import {
   vacationStudies,
   type VacationStudy,
   type InsertVacationStudy,
+  activityStatuses,
+  type ActivityStatus,
+  type InsertActivityStatus,
+  paymentNotes,
+  type PaymentNote,
+  type InsertPaymentNote,
+  enrollmentDetails,
+  type EnrollmentDetail,
+  type InsertEnrollmentDetail,
+  todos,
+  type Todo,
+  type InsertTodo,
+  InsertPaidTrialEnrollment, PaidTrialEnrollment, paidTrialEnrollments,
+  InsertFreeTrialEnrollment, FreeTrialEnrollment, freeTrialEnrollments,
+  InsertSingleLessonEnrollment, SingleLessonEnrollment, singleLessonEnrollments,
+  InsertSundayActivityEnrollment, SundayActivityEnrollment, sundayActivityEnrollments,
+  InsertTrainingEnrollment, TrainingEnrollment, trainingEnrollments,
+  InsertIndividualLessonEnrollment, IndividualLessonEnrollment, individualLessonEnrollments,
+  InsertCampusEnrollment, CampusEnrollment, campusEnrollments,
+  InsertRecitalEnrollment, RecitalEnrollment, recitalEnrollments,
+  InsertVacationStudyEnrollment, VacationStudyEnrollment, vacationStudyEnrollments,
+  courseQuotesGrid,
+  type CourseQuotesGrid,
+  type InsertCourseQuotesGrid,
+  bookingServiceCategories,
+  type BookingServiceCategory,
+  type InsertBookingServiceCategory,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -175,6 +202,13 @@ export interface IStorage {
   // User Activity Log operations
   logActivity(log: InsertUserActivityLog): Promise<UserActivityLog>;
   getUserActivityLogs(limit?: number): Promise<(UserActivityLog & { user: { username: string, firstName: string, lastName: string } })[]>;
+
+  // Booking Service Categories operations
+  getBookingServiceCategories(): Promise<BookingServiceCategory[]>;
+  getBookingServiceCategory(id: number): Promise<BookingServiceCategory | undefined>;
+  createBookingServiceCategory(category: InsertBookingServiceCategory): Promise<BookingServiceCategory>;
+  updateBookingServiceCategory(id: number, category: Partial<InsertBookingServiceCategory>): Promise<BookingServiceCategory>;
+  deleteBookingServiceCategory(id: number): Promise<void>;
 
   // Booking Service operations
   getBookingServices(): Promise<BookingService[]>;
@@ -276,6 +310,13 @@ export interface IStorage {
   deleteCourse(id: number): Promise<void>;
   getCoursesBySeason(seasonId: number): Promise<Course[]>;
 
+  // Activity Statuses
+  getActivityStatuses(): Promise<ActivityStatus[]>;
+  getActivityStatus(id: number): Promise<ActivityStatus | undefined>;
+  createActivityStatus(status: InsertActivityStatus): Promise<ActivityStatus>;
+  updateActivityStatus(id: number, status: Partial<InsertActivityStatus>): Promise<ActivityStatus>;
+  deleteActivityStatus(id: number): Promise<void>;
+
   // Workshops
   getWorkshops(): Promise<Workshop[]>;
   getWorkshop(id: number): Promise<Workshop | undefined>;
@@ -343,7 +384,8 @@ export interface IStorage {
 
   // Workshop Enrollments
   getWorkshopEnrollments(): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
-  getWorkshopEnrollmentsByMember(memberId: number): Promise<WorkshopEnrollment[]>;
+  getWorkshopEnrollmentsByMember(memberId: number): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
+  getWorkshopEnrollmentsBySeason(seasonId: number): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
   getWorkshopEnrollment(id: number): Promise<WorkshopEnrollment | undefined>;
   createWorkshopEnrollment(enrollment: InsertWorkshopEnrollment): Promise<WorkshopEnrollment>;
   updateWorkshopEnrollment(id: number, enrollment: Partial<InsertWorkshopEnrollment>): Promise<WorkshopEnrollment>;
@@ -354,6 +396,72 @@ export interface IStorage {
   getWorkshopAttendance(id: number): Promise<WorkshopAttendance | undefined>;
   createWorkshopAttendance(attendance: InsertWorkshopAttendance): Promise<WorkshopAttendance>;
   deleteWorkshopAttendance(id: number): Promise<void>;
+
+  // --- EXTRA ENROLLMENTS --- 
+
+  getPaidTrialEnrollments(): Promise<any[]>;
+  getPaidTrialEnrollmentsByMember(memberId: number): Promise<any[]>;
+  getPaidTrialEnrollment(id: number): Promise<PaidTrialEnrollment | undefined>;
+  createPaidTrialEnrollment(enrollment: InsertPaidTrialEnrollment): Promise<PaidTrialEnrollment>;
+  updatePaidTrialEnrollment(id: number, enrollment: Partial<InsertPaidTrialEnrollment>): Promise<PaidTrialEnrollment>;
+  deletePaidTrialEnrollment(id: number): Promise<void>;
+
+  getFreeTrialEnrollments(): Promise<any[]>;
+  getFreeTrialEnrollmentsByMember(memberId: number): Promise<any[]>;
+  getFreeTrialEnrollment(id: number): Promise<FreeTrialEnrollment | undefined>;
+  createFreeTrialEnrollment(enrollment: InsertFreeTrialEnrollment): Promise<FreeTrialEnrollment>;
+  updateFreeTrialEnrollment(id: number, enrollment: Partial<InsertFreeTrialEnrollment>): Promise<FreeTrialEnrollment>;
+  deleteFreeTrialEnrollment(id: number): Promise<void>;
+
+  getSingleLessonEnrollments(): Promise<any[]>;
+  getSingleLessonEnrollmentsByMember(memberId: number): Promise<any[]>;
+  getSingleLessonEnrollment(id: number): Promise<SingleLessonEnrollment | undefined>;
+  createSingleLessonEnrollment(enrollment: InsertSingleLessonEnrollment): Promise<SingleLessonEnrollment>;
+  updateSingleLessonEnrollment(id: number, enrollment: Partial<InsertSingleLessonEnrollment>): Promise<SingleLessonEnrollment>;
+  deleteSingleLessonEnrollment(id: number): Promise<void>;
+
+  getSundayActivityEnrollments(): Promise<any[]>;
+  getSundayActivityEnrollmentsByMember(memberId: number): Promise<any[]>;
+  getSundayActivityEnrollment(id: number): Promise<SundayActivityEnrollment | undefined>;
+  createSundayActivityEnrollment(enrollment: InsertSundayActivityEnrollment): Promise<SundayActivityEnrollment>;
+  updateSundayActivityEnrollment(id: number, enrollment: Partial<InsertSundayActivityEnrollment>): Promise<SundayActivityEnrollment>;
+  deleteSundayActivityEnrollment(id: number): Promise<void>;
+
+  getTrainingEnrollments(): Promise<any[]>;
+  getTrainingEnrollmentsByMember(memberId: number): Promise<any[]>;
+  getTrainingEnrollment(id: number): Promise<TrainingEnrollment | undefined>;
+  createTrainingEnrollment(enrollment: InsertTrainingEnrollment): Promise<TrainingEnrollment>;
+  updateTrainingEnrollment(id: number, enrollment: Partial<InsertTrainingEnrollment>): Promise<TrainingEnrollment>;
+  deleteTrainingEnrollment(id: number): Promise<void>;
+
+  getIndividualLessonEnrollments(): Promise<any[]>;
+  getIndividualLessonEnrollmentsByMember(memberId: number): Promise<any[]>;
+  getIndividualLessonEnrollment(id: number): Promise<IndividualLessonEnrollment | undefined>;
+  createIndividualLessonEnrollment(enrollment: InsertIndividualLessonEnrollment): Promise<IndividualLessonEnrollment>;
+  updateIndividualLessonEnrollment(id: number, enrollment: Partial<InsertIndividualLessonEnrollment>): Promise<IndividualLessonEnrollment>;
+  deleteIndividualLessonEnrollment(id: number): Promise<void>;
+
+  getCampusEnrollments(): Promise<any[]>;
+  getCampusEnrollmentsByMember(memberId: number): Promise<any[]>;
+  getCampusEnrollment(id: number): Promise<CampusEnrollment | undefined>;
+  createCampusEnrollment(enrollment: InsertCampusEnrollment): Promise<CampusEnrollment>;
+  updateCampusEnrollment(id: number, enrollment: Partial<InsertCampusEnrollment>): Promise<CampusEnrollment>;
+  deleteCampusEnrollment(id: number): Promise<void>;
+
+  getRecitalEnrollments(): Promise<any[]>;
+  getRecitalEnrollmentsByMember(memberId: number): Promise<any[]>;
+  getRecitalEnrollment(id: number): Promise<RecitalEnrollment | undefined>;
+  createRecitalEnrollment(enrollment: InsertRecitalEnrollment): Promise<RecitalEnrollment>;
+  updateRecitalEnrollment(id: number, enrollment: Partial<InsertRecitalEnrollment>): Promise<RecitalEnrollment>;
+  deleteRecitalEnrollment(id: number): Promise<void>;
+
+  getVacationStudyEnrollments(): Promise<any[]>;
+  getVacationStudyEnrollmentsByMember(memberId: number): Promise<any[]>;
+  getVacationStudyEnrollment(id: number): Promise<VacationStudyEnrollment | undefined>;
+  createVacationStudyEnrollment(enrollment: InsertVacationStudyEnrollment): Promise<VacationStudyEnrollment>;
+  updateVacationStudyEnrollment(id: number, enrollment: Partial<InsertVacationStudyEnrollment>): Promise<VacationStudyEnrollment>;
+  deleteVacationStudyEnrollment(id: number): Promise<void>;
+
 
   // Member Relationships (genitori/tutori)
   getMemberRelationships(memberId: number): Promise<MemberRelationship[]>;
@@ -520,6 +628,29 @@ export interface IStorage {
   updateVacationStudy(id: number, vacationStudy: Partial<InsertVacationStudy>): Promise<VacationStudy>;
   deleteVacationStudy(id: number): Promise<void>;
 
+  // Payment Notes
+  getPaymentNotes(): Promise<PaymentNote[]>;
+  getPaymentNote(id: number): Promise<PaymentNote | undefined>;
+  createPaymentNote(note: InsertPaymentNote): Promise<PaymentNote>;
+  updatePaymentNote(id: number, note: Partial<InsertPaymentNote>): Promise<PaymentNote>;
+  deletePaymentNote(id: number): Promise<void>;
+
+  // Enrollment Details
+  getEnrollmentDetails(): Promise<EnrollmentDetail[]>;
+  getEnrollmentDetail(id: number): Promise<EnrollmentDetail | undefined>;
+  createEnrollmentDetail(detail: InsertEnrollmentDetail): Promise<EnrollmentDetail>;
+  updateEnrollmentDetail(id: number, detail: Partial<InsertEnrollmentDetail>): Promise<EnrollmentDetail>;
+  deleteEnrollmentDetail(id: number): Promise<void>;
+
+  // Todos
+  getTodos(): Promise<Todo[]>;
+  createTodo(todo: InsertTodo): Promise<Todo>;
+  updateTodo(id: number, todo: Partial<InsertTodo>): Promise<Todo>;
+  deleteTodo(id: number): Promise<void>;
+
+  // Course Quotes Grid
+  getCourseQuotesGrid(activityType?: string): Promise<CourseQuotesGrid[]>;
+  upsertCourseQuotesGridBulk(quotes: InsertCourseQuotesGrid[], activityType?: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -599,19 +730,47 @@ export class DatabaseStorage implements IStorage {
       .set({ ...roleData, updatedAt: new Date() })
       .where(eq(userRoles.id, id));
 
-    const [role] = await db.select().from(userRoles).where(eq(userRoles.id, id));
-    if (!role) throw new Error("Role not found");
-    return role;
+    const [updatedRole] = await db.select().from(userRoles).where(eq(userRoles.id, id));
+    if (!updatedRole) throw new Error("Role not found after update");
+    return updatedRole;
   }
 
   async deleteUserRole(id: number): Promise<void> {
     await db.delete(userRoles).where(eq(userRoles.id, id));
   }
 
+  // ==== Activity Statuses ====
+  async getActivityStatuses(): Promise<ActivityStatus[]> {
+    return await db.select().from(activityStatuses).orderBy(activityStatuses.sortOrder);
+  }
+
+  async getActivityStatus(id: number): Promise<ActivityStatus | undefined> {
+    const [status] = await db.select().from(activityStatuses).where(eq(activityStatuses.id, id));
+    return status;
+  }
+
+  async createActivityStatus(statusData: InsertActivityStatus): Promise<ActivityStatus> {
+    const [result] = await db.insert(activityStatuses).values(statusData);
+    const insertId = (result as any).insertId;
+    const [newStatus] = await db.select().from(activityStatuses).where(eq(activityStatuses.id, insertId));
+    return newStatus;
+  }
+
+  async updateActivityStatus(id: number, statusData: Partial<InsertActivityStatus>): Promise<ActivityStatus> {
+    await db.update(activityStatuses).set(statusData).where(eq(activityStatuses.id, id));
+    const [updatedStatus] = await db.select().from(activityStatuses).where(eq(activityStatuses.id, id));
+    return updatedStatus;
+  }
+
+  async deleteActivityStatus(id: number): Promise<void> {
+    await db.delete(activityStatuses).where(eq(activityStatuses.id, id));
+  }
+
   // ==== User Activity Logs ====
   async logActivity(logData: InsertUserActivityLog): Promise<UserActivityLog> {
     const [result] = await db.insert(userActivityLogs).values(logData);
-    const [log] = await db.select().from(userActivityLogs).where(eq(userActivityLogs.id, result.insertId));
+    const insertId = (result as any).insertId;
+    const [log] = await db.select().from(userActivityLogs).where(eq(userActivityLogs.id, insertId));
     return log;
   }
 
@@ -638,6 +797,65 @@ export class DatabaseStorage implements IStorage {
         lastName: r.user.lastName || '',
       } : { username: 'deleted', firstName: 'Deleted', lastName: 'User' }
     })) as any;
+  }
+
+  // ==== Course Quotes Grid ====
+  async getCourseQuotesGrid(activityType?: string): Promise<CourseQuotesGrid[]> {
+    let query = db.select().from(courseQuotesGrid);
+    if (activityType) {
+      query = query.where(eq(courseQuotesGrid.activityType, activityType)) as any;
+    }
+    return await query.orderBy(courseQuotesGrid.sortOrder);
+  }
+
+  async upsertCourseQuotesGridBulk(gridItems: InsertCourseQuotesGrid[], activityType?: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      if (activityType) {
+        await tx.delete(courseQuotesGrid).where(eq(courseQuotesGrid.activityType, activityType));
+      } else {
+        await tx.delete(courseQuotesGrid);
+      }
+
+      if (gridItems.length > 0) {
+        let itemsToInsert = gridItems;
+        // Ensure inserted items have the activityType populated correctly if specified
+        if (activityType) {
+          itemsToInsert = gridItems.map(item => ({ ...item, activityType }));
+        }
+        await tx.insert(courseQuotesGrid).values(itemsToInsert);
+      }
+    });
+  }
+
+  // ==== Booking Service Categories ====
+  async getBookingServiceCategories(): Promise<BookingServiceCategory[]> {
+    return await db.select().from(bookingServiceCategories).orderBy(bookingServiceCategories.sortOrder);
+  }
+
+  async getBookingServiceCategory(id: number): Promise<BookingServiceCategory | undefined> {
+    const [category] = await db.select().from(bookingServiceCategories).where(eq(bookingServiceCategories.id, id));
+    return category;
+  }
+
+  async createBookingServiceCategory(category: InsertBookingServiceCategory): Promise<BookingServiceCategory> {
+    const [result] = await db.insert(bookingServiceCategories).values(category as any);
+    const id = (result as any).insertId || (result as any).id;
+    const fetched = await this.getBookingServiceCategory(id);
+    return fetched!;
+  }
+
+  async updateBookingServiceCategory(id: number, category: Partial<InsertBookingServiceCategory>): Promise<BookingServiceCategory> {
+    await db
+      .update(bookingServiceCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(bookingServiceCategories.id, id));
+
+    const updated = await this.getBookingServiceCategory(id);
+    return updated!;
+  }
+
+  async deleteBookingServiceCategory(id: number): Promise<void> {
+    await db.delete(bookingServiceCategories).where(eq(bookingServiceCategories.id, id));
   }
 
   // ==== Booking Services ====
@@ -886,6 +1104,8 @@ m.*,
       active: row.active,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      createdBy: row.created_by,
+      updatedBy: row.updated_by,
       activeCourseCount: row.active_course_count || 0,
     }));
 
@@ -1602,6 +1822,7 @@ m.*,
         enrollmentDate: enrollments.enrollmentDate,
         status: enrollments.status,
         notes: enrollments.notes,
+        details: enrollments.details,
         createdAt: enrollments.createdAt,
         memberFirstName: members.firstName,
         memberLastName: members.lastName,
@@ -1625,6 +1846,7 @@ m.*,
         enrollmentDate: enrollments.enrollmentDate,
         status: enrollments.status,
         notes: enrollments.notes,
+        details: enrollments.details,
         createdAt: enrollments.createdAt,
         memberFirstName: members.firstName,
         memberLastName: members.lastName,
@@ -1649,6 +1871,7 @@ m.*,
         enrollmentDate: enrollments.enrollmentDate,
         status: enrollments.status,
         notes: enrollments.notes,
+        details: enrollments.details,
         createdAt: enrollments.createdAt,
         memberFirstName: members.firstName,
         memberLastName: members.lastName,
@@ -1942,12 +2165,52 @@ m.*,
     return result;
   }
 
-  async getWorkshopEnrollmentsByMember(memberId: number): Promise<WorkshopEnrollment[]> {
-    return await db
-      .select()
+  async getWorkshopEnrollmentsByMember(memberId: number): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
+    const result = await db
+      .select({
+        id: workshopEnrollments.id,
+        workshopId: workshopEnrollments.workshopId,
+        memberId: workshopEnrollments.memberId,
+        enrollmentDate: workshopEnrollments.enrollmentDate,
+        status: workshopEnrollments.status,
+        notes: workshopEnrollments.notes,
+        createdAt: workshopEnrollments.createdAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberEmail: members.email,
+        memberFiscalCode: members.fiscalCode,
+        memberGender: members.gender,
+        seasonId: workshopEnrollments.seasonId,
+      })
       .from(workshopEnrollments)
+      .leftJoin(members, eq(workshopEnrollments.memberId, members.id))
       .where(eq(workshopEnrollments.memberId, memberId))
       .orderBy(desc(workshopEnrollments.enrollmentDate));
+    return result;
+  }
+
+  async getWorkshopEnrollmentsBySeason(seasonId: number): Promise<(WorkshopEnrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
+    const result = await db
+      .select({
+        id: workshopEnrollments.id,
+        workshopId: workshopEnrollments.workshopId,
+        memberId: workshopEnrollments.memberId,
+        enrollmentDate: workshopEnrollments.enrollmentDate,
+        status: workshopEnrollments.status,
+        notes: workshopEnrollments.notes,
+        createdAt: workshopEnrollments.createdAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberEmail: members.email,
+        memberFiscalCode: members.fiscalCode,
+        memberGender: members.gender,
+        seasonId: workshopEnrollments.seasonId,
+      })
+      .from(workshopEnrollments)
+      .leftJoin(members, eq(workshopEnrollments.memberId, members.id))
+      .where(eq(workshopEnrollments.seasonId, seasonId))
+      .orderBy(desc(workshopEnrollments.enrollmentDate));
+    return result;
   }
 
   async getWorkshopEnrollment(id: number): Promise<WorkshopEnrollment | undefined> {
@@ -1978,6 +2241,558 @@ m.*,
 
   async deleteWorkshopEnrollment(id: number): Promise<void> {
     await db.delete(workshopEnrollments).where(eq(workshopEnrollments.id, id));
+  }
+
+
+  // --- EXTRA ENROLLMENTS IMPLEMENTATION --- 
+
+  async getPaidTrialEnrollments(): Promise<any[]> {
+    return await db.select({
+      id: paidTrialEnrollments.id,
+      memberId: paidTrialEnrollments.memberId,
+      status: paidTrialEnrollments.status,
+      enrollmentDate: paidTrialEnrollments.enrollmentDate,
+      notes: paidTrialEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(paidTrialEnrollments)
+      .leftJoin(members, eq(paidTrialEnrollments.memberId, members.id))
+      .orderBy(desc(paidTrialEnrollments.enrollmentDate));
+  }
+
+  async getPaidTrialEnrollmentsByMember(memberId: number): Promise<any[]> {
+    return await db.select({
+      id: paidTrialEnrollments.id,
+      memberId: paidTrialEnrollments.memberId,
+      status: paidTrialEnrollments.status,
+      enrollmentDate: paidTrialEnrollments.enrollmentDate,
+      notes: paidTrialEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(paidTrialEnrollments)
+      .leftJoin(members, eq(paidTrialEnrollments.memberId, members.id))
+      .where(eq(paidTrialEnrollments.memberId, memberId))
+      .orderBy(desc(paidTrialEnrollments.enrollmentDate));
+  }
+
+  async getPaidTrialEnrollment(id: number): Promise<PaidTrialEnrollment | undefined> {
+    const [enrollment] = await db.select().from(paidTrialEnrollments).where(eq(paidTrialEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createPaidTrialEnrollment(enrollment: InsertPaidTrialEnrollment): Promise<PaidTrialEnrollment> {
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(paidTrialEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(paidTrialEnrollments).where(eq(paidTrialEnrollments.id, result.insertId));
+    return newEnrollment;
+  }
+
+  async updatePaidTrialEnrollment(id: number, enrollment: Partial<InsertPaidTrialEnrollment>): Promise<PaidTrialEnrollment> {
+    await db.update(paidTrialEnrollments).set(enrollment as any).where(eq(paidTrialEnrollments.id, id));
+    const [updated] = await db.select().from(paidTrialEnrollments).where(eq(paidTrialEnrollments.id, id));
+    return updated;
+  }
+
+  async deletePaidTrialEnrollment(id: number): Promise<void> {
+    await db.delete(paidTrialEnrollments).where(eq(paidTrialEnrollments.id, id));
+  }
+
+  async getFreeTrialEnrollments(): Promise<any[]> {
+    return await db.select({
+      id: freeTrialEnrollments.id,
+      memberId: freeTrialEnrollments.memberId,
+      status: freeTrialEnrollments.status,
+      enrollmentDate: freeTrialEnrollments.enrollmentDate,
+      notes: freeTrialEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(freeTrialEnrollments)
+      .leftJoin(members, eq(freeTrialEnrollments.memberId, members.id))
+      .orderBy(desc(freeTrialEnrollments.enrollmentDate));
+  }
+
+  async getFreeTrialEnrollmentsByMember(memberId: number): Promise<any[]> {
+    return await db.select({
+      id: freeTrialEnrollments.id,
+      memberId: freeTrialEnrollments.memberId,
+      status: freeTrialEnrollments.status,
+      enrollmentDate: freeTrialEnrollments.enrollmentDate,
+      notes: freeTrialEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(freeTrialEnrollments)
+      .leftJoin(members, eq(freeTrialEnrollments.memberId, members.id))
+      .where(eq(freeTrialEnrollments.memberId, memberId))
+      .orderBy(desc(freeTrialEnrollments.enrollmentDate));
+  }
+
+  async getFreeTrialEnrollment(id: number): Promise<FreeTrialEnrollment | undefined> {
+    const [enrollment] = await db.select().from(freeTrialEnrollments).where(eq(freeTrialEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createFreeTrialEnrollment(enrollment: InsertFreeTrialEnrollment): Promise<FreeTrialEnrollment> {
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(freeTrialEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(freeTrialEnrollments).where(eq(freeTrialEnrollments.id, result.insertId));
+    return newEnrollment;
+  }
+
+  async updateFreeTrialEnrollment(id: number, enrollment: Partial<InsertFreeTrialEnrollment>): Promise<FreeTrialEnrollment> {
+    await db.update(freeTrialEnrollments).set(enrollment as any).where(eq(freeTrialEnrollments.id, id));
+    const [updated] = await db.select().from(freeTrialEnrollments).where(eq(freeTrialEnrollments.id, id));
+    return updated;
+  }
+
+  async deleteFreeTrialEnrollment(id: number): Promise<void> {
+    await db.delete(freeTrialEnrollments).where(eq(freeTrialEnrollments.id, id));
+  }
+
+  async getSingleLessonEnrollments(): Promise<any[]> {
+    return await db.select({
+      id: singleLessonEnrollments.id,
+      memberId: singleLessonEnrollments.memberId,
+      status: singleLessonEnrollments.status,
+      enrollmentDate: singleLessonEnrollments.enrollmentDate,
+      notes: singleLessonEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(singleLessonEnrollments)
+      .leftJoin(members, eq(singleLessonEnrollments.memberId, members.id))
+      .orderBy(desc(singleLessonEnrollments.enrollmentDate));
+  }
+
+  async getSingleLessonEnrollmentsByMember(memberId: number): Promise<any[]> {
+    return await db.select({
+      id: singleLessonEnrollments.id,
+      memberId: singleLessonEnrollments.memberId,
+      status: singleLessonEnrollments.status,
+      enrollmentDate: singleLessonEnrollments.enrollmentDate,
+      notes: singleLessonEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(singleLessonEnrollments)
+      .leftJoin(members, eq(singleLessonEnrollments.memberId, members.id))
+      .where(eq(singleLessonEnrollments.memberId, memberId))
+      .orderBy(desc(singleLessonEnrollments.enrollmentDate));
+  }
+
+  async getSingleLessonEnrollment(id: number): Promise<SingleLessonEnrollment | undefined> {
+    const [enrollment] = await db.select().from(singleLessonEnrollments).where(eq(singleLessonEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createSingleLessonEnrollment(enrollment: InsertSingleLessonEnrollment): Promise<SingleLessonEnrollment> {
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(singleLessonEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(singleLessonEnrollments).where(eq(singleLessonEnrollments.id, result.insertId));
+    return newEnrollment;
+  }
+
+  async updateSingleLessonEnrollment(id: number, enrollment: Partial<InsertSingleLessonEnrollment>): Promise<SingleLessonEnrollment> {
+    await db.update(singleLessonEnrollments).set(enrollment as any).where(eq(singleLessonEnrollments.id, id));
+    const [updated] = await db.select().from(singleLessonEnrollments).where(eq(singleLessonEnrollments.id, id));
+    return updated;
+  }
+
+  async deleteSingleLessonEnrollment(id: number): Promise<void> {
+    await db.delete(singleLessonEnrollments).where(eq(singleLessonEnrollments.id, id));
+  }
+
+  async getSundayActivityEnrollments(): Promise<any[]> {
+    return await db.select({
+      id: sundayActivityEnrollments.id,
+      memberId: sundayActivityEnrollments.memberId,
+      status: sundayActivityEnrollments.status,
+      enrollmentDate: sundayActivityEnrollments.enrollmentDate,
+      notes: sundayActivityEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(sundayActivityEnrollments)
+      .leftJoin(members, eq(sundayActivityEnrollments.memberId, members.id))
+      .orderBy(desc(sundayActivityEnrollments.enrollmentDate));
+  }
+
+  async getSundayActivityEnrollmentsByMember(memberId: number): Promise<any[]> {
+    return await db.select({
+      id: sundayActivityEnrollments.id,
+      memberId: sundayActivityEnrollments.memberId,
+      status: sundayActivityEnrollments.status,
+      enrollmentDate: sundayActivityEnrollments.enrollmentDate,
+      notes: sundayActivityEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(sundayActivityEnrollments)
+      .leftJoin(members, eq(sundayActivityEnrollments.memberId, members.id))
+      .where(eq(sundayActivityEnrollments.memberId, memberId))
+      .orderBy(desc(sundayActivityEnrollments.enrollmentDate));
+  }
+
+  async getSundayActivityEnrollment(id: number): Promise<SundayActivityEnrollment | undefined> {
+    const [enrollment] = await db.select().from(sundayActivityEnrollments).where(eq(sundayActivityEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createSundayActivityEnrollment(enrollment: InsertSundayActivityEnrollment): Promise<SundayActivityEnrollment> {
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(sundayActivityEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(sundayActivityEnrollments).where(eq(sundayActivityEnrollments.id, result.insertId));
+    return newEnrollment;
+  }
+
+  async updateSundayActivityEnrollment(id: number, enrollment: Partial<InsertSundayActivityEnrollment>): Promise<SundayActivityEnrollment> {
+    await db.update(sundayActivityEnrollments).set(enrollment as any).where(eq(sundayActivityEnrollments.id, id));
+    const [updated] = await db.select().from(sundayActivityEnrollments).where(eq(sundayActivityEnrollments.id, id));
+    return updated;
+  }
+
+  async deleteSundayActivityEnrollment(id: number): Promise<void> {
+    await db.delete(sundayActivityEnrollments).where(eq(sundayActivityEnrollments.id, id));
+  }
+
+  async getTrainingEnrollments(): Promise<any[]> {
+    return await db.select({
+      id: trainingEnrollments.id,
+      memberId: trainingEnrollments.memberId,
+      status: trainingEnrollments.status,
+      enrollmentDate: trainingEnrollments.enrollmentDate,
+      notes: trainingEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(trainingEnrollments)
+      .leftJoin(members, eq(trainingEnrollments.memberId, members.id))
+      .orderBy(desc(trainingEnrollments.enrollmentDate));
+  }
+
+  async getTrainingEnrollmentsByMember(memberId: number): Promise<any[]> {
+    return await db.select({
+      id: trainingEnrollments.id,
+      memberId: trainingEnrollments.memberId,
+      status: trainingEnrollments.status,
+      enrollmentDate: trainingEnrollments.enrollmentDate,
+      notes: trainingEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(trainingEnrollments)
+      .leftJoin(members, eq(trainingEnrollments.memberId, members.id))
+      .where(eq(trainingEnrollments.memberId, memberId))
+      .orderBy(desc(trainingEnrollments.enrollmentDate));
+  }
+
+  async getTrainingEnrollment(id: number): Promise<TrainingEnrollment | undefined> {
+    const [enrollment] = await db.select().from(trainingEnrollments).where(eq(trainingEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createTrainingEnrollment(enrollment: InsertTrainingEnrollment): Promise<TrainingEnrollment> {
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(trainingEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(trainingEnrollments).where(eq(trainingEnrollments.id, result.insertId));
+    return newEnrollment;
+  }
+
+  async updateTrainingEnrollment(id: number, enrollment: Partial<InsertTrainingEnrollment>): Promise<TrainingEnrollment> {
+    await db.update(trainingEnrollments).set(enrollment as any).where(eq(trainingEnrollments.id, id));
+    const [updated] = await db.select().from(trainingEnrollments).where(eq(trainingEnrollments.id, id));
+    return updated;
+  }
+
+  async deleteTrainingEnrollment(id: number): Promise<void> {
+    await db.delete(trainingEnrollments).where(eq(trainingEnrollments.id, id));
+  }
+
+  async getIndividualLessonEnrollments(): Promise<any[]> {
+    return await db.select({
+      id: individualLessonEnrollments.id,
+      memberId: individualLessonEnrollments.memberId,
+      status: individualLessonEnrollments.status,
+      enrollmentDate: individualLessonEnrollments.enrollmentDate,
+      notes: individualLessonEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(individualLessonEnrollments)
+      .leftJoin(members, eq(individualLessonEnrollments.memberId, members.id))
+      .orderBy(desc(individualLessonEnrollments.enrollmentDate));
+  }
+
+  async getIndividualLessonEnrollmentsByMember(memberId: number): Promise<any[]> {
+    return await db.select({
+      id: individualLessonEnrollments.id,
+      memberId: individualLessonEnrollments.memberId,
+      status: individualLessonEnrollments.status,
+      enrollmentDate: individualLessonEnrollments.enrollmentDate,
+      notes: individualLessonEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(individualLessonEnrollments)
+      .leftJoin(members, eq(individualLessonEnrollments.memberId, members.id))
+      .where(eq(individualLessonEnrollments.memberId, memberId))
+      .orderBy(desc(individualLessonEnrollments.enrollmentDate));
+  }
+
+  async getIndividualLessonEnrollment(id: number): Promise<IndividualLessonEnrollment | undefined> {
+    const [enrollment] = await db.select().from(individualLessonEnrollments).where(eq(individualLessonEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createIndividualLessonEnrollment(enrollment: InsertIndividualLessonEnrollment): Promise<IndividualLessonEnrollment> {
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(individualLessonEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(individualLessonEnrollments).where(eq(individualLessonEnrollments.id, result.insertId));
+    return newEnrollment;
+  }
+
+  async updateIndividualLessonEnrollment(id: number, enrollment: Partial<InsertIndividualLessonEnrollment>): Promise<IndividualLessonEnrollment> {
+    await db.update(individualLessonEnrollments).set(enrollment as any).where(eq(individualLessonEnrollments.id, id));
+    const [updated] = await db.select().from(individualLessonEnrollments).where(eq(individualLessonEnrollments.id, id));
+    return updated;
+  }
+
+  async deleteIndividualLessonEnrollment(id: number): Promise<void> {
+    await db.delete(individualLessonEnrollments).where(eq(individualLessonEnrollments.id, id));
+  }
+
+  async getCampusEnrollments(): Promise<any[]> {
+    return await db.select({
+      id: campusEnrollments.id,
+      memberId: campusEnrollments.memberId,
+      status: campusEnrollments.status,
+      enrollmentDate: campusEnrollments.enrollmentDate,
+      notes: campusEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(campusEnrollments)
+      .leftJoin(members, eq(campusEnrollments.memberId, members.id))
+      .orderBy(desc(campusEnrollments.enrollmentDate));
+  }
+
+  async getCampusEnrollmentsByMember(memberId: number): Promise<any[]> {
+    return await db.select({
+      id: campusEnrollments.id,
+      memberId: campusEnrollments.memberId,
+      status: campusEnrollments.status,
+      enrollmentDate: campusEnrollments.enrollmentDate,
+      notes: campusEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(campusEnrollments)
+      .leftJoin(members, eq(campusEnrollments.memberId, members.id))
+      .where(eq(campusEnrollments.memberId, memberId))
+      .orderBy(desc(campusEnrollments.enrollmentDate));
+  }
+
+  async getCampusEnrollment(id: number): Promise<CampusEnrollment | undefined> {
+    const [enrollment] = await db.select().from(campusEnrollments).where(eq(campusEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createCampusEnrollment(enrollment: InsertCampusEnrollment): Promise<CampusEnrollment> {
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(campusEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(campusEnrollments).where(eq(campusEnrollments.id, result.insertId));
+    return newEnrollment;
+  }
+
+  async updateCampusEnrollment(id: number, enrollment: Partial<InsertCampusEnrollment>): Promise<CampusEnrollment> {
+    await db.update(campusEnrollments).set(enrollment as any).where(eq(campusEnrollments.id, id));
+    const [updated] = await db.select().from(campusEnrollments).where(eq(campusEnrollments.id, id));
+    return updated;
+  }
+
+  async deleteCampusEnrollment(id: number): Promise<void> {
+    await db.delete(campusEnrollments).where(eq(campusEnrollments.id, id));
+  }
+
+  async getRecitalEnrollments(): Promise<any[]> {
+    return await db.select({
+      id: recitalEnrollments.id,
+      memberId: recitalEnrollments.memberId,
+      status: recitalEnrollments.status,
+      enrollmentDate: recitalEnrollments.enrollmentDate,
+      notes: recitalEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(recitalEnrollments)
+      .leftJoin(members, eq(recitalEnrollments.memberId, members.id))
+      .orderBy(desc(recitalEnrollments.enrollmentDate));
+  }
+
+  async getRecitalEnrollmentsByMember(memberId: number): Promise<any[]> {
+    return await db.select({
+      id: recitalEnrollments.id,
+      memberId: recitalEnrollments.memberId,
+      status: recitalEnrollments.status,
+      enrollmentDate: recitalEnrollments.enrollmentDate,
+      notes: recitalEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(recitalEnrollments)
+      .leftJoin(members, eq(recitalEnrollments.memberId, members.id))
+      .where(eq(recitalEnrollments.memberId, memberId))
+      .orderBy(desc(recitalEnrollments.enrollmentDate));
+  }
+
+  async getRecitalEnrollment(id: number): Promise<RecitalEnrollment | undefined> {
+    const [enrollment] = await db.select().from(recitalEnrollments).where(eq(recitalEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createRecitalEnrollment(enrollment: InsertRecitalEnrollment): Promise<RecitalEnrollment> {
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(recitalEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(recitalEnrollments).where(eq(recitalEnrollments.id, result.insertId));
+    return newEnrollment;
+  }
+
+  async updateRecitalEnrollment(id: number, enrollment: Partial<InsertRecitalEnrollment>): Promise<RecitalEnrollment> {
+    await db.update(recitalEnrollments).set(enrollment as any).where(eq(recitalEnrollments.id, id));
+    const [updated] = await db.select().from(recitalEnrollments).where(eq(recitalEnrollments.id, id));
+    return updated;
+  }
+
+  async deleteRecitalEnrollment(id: number): Promise<void> {
+    await db.delete(recitalEnrollments).where(eq(recitalEnrollments.id, id));
+  }
+
+  async getVacationStudyEnrollments(): Promise<any[]> {
+    return await db.select({
+      id: vacationStudyEnrollments.id,
+      memberId: vacationStudyEnrollments.memberId,
+      status: vacationStudyEnrollments.status,
+      enrollmentDate: vacationStudyEnrollments.enrollmentDate,
+      notes: vacationStudyEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(vacationStudyEnrollments)
+      .leftJoin(members, eq(vacationStudyEnrollments.memberId, members.id))
+      .orderBy(desc(vacationStudyEnrollments.enrollmentDate));
+  }
+
+  async getVacationStudyEnrollmentsByMember(memberId: number): Promise<any[]> {
+    return await db.select({
+      id: vacationStudyEnrollments.id,
+      memberId: vacationStudyEnrollments.memberId,
+      status: vacationStudyEnrollments.status,
+      enrollmentDate: vacationStudyEnrollments.enrollmentDate,
+      notes: vacationStudyEnrollments.notes,
+      memberFirstName: members.firstName,
+      memberLastName: members.lastName,
+      memberEmail: members.email,
+      memberFiscalCode: members.fiscalCode
+    })
+      .from(vacationStudyEnrollments)
+      .leftJoin(members, eq(vacationStudyEnrollments.memberId, members.id))
+      .where(eq(vacationStudyEnrollments.memberId, memberId))
+      .orderBy(desc(vacationStudyEnrollments.enrollmentDate));
+  }
+
+  async getVacationStudyEnrollment(id: number): Promise<VacationStudyEnrollment | undefined> {
+    const [enrollment] = await db.select().from(vacationStudyEnrollments).where(eq(vacationStudyEnrollments.id, id));
+    return enrollment;
+  }
+
+  async createVacationStudyEnrollment(enrollment: InsertVacationStudyEnrollment): Promise<VacationStudyEnrollment> {
+    const activeSeason = await this.getActiveSeason();
+    const dataWithSeason = {
+      ...enrollment,
+      seasonId: enrollment.seasonId || activeSeason?.id || null
+    };
+    const [result] = await db.insert(vacationStudyEnrollments).values(dataWithSeason as any);
+    const [newEnrollment] = await db.select().from(vacationStudyEnrollments).where(eq(vacationStudyEnrollments.id, result.insertId));
+    return newEnrollment;
+  }
+
+  async updateVacationStudyEnrollment(id: number, enrollment: Partial<InsertVacationStudyEnrollment>): Promise<VacationStudyEnrollment> {
+    await db.update(vacationStudyEnrollments).set(enrollment as any).where(eq(vacationStudyEnrollments.id, id));
+    const [updated] = await db.select().from(vacationStudyEnrollments).where(eq(vacationStudyEnrollments.id, id));
+    return updated;
+  }
+
+  async deleteVacationStudyEnrollment(id: number): Promise<void> {
+    await db.delete(vacationStudyEnrollments).where(eq(vacationStudyEnrollments.id, id));
   }
 
   // ==== Workshop Attendances ====
@@ -2960,6 +3775,73 @@ m.*,
     await db.delete(vacationStudies).where(eq(vacationStudies.id, id));
   }
 
+  // ==== Payment Notes ====
+  async getPaymentNotes(): Promise<PaymentNote[]> {
+    return await db.select().from(paymentNotes).orderBy(paymentNotes.sortOrder);
+  }
+  async getPaymentNote(id: number): Promise<PaymentNote | undefined> {
+    const [item] = await db.select().from(paymentNotes).where(eq(paymentNotes.id, id));
+    return item;
+  }
+  async createPaymentNote(data: InsertPaymentNote): Promise<PaymentNote> {
+    const [result] = await db.insert(paymentNotes).values(data as any);
+    const [newItem] = await db.select().from(paymentNotes).where(eq(paymentNotes.id, result.insertId));
+    return newItem;
+  }
+  async updatePaymentNote(id: number, data: Partial<InsertPaymentNote>): Promise<PaymentNote> {
+    await db.update(paymentNotes).set({ ...data, updatedAt: new Date() } as any).where(eq(paymentNotes.id, id));
+    const [item] = await db.select().from(paymentNotes).where(eq(paymentNotes.id, id));
+    if (!item) throw new Error("Payment note not found");
+    return item;
+  }
+  async deletePaymentNote(id: number): Promise<void> {
+    await db.delete(paymentNotes).where(eq(paymentNotes.id, id));
+  }
+
+  // ==== Enrollment Details ====
+  async getEnrollmentDetails(): Promise<EnrollmentDetail[]> {
+    return await db.select().from(enrollmentDetails).orderBy(enrollmentDetails.sortOrder);
+  }
+  async getEnrollmentDetail(id: number): Promise<EnrollmentDetail | undefined> {
+    const [item] = await db.select().from(enrollmentDetails).where(eq(enrollmentDetails.id, id));
+    return item;
+  }
+  async createEnrollmentDetail(data: InsertEnrollmentDetail): Promise<EnrollmentDetail> {
+    const [result] = await db.insert(enrollmentDetails).values(data as any);
+    const [newItem] = await db.select().from(enrollmentDetails).where(eq(enrollmentDetails.id, result.insertId));
+    return newItem;
+  }
+  async updateEnrollmentDetail(id: number, data: Partial<InsertEnrollmentDetail>): Promise<EnrollmentDetail> {
+    await db.update(enrollmentDetails).set({ ...data, updatedAt: new Date() } as any).where(eq(enrollmentDetails.id, id));
+    const [item] = await db.select().from(enrollmentDetails).where(eq(enrollmentDetails.id, id));
+    if (!item) throw new Error("Enrollment detail not found");
+    return item;
+  }
+  async deleteEnrollmentDetail(id: number): Promise<void> {
+    await db.delete(enrollmentDetails).where(eq(enrollmentDetails.id, id));
+  }
+
+  // ==== Todos ====
+  async getTodos(): Promise<Todo[]> {
+    return await db.select().from(todos).orderBy(todos.id); // or descending if preferred
+  }
+
+  async createTodo(todoData: InsertTodo): Promise<Todo> {
+    const [result] = await db.insert(todos).values(todoData);
+    const [newTodo] = await db.select().from(todos).where(eq(todos.id, result.insertId));
+    return newTodo;
+  }
+
+  async updateTodo(id: number, todoData: Partial<InsertTodo>): Promise<Todo> {
+    await db.update(todos).set(todoData).where(eq(todos.id, id));
+    const [updatedTodo] = await db.select().from(todos).where(eq(todos.id, id));
+    if (!updatedTodo) throw new Error("Todo not found");
+    return updatedTodo;
+  }
+
+  async deleteTodo(id: number): Promise<void> {
+    await db.delete(todos).where(eq(todos.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -9,6 +9,7 @@ export default function PaidTrials() {
       categoryApiEndpoint="/api/categories"
       itemLabel="prova a pagamento"
       itemLabelPlural="prove a pagamento"
+      baseRoute="/scheda-prova-pagamento"
       testIdPrefix="paid-trial"
     />
   );

@@ -1,0 +1,208 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+12:10:44 PM [express] serving on port 5001
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+12:10:55 PM [express] GET /api/user 401 in 4ms
+12:10:57 PM [express] POST /api/login 200 in 104ms :: {"id":"admin-id","username":"admin","password":…
+12:10:57 PM [express] GET /api/notifications 304 in 75ms :: []
+12:10:57 PM [express] GET /api/client-categories 304 in 116ms :: [{"id":6,"name":"Insegnanti WS","des…
+12:10:57 PM [express] GET /api/subscription-types 304 in 129ms :: []
+12:10:57 PM [express] GET /api/categories 304 in 135ms :: [{"id":3,"name":"Aerial","description":null…
+12:10:57 PM [express] GET /api/studios 304 in 71ms :: [{"id":10,"name":"STUDIO 01 \n(80mq)","floor":n…
+12:10:57 PM [express] GET /api/members/duplicates 304 in 152ms :: [{"fiscalCode":"TSTGEN00A01H501Z","…
+12:10:57 PM [express] GET /api/courses 304 in 171ms :: [{"id":256,"sku":"2526GARIANOGIO18.D","name":"…
+12:10:57 PM [express] GET /api/workshops 304 in 95ms :: [{"id":16,"sku":"2526AGO-a","name":"TESTAGO",…
+12:10:57 PM [express] GET /api/payment-methods 304 in 86ms :: [{"id":1,"name":"Carta di credito 1","d…
+12:10:57 PM [express] GET /api/instructors 304 in 80ms :: [{"id":8,"firstName":"Ronald","lastName":"A…
+12:11:00 PM [express] GET /api/workshop-enrollments 304 in 83ms :: [{"id":3,"workshopId":16,"memberId…
+12:11:00 PM [express] GET /api/enrollments 304 in 102ms :: [{"id":8,"memberId":2270,"courseId":263,"e…
+12:11:04 PM [express] GET /api/payments 304 in 90ms :: [{"id":3,"memberId":3419,"enrollmentId":null,"…
+12:11:04 PM [express] GET /api/attendances 304 in 101ms :: []
+12:11:04 PM [express] GET /api/members 304 in 153ms :: {"members":[{"id":1214,"firstName":"LIA","last…
+12:22:25 PM [express] GET /api/enrollments 401 in 1ms
+12:26:16 PM [express] GET /api/workshop-enrollments 304 in 76ms :: [{"id":3,"workshopId":16,"memberId…
+12:26:16 PM [express] GET /api/workshops 304 in 96ms :: [{"id":16,"sku":"2526AGO-a","name":"TESTAGO",…
+12:32:51 PM [express] GET /api/payments 304 in 87ms :: [{"id":3,"memberId":3419,"enrollmentId":null,"…
+12:32:51 PM [express] GET /api/attendances 304 in 90ms :: []
+12:32:51 PM [express] GET /api/members 304 in 117ms :: {"members":[{"id":1214,"firstName":"LIA","last…
+12:38:23 PM [express] GET /api/workshop-enrollments 304 in 76ms :: [{"id":3,"workshopId":16,"memberId…
+12:38:23 PM [express] GET /api/workshops 304 in 96ms :: [{"id":16,"sku":"2526AGO-a","name":"TESTAGO",…
+12:48:43 PM [vite] hmr update /src/pages/scheda-corso.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+12:48:54 PM [vite] hmr update /src/pages/scheda-corso.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+12:49:10 PM [vite] hmr update /src/pages/scheda-corso.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+12:50:37 PM [vite] hmr update /src/pages/workshops.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+12:50:49 PM [vite] hmr update /src/pages/workshops.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+12:51:35 PM [vite] hmr update /src/pages/workshops.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+12:51:54 PM [vite] hmr update /src/pages/workshops.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+12:52:11 PM [vite] hmr update /src/pages/workshops.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+12:55:15 PM [express] GET /api/attendances 304 in 84ms :: []
+12:55:15 PM [express] GET /api/payments 304 in 92ms :: [{"id":3,"memberId":3419,"enrollmentId":null,"…
+12:55:15 PM [express] GET /api/members 304 in 115ms :: {"members":[{"id":1214,"firstName":"LIA","last…
+12:55:31 PM [express] GET /api/studios 304 in 68ms :: [{"id":10,"name":"STUDIO 01 \n(80mq)","floor":n…
+12:55:31 PM [express] GET /api/workshop-attendances 304 in 74ms :: []
+12:55:31 PM [express] GET /api/categories 304 in 73ms :: [{"id":3,"name":"Aerial","description":null,…
+12:55:31 PM [express] GET /api/instructors 304 in 76ms :: [{"id":8,"firstName":"Ronald","lastName":"A…
+12:55:47 PM [express] GET /api/user 401 in 2ms
+12:55:54 PM [express] GET /api/user 304 in 62ms :: {"id":"admin-id","username":"admin","password":"8b…
+12:55:54 PM [express] GET /api/notifications 304 in 75ms :: []
+12:55:54 PM [express] GET /api/workshop-enrollments 304 in 83ms :: [{"id":3,"workshopId":16,"memberId…
+12:55:55 PM [express] GET /api/enrollments 304 in 86ms :: [{"id":8,"memberId":2270,"courseId":263,"en…
+12:55:55 PM [express] GET /api/workshops 304 in 93ms :: [{"id":16,"sku":"2526AGO-a","name":"TESTAGO",…
+12:55:55 PM [express] GET /api/courses 304 in 262ms :: [{"id":256,"sku":"2526GARIANOGIO18.D","name":"…
+12:56:00 PM [express] GET /api/user 401 in 2ms
+12:56:03 PM [express] GET /api/payments 304 in 92ms :: [{"id":3,"memberId":3419,"enrollmentId":null,"…
+12:56:03 PM [express] GET /api/attendances 304 in 93ms :: []
+12:56:03 PM [express] GET /api/members 304 in 107ms :: {"members":[{"id":1214,"firstName":"LIA","last…
+12:56:09 PM [express] POST /api/login 401 in 17ms
+12:56:22 PM [express] GET /api/user 401 in 1ms
+12:56:28 PM [express] GET /api/instructors 304 in 73ms :: [{"id":8,"firstName":"Ronald","lastName":"A…
+12:56:28 PM [express] GET /api/workshop-attendances 304 in 73ms :: []
+12:56:28 PM [express] GET /api/categories 304 in 76ms :: [{"id":3,"name":"Aerial","description":null,…
+12:56:28 PM [express] GET /api/studios 304 in 75ms :: [{"id":10,"name":"STUDIO 01 \n(80mq)","floor":n…
+12:56:39 PM [express] POST /api/login 401 in 22ms
+12:56:50 PM [express] POST /api/login 401 in 54ms
+12:57:18 PM [express] GET /api/user 401 in 1ms
+12:57:28 PM [express] POST /api/login 401 in 18ms
+12:57:39 PM [express] POST /api/login 401 in 51ms
+12:58:00 PM [express] POST /api/login 401 in 50ms
+12:59:05 PM [express] GET /api/user 401 in 0ms
+12:59:08 PM [express] GET /api/user 401 in 1ms
+1:01:01 PM [express] GET /api/subscription-types 304 in 67ms :: []
+1:01:01 PM [express] GET /api/client-categories 304 in 74ms :: [{"id":6,"name":"Insegnanti WS","desc…
+1:01:01 PM [express] GET /api/members 200 in 139ms :: {"members":[{"id":2488,"firstName":"ELISA","la…
+1:11:07 PM [vite] hmr update /src/App.tsx?v=cVLDJKZ0FMZLGaCJZRtPY, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+1:11:08 PM [vite] hmr invalidate /src/App.tsx?v=cVLDJKZ0FMZLGaCJZRtPY Could not Fast Refresh ("hasPermission" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+1:11:08 PM [vite] page reload src/App.tsx
+1:11:08 PM [vite] hmr invalidate /src/App.tsx?v=cVLDJKZ0FMZLGaCJZRtPY Could not Fast Refresh ("hasPermission" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+1:11:08 PM [vite] page reload src/App.tsx
+1:11:09 PM [express] GET /api/user 304 in 52ms :: {"id":"admin-id","username":"admin","password":"8b…
+1:11:09 PM [express] GET /api/notifications 304 in 65ms :: []
+1:11:09 PM [express] GET /api/workshop-enrollments 304 in 70ms :: [{"id":3,"workshopId":16,"memberId…
+1:11:09 PM [express] GET /api/enrollments 304 in 88ms :: [{"id":8,"memberId":2270,"courseId":263,"en…
+1:11:09 PM [express] GET /api/workshops 304 in 89ms :: [{"id":16,"sku":"2526AGO-a","name":"TESTAGO",…
+1:11:09 PM [express] GET /api/courses 304 in 127ms :: [{"id":256,"sku":"2526GARIANOGIO18.D","name":"…
+1:11:44 PM [vite] hmr update /src/pages/iscritti_per_attivita.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+1:22:59 PM [express] GET /api/workshop-attendances 304 in 80ms :: []
+1:22:59 PM [express] GET /api/payments 304 in 100ms :: [{"id":3,"memberId":3419,"enrollmentId":null,…
+1:22:59 PM [express] GET /api/members 304 in 123ms :: {"members":[{"id":1214,"firstName":"LIA","last…
+1:23:13 PM [vite] hmr update /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY, /src/pages/scheda-corso.tsx, /src/pages/workshops.tsx, /src/pages/scheda-workshop.tsx
+1:28:58 PM [express] GET /api/workshop-attendances 304 in 77ms :: []
+1:28:58 PM [express] GET /api/payments 304 in 95ms :: [{"id":3,"memberId":3419,"enrollmentId":null,"…
+1:28:58 PM [express] GET /api/members 304 in 118ms :: {"members":[{"id":1214,"firstName":"LIA","last…
+1:42:43 PM [vite] hmr update /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY, /src/pages/scheda-corso.tsx, /src/pages/workshops.tsx, /src/pages/scheda-workshop.tsx
+1:47:12 PM [vite] hmr update /src/App.tsx?v=cVLDJKZ0FMZLGaCJZRtPY, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+1:47:13 PM [vite] hmr invalidate /src/App.tsx?v=cVLDJKZ0FMZLGaCJZRtPY Could not Fast Refresh ("hasPermission" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+1:47:13 PM [vite] page reload src/App.tsx
+1:47:13 PM [vite] hmr invalidate /src/App.tsx?v=cVLDJKZ0FMZLGaCJZRtPY Could not Fast Refresh ("hasPermission" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+1:47:13 PM [vite] page reload src/App.tsx
+1:47:14 PM [express] GET /api/user 304 in 54ms :: {"id":"admin-id","username":"admin","password":"8b…
+1:47:14 PM [express] GET /api/notifications 304 in 74ms :: []
+1:47:14 PM [express] GET /api/workshop-enrollments 304 in 74ms :: [{"id":3,"workshopId":16,"memberId…
+1:47:14 PM [express] GET /api/enrollments 304 in 92ms :: [{"id":8,"memberId":2270,"courseId":263,"en…
+1:47:14 PM [express] GET /api/workshops 304 in 93ms :: [{"id":16,"sku":"2526AGO-a","name":"TESTAGO",…
+1:47:14 PM [express] GET /api/courses 304 in 126ms :: [{"id":256,"sku":"2526GARIANOGIO18.D","name":"…
+1:49:21 PM [vite] hmr update /src/pages/iscritti_per_attivita.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+1:49:21 PM [express] GET /api/single-lessons 200 in 66ms :: []
+1:49:21 PM [express] GET /api/individual-lessons 200 in 66ms :: []
+1:49:21 PM [express] GET /api/sunday-activities 200 in 71ms :: []
+1:49:21 PM [express] GET /api/free-trials 200 in 76ms :: []
+1:49:21 PM [express] GET /api/paid-trials 304 in 75ms :: []
+1:49:21 PM [express] GET /api/trainings 200 in 75ms :: []
+1:49:21 PM [express] GET /api/campus-activities 200 in 66ms :: []
+1:49:21 PM [express] GET /api/recitals 200 in 65ms :: []
+1:49:21 PM [express] GET /api/vacation-studies 200 in 72ms :: []
+2:02:09 PM [vite] hmr update /src/pages/scheda-prova-pagamento.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:02:09 PM [vite] hmr update /src/pages/scheda-prova-gratuita.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:02:09 PM [vite] hmr update /src/pages/scheda-lezione-singola.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:02:09 PM [vite] hmr update /src/pages/scheda-domenica.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:02:09 PM [vite] hmr update /src/pages/scheda-allenamento.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:02:09 PM [vite] hmr update /src/pages/scheda-lezione-individuale.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:02:09 PM [vite] hmr update /src/pages/scheda-campus.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:02:09 PM [vite] hmr update /src/pages/scheda-saggio.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:02:09 PM [vite] hmr update /src/pages/scheda-vacanza-studio.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:06:49 PM [express] GET /api/attendances 304 in 98ms :: []
+2:06:49 PM [express] GET /api/payments 304 in 98ms :: [{"id":3,"memberId":3419,"enrollmentId":null,"…
+2:06:49 PM [express] GET /api/members 304 in 123ms :: {"members":[{"id":1214,"firstName":"LIA","last…
+2:06:58 PM [express] GET /api/workshop-attendances 304 in 75ms :: []
+2:14:04 PM [vite] hmr update /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY, /src/pages/scheda-corso.tsx, /src/pages/workshops.tsx, /src/pages/scheda-workshop.tsx, /src/pages/scheda-prova-pagamento.tsx, /src/pages/scheda-prova-gratuita.tsx, /src/pages/scheda-lezione-singola.tsx, /src/pages/scheda-domenica.tsx, /src/pages/scheda-allenamento.tsx, /src/pages/scheda-lezione-individuale.tsx, /src/pages/scheda-campus.tsx, /src/pages/scheda-vacanza-studio.tsx, /src/pages/scheda-saggio.tsx
+2:19:56 PM [vite] hmr update /src/pages/scheda-corso.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-workshop.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-prova-pagamento.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-prova-gratuita.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-lezione-singola.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-domenica.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-allenamento.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-lezione-individuale.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-campus.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-saggio.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] hmr update /src/pages/scheda-vacanza-studio.tsx, /src/index.css?v=cVLDJKZ0FMZLGaCJZRtPY
+2:19:56 PM [vite] Internal server error: /Users/gaetano1/SVILUPPO/CourseManager_Source_Export/client/src/pages/scheda-workshop.tsx: Unexpected token (197:69)
+
+  195 |                                         cardExpiryText = (
+  196 |                                             <span className={`inline-flex items-center gap-1.5 font-medium ${isExpired ? 'text-red-600' : 'text-slate-700'}`}>
+> 197 |                                                 {isExpired ? <XCircle, AlertTriangle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
+      |                                                                      ^
+  198 |                                                 {!isValidCardDate ? "Data non valida" : expiryDate.toLocaleDateString("it-IT")}
+  199 |                                             </span>
+  200 |                                         );
+  Plugin: vite:react-babel
+  File: /Users/gaetano1/SVILUPPO/CourseManager_Source_Export/client/src/pages/scheda-workshop.tsx:197:69
+  195|                                          cardExpiryText = (
+  196|                                              <span className={`inline-flex items-center gap-1.5 font-medium ${isExpired ? 'text-red-600' : 'text-slate-700'}`}>
+  197|                                                  {isExpired ? <XCircle, AlertTriangle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
+     |                                                                       ^
+  198|                                                  {!isValidCardDate ? "Data non valida" : expiryDate.toLocaleDateString("it-IT")}
+  199|                                              </span>
+      at toParseError (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at TypeScriptParserMixin.raise (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/tokenizer/index.ts:1504:19)
+      at TypeScriptParserMixin.unexpected (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/tokenizer/index.ts:1544:16)
+      at TypeScriptParserMixin.jsxParseIdentifier (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:278:14)
+      at TypeScriptParserMixin.jsxParseNamespacedName (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:288:25)
+      at TypeScriptParserMixin.jsxParseAttribute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:413:24)
+      at TypeScriptParserMixin.jsxParseOpeningElementAfterName (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:440:30)
+      at TypeScriptParserMixin.jsxParseOpeningElementAfterName (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/typescript/index.ts:4215:20)
+      at TypeScriptParserMixin.jsxParseOpeningElementAt (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:430:19)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:470:35)
+      at TypeScriptParserMixin.jsxParseElement (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:559:19)
+      at TypeScriptParserMixin.parseExprAtom (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:573:21)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/typescript/index.ts:3893:20)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at TypeScriptParserMixin.parseExprOps (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at fn (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/typescript/index.ts:3745:23)
+      at TypeScriptParserMixin.tryParse (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/util.ts:174:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/typescript/index.ts:3744:20)
+      at callback (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at TypeScriptParserMixin.allowInAnd (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:3194:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at TypeScriptParserMixin.parseConditional (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:403:30)
+      at TypeScriptParserMixin.parseConditional (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/typescript/index.ts:3393:20)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:390:17)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/typescript/index.ts:3764:22)
+      at TypeScriptParserMixin.parseExpressionBase (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at callback (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at TypeScriptParserMixin.allowInAnd (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:3194:12)
+      at TypeScriptParserMixin.parseExpression (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at TypeScriptParserMixin.jsxParseExpressionContainer (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:376:33)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:500:24)
+      at TypeScriptParserMixin.jsxParseElement (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:559:19)
+      at TypeScriptParserMixin.parseExprAtom (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/jsx/index.ts:573:21)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/typescript/index.ts:3893:20)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at TypeScriptParserMixin.parseExprOps (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at fn (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/typescript/index.ts:3745:23)
+      at TypeScriptParserMixin.tryParse (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/parser/util.ts:174:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/@babel/parser/src/plugins/typescript/index.ts:3744:20)

@@ -50,7 +50,7 @@ const MENU_PATHS = [
   { path: "/prenotazioni-sale", title: "Prenotazioni Sale" },
   { path: "/categorie-corsi", title: "Categorie Corsi" },
   { path: "/categoria-partecipante", title: "Categoria Partecipante" },
-  { path: "/metodi-pagamento", title: "Metodi di Pagamento" },
+  { path: "/elenchi", title: "Note Pagamenti" },
   { path: "/booking-services", title: "Servizi Prenotabili" },
   { path: "/admin", title: "Pannello Admin" },
   { path: "/importa", title: "Importazione Dati" },

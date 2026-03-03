@@ -153,13 +153,19 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
           <Button
             type="button"
             size="icon"
-            className="gold-3d-button flex-shrink-0 w-10 h-10"
+            className="gold-3d-button flex-shrink-0 w-10 h-10 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => {
-              if (newName.trim()) {
-                createMutation.mutate({ name: newName.trim(), color: newColor });
+              const trimmed = newName.trim();
+              if (trimmed) {
+                if (items?.some(i => i.name.toLowerCase() === trimmed.toLowerCase())) {
+                  alert("Questa voce esiste già!");
+                  return;
+                }
+                createMutation.mutate({ name: trimmed, color: newColor });
+                setNewName("");
               }
             }}
-            disabled={createMutation.isPending}
+            disabled={!newName.trim() || createMutation.isPending}
             data-testid={`button-elenchi-add-${testIdPrefix}`}
           >
             <Plus className="w-5 h-5" />

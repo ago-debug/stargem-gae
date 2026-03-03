@@ -54,8 +54,7 @@ export default function Instructors() {
     return courses.filter(
       course =>
         course.instructorId === instructorId ||
-        course.secondaryInstructor1Id === instructorId ||
-        course.secondaryInstructor2Id === instructorId
+        course.secondaryInstructor1Id === instructorId
     );
   };
 
@@ -426,7 +425,6 @@ export default function Instructors() {
                           <p className="opacity-70">
                             {course.instructorId === editingInstructor.id && "[Primario]"}
                             {course.secondaryInstructor1Id === editingInstructor.id && "[Secondario 1]"}
-                            {course.secondaryInstructor2Id === editingInstructor.id && "[Secondario 2]"}
                           </p>
                         </div>
                       </div>

@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { StickyNote, Plus, Pin, PinOff, Trash2, Clock, Edit, Tag } from "lucide-react";
+import { StickyNote, Plus, Pin, PinOff, Trash2, Clock, Edit, Tag, Archive, ArchiveRestore } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TeamNote } from "@shared/schema";
 
 const CATEGORIES = [
@@ -31,13 +32,20 @@ export default function NoteTeam() {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("generale");
   const [filterCategory, setFilterCategory] = useState("tutti");
+  const [targetUrl, setTargetUrl] = useState("");
 
   const { data: notes = [], isLoading } = useQuery<TeamNote[]>({
     queryKey: ["/api/team-notes"],
+    queryFn: async () => apiRequest("GET", "/api/team-notes"),
+  });
+
+  const { data: archivedNotes = [], isLoading: isLoadingArchived } = useQuery<TeamNote[]>({
+    queryKey: ["/api/team-notes/archived"],
+    queryFn: async () => apiRequest("GET", "/api/team-notes/archived"),
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: { title: string; content: string; category: string }) => {
+    mutationFn: async (data: { title: string; content: string; category: string; targetUrl?: string }) => {
       return apiRequest("POST", "/api/team-notes", data);
     },
     onSuccess: () => {
@@ -68,7 +76,19 @@ export default function NoteTeam() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-notes"] });
-      toast({ title: "Nota eliminata" });
+      queryClient.invalidateQueries({ queryKey: ["/api/team-notes/archived"] });
+      toast({ title: "Nota archiviata" });
+    },
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest("POST", `/api/team-notes/${id}/restore`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/team-notes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/team-notes/archived"] });
+      toast({ title: "Nota ripristinata dall'archivio" });
     },
   });
 
@@ -76,16 +96,25 @@ export default function NoteTeam() {
     setTitle("");
     setContent("");
     setCategory("generale");
+    setTargetUrl("");
     setEditingNote(null);
     setIsDialogOpen(false);
   };
 
   const handleSubmit = () => {
     if (!title.trim() || !content.trim()) return;
+
+    let processedUrl = targetUrl.trim();
+    if (processedUrl.startsWith('http')) {
+      try {
+        processedUrl = new URL(processedUrl).pathname;
+      } catch (e) { }
+    }
+
     if (editingNote) {
-      updateMutation.mutate({ id: editingNote.id, data: { title: title.trim(), content: content.trim(), category } });
+      updateMutation.mutate({ id: editingNote.id, data: { title: title.trim(), content: content.trim(), category, targetUrl: processedUrl || null } });
     } else {
-      createMutation.mutate({ title: title.trim(), content: content.trim(), category });
+      createMutation.mutate({ title: title.trim(), content: content.trim(), category, targetUrl: processedUrl || undefined });
     }
   };
 
@@ -94,6 +123,7 @@ export default function NoteTeam() {
     setTitle(note.title);
     setContent(note.content);
     setCategory(note.category || "generale");
+    setTargetUrl(note.targetUrl || "");
     setIsDialogOpen(true);
   };
 
@@ -102,6 +132,11 @@ export default function NoteTeam() {
   };
 
   const filteredNotes = notes.filter((n) => {
+    if (filterCategory !== "tutti" && n.category !== filterCategory) return false;
+    return true;
+  });
+
+  const filteredArchivedNotes = archivedNotes.filter((n) => {
     if (filterCategory !== "tutti" && n.category !== filterCategory) return false;
     return true;
   });
@@ -178,6 +213,16 @@ export default function NoteTeam() {
                   data-testid="input-note-content"
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Rotta / URL di fissaggio (Opzionale)</Label>
+                <Input
+                  value={targetUrl}
+                  onChange={(e) => setTargetUrl(e.target.value)}
+                  placeholder="es. /corsi o /pagamenti"
+                  data-testid="input-note-target-url"
+                />
+                <p className="text-[10px] text-muted-foreground">Se specificato, la nota apparirà come Sticky Note in sovrimpressione su quella pagina.</p>
+              </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={resetForm} data-testid="button-cancel-note">
                   Annulla
@@ -208,91 +253,159 @@ export default function NoteTeam() {
             ))}
           </SelectContent>
         </Select>
-        <span className="text-sm text-muted-foreground ml-auto">
-          {filteredNotes.length} note
-        </span>
       </div>
 
-      {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">Caricamento...</div>
-      ) : filteredNotes.length === 0 ? (
-        <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            Nessuna nota trovata
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredNotes.map((note) => (
-            <Card
-              key={note.id}
-              className={note.isPinned ? "ring-2 ring-amber-400 dark:ring-amber-600" : ""}
-              data-testid={`card-note-${note.id}`}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-base line-clamp-2" data-testid={`text-title-${note.id}`}>
-                    {note.isPinned && <Pin className="w-4 h-4 inline mr-1 text-amber-500" />}
-                    {note.title}
-                  </CardTitle>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {getCategoryBadge(note.category)}
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {formatDate(note.createdAt)}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-4 mb-3" data-testid={`text-content-${note.id}`}>
-                  {note.content}
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground" data-testid={`text-author-${note.id}`}>
-                    {note.authorName}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleTogglePin(note)}
-                      title={note.isPinned ? "Rimuovi fissaggio" : "Fissa in alto"}
-                      data-testid={`button-pin-${note.id}`}
-                    >
-                      {note.isPinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
-                    </Button>
-                    {note.authorId === user?.id && (
-                      <>
+      <Tabs defaultValue="active" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="active">Note Attive ({filteredNotes.length})</TabsTrigger>
+          <TabsTrigger value="archived">Archivio ({filteredArchivedNotes.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active">
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Caricamento...</div>
+          ) : filteredNotes.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Nessuna nota attiva trovata
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredNotes.map((note) => (
+                <Card
+                  key={note.id}
+                  className={note.isPinned ? "ring-2 ring-amber-400 dark:ring-amber-600" : ""}
+                  data-testid={`card-note-${note.id}`}
+                >
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle className="text-base line-clamp-2" data-testid={`text-title-${note.id}`}>
+                        {note.isPinned && <Pin className="w-4 h-4 inline mr-1 text-amber-500" />}
+                        {note.title}
+                      </CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {getCategoryBadge(note.category)}
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatDate(note.createdAt)}
+                      </span>
+                      {note.targetUrl && (
+                        <Badge variant="outline" className="text-[9px] h-4 py-0 px-1 truncate max-w-[100px]" title={`Fissata in: ${note.targetUrl}`}>
+                          <Pin className="w-2.5 h-2.5 mr-0.5" />
+                          {note.targetUrl}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-4 mb-3" data-testid={`text-content-${note.id}`}>
+                      {note.content}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground" data-testid={`text-author-${note.id}`}>
+                        {note.authorName}
+                      </span>
+                      <div className="flex gap-2 justify-end">
                         <Button
-                          size="icon"
                           variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-amber-600"
+                          onClick={() => handleTogglePin(note)}
+                          data-testid={`button-pin-${note.id}`}
+                        >
+                          {note.isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-primary"
                           onClick={() => handleEdit(note)}
                           data-testid={`button-edit-${note.id}`}
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <Button
-                          size="icon"
                           variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-destructive"
                           onClick={() => {
-                            if (confirm("Eliminare questa nota?")) {
+                            if (confirm("Vuoi archiviare questa nota?")) {
                               deleteMutation.mutate(note.id);
                             }
                           }}
                           data-testid={`button-delete-${note.id}`}
                         >
-                          <Trash2 className="w-4 h-4 text-destructive" />
+                          <Archive className="h-4 w-4" />
                         </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="archived">
+          {isLoadingArchived ? (
+            <div className="text-center py-8 text-muted-foreground">Caricamento...</div>
+          ) : filteredArchivedNotes.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                L'archivio è vuoto
               </CardContent>
             </Card>
-          ))}
-        </div>
-      )}
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-75">
+              {filteredArchivedNotes.map((note) => (
+                <Card key={note.id} className="bg-gray-50/50">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle className="text-base line-clamp-2 text-muted-foreground line-through decoration-muted-foreground/50">
+                        {note.title}
+                      </CardTitle>
+                      {getCategoryBadge(note.category)}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground break-words whitespace-pre-wrap line-clamp-4">
+                      {note.content}
+                    </p>
+                    {note.targetUrl && (
+                      <div className="flex items-center gap-1 text-xs font-mono bg-muted p-1 rounded w-fit">
+                        <Pin className="w-3 h-3" />
+                        <span className="truncate max-w-[200px]">{note.targetUrl}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-2 border-t mt-4">
+                      <Clock className="w-3 h-3" />
+                      Erano in {note.authorName} il {formatDate(note.createdAt)}
+                    </div>
+                    {note.deletedBy && (
+                      <div className="flex items-center gap-1.5 text-[10px] text-destructive pt-1 font-semibold uppercase tracking-wider text-right w-full justify-end">
+                        Archiviata da {note.deletedBy}
+                      </div>
+                    )}
+                  </CardContent>
+                  <div className="p-4 pt-0 flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 w-full font-bold shadow-sm"
+                      onClick={() => restoreMutation.mutate(note.id)}
+                    >
+                      <ArchiveRestore className="h-3.5 w-3.5 mr-2" />
+                      Ripristina Nota
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
