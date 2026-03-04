@@ -139,7 +139,7 @@ export default function IscrittiPerAttivita() {
         lastName: e.memberLastName || "N/A",
         email: e.memberEmail,
         startDate: e.startDate || e.enrollmentDate,
-        details: e.details || [],
+        details: Array.isArray(e.details) ? e.details : (typeof e.details === 'string' ? (JSON.parse(e.details) || []) : []),
       }));
   };
 
@@ -379,9 +379,9 @@ export default function IscrittiPerAttivita() {
                                         <TableCell>{enrollment.email || '-'}</TableCell>
                                         <TableCell>
                                           <div className="flex flex-wrap gap-1">
-                                            {enrollment.details?.map((detail: string) => (
+                                            {Array.isArray(enrollment.details) ? enrollment.details.map((detail: string) => (
                                               <EnrollmentDetailBadge key={detail} name={detail} />
-                                            ))}
+                                            )) : null}
                                           </div>
                                         </TableCell>
                                         <TableCell>
@@ -555,6 +555,7 @@ export default function IscrittiPerAttivita() {
 
           {activityMenuItems.filter(i => i.id !== "panoramica" && i.id !== "corsi" && i.id !== "workshop").map((item) => {
             const config = extraActivitiesMap[item.id];
+            if (!config) return null;
 
             // Applichiamo filtro ricerca per lo SKU / Nome
             const filteredData = Array.isArray(config?.data) ? (config.data as any[]).filter(activity => {
