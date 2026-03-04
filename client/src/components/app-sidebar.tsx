@@ -224,6 +224,11 @@ const configItems = [
     icon: Layers,
   },
   {
+    title: "Servizi Extra",
+    url: "/attivita/servizi",
+    icon: Database,
+  },
+  {
     title: "Categoria Partecipante",
     url: "/categoria-partecipante",
     icon: UserPlus,

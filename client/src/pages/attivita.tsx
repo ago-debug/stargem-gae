@@ -20,7 +20,16 @@ import {
   Activity,
   ArrowLeft,
   Database,
+  Plus,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import type {
@@ -323,13 +332,63 @@ export default function Attivita() {
                 <ArrowLeft className="w-4 h-4 text-white" />
               </Button>
               <div>
-                <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">
+                <h1 className="text-2xl font-semibold text-foreground flex items-center gap-2" data-testid="text-page-title">
                   Attivit&agrave;
                 </h1>
                 <p className="text-muted-foreground text-sm">
                   Panoramica e gestione di tutte le attivit&agrave;
                 </p>
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="gold-3d-button" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crea Attività
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Seleziona Tipo</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/attivita/corsi?action=create")}>
+                    <Calendar className="w-4 h-4 mr-2" /> Corsi
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/workshops?action=create")}>
+                    <Sparkles className="w-4 h-4 mr-2" /> Workshop
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/prove-pagamento?action=create")}>
+                    <CreditCard className="w-4 h-4 mr-2" /> Prova a Pagamento
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/prove-gratuite?action=create")}>
+                    <Gift className="w-4 h-4 mr-2" /> Prova Gratuita
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/servizi?action=create")}>
+                    <Database className="w-4 h-4 mr-2" /> Servizio Extra
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/lezioni-singole?action=create")}>
+                    <BookOpen className="w-4 h-4 mr-2" /> Lezione Singola
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/domeniche-movimento?action=create")}>
+                    <Sun className="w-4 h-4 mr-2" /> Domenica in Movimento
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/allenamenti?action=create")}>
+                    <Dumbbell className="w-4 h-4 mr-2" /> Allenamento/Affitto
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/lezioni-individuali?action=create")}>
+                    <UserCheck className="w-4 h-4 mr-2" /> Lezione Individuale
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/campus?action=create")}>
+                    <Users className="w-4 h-4 mr-2" /> Campus
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/saggi?action=create")}>
+                    <Award className="w-4 h-4 mr-2" /> Saggio
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/attivita/vacanze-studio?action=create")}>
+                    <Music className="w-4 h-4 mr-2" /> Vacanza Studio
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
           <ActivityNavMenu />

@@ -134,3 +134,19 @@
   "notes": ""
 }
 ---
+{
+  "name": "novembre gae",
+  "validFrom": "2026-03-04T13:00:06.255Z",
+  "validTo": "2027-03-04T13:00:06.255Z",
+  "active": true,
+  "notes": ""
+}
+---
+{
+  "name": "dicembre gae",
+  "validFrom": "2026-03-04T13:00:25.001Z",
+  "validTo": "2027-03-04T13:00:25.001Z",
+  "active": true,
+  "notes": ""
+}
+---

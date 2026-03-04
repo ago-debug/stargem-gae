@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useSearch } from "wouter";
@@ -96,9 +96,19 @@ export default function ActivityManagementPage({
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const initialSearch = urlParams.get('search') || "";
+  const actionParam = urlParams.get("action");
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  useEffect(() => {
+    if (actionParam === "create") {
+      setIsFormOpen(true);
+      // Rimuovi il parametro per non riaprire alla navigazione indietro
+      const newUrl = window.location.pathname + (initialSearch ? `?search=${initialSearch}` : "");
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, [actionParam, initialSearch]);
   const [editingItem, setEditingItem] = useState<ActivityItem | null>(null);
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<string>("");
   const [selectedStartTime, setSelectedStartTime] = useState<string>("");

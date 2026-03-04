@@ -81,14 +81,18 @@ export function setupAuth(app: Express) {
 
     passport.serializeUser((user, done) => done(null, (user as Express.User).id));
     passport.deserializeUser(async (id: string, done) => {
+        console.log(`[AUTH DEBUG] Deserializing user ${id}`);
         try {
             const user = await storage.getUser(id);
             if (user) {
+                console.log(`[AUTH DEBUG] User ${id} found, fetching roles`);
                 // Try case-insensitive role search or find by exactly matching user.role
                 let role = await storage.getUserRoleByName(user.role);
+                console.log(`[AUTH DEBUG] UserRoleByName result: `, !!role);
                 if (!role) {
                     // Fallback to searching all roles case-insensitively
                     const allRoles = await storage.getUserRoles();
+                    console.log(`[AUTH DEBUG] Fetched all roles, count: `, allRoles.length);
                     role = allRoles.find(r => r.name.toLowerCase() === user.role.toLowerCase());
                 }
 
@@ -109,8 +113,10 @@ export function setupAuth(app: Express) {
 
                 (user as any).permissions = permissions;
             }
+            console.log(`[AUTH DEBUG] Deserialization done for ${id}`);
             done(null, user);
         } catch (err) {
+            console.error(`[AUTH DEBUG] Deserialization error for ${id}:`, err);
             done(err);
         }
     });

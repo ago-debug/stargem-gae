@@ -98,7 +98,7 @@ export function MultiSelectPaymentNotes({ selectedNotes, onChange, testIdPrefix 
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2">
-        <Label>Note Pagamenti (Q)</Label>
+        <Label>Note Pagamenti</Label>
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="h-5 w-5 ml-1 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50">
