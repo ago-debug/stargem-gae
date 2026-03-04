@@ -281,6 +281,14 @@ export function AppSidebar() {
     queryKey: ["/api/latest-activity"],
   });
 
+  const { data: summary } = useQuery<Record<string, { total: number, active: number }>>({
+    queryKey: ["/api/activities-summary"],
+  });
+
+  const totalActiveActivities = summary
+    ? Object.values(summary).reduce((sum, item) => sum + item.active, 0)
+    : 0;
+
   const filteredRegistration = registrationItems.filter(item => hasPermission(user, item.url));
   const filteredTeaching = teachingItems.filter(item => hasPermission(user, item.url));
   const filteredSecretariat = secretariatItems.filter(item => hasPermission(user, item.url));
@@ -308,7 +316,7 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredRegistration.map((item) => {
-                  const isActive = location === item.url;
+                  const isActive = location === item.url || (item.url === "/attivita" && location.startsWith("/attivita"));
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
@@ -316,9 +324,14 @@ export function AppSidebar() {
                         isActive={isActive}
                         data-testid={`nav-${item.url.slice(1) || 'anagrafica'}`}
                       >
-                        <Link href={item.url}>
-                          <item.icon className="w-4 h-4" />
+                        <Link href={item.url} className="flex items-center w-full">
+                          <item.icon className="w-4 h-4 mr-2" />
                           <span>{item.title}</span>
+                          {item.url === "/attivita" && totalActiveActivities > 0 && (
+                            <span className="ml-auto flex-shrink-0 min-w-[20px] h-[20px] px-1.5 text-[11px] font-bold flex items-center justify-center rounded-full bg-amber-500 text-white shadow-sm">
+                              {totalActiveActivities}
+                            </span>
+                          )}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
