@@ -186,6 +186,11 @@ const analysisItems = [
 
 const accountingItems = [
   {
+    title: "Iscrizioni e Pagamenti",
+    url: "/iscrizioni-pagamenti",
+    icon: Wallet,
+  },
+  {
     title: "Scheda Contabile",
     url: "/scheda-contabile",
     icon: Wallet,
@@ -351,17 +356,6 @@ export function AppSidebar() {
             <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Segreteria</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <div className="flex items-center gap-2 px-2 py-1.5 w-full justify-start cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
-                      <StarGemCopilot className="h-4 w-4 bg-transparent outline-none ring-0 shadow-none border-0 p-0" />
-                      {/* The StarGemCopilot component itself contains the dropdown structure. 
-                           It defaults to just showing the icon. To make "StarGem CoPilot" text visible and clickable alongside it,
-                           we apply some styling. */}
-                      <span className="text-sm font-medium">StarGem CoPilot</span>
-                    </div>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 {filteredSecretariat.map((item) => {
                   const isActive = location === item.url;
                   return (
@@ -470,6 +464,17 @@ export function AppSidebar() {
             <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">ADMIN / TECNICO</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <div className="flex items-center gap-2 px-2 py-1.5 w-full justify-start cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
+                      <StarGemCopilot className="h-4 w-4 bg-transparent outline-none ring-0 shadow-none border-0 p-0" />
+                      {/* The StarGemCopilot component itself contains the dropdown structure. 
+                           It defaults to just showing the icon. To make "StarGem CoPilot" text visible and clickable alongside it,
+                           we apply some styling. */}
+                      <span className="text-sm font-medium">StarGem CoPilot</span>
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 {filteredAdminItems.map((item) => {
                   const isActive = location === item.url;
                   return (

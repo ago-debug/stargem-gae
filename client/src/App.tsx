@@ -37,6 +37,7 @@ import BookingServices from "@/pages/booking-services";
 import StudioBookings from "@/pages/studio-bookings";
 import AccountingSheet from "@/pages/accounting-sheet";
 import MascheraInputGenerale from "@/pages/maschera-input-generale";
+import IscrizioniPagamenti from "@/pages/iscrizioni-pagamenti";
 import PriceLists from "@/pages/listini";
 import ListiniHome from "@/pages/listini-home";
 import QuoteListini from "@/pages/quote-listini";
@@ -157,6 +158,7 @@ function Router() {
       <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
       <ProtectedRoute path="/maschera-generale" component={MascheraInputGenerale} />
       <ProtectedRoute path="/maschera-input" component={MascheraInputGenerale} />
+      <ProtectedRoute path="/iscrizioni-pagamenti" component={IscrizioniPagamenti} />
       <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
       <ProtectedRoute path="/attivita" component={Attivita} />
       <ProtectedRoute path="/categorie-attivita" component={ActivityCategories} />
