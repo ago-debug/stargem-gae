@@ -104,13 +104,13 @@ export default function IscrittiPerAttivita() {
   const isExtraLoading = Object.values(extraActivitiesMap).some(config => config.loading || config.enrollLoading);
   const isLoading = coursesLoading || workshopsLoading || enrollmentsLoading || wsEnrollmentsLoading || isExtraLoading;
 
-  const activeCourses = courses?.filter(c => c.active) || [];
-  const activeWorkshops = workshops?.filter(w => w.active) || [];
+  const activeCourses = Array.isArray(courses) ? (courses as Course[]).filter(c => c.active) : [];
+  const activeWorkshops = Array.isArray(workshops) ? (workshops as Workshop[]).filter(w => w.active) : [];
 
-  const activeEnrollments = enrollments?.filter(e => e.status === 'active' || !e.status) || [];
-  const totalCourseEnrollments = activeEnrollments.filter(e => e.courseId && courses?.some(c => c.id === e.courseId && c.active)).length;
+  const activeEnrollments = Array.isArray(enrollments) ? (enrollments as any[]).filter(e => e.status === 'active' || !e.status) : [];
+  const totalCourseEnrollments = Array.isArray(activeEnrollments) ? (activeEnrollments as any[]).filter(e => e.courseId && Array.isArray(courses) && (courses as Course[]).some(c => c.id === e.courseId && c.active)).length : 0;
   // Calculate specific workshop enrollments by checking the workshop-enrollments endpoint specifically
-  const totalWsEnrollments = Array.isArray(wsEnrollments) ? wsEnrollments.filter(e => (e.status === 'active' || !e.status) && workshops?.some(w => w.id === e.workshopId && w.active)).length : 0;
+  const totalWsEnrollments = Array.isArray(wsEnrollments) ? (wsEnrollments as any[]).filter(e => (e.status === 'active' || !e.status) && Array.isArray(workshops) && (workshops as Workshop[]).some(w => w.id === e.workshopId && w.active)).length : 0;
 
   const totalActiveEnrollmentsCount = totalCourseEnrollments + totalWsEnrollments;
 
@@ -557,20 +557,20 @@ export default function IscrittiPerAttivita() {
             const config = extraActivitiesMap[item.id];
 
             // Applichiamo filtro ricerca per lo SKU / Nome
-            const filteredData = config?.data?.filter(activity => {
+            const filteredData = Array.isArray(config?.data) ? (config.data as any[]).filter(activity => {
               const matchesSearch = activity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (activity.sku && activity.sku.toLowerCase().includes(searchQuery.toLowerCase()));
               if (!matchesSearch) return false;
               return true;
-            });
+            }) : [];
 
-            const activityDataWithEnrollments = filteredData?.map(activity => {
-              const activityEnrollments = config.enrollments?.filter(e => e[config.foreignKey] === activity.id && (e.status === 'active' || !e.status)) || [];
+            const activityDataWithEnrollments = Array.isArray(filteredData) ? (filteredData as any[]).map(activity => {
+              const activityEnrollments = Array.isArray(config.enrollments) ? (config.enrollments as any[]).filter(e => e[config.foreignKey] === activity.id && (e.status === 'active' || !e.status)) : [];
               return { ...activity, activityEnrollments };
             }).filter(activity => {
               if (showOnlyWithEnrollments && activity.activityEnrollments.length === 0) return false;
               return true;
-            });
+            }) : [];
 
             return (
               <TabsContent key={item.id} value={item.id} className="space-y-6 mt-0">
