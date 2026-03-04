@@ -19,6 +19,7 @@ import { KnowledgeInfo } from "@/components/knowledge-info";
 import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
 import { MultiSelectEnrollmentDetails, EnrollmentDetailBadge } from "@/components/multi-select-enrollment-details";
 import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
+import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CourseSelector } from "@/components/course-selector";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -341,6 +342,7 @@ export default function MascheraInputGenerale() {
     sessionStorage.setItem("mascheraInputPayments", JSON.stringify(payments));
   }, [payments]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [isNuovoPagamentoOpen, setIsNuovoPagamentoOpen] = useState(false);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
 
   // OLD: Single payment state (commented out or removed if not used elsewhere)
@@ -701,7 +703,7 @@ export default function MascheraInputGenerale() {
         </div>
       );
     }
-    if (!enrollments || enrollments.length === 0) {
+    if (!Array.isArray(enrollments) || enrollments.length === 0) {
       return <p className="text-sm text-muted-foreground italic p-2">{emptyMessage}</p>;
     }
     return (
@@ -710,7 +712,7 @@ export default function MascheraInputGenerale() {
           <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{listTitle}</Label>
           {enrollments.map((e: any) => {
             const assoc = baseData?.find((item: any) => item.id === e[foreignKey]);
-            const hasDetails = e.details && e.details.length > 0;
+            const hasDetails = Array.isArray(e.details) && e.details.length > 0;
             return (
               <div key={e.id} className="grid grid-cols-[140px_180px_240px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
                 <div className="font-bold text-sm truncate" title={assoc?.name}>{assoc?.name || 'Attività non trovata'}</div>
@@ -1425,7 +1427,7 @@ export default function MascheraInputGenerale() {
               { id: "gift", label: "Gift/Buono", icon: Gift },
               { id: "tessere", label: "Tessere", icon: IdCard },
               { id: "certificato", label: "Certificato Medico", icon: Stethoscope },
-              { id: "attivita", label: "Attività", icon: Activity, badgeCount: totalActivitiesCount },
+              { id: "attivita", label: "Attività", icon: Activity },
             ].map((item: any) => (
               <Button
                 key={item.id}
@@ -1437,11 +1439,6 @@ export default function MascheraInputGenerale() {
               >
                 <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 {item.label}
-                {item.badgeCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm border border-yellow-200">
-                    {item.badgeCount}
-                  </span>
-                )}
               </Button>
             ))}
           </div>
@@ -2593,10 +2590,10 @@ export default function MascheraInputGenerale() {
               </span>
               <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-pagamento" onClick={() => {
                 setEditingPaymentId(null);
-                setIsPaymentDialogOpen(true);
+                setIsNuovoPagamentoOpen(true);
               }}>
                 <Plus className="w-4 h-4" />
-                Aggiungi
+                Nuovo Pagamento
               </Button>
             </CardTitle>
           </CardHeader>
@@ -2621,7 +2618,7 @@ export default function MascheraInputGenerale() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {[...(memberPayments || []), ...payments].map((payment, idx) => {
+                      {[...(Array.isArray(memberPayments) ? memberPayments : []), ...payments].map((payment, idx) => {
                         const isExistingDBPayment = !!payment.createdAt || !!payment.amount;
                         // For Data Inserimento, use createdAt or similar if available, otherwise fallback
                         const pDataInserimento = payment.createdAt || payment.paidDate || payment.date;
@@ -2680,6 +2677,13 @@ export default function MascheraInputGenerale() {
                 </div>
               )}
             </div>
+
+            {/* Nuovo Pagamento Modal (Unificato) */}
+            <NuovoPagamentoModal
+              isOpen={isNuovoPagamentoOpen}
+              onClose={() => setIsNuovoPagamentoOpen(false)}
+              defaultMemberId={formData.id ? parseInt(formData.id) : undefined}
+            />
 
             <PaymentDialog
               open={isPaymentDialogOpen}
@@ -2897,12 +2901,12 @@ export default function MascheraInputGenerale() {
                       <Skeleton className="h-12 w-full" />
                       <Skeleton className="h-12 w-full" />
                     </div>
-                  ) : memberEnrollments && memberEnrollments.length > 0 ? (
+                  ) : Array.isArray(memberEnrollments) && memberEnrollments.length > 0 ? (
                     <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Iscrizioni Attive</Label>
                       {memberEnrollments.map((e: any) => {
                         const course = courses?.find((c: any) => c.id === e.courseId);
-                        const hasDetails = e.details && e.details.length > 0;
+                        const hasDetails = Array.isArray(e.details) && e.details.length > 0;
                         return (
                           <div key={e.id} className="grid grid-cols-[140px_180px_240px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
 

@@ -20,12 +20,14 @@ import type { Payment, InsertPayment, Member, PaymentMethod, Course } from "@sha
 
 import { useLocation } from "wouter";
 import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
+import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
 
 export default function Payments() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isNuovoPagamentoOpen, setIsNuovoPagamentoOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string>("");
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
@@ -302,11 +304,9 @@ export default function Payments() {
             Esporta CSV
           </Button>
           <Button
-            onClick={() => {
-              closeDialog();
-              setIsFormOpen(true);
-            }}
+            onClick={() => setIsNuovoPagamentoOpen(true)}
             data-testid="button-add-payment"
+            className="gold-3d-button"
           >
             <Plus className="w-4 h-4 mr-2" />
             Nuovo Pagamento
@@ -445,6 +445,11 @@ export default function Payments() {
           )}
         </CardContent>
       </Card>
+
+      <NuovoPagamentoModal
+        isOpen={isNuovoPagamentoOpen}
+        onClose={() => setIsNuovoPagamentoOpen(false)}
+      />
 
       <PaymentDialog
         open={isFormOpen}
