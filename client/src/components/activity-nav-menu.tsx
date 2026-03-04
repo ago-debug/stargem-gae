@@ -1,5 +1,7 @@
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Activity, Calendar, Sparkles, CreditCard, Gift, BookOpen,
   Sun, Dumbbell, UserCheck, Users, Award, Music, Database
@@ -23,22 +25,37 @@ const activityMenuItems = [
 
 export function ActivityNavMenu() {
   const [location, navigate] = useLocation();
+  const { data: summary } = useQuery<Record<string, { total: number, active: number }>>({
+    queryKey: ["/api/activities-summary"],
+  });
 
   return (
     <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin" data-testid="activity-nav-menu">
-      {activityMenuItems.map((item) => (
-        <Button
-          key={item.id}
-          variant="outline"
-          size="sm"
-          onClick={() => navigate(item.url)}
-          className={`text-xs h-8 whitespace-nowrap flex-shrink-0 ${location === item.url ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : ""}`}
-          data-testid={`nav-activity-${item.id}`}
-        >
-          <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
-          {item.label}
-        </Button>
-      ))}
+      {activityMenuItems.map((item) => {
+        const activeCount = summary?.[item.id]?.active || 0;
+
+        return (
+          <Button
+            key={item.id}
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(item.url)}
+            className={`relative text-xs h-8 whitespace-nowrap flex-shrink-0 ${location === item.url ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : ""}`}
+            data-testid={`nav-activity-${item.id}`}
+          >
+            <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
+            {item.label}
+            {item.id !== "panoramica" && activeCount > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-2 -right-2 px-1.5 min-w-[18px] h-[18px] text-[10px] flex items-center justify-center rounded-full"
+              >
+                {activeCount}
+              </Badge>
+            )}
+          </Button>
+        );
+      })}
     </div>
   );
 }
