@@ -127,9 +127,9 @@ export default function IscrittiPerAttivita() {
 
   const getEnrollmentsForActivity = (activityId: number, isWorkshop: boolean = false) => {
     const relevantEnrollments = isWorkshop ? wsEnrollments : enrollments;
-    if (!relevantEnrollments) return [];
+    if (!Array.isArray(relevantEnrollments)) return [];
 
-    return relevantEnrollments
+    return (relevantEnrollments as any[])
       .filter(e => e.status === 'active' || !e.status)
       .filter(e => isWorkshop ? e.workshopId === activityId : e.courseId === activityId)
       .map(e => ({
@@ -143,7 +143,7 @@ export default function IscrittiPerAttivita() {
       }));
   };
 
-  const filteredCourses = courses?.filter(course => {
+  const filteredCourses = Array.isArray(courses) ? (courses as Course[]).filter(course => {
     const matchesSearch = course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       course.sku?.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -152,9 +152,9 @@ export default function IscrittiPerAttivita() {
       return getEnrollmentsForActivity(course.id, false).length > 0;
     }
     return true;
-  });
+  }) : [];
 
-  const filteredWorkshops = workshops?.filter(workshop => {
+  const filteredWorkshops = Array.isArray(workshops) ? (workshops as Workshop[]).filter(workshop => {
     const matchesSearch = workshop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       workshop.sku?.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -163,7 +163,7 @@ export default function IscrittiPerAttivita() {
       return getEnrollmentsForActivity(workshop.id, true).length > 0;
     }
     return true;
-  });
+  }) : [];
 
   return (
     <div className="flex flex-col h-full">
