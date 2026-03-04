@@ -209,12 +209,12 @@ const configItems = [
     icon: List, // Si potrebbe usare una matitina ma la list va bene. O custom class.
   },
   {
-    title: "Quote/Listini",
+    title: "Listini e Quote",
     url: "/listini-old",
     icon: Database,
   },
   {
-    title: "Listini (V. Precedente)",
+    title: "Quote/Listini old",
     url: "/listini",
     icon: Database,
   },
