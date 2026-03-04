@@ -6106,11 +6106,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const summaries: Record<string, { total: number, active: number }> = {};
 
       const fetchCount = async (table: any, key: string) => {
-        const items = await db.select().from(table);
-        summaries[key] = {
-          total: items.length,
-          active: items.filter((i: any) => i.active).length
-        };
+        try {
+          const items = await db.select().from(table);
+          summaries[key] = {
+            total: items.length,
+            active: items.filter((i: any) => i.active).length
+          };
+        } catch (err) {
+          console.warn(`Could not fetch summary for table ${key}:`, err);
+          summaries[key] = { total: 0, active: 0 };
+        }
       };
 
       await Promise.all([

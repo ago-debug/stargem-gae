@@ -46,12 +46,11 @@ export function ActivityNavMenu() {
             <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
             {item.label}
             {item.id !== "panoramica" && activeCount > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -top-2 -right-2 px-1.5 min-w-[18px] h-[18px] text-[10px] flex items-center justify-center rounded-full"
+              <span
+                className="absolute -top-2 -right-2 px-1.5 min-w-[20px] h-[20px] text-[11px] font-bold flex items-center justify-center rounded-full bg-amber-500 text-white shadow-sm"
               >
                 {activeCount}
-              </Badge>
+              </span>
             )}
           </Button>
         );
