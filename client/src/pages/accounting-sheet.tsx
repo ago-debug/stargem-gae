@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
+import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
 
 export default function AccountingSheet() {
     const { toast } = useToast();
@@ -34,6 +35,7 @@ export default function AccountingSheet() {
         }
     }, []);
     const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+    const [isNuovoPagamentoOpen, setIsNuovoPagamentoOpen] = useState(false);
     const [payingMovement, setPayingMovement] = useState<Payment | null>(null);
     const [paymentMethod, setPaymentMethod] = useState("");
     const [amount, setAmount] = useState("");
@@ -426,7 +428,7 @@ export default function AccountingSheet() {
 
     const handleNewPayment = () => {
         resetPaymentForm();
-        setIsPaymentDialogOpen(true);
+        setIsNuovoPagamentoOpen(true);
     };
 
     const handlePaymentSubmit = async (e: React.FormEvent) => {
@@ -852,6 +854,12 @@ export default function AccountingSheet() {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            <NuovoPagamentoModal
+                isOpen={isNuovoPagamentoOpen}
+                onClose={() => setIsNuovoPagamentoOpen(false)}
+                defaultMemberId={selectedMember?.id}
+            />
 
             <Dialog open={isPaymentDialogOpen} onOpenChange={(open) => { if (!open) resetPaymentForm(); setIsPaymentDialogOpen(open); }}>
                 <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">

@@ -45,13 +45,6 @@ export function ActivityNavMenu() {
           >
             <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
             {item.label}
-            {item.id !== "panoramica" && activeCount > 0 && (
-              <span
-                className="absolute -top-2.5 -right-2 px-1.5 min-w-[20px] h-[20px] text-[11px] font-bold flex items-center justify-center rounded-full bg-gradient-to-b from-amber-400 to-amber-500 border border-amber-300 text-white shadow-md z-10"
-              >
-                {activeCount}
-              </span>
-            )}
           </Button>
         );
       })}
