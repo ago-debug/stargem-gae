@@ -5,10 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X, Camera, Edit, Trash2 } from "lucide-react";
+import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X, Camera, Edit, Trash2, Copy } from "lucide-react";
 import {
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
-  User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music
+  User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music, Database
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useSearch, useLocation } from "wouter";
@@ -664,6 +664,83 @@ export default function MascheraInputGenerale() {
   const { data: workshops } = useQuery<any[]>({ queryKey: ["/api/workshops"] });
   const { data: enrollmentDetails } = useQuery<any[]>({ queryKey: ["/api/enrollment-details"] });
 
+  // Extra activities base fetch
+  const { data: paidTrials } = useQuery<any[]>({ queryKey: ["/api/paid-trials"] });
+  const { data: freeTrials } = useQuery<any[]>({ queryKey: ["/api/free-trials"] });
+  const { data: singleLessons } = useQuery<any[]>({ queryKey: ["/api/single-lessons"] });
+  const { data: sundayActivities } = useQuery<any[]>({ queryKey: ["/api/sunday-activities"] });
+  const { data: trainings } = useQuery<any[]>({ queryKey: ["/api/trainings"] });
+  const { data: individualLessons } = useQuery<any[]>({ queryKey: ["/api/individual-lessons"] });
+  const { data: campusActivities } = useQuery<any[]>({ queryKey: ["/api/campus-activities"] });
+  const { data: recitals } = useQuery<any[]>({ queryKey: ["/api/recitals"] });
+  const { data: vacationStudies } = useQuery<any[]>({ queryKey: ["/api/vacation-studies"] });
+  const { data: bookingServices } = useQuery<any[]>({ queryKey: ["/api/booking-services"] });
+
+  const SectionBadge = ({ count }: { count: number }) => {
+    if (!count || count === 0) return null;
+    return (
+      <span className="ml-auto bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.3)] border border-yellow-200" title={`${count} iscrizioni attive`}>
+        {count}
+      </span>
+    );
+  };
+
+  const renderGenericEnrollmentList = (
+    enrollments: any[] | undefined,
+    baseData: any[] | undefined,
+    mutation: any,
+    emptyMessage: string,
+    listTitle: string,
+    entityLabel: string,
+    foreignKey: string
+  ) => {
+    if (!selectedMemberId) {
+      return (
+        <div className="text-center p-4 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
+          Seleziona un membro per gestire {entityLabel}
+        </div>
+      );
+    }
+    if (!enrollments || enrollments.length === 0) {
+      return <p className="text-sm text-muted-foreground italic p-2">{emptyMessage}</p>;
+    }
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{listTitle}</Label>
+          {enrollments.map((e: any) => {
+            const assoc = baseData?.find((item: any) => item.id === e[foreignKey]);
+            const hasDetails = e.details && e.details.length > 0;
+            return (
+              <div key={e.id} className="grid grid-cols-[140px_180px_240px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
+                <div className="font-bold text-sm truncate" title={assoc?.name}>{assoc?.name || 'Attività non trovata'}</div>
+                <div className="font-medium text-[11px] text-slate-900 truncate" title={assoc?.sku || undefined}>{assoc?.sku}</div>
+                <div className="text-xs text-muted-foreground flex items-center gap-2 truncate">
+                  <span>Registrata il: {new Date(e.enrollmentDate || e.createdAt || new Date()).toLocaleDateString('it-IT')}</span>
+                </div>
+                <div className="flex items-center gap-1 overflow-hidden flex-1">
+                  {hasDetails && e.details.map((detStr: string, idx: number) => {
+                    const color = enrollmentDetails?.find((d: any) => d.name === detStr)?.color;
+                    return <EnrollmentDetailBadge key={idx} name={detStr} color={color} className="h-5 py-0.5 px-2 text-[10px] truncate max-w-[120px]" />;
+                  })}
+                </div>
+                <div className="flex items-center justify-end gap-3 pl-2">
+                  <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200 text-[10px] h-5' : 'text-[10px] h-5'}>
+                    {e.status === 'active' ? 'Attiva' : e.status || '?'}
+                  </Badge>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => { if (confirm("Rimuovere questa riga?")) mutation.mutate(e.id); }}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   // Member Enrollments Queries
   const { data: memberEnrollments, isLoading: loadingEnrollments } = useQuery<any[]>({
     queryKey: ["/api/enrollments?type=corsi", "member", selectedMemberId],
@@ -687,6 +764,27 @@ export default function MascheraInputGenerale() {
     },
     enabled: !!selectedMemberId,
   });
+
+  const { data: memberPtEnrollments } = useQuery<any[]>({ queryKey: ["/api/paid-trial-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/paid-trial-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
+  const { data: memberFtEnrollments } = useQuery<any[]>({ queryKey: ["/api/free-trial-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/free-trial-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
+  const { data: memberSlEnrollments } = useQuery<any[]>({ queryKey: ["/api/single-lesson-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/single-lesson-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
+  const { data: memberSaEnrollments } = useQuery<any[]>({ queryKey: ["/api/sunday-activity-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/sunday-activity-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
+  const { data: memberTrEnrollments } = useQuery<any[]>({ queryKey: ["/api/training-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/training-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
+  const { data: memberIlEnrollments } = useQuery<any[]>({ queryKey: ["/api/individual-lesson-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/individual-lesson-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
+  const { data: memberCaEnrollments } = useQuery<any[]>({ queryKey: ["/api/campus-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/campus-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
+  const { data: memberReEnrollments } = useQuery<any[]>({ queryKey: ["/api/recital-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/recital-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
+  const { data: memberVsEnrollments } = useQuery<any[]>({ queryKey: ["/api/vacation-study-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/vacation-study-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
+  const { data: memberServEnrollments } = useQuery<any[]>({
+    queryKey: ["/api/booking-service-enrollments", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/booking-service-enrollments`);
+      if (!res.ok) return [];
+      const all = await res.json();
+      return all.filter((e: any) => e.memberId === selectedMemberId);
+    },
+    enabled: !!selectedMemberId
+  });
+
 
   const { data: memberPayments, isLoading: loadingPayments } = useQuery<any[]>({
     queryKey: ["/api/payments", "member", selectedMemberId],
@@ -772,6 +870,32 @@ export default function MascheraInputGenerale() {
       toast({ title: "Errore rimozione workshop", description: error.message, variant: "destructive" });
     }
   });
+
+  const createRemoveEnrollmentMutation = (endpoint: string, successMsg: string) => useMutation({
+    mutationFn: async (enrollmentId: number) => {
+      await apiRequest("DELETE", `/api/${endpoint}/${enrollmentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/${endpoint}`, "member", selectedMemberId] });
+      toast({ title: successMsg });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore rimozione iscrizione", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const removePtEnrollmentMutation = createRemoveEnrollmentMutation("paid-trial-enrollments", "Prova a pagamento rimossa");
+  const removeFtEnrollmentMutation = createRemoveEnrollmentMutation("free-trial-enrollments", "Prova gratuita rimossa");
+  const removeSlEnrollmentMutation = createRemoveEnrollmentMutation("single-lesson-enrollments", "Lezione singola rimossa");
+  const removeSaEnrollmentMutation = createRemoveEnrollmentMutation("sunday-activity-enrollments", "Domenica in movimento rimossa");
+  const removeTrEnrollmentMutation = createRemoveEnrollmentMutation("training-enrollments", "Allenamento rimosso");
+  const removeIlEnrollmentMutation = createRemoveEnrollmentMutation("individual-lesson-enrollments", "Lezione individuale rimossa");
+  const removeCaEnrollmentMutation = createRemoveEnrollmentMutation("campus-enrollments", "Campus rimosso");
+  const removeReEnrollmentMutation = createRemoveEnrollmentMutation("recital-enrollments", "Saggio rimosso");
+  const removeVsEnrollmentMutation = createRemoveEnrollmentMutation("vacation-study-enrollments", "Vacanza studio rimossa");
+  const removeServEnrollmentMutation = createRemoveEnrollmentMutation("booking-service-enrollments", "Servizio Extra rimosso");
+  const dummyMutation = { mutate: () => toast({ title: "Funzione non attiva", description: "Utilizzare la sezione dedicata per il merchandising." }) };
+
 
   // Intercept memberId from URL and auto-load Profile
   useEffect(() => {
@@ -992,34 +1116,27 @@ export default function MascheraInputGenerale() {
     });
 
     // Collect Payments (from list)
-    const paymentsPayload: any[] = payments.map(p => ({
-      courseId: parseInt(p.dettaglioId),
-      amount: p.totaleQuota?.toString() || "0.00",
-      type: p.attivita,
-      status: "paid",
-      tempId: p.attivita, // keeping this for matching with enrollment logic in backend if needed
-      // Adding extra fields for backend to potentially use or ignore
-      details: p
-    }));
+    const paymentsPayload: any[] = payments.map(p => {
+      const isPending = (p.saldoTotale || 0) > 0;
+
+      return {
+        courseId: parseInt(p.dettaglioId),
+        // L'importo da mostrare a database come "Valore transazione"
+        amount: p.totaleQuota?.toString() || "0.00",
+        type: p.attivita,
+        status: isPending ? "pending" : "paid",
+        tempId: p.attivita, // keeping this for matching with enrollment logic in backend if needed
+        // Adding extra fields for backend to potentially use or ignore
+        details: p
+      };
+    });
 
     saveMutation.mutate({ memberData, enrollments, payments: paymentsPayload });
   };
 
   const isFormValid = !!(
     formData.cognome.trim() &&
-    formData.nome.trim() &&
-    formData.codiceFiscale.trim() &&
-    formData.telefono.trim() &&
-    formData.email.trim() &&
-    formData.indirizzo.trim() &&
-    formData.cap.trim() &&
-    formData.citta.trim() &&
-    formData.dataNascita &&
-    formData.luogoNascita.trim() &&
-    formData.provinciaNascita.trim() &&
-    formData.sesso &&
-    formData.eta &&
-    formData.allievo
+    formData.nome.trim()
   );
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
@@ -1068,6 +1185,7 @@ export default function MascheraInputGenerale() {
       updatedPayments.push({ ...payment, id: Date.now().toString() });
     }
     setPayments(updatedPayments);
+    setDirtyFields(prev => ({ ...prev, payments: true }));
 
     // Auto-fill Attività section
     if (payment.attivita && payment.dettaglioId) {
@@ -1089,6 +1207,48 @@ export default function MascheraInputGenerale() {
     if (confirm("Sei sicuro di voler eliminare questo pagamento?")) {
       setPayments(payments.filter(p => p.id !== id));
     }
+  };
+
+  const handleCopyReceipt = (payment: any) => {
+    // Determine source
+    const details = payment.details || payment;
+    const isPending = (details.saldoTotale || 0) > 0 || payment.status === "pending";
+    const quotaOriginale = details.totaleQuota || payment.amount || 0;
+
+    let text = `Riepilogo Pagamento StarGem\n`;
+    text += `---------------------------------\n`;
+    text += `Dettaglio: ${details.dettaglioNome || payment.quotaDescription || payment.type || "-"}\n`;
+    text += `Quota Piena: € ${quotaOriginale}\n`;
+    if (details.valoreSconto) text += `Sconto 1: -€ ${details.valoreSconto}\n`;
+    if (details.valorePromo) text += `Sconto 2: -€ ${details.valorePromo}\n`;
+    if (details.quotaTesseraCheck) text += `Quota Tessera: +€ 25\n`;
+    if (details.lezioneProvaCheck) text += `Trattenuta Lezione Prova: -€ 20\n`;
+
+    if (details.integrazioneAttiva && details.differenzaVersoNuovaQuota !== undefined) {
+      text += `\n* Integrazione Applicata (entro 120gg) *\n`;
+      text += `Ricalcolo Differenza da Versare: € ${details.differenzaVersoNuovaQuota}\n`;
+    }
+
+    const daPagare = details.integrazioneAttiva ? details.differenzaVersoNuovaQuota : (quotaOriginale - (details.valoreSconto || 0) - (details.valorePromo || 0) + (details.quotaTesseraCheck ? 25 : 0) - (details.lezioneProvaCheck ? 20 : 0));
+
+    text += `---------------------------------\n`;
+    text += `TOTALE SCATURITO (DA PAGARE): € ${daPagare}\n`;
+    text += `IMPORTO VERSATO OGGI (Acconto): € ${details.acconto || quotaOriginale}\n`;
+
+    if (isPending) {
+      text += `\nESTRATTO CONTO: IN SOSPESO\n`;
+      text += `SALDO ANCORA DA VERSARE: € ${details.saldoTotale || details.debtAmount || "Da calcolare"}\n`;
+    } else {
+      text += `\nESTRATTO CONTO: SALDATO CON SUCCESSO\n`;
+      text += `SALDO PER QUESTA VOCE: € 0\n`;
+    }
+
+    navigator.clipboard.writeText(text).then(() => {
+      toast({ title: "Testo Ricevuta copiato in memoria!", description: "Ora puoi incollarlo su WhatsApp o nelle Email (CRTL+V)." });
+    }).catch((err) => {
+      console.error("Failed to copy text: ", err);
+      toast({ title: "Errore di Copia", description: "Impossibile copiare il testo", variant: "destructive" });
+    });
   };
 
   useEffect(() => {
@@ -1150,6 +1310,20 @@ export default function MascheraInputGenerale() {
   const handleGSheets = () => {
     toast({ title: "Google Sheets", description: "Integrazione Google Sheets non configurata.", variant: "default" });
   };
+
+  const totalActivitiesCount =
+    (memberEnrollments?.length || 0) +
+    (memberPtEnrollments?.length || 0) +
+    (memberFtEnrollments?.length || 0) +
+    (memberSlEnrollments?.length || 0) +
+    (memberSaEnrollments?.length || 0) +
+    (memberTrEnrollments?.length || 0) +
+    (memberIlEnrollments?.length || 0) +
+    (memberCaEnrollments?.length || 0) +
+    (memberReEnrollments?.length || 0) +
+    (memberVsEnrollments?.length || 0) +
+    (memberServEnrollments?.length || 0) +
+    (memberWorkshopEnrollments?.length || 0);
 
   return (
     <div className="flex flex-col h-full" data-testid="page-maschera-input-generale">
@@ -1251,18 +1425,23 @@ export default function MascheraInputGenerale() {
               { id: "gift", label: "Gift/Buono", icon: Gift },
               { id: "tessere", label: "Tessere", icon: IdCard },
               { id: "certificato", label: "Certificato Medico", icon: Stethoscope },
-              { id: "attivita", label: "Attività", icon: Activity },
+              { id: "attivita", label: "Attività", icon: Activity, badgeCount: totalActivitiesCount },
             ].map((item: any) => (
               <Button
                 key={item.id}
                 variant="outline"
                 size="sm"
                 onClick={() => scrollToSection(item.id)}
-                className="text-xs h-8 bg-background"
+                className="text-xs h-8 bg-background relative"
                 data-testid={`nav - ${item.id} `}
               >
                 <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 {item.label}
+                {item.badgeCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm border border-yellow-200">
+                    {item.badgeCount}
+                  </span>
+                )}
               </Button>
             ))}
           </div>
@@ -2466,6 +2645,15 @@ export default function MascheraInputGenerale() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
+                                    title="Copia Testo per Email/WhatsApp"
+                                    className="text-blue-600 hover:text-blue-800"
+                                    onClick={() => handleCopyReceipt(payment)}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={() => {
                                       setEditingPaymentId(payment.id || null);
                                       setIsPaymentDialogOpen(true);
@@ -2503,6 +2691,7 @@ export default function MascheraInputGenerale() {
               initialData={editingPaymentId ? payments.find(p => p.id === editingPaymentId) : null}
               corsiDB={corsiDB}
               categorieDB={categorieDB}
+              memberId={memberIdFromUrl ? parseInt(memberIdFromUrl) : undefined}
             />
           </CardContent>
         </Card>
@@ -2693,6 +2882,7 @@ export default function MascheraInputGenerale() {
                 <Calendar className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/corsi" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-corsi">Corsi</Link>
                 <KnowledgeInfo id="corsi" />
+                <SectionBadge count={memberEnrollments?.length || 0} />
               </h3>
 
               {!selectedMemberId ? (
@@ -2785,66 +2975,9 @@ export default function MascheraInputGenerale() {
                 <CreditCard className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/prove-pagamento" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-prove-pagamento">Prove a Pagamento</Link>
                 <KnowledgeInfo id="prove-a-pagamento" />
+                <SectionBadge count={memberPtEnrollments?.length || 0} />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  {/* ... existing Select ... */}
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["prove-pagamento"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "prove-pagamento": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice Corso</Label>
-                  <Select value={attivitaCodice["prove-pagamento"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "prove-pagamento": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="lg:col-span-2">
-                  <MultiSelectEnrollmentDetails
-                    selectedDetails={attivitaEnrollmentDetails["prove-pagamento"]}
-                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "prove-pagamento": details }))}
-                    testIdPrefix="prove-pag"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Iscritti</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              {renderGenericEnrollmentList(memberPtEnrollments, paidTrials, removePtEnrollmentMutation, "Nessuna prova a pagamento registrata.", "Prove a Pagamento Registrate", "le prove a pagamento", "paidTrialId")}
             </div>
 
             {/* PROVE GRATUITE */}
@@ -2853,73 +2986,9 @@ export default function MascheraInputGenerale() {
                 <Gift className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/prove-gratuite" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-prove-gratuite">Prove Gratuite</Link>
                 <KnowledgeInfo id="prove-gratuite" />
+                <SectionBadge count={memberFtEnrollments?.length || 0} />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["prove-gratuite"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "prove-gratuite": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice Corso</Label>
-                  <Select value={attivitaCodice["prove-gratuite"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "prove-gratuite": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="lg:col-span-2">
-                  <MultiSelectEnrollmentDetails
-                    selectedDetails={attivitaEnrollmentDetails["prove-gratuite"]}
-                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "prove-gratuite": details }))}
-                    testIdPrefix="prove-grat"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Iscritti</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Posti Disp.</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Data Prova</Label>
-                  <Input type="date" />
-                </div>
-              </div>
+              {renderGenericEnrollmentList(memberFtEnrollments, freeTrials, removeFtEnrollmentMutation, "Nessuna prova gratuita registrata.", "Prove Gratuite Registrate", "le prove gratuite", "freeTrialId")}
             </div>
 
             {/* LEZIONI SINGOLE */}
@@ -2928,77 +2997,9 @@ export default function MascheraInputGenerale() {
                 <BookOpen className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/lezioni-singole" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-lezioni-singole">Lezioni Singole</Link>
                 <KnowledgeInfo id="lezioni-singole" />
+                <SectionBadge count={memberSlEnrollments?.length || 0} />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["lezioni-singole"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "lezioni-singole": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice Corso</Label>
-                  <Select value={attivitaCodice["lezioni-singole"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "lezioni-singole": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="lg:col-span-2">
-                  <MultiSelectEnrollmentDetails
-                    selectedDetails={attivitaEnrollmentDetails["lezioni-singole"]}
-                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "lezioni-singole": details }))}
-                    testIdPrefix="lez-sing"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Iscritti</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Posti Disp.</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Welfare</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Presenze</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              {renderGenericEnrollmentList(memberSlEnrollments, singleLessons, removeSlEnrollmentMutation, "Nessuna lezione singola registrata.", "Lezioni Singole Registrate", "le lezioni singole", "singleLessonId")}
             </div>
 
             {/* WORKSHOP */}
@@ -3007,56 +3008,10 @@ export default function MascheraInputGenerale() {
                 <Calendar className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/workshop" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-workshop">Workshop</Link>
                 <KnowledgeInfo id="workshop" />
+                <SectionBadge count={memberWorkshopEnrollments?.length || 0} />
               </h3>
 
-              {!selectedMemberId ? (
-                <div className="text-center p-4 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
-                  Seleziona un membro per gestire i workshop
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Workshop List */}
-                  {memberWorkshopEnrollments && memberWorkshopEnrollments.length > 0 ? (
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Workshop Iscritti</Label>
-                      {memberWorkshopEnrollments.map((e: any) => {
-                        const workshop = workshops?.find((w: any) => w.id === e.workshopId);
-                        return (
-                          <div key={e.id} className="flex items-center justify-between p-3 bg-muted/40 border rounded-lg group hover:bg-muted/60 transition-colors">
-                            <div>
-                              <p className="font-medium">{workshop?.name || 'Workshop sconosciuto'}</p>
-                              <p className="text-xs text-muted-foreground">
-                                Data: {workshop?.startDate ? new Date(workshop.startDate).toLocaleDateString('it-IT') : '-'}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
-                                Iscritto
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => {
-                                  if (confirm("Rimuovere l'iscrizione a questo workshop?")) {
-                                    removeWorkshopEnrollmentMutation.mutate(e.id);
-                                  }
-                                }}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground italic p-2">Nessun workshop registrato.</p>
-                  )}
-
-
-                </div>
-              )}
+              {renderGenericEnrollmentList(memberWorkshopEnrollments, workshops, removeWorkshopEnrollmentMutation, "Nessun workshop registrato.", "Workshop Registrati", "i workshop", "workshopId")}
             </div>
 
             {/* DOMENICHE IN MOVIMENTO */}
@@ -3065,69 +3020,9 @@ export default function MascheraInputGenerale() {
                 <Sun className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/domeniche-movimento" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-domeniche-movimento">Domeniche in Movimento</Link>
                 <KnowledgeInfo id="domeniche-in-movimento" />
+                <SectionBadge count={memberSaEnrollments?.length || 0} />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {domenicheCategorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["domeniche-movimento"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "domeniche-movimento": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice</Label>
-                  <Select value={attivitaCodice["domeniche-movimento"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "domeniche-movimento": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="lg:col-span-2">
-                  <MultiSelectEnrollmentDetails
-                    selectedDetails={attivitaEnrollmentDetails["domeniche-movimento"]}
-                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "domeniche-movimento": details }))}
-                    testIdPrefix="dom-mov"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Data</Label>
-                  <Input type="date" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Importo</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              {renderGenericEnrollmentList(memberSaEnrollments, sundayActivities, removeSaEnrollmentMutation, "Nessuna domenica in movimento registrata.", "Domeniche in Movimento Registrate", "le domeniche in movimento", "sundayActivityId")}
             </div>
 
             {/* ALLENAMENTI */}
@@ -3136,69 +3031,9 @@ export default function MascheraInputGenerale() {
                 <Dumbbell className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/allenamenti" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-allenamenti">Allenamenti/Affitti</Link>
                 <KnowledgeInfo id="allenamenti" />
+                <SectionBadge count={memberTrEnrollments?.length || 0} />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allenamentiCategorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["allenamenti"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "allenamenti": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice</Label>
-                  <Select value={attivitaCodice["allenamenti"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "allenamenti": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="lg:col-span-2">
-                  <MultiSelectEnrollmentDetails
-                    selectedDetails={attivitaEnrollmentDetails["allenamenti"]}
-                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "allenamenti": details }))}
-                    testIdPrefix="allen"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Presenze</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Importo</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              {renderGenericEnrollmentList(memberTrEnrollments, trainings, removeTrEnrollmentMutation, "Nessun allenamento registrato.", "Allenamenti Registrati", "gli allenamenti", "trainingId")}
             </div>
 
             {/* LEZIONI INDIVIDUALI */}
@@ -3207,69 +3042,9 @@ export default function MascheraInputGenerale() {
                 <UserCheck className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/lezioni-individuali" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-lezioni-individuali">Lezioni Individuali</Link>
                 <KnowledgeInfo id="lezioni-individuali" />
+                <SectionBadge count={memberIlEnrollments?.length || 0} />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {lezioniIndCategorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["lezioni-individuali"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "lezioni-individuali": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice</Label>
-                  <Select value={attivitaCodice["lezioni-individuali"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "lezioni-individuali": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="lg:col-span-2">
-                  <MultiSelectEnrollmentDetails
-                    selectedDetails={attivitaEnrollmentDetails["lezioni-individuali"]}
-                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "lezioni-individuali": details }))}
-                    testIdPrefix="lez-ind"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Presenze</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Importo</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              {renderGenericEnrollmentList(memberIlEnrollments, individualLessons, removeIlEnrollmentMutation, "Nessuna lezione individuale registrata.", "Lezioni Individuali Registrate", "le lezioni individuali", "individualLessonId")}
             </div>
 
             {/* CAMPUS */}
@@ -3278,69 +3053,9 @@ export default function MascheraInputGenerale() {
                 <Users className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/campus" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-campus">Campus</Link>
                 <KnowledgeInfo id="campus" />
+                <SectionBadge count={memberCaEnrollments?.length || 0} />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {campusCategorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["campus"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "campus": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice</Label>
-                  <Select value={attivitaCodice["campus"]} onValueChange={(v) => setAttivitaCodice(prevTarget => ({ ...prevTarget, "campus": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="lg:col-span-2">
-                  <MultiSelectEnrollmentDetails
-                    selectedDetails={attivitaEnrollmentDetails["campus"]}
-                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "campus": details }))}
-                    testIdPrefix="camp"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Periodo</Label>
-                  <Input />
-                </div>
-                <div className="space-y-2">
-                  <Label>Importo</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              {renderGenericEnrollmentList(memberCaEnrollments, campusActivities, removeCaEnrollmentMutation, "Nessun campus registrato.", "Campus Registrati", "i campus", "campusActivityId")}
             </div>
 
             {/* SAGGI */}
@@ -3349,69 +3064,9 @@ export default function MascheraInputGenerale() {
                 <Award className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/saggi" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-saggi">Saggi</Link>
                 <KnowledgeInfo id="saggi" />
+                <SectionBadge count={memberReEnrollments?.length || 0} />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {saggiCategorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["saggi"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "saggi": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice</Label>
-                  <Select value={attivitaCodice["saggi"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "saggi": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="lg:col-span-2">
-                  <MultiSelectEnrollmentDetails
-                    selectedDetails={attivitaEnrollmentDetails["saggi"]}
-                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "saggi": details }))}
-                    testIdPrefix="saggi"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Data</Label>
-                  <Input type="date" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Importo</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              {renderGenericEnrollmentList(memberReEnrollments, recitals, removeReEnrollmentMutation, "Nessun saggio registrato.", "Saggi Registrati", "i saggi", "recitalId")}
             </div>
 
             {/* VACANZA STUDIO */}
@@ -3420,69 +3075,9 @@ export default function MascheraInputGenerale() {
                 <Music className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
                 <Link href="/attivita/vacanze-studio" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-vacanze-studio">Vacanze Studio</Link>
                 <KnowledgeInfo id="vacanze-studio" />
+                <SectionBadge count={memberVsEnrollments?.length || 0} />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label>Categorie</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {vacanzeCategorieDB.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Corso</Label>
-                  <Select value={attivitaCorso["vacanze-studio"]} onValueChange={(v) => setAttivitaCorso(prev => ({ ...prev, "vacanze-studio": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona corso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={String(corso.id)}>
-                          {corso.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice</Label>
-                  <Select value={attivitaCodice["vacanze-studio"]} onValueChange={(v) => setAttivitaCodice(prev => ({ ...prev, "vacanze-studio": v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona codice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {corsiDB.map((corso) => (
-                        <SelectItem key={corso.id} value={corso.sku || String(corso.id)}>
-                          {corso.sku}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="lg:col-span-2">
-                  <MultiSelectEnrollmentDetails
-                    selectedDetails={attivitaEnrollmentDetails["vacanze-studio"]}
-                    onChange={(details) => setAttivitaEnrollmentDetails(prev => ({ ...prev, "vacanze-studio": details }))}
-                    testIdPrefix="vac-stu"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Periodo</Label>
-                  <Input />
-                </div>
-                <div className="space-y-2">
-                  <Label>Importo</Label>
-                  <Input type="number" />
-                </div>
-              </div>
+              {renderGenericEnrollmentList(memberVsEnrollments, vacationStudies, removeVsEnrollmentMutation, "Nessuna vacanza studio registrata.", "Vacanze Studio Registrate", "le vacanze studio", "vacationStudyId")}
             </div>
 
             {/* MERCHANDISING */}
@@ -3492,42 +3087,18 @@ export default function MascheraInputGenerale() {
                 <Link href="/attivita/merchandising" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-merchandising">Merchandising</Link>
                 <KnowledgeInfo id="merchandising" />
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label>Articolo</Label>
-                  <Input />
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice</Label>
-                  <Input />
-                </div>
-                <div className="space-y-2">
-                  <Label>Taglia</Label>
-                  <Input />
-                </div>
-                <div className="space-y-2">
-                  <Label>Quantità</Label>
-                  <Input type="number" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Prezzo Unitario</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Totale</Label>
-                  <Input type="number" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Data Acquisto</Label>
-                  <Input type="date" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Note</Label>
-                  <Input />
-                </div>
-              </div>
+              {renderGenericEnrollmentList([], [], dummyMutation, "Nessun articolo di merchandising registrato.", "Merchandising Registrato", "il merchandising", "merchandisingId")}
+            </div>
+
+            {/* SERVIZI EXTRA */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded flex items-center gap-2">
+                <Database className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
+                <Link href="/attivita/servizi-extra" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-servizi-extra">Servizi Extra</Link>
+                <KnowledgeInfo id="servizi-extra" />
+                <SectionBadge count={memberServEnrollments?.length || 0} />
+              </h3>
+              {renderGenericEnrollmentList(memberServEnrollments, bookingServices, removeServEnrollmentMutation, "Nessun servizio extra registrato.", "Servizi Extra Registrati", "i servizi extra", "serviceId")}
             </div>
           </CardContent>
         </Card>

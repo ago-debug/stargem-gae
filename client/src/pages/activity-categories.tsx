@@ -36,6 +36,9 @@ const categoryPages: CategoryInfo[] = [
   { id: "saggi", label: "Categorie Saggi", icon: Award, color: "icon-gold-bg", url: "/categorie-saggi", apiEndpoint: "/api/recital-categories" },
   { id: "vacanze", label: "Categorie Vacanze Studio", icon: Music, color: "icon-gold-bg", url: "/categorie-vacanze-studio", apiEndpoint: "/api/vacation-categories" },
   { id: "servizi", label: "Categorie Servizi Extra", icon: Database, color: "icon-gold-bg", url: "/categorie-servizi", apiEndpoint: "/api/booking-service-categories" },
+  { id: "prove-pagamento", label: "Categorie Prove a Pagamento", icon: Award, color: "icon-gold-bg", url: "/categorie-corsi", apiEndpoint: "/api/categories" },
+  { id: "prove-gratuite", label: "Categorie Prove Gratuite", icon: Award, color: "icon-gold-bg", url: "/categorie-corsi", apiEndpoint: "/api/categories" },
+  { id: "lezioni-singole", label: "Categorie Lezioni Singole", icon: UserCheck, color: "icon-gold-bg", url: "/categorie-corsi", apiEndpoint: "/api/categories" },
 ];
 
 type AnyCategory = { id: number; name: string; parentId?: number | null };
