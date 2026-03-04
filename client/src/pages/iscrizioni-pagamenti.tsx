@@ -173,7 +173,7 @@ export default function IscrizioniPagamenti() {
             <div className="flex flex-col gap-2">
                 <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
                     <Calculator className="w-8 h-8 text-primary" />
-                    Iscrizioni e Pagamenti (Calcolatore)
+                    Iscrizioni e Pagamenti
                 </h1>
                 <p className="text-muted-foreground">
                     Gestione Checkout Unificato - Incrocia i prevendivi con i listini e finalizza l'incasso.
@@ -641,14 +641,12 @@ function CartTableRow({ row, courses, priceLists, quotes, updateRow, removeCartR
                 {/* RIGA 2.5: Multiselect Categorie e Note */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                        <Label className="text-xs text-slate-700 truncate font-bold">Dettagli Iscrizione / Orari</Label>
                         <MultiSelectEnrollmentDetails
                             selectedDetails={row.enrollmentDetails || []}
                             onChange={(vals) => updateRow(row.id, 'enrollmentDetails', vals)}
                         />
                     </div>
-                    <div className="space-y-1">
-                        <Label className="text-xs text-slate-700 truncate font-bold">Note Pagamento / Causali</Label>
+                    <div className="space-y-1 mt-1">
                         <MultiSelectPaymentNotes
                             selectedNotes={row.paymentNotes || []}
                             onChange={(vals) => updateRow(row.id, 'paymentNotes', vals)}
