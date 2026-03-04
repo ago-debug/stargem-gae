@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import type { Member, PriceList, Course, InsertPayment, Quote, PriceListItem } f
 
 export default function IscrizioniPagamenti() {
     const { toast } = useToast();
+    const [, setLocation] = useLocation();
 
     // === STATO CLIENTE ===
     const [selectedMemberId, setSelectedMemberId] = useState<string>("");
@@ -53,6 +55,16 @@ export default function IscrizioniPagamenti() {
     const { data: enrollments } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=corsi", { memberId: selectedMemberId }], enabled: !!selectedMemberId, queryFn: async () => { const res = await fetch(`/api/enrollments?type=corsi&memberId=${selectedMemberId}`); return res.ok ? res.json() : []; } });
     const { data: workshopEnrollments } = useQuery<any[]>({ queryKey: ["/api/workshop-enrollments", { memberId: selectedMemberId }], enabled: !!selectedMemberId, queryFn: async () => { const res = await fetch(`/api/workshop-enrollments?memberId=${selectedMemberId}`); return res.ok ? res.json() : []; } });
     const { data: workshops } = useQuery<any[]>({ queryKey: ["/api/workshops"] });
+    const { data: paidTrials } = useQuery<any[]>({ queryKey: ["/api/paid-trials"] });
+    const { data: freeTrials } = useQuery<any[]>({ queryKey: ["/api/free-trials"] });
+    const { data: singleLessons } = useQuery<any[]>({ queryKey: ["/api/single-lessons"] });
+    const { data: sundayActivities } = useQuery<any[]>({ queryKey: ["/api/sunday-activities"] });
+    const { data: trainings } = useQuery<any[]>({ queryKey: ["/api/trainings"] });
+    const { data: individualLessons } = useQuery<any[]>({ queryKey: ["/api/individual-lessons"] });
+    const { data: campusActivities } = useQuery<any[]>({ queryKey: ["/api/campus-activities"] });
+    const { data: recitals } = useQuery<any[]>({ queryKey: ["/api/recitals"] });
+    const { data: vacationStudies } = useQuery<any[]>({ queryKey: ["/api/vacation-studies"] });
+    const { data: studios } = useQuery<any[]>({ queryKey: ["/api/studios"] });
     const { data: studioBookings } = useQuery<any[]>({ queryKey: ["/api/studio-bookings", { memberId: selectedMemberId }], enabled: !!selectedMemberId, queryFn: async () => { const res = await fetch(`/api/studio-bookings?memberId=${selectedMemberId}`); return res.ok ? res.json() : []; } });
     const { data: membershipsDataList } = useQuery<any[]>({ queryKey: ["/api/memberships", { memberId: selectedMemberId }], enabled: !!selectedMemberId, queryFn: async () => { const res = await fetch(`/api/memberships?memberId=${selectedMemberId}`); return res.ok ? res.json() : []; } });
 
@@ -62,7 +74,7 @@ export default function IscrizioniPagamenti() {
     const memberStudioBookings = studioBookings?.filter((b: any) => b.memberId === Number(selectedMemberId)) || [];
     const memberMemberships = membershipsDataList?.filter((m: any) => m.memberId === Number(selectedMemberId)) || [];
 
-    const calculatedDebts = [
+    const calculatedDebts = !selectedMemberId ? [] : [
         ...memberEnrollments.map((e: any) => {
             const course = courses?.find(c => c.id === e.courseId);
             const total = parseFloat(course?.price || "0");
@@ -98,12 +110,49 @@ export default function IscrizioniPagamenti() {
             // 1. Crea le iscrizioni per ogni Item del carrello
             for (const row of cartRows) {
                 if (row.skus.length > 0) {
-                    await apiRequest("POST", "/api/enrollments", {
-                        memberId: parseInt(selectedMemberId),
-                        courseId: parseInt(row.skus[0]),
-                        status: "attivo",
-                        notes: `Iscr. Calcolatore Automatica (Periodo ID: ${row.periodId})`
-                    });
+                    const parsedId = parseInt(row.skus[0]);
+                    const baseNotes = `Iscr. Automatica Calcolatore (Listino: ${row.periodId})`;
+                    const basePayload = { memberId: parseInt(selectedMemberId), status: "attivo", notes: baseNotes };
+
+                    switch (row.activityType) {
+                        case 'eventi':
+                            await apiRequest("POST", "/api/workshop-enrollments", { ...basePayload, workshopId: parsedId });
+                            break;
+                        case 'prove_pagamento':
+                            await apiRequest("POST", "/api/paid-trial-enrollments", { ...basePayload, paidTrialId: parsedId });
+                            break;
+                        case 'prove_gratuite':
+                            await apiRequest("POST", "/api/free-trial-enrollments", { ...basePayload, freeTrialId: parsedId });
+                            break;
+                        case 'lezioni_singole':
+                            await apiRequest("POST", "/api/single-lesson-enrollments", { ...basePayload, singleLessonId: parsedId });
+                            break;
+                        case 'domeniche':
+                            await apiRequest("POST", "/api/sunday-activity-enrollments", { ...basePayload, sundayActivityId: parsedId });
+                            break;
+                        case 'allenamenti':
+                            await apiRequest("POST", "/api/training-enrollments", { ...basePayload, trainingId: parsedId });
+                            break;
+                        case 'lezioni_individuali':
+                            await apiRequest("POST", "/api/individual-lesson-enrollments", { ...basePayload, individualLessonId: parsedId });
+                            break;
+                        case 'campus':
+                            await apiRequest("POST", "/api/campus-enrollments", { ...basePayload, campusActivityId: parsedId });
+                            break;
+                        case 'saggi':
+                            await apiRequest("POST", "/api/recital-enrollments", { ...basePayload, recitalId: parsedId });
+                            break;
+                        case 'vacanze_studio':
+                            await apiRequest("POST", "/api/vacation-study-enrollments", { ...basePayload, vacationStudyId: parsedId });
+                            break;
+                        case 'servizi_extra':
+                            await apiRequest("POST", "/api/studio-bookings", { ...basePayload, studioId: parsedId, bookingDate: new Date().toISOString(), startTime: "12:00", endTime: "13:00", amount: row.basePrice.toString() }); // Simulato per ora
+                            break;
+                        case 'corsi':
+                        default:
+                            await apiRequest("POST", "/api/enrollments", { ...basePayload, courseId: parsedId });
+                            break;
+                    }
                 }
             }
 
@@ -123,7 +172,7 @@ export default function IscrizioniPagamenti() {
         },
         onSuccess: () => {
             toast({ title: "Checkout completato", description: "Iscrizioni e pagamento salvati con successo. ✅" });
-            setCartRows([{ id: Date.now().toString(), skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
+            setCartRows([{ id: Date.now().toString(), activityType: "corsi", skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
             setIncludeTessera(false);
             setIncludeProva(false);
             setPaymentNotes("");
@@ -138,7 +187,7 @@ export default function IscrizioniPagamenti() {
 
     // Add Item to Grid
     const addCartRow = () => {
-        setCartRows([...cartRows, { id: Date.now().toString(), skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
+        setCartRows([...cartRows, { id: Date.now().toString(), activityType: "corsi", skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
     };
 
     const removeCartRow = (id: string) => {
@@ -147,9 +196,26 @@ export default function IscrizioniPagamenti() {
 
     // Update specific row
     const updateRow = (id: string, field: string, value: any) => {
-        setCartRows(cartRows.map(r => {
+        setCartRows((prevCartRows) => prevCartRows.map(r => {
             if (r.id === id) {
                 const updated = { ...r, [field]: value };
+                // Calcola subtotale con sconti a cascata: (Base * (1-S1)) * (1-S2)
+                const base = parseFloat(updated.basePrice) || 0;
+                const s1 = parseFloat(updated.discountPercent1) || 0;
+                const s2 = parseFloat(updated.discountPercent2) || 0;
+                const stage1 = base * (1 - (s1 / 100));
+                updated.subtotal = stage1 * (1 - (s2 / 100));
+                return updated;
+            }
+            return r;
+        }));
+    };
+
+    // Update multiple fields on a specific row atomically
+    const updateRowBatch = (id: string, updates: Record<string, any>) => {
+        setCartRows((prevCartRows) => prevCartRows.map(r => {
+            if (r.id === id) {
+                const updated = { ...r, ...updates };
                 // Calcola subtotale con sconti a cascata: (Base * (1-S1)) * (1-S2)
                 const base = parseFloat(updated.basePrice) || 0;
                 const s1 = parseFloat(updated.discountPercent1) || 0;
@@ -211,20 +277,32 @@ export default function IscrizioniPagamenti() {
                                             )}
                                             <div className="flex items-center gap-1 shrink-0">
                                                 {selectedMemberId && (
-                                                    <X
-                                                        className="h-4 w-4 text-muted-foreground hover:text-destructive z-10 transition-colors"
-                                                        onClick={(e) => {
+                                                    <div
+                                                        role="button"
+                                                        aria-label="Rimuovi cliente"
+                                                        className="p-1 hover:bg-slate-200 rounded-md z-50 cursor-pointer transition-colors"
+                                                        onPointerDown={(e) => {
+                                                            e.preventDefault();
                                                             e.stopPropagation();
+                                                        }}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            // Clear Flow
                                                             setSelectedMemberId("");
                                                             setSelectedMember(null);
+                                                            setMemberSearchQuery("");
+                                                            setMemberSearchOpen(false);
                                                             // Total Reset
-                                                            setCartRows([{ id: Date.now().toString(), skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
+                                                            setCartRows([{ id: Date.now().toString(), activityType: "corsi", skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
                                                             setIncludeTessera(false);
                                                             setIncludeProva(false);
                                                             setPaymentMethod("contanti");
                                                             setPaymentNotes("");
                                                         }}
-                                                    />
+                                                    >
+                                                        <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                                                    </div>
                                                 )}
                                                 <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                                             </div>
@@ -326,7 +404,7 @@ export default function IscrizioniPagamenti() {
                         ) : calculatedDebts && calculatedDebts.length > 0 ? (
                             <div className="border rounded-md divide-y overflow-hidden shadow-sm bg-white">
                                 {calculatedDebts.map((debt: any, idx: number) => (
-                                    <div key={debt.id || idx} className="p-4 hover:bg-slate-50 cursor-pointer transition-colors relative flex justify-between items-center group">
+                                    <div key={debt.id || idx} onClick={() => setLocation(`/scheda-contabile?memberId=${selectedMemberId}`)} className="p-4 hover:bg-slate-50 cursor-pointer transition-colors relative flex justify-between items-center group">
                                         <div className="flex flex-col">
                                             <span className="font-bold text-slate-800 text-sm">{debt.description}</span>
                                             <span className="text-[10px] text-muted-foreground uppercase">{debt.date ? new Date(debt.date).toLocaleDateString('it-IT') : ""} - {debt.type}</span>
@@ -370,9 +448,21 @@ export default function IscrizioniPagamenti() {
                                         key={row.id}
                                         row={row}
                                         courses={courses || []}
+                                        workshops={workshops || []}
+                                        paidTrials={paidTrials || []}
+                                        freeTrials={freeTrials || []}
+                                        singleLessons={singleLessons || []}
+                                        sundayActivities={sundayActivities || []}
+                                        trainings={trainings || []}
+                                        individualLessons={individualLessons || []}
+                                        campusActivities={campusActivities || []}
+                                        recitals={recitals || []}
+                                        vacationStudies={vacationStudies || []}
+                                        studios={studios || []}
                                         priceLists={priceLists || []}
                                         quotes={quotes || []}
                                         updateRow={updateRow}
+                                        updateRowBatch={updateRowBatch}
                                         removeCartRow={removeCartRow}
                                         index={idx}
                                     />
@@ -511,11 +601,99 @@ export default function IscrizioniPagamenti() {
 }
 
 // === SUBCOMPONENTE RIGA CARRELLO (Per gestire l'auto-fetch del Listino Selezionato) ===
-function CartTableRow({ row, courses, priceLists, quotes, updateRow, removeCartRow, index }: { row: any, courses: Course[], priceLists: PriceList[], quotes: Quote[], updateRow: any, removeCartRow: any, index: number }) {
+function CartTableRow({
+    row, courses, workshops, paidTrials, freeTrials, singleLessons,
+    sundayActivities, trainings, individualLessons, campusActivities,
+    recitals, vacationStudies, studios, priceLists, quotes,
+    updateRow, updateRowBatch, removeCartRow, index
+}: {
+    row: any, courses: Course[], workshops: any[], paidTrials: any[],
+    freeTrials: any[], singleLessons: any[], sundayActivities: any[],
+    trainings: any[], individualLessons: any[], campusActivities: any[],
+    recitals: any[], vacationStudies: any[], studios: any[],
+    priceLists: PriceList[], quotes: Quote[], updateRow: any,
+    updateRowBatch: any, removeCartRow: any, index: number
+}) {
     const { data: listinoItems } = useQuery<PriceListItem[]>({
         queryKey: [`/api/price-lists/${row.periodId}/items`],
         enabled: !!row.periodId,
     });
+
+    // Effetto per autocompilare la basePrice se cambiano SKU o Listino
+    useEffect(() => {
+        if (row.periodId && row.skus.length > 0 && Array.isArray(listinoItems)) {
+            const entityId = parseInt(row.skus[0]);
+
+            // Mappa activityType usato nello state locale verso l'entityType salvato nei listini.
+            let entityType = "course";
+            switch (row.activityType) {
+                case "eventi": entityType = "workshop"; break;
+                case "prove_pagamento": entityType = "paid_trial"; break;
+                case "prove_gratuite": entityType = "free_trial"; break;
+                case "lezioni_singole": entityType = "single_lesson"; break;
+                case "domeniche": entityType = "sunday_activity"; break;
+                case "allenamenti": entityType = "training"; break;
+                case "lezioni_individuali": entityType = "individual_lesson"; break;
+                case "campus": entityType = "campus_activity"; break;
+                case "saggi": entityType = "recital"; break;
+                case "vacanze_studio": entityType = "vacation_study"; break;
+                case "servizi_extra": entityType = "booking_service"; break;
+            }
+
+            const item = listinoItems.find(i => i.entityType === entityType && i.entityId === entityId);
+
+            if (item) {
+                let finalPrice = parseFloat((item.price as string) || "0");
+                if (item.quoteId && quotes.length) {
+                    const q = quotes.find(qt => qt.id === item.quoteId);
+                    if (q) finalPrice = parseFloat((q.amount as string) || "0");
+                }
+                if (!isNaN(finalPrice) && row.basePrice !== finalPrice) {
+                    updateRow(row.id, 'basePrice', finalPrice);
+                }
+            }
+        }
+    }, [row.skus[0], row.periodId, listinoItems, row.activityType, quotes.length, row.basePrice, row.id, updateRow]);
+
+    // Calcolo attività presenti nel listino selezionato (se esistente) per filtrare il primo menu
+    const availableActivityTypes = useMemo(() => {
+        if (!row.periodId || !listinoItems) return ["corsi", "eventi", "prove_pagamento", "prove_gratuite", "lezioni_singole", "domeniche", "allenamenti", "lezioni_individuali", "campus", "saggi", "vacanze_studio", "servizi_extra"];
+
+        const types = new Set<string>();
+        listinoItems.forEach(i => {
+            switch (i.entityType) {
+                case "course": types.add("corsi"); break;
+                case "workshop": types.add("eventi"); break;
+                case "paid_trial": types.add("prove_pagamento"); break;
+                case "free_trial": types.add("prove_gratuite"); break;
+                case "single_lesson": types.add("lezioni_singole"); break;
+                case "sunday_activity": types.add("domeniche"); break;
+                case "training": types.add("allenamenti"); break;
+                case "individual_lesson": types.add("lezioni_individuali"); break;
+                case "campus_activity": types.add("campus"); break;
+                case "recital": types.add("saggi"); break;
+                case "vacation_study": types.add("vacanze_studio"); break;
+                case "booking_service": types.add("servizi_extra"); break;
+            }
+        });
+        return Array.from(types);
+    }, [listinoItems, row.periodId]);
+
+    // Risolvi il catalogo correntemente visualizzato nel dropdown "SKU"
+    let currentCatalog: any[] = courses;
+    switch (row.activityType) {
+        case "eventi": currentCatalog = workshops; break;
+        case "prove_pagamento": currentCatalog = paidTrials; break;
+        case "prove_gratuite": currentCatalog = freeTrials; break;
+        case "lezioni_singole": currentCatalog = singleLessons; break;
+        case "domeniche": currentCatalog = sundayActivities; break;
+        case "allenamenti": currentCatalog = trainings; break;
+        case "lezioni_individuali": currentCatalog = individualLessons; break;
+        case "campus": currentCatalog = campusActivities; break;
+        case "saggi": currentCatalog = recitals; break;
+        case "vacanze_studio": currentCatalog = vacationStudies; break;
+        case "servizi_extra": currentCatalog = studios; break;
+    }
 
     return (
         <div className="bg-white p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
@@ -530,57 +708,86 @@ function CartTableRow({ row, courses, priceLists, quotes, updateRow, removeCartR
             </Button>
 
             <div className="flex-1 space-y-4">
-                {/* RIGA 1: Attività e Dettaglio */}
-                <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_2fr_1.5fr_0.8fr_2fr_1fr] gap-4">
+                {/* RIGA 1: Listino, Attività, Dettaglio */}
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_1.5fr_2fr_0.8fr_2fr_1fr] gap-4">
                     <div className="space-y-1">
-                        <Label className="text-xs text-slate-700 truncate font-bold">Attività *</Label>
-                        <Select value="corsi" onValueChange={() => { }}>
-                            <SelectTrigger className="h-9 bg-slate-50">
-                                <SelectValue placeholder="Corsi" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="corsi">Corsi</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label className="text-xs text-slate-700 truncate font-bold">SKU / Dettaglio Attività *</Label>
-                        <Select value={row.skus[0] || ""} onValueChange={(val) => {
-                            updateRow(row.id, 'skus', [val]);
-                            if (row.periodId && listinoItems) {
-                                const courseId = parseInt(val);
-                                const item = listinoItems.find(i => i.entityType === "course" && i.entityId === courseId);
-                                if (item) {
-                                    let finalPrice = parseFloat(item.price as string);
-                                    if (item.quoteId) {
-                                        const q = quotes.find(qt => qt.id === item.quoteId);
-                                        if (q) finalPrice = parseFloat(q.amount as string);
-                                    }
-                                    if (!isNaN(finalPrice)) updateRow(row.id, 'basePrice', finalPrice);
-                                }
-                            }
+                        <Label className="text-xs text-slate-700 truncate font-bold">Listino *</Label>
+                        <Select value={row.periodId} onValueChange={(val) => {
+                            updateRowBatch(row.id, {
+                                periodId: val,
+                                activityType: '',
+                                skus: [],
+                                basePrice: 0
+                            });
                         }}>
-                            <SelectTrigger className="h-9 bg-yellow-50/50 border-yellow-200">
-                                <SelectValue placeholder="Seleziona..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {courses?.map(c => (
-                                    <SelectItem key={c.id} value={c.id.toString()}>{c.name} {c.sku ? `(${c.sku})` : ''}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label className="text-xs text-slate-700 truncate font-bold">Periodo Listino</Label>
-                        <Select value={row.periodId} onValueChange={(val) => updateRow(row.id, 'periodId', val)}>
                             <SelectTrigger className="h-9 bg-yellow-50/50 border-yellow-200">
                                 <SelectValue placeholder="Periodo..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {priceLists?.map(pl => (
                                     <SelectItem key={pl.id} value={pl.id.toString()}>{pl.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label className={cn("text-xs truncate font-bold", !row.periodId ? "text-slate-400" : "text-slate-700")}>Attività *</Label>
+                        <Select disabled={!row.periodId} value={row.activityType || ""} onValueChange={(val) => {
+                            updateRowBatch(row.id, {
+                                activityType: val,
+                                skus: [],
+                                basePrice: 0
+                            });
+                        }}>
+                            <SelectTrigger className={cn("h-9 border-slate-200", !row.periodId ? "bg-slate-100 opacity-50" : "bg-slate-50")}>
+                                <SelectValue placeholder="Seleziona..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {availableActivityTypes.includes("corsi") && <SelectItem value="corsi">Corsi e Discipline</SelectItem>}
+                                {availableActivityTypes.includes("prove_pagamento") && <SelectItem value="prove_pagamento">Prove a Pagamento</SelectItem>}
+                                {availableActivityTypes.includes("prove_gratuite") && <SelectItem value="prove_gratuite">Prove Gratuite</SelectItem>}
+                                {availableActivityTypes.includes("lezioni_singole") && <SelectItem value="lezioni_singole">Lezioni Singole</SelectItem>}
+                                {availableActivityTypes.includes("eventi") && <SelectItem value="eventi">Workshop</SelectItem>}
+                                {availableActivityTypes.includes("domeniche") && <SelectItem value="domeniche">Domeniche in Movimento</SelectItem>}
+                                {availableActivityTypes.includes("allenamenti") && <SelectItem value="allenamenti">Allenamenti/Affitti</SelectItem>}
+                                {availableActivityTypes.includes("lezioni_individuali") && <SelectItem value="lezioni_individuali">Lezioni Individuali</SelectItem>}
+                                {availableActivityTypes.includes("campus") && <SelectItem value="campus">Campus</SelectItem>}
+                                {availableActivityTypes.includes("saggi") && <SelectItem value="saggi">Saggi</SelectItem>}
+                                {availableActivityTypes.includes("vacanze_studio") && <SelectItem value="vacanze_studio">Vacanze Studio</SelectItem>}
+                                {availableActivityTypes.includes("servizi_extra") && <SelectItem value="servizi_extra">Servizi Extra</SelectItem>}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label className={cn("text-xs truncate font-bold", !row.activityType ? "text-slate-400" : "text-slate-700")}>SKU / Dettaglio Attività *</Label>
+                        <Select disabled={!row.activityType} value={row.skus[0] || ""} onValueChange={(val) => {
+                            updateRow(row.id, 'skus', [val]);
+                        }}>
+                            <SelectTrigger className={cn("h-9 border-slate-200", !row.activityType ? "bg-slate-100 opacity-50" : "bg-white")}>
+                                <SelectValue placeholder="Seleziona..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {currentCatalog?.filter(c => {
+                                    // Mostra solo SKU di cui esiste un record nel listino, se periodId è selezionato
+                                    if (!row.periodId || !listinoItems) return true;
+                                    let eType = "course";
+                                    if (row.activityType === "eventi") eType = "workshop";
+                                    else if (row.activityType === "prove_pagamento") eType = "paid_trial";
+                                    else if (row.activityType === "prove_gratuite") eType = "free_trial";
+                                    else if (row.activityType === "lezioni_singole") eType = "single_lesson";
+                                    else if (row.activityType === "domeniche") eType = "sunday_activity";
+                                    else if (row.activityType === "allenamenti") eType = "training";
+                                    else if (row.activityType === "lezioni_individuali") eType = "individual_lesson";
+                                    else if (row.activityType === "campus") eType = "campus_activity";
+                                    else if (row.activityType === "saggi") eType = "recital";
+                                    else if (row.activityType === "vacanze_studio") eType = "vacation_study";
+                                    else if (row.activityType === "servizi_extra") eType = "booking_service";
+
+                                    return listinoItems.some(i => i.entityType === eType && i.entityId === c.id);
+                                }).map(c => (
+                                    <SelectItem key={c.id} value={c.id.toString()}>{c.name} {c.sku ? `(${c.sku})` : ''}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -612,7 +819,7 @@ function CartTableRow({ row, courses, priceLists, quotes, updateRow, removeCartR
                 {/* RIGA 2: Sconti */}
                 <div className="grid grid-cols-1 xl:grid-cols-6 gap-4">
                     <div className="space-y-1">
-                        <Label className="text-xs text-emerald-700 truncate">Cod. Promo 2</Label>
+                        <Label className="text-xs text-emerald-700 truncate">Cod. Promo</Label>
                         <Input className="h-9 bg-emerald-50/30 font-mono text-xs uppercase" placeholder="COD. PERSONALE" />
                     </div>
                     <div className="space-y-1">
@@ -625,7 +832,7 @@ function CartTableRow({ row, courses, priceLists, quotes, updateRow, removeCartR
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-xs text-blue-700 truncate">Cod. Sconto 1</Label>
+                        <Label className="text-xs text-blue-700 truncate">Cod. Sconto</Label>
                         <Input className="h-9 bg-blue-50/30 font-mono text-xs uppercase" placeholder="COD. CAMPAGNA" value={row.discountCode || ""} onChange={(e) => updateRow(row.id, 'discountCode', e.target.value)} />
                     </div>
                     <div className="space-y-1">

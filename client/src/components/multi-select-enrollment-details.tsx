@@ -99,7 +99,7 @@ export function MultiSelectEnrollmentDetails({ selectedDetails, onChange, testId
     <div className="space-y-1">
       {testIdPrefix !== "inline" && (
         <div className="flex items-center gap-2">
-          <Label>Dettaglio Iscrizione (N)</Label>
+          <Label>Dettaglio Iscrizione</Label>
           <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="h-5 w-5 ml-1 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50">

@@ -185,6 +185,7 @@ function Router() {
       <ProtectedRoute path="/attivita/campus" component={CampusActivities} />
       <ProtectedRoute path="/attivita/saggi" component={Recitals} />
       <ProtectedRoute path="/attivita/vacanze-studio" component={VacationStudies} />
+      <ProtectedRoute path="/attivita/servizi" component={BookingServices} />
 
       <ProtectedRoute path="/categorie-workshop" component={WorkshopCategories} />
       <ProtectedRoute path="/categorie-domeniche" component={SundayCategories} />

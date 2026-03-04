@@ -752,7 +752,10 @@ export const paidTrialsRelations = relations(paidTrials, ({ one }) => ({
   }),
 }));
 
-export const insertPaidTrialSchema = createInsertSchema(paidTrials).omit({
+export const insertPaidTrialSchema = createInsertSchema(paidTrials, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   currentEnrollment: true,
   createdAt: true,
@@ -813,7 +816,10 @@ export const freeTrialsRelations = relations(freeTrials, ({ one }) => ({
   }),
 }));
 
-export const insertFreeTrialSchema = createInsertSchema(freeTrials).omit({
+export const insertFreeTrialSchema = createInsertSchema(freeTrials, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   currentEnrollment: true,
   createdAt: true,
@@ -874,7 +880,10 @@ export const singleLessonsRelations = relations(singleLessons, ({ one }) => ({
   }),
 }));
 
-export const insertSingleLessonSchema = createInsertSchema(singleLessons).omit({
+export const insertSingleLessonSchema = createInsertSchema(singleLessons, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   currentEnrollment: true,
   createdAt: true,
@@ -935,7 +944,10 @@ export const sundayActivitiesRelations = relations(sundayActivities, ({ one }) =
   }),
 }));
 
-export const insertSundayActivitySchema = createInsertSchema(sundayActivities).omit({
+export const insertSundayActivitySchema = createInsertSchema(sundayActivities, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   currentEnrollment: true,
   createdAt: true,
@@ -996,7 +1008,10 @@ export const trainingsRelations = relations(trainings, ({ one }) => ({
   }),
 }));
 
-export const insertTrainingSchema = createInsertSchema(trainings).omit({
+export const insertTrainingSchema = createInsertSchema(trainings, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   currentEnrollment: true,
   createdAt: true,
@@ -1057,7 +1072,10 @@ export const individualLessonsRelations = relations(individualLessons, ({ one })
   }),
 }));
 
-export const insertIndividualLessonSchema = createInsertSchema(individualLessons).omit({
+export const insertIndividualLessonSchema = createInsertSchema(individualLessons, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   currentEnrollment: true,
   createdAt: true,
@@ -1118,7 +1136,10 @@ export const campusActivitiesRelations = relations(campusActivities, ({ one }) =
   }),
 }));
 
-export const insertCampusActivitySchema = createInsertSchema(campusActivities).omit({
+export const insertCampusActivitySchema = createInsertSchema(campusActivities, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   currentEnrollment: true,
   createdAt: true,
@@ -1179,7 +1200,10 @@ export const recitalsRelations = relations(recitals, ({ one }) => ({
   }),
 }));
 
-export const insertRecitalSchema = createInsertSchema(recitals).omit({
+export const insertRecitalSchema = createInsertSchema(recitals, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   currentEnrollment: true,
   createdAt: true,
@@ -1240,7 +1264,10 @@ export const vacationStudiesRelations = relations(vacationStudies, ({ one }) => 
   }),
 }));
 
-export const insertVacationStudySchema = createInsertSchema(vacationStudies).omit({
+export const insertVacationStudySchema = createInsertSchema(vacationStudies, {
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+}).omit({
   id: true,
   currentEnrollment: true,
   createdAt: true,

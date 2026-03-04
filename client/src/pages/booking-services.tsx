@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -6,15 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Sparkles } from "lucide-react";
-import type { BookingService, InsertBookingService } from "@shared/schema";
+import type { BookingService, InsertBookingService, BookingServiceCategory } from "@shared/schema";
 
 export default function BookingServices() {
     const { toast } = useToast();
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingService, setEditingService] = useState<BookingService | null>(null);
+
+    const { data: categories } = useQuery<BookingServiceCategory[]>({
+        queryKey: ["/api/booking-service-categories"],
+    });
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(window.location.search);
+        if (queryParams.get("action") === "create") {
+            setIsFormOpen(true);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, []);
 
     const { data: services, isLoading } = useQuery<BookingService[]>({
         queryKey: ["/api/booking-services"],
@@ -68,6 +81,7 @@ export default function BookingServices() {
         const formData = new FormData(e.currentTarget);
         const data: InsertBookingService = {
             name: formData.get("name") as string,
+            categoryId: formData.get("categoryId") ? parseInt(formData.get("categoryId") as string) : null,
             description: formData.get("description") as string || null,
             price: formData.get("price") ? (formData.get("price") as string) : null,
             color: formData.get("color") as string || null,
@@ -195,6 +209,20 @@ export default function BookingServices() {
                                 rows={3}
                                 placeholder="Dettagli servizio..."
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="categoryId">Categoria</Label>
+                            <Select name="categoryId" defaultValue={editingService?.categoryId?.toString() || ""}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Seleziona la Categoria" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categories?.map((c) => (
+                                        <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div className="space-y-2">

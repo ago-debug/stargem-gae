@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Activity, Calendar, Sparkles, CreditCard, Gift, BookOpen,
-  Sun, Dumbbell, UserCheck, Users, Award, Music
+  Sun, Dumbbell, UserCheck, Users, Award, Music, Database
 } from "lucide-react";
 
 const activityMenuItems = [
@@ -11,6 +11,7 @@ const activityMenuItems = [
   { id: "workshop", label: "Workshop", icon: Sparkles, url: "/attivita/workshops" },
   { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, url: "/attivita/prove-pagamento" },
   { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, url: "/attivita/prove-gratuite" },
+  { id: "servizi", label: "Servizi Extra", icon: Database, url: "/attivita/servizi" },
   { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, url: "/attivita/lezioni-singole" },
   { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, url: "/attivita/domeniche-movimento" },
   { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, url: "/attivita/allenamenti" },
