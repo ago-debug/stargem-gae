@@ -1,19 +1,23 @@
 
-import { db } from '../server/db';
-import { sql } from 'drizzle-orm';
+import { db } from "../server/db";
+import { sql } from "drizzle-orm";
 
 async function checkTables() {
     try {
-        console.log("Checking for 'price_lists' table...");
-        // @ts-ignore
-        const [rows1] = await db.execute(sql`SHOW TABLES LIKE 'price_lists'`);
-        console.log("price_lists check result:", rows1);
+        console.log("Checking tables...");
+        const [result] = await db.execute(sql`SHOW TABLES LIKE 'booking_services'`);
+        console.log("Table booking_services status:", result);
 
-        console.log("Checking for 'price_list_items' table...");
-        // @ts-ignore
-        const [rows2] = await db.execute(sql`SHOW TABLES LIKE 'price_list_items'`);
-        console.log("price_list_items check result:", rows2);
+        const [categoriesResult] = await db.execute(sql`SHOW TABLES LIKE 'booking_service_categories'`);
+        console.log("Table booking_service_categories status:", categoriesResult);
 
+        if (Object.keys(result).length === 0) {
+            console.log("Table 'booking_services' is MISSING!");
+        } else {
+            console.log("Table 'booking_services' exists.");
+            const [columns] = await db.execute(sql`DESCRIBE booking_services`);
+            console.log("Columns in booking_services:", columns);
+        }
     } catch (error) {
         console.error("Error checking tables:", error);
     } finally {
