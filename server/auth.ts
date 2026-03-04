@@ -54,7 +54,7 @@ export function setupAuth(app: Express) {
         }),
         cookie: {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: false, // Changed to false to allow testing on http://localhost:5001
             maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
         },
     };
@@ -101,8 +101,9 @@ export function setupAuth(app: Express) {
                     }
                 }
 
-                // Safety: if user is admin string, ensure they have wildcard even if role DB entry is missing
-                if (user.role.toLowerCase() === 'admin') {
+                // Safety: if user is admin string or role has wildcard, ensure they have full access
+                const roleNameLower = user.role.toLowerCase();
+                if (roleNameLower === 'admin' || roleNameLower === 'admministratore totale' || (permissions as any)["*"] === "write") {
                     permissions = { "*": "write", ...((permissions as any) || {}) };
                 }
 
