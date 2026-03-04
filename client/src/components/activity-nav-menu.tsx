@@ -30,7 +30,7 @@ export function ActivityNavMenu() {
   });
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin" data-testid="activity-nav-menu">
+    <div className="flex items-center gap-2 overflow-x-auto pt-3 pb-2 px-1 scrollbar-thin" data-testid="activity-nav-menu">
       {activityMenuItems.map((item) => {
         const activeCount = summary?.[item.id]?.active || 0;
 
@@ -47,7 +47,7 @@ export function ActivityNavMenu() {
             {item.label}
             {item.id !== "panoramica" && activeCount > 0 && (
               <span
-                className="absolute -top-2 -right-2 px-1.5 min-w-[20px] h-[20px] text-[11px] font-bold flex items-center justify-center rounded-full bg-amber-500 text-white shadow-sm"
+                className="absolute -top-2.5 -right-2 px-1.5 min-w-[20px] h-[20px] text-[11px] font-bold flex items-center justify-center rounded-full bg-gradient-to-b from-amber-400 to-amber-500 border border-amber-300 text-white shadow-md z-10"
               >
                 {activeCount}
               </span>

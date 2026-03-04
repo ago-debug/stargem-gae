@@ -328,7 +328,7 @@ export function AppSidebar() {
                           <item.icon className="w-4 h-4 mr-2" />
                           <span>{item.title}</span>
                           {item.url === "/attivita" && totalActiveActivities > 0 && (
-                            <span className="ml-auto flex-shrink-0 min-w-[20px] h-[20px] px-1.5 text-[11px] font-bold flex items-center justify-center rounded-full bg-amber-500 text-white shadow-sm">
+                            <span className="ml-auto flex-shrink-0 min-w-[20px] h-[20px] px-1.5 text-[11px] font-bold flex items-center justify-center rounded-full bg-gradient-to-b from-amber-400 to-amber-500 border border-amber-300 text-white shadow-md z-10">
                               {totalActiveActivities}
                             </span>
                           )}
