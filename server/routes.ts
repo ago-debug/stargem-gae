@@ -50,6 +50,18 @@ import {
   teamNotes,
   insertTeamNoteSchema,
   insertBookingServiceCategorySchema,
+  courses,
+  workshops,
+  paidTrials,
+  freeTrials,
+  bookingServices,
+  singleLessons,
+  sundayActivities,
+  trainings,
+  individualLessons,
+  campusActivities,
+  recitals,
+  vacationStudies
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -6086,6 +6098,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating Copilot note:", error);
       res.status(500).json({ error: "Failed to generate note" });
+    }
+  });
+
+  app.get("/api/activities-summary", isAuthenticated, async (req, res) => {
+    try {
+      const summaries: Record<string, { total: number, active: number }> = {};
+
+      const fetchCount = async (table: any, key: string) => {
+        const items = await db.select().from(table);
+        summaries[key] = {
+          total: items.length,
+          active: items.filter((i: any) => i.active).length
+        };
+      };
+
+      await Promise.all([
+        fetchCount(courses, "corsi"),
+        fetchCount(workshops, "workshop"),
+        fetchCount(paidTrials, "prove-pagamento"),
+        fetchCount(freeTrials, "prove-gratuite"),
+        fetchCount(bookingServices, "servizi"),
+        fetchCount(singleLessons, "lezioni-singole"),
+        fetchCount(sundayActivities, "domeniche-movimento"),
+        fetchCount(trainings, "allenamenti"),
+        fetchCount(individualLessons, "lezioni-individuali"),
+        fetchCount(campusActivities, "campus"),
+        fetchCount(recitals, "saggi"),
+        fetchCount(vacationStudies, "vacanze-studio")
+      ]);
+
+      res.json(summaries);
+    } catch (error) {
+      console.error("Error fetching activities summary:", error);
+      res.status(500).json({ error: "Failed to fetch activities summary" });
     }
   });
 

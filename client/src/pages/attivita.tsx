@@ -303,6 +303,10 @@ export default function Attivita() {
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
 
+  const { data: summary } = useQuery<Record<string, { total: number, active: number }>>({
+    queryKey: ["/api/activities-summary"]
+  });
+
   const activeCourses = courses?.filter(c => c.active) || [];
   const inactiveCourses = courses?.filter(c => !c.active) || [];
   const activeWorkshops = workshops?.filter(w => w.active) || [];
@@ -466,15 +470,9 @@ export default function Attivita() {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {activitySections.map((section) => {
-                    let count = 0;
-                    let active = 0;
-                    if (section.type === "corsi") {
-                      count = courses?.length || 0;
-                      active = activeCourses.length;
-                    } else if (section.type === "workshop") {
-                      count = workshops?.length || 0;
-                      active = activeWorkshops.length;
-                    }
+                    const count = summary?.[section.id]?.total || 0;
+                    const active = summary?.[section.id]?.active || 0;
+
                     return (
                       <button
                         key={section.id}
