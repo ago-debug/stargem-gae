@@ -432,10 +432,16 @@ export default function MascheraInputGenerale() {
       const sesso = day > 40 ? 'F' : 'M';
       if (day > 40) day -= 40;
 
-      const dataNascita = `${year} -${month.toString().padStart(2, '0')} -${day.toString().padStart(2, '0')} `;
+      const dataNascita = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      const birthDate = new Date(dataNascita);
+
+      // Check for valid Date and valid Day
+      if (isNaN(birthDate.getTime()) || birthDate.getDate() !== day) {
+        return null;
+      }
+
       const codiceComune = cf.substring(11, 15).toUpperCase();
 
-      const birthDate = new Date(dataNascita);
       const today = new Date();
       let eta = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
@@ -492,6 +498,16 @@ export default function MascheraInputGenerale() {
               provinciaNascita: comuneData?.province?.code || comuneData?.provinceCode || "",
             }));
           });
+        } else {
+          setFormData((prev: any) => ({
+            ...prev,
+            dataNascita: "",
+            sesso: "",
+            eta: "",
+            luogoNascita: "",
+            provinciaNascita: "",
+            codComune: "",
+          }));
         }
       } else {
         setFormData((prev: any) => ({
@@ -530,6 +546,15 @@ export default function MascheraInputGenerale() {
               provinciaNascitaGen1: comuneData?.province?.code || "",
             }));
           });
+        } else {
+          setFormData((prev: any) => ({
+            ...prev,
+            dataNascitaGen1: "",
+            sessoGen1: "",
+            etaGen1: "",
+            luogoNascitaGen1: "",
+            provinciaNascitaGen1: "",
+          }));
         }
       } else {
         setFormData((prev: any) => ({
@@ -567,6 +592,15 @@ export default function MascheraInputGenerale() {
               provinciaNascitaGen2: comuneData?.province?.code || "",
             }));
           });
+        } else {
+          setFormData((prev: any) => ({
+            ...prev,
+            dataNascitaGen2: "",
+            sessoGen2: "",
+            etaGen2: "",
+            luogoNascitaGen2: "",
+            provinciaNascitaGen2: "",
+          }));
         }
       } else {
         setFormData((prev: any) => ({
