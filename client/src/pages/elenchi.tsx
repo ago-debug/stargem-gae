@@ -183,7 +183,7 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
         </div>
 
         <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-          {items?.map((item) => (
+          {items && [...items].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })).map((item) => (
             <div
               key={item.id}
               className="flex items-center gap-2 py-2 px-3 rounded-md border border-border/40 bg-white hover:bg-muted/30 transition-all group shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
@@ -469,7 +469,7 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
         </div>
 
         <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-          {list.items?.map((item) => (
+          {list.items && [...list.items].sort((a, b) => a.value.localeCompare(b.value, undefined, { numeric: true })).map((item) => (
             <div
               key={item.id}
               className="flex items-center gap-2 py-2 px-3 rounded-md border border-border/40 bg-white hover:bg-muted/30 transition-all group shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
@@ -621,7 +621,7 @@ function SimpleListsManager() {
 
       {lists && lists.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-          {lists.map(list => (
+          {[...lists].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })).map(list => (
             <SimpleListSection key={list.id} list={list} />
           ))}
         </div>

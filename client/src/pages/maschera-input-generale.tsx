@@ -1171,9 +1171,12 @@ export default function MascheraInputGenerale() {
     saveMutation.mutate({ memberData, enrollments, payments: paymentsPayload });
   };
 
+  const hasOrphanPayments = payments.some(p => !p.attivita || !p.dettaglioId);
+
   const isFormValid = !!(
     formData.cognome.trim() &&
-    formData.nome.trim()
+    formData.nome.trim() &&
+    !hasOrphanPayments
   );
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
@@ -1395,8 +1398,8 @@ export default function MascheraInputGenerale() {
                 size="sm"
                 className={`text-xs h-8 ${Object.keys(dirtyFields).length > 0 && isFormValid ? 'gold-3d-button' : 'bg-background'} `}
                 data-testid="button-salva"
-                disabled={(!isFormValid || saveMutation.isPending) && Object.keys(dirtyFields).length === 0}
-                title={!isFormValid ? "Compila tutti i campi obbligatori (*) per salvare" : Object.keys(dirtyFields).length === 0 ? "Nessuna modifica da salvare" : ""}
+                disabled={!isFormValid || saveMutation.isPending || Object.keys(dirtyFields).length === 0}
+                title={!isFormValid ? (hasOrphanPayments ? "Errore: Ci sono pagamenti orfani (senza attività). Correggi prima di salvare." : "Compila tutti i campi obbligatori (*) per salvare") : Object.keys(dirtyFields).length === 0 ? "Nessuna modifica da salvare" : ""}
                 onClick={handleSave}
               >
                 <Save className={`w-3 h-3 mr-1 sidebar-icon-gold ${saveMutation.isPending ? 'animate-spin' : ''} `} />

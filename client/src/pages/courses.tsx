@@ -471,7 +471,8 @@ export default function Courses() {
     queryKey: ["/api/quotes"],
   });
 
-  const nomiCorsi = useCustomListValues("nomi-corsi");
+  const nomiCorsi = useCustomListValues("nomi_corsi");
+  const postiDisponibili = useCustomListValues("posti_disponibili");
 
   const { data: courses, isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -1059,15 +1060,18 @@ export default function Courses() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="name">Nome Corso *</Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          required
-                          defaultValue={editingCourse.name}
-                          data-testid="input-name"
-                          list="nomi-corsi-list"
-                          autoComplete="off"
-                        />
+                        <Select name="name" defaultValue={editingCourse.name} required>
+                          <SelectTrigger data-testid="select-name">
+                            <SelectValue placeholder="Seleziona corso..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {nomiCorsi?.map((nome: string, i: number) => (
+                              <SelectItem key={i} value={nome}>
+                                {nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="space-y-2">
@@ -1210,14 +1214,18 @@ export default function Courses() {
 
                       <div className="space-y-2">
                         <Label htmlFor="maxCapacity">Posti Disponibili</Label>
-                        <Input
-                          id="maxCapacity"
-                          name="maxCapacity"
-                          type="number"
-                          min="1"
-                          defaultValue={editingCourse.maxCapacity || ""}
-                          data-testid="input-maxCapacity"
-                        />
+                        <Select name="maxCapacity" defaultValue={editingCourse.maxCapacity?.toString() || ""}>
+                          <SelectTrigger data-testid="select-maxCapacity">
+                            <SelectValue placeholder="Seleziona posti..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {postiDisponibili?.map((posto: string, i: number) => (
+                              <SelectItem key={i} value={posto}>
+                                {posto}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
 
@@ -1357,14 +1365,18 @@ export default function Courses() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nome Corso *</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      required
-                      data-testid="input-name"
-                      list="nomi-corsi-list"
-                      autoComplete="off"
-                    />
+                    <Select name="name" required>
+                      <SelectTrigger data-testid="select-name">
+                        <SelectValue placeholder="Seleziona corso..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {nomiCorsi?.map((nome: string, i: number) => (
+                          <SelectItem key={i} value={nome}>
+                            {nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -1505,13 +1517,18 @@ export default function Courses() {
 
                   <div className="space-y-2">
                     <Label htmlFor="maxCapacity">Posti Disponibili</Label>
-                    <Input
-                      id="maxCapacity"
-                      name="maxCapacity"
-                      type="number"
-                      min="1"
-                      data-testid="input-maxCapacity"
-                    />
+                    <Select name="maxCapacity">
+                      <SelectTrigger data-testid="select-maxCapacity">
+                        <SelectValue placeholder="Seleziona posti..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {postiDisponibili?.map((posto: string, i: number) => (
+                          <SelectItem key={i} value={posto}>
+                            {posto}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -1637,12 +1654,7 @@ export default function Courses() {
           </DialogContent>
         </Dialog>
 
-        {/* Datalist globally available per questo form */}
-        <datalist id="nomi-corsi-list">
-          {nomiCorsi.map((nome: string) => (
-            <option key={nome} value={nome} />
-          ))}
-        </datalist>
+
       </div>
     </div>
   );
