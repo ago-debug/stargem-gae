@@ -180,6 +180,12 @@ import {
   bookingServiceCategories,
   type BookingServiceCategory,
   type InsertBookingServiceCategory,
+  customLists,
+  type CustomList,
+  type InsertCustomList,
+  customListItems,
+  type CustomListItem,
+  type InsertCustomListItem,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -248,6 +254,17 @@ export interface IStorage {
   createQuote(quote: InsertQuote): Promise<Quote>;
   updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote>;
   deleteQuote(id: number): Promise<void>;
+
+  // Custom Lists operations
+  getCustomLists(): Promise<(CustomList & { items: CustomListItem[] })[]>;
+  getCustomListBySystemName(systemName: string): Promise<(CustomList & { items: CustomListItem[] }) | undefined>;
+  createCustomList(list: InsertCustomList): Promise<CustomList>;
+  deleteCustomList(id: number): Promise<void>;
+
+  createCustomListItem(item: InsertCustomListItem): Promise<CustomListItem>;
+  createCustomListItems(listId: number, values: string[]): Promise<void>;
+  updateCustomListItem(id: number, item: Partial<InsertCustomListItem>): Promise<CustomListItem>;
+  deleteCustomListItem(id: number): Promise<void>;
 
   // Paid Trials
   getPaidTrials(): Promise<PaidTrial[]>;
@@ -3116,6 +3133,85 @@ m.*,
 
   async deleteQuote(id: number): Promise<void> {
     await db.delete(quotes).where(eq(quotes.id, id));
+  }
+
+  // --- CUSTOM LISTS IMPLEMENTATION ---
+
+  async getCustomLists(): Promise<(CustomList & { items: CustomListItem[] })[]> {
+    const lists = await db.select().from(customLists).orderBy(customLists.name);
+    const items = await db.select().from(customListItems).orderBy(customListItems.sortOrder);
+
+    return lists.map(list => ({
+      ...list,
+      items: items.filter(item => item.listId === list.id)
+    }));
+  }
+
+  async getCustomListBySystemName(systemName: string): Promise<(CustomList & { items: CustomListItem[] }) | undefined> {
+    const [list] = await db.select().from(customLists).where(eq(customLists.systemName, systemName));
+    if (!list) return undefined;
+
+    const items = await db
+      .select()
+      .from(customListItems)
+      .where(eq(customListItems.listId, list.id))
+      .orderBy(customListItems.sortOrder);
+
+    return { ...list, items };
+  }
+
+  async createCustomList(list: InsertCustomList): Promise<CustomList> {
+    const [result] = await db.insert(customLists).values(list);
+    const [inserted] = await db.select().from(customLists).where(eq(customLists.id, result.insertId));
+    return inserted;
+  }
+
+  async deleteCustomList(id: number): Promise<void> {
+    await db.delete(customLists).where(eq(customLists.id, id));
+  }
+
+  async createCustomListItem(item: InsertCustomListItem): Promise<CustomListItem> {
+    const [result] = await db.insert(customListItems).values(item);
+    const [inserted] = await db.select().from(customListItems).where(eq(customListItems.id, result.insertId));
+    return inserted;
+  }
+
+  async createCustomListItems(listId: number, values: string[]): Promise<void> {
+    if (values.length === 0) return;
+    const items = await db.select().from(customListItems).where(eq(customListItems.listId, listId));
+    let maxOrder = items.reduce((max, i) => Math.max(max, i.sortOrder || 0), 0);
+
+    // Filtra duplicati sia esistenti che nei nuovi valori via Set
+    const existingValues = new Set(items.map(i => i.value.toLowerCase()));
+    const toInsert = [];
+    for (const val of values) {
+      const trimmed = val.trim();
+      if (trimmed && !existingValues.has(trimmed.toLowerCase())) {
+        existingValues.add(trimmed.toLowerCase());
+        maxOrder++;
+        toInsert.push({
+          listId,
+          value: trimmed,
+          sortOrder: maxOrder,
+          active: true
+        });
+      }
+    }
+
+    if (toInsert.length > 0) {
+      await db.insert(customListItems).values(toInsert);
+    }
+  }
+
+  async updateCustomListItem(id: number, item: Partial<InsertCustomListItem>): Promise<CustomListItem> {
+    await db.update(customListItems).set(item).where(eq(customListItems.id, id));
+    const [updated] = await db.select().from(customListItems).where(eq(customListItems.id, id));
+    if (!updated) throw new Error("Custom list item not found");
+    return updated;
+  }
+
+  async deleteCustomListItem(id: number): Promise<void> {
+    await db.delete(customListItems).where(eq(customListItems.id, id));
   }
 
   async getPaidTrials(): Promise<PaidTrial[]> {
