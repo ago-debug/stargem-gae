@@ -3665,7 +3665,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // 1. Upsert Member
       let member;
-      if (memberData.fiscalCode) {
+      if (memberData.id) {
+        // Explicity update user by ID from the UI so changes to fiscalCode do not cause duplicate insertion errors
+        memberData.updatedBy = (req.user as any)?.username || 'System';
+        memberData.updatedAt = new Date();
+        member = await storage.updateMember(memberData.id, memberData);
+      } else if (memberData.fiscalCode) {
         const existingMember = await storage.getMemberByFiscalCode(memberData.fiscalCode);
         if (existingMember) {
           memberData.updatedBy = (req.user as any)?.username || 'System';

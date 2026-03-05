@@ -1063,6 +1063,7 @@ export default function MascheraInputGenerale() {
   const handleSave = async () => {
     // Collect all data
     const memberData = {
+      id: selectedMemberId || undefined,
       firstName: formData.nome,
       lastName: formData.cognome,
       fiscalCode: formData.codiceFiscale,
