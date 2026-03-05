@@ -30,6 +30,6 @@ export function useCustomListValues(systemName: string): string[] {
 
     return data.items
         .filter(item => item.active !== false)
-        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-        .map(item => item.value);
+        .map(item => item.value)
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 }

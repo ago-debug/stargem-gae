@@ -3242,6 +3242,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payments", isAuthenticated, checkPermission("/pagamenti", "write"), async (req, res) => {
     try {
       const validatedData = insertPaymentSchema.parse(req.body);
+
+      // Strict Validation: Prevent Orphan Payments
+      const hasValidRelation =
+        validatedData.enrollmentId ||
+        validatedData.workshopEnrollmentId ||
+        validatedData.paidTrialEnrollmentId ||
+        validatedData.freeTrialEnrollmentId ||
+        validatedData.singleLessonEnrollmentId ||
+        validatedData.sundayActivityEnrollmentId ||
+        validatedData.trainingEnrollmentId ||
+        validatedData.individualLessonEnrollmentId ||
+        validatedData.campusEnrollmentId ||
+        validatedData.recitalEnrollmentId ||
+        validatedData.vacationStudyEnrollmentId ||
+        validatedData.bookingId ||
+        validatedData.membershipId;
+
+      if (!hasValidRelation) {
+        throw new Error("Salvataggio bloccato per sicurezza: Il pagamento non è associato ad alcuna attività, iscrizione o tesseramento. Seleziona prima un'attività (Corsi, Workshop, ecc.) da pagare.");
+      }
+
       const payment = await storage.createPayment({
         ...validatedData,
         createdById: (req.user as any).id
@@ -3784,6 +3805,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const paymentData of paymentItems) {
           if (!paymentData.processed) {
             try {
+              // Strict Validation: Prevent Orphan Payments
+              const hasValidRelation =
+                paymentData.enrollmentId ||
+                paymentData.workshopEnrollmentId ||
+                paymentData.paidTrialEnrollmentId ||
+                paymentData.freeTrialEnrollmentId ||
+                paymentData.singleLessonEnrollmentId ||
+                paymentData.sundayActivityEnrollmentId ||
+                paymentData.trainingEnrollmentId ||
+                paymentData.individualLessonEnrollmentId ||
+                paymentData.campusEnrollmentId ||
+                paymentData.recitalEnrollmentId ||
+                paymentData.vacationStudyEnrollmentId ||
+                paymentData.bookingId ||
+                paymentData.membershipId;
+
+              if (!hasValidRelation) {
+                throw new Error("Salvataggio bloccato: Impossibile salvare un pagamento orfano senza alcuna attività associata.");
+              }
+
               const payment = await storage.createPayment({
                 ...paymentData,
                 memberId: member.id,
@@ -4718,9 +4759,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/custom-lists/:systemName", isAuthenticated, async (req, res) => {
     try {
-      const list = await storage.getCustomListBySystemName(req.params.systemName);
+      let list = await storage.getCustomListBySystemName(req.params.systemName);
       if (!list) {
-        return res.status(404).json({ message: "Custom list not found" });
+        // Auto-create list if it doesn't exist
+        const formattedName = req.params.systemName
+          .split('_')
+          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+
+        list = await storage.createCustomList({
+          name: formattedName,
+          systemName: req.params.systemName,
+          description: `Auto-generated list for ${formattedName}`,
+          active: true
+        });
+
+        // Return with empty items array for newly created list
+        return res.json({ ...list, items: [] });
       }
       res.json(list);
     } catch (error) {

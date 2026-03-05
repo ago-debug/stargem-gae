@@ -3139,7 +3139,7 @@ m.*,
 
   async getCustomLists(): Promise<(CustomList & { items: CustomListItem[] })[]> {
     const lists = await db.select().from(customLists).orderBy(customLists.name);
-    const items = await db.select().from(customListItems).orderBy(customListItems.sortOrder);
+    const items = await db.select().from(customListItems).orderBy(customListItems.value);
 
     return lists.map(list => ({
       ...list,
@@ -3155,7 +3155,7 @@ m.*,
       .select()
       .from(customListItems)
       .where(eq(customListItems.listId, list.id))
-      .orderBy(customListItems.sortOrder);
+      .orderBy(customListItems.value);
 
     return { ...list, items };
   }
@@ -3528,7 +3528,7 @@ m.*,
 
   // ==== WorkshopCategories ====
   async getWorkshopCategories(): Promise<WorkshopCategory[]> {
-    return await db.select().from(workshopCategories);
+    return await db.select().from(workshopCategories).orderBy(workshopCategories.name);
   }
   async getWorkshopCategory(id: number): Promise<WorkshopCategory | undefined> {
     const [item] = await db.select().from(workshopCategories).where(eq(workshopCategories.id, id));
@@ -3551,7 +3551,7 @@ m.*,
 
   // ==== SundayCategories ====
   async getSundayCategories(): Promise<SundayCategory[]> {
-    return await db.select().from(sundayCategories);
+    return await db.select().from(sundayCategories).orderBy(sundayCategories.name);
   }
   async getSundayCategory(id: number): Promise<SundayCategory | undefined> {
     const [item] = await db.select().from(sundayCategories).where(eq(sundayCategories.id, id));
@@ -3574,7 +3574,7 @@ m.*,
 
   // ==== TrainingCategories ====
   async getTrainingCategories(): Promise<TrainingCategory[]> {
-    return await db.select().from(trainingCategories);
+    return await db.select().from(trainingCategories).orderBy(trainingCategories.name);
   }
   async getTrainingCategory(id: number): Promise<TrainingCategory | undefined> {
     const [item] = await db.select().from(trainingCategories).where(eq(trainingCategories.id, id));
@@ -3597,7 +3597,7 @@ m.*,
 
   // ==== IndividualLessonCategories ====
   async getIndividualLessonCategories(): Promise<IndividualLessonCategory[]> {
-    return await db.select().from(individualLessonCategories);
+    return await db.select().from(individualLessonCategories).orderBy(individualLessonCategories.name);
   }
   async getIndividualLessonCategory(id: number): Promise<IndividualLessonCategory | undefined> {
     const [item] = await db.select().from(individualLessonCategories).where(eq(individualLessonCategories.id, id));
@@ -3620,7 +3620,7 @@ m.*,
 
   // ==== CampusCategories ====
   async getCampusCategories(): Promise<CampusCategory[]> {
-    return await db.select().from(campusCategories);
+    return await db.select().from(campusCategories).orderBy(campusCategories.name);
   }
   async getCampusCategory(id: number): Promise<CampusCategory | undefined> {
     const [item] = await db.select().from(campusCategories).where(eq(campusCategories.id, id));
@@ -3643,7 +3643,7 @@ m.*,
 
   // ==== RecitalCategories ====
   async getRecitalCategories(): Promise<RecitalCategory[]> {
-    return await db.select().from(recitalCategories);
+    return await db.select().from(recitalCategories).orderBy(recitalCategories.name);
   }
   async getRecitalCategory(id: number): Promise<RecitalCategory | undefined> {
     const [item] = await db.select().from(recitalCategories).where(eq(recitalCategories.id, id));
@@ -3666,7 +3666,7 @@ m.*,
 
   // ==== VacationCategories ====
   async getVacationCategories(): Promise<VacationCategory[]> {
-    return await db.select().from(vacationCategories);
+    return await db.select().from(vacationCategories).orderBy(vacationCategories.name);
   }
   async getVacationCategory(id: number): Promise<VacationCategory | undefined> {
     const [item] = await db.select().from(vacationCategories).where(eq(vacationCategories.id, id));
@@ -3689,7 +3689,7 @@ m.*,
 
   // ==== FreeTrials ====
   async getFreeTrials(): Promise<FreeTrial[]> {
-    return await db.select().from(freeTrials);
+    return await db.select().from(freeTrials).orderBy(freeTrials.name);
   }
   async getFreeTrial(id: number): Promise<FreeTrial | undefined> {
     const [item] = await db.select().from(freeTrials).where(eq(freeTrials.id, id));
@@ -3712,7 +3712,7 @@ m.*,
 
   // ==== SingleLessons ====
   async getSingleLessons(): Promise<SingleLesson[]> {
-    return await db.select().from(singleLessons);
+    return await db.select().from(singleLessons).orderBy(singleLessons.name);
   }
   async getSingleLesson(id: number): Promise<SingleLesson | undefined> {
     const [item] = await db.select().from(singleLessons).where(eq(singleLessons.id, id));
@@ -3735,7 +3735,7 @@ m.*,
 
   // ==== SundayActivities ====
   async getSundayActivities(): Promise<SundayActivity[]> {
-    return await db.select().from(sundayActivities);
+    return await db.select().from(sundayActivities).orderBy(sundayActivities.name);
   }
   async getSundayActivity(id: number): Promise<SundayActivity | undefined> {
     const [item] = await db.select().from(sundayActivities).where(eq(sundayActivities.id, id));
@@ -3758,7 +3758,7 @@ m.*,
 
   // ==== Trainings ====
   async getTrainings(): Promise<Training[]> {
-    return await db.select().from(trainings);
+    return await db.select().from(trainings).orderBy(trainings.name);
   }
   async getTraining(id: number): Promise<Training | undefined> {
     const [item] = await db.select().from(trainings).where(eq(trainings.id, id));
@@ -3781,7 +3781,7 @@ m.*,
 
   // ==== IndividualLessons ====
   async getIndividualLessons(): Promise<IndividualLesson[]> {
-    return await db.select().from(individualLessons);
+    return await db.select().from(individualLessons).orderBy(individualLessons.name);
   }
   async getIndividualLesson(id: number): Promise<IndividualLesson | undefined> {
     const [item] = await db.select().from(individualLessons).where(eq(individualLessons.id, id));
@@ -3804,7 +3804,7 @@ m.*,
 
   // ==== CampusActivities ====
   async getCampusActivities(): Promise<CampusActivity[]> {
-    return await db.select().from(campusActivities);
+    return await db.select().from(campusActivities).orderBy(campusActivities.name);
   }
   async getCampusActivity(id: number): Promise<CampusActivity | undefined> {
     const [item] = await db.select().from(campusActivities).where(eq(campusActivities.id, id));
@@ -3827,7 +3827,7 @@ m.*,
 
   // ==== Recitals ====
   async getRecitals(): Promise<Recital[]> {
-    return await db.select().from(recitals);
+    return await db.select().from(recitals).orderBy(recitals.name);
   }
   async getRecital(id: number): Promise<Recital | undefined> {
     const [item] = await db.select().from(recitals).where(eq(recitals.id, id));
@@ -3850,7 +3850,7 @@ m.*,
 
   // ==== VacationStudies ====
   async getVacationStudies(): Promise<VacationStudy[]> {
-    return await db.select().from(vacationStudies);
+    return await db.select().from(vacationStudies).orderBy(vacationStudies.name);
   }
   async getVacationStudy(id: number): Promise<VacationStudy | undefined> {
     const [item] = await db.select().from(vacationStudies).where(eq(vacationStudies.id, id));

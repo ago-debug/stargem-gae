@@ -1,10 +1,19 @@
 # Ultimi Aggiornamenti Progetto "CourseManager"
 
-**Periodo di riferimento:** 23 Febbraio 2026 - 3 Marzo 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 5 Marzo 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
 
 ---
+
+### 4 - 5 Marzo 2026
+* **Mappatura DB e Documentazione Architetturale Definitiva:**
+  * Sviluppato il file `database_map.md` con l'Entity-Relationship Diagram (ERD) esatto dell'attuale struttura Drizzle ORM.
+  * Creato il file guida `GAE_progetto_architettura_e_collegamenti_database.md` indicando le aree "intoccabili" (tabella pagamenti e i 12 silos delle attività) e le "zone sicure" per lo sviluppo futuro.
+  * Stilato il documento visionario `database_map_future.md` (Single Table Inheritance) che illustra come collassare le attuali 12 tabelle di attività in sole 3 macro-tabelle (`activities`, `categories`, `activity_details`) per azzerare il debito tecnico futuro, definendo il vocabolario ufficiale dell'appliance (Macro-Attività -> Categorie -> Singolo Corso/Dettaglio -> Iscritti).
+* **Prevenzione "Pagamenti Orfani" (Strict Security):**
+  * **Backend:** Implementata una validazione ferrea negli endpoint `POST /api/payments` e `POST /api/maschera-generale/save`. Il server ora blocca e rifiuta fisicamente la transazione (Throw Error) se un pagamento in arrivo ha tutte le 12 chiavi relazionali (Foreign Keys delle attività) vuote/`null`.
+  * **Frontend:** Aggiunta una sicurezza visiva dinamica nella `maschera-input-generale.tsx`. Il pulsante "Salva" si disabilita automaticamente (Grigio) scansionando l'array dei pagamenti in tempo reale se rileva transazioni sospese prive di un'attività valida assegnata dalla tendina, avvertendo l'operatore tramite tooltip.
 
 ### 3 Marzo 2026
 * **Refactoring UI Maschera Input & Badge "Gold 3D" (Progetto Z2):** 
@@ -53,4 +62,4 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Avvio Refactoring Corsi:** Riorganizzazione della struttura a componente `courses.tsx` per ospitare componenti modulari riutilizzabili ed espansione dati di iscrizione (gettoni, rimborsi, log) a scomparsa, avviando il ciclo di aggiornamenti conclusi il 25 Febbraio.
 
 ---
-*Documento generato e aggiornato al 3 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
+*Documento generato e aggiornato al 5 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
