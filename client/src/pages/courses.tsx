@@ -25,6 +25,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { useCustomListValues } from "@/hooks/use-custom-list";
 import type { Course, InsertCourse, Category, Instructor, Studio, Attendance, Member, Quote, ActivityStatus } from "@shared/schema";
 
 const WEEKDAYS = [
@@ -469,6 +470,8 @@ export default function Courses() {
   const { data: quotes } = useQuery<Quote[]>({
     queryKey: ["/api/quotes"],
   });
+
+  const nomiCorsi = useCustomListValues("nomi-corsi");
 
   const { data: courses, isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -1062,6 +1065,8 @@ export default function Courses() {
                           required
                           defaultValue={editingCourse.name}
                           data-testid="input-name"
+                          list="nomi-corsi-list"
+                          autoComplete="off"
                         />
                       </div>
 
@@ -1357,6 +1362,8 @@ export default function Courses() {
                       name="name"
                       required
                       data-testid="input-name"
+                      list="nomi-corsi-list"
+                      autoComplete="off"
                     />
                   </div>
 
@@ -1629,6 +1636,13 @@ export default function Courses() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Datalist globally available per questo form */}
+        <datalist id="nomi-corsi-list">
+          {nomiCorsi.map((nome: string) => (
+            <option key={nome} value={nome} />
+          ))}
+        </datalist>
       </div>
     </div>
   );

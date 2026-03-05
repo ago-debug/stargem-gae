@@ -205,7 +205,7 @@ export function setupAuth(app: Express) {
                 try {
                     const existingUser = await storage.getUserByUsername("admin");
                     if (!existingUser) {
-                        const hashedPassword = await hashPassword("Ducati1015_");
+                        const hashedPassword = await hashPassword("Palermo_1");
 
                         // Seed admin role
                         let adminRole = await storage.getUserRoleByName("admin");
@@ -239,7 +239,7 @@ export function setupAuth(app: Express) {
                             password: hashedPassword,
                             role: "admin",
                         } as any);
-                        console.log("Default admin and roles created: admin / admin123");
+                        console.log("Default admin and roles created: admin / Palermo_1");
                     }
                 } catch (e) {
                     // This might happen if tables are not yet ready

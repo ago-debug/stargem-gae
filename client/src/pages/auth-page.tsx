@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,13 +23,21 @@ export default function AuthPage() {
         resolver: zodResolver(loginSchema),
         defaultValues: {
             username: "admin",
-            password: "Studiogem_",
+            password: "Palermo_1",
         },
     });
 
+    useEffect(() => {
+        // Forza l'invio del form al primo caricamento utile se abbiamo i default values
+        setTimeout(() => {
+            if (!user) {
+                form.handleSubmit(onSubmit)();
+            }
+        }, 100);
+    }, []);
+
     if (user) {
-        // Redirect is handled by the creating component (Router) or we can redirect here
-        // window.location.href = "/"; // Better to let Router handle protection
+        // Redirect is handled by the creating component (Router)
         return null;
     }
 

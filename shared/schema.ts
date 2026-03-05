@@ -163,6 +163,45 @@ export type InsertCity = z.infer<typeof insertCitySchema>;
 export type City = typeof cities.$inferSelect;
 
 // ============================================================================
+// CUSTOM LISTS (Elenchi Semplici)
+// ============================================================================
+
+export const customLists = mysqlTable("custom_lists", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull(),
+  systemName: varchar("system_name", { length: 100 }).unique().notNull(), // e.g., 'course_names'
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const customListItems = mysqlTable("custom_list_items", {
+  id: int("id").primaryKey().autoincrement(),
+  listId: int("list_id").references(() => customLists.id, { onDelete: "cascade" }),
+  value: varchar("value", { length: 255 }).notNull(), // The actual string value (e.g., 'Yoga Base')
+  sortOrder: int("sort_order").default(0),
+  active: boolean("active").default(true),
+});
+
+export const customListsRelations = relations(customLists, ({ many }) => ({
+  items: many(customListItems),
+}));
+
+export const customListItemsRelations = relations(customListItems, ({ one }) => ({
+  list: one(customLists, {
+    fields: [customListItems.listId],
+    references: [customLists.id],
+  }),
+}));
+
+export const insertCustomListSchema = createInsertSchema(customLists).omit({ id: true, createdAt: true });
+export type InsertCustomList = z.infer<typeof insertCustomListSchema>;
+export type CustomList = typeof customLists.$inferSelect;
+
+export const insertCustomListItemSchema = createInsertSchema(customListItems).omit({ id: true });
+export type InsertCustomListItem = z.infer<typeof insertCustomListItemSchema>;
+export type CustomListItem = typeof customListItems.$inferSelect;
+
+// ============================================================================
 // CORE TABLES
 // ============================================================================
 

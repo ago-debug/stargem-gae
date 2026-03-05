@@ -61,7 +61,9 @@ import {
   individualLessons,
   campusActivities,
   recitals,
-  vacationStudies
+  vacationStudies,
+  insertCustomListSchema,
+  insertCustomListItemSchema
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -4697,6 +4699,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to update quote" });
+    }
+  });
+
+  // ============================================================================
+  // CUSTOM LISTS ROUTES
+  // ============================================================================
+
+  app.get("/api/custom-lists", isAuthenticated, async (req, res) => {
+    try {
+      const lists = await storage.getCustomLists();
+      res.json(lists);
+    } catch (error) {
+      console.error("[API Error] Failed to fetch custom lists:", error);
+      res.status(500).json({ message: "Failed to fetch custom lists" });
+    }
+  });
+
+  app.get("/api/custom-lists/:systemName", isAuthenticated, async (req, res) => {
+    try {
+      const list = await storage.getCustomListBySystemName(req.params.systemName);
+      if (!list) {
+        return res.status(404).json({ message: "Custom list not found" });
+      }
+      res.json(list);
+    } catch (error) {
+      console.error("[API Error] Failed to fetch custom list:", error);
+      res.status(500).json({ message: "Failed to fetch custom list" });
+    }
+  });
+
+  app.post("/api/custom-lists", isAuthenticated, async (req, res) => {
+    try {
+      // Auto-generate systemName if not provided (basic slugify)
+      const data = { ...req.body };
+      if (!data.systemName && data.name) {
+        data.systemName = data.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_');
+      }
+
+      const parsedData = insertCustomListSchema.parse(data);
+      const list = await storage.createCustomList(parsedData);
+      res.status(201).json(list);
+    } catch (error) {
+      console.error("[API Error] Failed to create custom list:", error);
+      res.status(400).json({ message: "Failed to create custom list" });
+    }
+  });
+
+  app.delete("/api/custom-lists/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCustomList(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("[API Error] Failed to delete custom list:", error);
+      res.status(500).json({ message: "Failed to delete custom list" });
+    }
+  });
+
+  app.post("/api/custom-lists/:listId/items", isAuthenticated, async (req, res) => {
+    try {
+      const listId = parseInt(req.params.listId);
+      const data = insertCustomListItemSchema.parse({ ...req.body, listId });
+      const item = await storage.createCustomListItem(data);
+      res.status(201).json(item);
+    } catch (error) {
+      console.error("[API Error] Failed to create custom list item:", error);
+      res.status(400).json({ message: "Failed to create custom list item" });
+    }
+  });
+
+  app.post("/api/custom-lists/:listId/items/bulk", isAuthenticated, async (req, res) => {
+    try {
+      const listId = parseInt(req.params.listId);
+      const { values } = req.body;
+
+      if (!Array.isArray(values)) {
+        return res.status(400).json({ message: "Expected an array of values" });
+      }
+
+      await storage.createCustomListItems(listId, values);
+      res.status(201).json({ success: true });
+    } catch (error) {
+      console.error("[API Error] Failed to bulk create custom list items:", error);
+      res.status(400).json({ message: "Failed to bulk create custom list items" });
+    }
+  });
+
+  app.patch("/api/custom-lists/:listId/items/:itemId", isAuthenticated, async (req, res) => {
+    try {
+      const itemId = parseInt(req.params.itemId);
+      const data = insertCustomListItemSchema.partial().parse(req.body);
+      const item = await storage.updateCustomListItem(itemId, data);
+      res.json(item);
+    } catch (error) {
+      console.error("[API Error] Failed to update custom list item:", error);
+      res.status(400).json({ message: "Failed to update custom list item" });
+    }
+  });
+
+  app.delete("/api/custom-lists/:listId/items/:itemId", isAuthenticated, async (req, res) => {
+    try {
+      const itemId = parseInt(req.params.itemId);
+      await storage.deleteCustomListItem(itemId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("[API Error] Failed to delete custom list item:", error);
+      res.status(500).json({ message: "Failed to delete custom list item" });
     }
   });
 

@@ -5,9 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Edit, Plus, Trash2, GripVertical, ListChecks } from "lucide-react";
+import { Trash2, GripVertical, ListChecks, Plus, Edit, ClipboardPaste } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { ActivityStatus, PaymentNote, EnrollmentDetail } from "@shared/schema";
+import type { CustomList, CustomListItem } from "@shared/schema";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 function isLightColor(hex: string): boolean {
   const c = hex.replace("#", "");
@@ -270,6 +280,362 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
   );
 }
 
+interface SimpleListSectionProps {
+  list: CustomList & { items: CustomListItem[] };
+}
+
+function SimpleListSection({ list }: SimpleListSectionProps) {
+  const { toast } = useToast();
+  const [newValue, setNewValue] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingValue, setEditingValue] = useState("");
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkValues, setBulkValues] = useState("");
+
+  const bulkCreateMutation = useMutation({
+    mutationFn: async (values: string[]) => {
+      await apiRequest("POST", `/api/custom-lists/${list.id}/items/bulk`, { values });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
+      setBulkOpen(false);
+      setBulkValues("");
+      toast({ title: "Voci caricate con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleBulkSubmit = () => {
+    // Permette di inserire valori separati da 'a capo' o da 'virgola'
+    const lines = bulkValues.split(/[\n,]+/).map(v => v.trim()).filter(v => v.length > 0);
+    if (lines.length > 0) {
+      bulkCreateMutation.mutate(lines);
+    }
+  };
+
+  const createItemMutation = useMutation({
+    mutationFn: async (value: string) => {
+      const maxOrder = list.items?.reduce((max, i) => Math.max(max, i.sortOrder || 0), 0) || 0;
+      await apiRequest("POST", `/api/custom-lists/${list.id}/items`, { value, sortOrder: maxOrder + 1, active: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
+      setNewValue("");
+      toast({ title: `Voce aggiunta a ${list.name}` });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateItemMutation = useMutation({
+    mutationFn: async ({ id, value }: { id: number; value: string }) => {
+      await apiRequest("PATCH", `/api/custom-lists/${list.id}/items/${id}`, { value });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
+      setEditingId(null);
+      setEditingValue("");
+      toast({ title: "Voce aggiornata" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteItemMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/custom-lists/${list.id}/items/${id}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
+      toast({ title: "Voce eliminata" });
+    },
+  });
+
+  const deleteListMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", `/api/custom-lists/${list.id}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
+      toast({ title: `Elenco ${list.name} eliminato` });
+    },
+  });
+
+  return (
+    <Card className="border-border/60 shadow-sm bg-card/30" data-testid={`card-custom-list-${list.id}`}>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-6 group">
+        <div>
+          <CardTitle className="text-base font-bold text-foreground">
+            {list.name}
+          </CardTitle>
+          {list.description && <p className="text-xs text-muted-foreground mt-1">{list.description}</p>}
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="text-[10px] font-bold bg-muted/60 h-5">
+            {list.items?.length || 0} voci
+          </Badge>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity"
+            onClick={() => {
+              if (confirm(`Sei sicuro di voler eliminare l'intero elenco "${list.name}" e tutte le sue voci? Questa azione non può essere annullata.`)) {
+                deleteListMutation.mutate();
+              }
+            }}
+            title="Elimina Elenco Semplice"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Nuova voce..."
+            value={newValue}
+            onChange={(e) => setNewValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && newValue.trim()) {
+                e.preventDefault();
+                createItemMutation.mutate(newValue.trim());
+              }
+            }}
+            className="flex-1 h-10 bg-white shadow-sm border-border/50 text-[13px]"
+          />
+          <Button
+            type="button"
+            size="icon"
+            className="gold-3d-button flex-shrink-0 w-10 h-10"
+            onClick={() => {
+              if (newValue.trim()) {
+                if (list.items?.some(i => i.value.toLowerCase() === newValue.trim().toLowerCase())) {
+                  alert("Questa voce esiste già in questo elenco!");
+                  return;
+                }
+                createItemMutation.mutate(newValue.trim());
+              }
+            }}
+            disabled={!newValue.trim() || createItemMutation.isPending}
+          >
+            <Plus className="w-5 h-5" />
+          </Button>
+          <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
+            <DialogTrigger asChild>
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="flex-shrink-0 w-10 h-10 border-border/50 text-muted-foreground hover:bg-muted/50 hover:text-foreground shadow-sm bg-white"
+                title="Inserimento multiplo massivo"
+              >
+                <ClipboardPaste className="w-4 h-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Importazione Massiva in "{list.name}"</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Incolla in questo box una lista di nomi/valori copiando ad esempio da Excel, Word o blocco note. <br />
+                  Puoi separare i valori andando <strong>'a capo'</strong> (una riga per ogni nome) oppure usando la <strong>virgola</strong>.<br />
+                  I valori vuoti e gli eventuali duplicati verranno ignorati automaticamente.
+                </p>
+                <Textarea
+                  placeholder={"Es.\nCorso Yoga\nCorso Pilates\n\noppure:\nCorso Yoga, Corso Pilates, Corso Zumba"}
+                  value={bulkValues}
+                  onChange={(e) => setBulkValues(e.target.value)}
+                  className="min-h-[250px] font-mono text-sm leading-relaxed whitespace-pre bg-muted/30"
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => { setBulkOpen(false); setBulkValues(""); }}>Annulla</Button>
+                <Button
+                  onClick={handleBulkSubmit}
+                  disabled={!bulkValues.trim() || bulkCreateMutation.isPending}
+                  className="gold-3d-button px-6"
+                >
+                  {bulkCreateMutation.isPending ? "Caricamento..." : `Importa ${bulkValues.split(/[\n,]+/).filter(v => v.trim().length > 0).length} Voci`}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          {list.items?.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center gap-2 py-2 px-3 rounded-md border border-border/40 bg-white hover:bg-muted/30 transition-all group shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+            >
+              <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0 cursor-grab active:cursor-grabbing" />
+
+              {editingId === item.id ? (
+                <div className="flex items-center gap-2 flex-1">
+                  <Input
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    className="h-8 text-sm flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && editingValue.trim()) {
+                        e.preventDefault();
+                        updateItemMutation.mutate({ id: item.id, value: editingValue.trim() });
+                      }
+                      if (e.key === "Escape") {
+                        setEditingId(null);
+                        setEditingValue("");
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <Button
+                    type="button"
+                    size="icon"
+                    className="gold-3d-button flex-shrink-0 h-8 w-8"
+                    onClick={() => {
+                      if (editingValue.trim()) {
+                        updateItemMutation.mutate({ id: item.id, value: editingValue.trim() });
+                      }
+                    }}
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex-1 min-w-0 text-[13px] font-medium text-foreground">
+                    {item.value}
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-muted-foreground hover:bg-amber-100 hover:text-amber-600"
+                      onClick={() => {
+                        setEditingId(item.id);
+                        setEditingValue(item.value);
+                      }}
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-muted-foreground hover:bg-red-50 hover:text-destructive"
+                      onClick={() => {
+                        if (confirm(`Eliminare "${item.value}"?`)) {
+                          deleteItemMutation.mutate(item.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+          {(!list.items || list.items.length === 0) && (
+            <p className="text-sm text-muted-foreground text-center py-6 bg-muted/10 rounded-md border border-dashed border-border/50">Nessuna voce inserita in questo elenco.</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SimpleListsManager() {
+  const { toast } = useToast();
+  const [newListName, setNewListName] = useState("");
+  const [newListDescription, setNewListDescription] = useState("");
+
+  const { data: lists } = useQuery<(CustomList & { items: CustomListItem[] })[]>({
+    queryKey: ["/api/custom-lists"],
+  });
+
+  const createListMutation = useMutation({
+    mutationFn: async (data: { name: string; description?: string }) => {
+      await apiRequest("POST", "/api/custom-lists", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
+      setNewListName("");
+      setNewListDescription("");
+      toast({ title: "Nuovo elenco semplice creato con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  return (
+    <div className="space-y-6 pt-10 border-t border-border mt-10">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-foreground">Elenchi Semplici</h2>
+          <p className="text-sm text-muted-foreground">Gruppi personalizzati per menu a tendina e campi di selezione</p>
+        </div>
+      </div>
+
+      <Card className="border-border/60 shadow-sm bg-muted/20">
+        <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4 items-end">
+          <div className="w-full sm:flex-1 space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Nome Nuovo Elenco</label>
+            <Input
+              placeholder="es. Nomi Corsi"
+              value={newListName}
+              onChange={(e) => setNewListName(e.target.value)}
+              className="h-10 border-border/50 shadow-sm"
+            />
+          </div>
+          <div className="w-full sm:flex-[1.5] space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Descrizione (Opzionale)</label>
+            <Input
+              placeholder="es. Usato nelle impostazioni corsi"
+              value={newListDescription}
+              onChange={(e) => setNewListDescription(e.target.value)}
+              className="h-10 border-border/50 shadow-sm"
+            />
+          </div>
+          <Button
+            className="w-full sm:w-auto h-10 px-8 gold-3d-button font-medium whitespace-nowrap"
+            onClick={() => {
+              if (newListName.trim()) {
+                createListMutation.mutate({ name: newListName.trim(), description: newListDescription.trim() || undefined });
+              }
+            }}
+            disabled={!newListName.trim() || createListMutation.isPending}
+          >
+            Crea Elenco Semplice
+          </Button>
+        </CardContent>
+      </Card>
+
+      {lists && lists.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+          {lists.map(list => (
+            <SimpleListSection key={list.id} list={list} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 rounded-xl border border-dashed border-border mt-8 flex flex-col items-center justify-center bg-card/30">
+          <ListChecks className="h-10 w-10 text-muted-foreground/30 mb-4" />
+          <h3 className="text-lg font-medium text-foreground">Nessun elenco personalizzato in archivio</h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm">Crea il tuo primo elenco qui sopra per poterlo utilizzare nei campi a tendina del gestionale.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Elenchi() {
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
@@ -289,29 +655,55 @@ export default function Elenchi() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <EditableListSection
-          title="Stato"
-          queryKey="/api/activity-statuses"
-          apiPath="/api/activity-statuses"
-          emptyMessage="Nessuno stato definito"
-          testIdPrefix="stato"
-        />
-        <EditableListSection
-          title="Note Pagamenti"
-          queryKey="/api/payment-notes"
-          apiPath="/api/payment-notes"
-          emptyMessage="Nessuna nota pagamento definita"
-          testIdPrefix="note-pagamenti"
-        />
-        <EditableListSection
-          title="Dettaglio Iscrizione"
-          queryKey="/api/enrollment-details"
-          apiPath="/api/enrollment-details"
-          emptyMessage="Nessun dettaglio iscrizione definito"
-          testIdPrefix="dettaglio-iscrizione"
-        />
-      </div>
+      <Tabs defaultValue="semplici" className="space-y-8">
+        <div className="w-full flex justify-center">
+          <TabsList className="bg-muted/50 p-1 h-auto grid grid-cols-2 w-full max-w-md shadow-sm border border-border/50">
+            <TabsTrigger value="semplici" className="py-2.5 px-4 rounded font-semibold text-sm">
+              Elenchi Semplici
+            </TabsTrigger>
+            <TabsTrigger value="colorati" className="py-2.5 px-4 rounded font-semibold text-sm">
+              Elenchi Colorati
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="semplici" className="m-0 border-none p-0 outline-none mt-0">
+          <div className="-mt-10">
+            <SimpleListsManager />
+          </div>
+        </TabsContent>
+        <TabsContent value="colorati" className="m-0 border-none p-0 outline-none">
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Elenchi Colorati Multi</h2>
+              <p className="text-sm text-muted-foreground">Elenchi con opzioni cromatiche specifiche, principalmente usati per stati visivi.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <EditableListSection
+                title="Stato"
+                queryKey="/api/activity-statuses"
+                apiPath="/api/activity-statuses"
+                emptyMessage="Nessuno stato definito"
+                testIdPrefix="stato"
+              />
+              <EditableListSection
+                title="Note Pagamenti"
+                queryKey="/api/payment-notes"
+                apiPath="/api/payment-notes"
+                emptyMessage="Nessuna nota pagamento definita"
+                testIdPrefix="note-pagamenti"
+              />
+              <EditableListSection
+                title="Dettaglio Iscrizione"
+                queryKey="/api/enrollment-details"
+                apiPath="/api/enrollment-details"
+                emptyMessage="Nessun dettaglio iscrizione definito"
+                testIdPrefix="dettaglio-iscrizione"
+              />
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
