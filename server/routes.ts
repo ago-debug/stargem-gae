@@ -4767,15 +4767,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
 
-        list = await storage.createCustomList({
+        const newList = await storage.createCustomList({
           name: formattedName,
           systemName: req.params.systemName,
-          description: `Auto-generated list for ${formattedName}`,
-          active: true
+          description: `Auto-generated list for ${formattedName}`
         });
 
         // Return with empty items array for newly created list
-        return res.json({ ...list, items: [] });
+        return res.json({ ...newList, items: [] });
       }
       res.json(list);
     } catch (error) {
