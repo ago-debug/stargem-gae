@@ -1,0 +1,72 @@
+# Piano di Implementazione: Componenti UI Unificati (Micro-Form)
+
+Questo documento traccia il piano operativo per risolvere il disallineamento visivo e logico presente nelle 11 pagine di erogazione attività di CourseManager (Fase 2 della strategia).
+
+## Obiettivo
+Smettere di riscrivere a mano la logica di input orario e la logica di selezione pagamenti/quote all'interno di ogni singola schermata React (`corsi.tsx`, `workshops.tsx`, ecc.). 
+Costruiremo **due componenti React agnostici, blindati e universali**, da importare al posto dei vecchi cloni.
+
+---
+
+## 1. Il Componente "TimeSlotPicker.tsx"
+
+Attualmente il salvataggio degli orari è disomogeneo visivamente, ma nel database (schema.ts) tutte le 11 tabelle aspettano tre campi identici:
+- `dayOfWeek` (String, es. "Lunedì")
+- `startTime` (String, es. "18:00")
+- `endTime` (String, es. "19:00" - Opzionale)
+
+### Architettura del Componente 
+Creeremo `client/src/components/time-slot-picker.tsx`.
+Il componente riceverà e restituirà i dati tramite props standardizzate, agendo in modalità "Controlled Component".
+
+```typescript
+interface TimeSlotPickerProps {
+  dayOfWeek: string | undefined;
+  startTime: string | undefined;
+  endTime: string | undefined;
+  onChange: (data: { dayOfWeek: string; startTime: string; endTime?: string }) => void;
+  // Prop per capire se renderizzare l'input in orizzontale (tabella) o verticale (card)
+  layout?: 'horizontal' | 'vertical'; 
+  disabled?: boolean;
+}
+```
+
+### UX / UI Design (Rigoroso)
+*   **Day:** Un classico Select/Dropdown (Lunedì - Domenica), oppure un gruppo di 7 bottoni circolari stile "pillole" (molto moderno) tra cui scegliere il giorno cliccandolo.
+*   **Time:** Niente campi testuali liberi. Utilizzeremo due input nativi `type="time"` mascherati elegantemente da Shadcn UI, con la rotellina per l'orologio (se supportato dal browser).
+*   **Validazione:** Impossibile inserire una `endTime` minore della `startTime`. Il componente deve bloccare la selezione se rileva incongruenze, illuminandosi di rosso tenue.
+
+---
+
+## 2. Il Componente "PaymentModule.tsx"
+
+Attualmente ogni pagina ha il suo modo di far generare le quote. Dobbiamo creare un blocco grafico unico che faccia da ponte tra l'entità che si sta visualizzando (es. una lezione di Prova) e il carrello pagamenti universale.
+
+### Architettura del Componente
+Creeremo `client/src/components/payment-module-connector.tsx`.
+Questo componente non manderà direttamente i soldi a `payments`, ma impacchetterà i dati corretti per il sistema di Cassa Centrale (che si aspetta una quota, un utente e un ID di riferimento).
+
+```typescript
+interface PaymentConnectorProps {
+  // L'entità da cui stiamo per pagare 
+  activityType: 'course' | 'workshop' | 'single_lesson' | 'free_trial' | ... ;
+  // L'ID del record nel database a cui ancorare il pagamento
+  referenceId: number; 
+  // Prezzo esposto di default se non ci sono macro-listini
+  defaultPrice: string | number;
+  
+  // Callback quando l'utente sceglie di procedere in cassa
+  onProceedToCheckout: (cartItemInfo: CartItemPayload) => void;
+}
+```
+
+---
+
+## 3. Strategia di Rilascio (Rollout)
+
+Per evitare interruzioni al team di segreteria, adotteremo questo approccio chirurgico:
+
+1. **Creazione Silente:** Sviluppo iniziale dei due componenti nella libreria locale `src/components/`, senza importarli in nessuna pagina attiva.
+2. **Sostituzione Pilota (A/B Test):** Sostituiremo il form orari e pagamenti unicamente in **1 silo a basso traffico** (Esempio: "Attività Domenicali" o "Prove a Pagamento").
+3. **Validazione:** Testiamo che il salvataggio sul DB funzioni perfettamente usando i nuovi Micro-Form e che il dato sia identico al vecchio metodo.
+4. **Sostituzione Massiva:** Una volta approvato il Pilota, applicheremo un Find&Replace architetturale, iniettando i due Micro-Form nelle restanti 10 pagine (Corsi, Workshop, Campus, ecc.), cancellando per sempre le migliaia di righe Frontend duplicate.
