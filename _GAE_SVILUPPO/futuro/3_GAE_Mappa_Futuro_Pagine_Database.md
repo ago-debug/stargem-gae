@@ -1,5 +1,9 @@
 # Mappa Globale FUTURA: Pagine UI vs Motore SaaS (Single Table Inheritance)
 
+> [!NOTE] 
+> **Scopo di questo documento**
+> Questo file è la **Mappa Geografica del Frontend V2 (Fase 3)**. Illustra come l'interfaccia React dovrà collegarsi in futuro al nuovo database unificato SaaS (Single Table Inheritance). Serve agli sviluppatori Frontend per capire in quali endpoint inviare i dati quando le 11 tabelle separate cesseranno di esistere e l'attività diventerà un concetto universale gestito tramite `activities` e `activity_categories`.
+
 Questo documento traccia la mappa architetturale **Futura** del gestionale, a valle del refactoring SaaS previsto. Illustra come l'interfaccia React si collegherà al nuovo motore unificato Drizzle ORM basato su *Single Table Inheritance*.
 
 ## 1. Moduli Core (Motore SaaS Unificato)

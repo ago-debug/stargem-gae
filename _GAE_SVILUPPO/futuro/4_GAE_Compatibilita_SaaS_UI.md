@@ -1,5 +1,9 @@
 # Analisi di Compatibilità: Database SaaS vs. Interfaccia Grafica Attuale
 
+> [!TIP] 
+> **Scopo di questo documento**
+> Questo file è il **Ponte Architetturale Frontend-Backend (Fase 3)**. Spiega tecnicamente come risolvere il problema più grande del Refactoring: *come fa la UI attuale a disegnare ancora 12 interfacce visive bellissime e diverse, se nel Database esisterà una sola tabella universale cieca?* Illustra la strategia "Forms-as-Data" (JSON Driven UI) e come le Categorie istruiranno il rendering dei componenti in React.
+
 La decisione strategica di trasformare *CourseManager* in un prodotto Software as a Service (SaaS / Multi-tenant) impone un disaccoppiamento drastico tra la Logica dei Dati (Backend) e la Presentazione (Frontend). 
 
 Come correttamente indicato dalla dirigenza nell'Intervista 6, un database scalabile ed "agnostico" (Single Table Inheritance) non deve in alcun modo *stravolgere* o *rompere* l'interfaccia grafica attualmente in uso online dai clienti. Al contrario, deve alimentarla dinamicamente.

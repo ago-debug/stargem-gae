@@ -34,7 +34,8 @@ Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro
 | **Campus** | `/attivita/campus` | 🟡 **Attività** (Tab Campus) | `campus_activities` | |
 | **Saggi / Spettacoli** | `/attivita/saggi` | 🟡 **Attività** (Tab Saggi) | `recitals` | |
 | **Vacanze Studio** | `/attivita/vacanze-studio` | 🟡 **Attività** (Tab Vacanze) | `vacation_studies` | |
-| **Servizi Extras** | `/booking-services` | 🟡 **Servizi Prenotabili** | `booking_services` | Tabella specifica per extra / studi |
+| **Schede Attività Specifiche** | `/scheda-corso` ecc. | Da click su singola riga | `attendances`, `ws_attendances` | Gestione interna delle presenze all'interno delle attività (Appello). |
+| **Servizi Extras** | `/booking-services` | 🟡 **Servizi Prenotabili** | `booking_services` | Tabella specifica per extra prestazionali. |
 
 ---
 
@@ -43,10 +44,11 @@ Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro
 |---|---|---|---|---|
 | **Pannello Iscrizioni Rapide** | `/maschera-generale` | 🟡 **Maschera Input** | `members`, `[x]_enrollments`, `payments`, `price_list_items` | Il vero concentratore di azioni. (Es. scrive l'anagrafica, la collega al corso, genera il dovuto e incassa). |
 | **Iscrizioni e Pagamenti** | `/iscrizioni-pagamenti` | 🟡 **Iscrizioni e Pagamenti** | Lettura combinata `members`, `enrollments` | Interfaccia d'appoggio per gestione logistica |
-| **Nuovo Pagamento** | `/pagamenti` | 🟡 **Lista Pagamenti** | `payments` (Master) | Scrive in `payments`, lega una FK al memberId. |
+| **Nuovo Pagamento** | `/pagamenti` | 🟡 **Lista Pagamenti** | `payments`, `payment_methods`, `pay_notes` | Scrive in `payments`, lega una FK al memberId. |
 | **Scheda Contabile** | `/scheda-contabile` | 🟡 **Scheda Contabile** | Lettura: `payments`, `price_list_items`, `members` | Sola LETTURA. Incrocia il dovuto col versato. |
-| **Gestione Listini** | `/listini` | 🟡 **Listini e Quote** | `price_lists`, `price_list_items` | Scrive i "template" economici (le rate) per le attività. |
-| **Tessere Nazionali** | `/tessere` | 🟡 **Tessere & Certificati** | `memberships` | Tessere CSEN, FGI, ecc. Indipendente dall'anagrafica. |
+| **Gestione Listini Rate** | `/listini` | 🟡 **Listini e Quote** | `price_lists`, `price_list_items` | Scrive i "template" economici (le rate) per le attività. |
+| **Quote Indipendenti** | `/quote-listini/:type`| 🟡 **Gestione Quote** | `quotes`, `course_quotes_grid` | Definizione delle quote di pagamento slegate (indipendenti). |
+| **Tessere Nazionali** | `/tessere` | 🟡 **Tessere & Certificati** | `memberships`, `sub_types` | Tessere CSEN, FGI, ecc. Indipendente dall'anagrafica. |
 
 ---
 
@@ -54,9 +56,10 @@ Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro
 | Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
 |---|---|---|---|---|
 | **Elenco Anagrafiche** | `/anagrafica_a_lista` | 🟡 **Anagrafica a Lista** | `members` | Lista passiva e ricerca soci / tesserati. |
-| **Dashboard Membro Singolo** | `/membro/:id` | (Si apre da Anagrafica) | Lettura: `members`, `member_relationships`, `*_enrollments` | Hub di gestione scheda singola (es. genitore/figlio). |
+| **Dashboard Membro Singolo** | `/membro/:id` | (Si apre da Anagrafica) | Lettura: `members`, `member_relationships`, `medical_certificates`, `*_enrollments` | Hub di gestione scheda singola (es. genitore/figlio). Legge i Certificati Medici. |
 | **Insegnanti** | `/insegnanti` | 🟡 **Staff/Insegnanti** | `instructors`, `instr_rates` | Anagrafica Docenti e listino compensi. |
 | **Utenti System / Permessi** | `/utenti-permessi` | 🟡 **Utenti e Permessi** | `users`, `user_roles` | Account per accesso al Gestionale. (Email + Password) |
+| **Generazione Tessere** | `/generazione-tessere`| 🟡 **Genera Tessere PVC** | Lettura: `members`, `memberships` | Creazione stampe / PDF per le card RFID. |
 
 ---
 
@@ -67,12 +70,12 @@ Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro
 | **Prenotazioni Sale** | `/prenotazioni-sale` | 🟡 **Prenotazioni Sale** | `studio_bookings` | Booking eventi spot. |
 | **Calendario Planning** | `/calendario` | 🟡 **Calendario Corsi** | Lettura: 11 tabelle attività + `studios` | Sola lettura grafica delle ore programmate. |
 | **Todo List Task** | `/todo-list` | 🟡 **ToDoList** | `todos` | Task collaborative per lo staff. |
-| **Note Team / Chat** | `/commenti` | 🟡 **Commenti Team** | `teamComments` | Chat intercom della segreteria. |
-| **Inserisci Nota** | `/inserisci-nota` | 🟡 **Inserisci Nota** | `teamComments` | Inserimento rapido ticket. |
-| **Categorie Anagrafiche** | `/categoria-partecipante` | 🟡 **Categoria Partecipante**| `client_categories` | Scrive gerarchie su cui raggruppare i clienti. |
-| **Categorie Attività** | `/categorie-attivita` | 🟡 **Categorie Attività** | `categories` e affini | Classificazione delle materie. |
-| **Elenchi Dropdown Custom**| `/elenchi` | 🟡 **Elenchi** | `custom_lists`, `custom_list_items` | Controlla i menù a tendina custom in tutto il gestionale. |
-| **Log Ingressi Badge** | `/accessi` | 🟡 **Controllo Accessi** | `access_logs` | Lettura/Scrittura gate passaggi tornello/tablet. |
+| **Note Team / Chat** | `/commenti`, `/note-team` | 🟡 **Commenti Log / Note** | `team_comments`, `team_notes`, `messages` | Chat intercom della segreteria e post-it globali. |
+| **Categorie Anagrafiche** | `/categoria-partecipante` | 🟡 **Categoria Partecipante**| `cli_cats` | Scrive gerarchie su cui raggruppare i clienti. |
+| **Categorie Attività Multi**| `/categorie-*` | 🟡 **Categorie (Varie)** | Tutte le `*_cats` e `booking_service_categories` | Gestisce gli alberi (Corsi, Workshop, Campus, Domeniche, ...). |
+| **Elenchi Dropdown Custom**| `/elenchi` | 🟡 **Elenchi** | `custom_lists`, `custom_list_items`, `act_statuses`, `enroll_details` | Controlla i menù a tendina custom in tutto il gestionale. |
+| **Controllo Ingressi** | `/accessi` | 🟡 **Controllo Accessi** | `access_logs` | Lettura/Scrittura gate passaggi tornello/tablet. |
+| **Reset Stagione** | `/reset-stagione` | 🟡 **Reset Database Anno**| `seasons` (+ truncate su DB) | Imposta l'anno accademico e resetta dati vecchi. |
 
 ---
 
@@ -81,8 +84,10 @@ Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro
 |---|---|---|---|---|
 | **Dashboard Iniziale** | `/dashboard` | 🟡 **Dashboard Statistiche** | Tutte le entità (Lettura) | Statistiche in tempo reale, incassi, kpi. |
 | **Iscritti Per Attività** | `/iscritti_per_attivita`| 🟡 **Iscritti per Attività** | 11 Tabelle `*_enrollments` | Aggregazione degli iscritti ispezionando tutto il database. |
-| **Report Avanzato** | `/report` | 🟡 **Report & Statistiche** | Interrogazione incrociata DB | SQL Custom in lettura su richiesta. |
-| **Admin Panel** | `/admin` | 🟡 **Pannello Admin** | Controllo di sistema | |
+| **Report Avanzato** | `/report` | 🟡 **Report & Statistiche** | `custom_reports` | SQL Custom in lettura su richiesta e salvataggio query. |
+| **Importazione Dati** | `/importa` | 🟡 **Importa CSV** | Scrittura massiva + `import_configs` | Importazione di massa di DB legacy e mapping CSV. |
+| **Centro Notifiche** | Header Campanella | 🟡 (Non in sidebar) | `notifications` | Notifiche interne al framework UI. |
+| **Admin Panel** | `/admin` | 🟡 **Pannello Admin** | `system_configs`, `knowledge`, `user_activity_logs` | Settaggi globali, tooltips base, e audit del gestionale. |
 
 ---
 

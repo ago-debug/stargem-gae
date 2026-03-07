@@ -1,5 +1,9 @@
 # Registro Decisionale Architettura SaaS (Log Interviste)
 
+> [!NOTE] 
+> **Scopo di questo documento**
+> Questo file è il **Verbalino di Business (Fase 3)**. Traccia come un diario di bordo tutte le "eccezioni" discusse con l'amministrazione (Es. "Ma come si gestisce chi si iscrive a un workshop ma paga 3 giorni dopo?"). È vitale perché ogni riga SQL del nuovo database si baserà su queste scelte confermate dal management per non fare errori.
+
 Questo documento traccia pedissequamente la cronologia del dialogo intercorso tra lo Sviluppatore e l'Amministrazione nella fase di pre-produzione del nuovo Database "Single Table Inheritance" (Marzo 2026).
 Avere uno storico nero su bianco delle risposte del cliente è vitale per giustificare le scelte di design delle tabelle `activities`, `activity_categories`, `activity_details` ed `enrollments`.
 

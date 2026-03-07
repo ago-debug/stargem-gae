@@ -1,6 +1,10 @@
 # Piano di Implementazione: Componenti UI Unificati (Micro-Form)
 
-Questo documento traccia il piano operativo per risolvere il disallineamento visivo e logico presente nelle 11 pagine di erogazione attività di CourseManager (Fase 2 della strategia).
+> [!IMPORTANT] 
+> **Scopo di questo documento**
+> Questo file rappresenta la **To-Do List operativa e attiva** per l'unificazione e la pulizia dell'Interfaccia Utente (Fase 2). Qui documenteremo tutti i difetti visivi, l'UX disomogenea e progetteremo i "Micro-Componenti Universali" (come il *TimeSlotPicker* o il *PaymentModule*) necessari per smettere di clonare codice in 12 pagine diverse. Aggiungi qui le anomalie grafiche riscontrate per progettarne una soluzione strutturale trasversale.
+
+Questo documento traccia il piano operativo per risolvere il disallineamento visivo e logico presente nelle 12 pagine di erogazione attività di CourseManager (Fase 2 della strategia).
 
 ## Obiettivo
 Smettere di riscrivere a mano la logica di input orario e la logica di selezione pagamenti/quote all'interno di ogni singola schermata React (`corsi.tsx`, `workshops.tsx`, ecc.). 

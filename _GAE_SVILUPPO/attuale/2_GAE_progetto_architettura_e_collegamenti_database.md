@@ -1,12 +1,15 @@
 # Progetto, Architettura e Collegamenti Database
-*Documento di riferimento tecnico per futuri interventi strutturali su CourseManager*
+> [!IMPORTANT] 
+> **Scopo di questo documento**
+> Questo file è le **Sacre Norme Tecniche del Sistema**. Spiega le logiche architetturali portanti del database, definendo i confini tra il *Nucleo Intoccabile* (dove non fare refactoring improvvisati pena la rottura degli algoritmi di calcolo rate e ricevute) e il *Terreno Sicuro* (dove è facile e privo di rischi aggiungere colonne e nuove entità). Da leggere e seguire religiosamente prima di qualsiasi implementazione che tocchi schema e rotte API.
 
+*Documento di riferimento tecnico per futuri interventi strutturali su CourseManager*
 ![Badge](https://img.shields.io/badge/Status-Active-brightgreen) ![Architecture](https://img.shields.io/badge/Architecture-Drizzle_ORM-blue)
 
 ### 🔗 Documenti Correlati (Da Leggere)
 Per avere una visione completa dello stato del software e della sua evoluzione, consulta obbligatoriamente anche questi due documenti complementari:
-1. **[Registro Ultimi Aggiornamenti](file:///Users/gaetano1/SVILUPPO/CourseManager_Source_Export/GAE_ULTIMI_AGGIORNAMENTI.md)** -> Contiene lo storico dettagliato (Changelog) di tutte le modifiche, fix e nuove feature sviluppate di recente.
-2. **[Piano Architettura Futura (Single Table Inheritance)](file:///Users/gaetano1/.gemini/antigravity/brain/42b961de-c18c-4d35-bbe1-f0b7cce2cc41/database_map_future.md)** -> Contiene l'analisi avanzata (Entity-Relationship Diagram e Vocabolario) su come trasformare l'attuale struttura a "12 silos" in un unico motore dinamico in caso di refactoring totale.
+1. **[Registro Ultimi Aggiornamenti](../../GAE_ULTIMI_AGGIORNAMENTI.md)** -> Contiene lo storico dettagliato (Changelog) di tutte le modifiche, fix e nuove feature sviluppate di recente.
+2. **[Piano Architettura Futura (Single Table Inheritance)](../futuro/2_database_map_future.md)** -> Contiene l'analisi avanzata (Entity-Relationship Diagram e Vocabolario) su come trasformare l'attuale struttura a "12 silos" in un unico motore dinamico in caso di refactoring totale.
 
 ---
 
@@ -18,10 +21,10 @@ Il database è interamente definito nel file `/shared/schema.ts` (Drizzle ORM + 
 ## 1. Il Nucleo "Intoccabile" (o "Rischioso")
 L'architettura ha alcune colonne portanti che strutturano l'intero gestionale. Se modificate pesantemente in modo improprio, si va a rompere il funzionamento di incassi, ricevute ed elenchi in tutto il software (Frontend e Backend).
 
-### A. La divisione in 11 Moduli di Attività ("A Silos")
-Il progetto non ha un'unica macro orizzontale tabella `activities` in cui un campo definisce se è un "Corso" o un "Workshop". Inizialmente o nel corso del tempo, per assecondare business logic molto separate, il sistema è nato con **11 tabelle separate**.
+### A. La divisione in 12 Moduli "A Silos" (Didattica + Affitti)
+Il progetto non ha un'unica macro orizzontale tabella `activities` in cui un campo definisce se è un "Corso" o un "Workshop". Inizialmente o nel corso del tempo, per assecondare business logic molto separate, il sistema è nato con **tabelle separate** per ogni tipologia erogata.
 
-Le 11 tipologie (tutte con struttura fisica identica, ma tabelle DB separate) sono:
+Le 12 tipologie (tutte con struttura fisica identica per la parte didattica, ma tabelle DB separate) sono:
 1.  **Corsi** (`courses`, `enrollments`)
 2.  **Workshop** (`workshops`, `ws_enrollments`)
 3.  **Prove Pagate** (`paid_trials`, `pt_enrollments`)
@@ -33,15 +36,16 @@ Le 11 tipologie (tutte con struttura fisica identica, ma tabelle DB separate) so
 9.  **Campus** (`campus_activities`, `ca_enrollments`)
 10. **Saggi / Spettacoli** (`recitals`, `rec_enrollments`)
 11. **Vacanze Studio** (`vacation_studies`, `vs_enrollments`)
+12. **Servizi Extra / Prenotazioni** (`booking_services`, `studio_bookings`) - *Spesso contato come il 12° "Silo" ad uso non propriamente didattico, ma con proprio flusso pagamenti.*
 
-💡 **REGOLA D'ORO:** L'idea di unificare ora tutte e 11 le tabelle in una sola sarebbe un disastro informatico (refactoring totale impensabile). Qualsiasi nuova funzionalità logica (es. "aggiungere i posti massimi visibili", "aggiungere limitazioni sull'età") **deve essere propagata e considerata su tutte le 11 tabelle simultaneamente** per non creare squilibri nell'interfaccia. 
+💡 **REGOLA D'ORO:** L'idea di unificare ora tutte e 12 le tabelle in una sola sarebbe un disastro informatico (refactoring totale impensabile). Qualsiasi nuova funzionalità logica (es. "aggiungere limitazioni sull'età") **deve essere propagata e considerata su tutte le tabelle simultaneamente** per non creare squilibri nell'interfaccia. 
 Inoltre, quando si fa un inserimento da Front-End (es. tramite la *Maschera Input Generale*), questa funge da smistatore che reindirizza il salvataggio nella tabella corretta a seconda di quale attività l'operatore seleziona dalla tendina.
 
 ### B. Il sistema Centrale dei Pagamenti (`payments`)
 La tabella `payments` è l'**Hub di interscambio** ("Junction Table") del comparto economico.
 * Tutta l'amministrazione, bilanci, calcoli rata e solleciti vertono inesorabilmente qui.
 * Quando un pagamento viene registrato, contiene un *Foreign Key* (id esterno) che lo ancora fisicamente alla sua origine.
-* Poiché esistono 11 tipologie di iscrizione, la tabella dei pagamenti contiene 11 colonne relazionali diverse (es. `enrollment_id` per i corsi, `ws_enroll_id` per i workshop, ecc.).
+* Poiché esistono 12 tipologie di prenotazione/iscrizione, la tabella dei pagamenti contiene 12 colonne relazionali diverse (es. `enrollment_id` per i corsi, `ws_enroll_id` per i workshop, `booking_id` per le sale mediche, ecc.).
 * Modificare come i pagamenti si allacciano a sconti/iscrizioni è l'operazione più a rischio bug per l'intera parte contabile.
 
 ---
@@ -81,7 +85,7 @@ Quando decidi che vuoi inserire una nuova feature importante dentro l'ecosistema
 
 ---
 
-## 4. Estensibilità: Come aggiungere una 12ª Attività
+## 4. Estensibilità: Come aggiungere una 13ª Attività
 Nonostante i silos separati richiedano più lavoro di copia-incolla, aggiungere un nuovo modulo (es. "Eventi Esterni") è un pattern procedurale standard. Ecco i file esatti da toccare:
 
 1. **Database (`shared/schema.ts`)**:
@@ -97,7 +101,7 @@ Nonostante i silos separati richiedano più lavoro di copia-incolla, aggiungere 
    * Integrare la compilazione nella `maschera-input-generale.tsx` aggiungendo un nuovo Tab o Opzione.
 
 ## 5. Rischio Dispersione Dati e Integrità
-Il rischio principale di questa struttura a "11 rami" è la frammentazione se l'utente sbaglia o se si elimina un record "madre". Ecco come è gestito attualmente e cosa monitorare:
+Il rischio principale di questa struttura a "12 rami" è la frammentazione se l'utente sbaglia o se si elimina un record "madre". Ecco come è gestito attualmente e cosa monitorare:
 
 * **Eliminazione a Cascata (`onDelete: "cascade"`)**: Quasi tutte le tabelle dipendenti (es. le iscrizioni) hanno la cancellazione a cascata. Se elimini un Membro, spariscono le sue iscrizioni. Se elimini un Corso, spariscono le iscrizioni a quel corso. *Attenzione: i pagamenti però non sempre spariscono a cascata per fini contabili.*
 * **Punto di rottura (La "Maschera Generale")**: Se si crea una logica complessa in `maschera-input-generale.tsx`, bisogna fare molta attenzione a smistare correttamente i dati verso il Backend. Se un pagamento viene salvato senza l'`enrollment_id` corretto della specifica attività, si crea un pagamento "orfano" (si prendono i soldi, ma il sistema non sa per quale attività esatta).
@@ -141,9 +145,9 @@ Questo modello azzera il debito tecnico e previene alla radice i "Pagamenti Orfa
 ### L'Alberatura Universale a 3 Livelli (Vocabolario Ufficiale)
 Per evitare fraintendimenti di dominio, la struttura deve seguire questi nomi esatti (Mental Model per Database e Interfaccia Utente):
 
-1.  **Macro-Attività (`activities`)**
+1.  **Macro-Attività (`activities` o `services`)**
     Il grande "contenitore" fiscale e aggregativo.
-    *   *Esempi:* CORSI, WORKSHOP, PROVE GRATUITE, CAMPUS, ecc.
+    *   *Esempi:* CORSI, WORKSHOP, CAMPUS, AFFITTI SALE (Booking), ecc.
 2.  **Categorie (`categories`)**
     Gli stili, i rami principali o le sotto-discipline appartenenti alla Macro-Attività.
     *   *Esempi:* Aerial, Danza, Ballo, Fitness, Gioco e Musica, ecc.

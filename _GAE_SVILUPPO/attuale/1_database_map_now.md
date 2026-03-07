@@ -1,21 +1,23 @@
 # CourseManager Database Map (Stato Attuale)
 
-*(Nota: Questo documento mappa la complessa struttura "a 11 silos" attualmente in opera nel gestionale e funge da radiografia per il team tecnico).*
+> [!NOTE] 
+> **Scopo di questo documento**
+> Questo file è la **Radiografia Attuale (Fase 1)** del backend di CourseManager. Descrive fedelmente l'esatta struttura dei dati e le 73 tabelle fisiche in uso *ora* nel `shared/schema.ts` (Drizzle ORM + MySQL). Consultalo come fonte di verità quando devi interagire con il database odierno, capire dove finiscono le righe dei "11 Silos" o tracciare come si collegano utenti, incassi e ricevute della Cassa Centrale.
 
 Questo documento illustra la struttura completa delle tabelle del database e le loro relazioni, così come definite in `shared/schema.ts`. 
 Il database utilizza un modello relazionale gestito tramite Drizzle ORM e MySQL.
 
 ### 🔗 Documenti di Riferimento Architetturale (Da Leggere)
 Per avere la visione d'insieme prima, durante e dopo i futuri refactoring, fai affidamento ai seguenti documenti analitici stilati:
-* 🛡️ **[Progetto, Architettura e Collegamenti (Regole Auree)](GAE_progetto_architettura_e_collegamenti_database.md)** -> Manuale per sviluppatori che spiega il nucleo "intoccabile" e le zone "sicure" dove espandere funzionalità oggi senza rompere nulla.
-* 🚀 **[CourseManager Future Database Map (Single Table Inheritance)](database_map_future.md)** -> Il traguardo finale. Il blueprint del nuovo "Dynamic Activities Engine" a 3 livelli unificati, senza più duplicazioni o pagamenti orfani.
-* 🛠️ **[Piano Lavoro Migrazione DB](GAE_PIANO_LAVORO_MIGRAZIONE_DB.md)** -> La checklist operativa con fasi e tempistiche stimate per passare dall'attuale struttura a quella futura.
+* 🛡️ **[Progetto, Architettura e Collegamenti (Regole Auree)](2_GAE_progetto_architettura_e_collegamenti_database.md)** -> Manuale per sviluppatori che spiega il nucleo "intoccabile" e le zone "sicure" dove espandere funzionalità oggi senza rompere nulla.
+* 🚀 **[CourseManager Future Database Map (Single Table Inheritance)](../futuro/2_database_map_future.md)** -> Il traguardo finale. Il blueprint del nuovo "Dynamic Activities Engine" a 3 livelli unificati, senza più duplicazioni o pagamenti orfani.
+* 🛠️ **[Piano Lavoro Migrazione DB](../futuro/5_GAE_PIANO_LAVORO_MIGRAZIONE_DB.md)** -> La checklist operativa con fasi e tempistiche stimate per passare dall'attuale struttura a quella futura.
 
 ---
 
-## Moduli Logici (73 Tabelle Fisiche suddivise in 5 Macro-Aree)
+## Moduli Logici (73 Tabelle Fisiche suddivise in 8 Macro-Aree)
 
-L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per renderne comprensibile la gestione, l'intero database è stato astratto in **5 macro-aree logiche** (Core, Amministrazione, Anagrafica, Struttura, Reportistica). Seguono i blocchi dettagliati:
+L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per renderne comprensibile la gestione, l'intero database è stato astratto in **8 macro-aree logiche** (Autenticazione, Configurazione, Località, Comunicazioni, Anagrafica, Attività, Servizi Extra, Finanza). Seguono i blocchi dettagliati:
 ### 1. Autenticazione & Utenti (Authentication & Users)
 - **`users`**: La tabella base degli account per lo staff e gli operatori.
 - **`user_roles`**: Ruoli generici e permessi scritti in JSON per gli utenti.
@@ -27,6 +29,8 @@ L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per
 - **`act_statuses`, `pay_notes`, `enroll_details`**: Etichette colorate multi-opzione utilizzate per taggare in modo differenziato le iscrizioni e i pagamenti.
 - **`knowledge`**: Tooltip di aiuto e spiegazioni visibili nelle sezioni dell'interfaccia.
 - **`user_activity_logs`**: Log di sistema per l'audit (tracciamento di chi ha fatto cosa).
+- **`custom_reports`**: Definizioni salvate per la reportistica e l'estrazione dati personalizzata.
+- **`import_configs`**: Configurazioni e mapping salvati per l'importazione di dati massivi nel sistema.
 
 ### 3. Località (Locations)
 - **`countries`** -> **`provinces`** -> **`cities`**: Dati geografici strutturati in modo gerarchico (Nazioni, Province, Comuni con CAP).
@@ -36,10 +40,12 @@ L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per
 - **`team_comments`**: Conversazioni formattate a thread (simil-ticket) per appunti dello staff.
 - **`team_notes`**: Note testuali interne, fissabili o meno in alto (pinned).
 - **`todos`**: Lista condivisa delle cose da fare (Task semplici).
+- **`notifications`**: Centro notifiche e avvisi centralizzati per l'interfaccia utente dello staff.
 
 ### 5. Entità Centrali (Anagrafica & Setup base)
 - **`members`**: Il cuore assoluto del sistema (Allievi, Clienti, Partecipanti). Contiene dati anagrafici spesso "piatti" ma complessi, assieme a info mediche e generalità di minorenni/genitori.
 - **`member_relationships`**: Raccordi parentali che legano i minorenni ai tutori legali (`mother`, `father`).
+- **`cli_cats`**: Categorie Clienti per classificare l'utenza e gestire sconti o target specifici.
 - **`instructors`**: Gli Insegnanti, collegati alle rate `instr_rates` che ne definiscono la paga.
 - **`studios`**: Le aule mediche o sale fisiche in cui si svolgono le attività e si prendono appuntamenti.
 - **`seasons`**: Definizioni temporali per l'anno sportivo o accademico (es. 2025-2026).
@@ -70,6 +76,7 @@ I modelli parificati dei suddetti "11 silos" sono:
 - **`booking_service_categories`** -> **`booking_services`**: Dizionario e categorie degli elementi extra-didattici prenotabili (come "Affitto Sala Medica" o "Personal Trainer").
 - **`studio_bookings`**: Gli slot calendarizzati per prenotare fisicamente uno spazio ("studio") legato ad un servizio.
 - **`memberships`**: Assicurazioni o tessere associative annuali (il "Tesseramento"), dotati di barcode.
+- **`sub_types`**: Modelli e tipologie predefinite dei tesseramenti e abbonamenti (Subscription Types).
 - **`medical_certificates`**: Tabella di raccordo per tracciare l'idoneità, le scadenze o le mancate consegne dei certificati medici degli atleti.
 - **`access_logs`**: Tracce di passaggio derivanti dai tornelli e lettori barcode, indicanti entrata/uscita.
 

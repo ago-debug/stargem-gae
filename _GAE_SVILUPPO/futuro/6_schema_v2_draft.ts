@@ -4,9 +4,13 @@ import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizz
  * ============================================================================
  * COURSEMANAGER v2.0 - BOZZA SCHEMA "SINGLE TABLE INHERITANCE" (SAAS/MULTI-TENANT)
  * ============================================================================
- * Questo file è un DRAFT in ambiente isolato (_GAE_SVILUPPO) per testare la 
- * validità dell'architettura emersa in fase di analisi logica e interviste.
- * Non impatta minimamente il database di produzione.
+ * 
+ * SCOPO DI QUESTO DOCUMENTO:
+ * Questo file è il "Laboratorio di Prova" (Fase 3). È un DRAFT in ambiente isolato 
+ * per testare la solidità tecnica dell'architettura emersa in fase di analisi.
+ * Contiene le 5 uniche tabelle universali (activities, categories, details, enrollments)
+ * che andranno a sostituire le attuali 34 tabelle a silos.
+ * NOTA BENE: Questo file non impatta minimamente il database di produzione.
  */
 
 // 1. TENANT SETTINGS (Risposte T1, T2 - Fase 6 UI)

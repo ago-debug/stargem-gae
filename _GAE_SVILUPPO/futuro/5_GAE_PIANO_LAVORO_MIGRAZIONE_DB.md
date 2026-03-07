@@ -1,13 +1,17 @@
 # Piano Lavoro e Analisi Architetturale: Transizione Database CourseManager
 
+> [!CAUTION] 
+> **Scopo di questo documento**
+> Questo file è il **Manuale Operativo di Migrazione Dati (Fase 3)**. È la rigorosa checklist step-by-step che gli ingegneri del software dovranno seguire il giorno in cui verranno letteralmente cancellate le vecchie 30+ tabelle a Silos e attivate le 3 Tabelle Unificate SaaS. Contiene le istruzioni temporizzate su come effettuare i "Data Pump" (travasi di dati in sicurezza) senza perdere le vecchie contabilità o bloccare le segreterie.
+
 Questa documentazione definisce in modo chiaro e inequivocabile lo stato attuale del database di CourseManager e la roadmap operativa per il passaggio alla nuova architettura unificata (Single Table Inheritance). 
 Il presente documento funge da **programma lavorativo ufficiale per il team di sviluppo**. Contiene le mappe mentali ERD (attuale e futura) e una rigorosa checklist di tutti i passaggi necessari, completi di stime temporali. L'obiettivo primario di questa operazione è azzerare una volta per tutte il debito tecnico derivante dall'attuale frammentazione "a silos" e implementare un motore dati dinamico e infinitamente scalabile. Leggere attentamente l'intero flusso prima di iniziare i lavori di refactoring.
 
 ### 🔗 Documenti di Riferimento Architetturale (Da Leggere)
 Per avere la visione d'insieme prima, durante e dopo il refactoring, fare affidamento ai seguenti documenti analitici stilati:
-* 🗃️ **[CourseManager Database Map (Stato Attuale)](database_map_now.md)** -> La radiografia visiva dell'ecosistema odierno a "11 silos". Spiega come tutto confluisce faticosamente nella tabella `payments`.
-* 🛡️ **[Progetto, Architettura e Collegamenti (Regole Auree)](GAE_progetto_architettura_e_collegamenti_database.md)** -> Manuale per sviluppatori che spiega il nucleo "intoccabile" e le zone "sicure" dove espandere funzionalità oggi senza rompere nulla.
-* 🚀 **[CourseManager Future Database Map (Single Table Inheritance)](database_map_future.md)** -> Il traguardo finale. Il blueprint del nuovo "Dynamic Activities Engine" a 3 livelli unificati, senza più duplicazioni o pagamenti orfani.
+* 🗃️ **[CourseManager Database Map (Stato Attuale)](../attuale/1_database_map_now.md)** -> La radiografia visiva dell'ecosistema odierno a "11 silos". Spiega come tutto confluisce faticosamente nella tabella `payments`.
+* 🛡️ **[Progetto, Architettura e Collegamenti (Regole Auree)](../attuale/2_GAE_progetto_architettura_e_collegamenti_database.md)** -> Manuale per sviluppatori che spiega il nucleo "intoccabile" e le zone "sicure" dove espandere funzionalità oggi senza rompere nulla.
+* 🚀 **[CourseManager Future Database Map (Single Table Inheritance)](2_database_map_future.md)** -> Il traguardo finale. Il blueprint del nuovo "Dynamic Activities Engine" a 3 livelli unificati, senza più duplicazioni o pagamenti orfani.
 
 ---
 

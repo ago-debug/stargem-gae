@@ -7,9 +7,9 @@ Questo documento illustra la struttura futura di CourseManager, pensata per elim
 
 ### 🔗 Documenti di Riferimento Architetturale (Da Leggere)
 Per avere la visione d'insieme prima, durante e dopo i futuri refactoring, fai affidamento ai seguenti documenti analitici stilati:
-* 🗃️ **[CourseManager Database Map (Stato Attuale)](database_map_now.md)** -> La radiografia visiva dell'ecosistema odierno a "11 silos". Spiega come tutto confluisce faticosamente nella tabella `payments`.
-* 🛡️ **[Progetto, Architettura e Collegamenti (Regole Auree)](GAE_progetto_architettura_e_collegamenti_database.md)** -> Manuale per sviluppatori che spiega il nucleo "intoccabile" e le zone "sicure" dove espandere funzionalità oggi senza rompere nulla.
-* 🛠️ **[Piano Lavoro Migrazione DB](GAE_PIANO_LAVORO_MIGRAZIONE_DB.md)** -> La checklist operativa con fasi e tempistiche stimate per passare dall'attuale struttura a quella futura.
+* 🗃️ **[CourseManager Database Map (Stato Attuale)](../attuale/1_database_map_now.md)** -> La radiografia visiva dell'ecosistema odierno a "11 silos". Spiega come tutto confluisce faticosamente nella tabella `payments`.
+* 🛡️ **[Progetto, Architettura e Collegamenti (Regole Auree)](../attuale/2_GAE_progetto_architettura_e_collegamenti_database.md)** -> Manuale per sviluppatori che spiega il nucleo "intoccabile" e le zone "sicure" dove espandere funzionalità oggi senza rompere nulla.
+* 🛠️ **[Piano Lavoro Migrazione DB](5_GAE_PIANO_LAVORO_MIGRAZIONE_DB.md)** -> La checklist operativa con fasi e tempistiche stimate per passare dall'attuale struttura a quella futura.
 
 ---
 

@@ -1,5 +1,9 @@
 # Analisi Strategica per l'Ottimizzazione del Database (CourseManager)
 
+> [!IMPORTANT] 
+> **Scopo di questo documento**
+> Questo file rappresenta l'**Analisi Strategica e il Business Case (Fase 3)** per il refactoring del Database di CourseManager. Spiega *perché* stiamo passando dalla vecchia struttura a 11 silos alla nuova architettura SaaS (Single Table Inheritance), illustrando i vantaggi matematici del taglio delle tabelle e elencando rigorosamente tutte le eccezioni commerciali (prenotazioni, carnet, capienze, ecc.) che il nuovo motore dovrà gestire nativamente.
+
 Alla luce delle indagini condotte sullo stato dell'arte del gestionale, emerge una forte asimmetria tra la complessità visiva per l'utente (ben mascherata) e l'attuale complessità logica del backend. 
 
 Il database attuale è composto da **73 tabelle fisiche**, suddivise logicamente in **5 Macro-Aree**. Il "debito tecnico" primario risiede interamente nell'Area 1 ("Moduli Core: Attività e Corsi"), la quale adotta un approccio a *silos separati* (copia-incolla strutturale per 11 tipologie diverse di offerta didattica).
