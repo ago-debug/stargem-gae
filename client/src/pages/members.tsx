@@ -82,6 +82,11 @@ export default function Members() {
   const { data: membersData, isLoading } = useQuery<{ members: Member[]; total: number }>({
     queryKey: ["/api/members", { page: currentPage, pageSize: PAGE_SIZE, search: debouncedSearch }],
     queryFn: async () => {
+      // Lazy load prevention: if search is empty, don't fetch all members heavily
+      if (!debouncedSearch || debouncedSearch.length < 3) {
+        return { members: [], total: 0 };
+      }
+
       const params = new URLSearchParams({
         page: currentPage.toString(),
         pageSize: PAGE_SIZE.toString(),
@@ -91,6 +96,8 @@ export default function Members() {
       if (!res.ok) throw new Error("Failed to fetch members");
       return res.json();
     },
+    // Keep previous data when fetching new pages/searches
+    staleTime: 60000,
   });
 
   const members = membersData?.members || [];
@@ -588,11 +595,17 @@ export default function Members() {
                 </div>
               ))}
             </div>
+          ) : (!debouncedSearch || debouncedSearch.length < 3) ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Search className="w-12 h-12 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium mb-2">Ricerca Anagrafica</p>
+              <p className="text-sm">Digita almeno 3 caratteri (Nome, Cognome, Fiscale o Email) per avviare la ricerca ed evitare sovraccarichi.</p>
+            </div>
           ) : members.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">Nessun iscritto trovato</p>
-              <p className="text-sm">{debouncedSearch ? "Nessun risultato per la ricerca" : "Inizia aggiungendo il primo iscritto"}</p>
+              <p className="text-sm">Nessun risultato combacia con la tua ricerca attuale.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
