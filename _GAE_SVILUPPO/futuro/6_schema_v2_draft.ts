@@ -102,3 +102,28 @@ export const maintenanceTickets = pgTable("maintenance_tickets", {
     reportedBy: integer("reported_by"), // Team Ispettivo che apre il ticket
     createdAt: timestamp("created_at").defaultNow(),
 });
+
+// 6. MODULO CRM & MARKETING (Gestione Lead e Campagne)
+// Sistema per coltivare contatti pre-iscrizione e invio massivo comunicazioni.
+export const crmLeads = pgTable("crm_leads", {
+    id: serial("id").primaryKey(),
+    tenantId: integer("tenant_id").references(() => tenants.id),
+    firstName: text("first_name").notNull(),
+    lastName: text("last_name").notNull(),
+    email: text("email"),
+    phone: text("phone"),
+    source: text("source"), // Es. 'Facebook Ads', 'Passaparola', 'Sito Web'
+    status: text("status").default("new"), // 'new', 'contacted', 'converted', 'lost'
+    notes: text("notes"),
+    createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const crmCampaigns = pgTable("crm_campaigns", {
+    id: serial("id").primaryKey(),
+    tenantId: integer("tenant_id").references(() => tenants.id),
+    name: text("name").notNull(), // Es. "Promo Settembre 2026"
+    type: text("type").notNull(), // 'email', 'sms', 'push'
+    status: text("status").default("draft"), // 'draft', 'scheduled', 'sent'
+    sentAt: timestamp("sent_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+});

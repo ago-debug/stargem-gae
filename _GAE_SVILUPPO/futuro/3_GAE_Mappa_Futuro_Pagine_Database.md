@@ -46,11 +46,21 @@ La UI React continuerà ad avere menu espliciti (personalizzabili dal Cliente tr
 | Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
 |---|---|---|---|---|
 | **Sale e Aule** | `/studios` | 🟡 **Studios/Sale** | `studios` | Scrive la sala (Capienza, Orari Base). |
-| **App Staff / Turni Personale** | `/app-staff/turni` | 🟡 **App Dipendenti (HR)** | `team_shifts`, `users` | Visualizzazione turni di lavoro della segreteria/team e presenze (`instructor_attendances`). |
-| **Facility Management** | `/app-staff/manutenzione` | 🟡 **App Dipendenti (HR)** | `maintenance_tickets` | Segnalazione ticket guasti istruttori/ispettori alle aule. |
+| **App Staff (Insegnanti)** | `/app-staff/dashboard` | 🟡 **App Insegnanti** | Lettura: `activities`, `studios`, `enrollments` | Vista riservata ai docenti (Consultazione orari, prenotazione sale prove). |
+| **App Team (Amministrazione)** | `/app-team/turni` | 🟡 **App Team (HR)** | `team_shifts`, `users` | Visualizzazione turni di lavoro della segreteria/team e presenze (`instructor_attendances`). |
+| **Facility Management** | `/app-staff/manutenzione` | 🟡 **App Team (HR)** | `maintenance_tickets` | Segnalazione ticket guasti istruttori/ispettori alle aule. |
 | **Todo List Task** | `/todo-list` | 🟡 **ToDoList** | `todos` | Task collaborative per lo staff. |
 | **Note Team / Chat** | `/commenti` | 🟡 **Commenti Team** | `teamComments` | Chat intercom della segreteria. |
 | **Log Ingressi Badge** | `/accessi` | 🟡 **Controllo Accessi** | `access_logs` | Lettura/Scrittura gate passaggi tornello/tablet. |
+
+---
+
+## 5. Area CRM e Marketing (Novità SaaS)
+
+| Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
+|---|---|---|---|---|
+| **Gestione Lead/Prospect** | `/crm/leads` | 🟡 **CRM & Marketing** | `crm_leads` (Nuova Tabella) | Tracciamento potenziali clienti (non ancora iscritti) raccogliendo dati da form web esterni o social. |
+| **Campagne (Mail/SMS)** | `/crm/campagne` | 🟡 **CRM & Marketing** | `crm_campaigns` (Nuova Tabella) | Storico invii DEM, Newsletter e Promozioni collegate a target specifici (`members` o `crm_leads`). |
 
 ---
 
