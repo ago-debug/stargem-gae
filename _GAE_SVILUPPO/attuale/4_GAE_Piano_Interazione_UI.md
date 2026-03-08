@@ -74,3 +74,40 @@ Per evitare interruzioni al team di segreteria, adotteremo questo approccio chir
 2. **Sostituzione Pilota (A/B Test):** Sostituiremo il form orari e pagamenti unicamente in **1 silo a basso traffico** (Esempio: "Attività Domenicali" o "Prove a Pagamento").
 3. **Validazione:** Testiamo che il salvataggio sul DB funzioni perfettamente usando i nuovi Micro-Form e che il dato sia identico al vecchio metodo.
 4. **Sostituzione Massiva:** Una volta approvato il Pilota, applicheremo un Find&Replace architetturale, iniettando i due Micro-Form nelle restanti 10 pagine (Corsi, Workshop, Campus, ecc.), cancellando per sempre le migliaia di righe Frontend duplicate.
+
+---
+
+## 4. Esperienze Mobile-First: Le Tre App (Staff, Team, User)
+
+L'interfaccia non sarà più un monolite desktop per la segreteria, ma si dividerà in tre declinazioni UI focalizzate sui ruoli:
+
+### A. App Staff (Insegnanti)
+*   **Obiettivo UI:** Minimalista, pensata per smartphone ("On the go").
+*   **Funzioni Chiave:**
+    *   Visualizzazione della propria agenda lezioni (Calendario Personale).
+    *   Check-in/Timbratura Presenze (geolocalizzata o tramite click) per l'elaborazione paghe.
+    *   Prenotazione Sale ("Studios"): un planning visivo per prenotare aule libere per prove personali.
+    *   Visualizzazione iscritti (solo numeri, no anagrafiche sensibili per privacy).
+
+### B. App Team (Segreteria & Amministrazione)
+*   **Obiettivo UI:** Operativa, rapida, stile "To-Do List" o gestionale ticket.
+*   **Funzioni Chiave:**
+    *   Visualizzazione Turni di Lavoro (Shift Management) creati dal manager.
+    *   Messaggistica Interna / Chat Intercom integrata per comunicazioni veloci di sede.
+    *   Sistema di Facility/Maintenance: Pulsante rapido per aprire un Ticket Guasto (es. "Cassa Audio Sala 2 rotta") dal telefono.
+
+### C. App User (Allievi e Clienti)
+*   **Obiettivo UI:** E-commerce style, accattivante, "1-click buy".
+*   **Funzioni Chiave:**
+    *   Catalogo Corsi e Attività navigabile a schede.
+    *   Acquisto diretto di Pacchetti/Carnet (Stripe integration).
+    *   Prenotazione Lezioni (scalo dal carnet) e disdette rapide con gestione notifiche.
+
+---
+
+## 5. UI Del Modulo CRM & Marketing
+
+Per gestire l'acquisizione di nuovi clienti, l'UI si arricchirà di due nuove dashboard amministrative:
+
+*   **Kanban Board dei Lead:** Un'interfaccia drag-and-drop (stile Trello) per i Potenziali Clienti ("Nuovo Lead", "Contattato", "In Prova", "Convertito").
+*   **Campaign Builder:** Un editor visuale per comporre email o SMS massivi (DEM), con possibilità di filtrare l'audience (Es. "Tutti gli iscritti di Hip Hop dell'anno scorso non ancora rinnovati").
