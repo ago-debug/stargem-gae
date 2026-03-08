@@ -27,6 +27,7 @@ import { MembershipCard } from "@/components/membership-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member, Instructor, Category, Studio } from "@shared/schema";
 import { CourseSelector } from "@/components/course-selector";
+import { useMemberStore } from "@/store/useMemberStore";
 
 interface DuplicateFiscalCode {
   fiscalCode: string;
@@ -113,9 +114,20 @@ export default function AnagraficaHome() {
   const [formData, setFormData] = useState<MemberFormData>({
     country: "Italia",
   });
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(
-    memberIdFromUrl ? parseInt(memberIdFromUrl) : null
-  );
+
+  const selectedMemberId = useMemberStore((state) => state.selectedMemberId);
+  const setSelectedMemberId = useMemberStore((state) => state.setSelectedMemberId);
+
+  // Set the store immediately if there's a URL parameter on first load
+  useEffect(() => {
+    if (memberIdFromUrl) {
+      const id = parseInt(memberIdFromUrl);
+      if (!isNaN(id) && id !== selectedMemberId) {
+        setSelectedMemberId(id);
+      }
+    }
+  }, [memberIdFromUrl, setSelectedMemberId]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
@@ -130,13 +142,6 @@ export default function AnagraficaHome() {
   const { data: duplicateFiscalCodes } = useQuery<DuplicateFiscalCode[]>({
     queryKey: ["/api/members/duplicates"],
   });
-
-  // Sync selectedMemberId with URL parameter changes
-  useEffect(() => {
-    if (memberIdFromUrl) {
-      setSelectedMemberId(parseInt(memberIdFromUrl));
-    }
-  }, [memberIdFromUrl]);
 
   // Back to top scroll tracking
   useEffect(() => {

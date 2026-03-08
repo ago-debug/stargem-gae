@@ -25,6 +25,7 @@ import { CourseSelector } from "@/components/course-selector";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Course, Instructor, Category, Studio } from "@shared/schema";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useMemberStore } from "@/store/useMemberStore";
 
 interface DuplicateFiscalCode {
   fiscalCode: string;
@@ -368,8 +369,9 @@ export default function MascheraInputGenerale() {
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
-  // Active Member State for Enrollments
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+  // Active Member State for Enrollments from Zustand
+  const selectedMemberId = useMemberStore((state) => state.selectedMemberId);
+  const setSelectedMemberId = useMemberStore((state) => state.setSelectedMemberId);
   const [selectedCourseToAdd, setSelectedCourseToAdd] = useState<string>("");
   const [selectedWorkshopToAdd, setSelectedWorkshopToAdd] = useState<string>("");
   const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
