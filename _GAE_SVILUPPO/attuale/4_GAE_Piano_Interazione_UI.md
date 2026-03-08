@@ -12,6 +12,39 @@ Costruiremo **due componenti React agnostici, blindati e universali**, da import
 
 ---
 
+## 0. Elenco Definito dei Difetti Grafici e Funzionali (Stato Attuale)
+
+Durante l'analisi della UI attuale (Marzo 2026), prima di procedere con la riprogrammazione, sono emerse le seguenti criticità strutturali e di UX che i nuovi componenti dovranno risolvere nativamente, seguendo il principio di **Ottimizzazione senza distruzione**:
+
+### A. Frammentazione e Terminologia Confusa
+*   **Gestione a Silos:** Esistono decine di pagine separate per inserire entità simili (Corsi, Workshop, Campus, ecc.), frammentando l'esperienza di inserimento.
+*   **Nomenclatura Errata:** Il sistema usa la parola "Categorie" in modo atecnico. D'ora in poi, "Categoria" indicherà unicamente le materie fisiche (es. Danza, Arti Marziali, Fitness, Gioco Musica).
+
+### B. Gestione Insegnanti a Compartimenti Stagni
+*   **Disallineamento Anagrafiche:** Esiste una discrepanza gravissima tra la "Maschera Input" (dove si inseriscono i tesserati) e la sezione "Staff Insegnanti". L'insegnante "ABC" non risulta ricercabile nella Maschera Input per potergli fare una ricevuta.
+*   **Soluzione UI Futura:** Unificazione visiva in un'unica griglia anagrafica centrale, con l'uso di "Flag/Badge Multipli" a selezione (Staff, Insegnante, Personal Trainer, Tesserato) per la stessa persona. Gestione di accessi/permessi differenziati in base al ruolo.
+*   **Aziende ed Enti:** La nuova Anagrafica Centrale permetterà l'inserimento sia di persone fisiche che di Aziende/Fornitori, per gestire comodamente sconti e convenzioni o affitti spazi.
+
+### C. Sistema Pagamenti e Checkout Blindato
+*   **Flussi Multipli Carenti:** Ci sono troppi punti di accesso per pagare (Iscrizioni, Maschera Input, Calendario). Vanno unificati e rafforzati nei collegamenti.
+*   **Bug ("Pagamento Non Concluso"):** Mancata concatenazione degli eventi in Cassa (es. schermate che mostrano saldi ma non finalizzano la ricevuta).
+*   **Listini e Prezzi Bloccati (PIN Sicurezza):** Il prezzo base pescato dai listini/quote dovrà apparire in automatico. La forzatura/modifica manuale degli importi in Cassa (da parte della segreteria) sarà *bloccata*, e consentita unicamente previa autorizzazione (inserimento PIN/Codice Personale del manager).
+
+### D. Calendario Limitato e Non Universale
+*   **Da "Calendario Corsi" a "Calendario Attività":** Il flusso UI dovrà permettere prima la selezione di una delle 13 attività, poi dei dettagli.
+*   **Slot Orari Disallineati:** Nelle pagine di creazione dei corsi, il dropdown permette salti rigidi (es. 7:00, 7:30). Di contro, il Calendario ha una gestione diversa. L'inserimento orari deve essere uniformato per supportare durate flessibili (50 min, 1h30m, ecc.) coerentemente ovunque, consentendo l'inserimento di tutte le entità (Corsi, Workshop, Affitti) direttamente dal Super-Planning.
+
+### E. Rigidità nella Tipologia di Erogazione
+*   **Separazione Logica:** "Allenamenti" va separato da "Affitti". I servizi di Personal Training/Affitto necessitano di focus nominale sul cliente e sui pacchetti (es. "Pacchetto 10 ingressi Cugge").
+*   **Prove (Gratuite/Pagamento):** Non devono esistere 12 tabelle/pagine. L'attività "Prova" diventerà un semplice *Flag* (Gratis / A Pagamento) in fase di configurazione checkout dell'allievo, mostrata come voce separata nei pagamenti visivi.
+
+### F. Sovraccarico Anagrafica, Filtri e Persistenza Stato
+*   **Caricamento Dati Massivo (Filtri Obbligatori):** La lista anagrafiche base renderizza simultaneamente quasi 10.000 righe. Sarà obbligatorio inserire criteri di visibilità iniziali o filtri attivi (es. "Cerca...", o elenco in Lazy Load) per snellire il sistema.
+*   **Bug di Persistenza (Maschera Input):** Quando si seleziona un partecipante e si naviga verso altre sezioni (Panoramica ecc.), al ritorno la maschera "dimentica" e non mostra più i pagamenti/attività aperti. È necessario implementare un memory cache (es. Zustand) per l'utente esaminato.
+*   **Dati Sensibili Incompleti:** La UI attuale degli istruttori richiede solo Telefono e Mail. Sarà vitale avere la compilazione dei dati anagrafici completi per le questioni fiscali.
+
+---
+
 ## 1. Il Componente "TimeSlotPicker.tsx"
 
 Attualmente il salvataggio degli orari è disomogeneo visivamente, ma nel database (schema.ts) tutte le 11 tabelle aspettano tre campi identici:

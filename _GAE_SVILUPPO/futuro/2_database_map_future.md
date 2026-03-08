@@ -69,36 +69,45 @@ In ottica Enterprise, il sistema astrae la logica del team da quella didattica t
 
 ---
 
-## Entity-Relationship Diagram (Future ERD)
+## Entity-Relationship Diagrams (Future ERD)
 
-Questo diagramma evidenzia la spiccata verticalità e l'ordine relazionale rispetto all'approccio orizzontale espanso odierno.
+Per massimizzare la leggibilità, l'architettura futura è stata divisa in tre mini-diagrammi focali. Questo approccio modulare (Anagrafica, Attività, Pagamenti) permette di comprendere i confini esatti di ogni responsabilità del nuovo sistema SaaS.
+
+### 1. Diagramma Anagrafiche e Staff
+Questo primo schema illustra le fondamenta del sistema: l'organizzazione (Tenant), gli account di accesso (Users/Staff) e il legame con i moduli HR e di Manutenzione Strutturale.
 
 ```mermaid
 erDiagram
-    %% LIVELLO 0: SAAS ROOT
+    TENANTS ||--o{ USERS : "Assume/Tessera"
+    USERS ||--o{ TEAM_SHIFTS : "Svolge turni sede"
+    USERS ||--o{ MAINTENANCE_TICKETS : "Apre ticket guasto"
+```
+
+### 2. Diagramma del Motore Attività (Dynamic Engine)
+Il cuore pulsante del nuovo gestionale. Sostituisce definitivamente l'approccio a "silos" duplicati. Una singola entità `ACTIVITIES` assorbe corsi, workshop, affitti ed eventi esterni, ricevendo le direttive strutturali da `ACTIVITY_CATEGORIES` (che funge da "pre-seed" e router di rendering UI).
+
+```mermaid
+erDiagram
     TENANTS ||--o{ ACTIVITY_CATEGORIES : "Configura pre-seed"
     TENANTS ||--o{ ACTIVITIES : "Eroga eventi"
-    TENANTS ||--o{ USERS : "Assume/Tessera"
-
-    %% LIVELLO 1: IL MOTORE DINAMICO (Dynamic Activities Engine)
-    ACTIVITY_CATEGORIES ||--o{ ACTIVITIES : "Istanzia formati (es. Corsi, Private)"
+    ACTIVITY_CATEGORIES ||--o{ ACTIVITIES : "Istanzia formati"
     
     STUDIOS ||--o{ ACTIVITIES : "Ospita l'evento"
+    STUDIOS ||--o{ MAINTENANCE_TICKETS : "Subisce guasto"
     INSTRUCTORS ||--o{ ACTIVITIES : "Insegna l'evento"
+```
 
-    %% LIVELLO 2: ISCRITTI E TRANSAZIONI (Tutto converge qui)
+### 3. Diagramma Iscrizioni e Finanza (Il Crocevia dei Soldi)
+Tutto il traffico didattico converge nelle `ENROLLMENTS` (Iscrizioni), le quali a loro volta si agganciano in modo stringente a `PAYMENTS` (Cassa). Scompare la dispersione di 12 Foreign Keys diverse: ora ogni pagamento è tracciato deterministicamente al suo allievo (`MEMBERS`) e al suo esatto titolo d'ingresso (`ENROLLMENTS`).
+
+```mermaid
+erDiagram
     MEMBERS ||--o{ ENROLLMENTS : "1. Si iscrive a"
     ACTIVITIES ||--o{ ENROLLMENTS : "2. Riceve partecipanti"
 
-    %% LIVELLO 3: FINANZA SEMPLIFICATA
     MEMBERS ||--o{ PAYMENTS : "3. Paga"
-    ENROLLMENTS ||--o{ PAYMENTS : "4. Genera Titolo / Ricevuta"
+    ENROLLMENTS ||--o{ PAYMENTS : "4. Salda Iscrizione"
     PAYMENT_METHODS ||--o{ PAYMENTS : "tramite"
-
-    %% LIVELLO 4: HR & MANUTENZIONE (Area Staff)
-    USERS ||--o{ TEAM_SHIFTS : "Svolge turni sede"
-    USERS ||--o{ MAINTENANCE_TICKETS : "Apre ticket guasto"
-    STUDIOS ||--o{ MAINTENANCE_TICKETS : "Subisce guasto"
 ```
 
 ### Key Architectural Improvements (Sintesi dei Benefici)
