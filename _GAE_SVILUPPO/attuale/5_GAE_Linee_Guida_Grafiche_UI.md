@@ -8,11 +8,19 @@
 
 La palette di CourseManager prevede ruoli specifici per ciascun colore, al fine di guidare l'occhio dell'utente in modo intuitivo verso le azioni corrette:
 
-*   **Azzurro (Primary):** Colore portante del brand e per azioni confermative standard o componenti neutri ma interattivi (es. "Salva", box informativi).
-*   **Arancione (Warning/Highlight):** Usato per mettere in risalto elementi chiave, azioni che richiedono una seconda attenzione, stati "In Lavorazione", badge temporanei o elementi bloccanti.
-*   **Bianco (Background/Cards):** Usato rigorosamente come sfondo delle Card (es. la lista corsi, le finestre di popup) per mantenere una leggibilità chirurgica sui testi scuri.
-*   **Giallo (Navigation/Menu):** Riservato in via esclusiva agli elementi di navigazione principale del Front-End (es. voci di menu sulla sidebar selezionate, icone di raccordo principale).
-*   **Verde (Success/Action):** Esclusivo per i bottoni di conversione forte ("Paga", "Completato", tag di "Iscritto", esito positivo di una transazione).
+## 1. Codifica Cromatica (Palette Progetto)
+
+La palette di CourseManager prevede ruoli specifici per ciascun colore, al fine di guidare l'occhio dell'utente in modo intuitivo verso le azioni corrette. I colori *devono* essere richiamati tramite le variabili CSS centralizzate in `index.css` o le classi Tailwind già configurate, per garantire il perfetto switch Light/Dark mode.
+
+*   **Primary (Yellow/Gold):** Il colore predominante per pulsanti di azione principale, gli anelli di focus degli input (`--ring`) e gli header della sidebar (`--sidebar-primary`). È basato sul tono: `hsl(43 82% 46%)`.
+*   **Gold 3D (Elementi Premium):** Utilizzato per badge di stato importanti, bottoni di checkout o header di colonne ordinate. Classi CSS dedicate: `.gold-3d-button` e `.status-badge-gold`. Usa un gradiente lineare da `#e6b800` a `#b8860b`.
+*   **Neutral / Backgrounds:** 
+    *   Sfondo dell'App: `--background` (chiarissimo in Light, quasi nero in Dark mode).
+    *   Card e Finestre Modali: `--card` e `--popover`. Devono *sempre* staccare visivamente dal background.
+*   **Destructive / Error (Red):** Colore per cancellazioni o errori bloccanti, mappato su `--destructive`.
+*   **Verde / Successo:** Da utilizzare in modo parsimonioso ed esclusivo per stati di conferma (es. transazione completata o tag "Saldato").
+
+*Nota: Non utilizzare stringhe esadecimali grafiche hardcoded (es. `#ff0000`) nei componenti React, ma affidati sempre alle classi semantiche di Tailwind (es. `bg-primary`, `text-destructive`).*
 
 ## 2. Convenzioni Tipografiche e Layout
 
