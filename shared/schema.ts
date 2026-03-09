@@ -471,38 +471,14 @@ export const insertSubscriptionTypeSchema = createInsertSchema(subscriptionTypes
 export type InsertSubscriptionType = z.infer<typeof insertSubscriptionTypeSchema>;
 export type SubscriptionType = typeof subscriptionTypes.$inferSelect;
 
-// Instructors
-export const instructors = mysqlTable("instructors", {
-  id: int("id").primaryKey().autoincrement(),
-  firstName: varchar("first_name", { length: 255 }).notNull(),
-  lastName: varchar("last_name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }),
-  phone: varchar("phone", { length: 50 }),
-  specialization: text("specialization"),
-  bio: text("bio"),
-  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
-  active: boolean("active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const instructorsRelations = relations(instructors, ({ many }) => ({
-  courses: many(courses),
-  rates: many(instructorRates),
-}));
-
-export const insertInstructorSchema = createInsertSchema(instructors).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertInstructor = z.infer<typeof insertInstructorSchema>;
-export type Instructor = typeof instructors.$inferSelect;
+// Instructor Types (Aliased to Member for backward compatibility)
+export type InsertInstructor = Partial<InsertMember>;
+export type Instructor = Member;
 
 // Instructor Rates (per course type or category)
 export const instructorRates = mysqlTable("instr_rates", {
   id: int("id").primaryKey().autoincrement(),
-  instructorId: int("instructor_id").notNull().references(() => instructors.id, { onDelete: "cascade" }),
+  instructorId: int("instructor_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
   rateType: varchar("rate_type", { length: 50 }).notNull(), // 'hourly', 'per_lesson', 'fixed'
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
@@ -510,9 +486,9 @@ export const instructorRates = mysqlTable("instr_rates", {
 });
 
 export const instructorRatesRelations = relations(instructorRates, ({ one }) => ({
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [instructorRates.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
   category: one(categories, {
     fields: [instructorRates.categoryId],
@@ -578,6 +554,23 @@ export const insertEnrollmentDetailSchema = createInsertSchema(enrollmentDetails
 export type InsertEnrollmentDetail = z.infer<typeof insertEnrollmentDetailSchema>;
 export type EnrollmentDetail = typeof enrollmentDetails.$inferSelect;
 
+// Participant Types (Tipi Partecipante)
+export const participantTypes = mysqlTable("participant_types", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 100 }).notNull(),
+  color: varchar("color", { length: 50 }),
+  sortOrder: int("sort_order").default(0),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertParticipantTypeSchema = createInsertSchema(participantTypes).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertParticipantType = z.infer<typeof insertParticipantTypeSchema>;
+export type ParticipantType = typeof participantTypes.$inferSelect;
+
 // Studios (sale/studi)
 export const studios = mysqlTable("studios", {
   id: int("id").primaryKey().autoincrement(),
@@ -610,8 +603,8 @@ export const courses = mysqlTable("courses", {
   description: text("description"),
   categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }), // Studio/sala
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante primario
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }), // Insegnante secondario 1
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }), // Insegnante primario
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }), // Insegnante secondario 1
 
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
@@ -646,13 +639,13 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
     fields: [courses.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [courses.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [courses.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
   enrollments: many(enrollments),
   priceItems: many(priceListItems),
@@ -683,8 +676,8 @@ export const workshops = mysqlTable("workshops", {
   description: text("description"),
   categoryId: int("category_id").references(() => workshopCategories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -717,13 +710,13 @@ export const workshopsRelations = relations(workshops, ({ one, many }) => ({
     fields: [workshops.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [workshops.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [workshops.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
   priceItems: many(priceListItems),
 }));
@@ -749,8 +742,8 @@ export const paidTrials = mysqlTable("paid_trials", {
   description: text("description"),
   categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -781,13 +774,13 @@ export const paidTrialsRelations = relations(paidTrials, ({ one }) => ({
     fields: [paidTrials.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [paidTrials.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [paidTrials.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
 }));
 
@@ -813,8 +806,8 @@ export const freeTrials = mysqlTable("free_trials", {
   description: text("description"),
   categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -845,13 +838,13 @@ export const freeTrialsRelations = relations(freeTrials, ({ one }) => ({
     fields: [freeTrials.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [freeTrials.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [freeTrials.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
 }));
 
@@ -877,8 +870,8 @@ export const singleLessons = mysqlTable("single_lessons", {
   description: text("description"),
   categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -909,13 +902,13 @@ export const singleLessonsRelations = relations(singleLessons, ({ one }) => ({
     fields: [singleLessons.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [singleLessons.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [singleLessons.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
 }));
 
@@ -941,8 +934,8 @@ export const sundayActivities = mysqlTable("sunday_activities", {
   description: text("description"),
   categoryId: int("category_id").references(() => sundayCategories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -973,13 +966,13 @@ export const sundayActivitiesRelations = relations(sundayActivities, ({ one }) =
     fields: [sundayActivities.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [sundayActivities.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [sundayActivities.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
 }));
 
@@ -1005,8 +998,8 @@ export const trainings = mysqlTable("trainings", {
   description: text("description"),
   categoryId: int("category_id").references(() => trainingCategories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -1037,13 +1030,13 @@ export const trainingsRelations = relations(trainings, ({ one }) => ({
     fields: [trainings.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [trainings.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [trainings.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
 }));
 
@@ -1069,8 +1062,8 @@ export const individualLessons = mysqlTable("individual_lessons", {
   description: text("description"),
   categoryId: int("category_id").references(() => individualLessonCategories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -1101,13 +1094,13 @@ export const individualLessonsRelations = relations(individualLessons, ({ one })
     fields: [individualLessons.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [individualLessons.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [individualLessons.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
 }));
 
@@ -1133,8 +1126,8 @@ export const campusActivities = mysqlTable("campus_activities", {
   description: text("description"),
   categoryId: int("category_id").references(() => campusCategories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -1165,13 +1158,13 @@ export const campusActivitiesRelations = relations(campusActivities, ({ one }) =
     fields: [campusActivities.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [campusActivities.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [campusActivities.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
 }));
 
@@ -1197,8 +1190,8 @@ export const recitals = mysqlTable("recitals", {
   description: text("description"),
   categoryId: int("category_id").references(() => recitalCategories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -1229,13 +1222,13 @@ export const recitalsRelations = relations(recitals, ({ one }) => ({
     fields: [recitals.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [recitals.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [recitals.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
 }));
 
@@ -1261,8 +1254,8 @@ export const vacationStudies = mysqlTable("vacation_studies", {
   description: text("description"),
   categoryId: int("category_id").references(() => vacationCategories.id, { onDelete: "set null" }),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
@@ -1293,13 +1286,13 @@ export const vacationStudiesRelations = relations(vacationStudies, ({ one }) => 
     fields: [vacationStudies.quoteId],
     references: [quotes.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [vacationStudies.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
-  secondaryInstructor1: one(instructors, {
+  secondaryInstructor1: one(members, {
     fields: [vacationStudies.secondaryInstructor1Id],
-    references: [instructors.id],
+    references: [members.id],
   }),
 }));
 
@@ -1377,7 +1370,7 @@ export const members = mysqlTable("members", {
   fatherProvince: varchar("father_province", { length: 2 }),
   fatherPostalCode: varchar("father_postal_code", { length: 10 }),
 
-  photoUrl: text("photo_url"),
+  photoUrl: text("photo_url"), // Consider a manual ALTER to LONGTEXT if needed
 
   // Registration info
   season: varchar("season", { length: 50 }),
@@ -1394,6 +1387,13 @@ export const members = mysqlTable("members", {
   schoolCreditsYear: varchar("credits_year", { length: 20 }),
   tesserinoTecnicoNumber: varchar("tesserino_tecnico_number", { length: 100 }),
   tesserinoTecnicoIssueDate: date("tesserino_tecnico_date"),
+  privacyAccepted: boolean("privacy_accepted").default(false),
+  regulationsAccepted: boolean("regulations_accepted").default(false),
+  membershipApplicationSigned: boolean("membership_application_signed").default(false),
+  attachmentMetadata: json("attachment_metadata"),
+  giftMetadata: json("gift_metadata"),
+  tessereMetadata: json("tessere_metadata"),
+  certificatoMedicoMetadata: json("certificato_medico_metadata"),
 
   // Indirizzo suddiviso
   streetAddress: varchar("street_address", { length: 255 }), // Via/Piazza e numero civico
@@ -1404,6 +1404,12 @@ export const members = mysqlTable("members", {
 
   address: text("address"), // Mantenuto per retrocompatibilità
   notes: text("notes"),
+
+  // Campi Insegnanti
+  specialization: text("specialization"),
+  bio: text("bio"),
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
+
   active: boolean("active").default(true),
   createdBy: varchar("created_by", { length: 255 }),
   updatedBy: varchar("updated_by", { length: 255 }),
@@ -1453,6 +1459,13 @@ export const insertMemberSchema = createInsertSchema(members, {
   active: z.boolean().optional(),
   hasMedicalCertificate: z.boolean().optional(),
   isMinor: z.boolean().optional(),
+  privacyAccepted: z.boolean().optional(),
+  regulationsAccepted: z.boolean().optional(),
+  membershipApplicationSigned: z.boolean().optional(),
+  attachmentMetadata: z.any().optional(),
+  giftMetadata: z.any().optional(),
+  tessereMetadata: z.any().optional(),
+  certificatoMedicoMetadata: z.any().optional(),
 });
 export type InsertMember = z.infer<typeof insertMemberSchema>;
 export type Member = typeof members.$inferSelect;
@@ -2195,7 +2208,7 @@ export const studioBookings = mysqlTable("studio_bookings", {
   paid: boolean("paid").default(false),
   amount: decimal("amount", { precision: 10, scale: 2 }),
   googleEventId: varchar("google_event_id", { length: 255 }),
-  instructorId: int("instructor_id").references(() => instructors.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
@@ -2214,9 +2227,9 @@ export const studioBookingsRelations = relations(studioBookings, ({ one }) => ({
     fields: [studioBookings.serviceId],
     references: [bookingServices.id],
   }),
-  instructor: one(instructors, {
+  instructor: one(members, {
     fields: [studioBookings.instructorId],
-    references: [instructors.id],
+    references: [members.id],
   }),
   season: one(seasons, {
     fields: [studioBookings.seasonId],

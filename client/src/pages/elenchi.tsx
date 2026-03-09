@@ -680,6 +680,13 @@ export default function Elenchi() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <EditableListSection
+                title="Tipo Partecipante"
+                queryKey="/api/participant-types"
+                apiPath="/api/participant-types"
+                emptyMessage="Nessun tipo partecipante definito"
+                testIdPrefix="tipo-partecipante"
+              />
+              <EditableListSection
                 title="Stato"
                 queryKey="/api/activity-statuses"
                 apiPath="/api/activity-statuses"

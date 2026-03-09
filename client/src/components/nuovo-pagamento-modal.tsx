@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
 import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollment-details";
+import { PaymentModuleConnector } from "@/components/PaymentModuleConnector";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import type { Member, PriceList, Course, Quote, PriceListItem } from "@shared/schema";
@@ -571,51 +572,16 @@ export function NuovoPagamentoModal({
                 {/* === DIALOG CHECKOUT INNER === */}
                 <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
                     <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Conferma Incasso</DialogTitle>
-                            <DialogDescription>
-                                Procedi al pagamento di <strong>€ {grandTotal.toFixed(2)}</strong> per {selectedMember?.firstName} {selectedMember?.lastName}. Verranno create anche le relative iscrizioni attive.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="space-y-2">
-                                <Label>Metodo di Pagamento</Label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <Button
-                                        variant={paymentMethod === 'contanti' ? "default" : "outline"}
-                                        onClick={() => setPaymentMethod('contanti')}
-                                        className="flex gap-2"
-                                    >
-                                        <Banknote className="w-4 h-4" /> Contanti
-                                    </Button>
-                                    <Button
-                                        variant={paymentMethod === 'bonifico' ? "default" : "outline"}
-                                        onClick={() => setPaymentMethod('bonifico')}
-                                        className="flex gap-2"
-                                    >
-                                        <CreditCard className="w-4 h-4" /> Bonifico / POS
-                                    </Button>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Note Pagamento (Opzionali)</Label>
-                                <Input
-                                    placeholder="Num. ricevuta, dettagli..."
-                                    value={paymentNotes}
-                                    onChange={(e) => setPaymentNotes(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsCheckoutOpen(false)} disabled={checkoutMutation.isPending}>Annulla</Button>
-                            <Button
-                                onClick={() => checkoutMutation.mutate()}
-                                disabled={checkoutMutation.isPending}
-                                className="bg-green-600 hover:bg-green-700 font-bold"
-                            >
-                                {checkoutMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Elaborazione...</> : `Incassa € ${grandTotal.toFixed(2)}`}
-                            </Button>
-                        </DialogFooter>
+                        <PaymentModuleConnector
+                            basePrice={grandTotal}
+                            itemName={`Incasso: ${selectedMember?.firstName} ${selectedMember?.lastName}`}
+                            onPaymentComplete={(data) => {
+                                setPaymentMethod(data.paymentMethod);
+                                setPaymentNotes(data.receiptNumber ? `Ricevuta: ${data.receiptNumber}` : "");
+                                checkoutMutation.mutate();
+                            }}
+                            onCancel={() => setIsCheckoutOpen(false)}
+                        />
                     </DialogContent>
                 </Dialog>
             </DialogContent>

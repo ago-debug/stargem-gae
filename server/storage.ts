@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql, or, isNotNull } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, or, isNotNull, inArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
 import { ilike } from "drizzle-orm";
 import {
@@ -8,7 +8,6 @@ import {
   categories,
   clientCategories,
   subscriptionTypes,
-  instructors,
   studios,
   courses,
   workshops,
@@ -162,6 +161,9 @@ import {
   enrollmentDetails,
   type EnrollmentDetail,
   type InsertEnrollmentDetail,
+  participantTypes,
+  type ParticipantType,
+  type InsertParticipantType,
   todos,
   type Todo,
   type InsertTodo,
@@ -274,7 +276,23 @@ export interface IStorage {
 
   // Members
   getMembers(): Promise<Member[]>;
-  getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }>;
+  getMembersPaginated(
+    page: number,
+    pageSize: number,
+    search?: string,
+    season?: string,
+    status?: string,
+    gender?: string,
+    hasMedicalCert?: string,
+    isMinor?: string,
+    participantType?: string,
+    hasCard?: string,
+    hasEntityCard?: string,
+    hasEmail?: string,
+    hasPhone?: string,
+    missingFiscalCode?: string,
+    issuesFilter?: string
+  ): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }>;
   getMembersWithEntityCards(): Promise<Member[]>;
   getMember(id: number): Promise<Member | undefined>;
   getMemberByFiscalCode(fiscalCode: string): Promise<Member | undefined>;
@@ -283,6 +301,13 @@ export interface IStorage {
   updateMember(id: number, member: Partial<InsertMember>): Promise<Member>;
   deleteMember(id: number): Promise<void>;
   bulkCreateMembers(members: InsertMember[]): Promise<{ imported: number; skipped: number }>;
+
+  // Duplicates and Merging
+  mergeMembers(primaryId: number, secondaryIds: number[]): Promise<void>;
+  getDuplicateStats(): Promise<{ byFiscalCode: number; byEmail: number; byPhone: number; byName: number }>;
+  getMissingDataCounts(): Promise<{ missingFiscalCode: number; missingEmail: number; missingPhone: number }>;
+  checkDuplicateParticipant(data: any, excludeId?: number): Promise<{ isDuplicate: boolean; duplicateFields: string[]; message?: string }>;
+
 
   // Categories
   getCategories(): Promise<Category[]>;
@@ -308,9 +333,11 @@ export interface IStorage {
   // Instructors
   getInstructors(): Promise<Instructor[]>;
   getInstructor(id: number): Promise<Instructor | undefined>;
+  getInstructorByEmail(email: string): Promise<Instructor | undefined>;
   createInstructor(instructor: InsertInstructor): Promise<Instructor>;
   updateInstructor(id: number, instructor: Partial<InsertInstructor>): Promise<Instructor>;
   deleteInstructor(id: number): Promise<void>;
+  syncInstructorFromMember(member: Member): Promise<void>;
 
   // Studios
   getStudios(): Promise<Studio[]>;
@@ -333,6 +360,13 @@ export interface IStorage {
   createActivityStatus(status: InsertActivityStatus): Promise<ActivityStatus>;
   updateActivityStatus(id: number, status: Partial<InsertActivityStatus>): Promise<ActivityStatus>;
   deleteActivityStatus(id: number): Promise<void>;
+
+  // Participant Types
+  getParticipantTypes(): Promise<ParticipantType[]>;
+  getParticipantType(id: number): Promise<ParticipantType | undefined>;
+  createParticipantType(type: InsertParticipantType): Promise<ParticipantType>;
+  updateParticipantType(id: number, type: Partial<InsertParticipantType>): Promise<ParticipantType>;
+  deleteParticipantType(id: number): Promise<void>;
 
   // Workshops
   getWorkshops(): Promise<Workshop[]>;
@@ -756,6 +790,33 @@ export class DatabaseStorage implements IStorage {
     await db.delete(userRoles).where(eq(userRoles.id, id));
   }
 
+  // ==== Participant Types ====
+  async getParticipantTypes(): Promise<ParticipantType[]> {
+    return await db.select().from(participantTypes).orderBy(participantTypes.sortOrder);
+  }
+
+  async getParticipantType(id: number): Promise<ParticipantType | undefined> {
+    const [type] = await db.select().from(participantTypes).where(eq(participantTypes.id, id));
+    return type;
+  }
+
+  async createParticipantType(type: InsertParticipantType): Promise<ParticipantType> {
+    const [result] = await db.insert(participantTypes).values(type);
+    const id = result.insertId;
+    const [newType] = await db.select().from(participantTypes).where(eq(participantTypes.id, id));
+    return newType;
+  }
+
+  async updateParticipantType(id: number, type: Partial<InsertParticipantType>): Promise<ParticipantType> {
+    await db.update(participantTypes).set(type).where(eq(participantTypes.id, id));
+    const [updatedType] = await db.select().from(participantTypes).where(eq(participantTypes.id, id));
+    return updatedType;
+  }
+
+  async deleteParticipantType(id: number): Promise<void> {
+    await db.delete(participantTypes).where(eq(participantTypes.id, id));
+  }
+
   // ==== Activity Statuses ====
   async getActivityStatuses(): Promise<ActivityStatus[]> {
     return await db.select().from(activityStatuses).orderBy(activityStatuses.sortOrder);
@@ -940,16 +1001,16 @@ export class DatabaseStorage implements IStorage {
         serviceName: bookingServices.name,
         serviceColor: bookingServices.color,
         instructorId: studioBookings.instructorId,
-        instructorFirstName: instructors.firstName,
-        instructorLastName: instructors.lastName,
-        specialization: instructors.specialization,
+        instructorFirstName: members.firstName,
+        instructorLastName: members.lastName,
+        specialization: members.specialization,
         seasonId: studioBookings.seasonId,
       })
       .from(studioBookings)
       .leftJoin(members, eq(studioBookings.memberId, members.id))
       .leftJoin(studios, eq(studioBookings.studioId, studios.id))
       .leftJoin(bookingServices, eq(studioBookings.serviceId, bookingServices.id))
-      .leftJoin(instructors, eq(studioBookings.instructorId, instructors.id));
+      .leftJoin(members, eq(studioBookings.instructorId, members.id));
 
     const conditions = [];
     if (startDate && endDate) {
@@ -1021,57 +1082,137 @@ export class DatabaseStorage implements IStorage {
       .orderBy(members.lastName, members.firstName);
   }
 
-  async getMembersPaginated(page: number, pageSize: number, search?: string): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }> {
+  async getMembersPaginated(
+    page: number,
+    pageSize: number,
+    search?: string,
+    season?: string,
+    status?: string,
+    gender?: string,
+    hasMedicalCert?: string,
+    isMinor?: string,
+    participantType?: string,
+    hasCard?: string,
+    hasEntityCard?: string,
+    hasEmail?: string,
+    hasPhone?: string,
+    missingFiscalCode?: string,
+    issuesFilter?: string
+  ): Promise<{ members: (Member & { activeCourseCount: number })[]; total: number }> {
     const offset = (page - 1) * pageSize;
 
     let searchCondition = sql`1 = 1`;
     if (search && search.trim().length >= 2) {
       const searchTerm = `%${search.trim().toLowerCase()}%`;
       searchCondition = sql`(
-  LOWER(first_name) LIKE ${searchTerm} OR 
+        LOWER(first_name) LIKE ${searchTerm} OR 
         LOWER(last_name) LIKE ${searchTerm} OR 
         LOWER(email) LIKE ${searchTerm} OR 
         LOWER(fiscal_code) LIKE ${searchTerm} OR
         LOWER(card_number) LIKE ${searchTerm} OR
         LOWER(CONCAT(first_name, ' ', last_name)) LIKE ${searchTerm} OR
         LOWER(CONCAT(last_name, ' ', first_name)) LIKE ${searchTerm}
-)`;
+      )`;
+    }
+
+    // Add optional filters
+    if (season && season !== "all") {
+      searchCondition = sql`${searchCondition} AND season = ${season}`;
+    }
+
+    if (status && status !== "all") {
+      if (status === "active") searchCondition = sql`${searchCondition} AND active = 1`;
+      else if (status === "inactive") searchCondition = sql`${searchCondition} AND active = 0`;
+    }
+
+    if (gender && gender !== "all") {
+      searchCondition = sql`${searchCondition} AND gender = ${gender}`;
+    }
+
+    if (hasMedicalCert && hasMedicalCert !== "all") {
+      if (hasMedicalCert === "yes") searchCondition = sql`${searchCondition} AND has_medical_certificate = 1`;
+      else if (hasMedicalCert === "no") searchCondition = sql`${searchCondition} AND has_medical_certificate = 0`;
+      else if (hasMedicalCert === "expired") searchCondition = sql`${searchCondition} AND has_medical_certificate = 1 AND medical_certificate_expiry < CURRENT_DATE()`;
+    }
+
+    if (isMinor && isMinor !== "all") {
+      if (isMinor === "yes") searchCondition = sql`${searchCondition} AND is_minor = 1`;
+      else if (isMinor === "no") searchCondition = sql`${searchCondition} AND is_minor = 0`;
+    }
+
+    if (participantType && participantType !== "all") {
+      searchCondition = sql`${searchCondition} AND LOWER(participant_type) LIKE LOWER(${'%' + participantType + '%'})`;
+    }
+
+    if (hasCard && hasCard !== "all") {
+      if (hasCard === "yes") searchCondition = sql`${searchCondition} AND card_number IS NOT NULL AND card_number != ''`;
+      else if (hasCard === "no") searchCondition = sql`${searchCondition} AND (card_number IS NULL OR card_number = '')`;
+      else if (hasCard === "expired") searchCondition = sql`${searchCondition} AND card_number IS NOT NULL AND card_expiry_date < CURRENT_DATE()`;
+    }
+
+    if (hasEntityCard && hasEntityCard !== "all") {
+      if (hasEntityCard === "yes") searchCondition = sql`${searchCondition} AND entity_card_number IS NOT NULL AND entity_card_number != ''`;
+      else if (hasEntityCard === "no") searchCondition = sql`${searchCondition} AND (entity_card_number IS NULL OR entity_card_number = '')`;
+      else if (hasEntityCard === "expired") searchCondition = sql`${searchCondition} AND entity_card_number IS NOT NULL AND entity_card_expiry_date < CURRENT_DATE()`;
+    }
+
+    if (hasEmail && hasEmail !== "all") {
+      if (hasEmail === "yes") searchCondition = sql`${searchCondition} AND email IS NOT NULL AND email != ''`;
+      else if (hasEmail === "no") searchCondition = sql`${searchCondition} AND (email IS NULL OR email = '')`;
+    }
+
+    if (hasPhone && hasPhone !== "all") {
+      if (hasPhone === "yes") searchCondition = sql`${searchCondition} AND ((phone IS NOT NULL AND phone != '') OR (mobile IS NOT NULL AND mobile != ''))`;
+      else if (hasPhone === "no") searchCondition = sql`${searchCondition} AND (phone IS NULL OR phone = '') AND (mobile IS NULL OR mobile = '')`;
+    }
+
+    if (missingFiscalCode && missingFiscalCode === "yes") {
+      searchCondition = sql`${searchCondition} AND (fiscal_code IS NULL OR fiscal_code = '')`;
+    }
+
+    // Issues filter prioritizes data problems
+    if (issuesFilter === "any") {
+      searchCondition = sql`${searchCondition} AND (
+         (fiscal_code IS NULL OR fiscal_code = '') OR
+         (email IS NULL OR email = '') OR 
+         ((phone IS NULL OR phone = '') AND (mobile IS NULL OR mobile = ''))
+       )`;
     }
 
     // Use raw SQL for the complete query with subquery
     const [rows]: any = await db.execute(searchCondition === sql`1 = 1` ? sql`
-SELECT
-m.*,
-  COALESCE((
-    SELECT COUNT(*) 
+      SELECT
+        m.*,
+        COALESCE((
+          SELECT COUNT(*) 
           FROM enrollments e 
           WHERE e.member_id = m.id AND e.status = 'active'
-  ), 0) as active_course_count
+        ), 0) as active_course_count
       FROM members m
       ORDER BY m.last_name, m.first_name
       LIMIT ${pageSize}
       OFFSET ${offset}
-` : sql`
-SELECT
-m.*,
-  COALESCE((
-    SELECT COUNT(*) 
+    ` : sql`
+      SELECT
+        m.*,
+        COALESCE((
+          SELECT COUNT(*) 
           FROM enrollments e 
           WHERE e.member_id = m.id AND e.status = 'active'
-  ), 0) as active_course_count
+        ), 0) as active_course_count
       FROM members m
       WHERE ${searchCondition}
       ORDER BY m.last_name, m.first_name
       LIMIT ${pageSize}
       OFFSET ${offset}
-`);
+    `);
 
     // Count query
     const [countRows]: any = await db.execute(searchCondition === sql`1 = 1` ? sql`
       SELECT COUNT(*) as count FROM members
-  ` : sql`
+    ` : sql`
       SELECT COUNT(*) as count FROM members WHERE ${searchCondition}
-`);
+    `);
     const total = Number(countRows[0]?.count || 0);
 
     // Map snake_case to camelCase
@@ -1124,6 +1265,9 @@ m.*,
       createdBy: row.created_by,
       updatedBy: row.updated_by,
       activeCourseCount: row.active_course_count || 0,
+      privacyAccepted: row.privacy_accepted,
+      regulationsAccepted: row.regulations_accepted,
+      membershipApplicationSigned: row.membership_application_signed
     }));
 
     return { members: membersList as (Member & { activeCourseCount: number })[], total };
@@ -1144,21 +1288,116 @@ m.*,
   }
 
   async getDuplicateFiscalCodes(): Promise<{ fiscalCode: string; members: { id: number; firstName: string; lastName: string; }[] }[]> {
-    // Find all fiscal codes that appear more than once
-    const [rows]: any = await db.execute(sql`
-      SELECT UPPER(fiscal_code) as fiscal_code,
-  JSON_ARRAYAGG(JSON_OBJECT('id', id, 'firstName', first_name, 'lastName', last_name)) as members
-      FROM members 
-      WHERE fiscal_code IS NOT NULL AND fiscal_code != ''
-      GROUP BY UPPER(fiscal_code)
-      HAVING COUNT(*) > 1
-      ORDER BY UPPER(fiscal_code)
-  `);
+    // We will fetch all members and cluster them by finding pairs with >= 2 matching data points.
+    // Data points evaluated: first_name, last_name, fiscal_code, email, mobile/phone, date_of_birth (if present)
+    const allMembers = await db.select({
+      id: members.id,
+      firstName: members.firstName,
+      lastName: members.lastName,
+      fiscalCode: members.fiscalCode,
+      email: members.email,
+      mobile: members.mobile,
+      phone: members.phone,
+      dateOfBirth: members.dateOfBirth,
+      isMinor: members.isMinor
+    }).from(members);
 
-    return rows.map((row: any) => ({
-      fiscalCode: row.fiscal_code,
-      members: typeof row.members === 'string' ? JSON.parse(row.members) : row.members
-    }));
+    const isMatch = (m1: any, m2: any) => {
+      // 1. Exact Fiscal Code match is ALWAYS a duplicate (unless both are empty)
+      if (m1.fiscalCode && m2.fiscalCode && m1.fiscalCode.toUpperCase().trim() === m2.fiscalCode.toUpperCase().trim()) {
+        return true;
+      }
+
+      let matches = 0;
+      let firstNameMatch = false;
+      let contactOrDemographicMatch = false;
+
+      const f1 = (m1.firstName || '').toLowerCase().trim();
+      const f2 = (m2.firstName || '').toLowerCase().trim();
+      if (f1 && f2 && f1 === f2) {
+        matches++;
+        firstNameMatch = true;
+      }
+
+      const l1 = (m1.lastName || '').toLowerCase().trim();
+      const l2 = (m2.lastName || '').toLowerCase().trim();
+      if (l1 && l2 && l1 === l2) {
+        matches++;
+      }
+
+      const e1 = (m1.email || '').toLowerCase().trim();
+      const e2 = (m2.email || '').toLowerCase().trim();
+      if (e1 && e2 && e1 === e2) {
+        matches++;
+        contactOrDemographicMatch = true;
+      }
+
+      const p1 = (m1.mobile || m1.phone || '').trim();
+      const p2 = (m2.mobile || m2.phone || '').trim();
+      if (p1 && p2 && p1 === p2) {
+        matches++;
+        contactOrDemographicMatch = true;
+      }
+
+      if (m1.dateOfBirth && m2.dateOfBirth && m1.dateOfBirth === m2.dateOfBirth) {
+        matches++;
+        contactOrDemographicMatch = true;
+      }
+
+      // CRITICAL RULE: If First Names are different, they are definitely different people 
+      // (likely parents/children/spouses sharing contact info).
+      if (!firstNameMatch) {
+        return false;
+      }
+
+      // OMONOMY PROTECTION: 
+      // If the ONLY matches are Name + Surname (matches === 2), but they have no matching contact info / DOB,
+      // they are homonyms, NOT duplicates. They need at least one contact/demo match to be confirmed duplicates.
+      if (matches === 2 && !contactOrDemographicMatch) {
+        return false;
+      }
+
+      return matches >= 2;
+    };
+
+    const visited = new Set<number>();
+    const clusters: any[] = [];
+
+    for (let i = 0; i < allMembers.length; i++) {
+      const m1 = allMembers[i];
+      if (visited.has(m1.id)) continue;
+
+      const currentCluster = [m1];
+      visited.add(m1.id);
+
+      for (let j = i + 1; j < allMembers.length; j++) {
+        const m2 = allMembers[j];
+        if (visited.has(m2.id)) continue;
+
+        if (isMatch(m1, m2)) {
+          currentCluster.push(m2);
+          visited.add(m2.id);
+        }
+      }
+
+      if (currentCluster.length > 1) {
+        // Find a representative label for the cluster (e.g. Fiscal Code or Name)
+        const primaryFiscalCode = currentCluster.find(m => m.fiscalCode)?.fiscalCode || `Nome: ${currentCluster[0].firstName} ${currentCluster[0].lastName}`;
+
+        clusters.push({
+          fiscalCode: primaryFiscalCode.toUpperCase(),
+          members: currentCluster.map(m => ({
+            id: m.id,
+            firstName: m.firstName,
+            lastName: m.lastName,
+            fiscalCode: m.fiscalCode,
+            email: m.email
+          }))
+        });
+      }
+    }
+
+    return clusters;
   }
 
   async createMember(member: InsertMember): Promise<Member> {
@@ -1173,6 +1412,11 @@ m.*,
     // Sync medical certificate if data exists
     if (newMember.hasMedicalCertificate) {
       await this.syncMedicalCertificateFromMember(newMember);
+    }
+
+    // Sync instructor if staff
+    if (newMember.participantType && newMember.participantType.toLowerCase().startsWith('staff')) {
+      await this.syncInstructorFromMember(newMember);
     }
 
     return newMember;
@@ -1194,6 +1438,13 @@ m.*,
     // Sync medical certificate if data exists or was updated
     if (member.hasMedicalCertificate !== undefined || member.medicalCertificateExpiry !== undefined) {
       await this.syncMedicalCertificateFromMember(updated);
+    }
+
+    // Sync instructor if staff
+    if (member.participantType !== undefined) {
+      if (updated.participantType && updated.participantType.toLowerCase().startsWith('staff')) {
+        await this.syncInstructorFromMember(updated);
+      }
     }
 
     return updated;
@@ -1226,6 +1477,149 @@ m.*,
     }
 
     return { imported, skipped };
+  }
+
+  // ==== Duplicates and Merging ====
+
+  async checkDuplicateParticipant(data: any, excludeId?: number): Promise<{ isDuplicate: boolean; duplicateFields: string[]; message?: string }> {
+    const duplicateFields: string[] = [];
+    const normalizedData = {
+      firstName: data.firstName ? data.firstName.trim().toLowerCase() : undefined,
+      lastName: data.lastName ? data.lastName.trim().toLowerCase() : undefined,
+      fiscalCode: data.fiscalCode ? data.fiscalCode.trim().toUpperCase() : undefined,
+      email: data.email ? data.email.trim().toLowerCase() : undefined,
+      mobile: data.mobile ? data.mobile.trim() : undefined,
+    };
+
+    let conditions: any[] = [];
+
+    if (normalizedData.fiscalCode) {
+      conditions.push(eq(members.fiscalCode, normalizedData.fiscalCode));
+    }
+    if (normalizedData.email) {
+      conditions.push(eq(members.email, normalizedData.email));
+    }
+    if (normalizedData.mobile) {
+      conditions.push(eq(members.mobile, normalizedData.mobile));
+    }
+    if (normalizedData.firstName && normalizedData.lastName) {
+      conditions.push(
+        and(
+          eq(sql`LOWER(${members.firstName})`, normalizedData.firstName),
+          eq(sql`LOWER(${members.lastName})`, normalizedData.lastName)
+        )
+      );
+    }
+
+    if (conditions.length === 0) {
+      return { isDuplicate: false, duplicateFields: [] };
+    }
+
+    // Build the query
+    let baseQuery = db.select().from(members).where(or(...conditions));
+    const potentialDuplicates = await baseQuery;
+
+    // Filter out the excluded member (if updating existing)
+    const duplicates = potentialDuplicates.filter(d => d.id !== excludeId);
+
+    if (duplicates.length > 0) {
+      for (const d of duplicates) {
+        if (normalizedData.fiscalCode && d.fiscalCode?.toUpperCase() === normalizedData.fiscalCode) {
+          if (!duplicateFields.includes("Codice Fiscale")) duplicateFields.push("Codice Fiscale");
+        }
+        if (normalizedData.email && d.email?.toLowerCase() === normalizedData.email) {
+          if (!duplicateFields.includes("Email")) duplicateFields.push("Email");
+        }
+        if (normalizedData.mobile && d.mobile === normalizedData.mobile) {
+          if (!duplicateFields.includes("Cellulare")) duplicateFields.push("Cellulare");
+        }
+        if (normalizedData.firstName && normalizedData.lastName &&
+          d.firstName.toLowerCase() === normalizedData.firstName &&
+          d.lastName.toLowerCase() === normalizedData.lastName) {
+          if (!duplicateFields.includes("Nome e Cognome")) duplicateFields.push("Nome e Cognome");
+        }
+      }
+
+      return {
+        isDuplicate: true,
+        duplicateFields,
+        message: `Dati già presenti nel sistema: ${duplicateFields.join(", ")}.`
+      };
+    }
+
+    return { isDuplicate: false, duplicateFields: [] };
+  }
+
+  async getDuplicateStats(): Promise<{ byFiscalCode: number; byEmail: number; byPhone: number; byName: number }> {
+    // We run raw SQL group by aggregations to find duplicates efficiently
+    const [cfRows]: any = await db.execute(sql`
+      SELECT fiscal_code, COUNT(*) as c FROM members 
+      WHERE fiscal_code IS NOT NULL AND fiscal_code != '' 
+      GROUP BY fiscal_code HAVING c > 1
+    `);
+
+    const [emailRows]: any = await db.execute(sql`
+      SELECT email, COUNT(*) as c FROM members 
+      WHERE email IS NOT NULL AND email != '' 
+      GROUP BY email HAVING c > 1
+    `);
+
+    const [phoneRows]: any = await db.execute(sql`
+      SELECT mobile, COUNT(*) as c FROM members 
+      WHERE mobile IS NOT NULL AND mobile != '' 
+      GROUP BY mobile HAVING c > 1
+    `);
+
+    const [nameRows]: any = await db.execute(sql`
+      SELECT first_name, last_name, COUNT(*) as c FROM members 
+      GROUP BY LOWER(first_name), LOWER(last_name) HAVING c > 1
+    `);
+
+    return {
+      byFiscalCode: cfRows.length,
+      byEmail: emailRows.length,
+      byPhone: phoneRows.length,
+      byName: nameRows.length
+    };
+  }
+
+  async getMissingDataCounts(): Promise<{ missingFiscalCode: number; missingEmail: number; missingPhone: number }> {
+    const [cfRows]: any = await db.execute(sql`SELECT COUNT(*) as count FROM members WHERE fiscal_code IS NULL OR fiscal_code = ''`);
+    const [emailRows]: any = await db.execute(sql`SELECT COUNT(*) as count FROM members WHERE email IS NULL OR email = ''`);
+    const [phoneRows]: any = await db.execute(sql`SELECT COUNT(*) as count FROM members WHERE (phone IS NULL OR phone = '') AND (mobile IS NULL OR mobile = '')`);
+
+    return {
+      missingFiscalCode: Number(cfRows[0]?.count || 0),
+      missingEmail: Number(emailRows[0]?.count || 0),
+      missingPhone: Number(phoneRows[0]?.count || 0),
+    };
+  }
+
+  async mergeMembers(primaryId: number, secondaryIds: number[]): Promise<void> {
+    if (!secondaryIds || secondaryIds.length === 0) return;
+
+    // 1. Reassign enrollments
+    await db.update(enrollments).set({ memberId: primaryId }).where(inArray(enrollments.memberId, secondaryIds));
+
+    // 2. Reassign workshop enrollments
+    await db.update(workshopEnrollments).set({ memberId: primaryId }).where(inArray(workshopEnrollments.memberId, secondaryIds));
+
+    // 3. Reassign attendance records
+    await db.update(attendances).set({ memberId: primaryId }).where(inArray(attendances.memberId, secondaryIds));
+
+    // 4. Reassign payments
+    await db.update(payments)
+      .set({ memberId: primaryId })
+      .where(inArray(payments.memberId, secondaryIds));
+
+    // 5. Reassign medical certificates
+    await db.update(medicalCertificates).set({ memberId: primaryId }).where(inArray(medicalCertificates.memberId, secondaryIds));
+
+    // 6. Reassign memberships
+    await db.update(memberships).set({ memberId: primaryId }).where(inArray(memberships.memberId, secondaryIds));
+
+    // 7. Delete secondary members
+    await db.delete(members).where(inArray(members.id, secondaryIds));
   }
 
   // ==== Categories ====
@@ -1318,34 +1712,101 @@ m.*,
     await db.delete(subscriptionTypes).where(eq(subscriptionTypes.id, id));
   }
 
-  // ==== Instructors ====
+  // ==== Instructors (Le persone con participantType che contiene INSEGNANTE o STAFF) ====
   async getInstructors(): Promise<Instructor[]> {
-    return await db.select().from(instructors).orderBy(instructors.lastName, instructors.firstName);
+    return await db.select()
+      .from(members)
+      .where(
+        or(
+          eq(members.participantType, "INSEGNANTE"),
+          sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+          sql`LOWER(${members.participantType}) LIKE '%staff%'`
+        )
+      )
+      .orderBy(members.lastName, members.firstName);
   }
 
   async getInstructor(id: number): Promise<Instructor | undefined> {
-    const [instructor] = await db.select().from(instructors).where(eq(instructors.id, id));
+    const [instructor] = await db.select()
+      .from(members)
+      .where(
+        and(
+          eq(members.id, id),
+          or(
+            eq(members.participantType, "INSEGNANTE"),
+            sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+            sql`LOWER(${members.participantType}) LIKE '%staff%'`
+          )
+        )
+      );
     return instructor;
   }
 
   async createInstructor(instructor: InsertInstructor): Promise<Instructor> {
-    const [result] = await db.insert(instructors).values(instructor);
-    const [newInstructor] = await db.select().from(instructors).where(eq(instructors.id, result.insertId));
+    const [result] = await db.insert(members).values({
+      firstName: instructor.firstName || "Nuovo",
+      lastName: instructor.lastName || "Insegnante",
+      ...instructor,
+      participantType: "INSEGNANTE"
+    } as any);
+    const [newInstructor] = await db.select()
+      .from(members)
+      .where(eq(members.id, result.insertId));
     return newInstructor;
   }
 
   async updateInstructor(id: number, instructor: Partial<InsertInstructor>): Promise<Instructor> {
     await db
-      .update(instructors)
-      .set({ ...instructor, updatedAt: new Date() })
-      .where(eq(instructors.id, id));
-
-    const [updated] = await db.select().from(instructors).where(eq(instructors.id, id));
+      .update(members)
+      .set(instructor)
+      .where(
+        and(
+          eq(members.id, id),
+          or(
+            eq(members.participantType, "INSEGNANTE"),
+            sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+            sql`LOWER(${members.participantType}) LIKE '%staff%'`
+          )
+        )
+      );
+    const [updated] = await db.select()
+      .from(members)
+      .where(eq(members.id, id));
     return updated;
   }
 
   async deleteInstructor(id: number): Promise<void> {
-    await db.delete(instructors).where(eq(instructors.id, id));
+    await db.delete(members)
+      .where(
+        and(
+          eq(members.id, id),
+          or(
+            eq(members.participantType, "INSEGNANTE"),
+            sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+            sql`LOWER(${members.participantType}) LIKE '%staff%'`
+          )
+        )
+      );
+  }
+
+  async getInstructorByEmail(email: string): Promise<Instructor | undefined> {
+    const [instructor] = await db.select()
+      .from(members)
+      .where(
+        and(
+          eq(members.email, email),
+          or(
+            eq(members.participantType, "INSEGNANTE"),
+            sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+            sql`LOWER(${members.participantType}) LIKE '%staff%'`
+          )
+        )
+      );
+    return instructor;
+  }
+
+  async syncInstructorFromMember(member: Member): Promise<void> {
+    // No-op: handled dynamically by querying members table directly.
   }
 
   // ==== Studios ====

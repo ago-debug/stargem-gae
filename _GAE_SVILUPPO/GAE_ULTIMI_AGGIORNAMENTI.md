@@ -1,8 +1,21 @@
 # Ultimi Aggiornamenti Progetto "CourseManager"
 
-**Periodo di riferimento:** 23 Febbraio 2026 - 5 Marzo 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 9 Marzo 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
+
+---
+
+### 9 Marzo 2026 (Refactoring Duplicati & UI Anagrafica)
+*   **Motore Rilevamento Duplicati Intelligente:** Riscritto totalmente l'algoritmo di individuazione duplicati in `server/storage.ts` passando dal semplice conteggio campi a un clustering avanzato. Introdotti filtri rigidi **Anti-Famiglie** (ignora omonimie parziali di contatto se i nomi propri divergono) e **Anti-Omonimi** (richiede almeno un dato di contatto in comune per nomi identici).
+*   **Unione Rapida Duplicati (1-Click):** Ridisegnata la finestra "Report Duplicati" in React. Sostituiti gli alert generici con Card interattive raggruppate per Cluster identificati. Inserito pulsante "Unisci questi X" interno ad ogni card che pre-carica i dati completi dei candidati saltando la selezione manuale dall'elenco paginato.
+*   **Fix Backend Merge (`mergeMembers`):** Risolto fatal error SQL durante la funzione di unione anagrafica che bloccava il trasferimento dei pagamenti, migrando la sintassi legacy `entity_id` al nuovo schema `member_id` tramite Drizzle ORM.
+*   **Affinamenti Maschera Input & Liste:** 
+    * Inserito campo **Stato** (Attivo/Inattivo) nell'header della Maschera Input con pre-compilazione dinamica all'apertura.
+    * Inserita label **Tipo Partecipante** visibile.
+    * Aggiunto interruttore di stato on/off per il pulsante **Visualizza Tutti** nella vista Anagrafica a Lista, con salvataggio automatico dei filtri precedenti.
+    * Aggiunto nuovo parametro logico di filtraggio **Stagione** passabile dall'UI agli endpoint di paginazione.
+    * Rinominata voce di menù da "Categorie (Materie)" a **Categorie Attività**.
 
 ---
 
@@ -70,4 +83,4 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Avvio Refactoring Corsi:** Riorganizzazione della struttura a componente `courses.tsx` per ospitare componenti modulari riutilizzabili ed espansione dati di iscrizione (gettoni, rimborsi, log) a scomparsa, avviando il ciclo di aggiornamenti conclusi il 25 Febbraio.
 
 ---
-*Documento generato e aggiornato al 5 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
+*Documento generato e aggiornato al 9 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*

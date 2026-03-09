@@ -38,7 +38,7 @@ Il cambiamento massivo avviene sui **Moduli 5, 6 e 8** (Anagrafiche, Attività e
 
 ### 5. Core Entities (Immutato, con agganci semplificati)
 - **`members`**: The heart of the system.
-- **`instructors`**: Teachers.
+- **`members` (STI per Insegnanti)**: Teachers (Identificati tramite `participantType`). La tabella autonoma `instructors` è stata deprecata in favore della Single Table Inheritance (STI).
 - **`studios`**: Physical rooms/halls.
 
 ### 6. The Unified Activity Engine (SaaS / Single Table Inheritance)
@@ -94,7 +94,7 @@ erDiagram
     
     STUDIOS ||--o{ ACTIVITIES : "Ospita l'evento"
     STUDIOS ||--o{ MAINTENANCE_TICKETS : "Subisce guasto"
-    INSTRUCTORS ||--o{ ACTIVITIES : "Insegna l'evento"
+    MEMBERS ||--o{ ACTIVITIES : "Insegna l'evento (INSEGNANTE)"
 ```
 
 ### 3. Diagramma Iscrizioni e Finanza (Il Crocevia dei Soldi)

@@ -57,7 +57,7 @@ Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro
 |---|---|---|---|---|
 | **Elenco Anagrafiche** | `/anagrafica_a_lista` | 🟡 **Anagrafica a Lista** | `members` | Lista passiva e ricerca soci / tesserati. |
 | **Dashboard Membro Singolo** | `/membro/:id` | (Si apre da Anagrafica) | Lettura: `members`, `member_relationships`, `medical_certificates`, `*_enrollments` | Hub di gestione scheda singola (es. genitore/figlio). Legge i Certificati Medici. |
-| **Insegnanti** | `/insegnanti` | 🟡 **Staff/Insegnanti** | `instructors`, `instr_rates` | Anagrafica Docenti e listino compensi. |
+| **Insegnanti** | `/insegnanti` | 🟡 **Staff/Insegnanti** | `members` (STI), `instr_rates` | Anagrafica Docenti e listino compensi. Utilizza `participantType: 'INSEGNANTE'`. Ex tabella `instructors`. |
 | **Utenti System / Permessi** | `/utenti-permessi` | 🟡 **Utenti e Permessi** | `users`, `user_roles` | Account per accesso al Gestionale. (Email + Password) |
 | **Generazione Tessere** | `/generazione-tessere`| 🟡 **Genera Tessere PVC** | Lettura: `members`, `memberships` | Creazione stampe / PDF per le card RFID. |
 

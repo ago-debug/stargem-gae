@@ -49,7 +49,6 @@ const MENU_PATHS = [
   { path: "/report", title: "Report & Statistiche" },
   { path: "/prenotazioni-sale", title: "Prenotazioni Sale" },
   { path: "/categorie-corsi", title: "Categorie Corsi" },
-  { path: "/categoria-partecipante", title: "Categoria Partecipante" },
   { path: "/elenchi", title: "Note Pagamenti" },
   { path: "/booking-services", title: "Servizi Prenotabili" },
   { path: "/admin", title: "Pannello Admin" },

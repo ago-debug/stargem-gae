@@ -46,7 +46,7 @@ L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per
 - **`members`**: Il cuore assoluto del sistema (Allievi, Clienti, Partecipanti). Contiene dati anagrafici spesso "piatti" ma complessi, assieme a info mediche e generalità di minorenni/genitori.
 - **`member_relationships`**: Raccordi parentali che legano i minorenni ai tutori legali (`mother`, `father`).
 - **`cli_cats`**: Categorie Clienti per classificare l'utenza e gestire sconti o target specifici.
-- **`instructors`**: Gli Insegnanti, collegati alle rate `instr_rates` che ne definiscono la paga.
+- **`members` (STI per Insegnanti)**: Gli Insegnanti (identificati da `participantType = 'INSEGNANTE'`), sono ora gestiti all'interno di `members`, e mantengono collegamenti alle rate `instr_rates` che ne definiscono la paga. (Ex tabella `instructors` eliminata).
 - **`studios`**: Le aule mediche o sale fisiche in cui si svolgono le attività e si prendono appuntamenti.
 - **`seasons`**: Definizioni temporali per l'anno sportivo o accademico (es. 2025-2026).
 
@@ -116,14 +116,14 @@ erDiagram
     %% Esempio 1: CORSI
     CATEGORIES ||--o{ COURSES : "raggruppa in stili"
     STUDIOS ||--o{ COURSES : "ospita"
-    INSTRUCTORS ||--o{ COURSES : "insegna"
+    MEMBERS ||--o{ COURSES : "insegna (INSEGNANTE)"
     MEMBERS ||--o{ ENROLLMENTS : "iscritti"
     COURSES ||--o{ ENROLLMENTS : "contiene iscritti"
     
     %% Esempio 2: WORKSHOP
     WS_CATS ||--o{ WORKSHOPS : "raggruppa in stili"
     STUDIOS ||--o{ WORKSHOPS : "ospita"
-    INSTRUCTORS ||--o{ WORKSHOPS : "insegna"
+    MEMBERS ||--o{ WORKSHOPS : "insegna (INSEGNANTE)"
     MEMBERS ||--o{ WS_ENROLLMENTS : "iscritti"
     WORKSHOPS ||--o{ WS_ENROLLMENTS : "contiene iscritti"
 
