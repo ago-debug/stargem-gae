@@ -47,7 +47,7 @@ Tutto l'apprendimento, insegnamento e l'offerta al pubblico si condenserà in so
 1. **`tenants` (Root Aziendale / Whitelabeling)**
    - Definisce la Palestra/Scuola che usa l'applicativo. Contiene Logo, Colori Aziendali e customizzazione del menu (`custom_menu_config`).
    
-2. **`activity_categories` (Il "Pre-Seed" e UI Router)**
+2. **`activity_categories` (Il "Pre-Seed" e UI Router delle Categorie Attività)**
    - Non solo testuale ("Danza"), ma contiene la colonna vitale `ui_rendering_type` che istruisce il frontend su come stampare i form, accompagnata dal payload JSON `extra_info_schema` per i campi volanti (es. Taglia Maglietta).
 
 3. **`activities` (La Super-Tabella Eventi)**
@@ -84,11 +84,11 @@ erDiagram
 ```
 
 ### 2. Diagramma del Motore Attività (Dynamic Engine)
-Il cuore pulsante del nuovo gestionale. Sostituisce definitivamente l'approccio a "silos" duplicati. Una singola entità `ACTIVITIES` assorbe corsi, workshop, affitti ed eventi esterni, ricevendo le direttive strutturali da `ACTIVITY_CATEGORIES` (che funge da "pre-seed" e router di rendering UI).
+Il cuore pulsante del nuovo gestionale. Sostituisce definitivamente l'approccio a "silos" duplicati. Una singola entità `ACTIVITIES` assorbe corsi, workshop, affitti ed eventi esterni, ricevendo le direttive strutturali da `ACTIVITY_CATEGORIES` (Le Categorie Attività, che fungono da "pre-seed" e router di rendering UI).
 
 ```mermaid
 erDiagram
-    TENANTS ||--o{ ACTIVITY_CATEGORIES : "Configura pre-seed"
+    TENANTS ||--o{ ACTIVITY_CATEGORIES : "Configura le Categorie Attività"
     TENANTS ||--o{ ACTIVITIES : "Eroga eventi"
     ACTIVITY_CATEGORIES ||--o{ ACTIVITIES : "Istanzia formati"
     

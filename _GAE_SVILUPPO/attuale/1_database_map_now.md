@@ -53,7 +53,7 @@ L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per
 ### 6. Le Attività Didattiche e Iscrizioni (I famosi "11 Silos")
 L'erogazione delle discipline in CourseManager è attualmente frazionata su 11 gruppi di tabelle speculari, che condividono tutte la medesima struttura ma portano un nome e categorie diverse.
 Ogni blocco ha:
-1.  **Una Tabella Categoria** (es. `categories`, `ws_cats`, `sun_cats`, ecc.) che definisce l'albero stilistico.
+1.  **Una Tabella Categoria Attività** (es. `categories`, `ws_cats`, `sun_cats`, ecc.) che definisce l'albero stilistico.
 2.  **Una Tabella Attività** (es. `courses`, `workshops`, `sunday_activities`) che ospita il singolo evento, l'insegnante, l'orario e il prezzo base.
 3.  **Una Tabella Iscrizioni** (es. `enrollments`, `ws_enrollments`, `sa_enrollments`) che collega i `members` (gli allievi iscritti) all'attività vera e propria.
 
@@ -73,7 +73,7 @@ I modelli parificati dei suddetti "11 silos" sono:
 *(Nota: Esistono anche le tabelle `attendances` e `ws_attendances` per tracciare le presenze, manualmente o tramite codice a barre).*
 
 ### 7. Tesseramenti & Servizi Extra (Bookings)
-- **`booking_service_categories`** -> **`booking_services`**: Dizionario e categorie degli elementi extra-didattici prenotabili (come "Affitto Sala Medica" o "Personal Trainer").
+- **`booking_service_categories`** -> **`booking_services`**: Dizionario e Categorie Attività degli elementi extra-didattici prenotabili (come "Affitto Sala Medica" o "Personal Trainer").
 - **`studio_bookings`**: Gli slot calendarizzati per prenotare fisicamente uno spazio ("studio") legato ad un servizio.
 - **`memberships`**: Assicurazioni o tessere associative annuali (il "Tesseramento"), dotati di barcode.
 - **`sub_types`**: Modelli e tipologie predefinite dei tesseramenti e abbonamenti (Subscription Types).
