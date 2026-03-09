@@ -18,7 +18,7 @@ Durante l'analisi della UI attuale (Marzo 2026), prima di procedere con la ripro
 
 ### A. Frammentazione e Terminologia Confusa
 *   **Gestione a Silos:** Esistono decine di pagine separate per inserire entità simili (Corsi, Workshop, Campus, ecc.), frammentando l'esperienza di inserimento.
-*   **Nomenclatura Errata:** Il sistema usa la parola "Categorie" in modo atecnico. D'ora in poi, "Categoria" indicherà unicamente le materie fisiche (es. Danza, Arti Marziali, Fitness, Gioco Musica).
+*   **Nomenclatura Errata:** Il sistema indicava nel menu "Categorie (Materie)" in modo atecnico. È stato attualmente rinominato in **"Categorie Attività"**. In futuro, "Categoria" indicherà unicamente il contenitore delle materie fisiche (es. Danza, Arti Marziali, Fitness, Gioco Musica).
 
 ### B. Gestione Insegnanti a Compartimenti Stagni
 *   **Disallineamento Anagrafiche:** Esiste una discrepanza gravissima tra la "Maschera Input" (dove si inseriscono i tesserati) e la sezione "Staff Insegnanti". L'insegnante "ABC" non risulta ricercabile nella Maschera Input per potergli fare una ricevuta.
@@ -42,6 +42,7 @@ Durante l'analisi della UI attuale (Marzo 2026), prima di procedere con la ripro
 *   **Caricamento Dati Massivo (Filtri Obbligatori):** La lista anagrafiche base renderizza simultaneamente quasi 10.000 righe. Sarà obbligatorio inserire criteri di visibilità iniziali o filtri attivi (es. "Cerca...", o elenco in Lazy Load) per snellire il sistema.
 *   **Bug di Persistenza (Maschera Input):** Quando si seleziona un partecipante e si naviga verso altre sezioni (Panoramica ecc.), al ritorno la maschera "dimentica" e non mostra più i pagamenti/attività aperti. È necessario implementare un memory cache (es. Zustand) per l'utente esaminato.
 *   **Dati Sensibili Incompleti:** La UI attuale degli istruttori richiede solo Telefono e Mail. Sarà vitale avere la compilazione dei dati anagrafici completi per le questioni fiscali.
+*   **Gestione Duplicati:** Precedentemente il sistema segnalava i duplicati con logica debole (es. 1 punto per stesso Nome e Cognome), inondando la segreteria di "Falsi Positivi" (es. Omonimi, o Familiari con stessa email). Il sistema implementa ora un clustering euristico avanzato con **Filtro Anti-Famiglie** e **Filtro Anti-Omonimi** per validare i "veri" duplicati solo con prove incrociate certe (es. CF uguale o Nome identico + Email identica).
 
 ---
 
