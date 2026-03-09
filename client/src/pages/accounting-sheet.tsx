@@ -556,9 +556,9 @@ export default function AccountingSheet() {
                     <Link href={`/${selectedMember ? `?editMemberId=${selectedMember.id}&action=payment` : '?action=payment'}`}>
                         <Button
                             variant="default"
-                            disabled={!selectedMember || totalInSospeso < 0.01}
-                            className="bg-primary hover:bg-primary/90 disabled:opacity-50"
-                            title={totalInSospeso < 0.01 ? "Nessun debito da saldare" : "Nuovo Pagamento"}
+                            disabled={!selectedMember}
+                            className="gold-3d-button disabled:opacity-50"
+                            title="Nuovo Pagamento"
                         >
                             <Plus className="w-4 h-4 mr-2" />
                             Nuovo Pagamento

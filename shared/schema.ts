@@ -2475,6 +2475,81 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   id: true,
   createdAt: true,
 });
-export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+
+// ============================================================================
+// SINGLE TABLE INHERITANCE (STI) - UNIFIED ACTIVITY SCHEMA
+// ============================================================================
+
+export const activityDetails = mysqlTable("activity_details", {
+  id: int("id").primaryKey().autoincrement(),
+
+  // Il "motore" del Single Table Inheritance: definisce la tipologia logica
+  type: varchar("type", { length: 50 }).notNull(), // E.g., 'course', 'workshop', 'rental', 'internal', 'campus'
+
+  // Metadati di Base
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  sku: varchar("sku", { length: 100 }),
+  active: boolean("active").default(true),
+
+  // Relazioni Strutturali
+  categoryId: int("category_id"), // FK to activity_categories (se applicabile)
+  instructorId: int("instructor_id"), // FK to instructors
+  studioId: int("studio_id"), // FK to studios
+
+  // Scheduling & Timing
+  dayOfWeek: varchar("day_of_week", { length: 50 }),
+  startDate: date("start_date", { mode: "string" }),
+  endDate: date("end_date", { mode: "string" }),
+  startTime: varchar("start_time", { length: 5 }), // HH:mm
+  endTime: varchar("end_time", { length: 5 }),     // HH:mm
+
+  // Logiche Finanziarie e Spazi
+  price: decimal("price", { precision: 10, scale: 2 }), // Prezzo base
+  maxCapacity: int("max_capacity"),                     // Capienza massima
+  currentEnrollment: int("current_enrollment").default(0), // Contatore cache
+
+  // Estensione Flessibile (Per campi unici come 'campus_theme' o 'recital_costumes')
+  extraInfo: json("extra_info"), // Payload JSON dinamico
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow()
+});
+
+export const insertActivityDetailSchema = createInsertSchema(activityDetails).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertActivityDetail = z.infer<typeof insertActivityDetailSchema>;
+export type ActivityDetail = typeof activityDetails.$inferSelect;
+
+export const universalEnrollments = mysqlTable("universal_enrollments", {
+  id: int("id").primaryKey().autoincrement(),
+
+  memberId: int("member_id").notNull(), // FK to members
+  activityDetailId: int("activity_detail_id").notNull(), // FK to activity_details
+
+  // Stato Iscrizione
+  status: varchar("status", { length: 50 }).default('active'), // 'active', 'suspended', 'waiting_list', 'cancelled'
+  enrollmentDate: date("enrollment_date", { mode: "string" }),
+
+  // Logiche Avanzate (Carnet e Note)
+  residualEntries: int("residual_entries"), // Per iscrizioni a scalare (es. Carnet 10 lezioni)
+  notes: text("notes"),
+  extraData: json("extra_data"), // Metadata specifici dell'iscritto (es. "Taglia maglietta" per campus)
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow()
+});
+
+export const insertUniversalEnrollmentSchema = createInsertSchema(universalEnrollments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertUniversalEnrollment = z.infer<typeof insertUniversalEnrollmentSchema>;
+export type UniversalEnrollment = typeof universalEnrollments.$inferSelect;
 
