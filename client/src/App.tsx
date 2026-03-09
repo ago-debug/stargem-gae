@@ -16,7 +16,6 @@ import Members from "@/pages/members";
 import Courses from "@/pages/courses";
 import Workshops from "@/pages/workshops";
 import Categories from "@/pages/categories";
-import ClientCategories from "@/pages/client-categories";
 import Instructors from "@/pages/instructors";
 import Studios from "@/pages/studios";
 import Memberships from "@/pages/memberships";
@@ -162,7 +161,6 @@ function Router() {
       <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
       <ProtectedRoute path="/attivita" component={Attivita} />
       <ProtectedRoute path="/categorie-attivita" component={ActivityCategories} />
-      <ProtectedRoute path="/categoria-partecipante" component={ClientCategories} />
       <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
       <ProtectedRoute path="/scheda-workshop" component={SchedaWorkshop} />
       <ProtectedRoute path="/scheda-prova-pagamento" component={SchedaProvaPagamento} />

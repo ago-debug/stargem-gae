@@ -229,11 +229,6 @@ const configItems = [
     icon: Database,
   },
   {
-    title: "Categoria Partecipante",
-    url: "/categoria-partecipante",
-    icon: UserPlus,
-  },
-  {
     title: "Promo/Codici Sconto",
     url: "/promo-sconti",
     icon: Ticket,

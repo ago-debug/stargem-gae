@@ -619,7 +619,7 @@ export default function AnagraficaHome() {
     if (!formData.cardExpiryDate) return null;
     const expiry = new Date(formData.cardExpiryDate);
     const now = new Date();
-    if (expiry < now) return { status: "expired", label: "Scaduta", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+    if (expiry < now) return { status: "expired", label: "Scaduta", color: "bg-destructive/100 text-destructive800 dark:bg-destructive/900/30 dark:text-destructive400" };
     const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
     if (expiry < thirtyDays) return { status: "expiring", label: "In Scadenza", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" };
     return { status: "active", label: "Attiva", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" };
@@ -799,7 +799,7 @@ export default function AnagraficaHome() {
                       <Input
                         value={generatedMemberId}
                         readOnly
-                        className="bg-yellow-50 border-yellow-200 font-mono dark:bg-yellow-900/20 dark:border-yellow-700"
+                        className="bg-warning/50 border-warning200 font-mono dark:bg-warning/900/20 dark:border-warning700"
                         data-testid="input-member-id"
                       />
                     </div>

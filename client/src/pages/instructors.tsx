@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Briefcase, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Briefcase, ArrowUpDown, ChevronUp, ChevronDown, AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -40,6 +40,7 @@ export default function Instructors() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"firstName" | "lastName">("firstName");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [, setLocation] = useLocation();
 
   const { data: instructors, isLoading } = useQuery<Instructor[]>({
     queryKey: ["/api/instructors"],
@@ -156,8 +157,7 @@ export default function Instructors() {
         </div>
         <Button
           onClick={() => {
-            setEditingInstructor(null);
-            setIsFormOpen(true);
+            setLocation("/maschera-input?type=INSEGNANTE");
           }}
           data-testid="button-add-instructor"
         >
@@ -272,8 +272,22 @@ export default function Instructors() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{instructor.email || "-"}</TableCell>
-                      <TableCell>{instructor.phone || "-"}</TableCell>
+                      <TableCell>
+                        {instructor.email ? (instructor.email) : (
+                          <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
+                            <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
+                            <span>Manca Dato</span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {instructor.mobile || instructor.phone ? (instructor.mobile || instructor.phone) : (
+                          <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
+                            <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
+                            <span>Manca Dato</span>
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell>
                         {instructor.hourlyRate ? `€${instructor.hourlyRate}/h` : "-"}
                       </TableCell>
@@ -288,8 +302,7 @@ export default function Instructors() {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              setEditingInstructor(instructor);
-                              setIsFormOpen(true);
+                              setLocation(`/maschera-input?id=${instructor.id}`);
                             }}
                             data-testid={`button-edit-instructor-${instructor.id}`}
                           >

@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Link, useSearch, useLocation } from "wouter";
 import { validateFiscalCode, parseFiscalCode, getPlaceName } from "@/lib/fiscalCodeUtils";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { hasWritePermission } from "@/App";
-import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText, ChevronLeft, ChevronRight, Download, Camera, Smartphone, Coins } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText, ChevronLeft, ChevronRight, ChevronUp, Download, Upload, Camera, Smartphone, Coins, AlertTriangle } from "lucide-react";
 import { MembershipCard } from "@/components/membership-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Member, InsertMember, Attendance } from "@shared/schema";
@@ -41,9 +42,33 @@ export default function Members() {
   const initialSearch = urlParams.get('search') || "";
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [stagioneFilter, setStagioneFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [genderFilter, setGenderFilter] = useState("all");
+  const [hasMedicalCertFilter, setHasMedicalCertFilter] = useState("all");
+  const [isMinorFilter, setIsMinorFilter] = useState("all");
+  const [participantTypeFilter, setParticipantTypeFilter] = useState("all");
+  const [hasCardFilter, setHasCardFilter] = useState("all");
+  const [hasEntityCardFilter, setHasEntityCardFilter] = useState("all");
+  const [hasEmailFilter, setHasEmailFilter] = useState("all");
+  const [hasPhoneFilter, setHasPhoneFilter] = useState("all");
+  const [missingFiscalCodeFilter, setMissingFiscalCodeFilter] = useState("all");
+  const [issuesFilter, setIssuesFilter] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
+  const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
+
+  const [isShowingAll, setIsShowingAll] = useState(false);
+  const previousFilters = useRef<any>(null);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
+
+  // Merge state
+  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+  const [mergeCandidates, setMergeCandidates] = useState<any[]>([]);
+  const [isMergeDialogOpen, setIsMergeDialogOpen] = useState(false);
+  const [primaryMemberId, setPrimaryMemberId] = useState<number | null>(null);
   const [showParentFields, setShowParentFields] = useState(false);
   const [hasMedicalCert, setHasMedicalCert] = useState(false);
   const [isEnrollmentDialogOpen, setIsEnrollmentDialogOpen] = useState(false);
@@ -74,23 +99,40 @@ export default function Members() {
   const PAGE_SIZE = 50;
   const debouncedSearch = useDebounce(searchQuery, 300);
 
-  // Reset to page 1 when search changes
+  // Reset to page 1 when search or filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch]);
+
+    // If a specific filter is applied by the user while "isShowingAll" is true, turn it off.
+    if (isShowingAll && (
+      debouncedSearch !== "" || stagioneFilter !== "all" || statusFilter !== "all" || genderFilter !== "all" ||
+      hasMedicalCertFilter !== "all" || isMinorFilter !== "all" || participantTypeFilter !== "all" ||
+      hasCardFilter !== "all" || hasEntityCardFilter !== "all" || hasEmailFilter !== "all" ||
+      hasPhoneFilter !== "all" || missingFiscalCodeFilter !== "all" || issuesFilter !== "all"
+    )) {
+      setIsShowingAll(false);
+    }
+  }, [debouncedSearch, stagioneFilter, statusFilter, genderFilter, hasMedicalCertFilter, isMinorFilter, participantTypeFilter, hasCardFilter, hasEntityCardFilter, hasEmailFilter, hasPhoneFilter, missingFiscalCodeFilter, issuesFilter]);
 
   const { data: membersData, isLoading } = useQuery<{ members: Member[]; total: number }>({
-    queryKey: ["/api/members", { page: currentPage, pageSize: PAGE_SIZE, search: debouncedSearch }],
+    queryKey: ["/api/members", { page: currentPage, pageSize: PAGE_SIZE, search: debouncedSearch, season: stagioneFilter, status: statusFilter, gender: genderFilter, hasMedicalCert: hasMedicalCertFilter, isMinor: isMinorFilter, participantType: participantTypeFilter, hasCard: hasCardFilter, hasEntityCard: hasEntityCardFilter, hasEmail: hasEmailFilter, hasPhone: hasPhoneFilter, missingFiscalCode: missingFiscalCodeFilter, issuesFilter }],
     queryFn: async () => {
-      // Lazy load prevention: if search is empty, don't fetch all members heavily
-      if (!debouncedSearch || debouncedSearch.length < 3) {
-        return { members: [], total: 0 };
-      }
-
       const params = new URLSearchParams({
         page: currentPage.toString(),
         pageSize: PAGE_SIZE.toString(),
         search: debouncedSearch,
+        season: stagioneFilter,
+        status: statusFilter,
+        gender: genderFilter,
+        hasMedicalCert: hasMedicalCertFilter,
+        isMinor: isMinorFilter,
+        participantType: participantTypeFilter,
+        hasCard: hasCardFilter,
+        hasEntityCard: hasEntityCardFilter,
+        hasEmail: hasEmailFilter,
+        hasPhone: hasPhoneFilter,
+        missingFiscalCode: missingFiscalCodeFilter,
+        issuesFilter: issuesFilter,
       });
       const res = await fetch(`/api/members?${params}`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch members");
@@ -100,12 +142,36 @@ export default function Members() {
     staleTime: 60000,
   });
 
+  const { data: totalData } = useQuery<{ total: number }>({
+    queryKey: ["/api/members/total"],
+    queryFn: async () => {
+      const res = await fetch("/api/members?page=1&pageSize=1", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch total members");
+      return res.json();
+    },
+    staleTime: 300000,
+  });
+
+  const { data: missingDataCounts } = useQuery<{ missingFiscalCode: number; missingEmail: number; missingPhone: number }>({
+    queryKey: ["/api/members/missing-data"],
+    staleTime: 300000,
+  });
+
+  const { data: duplicateClusters } = useQuery<any[]>({
+    queryKey: ["/api/members/duplicates"],
+    staleTime: 300000,
+  });
+
   const members = membersData?.members || [];
   const totalMembers = membersData?.total || 0;
   const totalPages = Math.ceil(totalMembers / PAGE_SIZE);
 
   const { data: clientCategories } = useQuery<any[]>({
     queryKey: ["/api/client-categories"],
+  });
+
+  const { data: participantTypes } = useQuery<any[]>({
+    queryKey: ["/api/participant-types"],
   });
 
   const { data: subscriptionTypes } = useQuery<any[]>({
@@ -174,6 +240,33 @@ export default function Members() {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
       toast({ title: "Cliente eliminato con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const mergeMutation = useMutation({
+    mutationFn: async (data: { primaryId: number; secondaryIds: number[] }) => {
+      const res = await fetch("/api/members/merge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to merge members");
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members/total"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
+      toast({ title: "Successo", description: data.message });
+      setIsMergeDialogOpen(false);
+      setSelectedMembers([]);
+      setPrimaryMemberId(null);
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -487,55 +580,209 @@ export default function Members() {
     }
   };
 
-  const exportToCSV = () => {
-    if (!members || members.length === 0) {
+  const getMissingData = (member: any) => {
+    const missing: string[] = [];
+    const isMinor = calculateAge(member.dateOfBirth) < 18;
+
+    // Obligatory for ALL
+    if (!member.lastName) missing.push("Cognome");
+    if (!member.firstName) missing.push("Nome");
+    if (!member.fiscalCode) missing.push("Codice Fiscale");
+    if (!member.mobile && !member.phone) missing.push("Telefono/Cellulare");
+    if (!member.email) missing.push("Email");
+
+    if (isMinor) {
+      if (!member.fatherFirstName && !member.motherFirstName) missing.push("Dati Genitore (Nome)");
+      if (!member.fatherLastName && !member.motherLastName) missing.push("Dati Genitore (Cognome)");
+    }
+
+    // specific checks based on participantType
+    const pTypes = member.participantType
+      ? member.participantType.split(',').map((s: string) => s.trim().toUpperCase())
+      : [];
+
+    if (pTypes.some((t: string) => ['TESSERATO', 'PARTECIPANTE', 'INSEGNANTE', 'STAFF'].includes(t))) {
+      if (!member.cardNumber) missing.push("Tessera");
+      if (!member.hasMedicalCertificate) missing.push("Certificato Medico");
+      if (!member.entityCardNumber) missing.push("Tessera Ente");
+    }
+
+    if (pTypes.includes('PARTECIPANTE')) {
+      // Assuming these are tracked somehow, for now just placeholders or comments if not in schema
+      // missing.push("Domanda di tesseramento", "Regolamento", "Privacy");
+    }
+
+    if (pTypes.includes('INSEGNANTE')) {
+      if (!member.tesserinoTecnicoNumber) missing.push("Tesserino Tecnico");
+    }
+
+    return missing;
+  };
+
+  const exportToCSV = async () => {
+    if (totalMembers === 0) {
       toast({ title: "Nessun dato da esportare", variant: "destructive" });
       return;
     }
 
-    const headers = ["ID", "Nome", "Cognome", "Codice Fiscale", "Data Nascita", "Luogo Nascita", "Sesso", "Email", "Telefono", "Cellulare", "Indirizzo", "Città", "Provincia", "CAP", "N. Tessera", "Scadenza Tessera", "Certificato Medico", "Scadenza Certificato", "Note", "Stato"];
+    toast({ title: "Preparazione esportazione...", description: "Recupero tutti i record in corso. Attendi un istante." });
 
-    const rows = members.map(member => [
-      member.id,
-      member.firstName || "",
-      member.lastName || "",
-      member.fiscalCode || "",
-      member.dateOfBirth ? new Date(member.dateOfBirth).toLocaleDateString('it-IT') : "",
-      member.placeOfBirth || "",
-      member.gender || "",
-      member.email || "",
-      member.phone || "",
-      member.mobile || "",
-      member.streetAddress || "",
-      member.city || "",
-      member.province || "",
-      member.postalCode || "",
-      member.cardNumber || "",
-      member.cardExpiryDate ? new Date(member.cardExpiryDate).toLocaleDateString('it-IT') : "",
-      member.hasMedicalCertificate ? "Sì" : "No",
-      member.medicalCertificateExpiry ? new Date(member.medicalCertificateExpiry).toLocaleDateString('it-IT') : "",
-      member.notes || "",
-      member.active ? "Attivo" : "Inattivo"
-    ]);
+    try {
+      // Fetch ALL matching members based on current filters, overriding pagination
+      const params = new URLSearchParams({
+        page: "1",
+        pageSize: "999999", // get arbitrarily large amount to cover all
+        search: debouncedSearch,
+        status: statusFilter,
+        gender: genderFilter,
+        hasMedicalCert: hasMedicalCertFilter,
+        isMinor: isMinorFilter,
+        participantType: participantTypeFilter,
+        hasCard: hasCardFilter,
+        hasEntityCard: hasEntityCardFilter,
+        hasEmail: hasEmailFilter,
+        hasPhone: hasPhoneFilter,
+        missingFiscalCode: missingFiscalCodeFilter,
+        issuesFilter: issuesFilter,
+      });
 
-    const escapeCSV = (value: unknown) => {
-      const str = String(value ?? "");
-      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-        return `"${str.replace(/"/g, '""')}"`;
+      const res = await fetch(`/api/members?${params}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Errore nel recupero dati per l'esportazione");
+
+      const data = await res.json();
+      const allFilteredMembers: Member[] = data.members;
+
+      if (!allFilteredMembers || allFilteredMembers.length === 0) {
+        toast({ title: "Nessun dato da esportare", variant: "destructive" });
+        return;
       }
-      return str;
-    };
 
-    const csvContent = "\ufeff" + [headers.map(escapeCSV).join(","), ...rows.map(row => row.map(escapeCSV).join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `clienti_export_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-    toast({ title: "Esportazione completata" });
+      const headers = ["ID", "Nome", "Cognome", "Codice Fiscale", "Data Nascita", "Luogo Nascita", "Sesso", "Email", "Telefono", "Cellulare", "Indirizzo", "Città", "Provincia", "CAP", "N. Tessera", "Scadenza Tessera", "Certificato Medico", "Scadenza Certificato", "Note", "Stato"];
+
+      const rows = allFilteredMembers.map(member => [
+        member.id,
+        member.firstName || "",
+        member.lastName || "",
+        member.fiscalCode || "",
+        member.dateOfBirth ? new Date(member.dateOfBirth).toLocaleDateString('it-IT') : "",
+        member.placeOfBirth || "",
+        member.gender || "",
+        member.email || "",
+        member.phone || "",
+        member.mobile || "",
+        member.streetAddress || "",
+        member.city || "",
+        member.province || "",
+        member.postalCode || "",
+        member.cardNumber || "",
+        member.cardExpiryDate ? new Date(member.cardExpiryDate).toLocaleDateString('it-IT') : "",
+        member.hasMedicalCertificate ? "Sì" : "No",
+        member.medicalCertificateExpiry ? new Date(member.medicalCertificateExpiry).toLocaleDateString('it-IT') : "",
+        member.notes || "",
+        member.active ? "Attivo" : "Inattivo"
+      ]);
+
+      const escapeCSV = (value: unknown) => {
+        const str = String(value ?? "");
+        if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      const csvContent = "\ufeff" + [headers.map(escapeCSV).join(","), ...rows.map(row => row.map(escapeCSV).join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `clienti_export_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Esportazione completata", description: `Esportati ${allFilteredMembers.length} record.` });
+
+    } catch (err: any) {
+      toast({ title: "Errore durante l'esportazione", description: err.message, variant: "destructive" });
+    }
   };
+
+  const toggleShowAll = () => {
+    if (isShowingAll) {
+      // Restore previous state if disabling
+      if (previousFilters.current) {
+        setSearchQuery(previousFilters.current.searchQuery);
+        setStagioneFilter(previousFilters.current.stagioneFilter);
+        setStatusFilter(previousFilters.current.statusFilter);
+        setGenderFilter(previousFilters.current.genderFilter);
+        setHasMedicalCertFilter(previousFilters.current.hasMedicalCertFilter);
+        setIsMinorFilter(previousFilters.current.isMinorFilter);
+        setParticipantTypeFilter(previousFilters.current.participantTypeFilter);
+        setHasCardFilter(previousFilters.current.hasCardFilter);
+        setHasEntityCardFilter(previousFilters.current.hasEntityCardFilter);
+        setHasEmailFilter(previousFilters.current.hasEmailFilter);
+        setHasPhoneFilter(previousFilters.current.hasPhoneFilter);
+        setMissingFiscalCodeFilter(previousFilters.current.missingFiscalCodeFilter);
+        setIssuesFilter(previousFilters.current.issuesFilter);
+        setCurrentPage(previousFilters.current.currentPage);
+      }
+      setIsShowingAll(false);
+    } else {
+      // Save current state before clearing
+      previousFilters.current = {
+        searchQuery,
+        stagioneFilter,
+        statusFilter,
+        genderFilter,
+        hasMedicalCertFilter,
+        isMinorFilter,
+        participantTypeFilter,
+        hasCardFilter,
+        hasEntityCardFilter,
+        hasEmailFilter,
+        hasPhoneFilter,
+        missingFiscalCodeFilter,
+        issuesFilter,
+        currentPage
+      };
+
+      // Clear all
+      setSearchQuery("");
+      setStagioneFilter("all");
+      setStatusFilter("all");
+      setGenderFilter("all");
+      setHasMedicalCertFilter("all");
+      setIsMinorFilter("all");
+      setParticipantTypeFilter("all");
+      setHasCardFilter("all");
+      setHasEntityCardFilter("all");
+      setHasEmailFilter("all");
+      setHasPhoneFilter("all");
+      setMissingFiscalCodeFilter("all");
+      setIssuesFilter("all");
+      setCurrentPage(1);
+
+      setIsShowingAll(true);
+    }
+  };
+
+
+
+
+
+  const toggleMemberSelection = (memberId: number) => {
+    setSelectedMembers(prev =>
+      prev.includes(memberId) ? prev.filter(id => id !== memberId) : [...prev, memberId]
+    );
+  };
+
+  const toggleAllSelection = () => {
+    if (selectedMembers.length === members.length && members.length > 0) {
+      setSelectedMembers([]);
+    } else {
+      setSelectedMembers(members.map(m => m.id));
+    }
+  };
+
+
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
@@ -545,6 +792,14 @@ export default function Members() {
           <p className="text-muted-foreground">Anagrafica completa</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() => setLocation("/importa")}
+            data-testid="button-import-csv"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Importa CSV
+          </Button>
           <Button
             variant="outline"
             onClick={exportToCSV}
@@ -564,22 +819,209 @@ export default function Members() {
             <Plus className="w-4 h-4 mr-2" />
             Nuovo
           </Button>
+
+          {duplicateClusters && duplicateClusters.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => setShowDuplicatesModal(true)}
+              className="bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800"
+            >
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Visualizza Duplicati ({duplicateClusters.length})
+            </Button>
+          )}
+          {selectedMembers.length >= 2 && (
+            <Button
+              variant="default"
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={() => {
+                setMergeCandidates(members.filter(m => selectedMembers.includes(m.id)));
+                setIsMergeDialogOpen(true);
+              }}
+              disabled={!canWrite}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Unisci {selectedMembers.length} Selezionati
+            </Button>
+          )}
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Cerca per nome, cognome, CF o email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-                data-testid="input-search-members"
-              />
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cerca per nome, cognome, CF o email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                    data-testid="input-search-members"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={showFilters ? "bg-primary/10 text-primary border-primary/20" : ""}
+                >
+                  Filtri
+                  {showFilters ? <ChevronUp className="w-4 h-4 ml-2" /> : <ChevronRight className="w-4 h-4 ml-2" />}
+                </Button>
+                <Button
+                  variant={isShowingAll ? "default" : "secondary"}
+                  onClick={toggleShowAll}
+                  data-testid="button-show-all"
+                  className={isShowingAll ? "bg-primary text-primary-foreground shadow-sm" : ""}
+                >
+                  Visualizza tutti
+                </Button>
+                {isLoading ? (
+                  <Badge variant="outline" className="text-sm px-3 py-1.5 h-10 border-muted">
+                    <span className="animate-pulse">Calcolo...</span>
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-sm px-3 py-1.5 h-10 bg-muted/50 text-muted-foreground">
+                    N. {totalMembers} Record Trovati
+                  </Badge>
+                )}
+              </div>
             </div>
+
+            {showFilters && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 pt-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Stagione</Label>
+                  <Select value={stagioneFilter} onValueChange={setStagioneFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tutti" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutte</SelectItem>
+                      <SelectItem value="2024-2025">2024-2025</SelectItem>
+                      <SelectItem value="2025-2026">2025-2026</SelectItem>
+                      <SelectItem value="2026-2027">2026-2027</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Stato</Label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tutti" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="active">Attivi</SelectItem>
+                      <SelectItem value="inactive">Inattivi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Tipo Partecipante</Label>
+                  <Select value={participantTypeFilter} onValueChange={setParticipantTypeFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tutti" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      {participantTypes?.map((pt) => (
+                        <SelectItem key={pt.id} value={pt.name}>
+                          {pt.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Certificato Medico</Label>
+                  <Select value={hasMedicalCertFilter} onValueChange={setHasMedicalCertFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tutti" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="yes">Presente</SelectItem>
+                      <SelectItem value="no">Assente</SelectItem>
+                      <SelectItem value="expired">Scaduto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Età</Label>
+                  <Select value={isMinorFilter} onValueChange={setIsMinorFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tutti" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="adult">Maggiorenni</SelectItem>
+                      <SelectItem value="minor">Minorenni</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Sesso</Label>
+                  <Select value={genderFilter} onValueChange={setGenderFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tutti" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="M">Maschio</SelectItem>
+                      <SelectItem value="F">Femmina</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Tessera Interna</Label>
+                  <Select value={hasCardFilter} onValueChange={setHasCardFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tutti" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="yes">Presente</SelectItem>
+                      <SelectItem value="no">Assente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Tessera Ente</Label>
+                  <Select value={hasEntityCardFilter} onValueChange={setHasEntityCardFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tutti" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="yes">Presente</SelectItem>
+                      <SelectItem value="no">Assente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Allarmi Dati</Label>
+                  <Select value={issuesFilter} onValueChange={setIssuesFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Tutti" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="with_issues">Problemi/Mancanti (⚠️)</SelectItem>
+                      <SelectItem value="no_issues">Dati completi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5 col-span-2 md:col-span-4 lg:col-span-2 flex items-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-full text-muted-foreground"
+                    onClick={() => {
+                      setStatusFilter("all");
+                      setGenderFilter("all");
+                      setHasMedicalCertFilter("all");
+                      setIsMinorFilter("all");
+                      setParticipantTypeFilter("all");
+                      setHasCardFilter("all");
+                      setHasEntityCardFilter("all");
+                      setHasEmailFilter("all");
+                      setHasPhoneFilter("all");
+                      setMissingFiscalCodeFilter("all");
+                      setIssuesFilter("all");
+                    }}
+                  >
+                    Resetta filtri
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -594,12 +1036,6 @@ export default function Members() {
                   <Skeleton className="h-8 w-20" />
                 </div>
               ))}
-            </div>
-          ) : (!debouncedSearch || debouncedSearch.length < 3) ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Search className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <p className="text-lg font-medium mb-2">Ricerca Anagrafica</p>
-              <p className="text-sm">Digita almeno 3 caratteri (Nome, Cognome, Fiscale o Email) per avviare la ricerca ed evitare sovraccarichi.</p>
             </div>
           ) : members.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
@@ -638,6 +1074,13 @@ export default function Members() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[50px]">
+                      <Checkbox
+                        checked={members.length > 0 && selectedMembers.length === members.length}
+                        onCheckedChange={toggleAllSelection}
+                        aria-label="Seleziona tutti"
+                      />
+                    </TableHead>
                     <TableHead>Nome e Cognome</TableHead>
                     <TableHead>Codice Fiscale</TableHead>
                     <TableHead>Email</TableHead>
@@ -645,6 +1088,7 @@ export default function Members() {
                     <TableHead>Tessera</TableHead>
                     <TableHead>Cert. Medico</TableHead>
                     <TableHead>Stato</TableHead>
+                    <TableHead className="w-10"></TableHead>
                     <TableHead className="text-right">Corsi Attivi</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -653,18 +1097,60 @@ export default function Members() {
                     <Fragment key={member.id}>
                       <TableRow data-testid={`member-row-${member.id}`} className="border-b-0 hover:bg-muted/10">
                         <TableCell>
-                          <Link href={`/?memberId=${member.id}`}>
-                            <span
-                              className="font-bold hover:underline cursor-pointer"
-                              data-testid={`link-member-${member.id}`}
-                            >
-                              {member.firstName} {member.lastName}
-                            </span>
-                          </Link>
+                          <Checkbox
+                            checked={selectedMembers.includes(member.id)}
+                            onCheckedChange={() => toggleMemberSelection(member.id)}
+                            aria-label={`Seleziona ${member.firstName} ${member.lastName}`}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Link href={`/?memberId=${member.id}`}>
+                              <span
+                                className="font-bold hover:underline cursor-pointer"
+                                data-testid={`link-member-${member.id}`}
+                              >
+                                {member.firstName} {member.lastName}
+                              </span>
+                            </Link>
+                            {getMissingData(member).length > 0 && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <AlertTriangle className="w-4 h-4 text-amber-500 cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <div className="text-sm border-amber-200 bg-amber-50 text-amber-900 shadow-sm p-3">
+                                      <p className="font-semibold mb-1">Dati Mancanti ({getMissingData(member).length}):</p>
+                                      <ul className="list-disc pl-4 space-y-0.5">
+                                        {getMissingData(member).map((item, i) => (
+                                          <li key={i}>{item}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="font-mono text-sm">{member.fiscalCode || "-"}</TableCell>
-                        <TableCell>{member.email || "-"}</TableCell>
-                        <TableCell>{member.mobile || member.phone || "-"}</TableCell>
+                        <TableCell>
+                          {member.email ? member.email : (
+                            <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
+                              <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
+                              <span>Manca Dato</span>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {member.mobile || member.phone ? (member.mobile || member.phone) : (
+                            <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
+                              <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
+                              <span>Manca Dato</span>
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell>
                           {member.cardNumber ? (
                             <div className="text-sm">
@@ -698,6 +1184,31 @@ export default function Members() {
                             {member.active ? "Attivo" : "Inattivo"}
                           </Badge>
                         </TableCell>
+                        <TableCell>
+                          {(() => {
+                            const missingData = getMissingData(member);
+                            if (missingData.length > 0) {
+                              return (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <AlertTriangle className="w-5 h-5 text-warning-500 cursor-help" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-destructive text-destructive-foreground">
+                                      <div className="font-semibold mb-1">Dati Obbligatori Mancanti:</div>
+                                      <ul className="list-disc pl-4 text-xs">
+                                        {missingData.map((item, idx) => (
+                                          <li key={idx}>{item}</li>
+                                        ))}
+                                      </ul>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </TableCell>
                         <TableCell className="text-right">
                           {(member as any).activeCourseCount > 0 ? (
                             <Badge variant="outline" className="text-xs">
@@ -709,7 +1220,7 @@ export default function Members() {
                         </TableCell>
                       </TableRow>
                       <TableRow className="bg-muted/30 border-t-0 hover:bg-muted/40">
-                        <TableCell colSpan={8} className="py-2 pl-4 md:pl-10">
+                        <TableCell colSpan={9} className="py-2 pl-4 md:pl-10">
                           <div className="flex items-center gap-3 flex-wrap">
                             <span className="text-[10px] font-bold uppercase text-muted-foreground mr-2">Azioni rapide:</span>
                             <Button
@@ -1777,6 +2288,63 @@ export default function Members() {
         </DialogContent>
       </Dialog>
 
+      {/* Merge Duplicates Dialog */}
+      <Dialog open={isMergeDialogOpen} onOpenChange={setIsMergeDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Unisci Anagrafiche Duplicate</DialogTitle>
+            <DialogDescription>
+              Seleziona quale sarà il contatto <strong>Master</strong>. Tutti gli acquisti e iscrizioni degli altri contatti selezionati saranno spostati su questo e i contatti secondari verranno <strong>eliminati definitivamente</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <Label>Scegli il contatto Master:</Label>
+            <div className="space-y-2 border rounded-md p-3 max-h-60 overflow-y-auto">
+              {mergeCandidates.map(member => (
+                <div key={member.id} className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id={`primary-${member.id}`}
+                    name="primaryMember"
+                    value={member.id}
+                    checked={primaryMemberId === member.id}
+                    onChange={() => setPrimaryMemberId(member.id)}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor={`primary-${member.id}`} className="cursor-pointer font-normal">
+                    {member.firstName} {member.lastName} <br />
+                    <span className="text-xs text-muted-foreground mr-2">CF: {member.fiscalCode || '-'}</span>
+                    <span className="text-xs text-muted-foreground">Email: {member.email || '-'}</span>
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsMergeDialogOpen(false)}>
+              Annulla
+            </Button>
+            <Button
+              variant="default"
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={() => {
+                if (!primaryMemberId) {
+                  toast({ title: "Errore", description: "Seleziona un contatto master.", variant: "destructive" });
+                  return;
+                }
+                const secondaryIds = selectedMembers.filter(id => id !== primaryMemberId);
+                mergeMutation.mutate({ primaryId: primaryMemberId, secondaryIds });
+              }}
+              disabled={mergeMutation.isPending || !primaryMemberId}
+            >
+              Conferma Unione ({selectedMembers.length} contatti)
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Enrollment Management Dialog */}
       <EnrollmentDialog
         member={selectedMemberForEnrollment}
@@ -1797,6 +2365,79 @@ export default function Members() {
         isOpen={isCardDialogOpen}
         onOpenChange={setIsCardDialogOpen}
       />
+
+      {/* Report Duplicati Modal */}
+      {showDuplicatesModal && duplicateClusters && (
+        <Dialog open={showDuplicatesModal} onOpenChange={setShowDuplicatesModal}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-yellow-600">
+                <AlertTriangle className="w-5 h-5" />
+                Report Anagrafiche Duplicate
+              </DialogTitle>
+              <DialogDescription>
+                Sistema di rilevamento duplicati. Si consiglia di unire le schede utilizzando la funzione "Unisci Selezionati".
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              <div className="bg-muted p-4 rounded-lg text-sm border">
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <Search className="w-4 h-4" />
+                  Come risolvere
+                </h4>
+                <ol className="list-decimal list-inside text-muted-foreground space-y-1">
+                  <li>Cerca le anagrafiche elencate usando la barra di ricerca in Anagrafica a Lista</li>
+                  <li>Seleziona le anagrafiche duplicate con le spunte a sinistra</li>
+                  <li>Clicca sul pulsante viola "Unisci Selezionati" che comparirà in alto a destra</li>
+                  <li>Scegli l'anagrafica da mantenere come principale, i dati delle altre verranno trasferiti su di essa</li>
+                </ol>
+              </div>
+
+              <div className="space-y-4">
+                {duplicateClusters.map((cluster: any, idx: number) => (
+                  <Card key={idx} className="p-4 border-yellow-200 dark:border-yellow-800 bg-yellow-50/30 dark:bg-yellow-900/10">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="font-mono text-sm font-medium bg-yellow-100 dark:bg-yellow-900/40 px-2 py-1 rounded inline-block text-yellow-800 dark:text-yellow-400">
+                          Match identificato: {cluster.fiscalCode}
+                        </div>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="bg-purple-600 hover:bg-purple-700 h-8"
+                          onClick={() => {
+                            const idsToMerge = cluster.members.map((m: any) => m.id);
+                            setSelectedMembers(idsToMerge);
+                            setMergeCandidates(cluster.members);
+                            setShowDuplicatesModal(false);
+                            setTimeout(() => setIsMergeDialogOpen(true), 100);
+                          }}
+                        >
+                          <Users className="w-3.5 h-3.5 mr-1.5" />
+                          Unisci questi {cluster.members.length}
+                        </Button>
+                      </div>
+                      <div className="flex flex-col gap-2 mt-2">
+                        {cluster.members.map((m: any) => (
+                          <div key={m.id} className="flex items-center justify-between bg-background p-2 rounded border border-yellow-100 dark:border-yellow-900/20 text-sm shadow-sm">
+                            <span className="font-medium text-foreground">{m.firstName} {m.lastName}</span>
+                            <span className="text-muted-foreground text-xs">{m.email || 'Nessuna email'} • {m.fiscalCode || 'Nessun CF'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDuplicatesModal(false)}>Chiudi</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

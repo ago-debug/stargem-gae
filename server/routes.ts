@@ -21,7 +21,6 @@ import {
   insertCategorySchema,
   insertClientCategorySchema,
   insertSubscriptionTypeSchema,
-  insertInstructorSchema,
   insertStudioSchema,
   insertCourseSchema,
   insertWorkshopSchema,
@@ -963,9 +962,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = parseInt(req.query.page as string) || 1;
       const pageSize = parseInt(req.query.pageSize as string) || 50;
       const search = req.query.search as string || "";
+      const seasonFilter = req.query.season as string || "all";
+      const statusFilter = req.query.status as string || "all";
+      const genderFilter = req.query.gender as string || "all";
+      const hasMedicalCertFilter = req.query.hasMedicalCert as string || "all";
+      const isMinorFilter = req.query.isMinor as string || "all";
+      const participantTypeFilter = req.query.participantType as string || "all";
+      const hasCardFilter = req.query.hasCard as string || "all";
+      const hasEntityCardFilter = req.query.hasEntityCard as string || "all";
+      const hasEmailFilter = req.query.hasEmail as string || "all";
+      const hasPhoneFilter = req.query.hasPhone as string || "all";
+      const missingFiscalCodeFilter = req.query.missingFiscalCode as string || "all";
+      const issuesFilter = req.query.issuesFilter as string || "all";
+
+      console.log("Filters received in /api/members:", {
+        search, seasonFilter, statusFilter, genderFilter, hasMedicalCertFilter, isMinorFilter, participantTypeFilter, hasCardFilter, hasEntityCardFilter, hasEmailFilter, hasPhoneFilter, missingFiscalCodeFilter, issuesFilter
+      });
 
       // Always use paginated query for performance
-      const result = await storage.getMembersPaginated(page, pageSize, search);
+      const result = await storage.getMembersPaginated(
+        page, pageSize, search, seasonFilter, statusFilter, genderFilter,
+        hasMedicalCertFilter, isMinorFilter, participantTypeFilter,
+        hasCardFilter, hasEntityCardFilter, hasEmailFilter,
+        hasPhoneFilter, missingFiscalCodeFilter, issuesFilter
+      );
       res.json(result);
     } catch (error) {
       console.error("Error fetching members:", error);
@@ -983,13 +1003,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/members/merge", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
+    try {
+      const { primaryId, secondaryIds } = req.body;
+
+      if (!primaryId || !secondaryIds || !Array.isArray(secondaryIds) || secondaryIds.length === 0) {
+        return res.status(400).json({ message: "Parametri di fusione non validi" });
+      }
+
+      await storage.mergeMembers(primaryId, secondaryIds);
+      await logUserActivity(req, "MERGE", "members", primaryId.toString(), {
+        action: `Uniti ${secondaryIds.length} profili duplicati nel profilo principale`
+      });
+
+      res.json({ success: true, message: "Anagrafiche unite con successo" });
+    } catch (error) {
+      console.error("[API Error] Failed to merge members:", error);
+      res.status(500).json({ message: "Errore durante l'unione dei contatti" });
+    }
+  });
+
   app.get("/api/members/duplicates", isAuthenticated, async (req, res) => {
     try {
       const duplicates = await storage.getDuplicateFiscalCodes();
       res.json(duplicates);
     } catch (error) {
-      console.error("Error fetching duplicates:", error);
+      console.error("Error fetching duplicate fiscal codes:", error);
       res.status(500).json({ message: "Failed to fetch duplicate fiscal codes" });
+    }
+  });
+
+  app.get("/api/members/duplicate-stats", isAuthenticated, async (req, res) => {
+    try {
+      const stats = await storage.getDuplicateStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching duplicate stats:", error);
+      res.status(500).json({ message: "Failed to fetch duplicate stats" });
+    }
+  });
+
+  app.get("/api/members/missing-data", isAuthenticated, async (req, res) => {
+    try {
+      const counts = await storage.getMissingDataCounts();
+      res.json(counts);
+    } catch (error) {
+      console.error("Error fetching missing data counts:", error);
+      res.status(500).json({ message: "Failed to fetch missing data counts" });
     }
   });
 
@@ -1041,19 +1101,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check for duplicate fiscal code
-      if (normalizedData.fiscalCode) {
-        const existingMember = await storage.getMemberByFiscalCode(normalizedData.fiscalCode);
-        if (existingMember) {
-          return res.status(409).json({
-            message: `Codice fiscale già presente nel sistema`,
-            conflictWith: {
-              id: existingMember.id,
-              firstName: existingMember.firstName,
-              lastName: existingMember.lastName,
-              fiscalCode: existingMember.fiscalCode
-            }
-          });
-        }
+      // Comprehensive duplicate check (Name, Email, Phone, Fiscal Code)
+      const duplicateCheck = await storage.checkDuplicateParticipant(normalizedData);
+      if (duplicateCheck.isDuplicate) {
+        return res.status(409).json({
+          message: duplicateCheck.message,
+          conflict: true
+        });
       }
 
       if (req.user) {
@@ -1073,6 +1127,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/members/:id", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+
+      // Handle instructor intercept
+      if (id >= 1000000) {
+        const realId = id - 1000000;
+        const { firstName, lastName, email, phone } = req.body;
+
+        const instructorUpdate: any = {};
+        if (firstName !== undefined) instructorUpdate.firstName = firstName;
+        if (lastName !== undefined) instructorUpdate.lastName = lastName;
+        if (email !== undefined) instructorUpdate.email = email;
+        if (phone !== undefined) instructorUpdate.phone = phone;
+
+        // Instructors don't have separate PATCH yet, keep current code if minimal
+        if (!instructorUpdate.firstName && !instructorUpdate.lastName) {
+          // If no name fields are provided, we might not need to update
+          // Or handle as an error if name is mandatory
+        }
+
+        // Comprehensive duplicate check for instructors (Name, Email, Phone, Fiscal Code)
+        // Note: Instructors don't have fiscalCode in the current model, but this function handles it.
+        const duplicateCheck = await storage.checkDuplicateParticipant(instructorUpdate, realId + 1000000);
+        if (duplicateCheck.isDuplicate) {
+          return res.status(409).json({
+            message: duplicateCheck.message,
+            conflict: true
+          });
+        }
+
+        const updatedInstructor = await storage.updateInstructor(realId, instructorUpdate);
+        await logUserActivity(req, "UPDATE", "instructors", realId.toString(), { name: `${updatedInstructor.firstName} ${updatedInstructor.lastName}` });
+
+        // Return simulated Member response
+        const fakeMember = await storage.getMember(id);
+        return res.json(fakeMember);
+      }
+
       const normalizeEmpty = (val: any): any => {
         if (val === "" || val === undefined) return null;
         if (typeof val === "string" && val.trim() === "") return null;
@@ -1093,20 +1183,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         normalizedData.fiscalCode = normalizedData.fiscalCode.toUpperCase().trim();
       }
 
-      // Check for duplicate fiscal code (excluding current member)
-      if (normalizedData.fiscalCode) {
-        const existingMember = await storage.getMemberByFiscalCode(normalizedData.fiscalCode);
-        if (existingMember && existingMember.id !== id) {
-          return res.status(409).json({
-            message: `Codice fiscale già presente nel sistema`,
-            conflictWith: {
-              id: existingMember.id,
-              firstName: existingMember.firstName,
-              lastName: existingMember.lastName,
-              fiscalCode: existingMember.fiscalCode
-            }
-          });
-        }
+      // Comprehensive duplicate check (Name, Email, Phone, Fiscal Code)
+      const duplicateCheck = await storage.checkDuplicateParticipant(normalizedData, id);
+      if (duplicateCheck.isDuplicate) {
+        return res.status(409).json({
+          message: duplicateCheck.message,
+          conflict: true
+        });
       }
 
       if (req.user) {
@@ -1125,6 +1208,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/members/:id", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+
+      // Handle instructor deletion intercept
+      if (id >= 1000000) {
+        const realId = id - 1000000;
+        const instructorToDelete = await storage.getInstructor(realId);
+        await storage.deleteInstructor(realId);
+        await logUserActivity(req, "DELETE", "instructors", realId.toString(), { name: `${instructorToDelete?.firstName} ${instructorToDelete?.lastName}` });
+        return res.status(204).send();
+      }
+
       const memberToDelete = await storage.getMember(id);
       await storage.deleteMember(id);
       await logUserActivity(req, "DELETE", "members", id.toString(), { name: `${memberToDelete?.firstName} ${memberToDelete?.lastName}` });
@@ -2283,6 +2376,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==== Participant Types Routes ====
+  app.get("/api/participant-types", isAuthenticated, async (req, res) => {
+    try {
+      const types = await storage.getParticipantTypes();
+      res.json(types);
+    } catch (error) {
+      console.error("[API Error] Failed to fetch participant types:", error);
+      res.status(500).json({ message: "Failed to fetch participant types" });
+    }
+  });
+
+  app.post("/api/participant-types", isAuthenticated, async (req, res) => {
+    try {
+      const newType = await storage.createParticipantType(req.body);
+      res.status(201).json(newType);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/participant-types/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updatedType = await storage.updateParticipantType(id, req.body);
+      res.json(updatedType);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/participant-types/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteParticipantType(id);
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   // ==== Activity Statuses Routes ====
   app.get("/api/activity-statuses", isAuthenticated, async (req, res) => {
     try {
@@ -2490,7 +2623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/instructors", isAuthenticated, async (req, res) => {
     try {
-      const validatedData = insertInstructorSchema.parse(req.body);
+      const validatedData = insertMemberSchema.parse(req.body);
       const instructor = await storage.createInstructor(validatedData);
       await logUserActivity(req, "CREATE", "instructors", instructor.id.toString(), { name: instructor.firstName + " " + instructor.lastName });
       res.status(201).json(instructor);
