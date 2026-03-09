@@ -62,7 +62,8 @@ import {
   recitals,
   vacationStudies,
   insertCustomListSchema,
-  insertCustomListItemSchema
+  insertCustomListItemSchema,
+  auditLogs
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -3163,6 +3164,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             currentEnrollment: course.currentEnrollment - 1,
           } as any);
         }
+
+        // Crea audit log per l'eliminazione
+        await storage.createAuditLog({
+          action: "DELETE",
+          entityType: "enrollments",
+          entityId: id,
+          performedBy: (req.user as any)?.username || "Sistema",
+          details: JSON.stringify(enrollment)
+        });
       }
 
       await storage.deleteEnrollment(id);
@@ -3422,6 +3432,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: error.message || "Failed to update payment" });
     }
   });
+
+  app.delete("/api/payments/:id", isAuthenticated, checkPermission("/pagamenti", "write"), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+
+      const payment = await storage.getPayment(id);
+      if (payment) {
+        // Crea audit log per l'eliminazione
+        await storage.createAuditLog({
+          action: "DELETE",
+          entityType: "payments",
+          entityId: id,
+          performedBy: (req.user as any)?.username || "Sistema",
+          details: JSON.stringify(payment)
+        });
+      }
+
+      await storage.deletePayment(id);
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Error deleting payment:", error);
+      res.status(400).json({ message: error.message || "Failed to delete payment" });
+    }
+  });
+
   // ==== EXTRA ENROLLMENTS ENDPOINTS ==== 
   // PaidTrial Enrollments
   app.get("/api/paid-trial-enrollments", isAuthenticated, async (req, res) => {
@@ -3992,6 +4027,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch access logs" });
+    }
+  });
+
+  // ==== Audit Logs (Deletions) ====
+  app.get("/api/audit-logs", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const logs = await db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt));
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch audit logs" });
     }
   });
 

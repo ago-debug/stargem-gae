@@ -188,6 +188,9 @@ import {
   customListItems,
   type CustomListItem,
   type InsertCustomListItem,
+  auditLogs,
+  type AuditLog,
+  type InsertAuditLog,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -210,6 +213,9 @@ export interface IStorage {
   // User Activity Log operations
   logActivity(log: InsertUserActivityLog): Promise<UserActivityLog>;
   getUserActivityLogs(limit?: number): Promise<(UserActivityLog & { user: { username: string, firstName: string, lastName: string } })[]>;
+
+  // Audit Log operations
+  createAuditLog(log: InsertAuditLog): Promise<void>;
 
   // Booking Service Categories operations
   getBookingServiceCategories(): Promise<BookingServiceCategory[]>;
@@ -788,6 +794,11 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUserRole(id: number): Promise<void> {
     await db.delete(userRoles).where(eq(userRoles.id, id));
+  }
+
+  // ==== Audit Logs ====
+  async createAuditLog(logData: InsertAuditLog): Promise<void> {
+    await db.insert(auditLogs).values(logData);
   }
 
   // ==== Participant Types ====

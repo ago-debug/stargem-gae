@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Lock, Unlock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { PaymentMethod } from "@shared/schema";
 
 interface PaymentModuleProps {
   basePrice: number;
@@ -16,10 +18,12 @@ interface PaymentModuleProps {
 
 export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete, onCancel }: PaymentModuleProps) {
   const [amount, setAmount] = useState<number>(basePrice);
-  const [paymentMethod, setPaymentMethod] = useState("contanti");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [receiptNumber, setReceiptNumber] = useState("");
   const [isPaid, setIsPaid] = useState(false);
-  
+
+  const { data: paymentMethods } = useQuery<PaymentMethod[]>({ queryKey: ["/api/payment-methods"] });
+
   // Scudo Manager (PIN Override)
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [pinInput, setPinInput] = useState("");
@@ -57,15 +61,15 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
     <div className="p-4 border border-border bg-card rounded-lg shadow-sm space-y-4">
       <h3 className="text-lg font-semibold text-primary">Checkout: {itemName}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
-        
+
         {/* Importo con Checkout Blindato */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Importo (€)</Label>
             <div className="relative flex items-center group">
-              <Input 
-                type="number" 
-                value={isPriceUnlocked ? tempAmount : amount} 
+              <Input
+                type="number"
+                value={isPriceUnlocked ? tempAmount : amount}
                 onChange={(e) => {
                   if (isPriceUnlocked) {
                     setTempAmount(e.target.value);
@@ -75,7 +79,7 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
                 readOnly={!isPriceUnlocked}
                 className={`font-mono pl-8 text-right cursor-[text] ${!isPriceUnlocked ? "bg-muted cursor-pointer group-hover:bg-muted/70 transition-colors" : "border-destructive ring-destructive focus-visible:ring-destructive"}`}
               />
-              <div 
+              <div
                 className={`absolute inset-y-0 left-2 flex items-center text-xs pointer-events-none ${isPriceUnlocked ? 'text-destructive' : 'text-muted-foreground'}`}
                 title={isPriceUnlocked ? "Sbloccato" : "Importo blindato. Clicca per sbloccare con PIN."}
               >
@@ -90,9 +94,9 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
             <Select value={paymentMethod} onValueChange={setPaymentMethod}>
               <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="contanti">Contanti</SelectItem>
-                <SelectItem value="carta">POS / Carta</SelectItem>
-                <SelectItem value="bonifico">Bonifico</SelectItem>
+                {paymentMethods?.map(pm => (
+                  <SelectItem key={pm.id} value={pm.name}>{pm.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -101,10 +105,10 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>N° Ricevuta (Opt)</Label>
-            <Input 
-              value={receiptNumber} 
-              onChange={(e) => setReceiptNumber(e.target.value)} 
-              placeholder="Es: R-2026-001" 
+            <Input
+              value={receiptNumber}
+              onChange={(e) => setReceiptNumber(e.target.value)}
+              placeholder="Es: R-2026-001"
             />
           </div>
 
@@ -121,7 +125,7 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
         <div className="flex justify-end space-x-2 pt-4">
           {onCancel && <Button type="button" variant="outline" onClick={onCancel}>Annulla</Button>}
           <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            {isPaid ? "Conferma Pagamento" : "Salva Prevntivo"}
+            {isPaid ? "Conferma Pagamento" : "Salva Preventivo"}
           </Button>
         </div>
       </form>
@@ -131,7 +135,7 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
         <DialogContent className="sm:max-w-xs p-6">
           <DialogHeader>
             <DialogTitle className="text-destructive flex flex-col items-center gap-2 pb-2">
-              <Lock className="w-10 h-10 mb-2" /> 
+              <Lock className="w-10 h-10 mb-2" />
               Sblocco Importo
             </DialogTitle>
           </DialogHeader>
@@ -139,10 +143,10 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
             <p className="text-sm text-center text-muted-foreground px-2">
               Inserire **PIN Manager** per forzare la modifica del listino di default.
             </p>
-            <Input 
-              type="password" 
-              placeholder="PIN Manager" 
-              value={pinInput} 
+            <Input
+              type="password"
+              placeholder="PIN Manager"
+              value={pinInput}
               onChange={(e) => setPinInput(e.target.value)}
               className="text-center tracking-widest text-2xl h-14 font-mono w-4/5 mx-auto block"
               autoFocus

@@ -694,10 +694,10 @@ export default function Elenchi() {
                 testIdPrefix="stato"
               />
               <EditableListSection
-                title="Note Pagamenti"
+                title="Metodi di Pagamento"
                 queryKey="/api/payment-notes"
                 apiPath="/api/payment-notes"
-                emptyMessage="Nessuna nota pagamento definita"
+                emptyMessage="Nessun metodo di pagamento definito"
                 testIdPrefix="note-pagamenti"
               />
               <EditableListSection

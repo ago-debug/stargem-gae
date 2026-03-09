@@ -34,6 +34,7 @@ import {
   List,
   Layers,
   UserPlus,
+  Trash2,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -185,11 +186,7 @@ const analysisItems = [
 ];
 
 const accountingItems = [
-  {
-    title: "Iscrizioni e Pagamenti",
-    url: "/iscrizioni-pagamenti",
-    icon: Wallet,
-  },
+
   {
     title: "Scheda Contabile",
     url: "/scheda-contabile",
@@ -253,6 +250,11 @@ const adminItems = [
     icon: UserCog,
   },
   {
+    title: "Storico Eliminazioni",
+    url: "/audit-logs",
+    icon: Trash2,
+  },
+  {
     title: "Reset Stagione",
     url: "/reset-stagione",
     icon: RotateCcw,
@@ -295,7 +297,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-0 border-b border-sidebar-border flex items-center justify-center h-10 overflow-hidden">
-        <Link href="/maschera-input" className="cursor-pointer block flex items-center justify-center h-full">
+        <Link href="/" className="cursor-pointer block flex items-center justify-center h-full">
           <img
             src="/logo_stargem.png"
             alt="StarGem"
@@ -321,6 +323,33 @@ export function AppSidebar() {
                       >
                         <Link href={item.url} className="flex items-center w-full">
                           <item.icon className="w-4 h-4 mr-2" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {filteredAccounting.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Contabilità</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filteredAccounting.map((item) => {
+                  const isActive = location === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        data-testid={`nav-${item.url.slice(1)}`}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="w-4 h-4" />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -386,66 +415,39 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {filteredAnalysis.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Analisi e Report</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {filteredAnalysis.map((item) => {
-                  const isActive = location === item.url;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        data-testid={`nav-${item.url.slice(1)}`}
-                      >
-                        <Link href={item.url}>
-                          <item.icon className="w-4 h-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {filteredAccounting.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Contabilità</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {filteredAccounting.map((item) => {
-                  const isActive = location === item.url;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        data-testid={`nav-${item.url.slice(1)}`}
-                      >
-                        <Link href={item.url}>
-                          <item.icon className="w-4 h-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
         {filteredConfig.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Configurazione</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredConfig.map((item) => {
+                  const isActive = location === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        data-testid={`nav-${item.url.slice(1)}`}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {filteredAnalysis.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Analisi e Report</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filteredAnalysis.map((item) => {
                   const isActive = location === item.url;
                   return (
                     <SidebarMenuItem key={item.title}>
