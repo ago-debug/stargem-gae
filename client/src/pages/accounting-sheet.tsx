@@ -590,11 +590,11 @@ export default function AccountingSheet() {
                                         {selectedMember ? (
                                             <div className="flex items-center gap-2">
                                                 <User className="w-4 h-4 text-primary" />
-                                                <span className="font-semibold">{selectedMember.firstName} {selectedMember.lastName}</span>
+                                                <span className="font-semibold">{selectedMember.lastName} {selectedMember.firstName}</span>
                                                 <span className="text-xs text-muted-foreground ml-2">({selectedMember.fiscalCode})</span>
                                             </div>
                                         ) : (
-                                            "Cerca partecipante per nome, cognome o codice fiscale..."
+                                            "Cerca partecipante per cognome, nome o codice fiscale..."
                                         )}
                                         <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
@@ -615,7 +615,7 @@ export default function AccountingSheet() {
                                                     {searchedMembers.map((member: Member) => (
                                                         <CommandItem
                                                             key={member.id}
-                                                            value={`${member.firstName} ${member.lastName}`}
+                                                            value={`${member.lastName} ${member.firstName}`}
                                                             onSelect={() => {
                                                                 setSelectedMember(member);
                                                                 setMemberSearchOpen(false);
@@ -623,7 +623,7 @@ export default function AccountingSheet() {
                                                             className="p-3"
                                                         >
                                                             <div className="flex flex-col">
-                                                                <span className="font-bold">{member.firstName} {member.lastName}</span>
+                                                                <span className="font-bold">{member.lastName} {member.firstName}</span>
                                                                 <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
                                                             </div>
                                                         </CommandItem>
@@ -637,35 +637,7 @@ export default function AccountingSheet() {
                         </div>
                     </div>
 
-                    {selectedMember && (
-                        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-
-
-                            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
-                                <div className="flex items-center gap-3 text-green-700">
-                                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                                        <Check className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-0.5">Totale Versato</p>
-                                        <p className="text-2xl font-black">€{totalPaid.toFixed(2)}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
-                                <div className="flex items-center gap-3 text-rose-700">
-                                    <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center">
-                                        <ChevronsUpDown className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-0.5">Residuo da Pagare</p>
-                                        <p className="text-2xl font-black text-rose-600">€{totalInSospeso.toFixed(2)}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {/* Residui and Totals moved to Nuovo Pagamento Modal */}
                 </CardHeader>
                 <CardContent>
                     {!selectedMember ? (
@@ -856,7 +828,7 @@ export default function AccountingSheet() {
                     <DialogHeader>
                         <DialogTitle>{(editingPayment || payingMovement) ? 'Modifica/Registra Pagamento' : 'Nuovo Pagamento'}</DialogTitle>
                         <DialogDescription>
-                            Registra i dettagli del pagamento per {selectedMember?.firstName} {selectedMember?.lastName}
+                            Registra i dettagli del pagamento per {selectedMember?.lastName} {selectedMember?.firstName}
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handlePaymentSubmit} className="space-y-4">

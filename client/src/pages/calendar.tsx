@@ -200,7 +200,7 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
                                                 key={m.id}
                                                 onSelect={() => createEnrollmentMutation.mutate({ memberId: m.id, courseId })}
                                             >
-                                                {m.firstName} {m.lastName}
+                                                {m.lastName} {m.firstName}
                                             </CommandItem>
                                         ))}
                                     </CommandGroup>
@@ -222,7 +222,7 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
                     <TableBody>
                         {courseEnrollments.map((e) => (
                             <TableRow key={e.enrollmentId}>
-                                <TableCell>{e.firstName} {e.lastName}</TableCell>
+                                <TableCell>{e.lastName} {e.firstName}</TableCell>
                                 <TableCell className="text-right">
                                     <Button
                                         variant="ghost"
@@ -257,7 +257,7 @@ function AttendancesTab({ courseId }: { courseId: number }) {
         ?.filter(a => a.courseId === courseId)
         .map(a => {
             const member = members.find(m => m.id === a.memberId);
-            return { ...a, memberName: member ? `${member.firstName} ${member.lastName}` : "Sconosciuto" };
+            return { ...a, memberName: member ? `${member.lastName} ${member.firstName}` : "Sconosciuto" };
         })
         .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime()) || [];
 
@@ -603,7 +603,7 @@ export default function CalendarPage() {
                 const currentMembers = Array.isArray(oldData) ? oldData : (oldData?.members || []);
                 return { members: [...currentMembers, data] };
             });
-            toast({ title: "Cliente/Associato creato", description: `${data.firstName} ${data.lastName} aggiunto correttamente.` });
+            toast({ title: "Partecipante creato", description: `${data.lastName} ${data.firstName} aggiunto correttamente.` });
             setQuickAddMemberOpen(false);
             setBookingForm((prev: any) => ({ ...prev, memberId: data.id }));
             setLastAddedMember(data); // Set the last added member
@@ -694,7 +694,7 @@ export default function CalendarPage() {
             let matchSearch = true;
             if (search) {
                 const instr = instructors?.find(i => i.id === course.instructorId);
-                const instrName = instr ? `${instr.firstName} ${instr.lastName}`.toLowerCase() : "";
+                const instrName = instr ? `${instr.lastName} ${instr.firstName}`.toLowerCase() : "";
                 matchSearch = course.name.toLowerCase().includes(search) ||
                     (course.description?.toLowerCase().includes(search) || false) ||
                     instrName.includes(search);
@@ -720,7 +720,7 @@ export default function CalendarPage() {
             let matchSearch = true;
             if (search) {
                 const instr = instructors?.find(i => i.id === workshop.instructorId);
-                const instrName = instr ? `${instr.firstName} ${instr.lastName}`.toLowerCase() : "";
+                const instrName = instr ? `${instr.lastName} ${instr.firstName}`.toLowerCase() : "";
                 matchSearch = workshop.name.toLowerCase().includes(search) ||
                     (workshop.description?.toLowerCase().includes(search) || false) ||
                     instrName.includes(search);
@@ -1072,7 +1072,7 @@ export default function CalendarPage() {
                                         <span className="truncate">
                                             {selectedInstructor === "all" ? "Tutti gli Insegnanti" : (() => {
                                                 const i = sortedInstructors.find(i => i.id.toString() === selectedInstructor);
-                                                return i ? `${i.firstName} ${i.lastName}` : "Insegnante";
+                                                return i ? `${i.lastName} ${i.firstName}` : "Insegnante";
                                             })()}
                                         </span>
                                     </div>
@@ -1098,7 +1098,7 @@ export default function CalendarPage() {
                                                     onSelect={() => setSelectedInstructor(i.id.toString())}
                                                     className="flex items-center justify-between"
                                                 >
-                                                    <span className="truncate">{i.firstName} {i.lastName}</span>
+                                                    <span className="truncate">{i.lastName} {i.firstName}</span>
                                                     {selectedInstructor === i.id.toString() && <Check className="w-4 h-4" />}
                                                 </CommandItem>
                                             ))}
@@ -1744,7 +1744,7 @@ export default function CalendarPage() {
                                                 <SelectContent>
                                                     <SelectItem value="none">Nessuno</SelectItem>
                                                     {instructors?.map(i => (
-                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.firstName} {i.lastName}</SelectItem>
+                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
@@ -1761,7 +1761,7 @@ export default function CalendarPage() {
                                                 <SelectContent>
                                                     <SelectItem value="none">Nessuno</SelectItem>
                                                     {instructors?.map(i => (
-                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.firstName} {i.lastName}</SelectItem>
+                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
@@ -2112,7 +2112,7 @@ export default function CalendarPage() {
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label>Cliente/Associato *</Label>
+                                <Label>Partecipante *</Label>
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -2120,7 +2120,7 @@ export default function CalendarPage() {
                                     className="h-6 px-2 text-[11px] gap-1 text-[#f43f5e] hover:bg-[#f43f5e]/10"
                                     onClick={() => setQuickAddMemberOpen(true)}
                                 >
-                                    <UserPlus className="w-3.5 h-3.5" /> Nuovo Cliente
+                                    <UserPlus className="w-3.5 h-3.5" /> Nuovo Partecipante
                                 </Button>
                             </div>
                             <Popover open={memberSearchOpen} onOpenChange={setMemberSearchOpen}>
@@ -2134,10 +2134,10 @@ export default function CalendarPage() {
                                                         : (members?.find((m: Member) => m.id === bookingForm.memberId)
                                                             ? (() => {
                                                                 const m = members.find((m: Member) => m.id === bookingForm.memberId)!;
-                                                                return `${m.firstName} ${m.lastName}`;
+                                                                return `${m.lastName} ${m.firstName}`;
                                                             })()
                                                             : (lastAddedMember && lastAddedMember.id === bookingForm.memberId
-                                                                ? `${lastAddedMember.firstName} ${lastAddedMember.lastName}`
+                                                                ? `${lastAddedMember.lastName} ${lastAddedMember.firstName}`
                                                                 : "Caricamento nome..."))
                                                     }
                                                 </span>
@@ -2150,7 +2150,7 @@ export default function CalendarPage() {
                                 <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                                     <Command shouldFilter={false}>
                                         <CommandInput
-                                            placeholder="Cerca cliente..."
+                                            placeholder="Cerca partecipante..."
                                             value={searchBookingMemberQuery}
                                             onValueChange={setSearchBookingMemberQuery}
                                         />
@@ -2160,16 +2160,16 @@ export default function CalendarPage() {
                                             )}
                                             {searchBookingMemberQuery.length >= 2 && !bookingSearchData?.members?.length && !lastAddedMember && (
                                                 <CommandEmpty className="p-2 text-center">
-                                                    <p className="text-xs text-muted-foreground mb-2">Nessun cliente trovato.</p>
+                                                    <p className="text-xs text-muted-foreground mb-2">Nessun partecipante trovato.</p>
                                                     <Button variant="outline" size="sm" className="w-full" onClick={() => setQuickAddMemberOpen(true)}>
-                                                        <Plus className="w-4 h-4 mr-2" /> Crea Nuovo Cliente
+                                                        <Plus className="w-4 h-4 mr-2" /> Crea Nuovo Partecipante
                                                     </Button>
                                                 </CommandEmpty>
                                             )}
-                                            <CommandGroup heading="Clienti">
+                                            <CommandGroup heading="Partecipanti">
                                                 {lastAddedMember && (
                                                     <CommandItem
-                                                        value={`${lastAddedMember.firstName} ${lastAddedMember.lastName}`}
+                                                        value={`${lastAddedMember.lastName} ${lastAddedMember.firstName}`}
                                                         onSelect={() => {
                                                             setBookingForm((prev: any) => ({
                                                                 ...prev,
@@ -2184,7 +2184,7 @@ export default function CalendarPage() {
                                                     >
                                                         <Check className={`mr-2 h-4 w-4 ${bookingForm.memberId === lastAddedMember.id ? "opacity-100" : "opacity-0"}`} />
                                                         <div className="flex flex-col">
-                                                            <span className="font-bold">✨ {lastAddedMember.firstName} {lastAddedMember.lastName}</span>
+                                                            <span className="font-bold">✨ {lastAddedMember.lastName} {lastAddedMember.firstName}</span>
                                                             <span className="text-[10px] text-muted-foreground">{lastAddedMember.fiscalCode}</span>
                                                         </div>
                                                     </CommandItem>
@@ -2192,7 +2192,7 @@ export default function CalendarPage() {
                                                 {bookingSearchData?.members?.map((m: Member) => (
                                                     <CommandItem
                                                         key={m.id}
-                                                        value={`${m.firstName} ${m.lastName}`}
+                                                        value={`${m.lastName} ${m.firstName}`}
                                                         onSelect={() => {
                                                             setBookingForm((prev: any) => ({
                                                                 ...prev,
@@ -2207,7 +2207,7 @@ export default function CalendarPage() {
                                                     >
                                                         <Check className={`mr-2 h-4 w-4 ${bookingForm.memberId === m.id ? "opacity-100" : "opacity-0"}`} />
                                                         <div className="flex flex-col">
-                                                            <span>{m.firstName} {m.lastName}</span>
+                                                            <span>{m.lastName} {m.firstName}</span>
                                                             <span className="text-[10px] text-muted-foreground">{m.fiscalCode}</span>
                                                         </div>
                                                     </CommandItem>
@@ -2241,7 +2241,7 @@ export default function CalendarPage() {
                                             {bookingForm.instructorId
                                                 ? <span className="font-medium">{(() => {
                                                     const i = instructors?.find(i => i.id === bookingForm.instructorId);
-                                                    return i ? `${i.firstName} ${i.lastName}` : "Insegnante";
+                                                    return i ? `${i.lastName} ${i.firstName}` : "Insegnante";
                                                 })()}</span>
                                                 : <span className="text-muted-foreground">Seleziona insegnante...</span>
                                             }
@@ -2273,7 +2273,7 @@ export default function CalendarPage() {
                                                         }}
                                                     >
                                                         <Check className={`mr-2 h-4 w-4 ${bookingForm.instructorId === i.id ? "opacity-100" : "opacity-0"}`} />
-                                                        {i.firstName} {i.lastName}
+                                                        {i.lastName} {i.firstName}
                                                     </CommandItem>
                                                 ))}
                                             </CommandGroup>
@@ -2513,7 +2513,7 @@ export default function CalendarPage() {
             <Dialog open={quickAddMemberOpen} onOpenChange={setQuickAddMemberOpen} >
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Anagrafica Completa Nuovo Cliente/Associato</DialogTitle>
+                        <DialogTitle>Anagrafica Completa Nuovo Partecipante</DialogTitle>
                         <DialogDescription>Compila tutti i campi richiesti per l'iscrizione.</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-6 py-4">
@@ -2611,7 +2611,7 @@ export default function CalendarPage() {
                                 if (!newMemberForm.firstName.trim() || !newMemberForm.lastName.trim() || !newMemberForm.fiscalCode.trim() || !newMemberForm.email.trim()) {
                                     toast({
                                         title: "Dati mancanti",
-                                        description: "Nome, Cognome, Codice Fiscale ed Email sono obbligatori.",
+                                        description: "Cognome, Nome, Codice Fiscale ed Email sono obbligatori.",
                                         variant: "destructive"
                                     });
                                     return;

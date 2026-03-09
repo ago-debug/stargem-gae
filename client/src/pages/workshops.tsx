@@ -164,7 +164,7 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
           <PopoverContent className="w-80 p-0" align="end">
             <Command shouldFilter={false}>
               <CommandInput
-                placeholder="Cerca per nome, cognome o CF (min. 3 caratteri)..."
+                placeholder="Cerca per cognome, nome o CF (min. 3 caratteri)..."
                 value={memberSearchQuery}
                 onValueChange={setMemberSearchQuery}
               />
@@ -188,7 +188,7 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
                           data-testid={`option-workshop-member-${member.id}`}
                         >
                           <div className="flex flex-col">
-                            <span className="font-medium">{member.firstName} {member.lastName}</span>
+                            <span className="font-medium">{member.lastName} {member.firstName}</span>
                             {member.fiscalCode && (
                               <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
                             )}
@@ -323,7 +323,7 @@ function AttendancesTab({ workshopId }: AttendancesTabProps) {
       const member = members?.find(m => m.id === a.memberId);
       return {
         ...a,
-        memberName: member ? `${member.firstName} ${member.lastName}` : "Sconosciuto",
+        memberName: member ? `${member.lastName} ${member.firstName}` : "Sconosciuto",
       };
     })
     .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
@@ -365,7 +365,7 @@ function AttendancesTab({ workshopId }: AttendancesTabProps) {
                   <SelectContent>
                     {enrolledMembers.map(member => (
                       <SelectItem key={member.id} value={member.id.toString()}>
-                        {member.firstName} {member.lastName}
+                        {member.lastName} {member.firstName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -554,7 +554,7 @@ export default function Workshops() {
         const member = members.find(m => m.id === a.memberId);
         return {
           ...a,
-          memberName: member ? `${member.firstName} ${member.lastName}` : "Sconosciuto",
+          memberName: member ? `${member.lastName} ${member.firstName}` : "Sconosciuto",
         };
       })
       .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
@@ -721,7 +721,7 @@ export default function Workshops() {
       case "category": return categories?.find(c => c.id === workshop.categoryId)?.name;
       case "instructor": {
         const inst = instructors?.find(i => i.id === workshop.instructorId);
-        return inst ? `${inst.firstName} ${inst.lastName}` : null;
+        return inst ? `${inst.lastName} ${inst.firstName}` : null;
       }
       case "price": return Number(workshop.price) || 0;
       case "capacity": return workshop.maxCapacity || 0;
@@ -749,7 +749,7 @@ export default function Workshops() {
         workshop.name,
         workshop.description || "",
         category?.name || "",
-        instructor ? `${instructor.firstName} ${instructor.lastName}` : "",
+        instructor ? `${instructor.lastName} ${instructor.firstName}` : "",
         workshop.price || "",
         workshop.maxCapacity || "",
         dayLabel,
@@ -895,7 +895,7 @@ export default function Workshops() {
                         </TableCell>
                         <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : ""}>
                           {instructors?.find(i => i.id === workshop.instructorId)
-                            ? `${instructors.find(i => i.id === workshop.instructorId)?.firstName} ${instructors.find(i => i.id === workshop.instructorId)?.lastName}`
+                            ? `${instructors.find(i => i.id === workshop.instructorId)?.lastName} ${instructors.find(i => i.id === workshop.instructorId)?.firstName}`
                             : "-"}
                         </TableCell>
                         <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : ""}>
@@ -1085,7 +1085,7 @@ export default function Workshops() {
                             <SelectContent>
                               {instructors?.map((instructor) => (
                                 <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                                  {instructor.firstName} {instructor.lastName}
+                                  {instructor.lastName} {instructor.firstName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1101,7 +1101,7 @@ export default function Workshops() {
                             <SelectContent>
                               {instructors?.map((instructor) => (
                                 <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                                  {instructor.firstName} {instructor.lastName}
+                                  {instructor.lastName} {instructor.firstName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1380,7 +1380,7 @@ export default function Workshops() {
                         <SelectContent>
                           {instructors?.map((instructor) => (
                             <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                              {instructor.firstName} {instructor.lastName}
+                              {instructor.lastName} {instructor.firstName}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1396,7 +1396,7 @@ export default function Workshops() {
                         <SelectContent>
                           {instructors?.map((instructor) => (
                             <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                              {instructor.firstName} {instructor.lastName}
+                              {instructor.lastName} {instructor.firstName}
                             </SelectItem>
                           ))}
                         </SelectContent>

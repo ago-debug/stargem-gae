@@ -154,11 +154,11 @@ export default function Payments() {
 
   const getMemberName = (payment: any) => {
     if (payment.memberFirstName || payment.memberLastName) {
-      return `${payment.memberFirstName || ''} ${payment.memberLastName || ''}`.trim();
+      return `${payment.memberLastName || ''} ${payment.memberFirstName || ''}`.trim();
     }
     if (!payment.memberId) return "-";
     const member = members?.find(m => m.id === payment.memberId);
-    return member ? `${member.firstName} ${member.lastName}` : "Sconosciuto";
+    return member ? `${member.lastName} ${member.firstName}` : "Sconosciuto";
   };
 
 
@@ -172,7 +172,7 @@ export default function Payments() {
       ? payments.filter(p => p.status === 'pending')
       : payments;
 
-    const headers = ["ID", "Cliente", "Tipo", "Descrizione", "Importo", "Scadenza", "Metodo", "Data Pagamento"];
+    const headers = ["ID", "Partecipante", "Tipo", "Descrizione", "Importo", "Scadenza", "Metodo", "Data Pagamento"];
     const rows = filteredData.map(p => [
       p.id,
       getMemberName(p),
@@ -363,10 +363,10 @@ export default function Payments() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => updateStatusMutation.mutate({ id: payment.id, status: 'paid' })}
-                            data-testid={`button-mark-paid-${payment.id}`}
+                            onClick={() => openEditDialog(payment)}
+                            data-testid={`button-pay-${payment.id}`}
                           >
-                            Segna Pagato
+                            Paga
                           </Button>
                         )}
                       </div>

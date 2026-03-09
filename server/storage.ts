@@ -1569,7 +1569,7 @@ export class DatabaseStorage implements IStorage {
         if (normalizedData.firstName && normalizedData.lastName &&
           d.firstName.toLowerCase() === normalizedData.firstName &&
           d.lastName.toLowerCase() === normalizedData.lastName) {
-          if (!duplicateFields.includes("Nome e Cognome")) duplicateFields.push("Nome e Cognome");
+          if (!duplicateFields.includes("Cognome e Nome")) duplicateFields.push("Cognome e Nome");
         }
       }
 

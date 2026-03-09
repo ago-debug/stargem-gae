@@ -111,7 +111,7 @@ export default function Memberships() {
   const handleMembershipSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedMembershipMember) {
-      toast({ title: "Errore", description: "Seleziona un cliente/associato", variant: "destructive" });
+      toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
       return;
     }
     const formData = new FormData(e.currentTarget);
@@ -132,7 +132,7 @@ export default function Memberships() {
   const handleCertificateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedCertMember) {
-      toast({ title: "Errore", description: "Seleziona un cliente/associato", variant: "destructive" });
+      toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
       return;
     }
     const formData = new FormData(e.currentTarget);
@@ -150,11 +150,11 @@ export default function Memberships() {
 
   const getMemberName = (item: any) => {
     if (item.memberFirstName && item.memberLastName) {
-      return `${item.memberFirstName} ${item.memberLastName}`;
+      return `${item.memberLastName} ${item.memberFirstName}`;
     }
     if (!item.memberId) return "-";
     const member = members?.find(m => m.id === item.memberId);
-    return member ? `${member.firstName} ${member.lastName}` : "Sconosciuto";
+    return member ? `${member.lastName} ${member.firstName}` : "Sconosciuto";
   };
 
   const getExpiryStatus = (expiryDate: string | Date | null | undefined) => {
@@ -172,14 +172,14 @@ export default function Memberships() {
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2">Tessere & Certificati Medici</h1>
-        <p className="text-muted-foreground">Gestisci tessere associative e certificati medici</p>
+        <p className="text-muted-foreground">Gestisci tessere StudioGem e certificati medici</p>
       </div>
 
       <Tabs defaultValue="memberships" className="space-y-6">
         <TabsList>
           <TabsTrigger value="memberships" data-testid="tab-memberships">
             <IdCard className="w-4 h-4 mr-2" />
-            Tessere Associative
+            Tessere StudioGem
           </TabsTrigger>
           <TabsTrigger value="entity-cards" data-testid="tab-entity-cards">
             <Building2 className="w-4 h-4 mr-2" />
@@ -210,7 +210,7 @@ export default function Memberships() {
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Cerca per nome, cognome o codice fiscale..."
+                  placeholder="Cerca per cognome, nome o codice fiscale..."
                   value={membershipSearch}
                   onChange={(e) => setMembershipSearch(e.target.value)}
                   className="pl-10"
@@ -254,7 +254,7 @@ export default function Memberships() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Cliente/Associato</TableHead>
+                        <TableHead>Partecipante</TableHead>
                         <TableHead>N. Tessera</TableHead>
                         <TableHead>Barcode</TableHead>
                         <TableHead>Tipo</TableHead>
@@ -324,7 +324,7 @@ export default function Memberships() {
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Cerca per nome, cognome o codice fiscale..."
+                  placeholder="Cerca per cognome, nome o codice fiscale..."
                   value={certificateSearch}
                   onChange={(e) => setCertificateSearch(e.target.value)}
                   className="pl-10"
@@ -368,7 +368,7 @@ export default function Memberships() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Cliente/Associato</TableHead>
+                        <TableHead>Partecipante</TableHead>
                         <TableHead>Medico</TableHead>
                         <TableHead>Data Rilascio</TableHead>
                         <TableHead>Scadenza</TableHead>
@@ -423,7 +423,7 @@ export default function Memberships() {
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Cerca per nome, cognome o codice fiscale..."
+                  placeholder="Cerca per cognome, nome o codice fiscale..."
                   value={entityCardSearch}
                   onChange={(e) => setEntityCardSearch(e.target.value)}
                   className="pl-10"
@@ -455,7 +455,7 @@ export default function Memberships() {
                     <div className="text-center py-12 text-muted-foreground">
                       <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p className="text-lg font-medium mb-2">Nessuna tessera ente trovata</p>
-                      <p className="text-sm">Le tessere ente vengono gestite nella scheda Anagrafica del cliente/associato</p>
+                      <p className="text-sm">Le tessere ente vengono gestite nella scheda Anagrafica del partecipante</p>
                     </div>
                   );
                 }
@@ -464,7 +464,7 @@ export default function Memberships() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Cliente/Associato</TableHead>
+                        <TableHead>Partecipante</TableHead>
                         <TableHead>Tipo Ente</TableHead>
                         <TableHead>Numero Tessera</TableHead>
                         <TableHead>Data Rilascio</TableHead>
@@ -480,7 +480,7 @@ export default function Memberships() {
                         return (
                           <TableRow key={member.id} data-testid={`entity-card-row-${member.id}`}>
                             <TableCell className="font-medium">
-                              {member.firstName} {member.lastName}
+                              {member.lastName} {member.firstName}
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline">{member.entityCardType || "-"}</Badge>
@@ -517,13 +517,13 @@ export default function Memberships() {
       <Dialog open={isMembershipFormOpen} onOpenChange={setIsMembershipFormOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Nuova Tessera Associativa</DialogTitle>
+            <DialogTitle>Nuova Tessera StudioGem</DialogTitle>
             <DialogDescription>Inserisci i dettagli della tessera</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleMembershipSubmit} className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Cliente/Associato *</Label>
+                <Label>Partecipante *</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -535,7 +535,7 @@ export default function Memberships() {
                   data-testid="button-new-member-membership"
                 >
                   <UserPlus className="w-4 h-4 mr-1" />
-                  Nuovo Cliente/Associato
+                  Nuovo Partecipante
                 </Button>
               </div>
               <Popover open={membershipMemberOpen} onOpenChange={setMembershipMemberOpen}>
@@ -548,8 +548,8 @@ export default function Memberships() {
                     data-testid="select-member"
                   >
                     {selectedMembershipMember
-                      ? `${selectedMembershipMember.firstName} ${selectedMembershipMember.lastName}`
-                      : "Cerca cliente/associato (min. 3 caratteri)..."
+                      ? `${selectedMembershipMember.lastName} ${selectedMembershipMember.firstName}`
+                      : "Cerca partecipante (min. 3 caratteri)..."
                     }
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -557,7 +557,7 @@ export default function Memberships() {
                 <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[300px] p-0" align="start">
                   <Command shouldFilter={false}>
                     <CommandInput
-                      placeholder="Cerca per nome, cognome o codice fiscale..."
+                      placeholder="Cerca per cognome, nome o codice fiscale..."
                       value={membershipMemberSearch}
                       onValueChange={setMembershipMemberSearch}
                       data-testid="input-search-member-membership"
@@ -566,7 +566,7 @@ export default function Memberships() {
                       {membershipMemberSearch.length < 3 ? (
                         <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                       ) : !membershipSearchResults?.members?.length ? (
-                        <CommandEmpty>Nessun cliente/associato trovato</CommandEmpty>
+                        <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
                       ) : (
                         <CommandGroup>
                           {membershipSearchResults.members.map((member) => (
@@ -586,7 +586,7 @@ export default function Memberships() {
                                 )}
                               />
                               <div className="flex flex-col">
-                                <span className="font-medium">{member.firstName} {member.lastName}</span>
+                                <span className="font-medium">{member.lastName} {member.firstName}</span>
                                 {member.fiscalCode && (
                                   <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
                                 )}
@@ -707,7 +707,7 @@ export default function Memberships() {
           <form onSubmit={handleCertificateSubmit} className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Cliente/Associato *</Label>
+                <Label>Partecipante *</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -719,7 +719,7 @@ export default function Memberships() {
                   data-testid="button-new-member-certificate"
                 >
                   <UserPlus className="w-4 h-4 mr-1" />
-                  Nuovo Cliente/Associato
+                  Nuovo Partecipante
                 </Button>
               </div>
               <Popover open={certMemberOpen} onOpenChange={setCertMemberOpen}>
@@ -732,8 +732,8 @@ export default function Memberships() {
                     data-testid="select-cert-member"
                   >
                     {selectedCertMember
-                      ? `${selectedCertMember.firstName} ${selectedCertMember.lastName}`
-                      : "Cerca cliente/associato (min. 3 caratteri)..."
+                      ? `${selectedCertMember.lastName} ${selectedCertMember.firstName}`
+                      : "Cerca partecipante (min. 3 caratteri)..."
                     }
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -741,7 +741,7 @@ export default function Memberships() {
                 <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[300px] p-0" align="start">
                   <Command shouldFilter={false}>
                     <CommandInput
-                      placeholder="Cerca per nome, cognome o codice fiscale..."
+                      placeholder="Cerca per cognome, nome o codice fiscale..."
                       value={certMemberSearch}
                       onValueChange={setCertMemberSearch}
                       data-testid="input-search-member-certificate"
@@ -750,7 +750,7 @@ export default function Memberships() {
                       {certMemberSearch.length < 3 ? (
                         <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
                       ) : !certSearchResults?.members?.length ? (
-                        <CommandEmpty>Nessun cliente/associato trovato</CommandEmpty>
+                        <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
                       ) : (
                         <CommandGroup>
                           {certSearchResults.members.map((member) => (
@@ -770,7 +770,7 @@ export default function Memberships() {
                                 )}
                               />
                               <div className="flex flex-col">
-                                <span className="font-medium">{member.firstName} {member.lastName}</span>
+                                <span className="font-medium">{member.lastName} {member.firstName}</span>
                                 {member.fiscalCode && (
                                   <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
                                 )}

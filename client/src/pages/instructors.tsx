@@ -125,7 +125,7 @@ export default function Instructors() {
 
   const filteredInstructors = useMemo(() => {
     let result = instructors?.filter((instructor) => {
-      const matchesSearch = `${instructor.firstName} ${instructor.lastName} ${instructor.specialization}`.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = `${instructor.lastName} ${instructor.firstName} ${instructor.specialization}`.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === "all" ? true : (statusFilter === "active" ? instructor.active : !instructor.active);
       return matchesSearch && matchesStatus;
     }) || [];
@@ -149,15 +149,15 @@ export default function Instructors() {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-6 w-full mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Insegnanti</h1>
-          <p className="text-muted-foreground">Gestisci il team di insegnanti e le loro tariffe</p>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Staff / Insegnanti</h1>
+          <p className="text-muted-foreground">Gestisci lo staff di insegnanti e le loro tariffe</p>
         </div>
         <Button
           onClick={() => {
-            setLocation("/maschera-input?type=INSEGNANTE");
+            setLocation("/?type=INSEGNANTE");
           }}
           data-testid="button-add-instructor"
         >
@@ -172,7 +172,7 @@ export default function Instructors() {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Cerca insegnante..."
+                placeholder="Cerca Staff / Insegnante..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -211,16 +211,16 @@ export default function Instructors() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort("firstName")}>
-                    <div className="flex items-center gap-1">
-                      Nome
-                      {sortBy === "firstName" ? (sortOrder === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
-                    </div>
-                  </TableHead>
                   <TableHead className="cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort("lastName")}>
                     <div className="flex items-center gap-1">
                       Cognome
                       {sortBy === "lastName" ? (sortOrder === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
+                    </div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort("firstName")}>
+                    <div className="flex items-center gap-1">
+                      Nome
+                      {sortBy === "firstName" ? (sortOrder === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                     </div>
                   </TableHead>
                   <TableHead>Specializzazione</TableHead>
@@ -238,10 +238,10 @@ export default function Instructors() {
                   return (
                     <TableRow key={instructor.id} data-testid={`instructor-row-${instructor.id}`}>
                       <TableCell className="font-medium">
-                        {instructor.firstName}
+                        {instructor.lastName}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {instructor.lastName}
+                        {instructor.firstName}
                       </TableCell>
                       <TableCell>{instructor.specialization || "-"}</TableCell>
                       <TableCell>
@@ -302,7 +302,7 @@ export default function Instructors() {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              setLocation(`/maschera-input?id=${instructor.id}`);
+                              setLocation(`/?memberId=${instructor.id}`);
                             }}
                             data-testid={`button-edit-instructor-${instructor.id}`}
                           >

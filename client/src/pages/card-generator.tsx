@@ -141,7 +141,7 @@ export default function CardGenerator() {
                         <div className="relative flex-1 max-w-md">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
-                                placeholder="Cerca iscritti per nome, cognome o CF..."
+                                placeholder="Cerca iscritti per cognome, nome o CF..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="pl-10 h-10 border-2 focus-visible:ring-[#e11d48]"
@@ -181,7 +181,7 @@ export default function CardGenerator() {
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
                                     <TableHead className="w-12 text-center">Sel.</TableHead>
-                                    <TableHead>Nome e Cognome</TableHead>
+                                    <TableHead>Cognome e Nome</TableHead>
                                     <TableHead>N. Tessera</TableHead>
                                     <TableHead>Codice Fiscale</TableHead>
                                     <TableHead className="text-right">Azione</TableHead>
@@ -202,7 +202,7 @@ export default function CardGenerator() {
                                                     className="border-2 data-[state=checked]:bg-[#e11d48]"
                                                 />
                                             </TableCell>
-                                            <TableCell className="font-bold">{member.firstName} {member.lastName}</TableCell>
+                                            <TableCell className="font-bold">{member.lastName} {member.firstName}</TableCell>
                                             <TableCell className="font-mono text-[#e11d48] text-sm">{member.cardNumber || "--"}</TableCell>
                                             <TableCell className="font-mono text-xs text-muted-foreground">{member.fiscalCode}</TableCell>
                                             <TableCell className="text-right">
@@ -342,7 +342,7 @@ function MembershipCardDialog({
                 <DialogHeader className="border-b pb-4 mb-4">
                     <DialogTitle className="text-2xl font-black italic tracking-tighter">Anteprima Card</DialogTitle>
                     <DialogDescription>
-                        Visualizzazione card di {member.firstName} {member.lastName}
+                        Visualizzazione card di {member.lastName} {member.firstName}
                     </DialogDescription>
                 </DialogHeader>
 

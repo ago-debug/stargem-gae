@@ -351,7 +351,7 @@ export default function AnagraficaHome() {
       if (error.conflictWith) {
         toast({
           title: "Codice Fiscale Duplicato",
-          description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.firstName} ${error.conflictWith.lastName}`,
+          description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.lastName} ${error.conflictWith.firstName}`,
           variant: "destructive"
         });
       } else {
@@ -655,7 +655,7 @@ export default function AnagraficaHome() {
               </div>
               <MemberSearch
                 onSelect={handleMemberSelect}
-                placeholder="Cerca cliente/associato..."
+                placeholder="Cerca partecipante..."
                 useServerSearch={true}
               />
             </div>
@@ -793,7 +793,7 @@ export default function AnagraficaHome() {
                 {/* Row 1: ID, Cognome, Nome, Data Nascita */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <Label>ID Cliente/Associato</Label>
+                    <Label>ID Partecipante</Label>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700">Auto</Badge>
                       <Input
@@ -911,7 +911,7 @@ export default function AnagraficaHome() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Tipologia Cliente/Associato</Label>
+                    <Label>Tipologia Partecipante</Label>
                     <SearchableSelect
                       options={clientCategories || []}
                       value={formData.categoryId || null}
@@ -924,7 +924,7 @@ export default function AnagraficaHome() {
                         try {
                           await apiRequest("POST", "/api/client-categories", { name });
                           queryClient.invalidateQueries({ queryKey: ["/api/client-categories"] });
-                          toast({ title: "Tipologia cliente/associato creata" });
+                          toast({ title: "Tipologia partecipante creata" });
                         } catch (error) {
                           toast({ title: "Errore nella creazione", variant: "destructive" });
                         }
@@ -1064,7 +1064,7 @@ export default function AnagraficaHome() {
                       onChange={(e) => setFormData(p => ({ ...p, isMinor: e.target.checked }))}
                       className="w-4 h-4 rounded border-muted-foreground"
                     />
-                    <Label htmlFor="isMinorHome" className="font-bold cursor-pointer">Cliente/Associato Minorenne</Label>
+                    <Label htmlFor="isMinorHome" className="font-bold cursor-pointer">Partecipante Minorenne</Label>
                   </div>
 
                   {(formData.isMinor || (formData.dateOfBirth && (new Date().getFullYear() - new Date(formData.dateOfBirth).getFullYear() < 18))) && (
@@ -1193,7 +1193,7 @@ export default function AnagraficaHome() {
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <IdCard className="w-5 h-5" />
-                    Tessera Cliente/Associato
+                    Tessera Partecipante
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -1786,7 +1786,7 @@ export default function AnagraficaHome() {
                         }}
                         data-testid={`button-duplicate-member-${member.id}`}
                       >
-                        {member.firstName} {member.lastName}
+                        {member.lastName} {member.firstName}
                       </Button>
                     ))}
                   </div>
@@ -1815,7 +1815,7 @@ export default function AnagraficaHome() {
           <form onSubmit={handleCreatePayment} className="space-y-4">
             <div className="bg-muted/50 p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">Cliente:</p>
-              <p className="font-medium">{selectedMember?.firstName} {selectedMember?.lastName}</p>
+              <p className="font-medium">{selectedMember?.lastName} {selectedMember?.firstName}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

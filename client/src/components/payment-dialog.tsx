@@ -218,7 +218,7 @@ export function PaymentDialog({
         ? corsiDB
         : (dynamicActivities || []).map(item => ({
             id: item.id,
-            name: item.name || item.title || `${item.firstName} ${item.lastName}` || `Item ${item.id}`,
+            name: item.name || item.title || `${item.lastName} ${item.firstName}` || `Item ${item.id}`,
             sku: item.sku || item.code || "",
             maxCapacity: item.maxCapacity || 0,
             currentEnrollment: item.currentEnrollment || 0
@@ -389,7 +389,7 @@ export function PaymentDialog({
                             {memberDetails ? (
                                 <span className="font-bold flex items-center gap-2">
                                     <UserIcon className="w-5 h-5 flex-shrink-0" />
-                                    {memberDetails.firstName} {memberDetails.lastName}
+                                    {memberDetails.lastName} {memberDetails.firstName}
                                 </span>
                             ) : (
                                 <div className="flex flex-col gap-4">
@@ -399,7 +399,7 @@ export function PaymentDialog({
                                     {memberSelector && (
                                         <div className="w-full max-w-sm mt-1 mb-2 font-normal text-base text-foreground">
                                             {memberSelector}
-                                            {touched && !memberId && typeof memberSelector !== 'undefined' && <p className="text-red-500 text-xs mt-1">Seleziona un cliente</p>}
+                                            {touched && !memberId && typeof memberSelector !== 'undefined' && <p className="text-red-500 text-xs mt-1">Seleziona un partecipante</p>}
                                         </div>
                                     )}
                                 </div>
@@ -823,7 +823,7 @@ export function PaymentDialog({
                             <b className="text-slate-800">Importo:</b> € {(isGratuito ? 0 : formData.saldoTotale).toFixed(2)}<br />
                             <b className="text-slate-800">Attività:</b> {optionsToRender.find(c => c.id.toString() === formData.dettaglioId)?.name || "N/A"}
                             {memberDetails ? (
-                                <><br /><b className="text-slate-800">Per:</b> {memberDetails.firstName} {memberDetails.lastName}</>
+                                <><br /><b className="text-slate-800">Per:</b> {memberDetails.lastName} {memberDetails.firstName}</>
                             ) : ""}
                         </AlertDialogDescription>
                     </AlertDialogHeader>

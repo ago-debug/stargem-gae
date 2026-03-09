@@ -100,7 +100,7 @@ function CourseCard({ course, categories, instructors }: { course: Course; categ
               )}
               {instructor && (
                 <span className="text-xs text-muted-foreground">
-                  {instructor.firstName} {instructor.lastName}
+                  {instructor.lastName} {instructor.firstName}
                 </span>
               )}
               {dayLabel && (
@@ -146,7 +146,7 @@ function WorkshopCard({ workshop, categories, instructors }: { workshop: Worksho
               )}
               {instructor && (
                 <span className="text-xs text-muted-foreground">
-                  {instructor.firstName} {instructor.lastName}
+                  {instructor.lastName} {instructor.firstName}
                 </span>
               )}
               {dayLabel && (

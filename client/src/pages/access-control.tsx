@@ -300,7 +300,7 @@ export default function AccessControl() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Search className="w-5 h-5" />
-                  Cerca Cliente/Associato
+                  Cerca Partecipante
                 </CardTitle>
                 <CardDescription>
                   Digita almeno 3 caratteri per cercare
@@ -311,7 +311,7 @@ export default function AccessControl() {
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Nome, cognome o codice fiscale..."
+                    placeholder="Cognome, nome o codice fiscale..."
                     className="pl-10"
                     data-testid="input-member-search"
                   />
@@ -373,7 +373,7 @@ export default function AccessControl() {
                 {searchQuery.length >= 3 && !searchLoading && filteredMembers.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <User className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                    <p>Nessun cliente/associato trovato</p>
+                    <p>Nessun partecipante trovato</p>
                   </div>
                 )}
               </CardContent>
@@ -630,8 +630,8 @@ export default function AccessControl() {
                 <CardContent className="flex items-center justify-center min-h-[500px]">
                   <div className="text-center text-muted-foreground">
                     <User className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium mb-2">Seleziona un cliente/associato</p>
-                    <p className="text-sm">Cerca per nome, cognome o codice fiscale</p>
+                    <p className="text-lg font-medium mb-2">Seleziona un partecipante</p>
+                    <p className="text-sm">Cerca per cognome, nome o codice fiscale</p>
                   </div>
                 </CardContent>
               )}
@@ -772,7 +772,7 @@ export default function AccessControl() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Data/Ora</TableHead>
-                  <TableHead>Nome e Cognome</TableHead>
+                  <TableHead>Cognome e Nome</TableHead>
                   <TableHead>Barcode</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Stato Tessera</TableHead>

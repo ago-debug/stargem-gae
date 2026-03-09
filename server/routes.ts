@@ -4379,7 +4379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               };
 
               if (!instructorData.firstName || !instructorData.lastName) {
-                throw new Error("Nome e Cognome sono obbligatori");
+                throw new Error("Cognome e Nome sono obbligatori");
               }
 
               await storage.createInstructor(instructorData);
@@ -4472,7 +4472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
 
             if (!memberData.firstName || !memberData.lastName) {
-              throw new Error("Nome e Cognome sono obbligatori");
+              throw new Error("Cognome e Nome sono obbligatori");
             }
 
             await storage.createMember(memberData);
@@ -4508,7 +4508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
 
             if (!instructorData.firstName || !instructorData.lastName) {
-              throw new Error("Nome e Cognome sono obbligatori");
+              throw new Error("Cognome e Nome sono obbligatori");
             }
 
             await storage.createInstructor(instructorData);
