@@ -72,7 +72,7 @@ Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro
 | **Todo List Task** | `/todo-list` | 🟡 **ToDoList** | `todos` | Task collaborative per lo staff. |
 | **Note Team / Chat** | `/commenti`, `/note-team` | 🟡 **Commenti Log / Note** | `team_comments`, `team_notes`, `messages` | Chat intercom della segreteria e post-it globali. |
 | **Categorie Anagrafiche** | `/categoria-partecipante` | 🟡 **Categoria Partecipante**| `cli_cats` | Scrive gerarchie su cui raggruppare i clienti. |
-| **Categorie Attività Multi**| `/categorie-*` | 🟡 **Categorie (Varie)** | Tutte le `*_cats` e `booking_service_categories` | Gestisce gli alberi (Corsi, Workshop, Campus, Domeniche, ...). |
+| **Categorie Attività Multi**| `/categorie-*` | 🟡 **Categorie Attività** | Tutte le `*_cats` e `booking_service_categories` | Gestisce gli alberi (Corsi, Workshop, Campus, Domeniche, ...). |
 | **Elenchi Dropdown Custom**| `/elenchi` | 🟡 **Elenchi** | `custom_lists`, `custom_list_items`, `act_statuses`, `enroll_details` | Controlla i menù a tendina custom in tutto il gestionale. |
 | **Controllo Ingressi** | `/accessi` | 🟡 **Controllo Accessi** | `access_logs` | Lettura/Scrittura gate passaggi tornello/tablet. |
 | **Reset Stagione** | `/reset-stagione` | 🟡 **Reset Database Anno**| `seasons` (+ truncate su DB) | Imposta l'anno accademico e resetta dati vecchi. |
