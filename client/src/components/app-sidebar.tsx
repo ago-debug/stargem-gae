@@ -150,11 +150,7 @@ const secretariatItems = [
     url: "/accessi",
     icon: ScanBarcode,
   },
-  {
-    title: "Commenti Team",
-    url: "/commenti",
-    icon: MessageSquarePlus,
-  },
+
   {
     title: "Inserisci Nota",
     url: "/inserisci-nota",

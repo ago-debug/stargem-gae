@@ -161,7 +161,7 @@ export function MemberEditDialog() {
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <User className="w-5 h-5 text-primary" />
-                        Modifica Rapida Anagrafica - {member?.firstName} {member?.lastName}
+                        Modifica Rapida Anagrafica - {member?.lastName} {member?.firstName}
                     </DialogTitle>
                     <DialogDescription>
                         Aggiorna i dati anagrafici e i contatti dell'iscritto.
@@ -331,7 +331,7 @@ export function MemberEditDialog() {
                         <Separator />
 
                         <div className="space-y-4">
-                            <h4 className="font-bold flex items-center gap-2 text-sm uppercase text-muted-foreground tracking-wider">Tessera Cliente/Associato</h4>
+                            <h4 className="font-bold flex items-center gap-2 text-sm uppercase text-muted-foreground tracking-wider">Tessera Partecipante</h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="cardNumber">Numero</Label>
@@ -415,7 +415,7 @@ export function MemberEditDialog() {
                                 onChange={(e) => setIsMinorChecked(e.target.checked)}
                                 className="w-5 h-5 rounded"
                             />
-                            <Label htmlFor="isMinorEdit" className="font-bold cursor-pointer">Cliente/Associato Minorenne</Label>
+                            <Label htmlFor="isMinorEdit" className="font-bold cursor-pointer">Partecipante Minorenne</Label>
                         </div>
 
                         {isMinorChecked && (

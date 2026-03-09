@@ -1190,6 +1190,16 @@ export default function MascheraInputGenerale() {
             if (actionFromUrl === 'payment') {
               setIsNuovoPagamentoOpen(true);
             }
+            // Gestione scroll automatico post-caricamento anagrafica
+            if (window.location.hash) {
+              setTimeout(() => {
+                const id = window.location.hash.replace('#', '');
+                const element = document.getElementById(id);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }, 500); // Piccolo delay per attendere il render dei dati
+            }
           })
           .catch(err => console.error("Errore auto-loading membro da URL", err));
       }
@@ -1350,7 +1360,7 @@ export default function MascheraInputGenerale() {
     }
 
     setShowResults(false);
-    setSearchTerm(`${member.firstName} ${member.lastName} `);
+    setSearchTerm(`${member.lastName} ${member.firstName} `);
     setDirtyFields({});
     sessionStorage.removeItem("mascheraInputDirtyFields");
     setIsSaved(true);
@@ -1805,7 +1815,7 @@ export default function MascheraInputGenerale() {
                       className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
                       onClick={() => handleSelectMember(member)}
                     >
-                      <div className="font-bold">{member.firstName} {member.lastName}</div>
+                      <div className="font-bold">{member.lastName} {member.firstName}</div>
                       <div className="text-xs text-muted-foreground">{member.fiscalCode} - {member.email}</div>
                     </div>
                   ))
@@ -3831,7 +3841,7 @@ export default function MascheraInputGenerale() {
                         }}
                         data-testid={`button - duplicate - member - ${member.id} `}
                       >
-                        {member.firstName} {member.lastName}
+                        {member.lastName} {member.firstName}
                       </Button>
                     ))}
                   </div>

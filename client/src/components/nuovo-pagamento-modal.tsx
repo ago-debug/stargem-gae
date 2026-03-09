@@ -361,6 +361,9 @@ export function NuovoPagamentoModal({
     const provaValue = includeProva ? -20 : 0;
     const grandTotal = totalCart + tesseraValue + provaValue;
 
+    const totalInSospeso = calculatedDebts.reduce((sum: number, d: any) => sum + (d.remaining || 0), 0);
+    const totalPaid = memberPayments.filter((p: any) => p.status === 'paid' || p.status === 'completed').reduce((sum: number, p: any) => sum + parseFloat(p.amount || "0"), 0);
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="max-w-[1400px] w-[95vw] h-[95vh] overflow-y-auto bg-slate-100/50 p-0 border-0">
@@ -402,11 +405,11 @@ export function NuovoPagamentoModal({
                                                 >
                                                     {selectedMember ? (
                                                         <div className="flex flex-col items-start overflow-hidden">
-                                                            <span className="font-bold truncate text-base">{selectedMember.firstName} {selectedMember.lastName}</span>
+                                                            <span className="font-bold truncate text-base">{selectedMember.lastName} {selectedMember.firstName}</span>
                                                             <span className="text-[10px] text-muted-foreground uppercase">{selectedMember.fiscalCode || 'No CF'}</span>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-muted-foreground">Cerca per nome, cognome o CF...</span>
+                                                        <span className="text-muted-foreground">Cerca per cognome, nome o CF...</span>
                                                     )}
                                                     <div className="flex items-center gap-1 shrink-0">
                                                         {selectedMemberId && (
@@ -445,7 +448,7 @@ export function NuovoPagamentoModal({
                                                         <CommandEmpty>
                                                             {memberSearchQuery.length < 3
                                                                 ? "Inserisci almeno 3 caratteri per cercare"
-                                                                : "Nessun cliente trovato"}
+                                                                : "Nessun partecipante trovato"}
                                                         </CommandEmpty>
                                                         {memberSearchQuery.length >= 3 && (
                                                             <CommandGroup>
@@ -462,7 +465,7 @@ export function NuovoPagamentoModal({
                                                                     >
                                                                         <Check className={cn("mr-2 h-4 w-4", selectedMemberId === member.id.toString() ? "opacity-100 text-primary" : "opacity-0")} />
                                                                         <div className="flex flex-col">
-                                                                            <span className="font-bold">{member.firstName} {member.lastName}</span>
+                                                                            <span className="font-bold">{member.lastName} {member.firstName}</span>
                                                                             {member.fiscalCode && (
                                                                                 <span className="text-[10px] text-muted-foreground">{member.fiscalCode}</span>
                                                                             )}
@@ -519,6 +522,29 @@ export function NuovoPagamentoModal({
                         {/* COLONNA DESTRA: TAVOLO CARRELLO E EXTRA */}
                         <div className="lg:col-span-8 xl:col-span-9 space-y-6">
                             <div className="border border-slate-200 shadow-sm bg-white p-4 rounded-lg">
+                                {selectedMemberId && (
+                                    <div className="flex gap-4 mb-6">
+                                        <div className="flex-1 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-center gap-3 shadow-sm">
+                                            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700">
+                                                <Check className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] font-bold uppercase tracking-widest opacity-80 text-green-800 mb-0.5">Totale Versato</p>
+                                                <p className="text-xl font-black text-green-700">€{totalPaid.toFixed(2)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1 bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center justify-center gap-3 shadow-sm">
+                                            <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-700">
+                                                <ChevronsUpDown className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] font-bold uppercase tracking-widest opacity-80 text-rose-800 mb-0.5">Residuo da Pagare</p>
+                                                <p className="text-xl font-black text-rose-600">€{totalInSospeso.toFixed(2)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 block">Cosa desideri pagare?</span>
                                 {!selectedMemberId ? (
                                     <div className="p-4 rounded-md bg-slate-50 text-center text-sm text-slate-500 italic">
@@ -679,7 +705,7 @@ export function NuovoPagamentoModal({
                     <DialogContent className="sm:max-w-[425px]">
                         <PaymentModuleConnector
                             basePrice={grandTotal}
-                            itemName={`Incasso: ${selectedMember?.firstName} ${selectedMember?.lastName}`}
+                            itemName={`Incasso: ${selectedMember?.lastName} ${selectedMember?.firstName}`}
                             onPaymentComplete={(data) => {
                                 // Provide default to avoid undefined behavior, pass directly into mutate
                                 const notes = data.receiptNumber ? `Ricevuta: ${data.receiptNumber}` : "";

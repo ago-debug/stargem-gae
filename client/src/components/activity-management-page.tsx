@@ -254,7 +254,7 @@ export default function ActivityManagementPage({
       case "category": return categories?.find(c => c.id === item.categoryId)?.name;
       case "instructor": {
         const inst = instructors?.find(i => i.id === item.instructorId);
-        return inst ? `${inst.firstName} ${inst.lastName}` : null;
+        return inst ? `${inst.lastName} ${inst.firstName}` : null;
       }
       case "price": return Number(item.price) || 0;
       case "capacity": return item.maxCapacity || 0;
@@ -282,7 +282,7 @@ export default function ActivityManagementPage({
         item.name,
         item.description || "",
         category?.name || "",
-        instructor ? `${instructor.firstName} ${instructor.lastName}` : "",
+        instructor ? `${instructor.lastName} ${instructor.firstName}` : "",
         item.price || "",
         item.currentEnrollment?.toString() || "0",
         item.maxCapacity || "",
@@ -403,7 +403,7 @@ export default function ActivityManagementPage({
               <SelectContent>
                 {instructors?.map((instructor) => (
                   <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                    {instructor.firstName} {instructor.lastName}
+                    {instructor.lastName} {instructor.firstName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -419,7 +419,7 @@ export default function ActivityManagementPage({
               <SelectContent>
                 {instructors?.map((instructor) => (
                   <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                    {instructor.firstName} {instructor.lastName}
+                    {instructor.lastName} {instructor.firstName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -696,7 +696,7 @@ export default function ActivityManagementPage({
                       </TableCell>
                       <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : undefined}>
                         {instructors?.find(i => i.id === item.instructorId)
-                          ? `${instructors.find(i => i.id === item.instructorId)?.firstName} ${instructors.find(i => i.id === item.instructorId)?.lastName}`
+                          ? `${instructors.find(i => i.id === item.instructorId)?.lastName} ${instructors.find(i => i.id === item.instructorId)?.firstName}`
                           : "-"}
                       </TableCell>
                       <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : undefined}>{item.price ? `€${item.price}` : "€0.00"}</TableCell>

@@ -363,8 +363,8 @@ export default function IscrittiPerAttivita() {
                                 <Table>
                                   <TableHeader>
                                     <TableRow>
-                                      <TableHead>Nome</TableHead>
                                       <TableHead>Cognome</TableHead>
+                                      <TableHead>Nome</TableHead>
                                       <TableHead>Email</TableHead>
                                       <TableHead>Dettagli</TableHead>
                                       <TableHead>Data Iscrizione</TableHead>
@@ -374,8 +374,8 @@ export default function IscrittiPerAttivita() {
                                   <TableBody>
                                     {courseEnrollments.map((enrollment) => (
                                       <TableRow key={enrollment.enrollmentId}>
-                                        <TableCell className="font-medium">{enrollment.firstName}</TableCell>
-                                        <TableCell>{enrollment.lastName}</TableCell>
+                                        <TableCell className="font-medium">{enrollment.lastName}</TableCell>
+                                        <TableCell>{enrollment.firstName}</TableCell>
                                         <TableCell>{enrollment.email || '-'}</TableCell>
                                         <TableCell>
                                           <div className="flex flex-wrap gap-1">
@@ -501,8 +501,8 @@ export default function IscrittiPerAttivita() {
                                 <Table>
                                   <TableHeader>
                                     <TableRow>
-                                      <TableHead>Nome</TableHead>
                                       <TableHead>Cognome</TableHead>
+                                      <TableHead>Nome</TableHead>
                                       <TableHead>Email</TableHead>
                                       <TableHead className="text-right">Azioni</TableHead>
                                     </TableRow>
@@ -510,8 +510,8 @@ export default function IscrittiPerAttivita() {
                                   <TableBody>
                                     {workshopEnrollments.map((enrollment) => (
                                       <TableRow key={enrollment.enrollmentId}>
-                                        <TableCell className="font-medium">{enrollment.firstName}</TableCell>
-                                        <TableCell>{enrollment.lastName}</TableCell>
+                                        <TableCell className="font-medium">{enrollment.lastName}</TableCell>
+                                        <TableCell>{enrollment.firstName}</TableCell>
                                         <TableCell>{enrollment.email || '-'}</TableCell>
                                         <TableCell className="text-right">
                                           <Button
@@ -644,8 +644,8 @@ export default function IscrittiPerAttivita() {
                                   <Table>
                                     <TableHeader>
                                       <TableRow>
-                                        <TableHead>Nome</TableHead>
                                         <TableHead>Cognome</TableHead>
+                                        <TableHead>Nome</TableHead>
                                         <TableHead>Email</TableHead>
                                         <TableHead>Dettagli</TableHead>
                                         <TableHead>Data Iscrizione</TableHead>
@@ -655,8 +655,8 @@ export default function IscrittiPerAttivita() {
                                     <TableBody>
                                       {activityEnrollments.map((enroll: any) => (
                                         <TableRow key={enroll.id}>
-                                          <TableCell className="font-medium">{enroll.memberFirstName || '-'}</TableCell>
-                                          <TableCell>{enroll.memberLastName || '-'}</TableCell>
+                                          <TableCell className="font-medium">{enroll.memberLastName || '-'}</TableCell>
+                                          <TableCell>{enroll.memberFirstName || '-'}</TableCell>
                                           <TableCell>{enroll.memberEmail || '-'}</TableCell>
                                           <TableCell>
                                             <span className="text-xs text-muted-foreground">-</span>

@@ -152,7 +152,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
           <PopoverContent className="w-80 p-0" align="end">
             <Command shouldFilter={false}>
               <CommandInput
-                placeholder="Cerca per nome, cognome o CF (min. 3 caratteri)..."
+                placeholder="Cerca per cognome, nome o CF (min. 3 caratteri)..."
                 value={memberSearchQuery}
                 onValueChange={setMemberSearchQuery}
               />
@@ -177,7 +177,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
                           data-testid={`option-member-${member.id}`}
                         >
                           <div className="flex flex-col">
-                            <span className="font-medium">{member.firstName} {member.lastName}</span>
+                            <span className="font-medium">{member.lastName} {member.firstName}</span>
                             {member.fiscalCode && (
                               <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
                             )}
@@ -213,7 +213,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
                   <TableCell>{enrollment.email || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link href={`/anagrafica_a_lista?search=${encodeURIComponent(`${enrollment.firstName} ${enrollment.lastName}`)}`}>
+                      <Link href={`/anagrafica_a_lista?search=${encodeURIComponent(`${enrollment.lastName} ${enrollment.firstName}`)}`}>
                         <Button variant="ghost" size="sm" data-testid={`button-view-member-${enrollment.memberId}`}>
                           Visualizza
                         </Button>
@@ -308,7 +308,7 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
       const member = members?.find(m => m.id === a.memberId);
       return {
         ...a,
-        memberName: member ? `${member.firstName} ${member.lastName}` : "Sconosciuto",
+        memberName: member ? `${member.lastName} ${member.firstName}` : "Sconosciuto",
       };
     })
     .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
@@ -351,7 +351,7 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
                   <SelectContent>
                     {enrolledMembers.map(member => (
                       <SelectItem key={member.id} value={member.id.toString()}>
-                        {member.firstName} {member.lastName}
+                        {member.lastName} {member.firstName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -733,7 +733,7 @@ export default function Courses() {
       case "category": return categories?.find(c => c.id === course.categoryId)?.name;
       case "instructor": {
         const inst = instructors?.find(i => i.id === course.instructorId);
-        return inst ? `${inst.firstName} ${inst.lastName}` : null;
+        return inst ? `${inst.lastName} ${inst.firstName}` : null;
       }
       case "price": return Number(course.price) || 0;
       case "capacity": return course.maxCapacity || 0;
@@ -762,7 +762,7 @@ export default function Courses() {
         course.name,
         course.description || "",
         category?.name || "",
-        instructor ? `${instructor.firstName} ${instructor.lastName}` : "",
+        instructor ? `${instructor.lastName} ${instructor.firstName}` : "",
         course.price || "",
         course.maxCapacity || "",
         dayLabel,
@@ -938,7 +938,7 @@ export default function Courses() {
                         </TableCell>
                         <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : ""}>
                           {instructors?.find(i => i.id === course.instructorId)
-                            ? `${instructors.find(i => i.id === course.instructorId)?.firstName} ${instructors.find(i => i.id === course.instructorId)?.lastName}`
+                            ? `${instructors.find(i => i.id === course.instructorId)?.lastName} ${instructors.find(i => i.id === course.instructorId)?.firstName}`
                             : "-"}
                         </TableCell>
                         <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : ""}>
@@ -951,9 +951,9 @@ export default function Courses() {
                           {enrollmentsList.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {enrollmentsList.slice(0, 2).map((member) => (
-                                <Link key={member.id} href={`/iscritti?search=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`}>
+                                <Link key={member.id} href={`/iscritti?search=${encodeURIComponent(`${member.lastName} ${member.firstName}`)}`}>
                                   <Badge variant="outline" className="text-xs cursor-pointer hover-elevate">
-                                    {member.firstName} {member.lastName}
+                                    {member.lastName} {member.firstName}
                                   </Badge>
                                 </Link>
                               ))}
@@ -1150,7 +1150,7 @@ export default function Courses() {
                             <SelectContent>
                               {instructors?.map((instructor) => (
                                 <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                                  {instructor.firstName} {instructor.lastName}
+                                  {instructor.lastName} {instructor.firstName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1166,7 +1166,7 @@ export default function Courses() {
                             <SelectContent>
                               {instructors?.map((instructor) => (
                                 <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                                  {instructor.firstName} {instructor.lastName}
+                                  {instructor.lastName} {instructor.firstName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1453,7 +1453,7 @@ export default function Courses() {
                         <SelectContent>
                           {instructors?.map((instructor) => (
                             <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                              {instructor.firstName} {instructor.lastName}
+                              {instructor.lastName} {instructor.firstName}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1469,7 +1469,7 @@ export default function Courses() {
                         <SelectContent>
                           {instructors?.map((instructor) => (
                             <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                              {instructor.firstName} {instructor.lastName}
+                              {instructor.lastName} {instructor.firstName}
                             </SelectItem>
                           ))}
                         </SelectContent>

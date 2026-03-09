@@ -79,7 +79,7 @@ export function CourseSelector({
     const getInstructorName = (id: number | null) => {
         if (!id) return "";
         const instructor = instructors.find((i) => i.id === id);
-        return instructor ? `${instructor.firstName} ${instructor.lastName}` : "";
+        return instructor ? `${instructor.lastName} ${instructor.firstName}` : "";
     };
 
     const getCategoryName = (id: number | null) => {
@@ -256,7 +256,7 @@ export function CourseSelector({
                                         <SelectItem value="all">Tutti</SelectItem>
                                         {instructors.map((i) => (
                                             <SelectItem key={i.id} value={i.id.toString()}>
-                                                {i.firstName} {i.lastName}
+                                                {i.lastName} {i.firstName}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

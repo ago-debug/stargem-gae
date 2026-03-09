@@ -564,9 +564,9 @@ export default function ImportData() {
 
   const downloadTemplate = (type: string) => {
     const templates: Record<string, string> = {
-      members: "Nome,Cognome,Email,Telefono,Data di Nascita,Indirizzo,Città,CAP,Codice Fiscale,Note\nMario,Rossi,mario.rossi@email.com,3331234567,1990-01-15,Via Roma 1,Milano,20100,RSSMRA90A15F205X,\n",
+      members: "cognome, nome,Email,Telefono,Data di Nascita,Indirizzo,Città,CAP,Codice Fiscale,Note\nMario,Rossi,mario.rossi@email.com,3331234567,1990-01-15,Via Roma 1,Milano,20100,RSSMRA90A15F205X,\n",
       courses: "Nome Corso,Descrizione,Prezzo,Capienza Massima,Orario\nYoga Base,Corso di yoga per principianti,50.00,20,Lun-Mer 18:00-19:30\n",
-      instructors: "Nome,Cognome,Email,Telefono,Specializzazione,Tariffa Oraria\nGiovanni,Bianchi,g.bianchi@email.com,3339876543,Yoga,35.00\n",
+      instructors: "cognome, nome,Email,Telefono,Specializzazione,Tariffa Oraria\nGiovanni,Bianchi,g.bianchi@email.com,3339876543,Yoga,35.00\n",
     };
 
     const template = templates[type];

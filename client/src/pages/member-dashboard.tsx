@@ -130,7 +130,7 @@ export default function MemberDashboard() {
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      toast({ title: isNewMember ? "Cliente/Associato creato con successo" : "Dati salvati con successo" });
+      toast({ title: isNewMember ? "Partecipante creato con successo" : "Dati salvati con successo" });
       if (isNewMember && data?.id) {
         setLocation(`/membro/${data.id}`);
       }
@@ -142,7 +142,7 @@ export default function MemberDashboard() {
 
   const handleSave = () => {
     if (!formData.firstName || !formData.lastName) {
-      toast({ title: "Errore", description: "Nome e Cognome sono obbligatori", variant: "destructive" });
+      toast({ title: "Errore", description: "Cognome e Nome sono obbligatori", variant: "destructive" });
       return;
     }
     // Ensure explicit defaults for boolean fields before save
@@ -329,7 +329,7 @@ export default function MemberDashboard() {
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <Label>ID Cliente/Associato</Label>
+                    <Label>ID Partecipante</Label>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Auto</Badge>
                       <Input
@@ -396,7 +396,7 @@ export default function MemberDashboard() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Tipologia Cliente/Associato</Label>
+                    <Label>Tipologia Partecipante</Label>
                     <Select
                       value={formData.categoryId?.toString() || ""}
                       onValueChange={(v) => setFormData(prev => ({ ...prev, categoryId: v ? parseInt(v) : undefined }))}
@@ -576,7 +576,7 @@ export default function MemberDashboard() {
               <CardContent>
                 {!memberPayments || memberPayments.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
-                    Storico pagamenti per questo cliente/associato
+                    Storico pagamenti per questo partecipante
                   </p>
                 ) : (
                   <Table>

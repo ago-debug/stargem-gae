@@ -199,7 +199,7 @@ export default function Members() {
       if (error.conflictWith) {
         toast({
           title: "Codice Fiscale Duplicato",
-          description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.firstName} ${error.conflictWith.lastName}`,
+          description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.lastName} ${error.conflictWith.firstName}`,
           variant: "destructive"
         });
       } else {
@@ -223,7 +223,7 @@ export default function Members() {
       if (error.conflictWith) {
         toast({
           title: "Codice Fiscale Duplicato",
-          description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.firstName} ${error.conflictWith.lastName}`,
+          description: `Il codice fiscale è già utilizzato da: ${error.conflictWith.lastName} ${error.conflictWith.firstName}`,
           variant: "destructive"
         });
       } else {
@@ -855,7 +855,7 @@ export default function Members() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Cerca per nome, cognome, CF o email..."
+                    placeholder="Cerca per cognome, nome, CF o email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -1081,7 +1081,7 @@ export default function Members() {
                         aria-label="Seleziona tutti"
                       />
                     </TableHead>
-                    <TableHead>Nome e Cognome</TableHead>
+                    <TableHead>Cognome e Nome</TableHead>
                     <TableHead>Codice Fiscale</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Mobile</TableHead>
@@ -1100,7 +1100,7 @@ export default function Members() {
                           <Checkbox
                             checked={selectedMembers.includes(member.id)}
                             onCheckedChange={() => toggleMemberSelection(member.id)}
-                            aria-label={`Seleziona ${member.firstName} ${member.lastName}`}
+                            aria-label={`Seleziona ${member.lastName} ${member.firstName}`}
                           />
                         </TableCell>
                         <TableCell>
@@ -1110,7 +1110,7 @@ export default function Members() {
                                 className="font-bold hover:underline cursor-pointer"
                                 data-testid={`link-member-${member.id}`}
                               >
-                                {member.firstName} {member.lastName}
+                                {member.lastName} {member.firstName}
                               </span>
                             </Link>
                             {getMissingData(member).length > 0 && (
@@ -1333,7 +1333,7 @@ export default function Members() {
       }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingMember ? "Modifica Cliente" : "Nuovo Cliente"}</DialogTitle>
+            <DialogTitle>{editingMember ? "Modifica Cliente" : "Nuovo Partecipante"}</DialogTitle>
             <DialogDescription>
               Inserisci i dati anagrafici completi dell'iscritto
             </DialogDescription>
@@ -2296,7 +2296,7 @@ export default function Members() {
                 disabled={createMutation.isPending || updateMutation.isPending}
                 data-testid="button-submit-member"
               >
-                {editingMember ? "Salva Modifiche" : "Crea Cliente/Associato"}
+                {editingMember ? "Salva Modifiche" : "Crea Partecipante"}
               </Button>
             </DialogFooter>
           </form>
@@ -2328,7 +2328,7 @@ export default function Members() {
                     className="w-4 h-4"
                   />
                   <Label htmlFor={`primary-${member.id}`} className="cursor-pointer font-normal">
-                    {member.firstName} {member.lastName} <br />
+                    {member.lastName} {member.firstName} <br />
                     <span className="text-xs text-muted-foreground mr-2">CF: {member.fiscalCode || '-'}</span>
                     <span className="text-xs text-muted-foreground">Email: {member.email || '-'}</span>
                   </Label>
@@ -2436,7 +2436,7 @@ export default function Members() {
                       <div className="flex flex-col gap-2 mt-2">
                         {cluster.members.map((m: any) => (
                           <div key={m.id} className="flex items-center justify-between bg-background p-2 rounded border border-yellow-100 dark:border-yellow-900/20 text-sm shadow-sm">
-                            <span className="font-medium text-foreground">{m.firstName} {m.lastName}</span>
+                            <span className="font-medium text-foreground">{m.lastName} {m.firstName}</span>
                             <span className="text-muted-foreground text-xs">{m.email || 'Nessuna email'} • {m.fiscalCode || 'Nessun CF'}</span>
                           </div>
                         ))}
@@ -2577,7 +2577,7 @@ function EnrollmentDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Gestione Iscrizioni - {member?.firstName} {member?.lastName}
+            Gestione Iscrizioni - {member?.lastName} {member?.firstName}
           </DialogTitle>
           <DialogDescription>
             Iscriviti a corsi e gestisci le quote di pagamento
@@ -2673,6 +2673,11 @@ function EnrollmentDialog({
                                     payment.status === "overdue" ? "Scaduto" :
                                       "In sospeso"}
                                 </Badge>
+                                {payment.status !== "paid" && member && (
+                                  <Button asChild size="sm" variant="outline" className="h-7 text-xs px-2 cursor-pointer bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-300 dark:border-amber-800">
+                                    <Link href={`/?memberId=${member.id}&action=payment`}>Paga Ora</Link>
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           ))}
@@ -2689,66 +2694,16 @@ function EnrollmentDialog({
 
           {/* New Enrollment Form */}
           <div>
-            <h3 className="font-medium mb-3">Nuova Iscrizione</h3>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="course">Corso *</Label>
-                <select
-                  id="course"
-                  value={selectedCourseId}
-                  onChange={(e) => setSelectedCourseId(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  data-testid="select-enrollment-course"
-                >
-                  <option value="">Seleziona un corso</option>
-                  {availableCourses.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.name} {course.price ? `- €${course.price}` : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="courseFee">Quota Corso (€) *</Label>
-                  <Input
-                    id="courseFee"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={courseFee}
-                    onChange={(e) => setCourseFee(e.target.value)}
-                    data-testid="input-course-fee"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="membershipFee">Quota Tesseramento (€)</Label>
-                  <Input
-                    id="membershipFee"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={membershipFee}
-                    onChange={(e) => setMembershipFee(e.target.value)}
-                    disabled={!includeMembership}
-                    data-testid="input-membership-fee"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="includeMembership"
-                  checked={includeMembership}
-                  onCheckedChange={(checked) => setIncludeMembership(checked as boolean)}
-                  data-testid="checkbox-include-membership"
-                />
-                <Label htmlFor="includeMembership" className="cursor-pointer">
-                  Includi quota tesseramento
-                </Label>
-              </div>
+            <h3 className="font-medium mb-3">Nuova Iscrizione o Pagamento</h3>
+            <div className="bg-muted/30 border rounded-md p-6 text-center">
+              <p className="text-sm text-muted-foreground mb-4">
+                Le nuove iscrizioni e i pagamenti vengono gestiti centralmente nella Maschera Input Generale per garantire il corretto processo di Checkout.
+              </p>
+              <Button asChild className="w-full sm:w-auto">
+                <Link href={`/?memberId=${member?.id}`}>
+                  Vai alla Maschera Input
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -2761,13 +2716,6 @@ function EnrollmentDialog({
             data-testid="button-cancel-enrollment"
           >
             Chiudi
-          </Button>
-          <Button
-            onClick={handleEnroll}
-            disabled={!selectedCourseId || !courseFee || createEnrollmentMutation.isPending}
-            data-testid="button-submit-enrollment"
-          >
-            Iscriviti al Corso
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -2934,7 +2882,7 @@ function MembershipManagementDialog({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Gestione Tessere e Certificati - {member?.firstName} {member?.lastName}
+            Gestione Tessere e Certificati - {member?.lastName} {member?.firstName}
           </DialogTitle>
           <DialogDescription>
             Gestisci tessere associative e certificati medici
@@ -2950,13 +2898,14 @@ function MembershipManagementDialog({
                 <h3 className="font-semibold">Tessere Associative</h3>
               </div>
               <Button
+                asChild
                 size="sm"
                 variant="outline"
-                onClick={() => setIsAddingMembership(true)}
                 data-testid="button-add-membership"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuova Tessera
+                <Link href={`/?memberId=${member?.id}#tessere`}>
+                  Rinnova / Gestisci Tessera
+                </Link>
               </Button>
             </div>
 
@@ -3001,14 +2950,7 @@ function MembershipManagementDialog({
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setEditingMembership(membership)}
-                          data-testid={`button-edit-membership-${membership.id}`}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        {/* Edit handled via maschera input */}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -3028,111 +2970,6 @@ function MembershipManagementDialog({
               </div>
             )}
 
-            {/* Membership Form */}
-            {(isAddingMembership || editingMembership) && (
-              <form onSubmit={handleSubmitMembership} className="mt-4 border rounded-md p-4 bg-muted/30 space-y-4">
-                <h4 className="font-medium">{editingMembership ? "Modifica Tessera" : "Nuova Tessera"}</h4>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="previousMembershipNumber">Tessera Precedente (opzionale)</Label>
-                    <Input
-                      id="previousMembershipNumber"
-                      name="previousMembershipNumber"
-                      defaultValue={editingMembership?.previousMembershipNumber || ""}
-                      placeholder="es: 2526000123"
-                      data-testid="input-previous-membership-number"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="fee">Quota (€)</Label>
-                    <Input
-                      id="fee"
-                      name="fee"
-                      type="number"
-                      step="0.01"
-                      defaultValue={editingMembership?.fee || "30.00"}
-                      data-testid="input-membership-fee"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="issueDate">Data Rilascio *</Label>
-                    <Input
-                      id="issueDate"
-                      name="issueDate"
-                      type="date"
-                      required
-                      defaultValue={editingMembership?.issueDate || new Date().toISOString().split('T')[0]}
-                      data-testid="input-membership-issue-date"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="expiryDate">Data Scadenza *</Label>
-                    <Input
-                      id="expiryDate"
-                      name="expiryDate"
-                      type="date"
-                      required
-                      defaultValue={editingMembership?.expiryDate || ""}
-                      data-testid="input-membership-expiry-date"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Stato</Label>
-                    <Select name="status" defaultValue={editingMembership?.status || "active"}>
-                      <SelectTrigger data-testid="select-membership-status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Attiva</SelectItem>
-                        <SelectItem value="expired">Scaduta</SelectItem>
-                        <SelectItem value="suspended">Sospesa</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Tipo</Label>
-                    <Select name="type" defaultValue={editingMembership?.type || "annual"}>
-                      <SelectTrigger data-testid="select-membership-type">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="annual">Annuale</SelectItem>
-                        <SelectItem value="monthly">Mensile</SelectItem>
-                        <SelectItem value="seasonal">Stagionale</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsAddingMembership(false);
-                      setEditingMembership(null);
-                    }}
-                    data-testid="button-cancel-membership"
-                  >
-                    Annulla
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createMembershipMutation.isPending || updateMembershipMutation.isPending}
-                    data-testid="button-submit-membership"
-                  >
-                    {editingMembership ? "Salva Modifiche" : "Crea Tessera"}
-                  </Button>
-                </div>
-              </form>
-            )}
           </div>
 
           <Separator />
@@ -3145,13 +2982,14 @@ function MembershipManagementDialog({
                 <h3 className="font-semibold">Certificati Medici</h3>
               </div>
               <Button
+                asChild
                 size="sm"
                 variant="outline"
-                onClick={() => setIsAddingCertificate(true)}
                 data-testid="button-add-certificate"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuovo Certificato
+                <Link href={`/?memberId=${member?.id}#certificato`}>
+                  Rinnova / Gestisci Certificato
+                </Link>
               </Button>
             </div>
 
@@ -3196,14 +3034,7 @@ function MembershipManagementDialog({
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setEditingCertificate(cert)}
-                          data-testid={`button-edit-certificate-${cert.id}`}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        {/* Edit handled via maschera input */}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -3223,96 +3054,6 @@ function MembershipManagementDialog({
               </div>
             )}
 
-            {/* Certificate Form */}
-            {(isAddingCertificate || editingCertificate) && (
-              <form onSubmit={handleSubmitCertificate} className="mt-4 border rounded-md p-4 bg-muted/30 space-y-4">
-                <h4 className="font-medium">{editingCertificate ? "Modifica Certificato" : "Nuovo Certificato"}</h4>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cert-issueDate">Data Rilascio *</Label>
-                    <Input
-                      id="cert-issueDate"
-                      name="issueDate"
-                      type="date"
-                      required
-                      defaultValue={editingCertificate?.issueDate || new Date().toISOString().split('T')[0]}
-                      data-testid="input-certificate-issue-date"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cert-expiryDate">Data Scadenza *</Label>
-                    <Input
-                      id="cert-expiryDate"
-                      name="expiryDate"
-                      type="date"
-                      required
-                      defaultValue={editingCertificate?.expiryDate || ""}
-                      data-testid="input-certificate-expiry-date"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="doctorName">Nome Medico</Label>
-                    <Input
-                      id="doctorName"
-                      name="doctorName"
-                      defaultValue={editingCertificate?.doctorName || ""}
-                      placeholder="Dr. Mario Rossi"
-                      data-testid="input-doctor-name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cert-status">Stato</Label>
-                    <Select name="status" defaultValue={editingCertificate?.status || "valid"}>
-                      <SelectTrigger data-testid="select-certificate-status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="valid">Valido</SelectItem>
-                        <SelectItem value="expired">Scaduto</SelectItem>
-                        <SelectItem value="pending">In attesa</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cert-notes">Note</Label>
-                  <Textarea
-                    id="cert-notes"
-                    name="notes"
-                    rows={2}
-                    defaultValue={editingCertificate?.notes || ""}
-                    placeholder="Note aggiuntive..."
-                    data-testid="input-certificate-notes"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsAddingCertificate(false);
-                      setEditingCertificate(null);
-                    }}
-                    data-testid="button-cancel-certificate"
-                  >
-                    Annulla
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createCertificateMutation.isPending || updateCertificateMutation.isPending}
-                    data-testid="button-submit-certificate"
-                  >
-                    {editingCertificate ? "Salva Modifiche" : "Crea Certificato"}
-                  </Button>
-                </div>
-              </form>
-            )}
           </div>
         </div>
 
@@ -3347,7 +3088,7 @@ function MembershipCardDialog({
         <DialogHeader>
           <DialogTitle>Tessera Digitale</DialogTitle>
           <DialogDescription>
-            Tessera di iscrizione per {member.firstName} {member.lastName}
+            Tessera di iscrizione per {member.lastName} {member.firstName}
           </DialogDescription>
         </DialogHeader>
 
