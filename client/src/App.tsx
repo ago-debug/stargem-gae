@@ -25,6 +25,7 @@ import Reports from "@/pages/reports";
 import ImportData from "@/pages/import-data";
 import UtentiPermessi from "@/pages/utenti-permessi";
 import ResetStagione from "@/pages/reset-stagione";
+import AuditLogs from "@/pages/audit-logs";
 import MemberDashboard from "@/pages/member-dashboard";
 import AnagraficaHome from "@/pages/anagrafica-home";
 import TestGae from "@/pages/test-gae";
@@ -148,6 +149,7 @@ function Router() {
       <ProtectedRoute path="/importa" component={ImportData} />
       <ProtectedRoute path="/utenti-permessi" component={UtentiPermessi} />
       <ProtectedRoute path="/reset-stagione" component={ResetStagione} />
+      <ProtectedRoute path="/audit-logs" component={AuditLogs} />
       <ProtectedRoute path="/membro/:id" component={MemberDashboard} />
       <ProtectedRoute path="/test-gae" component={TestGae} />
       <ProtectedRoute path="/generazione-tessere" component={CardGenerator} />
@@ -155,8 +157,6 @@ function Router() {
       <ProtectedRoute path="/booking-services" component={BookingServices} />
       <ProtectedRoute path="/prenotazioni-sale" component={StudioBookings} />
       <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
-      <ProtectedRoute path="/maschera-generale" component={MascheraInputGenerale} />
-      <ProtectedRoute path="/maschera-input" component={MascheraInputGenerale} />
       <ProtectedRoute path="/iscrizioni-pagamenti" component={IscrizioniPagamenti} />
       <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
       <ProtectedRoute path="/attivita" component={Attivita} />

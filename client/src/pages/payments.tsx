@@ -18,16 +18,13 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from "@/lib/utils";
 import type { Payment, InsertPayment, Member, PaymentMethod, Course } from "@shared/schema";
 
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
-import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
-
 export default function Payments() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isNuovoPagamentoOpen, setIsNuovoPagamentoOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string>("");
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
@@ -284,7 +281,7 @@ export default function Payments() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Pagamenti</h1>
-          <p className="text-muted-foreground">Traccia pagamenti, quote e incassi</p>
+          <p className="text-muted-foreground">Traccia pagamenti, quote e incassi dei partecipanti</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button
@@ -303,14 +300,15 @@ export default function Payments() {
             <Download className="w-4 h-4 mr-2" />
             Esporta CSV
           </Button>
-          <Button
-            onClick={() => setIsNuovoPagamentoOpen(true)}
-            data-testid="button-add-payment"
-            className="gold-3d-button"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nuovo Pagamento
-          </Button>
+          <Link href="/?action=payment">
+            <Button
+              data-testid="button-add-payment"
+              className="gold-3d-button"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nuovo Pagamento
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -377,13 +375,13 @@ export default function Payments() {
             <div className="text-center py-12 text-muted-foreground">
               <CreditCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">Nessun pagamento trovato</p>
-              <p className="text-sm">Inizia registrando il primo pagamento</p>
+              <p className="text-sm">Inizia registrando un nuovo pagamento per un partecipante.</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Cliente</TableHead>
+                  <TableHead>Partecipante</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Descrizione</TableHead>
                   <TableHead>Importo</TableHead>
@@ -446,10 +444,7 @@ export default function Payments() {
         </CardContent>
       </Card>
 
-      <NuovoPagamentoModal
-        isOpen={isNuovoPagamentoOpen}
-        onClose={() => setIsNuovoPagamentoOpen(false)}
-      />
+
 
       <PaymentDialog
         open={isFormOpen}
@@ -464,7 +459,7 @@ export default function Payments() {
         memberId={selectedMemberId ? parseInt(selectedMemberId) : undefined}
         memberSelector={
           <div className="space-y-2 px-4 pt-4 pb-2 bg-muted/30 rounded-lg mx-6 mt-4 border">
-            <Label htmlFor="memberId" className="text-secondary-foreground font-bold text-sm">Cliente (obbligatorio per incassare pagamenti slegati)</Label>
+            <Label htmlFor="memberId" className="text-secondary-foreground font-bold text-sm">Partecipante (obbligatorio per incassare pagamenti slegati)</Label>
             <Popover open={memberSearchOpen} onOpenChange={setMemberSearchOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -499,7 +494,7 @@ export default function Payments() {
               <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[300px] p-0" align="start">
                 <Command shouldFilter={false}>
                   <CommandInput
-                    placeholder="Cerca cliente (min. 3 caratteri)..."
+                    placeholder="Cerca partecipante (min. 3 caratteri)..."
                     value={memberSearchQuery}
                     onValueChange={setMemberSearchQuery}
                   />
@@ -507,7 +502,7 @@ export default function Payments() {
                     <CommandEmpty>
                       {memberSearchQuery.length < 3
                         ? "Inserisci almeno 3 caratteri per cercare"
-                        : "Nessun cliente trovato"}
+                        : "Nessun partecipante trovato"}
                     </CommandEmpty>
                     {memberSearchQuery.length >= 3 && (
                       <CommandGroup>

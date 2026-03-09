@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
-import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
+import { useLocation, Link } from "wouter";
 
 export default function AccountingSheet() {
     const { toast } = useToast();
@@ -34,8 +34,8 @@ export default function AccountingSheet() {
             }).catch(console.error);
         }
     }, []);
+    const [, setLocation] = useLocation();
     const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-    const [isNuovoPagamentoOpen, setIsNuovoPagamentoOpen] = useState(false);
     const [payingMovement, setPayingMovement] = useState<Payment | null>(null);
     const [paymentMethod, setPaymentMethod] = useState("");
     const [amount, setAmount] = useState("");
@@ -426,10 +426,7 @@ export default function AccountingSheet() {
         setIsPaymentDialogOpen(true);
     };
 
-    const handleNewPayment = () => {
-        resetPaymentForm();
-        setIsNuovoPagamentoOpen(true);
-    };
+
 
     const handlePaymentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -553,19 +550,20 @@ export default function AccountingSheet() {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold text-primary">Scheda Contabile Movimenti</h1>
-                    <p className="text-muted-foreground">Visualizza l'estratto conto e lo storico pagamenti di un cliente</p>
+                    <p className="text-muted-foreground">Visualizza l'estratto conto e lo storico pagamenti di un partecipante</p>
                 </div>
                 <div className="flex gap-2 print:hidden">
-                    <Button
-                        variant="default"
-                        onClick={handleNewPayment}
-                        disabled={!selectedMember || totalInSospeso < 0.01}
-                        className="bg-primary hover:bg-primary/90 disabled:opacity-50"
-                        title={totalInSospeso < 0.01 ? "Nessun debito da saldare" : "Nuovo Pagamento"}
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Nuovo Pagamento
-                    </Button>
+                    <Link href={`/${selectedMember ? `?editMemberId=${selectedMember.id}&action=payment` : '?action=payment'}`}>
+                        <Button
+                            variant="default"
+                            disabled={!selectedMember || totalInSospeso < 0.01}
+                            className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+                            title={totalInSospeso < 0.01 ? "Nessun debito da saldare" : "Nuovo Pagamento"}
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Nuovo Pagamento
+                        </Button>
+                    </Link>
                     <Button variant="outline" onClick={handleExportCSV} disabled={!selectedMember}>
                         <Download className="w-4 h-4 mr-2" />
                         Esporta CSV
@@ -581,7 +579,7 @@ export default function AccountingSheet() {
                 <CardHeader className="pb-4">
                     <div className="flex flex-col md:flex-row md:items-end gap-4 print:hidden">
                         <div className="flex-1 space-y-2">
-                            <Label>Seleziona Cliente</Label>
+                            <Label>Seleziona Partecipante</Label>
                             <Popover open={memberSearchOpen} onOpenChange={setMemberSearchOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -596,7 +594,7 @@ export default function AccountingSheet() {
                                                 <span className="text-xs text-muted-foreground ml-2">({selectedMember.fiscalCode})</span>
                                             </div>
                                         ) : (
-                                            "Cerca cliente per nome, cognome o codice fiscale..."
+                                            "Cerca partecipante per nome, cognome o codice fiscale..."
                                         )}
                                         <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
@@ -611,7 +609,7 @@ export default function AccountingSheet() {
                                             {memberSearchQuery.length < 3 ? (
                                                 <CommandEmpty>Digita almeno 3 caratteri...</CommandEmpty>
                                             ) : searchedMembers.length === 0 ? (
-                                                <CommandEmpty>Nessun cliente trovato.</CommandEmpty>
+                                                <CommandEmpty>Nessun partecipante trovato.</CommandEmpty>
                                             ) : (
                                                 <CommandGroup>
                                                     {searchedMembers.map((member: Member) => (
@@ -673,11 +671,11 @@ export default function AccountingSheet() {
                     {!selectedMember ? (
                         <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed rounded-lg bg-muted/20">
                             <User className="w-12 h-12 text-muted-foreground mb-4 opacity-20" />
-                            <p className="text-muted-foreground font-medium italic">Seleziona un cliente per visualizzare i movimenti contabili</p>
+                            <p className="text-muted-foreground font-medium italic">Seleziona un partecipante per visualizzare i movimenti contabili</p>
                         </div>
                     ) : sortedMovements.length === 0 ? (
                         <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed rounded-lg bg-muted/20">
-                            <p className="text-muted-foreground font-medium italic">Nessun movimento registrato per questo cliente</p>
+                            <p className="text-muted-foreground font-medium italic">Nessun movimento registrato per questo partecipante</p>
                         </div>
                     ) : (
                         <div className="border rounded-lg overflow-hidden">
@@ -690,8 +688,8 @@ export default function AccountingSheet() {
                                         <TableHead className="w-[120px] text-right">Totale</TableHead>
                                         <TableHead className="w-[120px] text-right">Pagato</TableHead>
                                         <TableHead className="w-[120px] text-right">Residuo</TableHead>
-                                        <TableHead className="w-[140px] text-center">Stato</TableHead>
-                                        <TableHead className="w-[140px] text-right print:hidden">Azioni</TableHead>
+                                        <TableHead className="w-[120px] text-center">Stato</TableHead>
+                                        <TableHead className="w-[200px] text-right print:hidden">Azioni</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -742,11 +740,7 @@ export default function AccountingSheet() {
                                                     </Button>
                                                     {m.remaining > 0.01 && (
                                                         <Button size="sm" variant="ghost" className="h-8 text-primary hover:text-primary hover:bg-primary/10" onClick={() => {
-                                                            const debtItem = { id: m.id, dbId: m.dbId, type: m.type, remaining: m.remaining };
-                                                            setSelectedItem(debtItem);
-                                                            setAmount(debtItem.remaining.toFixed(2));
-                                                            setSelectedType(m.type);
-                                                            setIsPaymentDialogOpen(true);
+                                                            setLocation(`/?editMemberId=${selectedMember.id}&action=payment&payDebt=${m.dbId}&debtType=${m.type}`);
                                                         }}>
                                                             <CreditCard className="w-4 h-4 mr-1" />
                                                             Paga
@@ -855,11 +849,7 @@ export default function AccountingSheet() {
                 </DialogContent>
             </Dialog>
 
-            <NuovoPagamentoModal
-                isOpen={isNuovoPagamentoOpen}
-                onClose={() => setIsNuovoPagamentoOpen(false)}
-                defaultMemberId={selectedMember?.id}
-            />
+
 
             <Dialog open={isPaymentDialogOpen} onOpenChange={(open) => { if (!open) resetPaymentForm(); setIsPaymentDialogOpen(open); }}>
                 <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">

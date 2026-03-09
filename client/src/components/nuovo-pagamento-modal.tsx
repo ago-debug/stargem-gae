@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -30,6 +30,7 @@ export function NuovoPagamentoModal({
 }) {
     const { toast } = useToast();
     const [, setLocation] = useLocation();
+    const searchString = useSearch();
 
     // === STATO CLIENTE ===
     const [selectedMemberId, setSelectedMemberId] = useState<string>("");
@@ -41,6 +42,7 @@ export function NuovoPagamentoModal({
     useEffect(() => {
         if (isOpen) {
             if (defaultMemberId) {
+                console.log("NuovoPagamentoModal opened with defaultMemberId:", defaultMemberId);
                 setSelectedMemberId(defaultMemberId.toString());
             } else if (!selectedMemberId) {
                 setSelectedMemberId("");
@@ -51,9 +53,12 @@ export function NuovoPagamentoModal({
 
     // Fetch the default member details if we have an ID but not the object
     useEffect(() => {
-        if (selectedMemberId && !selectedMember) {
+        if (selectedMemberId && (!selectedMember || selectedMember.id.toString() !== selectedMemberId)) {
             fetch(`/api/members/${selectedMemberId}`).then(r => r.json()).then(data => {
-                if (data && data.id) setSelectedMember(data);
+                if (data && data.id) {
+                    console.log("Fetched member data for NuovoPagamentoModal:", data);
+                    setSelectedMember(data);
+                }
             }).catch(e => console.error(e));
         }
     }, [selectedMemberId, selectedMember]);
@@ -119,7 +124,7 @@ export function NuovoPagamentoModal({
         ...memberStudioBookings.map((b: any) => {
             const total = parseFloat(b.amount || "0");
             const paid = memberPayments.filter((p: any) => p.bookingId === b.id && (p.status === 'paid' || p.status === 'completed')).reduce((s: number, p: any) => s + parseFloat(p.amount), 0);
-            return { id: `booking-${b.id}`, description: `${b.title || 'Affitto Sala'} (Servizio)`, date: b.createdAt, type: 'service_booking', total, paid, remaining: Math.max(0, total - paid) };
+            return { id: `service_booking-${b.id}`, description: `${b.title || 'Affitto Sala'} (Servizio)`, date: b.createdAt, type: 'service_booking', total, paid, remaining: Math.max(0, total - paid) };
         }),
         ...memberMemberships.map((m: any) => {
             const total = parseFloat(m.fee || "0");
@@ -130,73 +135,151 @@ export function NuovoPagamentoModal({
 
     const isLoadingDebts = !payments || !enrollments || !courses;
 
+    // Auto-load specific debt from URL if present
+    useEffect(() => {
+        if (isOpen && calculatedDebts.length > 0) {
+            const urlParams = new URLSearchParams(searchString);
+            const payDebt = urlParams.get('payDebt');
+            const debtType = urlParams.get('debtType');
+
+            if (payDebt && debtType) {
+                const targetDebt = calculatedDebts.find((d: any) => d.id === `${debtType}-${payDebt}`);
+                if (targetDebt && targetDebt.remaining > 0.01) {
+                    // Check if not already in cart
+                    if (!cartRows.some(r => r.isDebt && r.skus && r.skus[0] === targetDebt.id)) {
+                        // We use a functional state update to avoid dependency cycles with addCartRow if possible,
+                        // but since addCartRow is memoized or we can just call it, let's do it directly.
+                        setCartRows(prev => {
+                            if (prev.some(r => r.isDebt && r.skus && r.skus[0] === targetDebt.id)) return prev;
+                            const newRow = {
+                                id: Date.now().toString() + Math.random().toString(),
+                                activityType: "saldo_debito",
+                                skus: [targetDebt.id],
+                                periodId: "N/A",
+                                basePrice: targetDebt.remaining,
+                                discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: targetDebt.remaining,
+                                paymentNotes: [], enrollmentDetails: [],
+                                isDebt: true,
+                                debtDescription: targetDebt.description
+                            };
+                            return [...prev, newRow];
+                        });
+
+                        // Clean up URL to prevent re-adding on subsequent renders
+                        urlParams.delete('payDebt');
+                        urlParams.delete('debtType');
+                        const newSearch = urlParams.toString();
+                        const newUrl = newSearch ? `${window.location.pathname}?${newSearch}` : window.location.pathname;
+                        // Avoid full reload by using History API to silently clean URL
+                        window.history.replaceState(null, '', newUrl);
+                    }
+                }
+            }
+        }
+    }, [isOpen, calculatedDebts, searchString, cartRows]);
+
     // === ORCHESTRATORE PAGAMENTO ===
     const checkoutMutation = useMutation({
-        mutationFn: async () => {
+        mutationFn: async (checkoutData: { paymentMethod: string, paymentNotes: string, isPaid: boolean }) => {
             if (!selectedMemberId) throw new Error("Seleziona prima un cliente.");
 
-            // 1. Crea le iscrizioni per ogni Item del carrello
+            // Processiamo riga per riga per creare pagamenti collegati
             for (const row of cartRows) {
-                if (row.skus.length > 0) {
+                if (row.isDebt) {
+                    // E.g. debt.id = "course-12" or "service_booking-15"
+                    const firstDash = row.skus[0].indexOf('-');
+                    const type = row.skus[0].substring(0, firstDash);
+                    const idStr = row.skus[0].substring(firstDash + 1);
+                    const parsedId = parseInt(idStr);
+
+                    const paymentPayload: any = {
+                        memberId: parseInt(selectedMemberId),
+                        amount: parseFloat(row.subtotal).toString(),
+                        paymentMethod: checkoutData.paymentMethod,
+                        type: type,
+                        status: checkoutData.isPaid ? "paid" : "pending",
+                        notes: `Saldo debito pregresso. ${checkoutData.paymentNotes || ''}`,
+                        quotaDescription: row.debtDescription,
+                        period: "Custom",
+                        paidDate: new Date().toISOString()
+                    };
+
+                    if (type === "course") paymentPayload.enrollmentId = parsedId;
+                    else if (type === "workshop") paymentPayload.workshopEnrollmentId = parsedId;
+                    else if (type === "service_booking" || type === "booking") paymentPayload.bookingId = parsedId;
+                    else if (type === "membership") paymentPayload.membershipId = parsedId;
+
+                    if (parseFloat(row.subtotal) > 0) {
+                        await apiRequest("POST", "/api/payments", paymentPayload);
+                    }
+                } else if (row.skus.length > 0) {
+                    // Nuova Iscrizione
                     const parsedId = parseInt(row.skus[0]);
                     const baseNotes = `Iscr. Automatica Calcolatore (Listino: ${row.periodId})`;
                     const basePayload = { memberId: parseInt(selectedMemberId), status: "attivo", notes: baseNotes };
 
+                    const paymentPayload: any = {
+                        memberId: parseInt(selectedMemberId),
+                        amount: parseFloat(row.subtotal).toString(),
+                        paymentMethod: checkoutData.paymentMethod,
+                        status: checkoutData.isPaid ? "paid" : "pending",
+                        notes: `Checkout Immediato. ${checkoutData.paymentNotes || ""}`,
+                        quotaDescription: "Checkout Unificato (Calcolatore)",
+                        period: "Custom",
+                        paidDate: new Date().toISOString()
+                    };
+
+                    const createEnrollmentAndPay = async (endpoint: string, payload: any, entityKey: string, pTypeVal: string) => {
+                        const res = await apiRequest("POST", endpoint, payload);
+                        const data = await res.json();
+                        paymentPayload[entityKey] = data.id;
+                        paymentPayload.type = pTypeVal;
+                        if (parseFloat(row.subtotal) > 0) {
+                            await apiRequest("POST", "/api/payments", paymentPayload);
+                        }
+                    };
+
                     switch (row.activityType) {
                         case 'eventi':
-                            await apiRequest("POST", "/api/workshop-enrollments", { ...basePayload, workshopId: parsedId });
+                            await createEnrollmentAndPay("/api/workshop-enrollments", { ...basePayload, workshopId: parsedId }, "workshopEnrollmentId", "workshop");
                             break;
                         case 'prove_pagamento':
-                            await apiRequest("POST", "/api/paid-trial-enrollments", { ...basePayload, paidTrialId: parsedId });
+                            await createEnrollmentAndPay("/api/paid-trial-enrollments", { ...basePayload, paidTrialId: parsedId }, "paidTrialEnrollmentId", "paid_trial");
                             break;
                         case 'prove_gratuite':
-                            await apiRequest("POST", "/api/free-trial-enrollments", { ...basePayload, freeTrialId: parsedId });
+                            await createEnrollmentAndPay("/api/free-trial-enrollments", { ...basePayload, freeTrialId: parsedId }, "freeTrialEnrollmentId", "free_trial");
                             break;
                         case 'lezioni_singole':
-                            await apiRequest("POST", "/api/single-lesson-enrollments", { ...basePayload, singleLessonId: parsedId });
+                            await createEnrollmentAndPay("/api/single-lesson-enrollments", { ...basePayload, singleLessonId: parsedId }, "singleLessonEnrollmentId", "single_lesson");
                             break;
                         case 'domeniche':
-                            await apiRequest("POST", "/api/sunday-activity-enrollments", { ...basePayload, sundayActivityId: parsedId });
+                            await createEnrollmentAndPay("/api/sunday-activity-enrollments", { ...basePayload, sundayActivityId: parsedId }, "sundayActivityEnrollmentId", "sunday_activity");
                             break;
                         case 'allenamenti':
-                            await apiRequest("POST", "/api/training-enrollments", { ...basePayload, trainingId: parsedId });
+                            await createEnrollmentAndPay("/api/training-enrollments", { ...basePayload, trainingId: parsedId }, "trainingEnrollmentId", "training");
                             break;
                         case 'lezioni_individuali':
-                            await apiRequest("POST", "/api/individual-lesson-enrollments", { ...basePayload, individualLessonId: parsedId });
+                            await createEnrollmentAndPay("/api/individual-lesson-enrollments", { ...basePayload, individualLessonId: parsedId }, "individualLessonEnrollmentId", "individual_lesson");
                             break;
                         case 'campus':
-                            await apiRequest("POST", "/api/campus-enrollments", { ...basePayload, campusActivityId: parsedId });
+                            await createEnrollmentAndPay("/api/campus-enrollments", { ...basePayload, campusActivityId: parsedId }, "campusEnrollmentId", "campus");
                             break;
                         case 'saggi':
-                            await apiRequest("POST", "/api/recital-enrollments", { ...basePayload, recitalId: parsedId });
+                            await createEnrollmentAndPay("/api/recital-enrollments", { ...basePayload, recitalId: parsedId }, "recitalEnrollmentId", "recital");
                             break;
                         case 'vacanze_studio':
-                            await apiRequest("POST", "/api/vacation-study-enrollments", { ...basePayload, vacationStudyId: parsedId });
+                            await createEnrollmentAndPay("/api/vacation-study-enrollments", { ...basePayload, vacationStudyId: parsedId }, "vacationStudyEnrollmentId", "vacation_study");
                             break;
                         case 'servizi_extra':
-                            await apiRequest("POST", "/api/studio-bookings", { ...basePayload, studioId: parsedId, bookingDate: new Date().toISOString(), startTime: "12:00", endTime: "13:00", amount: row.basePrice.toString() });
+                            await createEnrollmentAndPay("/api/studio-bookings", { ...basePayload, studioId: parsedId, bookingDate: new Date().toISOString(), startTime: "12:00", endTime: "13:00", amount: row.basePrice.toString() }, "bookingId", "service_booking");
                             break;
                         case 'corsi':
                         default:
-                            await apiRequest("POST", "/api/enrollments", { ...basePayload, courseId: parsedId });
+                            await createEnrollmentAndPay("/api/enrollments", { ...basePayload, courseId: parsedId }, "enrollmentId", "course");
                             break;
                     }
                 }
             }
-
-            // 2. Registra Pagamento Cumulativo
-            await apiRequest("POST", "/api/payments", {
-                memberId: parseInt(selectedMemberId),
-                amount: grandTotal,
-                paymentMethod: paymentMethod,
-                type: "generale",
-                status: "saldato",
-                notes: `Checkout Calcolatore: ${paymentNotes || "Nessuna nota"}\nTessera: ${includeTessera}\nProva: ${includeProva}`,
-                quotaDescription: "Checkout Unificato (Calcolatore)",
-                period: "Custom",
-                totalQuota: totalCart,
-                paidDate: new Date().toISOString()
-            });
         },
         onSuccess: () => {
             toast({ title: "Checkout completato", description: "Iscrizioni e pagamento salvati con successo. ✅" });
@@ -214,8 +297,27 @@ export function NuovoPagamentoModal({
         }
     });
 
-    const addCartRow = () => {
-        setCartRows([...cartRows, { id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
+    const addCartRow = (debt?: any) => {
+        if (debt) {
+            // Check if already in cart
+            if (cartRows.some(r => r.isDebt && r.skus && r.skus[0] === debt.id)) {
+                toast({ title: "Debito già nel carrello", variant: "default" });
+                return;
+            }
+            setCartRows([...cartRows, {
+                id: Date.now().toString(),
+                activityType: "saldo_debito",
+                skus: [debt.id],
+                periodId: "N/A",
+                basePrice: debt.remaining,
+                discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: debt.remaining,
+                paymentNotes: [], enrollmentDetails: [],
+                isDebt: true,
+                debtDescription: debt.description
+            }]);
+        } else {
+            setCartRows([...cartRows, { id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
+        }
     };
 
     const removeCartRow = (id: string) => {
@@ -426,9 +528,10 @@ export function NuovoPagamentoModal({
                                     <div className="border rounded-md divide-y overflow-hidden shadow-sm bg-white">
                                         {calculatedDebts.map((debt: any, idx: number) => (
                                             <div key={debt.id || idx} onClick={() => {
-                                                onClose(); // In a modal, maybe we don't route immediately, but we can wrap it or close first.
-                                                setLocation(`/scheda-contabile?memberId=${selectedMemberId}`)
-                                            }} className="p-4 hover:bg-slate-50 cursor-pointer transition-colors relative flex justify-between items-center group">
+                                                if (debt.remaining > 0.01) {
+                                                    addCartRow(debt);
+                                                }
+                                            }} className={cn("p-4 transition-colors relative flex justify-between items-center group", debt.remaining > 0.01 ? "hover:bg-slate-50 cursor-pointer" : "opacity-75")}>
                                                 <div className="flex flex-col">
                                                     <span className="font-bold text-slate-800 text-sm">{debt.description}</span>
                                                     <span className="text-[10px] text-muted-foreground uppercase">{debt.date ? new Date(debt.date).toLocaleDateString('it-IT') : ""} - {debt.type}</span>
@@ -576,9 +679,15 @@ export function NuovoPagamentoModal({
                             basePrice={grandTotal}
                             itemName={`Incasso: ${selectedMember?.firstName} ${selectedMember?.lastName}`}
                             onPaymentComplete={(data) => {
+                                // Provide default to avoid undefined behavior, pass directly into mutate
+                                const notes = data.receiptNumber ? `Ricevuta: ${data.receiptNumber}` : "";
                                 setPaymentMethod(data.paymentMethod);
-                                setPaymentNotes(data.receiptNumber ? `Ricevuta: ${data.receiptNumber}` : "");
-                                checkoutMutation.mutate();
+                                setPaymentNotes(notes);
+                                checkoutMutation.mutate({
+                                    paymentMethod: data.paymentMethod || "",
+                                    paymentNotes: notes,
+                                    isPaid: data.isPaid
+                                });
                             }}
                             onCancel={() => setIsCheckoutOpen(false)}
                         />
@@ -664,13 +773,53 @@ function CartTableRow({
         case "servizi_extra": currentCatalog = studios || []; break;
     }
 
+    if (row.isDebt) {
+        return (
+            <div className="bg-slate-50 p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
+                <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive hover:bg-red-50" onClick={() => { if (confirm("Rimuovere questa riga dal carrello?")) removeCartRow(row.id); }}>
+                    <Trash2 className="w-5 h-5" />
+                </Button>
+                <div className="flex-1 space-y-4">
+                    <div className="flex items-center gap-4 border-b pb-3 mb-2">
+                        <div className="p-2 bg-blue-100/50 rounded-full text-blue-700">
+                            <ShoppingCart className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-slate-800 text-lg">Saldo Debito Pregresso</h4>
+                            <p className="text-sm text-muted-foreground">{row.debtDescription}</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <div className="space-y-1">
+                            <Label className="text-xs text-slate-700 font-bold">Importo da Saldare *</Label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                className="h-10 text-lg font-bold bg-white"
+                                value={row.basePrice || ""}
+                                onChange={(e) => {
+                                    updateRow(row.id, 'basePrice', e.target.value);
+                                    updateRow(row.id, 'subtotal', e.target.value); // Sync subtotal directly for debts
+                                }}
+                            />
+                        </div>
+                        <div className="text-right">
+                            <span className="text-xs font-bold text-muted-foreground mr-3 uppercase">Subtotale Riga:</span>
+                            <span className="text-2xl font-black text-green-700">€ {(parseFloat(row.subtotal) || 0).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-white p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
             <Button
                 variant="ghost"
                 size="icon"
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive hover:bg-red-50"
-                onClick={() => removeCartRow(row.id)}
+                onClick={() => { if (confirm("Rimuovere questa riga dal carrello?")) removeCartRow(row.id); }}
             >
                 <Trash2 className="w-5 h-5" />
             </Button>

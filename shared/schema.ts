@@ -2457,3 +2457,24 @@ export type InsertPriceList = z.infer<typeof insertPriceListSchema>;
 export type PriceList = typeof priceLists.$inferSelect;
 export type InsertPriceListItem = z.infer<typeof insertPriceListItemSchema>;
 export type PriceListItem = typeof priceListItems.$inferSelect;
+
+// ============================================================================
+// AUDIT LOGS
+// ============================================================================
+export const auditLogs = mysqlTable("audit_logs", {
+  id: int("id").primaryKey().autoincrement(),
+  action: varchar("action", { length: 50 }).notNull(), // e.g., "DELETE"
+  entityType: varchar("entity_type", { length: 100 }).notNull(), // e.g., "payments", "courses"
+  entityId: int("entity_id").notNull(),
+  performedBy: varchar("performed_by", { length: 255 }).notNull(), // user ID or name
+  details: text("details"), // JSON payload of deleted data
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type AuditLog = typeof auditLogs.$inferSelect;
+

@@ -127,7 +127,8 @@ export default function MascheraInputGenerale() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
-  const memberIdFromUrl = urlParams.get('memberId');
+  const memberIdFromUrl = urlParams.get('memberId') || urlParams.get('editMemberId');
+  const actionFromUrl = urlParams.get('action');
   const { user } = useAuth();
 
   useBarcodeScanner((barcode) => {
@@ -341,11 +342,13 @@ export default function MascheraInputGenerale() {
   };
 
   const removeAllegatoFile = (key: keyof AllegatiState) => {
-    setAllegati(prev => ({
-      ...prev,
-      [key]: { ...prev[key], hasFile: false, fileName: '', data: '', previewUrl: '' }
-    }));
-    setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
+    if (confirm("Sei sicuro di voler rimuovere questo file?")) {
+      setAllegati(prev => ({
+        ...prev,
+        [key]: { ...prev[key], hasFile: false, fileName: '', data: '', previewUrl: '' }
+      }));
+      setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
+    }
   };
 
   const openPreview = (previewUrl?: string) => {
@@ -1184,11 +1187,14 @@ export default function MascheraInputGenerale() {
           })
           .then(member => {
             handleSelectMember(member);
+            if (actionFromUrl === 'payment') {
+              setIsNuovoPagamentoOpen(true);
+            }
           })
           .catch(err => console.error("Errore auto-loading membro da URL", err));
       }
     }
-  }, [memberIdFromUrl]);
+  }, [memberIdFromUrl, actionFromUrl]);
 
   // Debounced Search
   useEffect(() => {
@@ -1352,6 +1358,19 @@ export default function MascheraInputGenerale() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const deletePaymentMutation = useMutation({
+    mutationFn: async (paymentId: number) => {
+      await apiRequest("DELETE", `/api/payments/${paymentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
+      toast({ title: "Pagamento rimosso con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore rimozione pagamento", description: error.message, variant: "destructive" });
+    }
+  });
 
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
@@ -1579,8 +1598,10 @@ export default function MascheraInputGenerale() {
   };
 
   const handleDeletePayment = (id: string) => {
-    if (confirm("Sei sicuro di voler eliminare questo pagamento?")) {
-      setPayments(payments.filter(p => p.id !== id));
+    if (confirm("Sei sicuro di voler eliminare definitivamente questo pagamento? ATTENZIONE: l'azione è irreversibile.")) {
+      deletePaymentMutation.mutate(parseInt(id));
+      // Optionally update local state immediately for snappy UX, but invalidateQueries handles it.
+      setPayments(payments.filter(p => String(p.id) !== id));
     }
   };
 
@@ -3136,10 +3157,16 @@ export default function MascheraInputGenerale() {
                 <CreditCard className="w-5 h-5 sidebar-icon-gold" />
                 Pagamenti
               </span>
-              <Button size="sm" className="gold-3d-button" data-testid="button-aggiungi-pagamento" onClick={() => {
-                setEditingPaymentId(null);
-                setIsNuovoPagamentoOpen(true);
-              }}>
+              <Button
+                size="sm"
+                className="gold-3d-button"
+                data-testid="button-aggiungi-pagamento"
+                disabled={!selectedMemberId}
+                onClick={() => {
+                  setEditingPaymentId(null);
+                  setIsNuovoPagamentoOpen(true);
+                }}
+              >
                 <Plus className="w-4 h-4" />
                 Nuovo Pagamento
               </Button>
@@ -3147,9 +3174,13 @@ export default function MascheraInputGenerale() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
-              {(payments.length === 0 && (!memberPayments || memberPayments.length === 0)) ? (
+              {!selectedMemberId ? (
+                <div className="text-center p-6 text-muted-foreground bg-muted/10 rounded-lg border border-dashed my-4">
+                  Salva o seleziona un partecipante per sbloccare questa sezione
+                </div>
+              ) : (payments.length === 0 && (!memberPayments || memberPayments.length === 0)) ? (
                 <div className="text-center py-8 text-muted-foreground border rounded bg-muted/20">
-                  Nessun pagamento registrato. Clicca su "Aggiungi" per inserirne uno.
+                  Nessun pagamento registrato. Clicca su "Nuovo Pagamento" per inserirne uno.
                 </div>
               ) : (
                 <div className="rounded-md border">
@@ -3160,7 +3191,7 @@ export default function MascheraInputGenerale() {
                         <TableHead>Attività</TableHead>
                         <TableHead>Dettaglio</TableHead>
                         <TableHead>Data Pagamento</TableHead>
-                        <TableHead>Note Pagamenti</TableHead>
+                        <TableHead>Metodo di Pagamento</TableHead>
                         <TableHead className="text-right">Importo</TableHead>
                         <TableHead className="w-[100px]"></TableHead>
                       </TableRow>
@@ -3230,7 +3261,7 @@ export default function MascheraInputGenerale() {
             <NuovoPagamentoModal
               isOpen={isNuovoPagamentoOpen}
               onClose={() => setIsNuovoPagamentoOpen(false)}
-              defaultMemberId={formData.id ? parseInt(formData.id) : undefined}
+              defaultMemberId={selectedMemberId ? Number(selectedMemberId) : undefined}
             />
 
             <PaymentDialog
@@ -3291,8 +3322,10 @@ export default function MascheraInputGenerale() {
                           size="sm"
                           className="text-destructive hover:bg-destructive hover:text-destructive-foreground h-8 px-2"
                           onClick={() => {
-                            setBottomSectionsData(prev => ({ ...prev, gift: prev.gift.filter((_, i) => i !== index) }));
-                            setDirtyFields(prev => ({ ...prev, gift_removed: true }));
+                            if (confirm("Sei sicuro di voler rimuovere questo elemento?")) {
+                              setBottomSectionsData(prev => ({ ...prev, gift: prev.gift.filter((_, i) => i !== index) }));
+                              setDirtyFields(prev => ({ ...prev, gift_removed: true }));
+                            }
                           }}
                         >
                           <Trash2 className="w-4 h-4 mr-1" /> Rimuovi
