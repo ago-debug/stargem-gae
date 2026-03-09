@@ -682,9 +682,9 @@ export default function MascheraInputGenerale() {
   const renderMancaDato = (val: string | undefined | null) => {
     if (selectedMemberId && (!val || String(val).trim() === "")) {
       return (
-        <span className="text-red-500 font-bold text-[10px] flex items-center gap-1 ml-2 bg-red-50 dark:bg-red-900/30 px-1.5 py-0.5 rounded" title="Manca Dato">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-bold text-red-500 select-none pointer-events-none z-10">
           <AlertTriangle className="w-3 h-3 fill-red-500 text-white" /> Manca Dato
-        </span>
+        </div>
       );
     }
     return null;
@@ -1719,7 +1719,11 @@ export default function MascheraInputGenerale() {
     (memberReEnrollments?.length || 0) +
     (memberVsEnrollments?.length || 0) +
     (memberServEnrollments?.length || 0) +
+    (memberServEnrollments?.length || 0) +
     (memberWorkshopEnrollments?.length || 0);
+
+  const isGen1Active = formData.nomeGen1.trim() !== "" || formData.cognomeGen1.trim() !== "";
+  const isGen2Active = formData.nomeGen2.trim() !== "" || formData.cognomeGen2.trim() !== "";
 
   return (
     <div className="flex flex-col h-full" data-testid="page-maschera-input-generale">
@@ -1879,7 +1883,7 @@ export default function MascheraInputGenerale() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Codice ID (C)</Label>
+                <Label>Codice ID</Label>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-warning/100 text-warning800 border-warning300">Auto</Badge>
                   <Input
@@ -2692,30 +2696,38 @@ export default function MascheraInputGenerale() {
                 {/* L'heading "Dati Personali" è stato spostato nel CardTitle per risparmiare spazio */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   <div className="space-y-2">
-                    <Label className="flex items-center">Cognome * {renderMancaDato(formData.cognome)}</Label>
-                    <Input value={formData.cognome} onChange={(e) => handleChange("cognome", e.target.value)} className={getInputClassName("cognome", true)} />
+                    <Label className="flex items-center">Cognome <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input value={formData.cognome} onChange={(e) => handleChange("cognome", e.target.value)} className={getInputClassName("cognome", true)} />
+                      {renderMancaDato(formData.cognome)}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center">Nome * {renderMancaDato(formData.nome)}</Label>
-                    <Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} className={getInputClassName("nome", true)} />
+                    <Label className="flex items-center">Nome <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input value={formData.nome} onChange={(e) => handleChange("nome", e.target.value)} className={getInputClassName("nome", true)} />
+                      {renderMancaDato(formData.nome)}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      Codice Fiscale (J) *
+                      Codice Fiscale <span className="text-red-500 ml-1">*</span>
                       <a href="/generatore-cf-stranieri" target="_blank" rel="noopener noreferrer" title="Attenzione, per gli stranieri senza codice fiscale clicca qui" className="text-destructive hover:text-destructive700 transition-colors" data-testid="link-generatore-cf">
                         <AlertTriangle className="w-4 h-4 cursor-pointer" />
                       </a>
-                      {renderMancaDato(formData.codiceFiscale)}
                     </Label>
-                    <Input
-                      value={formData.codiceFiscale}
-                      onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())}
-                      className={getInputClassName("codiceFiscale", true)}
-                    />
+                    <div className="relative">
+                      <Input
+                        value={formData.codiceFiscale}
+                        onChange={(e) => handleChange("codiceFiscale", e.target.value.toUpperCase())}
+                        className={getInputClassName("codiceFiscale", true)}
+                      />
+                      {renderMancaDato(formData.codiceFiscale)}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-1">
-                      <Label className="flex items-center">Telefono * {renderMancaDato(formData.telefono)}</Label>
+                      <Label className="flex items-center">Telefono <span className="text-red-500 ml-1">*</span></Label>
                       <span
                         className="ml-1 cursor-help"
                         title={verificaStato.telefono ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
@@ -2738,15 +2750,18 @@ export default function MascheraInputGenerale() {
                         </Button>
                       )}
                     </div>
-                    <Input
-                      value={formData.telefono}
-                      onChange={(e) => handleChange("telefono", e.target.value)}
-                      className={`${getInputClassName("telefono", true)} ${verificaStato.telefono ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
-                    />
+                    <div className="relative">
+                      <Input
+                        value={formData.telefono}
+                        onChange={(e) => handleChange("telefono", e.target.value)}
+                        className={`${getInputClassName("telefono", true)} ${verificaStato.telefono ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
+                      />
+                      {renderMancaDato(formData.telefono)}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-1">
-                      <Label className="flex items-center">Email * {renderMancaDato(formData.email)}</Label>
+                      <Label className="flex items-center">Email <span className="text-red-500 ml-1">*</span></Label>
                       <span
                         className="ml-1 cursor-help"
                         title={verificaStato.email ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
@@ -2769,26 +2784,38 @@ export default function MascheraInputGenerale() {
                         </Button>
                       )}
                     </div>
-                    <Input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleChange("email", e.target.value)}
-                      className={`${getInputClassName("email", true)} ${verificaStato.email ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
-                    />
+                    <div className="relative">
+                      <Input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                        className={`${getInputClassName("email", true)} ${verificaStato.email ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
+                      />
+                      {renderMancaDato(formData.email)}
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
                   <div className="space-y-2">
-                    <Label className="flex items-center">Indirizzo residenza * {renderMancaDato(formData.indirizzo)}</Label>
-                    <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} data-testid="input-indirizzo" className={getInputClassName("indirizzo", true)} />
+                    <Label className="flex items-center">Indirizzo residenza <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input placeholder="Via/Piazza, n. civico" value={formData.indirizzo} onChange={(e) => handleChange("indirizzo", e.target.value)} data-testid="input-indirizzo" className={getInputClassName("indirizzo", true)} />
+                      {renderMancaDato(formData.indirizzo)}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center">CAP * {renderMancaDato(formData.cap)}</Label>
-                    <Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} data-testid="input-cap" className={getInputClassName("cap", true)} />
+                    <Label className="flex items-center">CAP <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input value={formData.cap} onChange={(e) => handleChange("cap", e.target.value)} data-testid="input-cap" className={getInputClassName("cap", true)} />
+                      {renderMancaDato(formData.cap)}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center">Città * {renderMancaDato(formData.citta)}</Label>
-                    <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} data-testid="input-citta" className={getInputClassName("citta", true)} />
+                    <Label className="flex items-center">Città <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} data-testid="input-citta" className={getInputClassName("citta", true)} />
+                      {renderMancaDato(formData.citta)}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Provincia</Label>
@@ -2801,44 +2828,59 @@ export default function MascheraInputGenerale() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
                   <div className="space-y-2">
-                    <Label className="flex items-center line-clamp-1">Data di Nascita * {renderMancaDato(formData.dataNascita)}</Label>
-                    <Input
-                      value={formData.dataNascita ? new Date(formData.dataNascita).toLocaleDateString('it-IT') : ''}
-                      readOnly
-                      className={getInputClassName("dataNascita", true, true)}
-                    />
+                    <Label className="flex items-center line-clamp-1">Data di Nascita <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input
+                        value={formData.dataNascita ? new Date(formData.dataNascita).toLocaleDateString('it-IT') : ''}
+                        readOnly
+                        className={getInputClassName("dataNascita", true, true)}
+                      />
+                      {renderMancaDato(formData.dataNascita)}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center line-clamp-1">Luogo di Nascita * {renderMancaDato(formData.luogoNascita)}</Label>
-                    <Input
-                      value={formData.luogoNascita}
-                      readOnly
-                      className={getInputClassName("luogoNascita", true, true)}
-                    />
+                    <Label className="flex items-center line-clamp-1">Luogo di Nascita <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input
+                        value={formData.luogoNascita}
+                        readOnly
+                        className={getInputClassName("luogoNascita", true, true)}
+                      />
+                      {renderMancaDato(formData.luogoNascita)}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center line-clamp-1">Prov. Nascita * {renderMancaDato(formData.provinciaNascita)}</Label>
-                    <Input
-                      value={formData.provinciaNascita}
-                      readOnly
-                      className={getInputClassName("provinciaNascita", true, true)}
-                    />
+                    <Label className="flex items-center line-clamp-1">Prov. Nascita <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input
+                        value={formData.provinciaNascita}
+                        readOnly
+                        className={getInputClassName("provinciaNascita", true, true)}
+                      />
+                      {renderMancaDato(formData.provinciaNascita)}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center">Sesso * {renderMancaDato(formData.sesso)}</Label>
-                    <Input
-                      value={formData.sesso === 'M' ? 'Maschio' : formData.sesso === 'F' ? 'Femmina' : ''}
-                      readOnly
-                      className={getInputClassName("sesso", true, true)}
-                    />
+                    <Label className="flex items-center">Sesso <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input
+                        value={formData.sesso === 'M' ? 'Maschio' : formData.sesso === 'F' ? 'Femmina' : ''}
+                        readOnly
+                        className={getInputClassName("sesso", true, true)}
+                      />
+                      {renderMancaDato(formData.sesso)}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center">Età * {renderMancaDato(formData.eta)}</Label>
-                    <Input
-                      value={formData.eta}
-                      readOnly
-                      className={getInputClassName("eta", true, true)}
-                    />
+                    <Label className="flex items-center">Età <span className="text-red-500 ml-1">*</span></Label>
+                    <div className="relative">
+                      <Input
+                        value={formData.eta}
+                        readOnly
+                        className={getInputClassName("eta", true, true)}
+                      />
+                      {renderMancaDato(formData.eta)}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     {/* Tipo Partecipante è stato spostato nell'Intestazione */}
@@ -2860,16 +2902,19 @@ export default function MascheraInputGenerale() {
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      Codice Fiscale
+                      Codice Fiscale {isGen1Active && <span className="text-red-500 ml-1">*</span>}
                       <a href="/generatore-cf-stranieri" target="_blank" rel="noopener noreferrer" title="Attenzione, per gli stranieri senza codice fiscale clicca qui" className="text-destructive hover:text-destructive700 transition-colors" data-testid="link-generatore-cf-gen1">
                         <AlertTriangle className="w-4 h-4 cursor-pointer" />
                       </a>
                     </Label>
-                    <Input value={formData.cfGen1} onChange={(e) => handleChange("cfGen1", e.target.value.toUpperCase())} className={getInputClassName("cfGen1", false)} />
+                    <div className="relative">
+                      <Input value={formData.cfGen1} onChange={(e) => handleChange("cfGen1", e.target.value.toUpperCase())} className={getInputClassName("cfGen1", isGen1Active)} />
+                      {isGen1Active && renderMancaDato(formData.cfGen1)}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-1">
-                      <Label>Telefono</Label>
+                      <Label>Telefono {isGen1Active && <span className="text-red-500 ml-1">*</span>}</Label>
                       <span
                         className="ml-1 cursor-help"
                         title={verificaStato.telGen1 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
@@ -2892,15 +2937,18 @@ export default function MascheraInputGenerale() {
                         </Button>
                       )}
                     </div>
-                    <Input
-                      value={formData.telGen1}
-                      onChange={(e) => handleChange("telGen1", e.target.value)}
-                      className={`${getInputClassName("telGen1", false)} ${verificaStato.telGen1 ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
-                    />
+                    <div className="relative">
+                      <Input
+                        value={formData.telGen1}
+                        onChange={(e) => handleChange("telGen1", e.target.value)}
+                        className={`${getInputClassName("telGen1", isGen1Active)} ${verificaStato.telGen1 ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
+                      />
+                      {isGen1Active && renderMancaDato(formData.telGen1)}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-1">
-                      <Label>Email</Label>
+                      <Label>Email {isGen1Active && <span className="text-red-500 ml-1">*</span>}</Label>
                       <span
                         className="ml-1 cursor-help"
                         title={verificaStato.emailGen1 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
@@ -2923,11 +2971,14 @@ export default function MascheraInputGenerale() {
                         </Button>
                       )}
                     </div>
-                    <Input
-                      value={formData.emailGen1}
-                      onChange={(e) => handleChange("emailGen1", e.target.value)}
-                      className={`${getInputClassName("emailGen1", false)} ${verificaStato.emailGen1 ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
-                    />
+                    <div className="relative">
+                      <Input
+                        value={formData.emailGen1}
+                        onChange={(e) => handleChange("emailGen1", e.target.value)}
+                        className={`${getInputClassName("emailGen1", isGen1Active)} ${verificaStato.emailGen1 ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
+                      />
+                      {isGen1Active && renderMancaDato(formData.emailGen1)}
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
@@ -3010,16 +3061,19 @@ export default function MascheraInputGenerale() {
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      Codice Fiscale
+                      Codice Fiscale {isGen2Active && <span className="text-red-500 ml-1">*</span>}
                       <a href="/generatore-cf-stranieri" target="_blank" rel="noopener noreferrer" title="Attenzione, per gli stranieri senza codice fiscale clicca qui" className="text-destructive hover:text-destructive700 transition-colors" data-testid="link-generatore-cf-gen2">
                         <AlertTriangle className="w-4 h-4 cursor-pointer" />
                       </a>
                     </Label>
-                    <Input value={formData.cfGen2} onChange={(e) => handleChange("cfGen2", e.target.value.toUpperCase())} className={getInputClassName("cfGen2", false)} />
+                    <div className="relative">
+                      <Input value={formData.cfGen2} onChange={(e) => handleChange("cfGen2", e.target.value.toUpperCase())} className={getInputClassName("cfGen2", isGen2Active)} />
+                      {isGen2Active && renderMancaDato(formData.cfGen2)}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-1">
-                      <Label>Telefono</Label>
+                      <Label>Telefono {isGen2Active && <span className="text-red-500 ml-1">*</span>}</Label>
                       <span
                         className="ml-1 cursor-help"
                         title={verificaStato.telGen2 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
@@ -3042,15 +3096,18 @@ export default function MascheraInputGenerale() {
                         </Button>
                       )}
                     </div>
-                    <Input
-                      value={formData.telGen2}
-                      onChange={(e) => handleChange("telGen2", e.target.value)}
-                      className={`${getInputClassName("telGen2", false)} ${verificaStato.telGen2 ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
-                    />
+                    <div className="relative">
+                      <Input
+                        value={formData.telGen2}
+                        onChange={(e) => handleChange("telGen2", e.target.value)}
+                        className={`${getInputClassName("telGen2", isGen2Active)} ${verificaStato.telGen2 ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
+                      />
+                      {isGen2Active && renderMancaDato(formData.telGen2)}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-1">
-                      <Label>Email</Label>
+                      <Label>Email {isGen2Active && <span className="text-red-500 ml-1">*</span>}</Label>
                       <span
                         className="ml-1 cursor-help"
                         title={verificaStato.emailGen2 ? "Verificato" : "Da verificare - clicca il bottone per verificare"}
@@ -3073,11 +3130,14 @@ export default function MascheraInputGenerale() {
                         </Button>
                       )}
                     </div>
-                    <Input
-                      value={formData.emailGen2}
-                      onChange={(e) => handleChange("emailGen2", e.target.value)}
-                      className={verificaStato.emailGen2 ? "bg-green-50 border-green-300" : ""}
-                    />
+                    <div className="relative">
+                      <Input
+                        value={formData.emailGen2}
+                        onChange={(e) => handleChange("emailGen2", e.target.value)}
+                        className={`${getInputClassName("emailGen2", isGen2Active)} ${verificaStato.emailGen2 ? "bg-green-50 border-green-300" : ""}`}
+                      />
+                      {isGen2Active && renderMancaDato(formData.emailGen2)}
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">

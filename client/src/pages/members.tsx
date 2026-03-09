@@ -785,7 +785,7 @@ export default function Members() {
 
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2">Anagrafica a Lista</h1>
@@ -1134,7 +1134,14 @@ export default function Members() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="font-mono text-sm">{member.fiscalCode || "-"}</TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {member.fiscalCode ? member.fiscalCode : (
+                            <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
+                              <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
+                              <span>Manca Dato</span>
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell>
                           {member.email ? member.email : (
                             <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
@@ -1161,7 +1168,12 @@ export default function Members() {
                                 </div>
                               )}
                             </div>
-                          ) : "-"}
+                          ) : (
+                            <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
+                              <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
+                              <span>Manca Dato</span>
+                            </div>
+                          )}
                         </TableCell>
                         <TableCell>
                           {member.hasMedicalCertificate ? (
@@ -1176,7 +1188,10 @@ export default function Members() {
                               }
                             </Badge>
                           ) : (
-                            <span className="text-muted-foreground">-</span>
+                            <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
+                              <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
+                              <span>Manca Dato</span>
+                            </div>
                           )}
                         </TableCell>
                         <TableCell>

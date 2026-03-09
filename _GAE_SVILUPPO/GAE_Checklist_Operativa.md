@@ -14,7 +14,7 @@ Questi task servono a risolvere i "dolori" dell'applicazione odierna prima di tu
 ## 2. Unificazione Componenti React (SaaS V2 Builder)
 I due componenti universali che sostituiranno le decine di form sparsi.
 
-- [ ] **Creare `TimeSlotPicker.tsx`:** 
+- [x] **Creare `TimeSlotPicker.tsx`:** 
   Un unico componente per selezionare Orario Inizio, Fine, Sala e Insegnante, con validazione anti-conflitto. Sostituirà le maschere duplicate nelle pagine "Crea Corso", "Crea Workshop", "Calendario".
 - [x] **Creare `PaymentModuleConnector.tsx`:** 
   L'unica autorizzata interfaccia di "Checkout". Deve pescare automaticamente il costo base dell'attività. Le forzature manuali sul prezzo richiederanno un **PIN Segreteria**.

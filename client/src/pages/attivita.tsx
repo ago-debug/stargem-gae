@@ -296,8 +296,9 @@ export default function Attivita() {
   const [activeTab, setActiveTab] = useState("panoramica");
   const [, navigate] = useLocation();
 
-  const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
-  const { data: workshops } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
+  const { data: activities } = useQuery<any[]>({ queryKey: ["/api/activities"] });
+  const courses = activities?.filter(a => a.type === 'course') || [];
+  const workshops = activities?.filter(a => a.type === 'workshop') || [];
   const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
   const { data: workshopCategories } = useQuery<WorkshopCategory[]>({ queryKey: ["/api/workshop-categories"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });

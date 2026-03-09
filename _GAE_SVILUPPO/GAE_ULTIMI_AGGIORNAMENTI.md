@@ -6,7 +6,9 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
-### 9 Marzo 2026 (Refactoring Duplicati & UI Anagrafica)
+### 9 Marzo 2026 (Refactoring Duplicati, UI Anagrafica & Fix Checkout)
+*   **Fix Crash Bloccante Server (5001):** Risolto un crash silente del server Vite/Express causato da un errore di tipizzazione TypeScript (`editingPayment` mancante nelle props) nel componente `<NuovoPagamentoModal>` all'interno di `client/src/pages/payments.tsx`, che lasciava la porta 5001 appesa in stato `EADDRINUSE`.
+*   **Checkout Unificato & Payment Module:** Consolidato l'utilizzo del componente `PaymentModuleConnector.tsx` come unica interfaccia autorizzata di checkout.
 *   **Motore Rilevamento Duplicati Intelligente:** Riscritto totalmente l'algoritmo di individuazione duplicati in `server/storage.ts` passando dal semplice conteggio campi a un clustering avanzato. Introdotti filtri rigidi **Anti-Famiglie** (ignora omonimie parziali di contatto se i nomi propri divergono) e **Anti-Omonimi** (richiede almeno un dato di contatto in comune per nomi identici).
 *   **Unione Rapida Duplicati (1-Click):** Ridisegnata la finestra "Report Duplicati" in React. Sostituiti gli alert generici con Card interattive raggruppate per Cluster identificati. Inserito pulsante "Unisci questi X" interno ad ogni card che pre-carica i dati completi dei candidati saltando la selezione manuale dall'elenco paginato.
 *   **Fix Backend Merge (`mergeMembers`):** Risolto fatal error SQL durante la funzione di unione anagrafica che bloccava il trasferimento dei pagamenti, migrando la sintassi legacy `entity_id` al nuovo schema `member_id` tramite Drizzle ORM.

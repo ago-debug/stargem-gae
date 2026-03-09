@@ -115,7 +115,7 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
     const [memberSearchQuery, setMemberSearchQuery] = useState("");
 
     const { data: enrollments } = useQuery<any[]>({
-        queryKey: ["/api/enrollments?type=corsi"],
+        queryKey: ["/api/universal-enrollments"],
     });
 
     const { data: searchResults } = useQuery<{ members: Member[], total: number }>({
@@ -129,15 +129,15 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
 
     const createEnrollmentMutation = useMutation({
         mutationFn: async (data: { memberId: number; courseId: number }) => {
-            await apiRequest("POST", "/api/enrollments", {
+            await apiRequest("POST", "/api/universal-enrollments", {
                 memberId: data.memberId,
-                courseId: data.courseId,
+                activityDetailId: data.courseId,
                 startDate: new Date().toISOString().split('T')[0],
                 status: 'active',
             });
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/universal-enrollments"] });
             toast({ title: "Iscrizione aggiunta con successo" });
             setIsAddingEnrollment(false);
             setMemberSearchQuery("");
@@ -149,10 +149,10 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
 
     const deleteEnrollmentMutation = useMutation({
         mutationFn: async (enrollmentId: number) => {
-            await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`, undefined);
+            await apiRequest("DELETE", `/api/universal-enrollments/${enrollmentId}`, undefined);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/universal-enrollments"] });
             toast({ title: "Iscrizione rimossa con successo" });
         },
         onError: (error: Error) => {
@@ -161,7 +161,7 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
     });
 
     const courseEnrollments = enrollments
-        ?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status))
+        ?.filter(e => e.activityDetailId === courseId && (e.status === 'active' || !e.status))
         .map(e => ({
             enrollmentId: e.id,
             memberId: e.memberId,
@@ -245,7 +245,7 @@ function AttendancesTab({ courseId }: { courseId: number }) {
     const { toast } = useToast();
     const { data: attendances } = useQuery<Attendance[]>({ queryKey: ["/api/attendances"] });
     const { data: membersData } = useQuery<{ members: Member[] }>({ queryKey: ["/api/members"] });
-    const { data: enrollments } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=corsi"] });
+    const { data: enrollments } = useQuery<any[]>({ queryKey: ["/api/universal-enrollments"] });
 
     const deleteAttendanceMutation = useMutation({
         mutationFn: async (id: number) => apiRequest("DELETE", `/api/attendances/${id}`, undefined),
@@ -350,9 +350,12 @@ export default function CalendarPage() {
     const [location] = useLocation();
 
     // Queries
-    const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
-        queryKey: ["/api/courses"],
+    const { data: activities, isLoading: activitiesLoading } = useQuery<any[]>({
+        queryKey: ["/api/activities"],
     });
+
+    const courses = activities?.filter(a => a.type === 'course') || [];
+    const coursesLoading = activitiesLoading;
 
     const { data: studios, isLoading: studiosLoading } = useQuery<Studio[]>({
         queryKey: ["/api/studios"],
@@ -367,7 +370,7 @@ export default function CalendarPage() {
     });
 
     const { data: enrollments } = useQuery<any[]>({
-        queryKey: ["/api/enrollments?type=corsi"],
+        queryKey: ["/api/universal-enrollments"],
     });
 
     const { data: quotes } = useQuery<Quote[]>({ // Fetch quotes
@@ -386,13 +389,9 @@ export default function CalendarPage() {
         queryKey: ["/api/payment-methods"],
     });
 
-    const { data: workshops } = useQuery<Workshop[]>({
-        queryKey: ["/api/workshops"],
-    });
+    const workshops = activities?.filter(a => a.type === 'workshop') || [];
 
-    const { data: workshopEnrollments } = useQuery<any[]>({
-        queryKey: ["/api/workshop-enrollments"],
-    });
+
 
     const { data: workshopAttendances } = useQuery<any[]>({
         queryKey: ["/api/workshop-attendances"],
@@ -640,7 +639,7 @@ export default function CalendarPage() {
     const isLoading = coursesLoading || studiosLoading || instructorsLoading || categoriesLoading;
 
     const getCourseStats = (courseId: number) => {
-        const courseEnrollments = enrollments?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status)) || [];
+        const courseEnrollments = enrollments?.filter(e => e.activityDetailId === courseId && (e.status === 'active' || !e.status)) || [];
         const men = courseEnrollments.filter(e => {
             const g = e.memberGender?.toUpperCase();
             return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
@@ -653,7 +652,7 @@ export default function CalendarPage() {
     };
 
     const getWorkshopStats = (workshopId: number) => {
-        const enrolls = workshopEnrollments?.filter(e => e.workshopId === workshopId && (e.status === 'active' || !e.status)) || [];
+        const enrolls = enrollments?.filter(e => e.activityDetailId === workshopId && (e.status === 'active' || !e.status)) || [];
         const men = enrolls.filter(e => {
             const g = e.memberGender?.toUpperCase();
             return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
@@ -785,11 +784,11 @@ export default function CalendarPage() {
 
     const updateCourseMutation = useMutation({
         mutationFn: async ({ id, data }: { id: number; data: any }) => {
-            return await apiRequest("PATCH", `/api/courses/${id}`, data);
+            return await apiRequest("PATCH", `/api/activities/${id}`, data);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
-            toast({ title: "Corso aggiornato", description: "Le modifiche sono state salvate correttamente." });
+            queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+            toast({ title: "Attività aggiornata", description: "Le modifiche sono state salvate correttamente." });
             setEditingCourse(null);
         },
         onError: (err: Error) => {
@@ -799,11 +798,11 @@ export default function CalendarPage() {
 
     const deleteCourseMutation = useMutation({
         mutationFn: async (id: number) => {
-            return await apiRequest("DELETE", `/api/courses/${id}`);
+            return await apiRequest("DELETE", `/api/activities/${id}`);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
-            toast({ title: "Corso eliminato", description: "Il corso è stato rimosso correttamente." });
+            queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+            toast({ title: "Attività eliminata", description: "L'attività è stata rimossa correttamente." });
             setEditingCourse(null);
         },
         onError: (err: Error) => {
@@ -839,7 +838,7 @@ export default function CalendarPage() {
         e.preventDefault();
 
         // Ensure all dates are strings or null before sending
-        const dataToSave: any = { ...editForm };
+        const dataToSave: any = { ...editForm, type: 'course' };
         if (dataToSave.startDate instanceof Date) {
             dataToSave.startDate = dataToSave.startDate.toISOString().split('T')[0];
         } else if (dataToSave.startDate === "") {
@@ -862,11 +861,11 @@ export default function CalendarPage() {
 
     const createCourseMutation = useMutation({
         mutationFn: async (data: any) => {
-            return await apiRequest("POST", "/api/courses", data);
+            return await apiRequest("POST", "/api/activities", data);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
-            toast({ title: "Corso creato", description: "Il nuovo corso è stato aggiunto con successo." });
+            queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+            toast({ title: "Attività creata", description: "La nuova attività è stata aggiunta con successo." });
             setEditingCourse(null);
         },
         onError: (err: Error) => {

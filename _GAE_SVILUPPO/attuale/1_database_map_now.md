@@ -37,7 +37,7 @@ L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per
 
 ### 4. Comunicazioni del Team
 - **`messages`**: Messaggi diretti e privati tra gli utenti dello staff.
-- **`team_comments`**: Conversazioni formattate a thread (simil-ticket) per appunti dello staff.
+- **`team_comments`**: Conversazioni formattate a thread (simil-chat) per appunti dello staff. Supporta risposte nidificate (nested replies) tramite il campo `parentId`.
 - **`team_notes`**: Note testuali interne, fissabili o meno in alto (pinned).
 - **`todos`**: Lista condivisa delle cose da fare (Task semplici).
 - **`notifications`**: Centro notifiche e avvisi centralizzati per l'interfaccia utente dello staff.
@@ -99,6 +99,7 @@ Questa è la base dati umana. Tutto parte dai `MEMBERS` (Allievi, Genitori, ecc.
 ```mermaid
 erDiagram
     USERS ||--o{ TEAM_COMMENTS : "autori"
+    TEAM_COMMENTS ||--o{ TEAM_COMMENTS : "risposte (parentId)"
     USERS ||--o{ TEAM_NOTES : "scrivono"
     USERS ||--o{ TODOS : "creano"
     

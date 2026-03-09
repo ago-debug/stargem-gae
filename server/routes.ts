@@ -63,7 +63,11 @@ import {
   vacationStudies,
   insertCustomListSchema,
   insertCustomListItemSchema,
-  auditLogs
+  auditLogs,
+  insertActivityDetailSchema,
+  insertUniversalEnrollmentSchema,
+  activityDetails,
+  universalEnrollments
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -6445,6 +6449,223 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating Copilot note:", error);
       res.status(500).json({ error: "Failed to generate note" });
+    }
+  });
+
+  // ==========================================
+  // STI: UNIFIED ACTIVITY APIS
+  // ==========================================
+  app.get("/api/activities", isAuthenticated, async (req, res) => {
+    try {
+      const type = req.query.type as string;
+      if (type) {
+        const activities = await storage.getActivityDetailsByType(type);
+        res.json(activities);
+      } else {
+        const activities = await storage.getActivityDetails();
+        res.json(activities);
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch activities" });
+    }
+  });
+
+  app.get("/api/activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const activity = await storage.getActivityDetail(id);
+      if (!activity) return res.status(404).json({ error: "Activity not found" });
+      res.json(activity);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch activity" });
+    }
+  });
+
+  app.post("/api/activities", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertActivityDetailSchema.parse(req.body);
+      const activity = await storage.createActivityDetail(parsed);
+      res.status(201).json(activity);
+    } catch (error: any) {
+      console.error("error API post", error);
+      res.status(400).json({ error: "Invalid activity data", details: error.errors || error.message });
+    }
+  });
+
+  app.patch("/api/activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const parsed = insertActivityDetailSchema.partial().parse(req.body);
+      const activity = await storage.updateActivityDetail(id, parsed);
+      res.json(activity);
+    } catch (error: any) {
+      res.status(400).json({ error: "Invalid activity data", details: error.errors || error.message });
+    }
+  });
+
+  app.delete("/api/activities/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteActivityDetail(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete activity" });
+    }
+  });
+
+  // ==========================================
+  // STI: UNIFIED ENROLLMENTS APIS
+  // ==========================================
+  app.get("/api/universal-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
+      const activityId = req.query.activityId ? parseInt(req.query.activityId as string) : undefined;
+
+      let enrollments = [];
+      if (memberId) {
+        enrollments = await storage.getUniversalEnrollmentsByMemberId(memberId);
+      } else if (activityId) {
+        enrollments = await storage.getUniversalEnrollmentsByActivityId(activityId);
+      } else {
+        enrollments = await storage.getUniversalEnrollments();
+      }
+
+      const allMembers = await storage.getMembers();
+      const memberMap = new Map(allMembers.map(m => [m.id, m]));
+      const enriched = enrollments.map(e => {
+        const m = memberMap.get(e.memberId);
+        return {
+          ...e,
+          memberFirstName: m?.firstName,
+          memberLastName: m?.lastName,
+          memberEmail: m?.email,
+          memberPhone: m?.phone || m?.mobile,
+          memberGender: m?.gender
+        };
+      });
+      res.json(enriched);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch universal enrollments" });
+    }
+  });
+
+  app.post("/api/universal-enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertUniversalEnrollmentSchema.parse(req.body);
+      const enrollment = await storage.createUniversalEnrollment(parsed);
+
+      // Update cache
+      if (parsed.activityDetailId) {
+        const activity = await storage.getActivityDetail(parsed.activityDetailId);
+        if (activity) {
+          const enrollments = await storage.getUniversalEnrollmentsByActivityId(parsed.activityDetailId);
+          await storage.updateActivityDetail(parsed.activityDetailId, {
+            currentEnrollment: enrollments.length
+          });
+        }
+      }
+
+      res.status(201).json(enrollment);
+    } catch (error: any) {
+      res.status(400).json({ error: "Invalid enrollment data", details: error.errors || error.message });
+    }
+  });
+
+  app.patch("/api/universal-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const parsed = insertUniversalEnrollmentSchema.partial().parse(req.body);
+      const enrollment = await storage.updateUniversalEnrollment(id, parsed);
+
+      if (enrollment && parsed.status === 'cancelled') {
+        // Update cache if cancelled
+        const activity = await storage.getActivityDetail(enrollment.activityDetailId);
+        if (activity) {
+          const enrollments = await storage.getUniversalEnrollmentsByActivityId(activity.id);
+          const activeCount = enrollments.filter(e => e.status !== 'cancelled').length;
+          await storage.updateActivityDetail(activity.id, {
+            currentEnrollment: activeCount
+          });
+        }
+      }
+
+      res.json(enrollment);
+    } catch (error: any) {
+      res.status(400).json({ error: "Invalid enrollment data", details: error.errors || error.message });
+    }
+  });
+
+  app.delete("/api/universal-enrollments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const enrollment = await db.select().from(universalEnrollments).where(eq(universalEnrollments.id, id)).then(r => r[0]);
+
+      await storage.deleteUniversalEnrollment(id);
+
+      if (enrollment) {
+        const activity = await storage.getActivityDetail(enrollment.activityDetailId);
+        if (activity) {
+          const enrollmentsList = await storage.getUniversalEnrollmentsByActivityId(activity.id);
+          const activeCount = enrollmentsList.filter(e => e.status !== 'cancelled').length;
+          await storage.updateActivityDetail(activity.id, {
+            currentEnrollment: activeCount
+          });
+        }
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete enrollment" });
+    }
+  });
+
+  // ==========================================
+  // STI: UNIFIED CALENDAR APIS
+  // ==========================================
+  app.get("/api/calendar-events", isAuthenticated, async (req, res) => {
+    try {
+      // Fetch all activity_details representing events
+      const activities = await storage.getActivityDetails();
+
+      // Need studios to populate titles properly
+      const studiosList = await storage.getStudios();
+      const studioMap = Object.fromEntries(studiosList.map(s => [s.id, s]));
+
+      // Map activity details to unified calendar events
+      const events = activities.map(activity => {
+        let eventColor = "#3788d8"; // Default blue
+        switch (activity.type) {
+          case 'course': eventColor = "#4CAF50"; break; // Green
+          case 'workshop': eventColor = "#9C27B0"; break; // Purple
+          case 'rental': eventColor = "#FF9800"; break; // Orange
+          case 'internal': eventColor = "#F44336"; break; // Red
+          case 'campus': eventColor = "#00BCD4"; break; // Cyan
+        }
+
+        return {
+          id: `${activity.type}-${activity.id}`,
+          title: activity.name,
+          start: activity.startDate ? `${activity.startDate}T${activity.startTime || '00:00'}` : null,
+          end: activity.endDate ? `${activity.endDate}T${activity.endTime || '23:59'}` : null,
+          backgroundColor: eventColor,
+          extendedProps: {
+            activityType: activity.type,
+            activityId: activity.id,
+            description: activity.description,
+            studioId: activity.studioId,
+            studio: activity.studioId ? studioMap[activity.studioId]?.name : undefined,
+            instructorId: activity.instructorId,
+            categoryId: activity.categoryId,
+            dayOfWeek: activity.dayOfWeek,
+            currentEnrollment: activity.currentEnrollment,
+            maxCapacity: activity.maxCapacity
+          }
+        };
+      }).filter(event => event.start !== null); // Only return events with a start date/day
+
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching calendar events:", error);
+      res.status(500).json({ error: "Failed to fetch calendar events" });
     }
   });
 

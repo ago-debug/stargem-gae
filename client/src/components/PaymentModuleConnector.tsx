@@ -14,9 +14,10 @@ interface PaymentModuleProps {
   itemName: string;
   onPaymentComplete: (data: { amount: number, paymentMethod: string, receiptNumber: string, isPaid: boolean, itemName: string }) => void;
   onCancel?: () => void;
+  isPending?: boolean;
 }
 
-export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete, onCancel }: PaymentModuleProps) {
+export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete, onCancel, isPending }: PaymentModuleProps) {
   const [amount, setAmount] = useState<number>(basePrice);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [receiptNumber, setReceiptNumber] = useState("");
@@ -123,8 +124,8 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
         </div>
 
         <div className="flex justify-end space-x-2 pt-4">
-          {onCancel && <Button type="button" variant="outline" onClick={onCancel}>Annulla</Button>}
-          <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+          {onCancel && <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>Annulla</Button>}
+          <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             {isPaid ? "Conferma Pagamento" : "Salva Preventivo"}
           </Button>
         </div>

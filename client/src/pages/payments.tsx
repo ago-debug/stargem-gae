@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import type { Payment, InsertPayment, Member, PaymentMethod, Course } from "@shared/schema";
 
 import { useLocation, Link } from "wouter";
-import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
+import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
 export default function Payments() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -161,32 +161,7 @@ export default function Payments() {
     return member ? `${member.firstName} ${member.lastName}` : "Sconosciuto";
   };
 
-  const getInitialPaymentData = (payment: Payment | null): PaymentData | null => {
-    if (!payment) return null;
-    return {
-      attivita: payment.type || "",
-      dettaglioId: payment.enrollmentId?.toString() || payment.workshopEnrollmentId?.toString() || payment.bookingId?.toString() || payment.membershipId?.toString() || "",
-      dettaglioNome: "",
-      enrollmentDetails: [],
-      paymentNotes: payment.notes ? payment.notes.split(',') : [],
-      quantita: 1,
-      descrizioneQuota: payment.description || "",
-      periodo: "",
-      totaleQuota: Number(payment.amount),
-      codiceSconto: payment.discountCode || "",
-      valoreSconto: Number(payment.discountValue) || 0,
-      percentualeSconto: 0,
-      codiciPromo: "",
-      valorePromo: 0,
-      percentualePromo: 0,
-      acconto: payment.status === 'paid' ? Number(payment.amount) : 0, // mock status per bypass
-      dataPagamento: payment.paidDate ? new Date(payment.paidDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      saldoAnnuale: 0,
-      numeroRicevute: 1,
-      confermaBonifico: "",
-      saldoTotale: payment.status === 'paid' ? 0 : Number(payment.amount)
-    };
-  };
+
 
   const exportToCSV = () => {
     if (!payments || payments.length === 0) {
@@ -218,46 +193,6 @@ export default function Payments() {
     link.click();
     URL.revokeObjectURL(url);
     toast({ title: "Esportazione completata" });
-  };
-
-  const handleSavePaymentDialog = (pd: PaymentData) => {
-    if (!selectedMemberId) {
-      toast({ title: "Errore", description: "Seleziona un cliente (usa il pulsante in alto a sinistra del modale)", variant: "destructive" });
-      return;
-    }
-
-    // Lo status è pending se saldoTotale > 0, oppure paid
-    const isPending = (pd.saldoTotale || 0) > 0;
-
-    // Map PaymentData back to InsertPayment
-    // Assumiamo che il PaymentDialog emetti l'Attivita come 'type' (es. corsi, workshop, ecc)
-    // Se c'era già un editingPayment, riciacciamo il suo id.
-    const payload: Partial<InsertPayment> = {
-      memberId: parseInt(selectedMemberId),
-      amount: pd.totaleQuota.toString(),
-      type: pd.attivita || "corsi",
-      status: isPending ? "pending" : "paid",
-      description: pd.descrizioneQuota,
-      paidDate: pd.dataPagamento ? new Date(pd.dataPagamento) : new Date(),
-      // Possiamo mappare le note joinate se paymentNotes sono state riempite
-      notes: pd.paymentNotes?.length ? pd.paymentNotes.join(',') : null,
-      discountCode: pd.codiceSconto || null,
-      discountValue: pd.valoreSconto ? pd.valoreSconto.toString() : null,
-    };
-
-    // Routing corretto verso la ForeignKey basato sul Type (Attivita) se dettaglioId esiste
-    if (pd.dettaglioId) {
-      if (pd.attivita === 'corsi') payload.enrollmentId = parseInt(pd.dettaglioId);
-      else if (pd.attivita === 'workshop') payload.workshopEnrollmentId = parseInt(pd.dettaglioId);
-      else if (pd.attivita === 'tessere' || pd.attivita === 'membership') payload.membershipId = parseInt(pd.dettaglioId);
-      else payload.bookingId = parseInt(pd.dettaglioId);
-    }
-
-    if (editingPayment) {
-      updateMutation.mutate({ id: editingPayment.id, data: payload as Partial<InsertPayment> });
-    } else {
-      createMutation.mutate(payload as InsertPayment);
-    }
   };
 
   const filteredPayments = payments?.filter(p => {
@@ -446,101 +381,11 @@ export default function Payments() {
 
 
 
-      <PaymentDialog
-        open={isFormOpen}
-        onOpenChange={(open) => {
-          if (!open) closeDialog();
-          else setIsFormOpen(open);
-        }}
-        onSave={handleSavePaymentDialog}
-        initialData={getInitialPaymentData(editingPayment)}
-        corsiDB={courses?.map(c => ({ id: c.id, name: c.name, sku: c.sku || "", maxCapacity: c.maxCapacity || 0, currentEnrollment: c.currentEnrollment || 0 })) || []}
-        categorieDB={[]}
-        memberId={selectedMemberId ? parseInt(selectedMemberId) : undefined}
-        memberSelector={
-          <div className="space-y-2 px-4 pt-4 pb-2 bg-muted/30 rounded-lg mx-6 mt-4 border">
-            <Label htmlFor="memberId" className="text-secondary-foreground font-bold text-sm">Partecipante (obbligatorio per incassare pagamenti slegati)</Label>
-            <Popover open={memberSearchOpen} onOpenChange={setMemberSearchOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={memberSearchOpen}
-                  className="w-full justify-between font-normal h-12 bg-background border shadow-sm"
-                >
-                  {selectedMember ? (
-                    <div className="flex flex-col items-start overflow-hidden">
-                      <span className="font-bold truncate">{selectedMember.firstName} {selectedMember.lastName}</span>
-                      <span className="text-[10px] text-muted-foreground uppercase">{selectedMember.fiscalCode || 'No CF'}</span>
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">Cerca per nome, cognome o CF...</span>
-                  )}
-                  <div className="flex items-center gap-1 shrink-0">
-                    {selectedMemberId && (
-                      <X
-                        className="h-4 w-4 text-muted-foreground hover:text-foreground z-10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedMemberId("");
-                          setSelectedMember(null);
-                        }}
-                      />
-                    )}
-                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                  </div>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[300px] p-0" align="start">
-                <Command shouldFilter={false}>
-                  <CommandInput
-                    placeholder="Cerca partecipante (min. 3 caratteri)..."
-                    value={memberSearchQuery}
-                    onValueChange={setMemberSearchQuery}
-                  />
-                  <CommandList>
-                    <CommandEmpty>
-                      {memberSearchQuery.length < 3
-                        ? "Inserisci almeno 3 caratteri per cercare"
-                        : "Nessun partecipante trovato"}
-                    </CommandEmpty>
-                    {memberSearchQuery.length >= 3 && (
-                      <CommandGroup>
-                        {searchedMembers
-                          .slice(0, 20)
-                          .map((member) => (
-                            <CommandItem
-                              key={member.id}
-                              value={member.id.toString()}
-                              onSelect={() => {
-                                setSelectedMemberId(member.id.toString());
-                                setSelectedMember(member);
-                                setMemberSearchOpen(false);
-                                setMemberSearchQuery("");
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedMemberId === member.id.toString() ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              <div className="flex flex-col">
-                                <span className="font-bold">{member.firstName} {member.lastName}</span>
-                                {member.fiscalCode && (
-                                  <span className="text-[10px] text-muted-foreground">{member.fiscalCode}</span>
-                                )}
-                              </div>
-                            </CommandItem>
-                          ))}
-                      </CommandGroup>
-                    )}
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-        }
+      <NuovoPagamentoModal
+        isOpen={isFormOpen}
+        onClose={closeDialog}
+        defaultMemberId={selectedMemberId ? parseInt(selectedMemberId) : undefined}
+        editingPayment={editingPayment}
       />
     </div>
   );

@@ -59,9 +59,10 @@ Tutto l'apprendimento, insegnamento e l'offerta al pubblico si condenserà in so
    - *Key Columns:* `status` (active, waiting_list, frozen), `remaining_punch_cards` (Carnet ingressi), `wallet_credit` (Buoni Rimborso), prelevando il metadata JSON dalla categoria padre.
 
 ### 8. Gestione Operative & HR (Il Modulo Staff e Ticketing)
-In ottica Enterprise, il sistema astrae la logica del team da quella didattica tramite due moduli dedicati:
+In ottica Enterprise, il sistema astrae la logica del team da quella didattica tramite moduli dedicati alla comunicazione inter-team e facility:
 - **`team_shifts`**: Griglia temporale dedicata all'amministrazione per le timbrature presenze (Payroll).
 - **`maintenance_tickets`**: Segnalazioni guasti sale/facilities gestibili dallo Staff con transizioni di stato.
+- **`team_comments`** e **`todos`**: Workspace di comunicazione a thread nidificati (nested chat) e chore-list collaborativa per connettere operativamente la segreteria.
 
 ### 9. Finances & Payments (Rivoluzionato)
 - **`payments`**: La transazione contabile. Nel nuovo sistema **non avrà più 12 colonne FK orfane**.

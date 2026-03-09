@@ -22,11 +22,13 @@ import type { Member, PriceList, Course, Quote, PriceListItem } from "@shared/sc
 export function NuovoPagamentoModal({
     isOpen,
     onClose,
-    defaultMemberId
+    defaultMemberId,
+    editingPayment
 }: {
     isOpen: boolean;
     onClose: () => void;
     defaultMemberId?: number | null;
+    editingPayment?: any;
 }) {
     const { toast } = useToast();
     const [, setLocation] = useLocation();
