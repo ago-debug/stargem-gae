@@ -15,6 +15,7 @@ import { Plus, Search, CreditCard, Check, ChevronsUpDown, X, Edit, Download, Fil
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
 import type { Payment, InsertPayment, Member, PaymentMethod, Course } from "@shared/schema";
 
@@ -195,14 +196,31 @@ export default function Payments() {
     toast({ title: "Esportazione completata" });
   };
 
-  const filteredPayments = payments?.filter(p => {
+  const filteredPaymentsRaw = payments?.filter(p => {
     const matchesSearch = !searchQuery ||
       getMemberName(p).toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.type || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPending = !showPendingOnly || p.status === 'pending';
     return matchesSearch && matchesPending;
-  });
+  }) || [];
+
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Payment>("dueDate");
+
+  const getSortValue = (payment: Payment, key: string) => {
+    switch (key) {
+      case "member": return getMemberName(payment);
+      case "type": return payment.type;
+      case "description": return payment.description;
+      case "amount": return parseFloat((payment.amount as string) || "0");
+      case "dueDate": return payment.dueDate;
+      case "paidDate": return payment.paidDate;
+      case "paymentMethod": return payment.paymentMethod;
+      default: return null;
+    }
+  };
+
+  const filteredPayments = sortItems(filteredPaymentsRaw, getSortValue);
 
   const formatLocalISO = (date: Date | string | null | undefined) => {
     if (!date) return "";
@@ -316,20 +334,20 @@ export default function Payments() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Partecipante</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Descrizione</TableHead>
-                  <TableHead>Importo</TableHead>
-                  <TableHead>Scadenza</TableHead>
-                  <TableHead>Pagato il</TableHead>
-                  <TableHead>Metodo</TableHead>
+                  <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Partecipante</SortableTableHead>
+                  <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
+                  <SortableTableHead sortKey="description" currentSort={sortConfig} onSort={handleSort}>Descrizione</SortableTableHead>
+                  <SortableTableHead sortKey="amount" currentSort={sortConfig} onSort={handleSort}>Importo</SortableTableHead>
+                  <SortableTableHead sortKey="dueDate" currentSort={sortConfig} onSort={handleSort}>Scadenza</SortableTableHead>
+                  <SortableTableHead sortKey="paidDate" currentSort={sortConfig} onSort={handleSort}>Pagato il</SortableTableHead>
+                  <SortableTableHead sortKey="paymentMethod" currentSort={sortConfig} onSort={handleSort}>Metodo</SortableTableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredPayments.map((payment) => (
                   <TableRow key={payment.id} data-testid={`payment-row-${payment.id}`}>
-                    <TableCell className="font-medium">
+                    <TableCell className={cn("font-medium", isSortedColumn("member") && "sorted-column-cell")}>
                       <button
                         onClick={() => setLocation(`${window.location.pathname}?editMemberId=${payment.memberId}`)}
                         className="flex items-center gap-2 hover:underline text-primary text-left"
@@ -339,16 +357,16 @@ export default function Payments() {
                         {getMemberName(payment)}
                       </button>
                     </TableCell>
-                    <TableCell className="capitalize">{payment.type}</TableCell>
-                    <TableCell>{payment.description || "-"}</TableCell>
-                    <TableCell className="font-medium">€{payment.amount}</TableCell>
-                    <TableCell>
+                    <TableCell className={cn("capitalize", isSortedColumn("type") && "sorted-column-cell")}>{payment.type}</TableCell>
+                    <TableCell className={cn(isSortedColumn("description") && "sorted-column-cell")}>{payment.description || "-"}</TableCell>
+                    <TableCell className={cn("font-medium", isSortedColumn("amount") && "sorted-column-cell")}>€{payment.amount}</TableCell>
+                    <TableCell className={cn(isSortedColumn("dueDate") && "sorted-column-cell")}>
                       {payment.dueDate ? new Date(payment.dueDate).toLocaleDateString('it-IT') : "-"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={cn(isSortedColumn("paidDate") && "sorted-column-cell")}>
                       {payment.paidDate ? new Date(payment.paidDate).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "-"}
                     </TableCell>
-                    <TableCell className="capitalize">{payment.paymentMethod || "-"}</TableCell>
+                    <TableCell className={cn("capitalize", isSortedColumn("paymentMethod") && "sorted-column-cell")}>{payment.paymentMethod || "-"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button

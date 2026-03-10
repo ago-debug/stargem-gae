@@ -9,6 +9,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -395,6 +397,23 @@ export default function StudioBookings() {
         }).sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime());
     }, [bookings, searchQuery, statusFilter, studioFilter, dateFilter]);
 
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("datetime");
+
+    const getSortValue = (b: any, key: string) => {
+        switch (key) {
+            case "datetime": return new Date(b.bookingDate).toISOString() + b.startTime;
+            case "studioName": return b.studioName || "Sala";
+            case "instructor": return b.instructorFirstName ? `${b.instructorFirstName} ${b.instructorLastName}` : "";
+            case "service": return b.serviceName || b.title || "Servizio";
+            case "member": return b.memberFirstName ? `${b.memberFirstName} ${b.memberLastName}` : (b.title || "");
+            case "status": return b.status || "";
+            case "paid": return b.paid ? 1 : 0;
+            default: return null;
+        }
+    };
+
+    const sortedBookings = sortItems(filteredBookings, getSortValue);
+
     const handleCreateBooking = () => {
         const today = new Date();
         const hour = Math.max(8, today.getHours() + 1);
@@ -510,13 +529,13 @@ export default function StudioBookings() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Data e Ora</TableHead>
-                                    <TableHead>Sala</TableHead>
-                                    <TableHead>Insegnante</TableHead>
-                                    <TableHead>Servizio</TableHead>
-                                    <TableHead>Partecipante</TableHead>
-                                    <TableHead>Stato</TableHead>
-                                    <TableHead>Pagamento</TableHead>
+                                    <SortableTableHead sortKey="datetime" currentSort={sortConfig} onSort={handleSort}>Data e Ora</SortableTableHead>
+                                    <SortableTableHead sortKey="studioName" currentSort={sortConfig} onSort={handleSort}>Sala</SortableTableHead>
+                                    <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Insegnante</SortableTableHead>
+                                    <SortableTableHead sortKey="service" currentSort={sortConfig} onSort={handleSort}>Servizio</SortableTableHead>
+                                    <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Partecipante</SortableTableHead>
+                                    <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
+                                    <SortableTableHead sortKey="paid" currentSort={sortConfig} onSort={handleSort}>Pagamento</SortableTableHead>
                                     <TableHead className="text-right">Azioni</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -532,9 +551,9 @@ export default function StudioBookings() {
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filteredBookings.map((b) => (
+                                    sortedBookings.map((b) => (
                                         <TableRow key={b.id}>
-                                            <TableCell className="font-medium">
+                                            <TableCell className={cn("font-medium", isSortedColumn("datetime") && "sorted-column-cell")}>
                                                 <div className="flex flex-col">
                                                     <span>{format(new Date(b.bookingDate), 'dd/MM/yyyy')}</span>
                                                     <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -542,12 +561,12 @@ export default function StudioBookings() {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className={cn(isSortedColumn("studioName") && "sorted-column-cell")}>
                                                 <Badge variant="outline" className="bg-slate-50">
                                                     {b.studioName || "Sala"}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className={cn(isSortedColumn("instructor") && "sorted-column-cell")}>
                                                 {b.instructorFirstName ? (
                                                     <div className="flex items-center gap-2">
                                                         <User className="w-4 h-4 text-muted-foreground" />
@@ -557,12 +576,12 @@ export default function StudioBookings() {
                                                     <span className="text-muted-foreground italic text-xs">Nessuno</span>
                                                 )}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className={cn(isSortedColumn("service") && "sorted-column-cell")}>
                                                 <div className="font-medium text-primary">
                                                     {b.serviceName || b.title || "Servizio"}
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className={cn(isSortedColumn("member") && "sorted-column-cell")}>
                                                 {b.memberFirstName ? (
                                                     <div className="flex flex-col">
                                                         <span className="font-bold">{b.memberFirstName} {b.memberLastName}</span>
@@ -571,7 +590,7 @@ export default function StudioBookings() {
                                                     <span className="italic text-muted-foreground">{b.title || "-"}</span>
                                                 )}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className={cn(isSortedColumn("status") && "sorted-column-cell")}>
                                                 <Badge
                                                     variant={
                                                         b.status === 'confirmed' ? 'default' :
@@ -582,7 +601,7 @@ export default function StudioBookings() {
                                                         b.status === 'pending' ? 'In attesa' : 'Annullata'}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className={cn(isSortedColumn("paid") && "sorted-column-cell")}>
                                                 <div className="flex flex-col gap-1">
                                                     <Badge variant={b.paid ? 'default' : 'secondary'} className={b.paid ? "bg-green-600" : ""}>
                                                         {b.paid ? 'Pagato' : 'Da pagare'}

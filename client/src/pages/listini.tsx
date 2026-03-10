@@ -19,7 +19,8 @@ import { it } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 export default function PriceLists() {
     const { toast } = useToast();
     const [selectedList, setSelectedList] = useState<PriceList | null>(null);
@@ -502,6 +503,19 @@ function PriceItemManager({ type, entities, activeItems, quotes, onUpsert, onDel
         (e.sku && e.sku.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("name");
+
+    const getSortValue = (entity: any, key: string) => {
+        switch (key) {
+            case "sku": return entity.sku || "";
+            case "name": return entity.name;
+            case "price": return entity.price ? parseFloat(entity.price) : 0;
+            default: return null;
+        }
+    };
+
+    const sortedEntities = sortItems(filteredEntities, getSortValue);
+
     return (
         <div className="space-y-4">
             <div className="relative">
@@ -518,22 +532,22 @@ function PriceItemManager({ type, entities, activeItems, quotes, onUpsert, onDel
                 <Table>
                     <TableHeader className="bg-muted/30">
                         <TableRow>
-                            <TableHead className="w-[100px]">SKU</TableHead>
-                            <TableHead>Nome</TableHead>
-                            <TableHead className="w-[150px]">Prezzo Base</TableHead>
+                            <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort} className="w-[100px]">SKU</SortableTableHead>
+                            <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                            <SortableTableHead sortKey="price" currentSort={sortConfig} onSort={handleSort} className="w-[150px]">Prezzo Base</SortableTableHead>
                             <TableHead className="w-[180px]">Applica Quota</TableHead>
                             <TableHead className="w-[150px] text-right">Quota Listino (€)</TableHead>
                             <TableHead className="w-[80px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredEntities.map((entity) => {
+                        {sortedEntities.map((entity) => {
                             const activeItem = activeItems.find(i => i.entityId === entity.id);
                             return (
                                 <TableRow key={entity.id} className={activeItem ? "bg-primary/5" : ""}>
-                                    <TableCell className="font-mono text-[10px] text-muted-foreground uppercase">{entity.sku || "-"}</TableCell>
-                                    <TableCell className="font-medium text-sm">{entity.name}</TableCell>
-                                    <TableCell className="text-muted-foreground text-sm font-mono">
+                                    <TableCell className={cn("font-mono text-[10px] text-muted-foreground uppercase", isSortedColumn("sku") && "sorted-column-cell")}>{entity.sku || "-"}</TableCell>
+                                    <TableCell className={cn("font-medium text-sm", isSortedColumn("name") && "sorted-column-cell")}>{entity.name}</TableCell>
+                                    <TableCell className={cn("text-muted-foreground text-sm font-mono", isSortedColumn("price") && "sorted-column-cell")}>
                                         {entity.price ? `€ ${parseFloat(entity.price).toFixed(2)}` : "-"}
                                     </TableCell>
                                     <TableCell>
@@ -652,6 +666,19 @@ function QuotesManager() {
         }
     });
 
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Quote>("name");
+
+    const getSortValue = (quote: Quote, key: string) => {
+        switch (key) {
+            case "name": return quote.name;
+            case "category": return quote.category;
+            case "amount": return quote.amount ? parseFloat(quote.amount as any) : 0;
+            default: return null;
+        }
+    };
+
+    const sortedQuotes = sortItems(quotes || [], getSortValue);
+
     if (isLoading) return <div>Caricamento quote...</div>;
 
     return (
@@ -728,20 +755,20 @@ function QuotesManager() {
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-muted/50 hover:bg-muted/50">
-                            <TableHead>Nome</TableHead>
-                            <TableHead>Categoria</TableHead>
-                            <TableHead>Importo</TableHead>
+                            <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                            <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
+                            <SortableTableHead sortKey="amount" currentSort={sortConfig} onSort={handleSort}>Importo</SortableTableHead>
                             <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {quotes?.map((quote) => (
+                        {sortedQuotes.map((quote) => (
                             <TableRow key={quote.id}>
-                                <TableCell className="font-medium">{quote.name}</TableCell>
-                                <TableCell>
+                                <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{quote.name}</TableCell>
+                                <TableCell className={cn(isSortedColumn("category") && "sorted-column-cell")}>
                                     <Badge variant="secondary" className="font-normal text-xs">{quote.category}</Badge>
                                 </TableCell>
-                                <TableCell className="font-mono">€ {Number(quote.amount).toFixed(2)}</TableCell>
+                                <TableCell className={cn("font-mono", isSortedColumn("amount") && "sorted-column-cell")}>€ {Number(quote.amount).toFixed(2)}</TableCell>
                                 <TableCell>
                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteQuoteMutation.mutate(quote.id)}>
                                         <Trash2 className="w-3.5 h-3.5" />

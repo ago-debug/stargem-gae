@@ -67,6 +67,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Separator } from "@/components/ui/separator";
 import { validateFiscalCode, parseFiscalCode, getPlaceName } from "@/lib/fiscalCodeUtils";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 
 const WEEKDAYS = [
     { id: "LUN", label: "Lunedì", short: "Lun" },
@@ -170,6 +172,16 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
             email: e.memberEmail || '',
         })) || [];
 
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
+    const getSortValue = (enrollment: any, key: string) => {
+        switch (key) {
+            case "firstName": return enrollment.firstName || "";
+            case "lastName": return enrollment.lastName || "";
+            default: return null;
+        }
+    };
+    const sortedEnrollments = sortItems(courseEnrollments, getSortValue);
+
     return (
         <div className="space-y-4 pt-4">
             <div className="flex items-center justify-between">
@@ -215,14 +227,14 @@ function EnrollmentsTab({ courseId }: { courseId: number }) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Nome</TableHead>
+                            <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
                             <TableHead className="text-right">Azioni</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {courseEnrollments.map((e) => (
+                        {sortedEnrollments.map((e: any) => (
                             <TableRow key={e.enrollmentId}>
-                                <TableCell>{e.lastName} {e.firstName}</TableCell>
+                                <TableCell className={cn(isSortedColumn("lastName") && "sorted-column-cell")}>{e.lastName} {e.firstName}</TableCell>
                                 <TableCell className="text-right">
                                     <Button
                                         variant="ghost"
@@ -261,6 +273,17 @@ function AttendancesTab({ courseId }: { courseId: number }) {
         })
         .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime()) || [];
 
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("attendanceDate");
+    const getSortValue = (attendance: any, key: string) => {
+        switch (key) {
+            case "attendanceDate": return attendance.attendanceDate || "";
+            case "memberName": return attendance.memberName || "";
+            default: return null;
+        }
+    };
+
+    const sortedAttendances = sortItems(courseAttendances, getSortValue);
+
     return (
         <div className="space-y-4 pt-4">
             <h3 className="text-lg font-medium">Presenze Recenti</h3>
@@ -268,16 +291,16 @@ function AttendancesTab({ courseId }: { courseId: number }) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Data</TableHead>
-                            <TableHead>Membro</TableHead>
+                            <SortableTableHead sortKey="attendanceDate" currentSort={sortConfig} onSort={handleSort}>Data</SortableTableHead>
+                            <SortableTableHead sortKey="memberName" currentSort={sortConfig} onSort={handleSort}>Membro</SortableTableHead>
                             <TableHead className="text-right">Azioni</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {courseAttendances.map((a) => (
+                        {sortedAttendances.map((a: any) => (
                             <TableRow key={a.id}>
-                                <TableCell>{format(new Date(a.attendanceDate), "dd/MM/yyyy")}</TableCell>
-                                <TableCell>{a.memberName}</TableCell>
+                                <TableCell className={cn(isSortedColumn("attendanceDate") && "sorted-column-cell")}>{format(new Date(a.attendanceDate), "dd/MM/yyyy")}</TableCell>
+                                <TableCell className={cn(isSortedColumn("memberName") && "sorted-column-cell")}>{a.memberName}</TableCell>
                                 <TableCell className="text-right">
                                     <Button
                                         variant="ghost"

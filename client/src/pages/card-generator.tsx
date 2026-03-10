@@ -10,6 +10,8 @@ import { Search, IdCard, CheckSquare, Square, Download, Smartphone, Loader2 } fr
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 
 function useDebounce<T>(value: T, delay: number): T {
     const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -45,6 +47,18 @@ export default function CardGenerator() {
     });
 
     const members = membersData?.members || [];
+
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Member>("name");
+    const getSortValue = (member: Member, key: string) => {
+        switch (key) {
+            case "name": return member.lastName + " " + member.firstName;
+            case "cardNumber": return member.cardNumber || "";
+            case "fiscalCode": return member.fiscalCode || "";
+            default: return null;
+        }
+    };
+    const sortedMembers = sortItems(members, getSortValue);
+
     const selectedMembers = members.filter(m => selectedMemberIds.has(m.id));
 
     const toggleSelectAll = () => {
@@ -181,9 +195,9 @@ export default function CardGenerator() {
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
                                     <TableHead className="w-12 text-center">Sel.</TableHead>
-                                    <TableHead>Cognome e Nome</TableHead>
-                                    <TableHead>N. Tessera</TableHead>
-                                    <TableHead>Codice Fiscale</TableHead>
+                                    <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Cognome e Nome</SortableTableHead>
+                                    <SortableTableHead sortKey="cardNumber" currentSort={sortConfig} onSort={handleSort}>N. Tessera</SortableTableHead>
+                                    <SortableTableHead sortKey="fiscalCode" currentSort={sortConfig} onSort={handleSort}>Codice Fiscale</SortableTableHead>
                                     <TableHead className="text-right">Azione</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -193,7 +207,7 @@ export default function CardGenerator() {
                                 ) : members.length === 0 ? (
                                     <TableRow><TableCell colSpan={5} className="text-center py-12 text-muted-foreground">Nessun iscritto trovato per la ricerca "{searchQuery}"</TableCell></TableRow>
                                 ) : (
-                                    members.map((member) => (
+                                    sortedMembers.map((member) => (
                                         <TableRow key={member.id} className="hover:bg-muted/5 transition-colors">
                                             <TableCell className="text-center">
                                                 <Checkbox
@@ -202,9 +216,9 @@ export default function CardGenerator() {
                                                     className="border-2 data-[state=checked]:bg-[#e11d48]"
                                                 />
                                             </TableCell>
-                                            <TableCell className="font-bold">{member.lastName} {member.firstName}</TableCell>
-                                            <TableCell className="font-mono text-[#e11d48] text-sm">{member.cardNumber || "--"}</TableCell>
-                                            <TableCell className="font-mono text-xs text-muted-foreground">{member.fiscalCode}</TableCell>
+                                            <TableCell className={cn("font-bold", isSortedColumn("name") && "sorted-column-cell")}>{member.lastName} {member.firstName}</TableCell>
+                                            <TableCell className={cn("font-mono text-[#e11d48] text-sm", isSortedColumn("cardNumber") && "sorted-column-cell")}>{member.cardNumber || "--"}</TableCell>
+                                            <TableCell className={cn("font-mono text-xs text-muted-foreground", isSortedColumn("fiscalCode") && "sorted-column-cell")}>{member.fiscalCode}</TableCell>
                                             <TableCell className="text-right">
                                                 <Button
                                                     variant="ghost"

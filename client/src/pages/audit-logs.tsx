@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, AlertCircle, FileJson } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 
 interface AuditLog {
     id: number;
@@ -22,6 +24,20 @@ export default function AuditLogsPage() {
     const { data: logs, isLoading } = useQuery<AuditLog[]>({
         queryKey: ["/api/audit-logs"],
     });
+
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<AuditLog>("createdAt");
+
+    const getSortValue = (log: AuditLog, key: string) => {
+        switch (key) {
+            case "createdAt": return log.createdAt;
+            case "performedBy": return log.performedBy;
+            case "entityType": return log.entityType;
+            case "action": return log.action;
+            default: return null;
+        }
+    };
+
+    const sortedLogs = logs ? sortItems(logs, getSortValue) : [];
 
     const getEntityLabel = (type: string) => {
         switch (type) {
@@ -59,10 +75,10 @@ export default function AuditLogsPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Data</TableHead>
-                                    <TableHead>Utente</TableHead>
-                                    <TableHead>Oggetto</TableHead>
-                                    <TableHead>Azione</TableHead>
+                                    <SortableTableHead sortKey="createdAt" currentSort={sortConfig} onSort={handleSort}>Data</SortableTableHead>
+                                    <SortableTableHead sortKey="performedBy" currentSort={sortConfig} onSort={handleSort}>Utente</SortableTableHead>
+                                    <SortableTableHead sortKey="entityType" currentSort={sortConfig} onSort={handleSort}>Oggetto</SortableTableHead>
+                                    <SortableTableHead sortKey="action" currentSort={sortConfig} onSort={handleSort}>Azione</SortableTableHead>
                                     <TableHead className="text-right">Dati Originali</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -81,22 +97,22 @@ export default function AuditLogsPage() {
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    logs.map((log) => (
+                                    sortedLogs.map((log) => (
                                         <TableRow key={log.id}>
-                                            <TableCell className="whitespace-nowrap">
+                                            <TableCell className={cn("whitespace-nowrap", isSortedColumn("createdAt") && "sorted-column-cell")}>
                                                 {format(new Date(log.createdAt), "dd MMM yyyy, HH:mm", { locale: it })}
                                             </TableCell>
-                                            <TableCell className="font-medium text-amber-600 dark:text-amber-500">
+                                            <TableCell className={cn("font-medium text-amber-600 dark:text-amber-500", isSortedColumn("performedBy") && "sorted-column-cell")}>
                                                 {log.performedBy}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className={cn(isSortedColumn("entityType") && "sorted-column-cell")}>
                                                 <div className="flex items-center gap-2">
                                                     <Badge variant="outline" className="font-mono bg-slate-50">
                                                         {getEntityLabel(log.entityType)} #{log.entityId}
                                                     </Badge>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className={cn(isSortedColumn("action") && "sorted-column-cell")}>
                                                 <Badge variant="destructive" className="bg-red-100 text-red-800 hover:bg-red-200 border-red-200">
                                                     {log.action}
                                                 </Badge>

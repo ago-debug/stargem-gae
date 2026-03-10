@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -173,10 +175,71 @@ export default function MemberDashboard() {
     }
   };
 
+
   const memberEnrollments = enrollments?.filter(e => e.memberId === memberId) || [];
   const memberAttendances = attendances?.filter(a => a.memberId === memberId) || [];
   const memberMemberships = memberships?.filter(m => m.memberId === memberId) || [];
   const memberCertificates = medicalCertificates?.filter(c => c.memberId === memberId) || [];
+
+  const { sortConfig: scPay, handleSort: hsPay, sortItems: siPay, isSortedColumn: iscPay } = useSortableTable<any>("dueDate");
+  const getSortValuePay = (p: any, key: string) => {
+    switch (key) {
+      case "description": return p.description || p.type || "";
+      case "dueDate": return p.dueDate || "";
+      case "paymentMethod": return p.paymentMethod || "";
+      case "amount": return Number(p.amount || 0);
+      case "status": return p.status || "";
+      default: return null;
+    }
+  };
+  const sortedPayments = siPay(memberPayments || [], getSortValuePay);
+
+  const { sortConfig: scCert, handleSort: hsCert, sortItems: siCert, isSortedColumn: iscCert } = useSortableTable<any>("expiryDate");
+  const getSortValueCert = (c: any, key: string) => {
+    switch (key) {
+      case "type": return c.type || "Medico";
+      case "issueDate": return c.issueDate || "";
+      case "expiryDate": return c.expiryDate || "";
+      case "status": return new Date(c.expiryDate) > new Date() ? 1 : 0;
+      default: return null;
+    }
+  };
+  const sortedCertificates = siCert(memberCertificates, getSortValueCert);
+
+  const { sortConfig: scMemb, handleSort: hsMemb, sortItems: siMemb, isSortedColumn: iscMemb } = useSortableTable<any>("endDate");
+  const getSortValueMemb = (m: any, key: string) => {
+    switch (key) {
+      case "type": return m.type || "";
+      case "startDate": return m.startDate || "";
+      case "endDate": return m.endDate || "";
+      case "status": return m.status || "";
+      default: return null;
+    }
+  };
+  const sortedMemberships = siMemb(memberMemberships, getSortValueMemb);
+
+  const { sortConfig: scAtt, handleSort: hsAtt, sortItems: siAtt, isSortedColumn: iscAtt } = useSortableTable<any>("attendanceDate");
+  const getSortValueAtt = (a: any, key: string) => {
+    switch (key) {
+      case "attendanceDate": return a.attendanceDate || "";
+      case "courseId": return courses?.find(c => c.id === a.courseId)?.name || "";
+      case "type": return a.type || "";
+      default: return null;
+    }
+  };
+  const sortedAttendances = siAtt(memberAttendances, getSortValueAtt);
+
+  const { sortConfig: scEnr, handleSort: hsEnr, sortItems: siEnr, isSortedColumn: iscEnr } = useSortableTable<any>("startDate");
+  const getSortValueEnr = (e: any, key: string) => {
+    switch (key) {
+      case "courseId": return courses?.find(c => c.id === e.courseId)?.name || "";
+      case "startDate": return e.startDate || "";
+      case "status": return e.status || "";
+      default: return null;
+    }
+  };
+  const sortedEnrollments = siEnr(memberEnrollments, getSortValueEnr);
+
 
   const getCardStatus = () => {
     if (!formData.cardExpiryDate) return null;
@@ -582,21 +645,21 @@ export default function MemberDashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Descrizione</TableHead>
-                        <TableHead>Scadenza</TableHead>
-                        <TableHead>Metodo</TableHead>
-                        <TableHead>Importo</TableHead>
-                        <TableHead>Stato</TableHead>
+                        <SortableTableHead sortKey="description" currentSort={scPay} onSort={hsPay}>Descrizione</SortableTableHead>
+                        <SortableTableHead sortKey="dueDate" currentSort={scPay} onSort={hsPay}>Scadenza</SortableTableHead>
+                        <SortableTableHead sortKey="paymentMethod" currentSort={scPay} onSort={hsPay}>Metodo</SortableTableHead>
+                        <SortableTableHead sortKey="amount" currentSort={scPay} onSort={hsPay}>Importo</SortableTableHead>
+                        <SortableTableHead sortKey="status" currentSort={scPay} onSort={hsPay}>Stato</SortableTableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {memberPayments.map((p: any) => (
+                      {sortedPayments.map((p: any) => (
                         <TableRow key={p.id}>
-                          <TableCell className="font-medium">{p.description || p.type}</TableCell>
-                          <TableCell>{p.dueDate ? format(new Date(p.dueDate), "dd/MM/yyyy") : "-"}</TableCell>
-                          <TableCell>{p.paymentMethod || "-"}</TableCell>
-                          <TableCell>€{p.amount}</TableCell>
-                          <TableCell>
+                          <TableCell className={cn("font-medium", iscPay("description") && "sorted-column-cell")}>{p.description || p.type}</TableCell>
+                          <TableCell className={cn(iscPay("dueDate") && "sorted-column-cell")}>{p.dueDate ? format(new Date(p.dueDate), "dd/MM/yyyy") : "-"}</TableCell>
+                          <TableCell className={cn(iscPay("paymentMethod") && "sorted-column-cell")}>{p.paymentMethod || "-"}</TableCell>
+                          <TableCell className={cn(iscPay("amount") && "sorted-column-cell")}>€{p.amount}</TableCell>
+                          <TableCell className={cn(iscPay("status") && "sorted-column-cell")}>
                             <Badge variant={p.status === 'paid' ? 'default' : p.status === 'overdue' ? 'destructive' : 'secondary'}>
                               {p.status === 'paid' ? 'Pagato' : p.status === 'overdue' ? 'Scaduto' : 'In Attesa'}
                             </Badge>
@@ -698,19 +761,19 @@ export default function MemberDashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Data Rilascio</TableHead>
-                        <TableHead>Data Scadenza</TableHead>
-                        <TableHead>Stato</TableHead>
+                        <SortableTableHead sortKey="type" currentSort={scCert} onSort={hsCert}>Tipo</SortableTableHead>
+                        <SortableTableHead sortKey="issueDate" currentSort={scCert} onSort={hsCert}>Data Rilascio</SortableTableHead>
+                        <SortableTableHead sortKey="expiryDate" currentSort={scCert} onSort={hsCert}>Data Scadenza</SortableTableHead>
+                        <SortableTableHead sortKey="status" currentSort={scCert} onSort={hsCert}>Stato</SortableTableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {memberCertificates.map((cert: any) => (
+                      {sortedCertificates.map((cert: any) => (
                         <TableRow key={cert.id}>
-                          <TableCell>{cert.type || "Medico"}</TableCell>
-                          <TableCell>{cert.issueDate ? format(new Date(cert.issueDate), "dd/MM/yyyy") : "-"}</TableCell>
-                          <TableCell>{cert.expiryDate ? format(new Date(cert.expiryDate), "dd/MM/yyyy") : "-"}</TableCell>
-                          <TableCell>
+                          <TableCell className={cn(iscCert("type") && "sorted-column-cell")}>{cert.type || "Medico"}</TableCell>
+                          <TableCell className={cn(iscCert("issueDate") && "sorted-column-cell")}>{cert.issueDate ? format(new Date(cert.issueDate), "dd/MM/yyyy") : "-"}</TableCell>
+                          <TableCell className={cn(iscCert("expiryDate") && "sorted-column-cell")}>{cert.expiryDate ? format(new Date(cert.expiryDate), "dd/MM/yyyy") : "-"}</TableCell>
+                          <TableCell className={cn(iscCert("status") && "sorted-column-cell")}>
                             <Badge variant={new Date(cert.expiryDate) > new Date() ? "default" : "destructive"}>
                               {new Date(cert.expiryDate) > new Date() ? "Valido" : "Scaduto"}
                             </Badge>
@@ -761,19 +824,19 @@ export default function MemberDashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Inizio</TableHead>
-                        <TableHead>Fine</TableHead>
-                        <TableHead>Stato</TableHead>
+                        <SortableTableHead sortKey="type" currentSort={scMemb} onSort={hsMemb}>Tipo</SortableTableHead>
+                        <SortableTableHead sortKey="startDate" currentSort={scMemb} onSort={hsMemb}>Inizio</SortableTableHead>
+                        <SortableTableHead sortKey="endDate" currentSort={scMemb} onSort={hsMemb}>Fine</SortableTableHead>
+                        <SortableTableHead sortKey="status" currentSort={scMemb} onSort={hsMemb}>Stato</SortableTableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {memberMemberships.map((membership: any) => (
+                      {sortedMemberships.map((membership: any) => (
                         <TableRow key={membership.id}>
-                          <TableCell>{membership.type}</TableCell>
-                          <TableCell>{membership.startDate ? format(new Date(membership.startDate), "dd/MM/yyyy") : "-"}</TableCell>
-                          <TableCell>{membership.endDate ? format(new Date(membership.endDate), "dd/MM/yyyy") : "-"}</TableCell>
-                          <TableCell>
+                          <TableCell className={cn(iscMemb("type") && "sorted-column-cell")}>{membership.type}</TableCell>
+                          <TableCell className={cn(iscMemb("startDate") && "sorted-column-cell")}>{membership.startDate ? format(new Date(membership.startDate), "dd/MM/yyyy") : "-"}</TableCell>
+                          <TableCell className={cn(iscMemb("endDate") && "sorted-column-cell")}>{membership.endDate ? format(new Date(membership.endDate), "dd/MM/yyyy") : "-"}</TableCell>
+                          <TableCell className={cn(iscMemb("status") && "sorted-column-cell")}>
                             <Badge variant={membership.status === "active" ? "default" : "secondary"}>
                               {membership.status === "active" ? "Attiva" : "Scaduta"}
                             </Badge>
@@ -804,21 +867,21 @@ export default function MemberDashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Corso</TableHead>
-                        <TableHead>Tipo</TableHead>
+                        <SortableTableHead sortKey="attendanceDate" currentSort={scAtt} onSort={hsAtt}>Data</SortableTableHead>
+                        <SortableTableHead sortKey="courseId" currentSort={scAtt} onSort={hsAtt}>Corso</SortableTableHead>
+                        <SortableTableHead sortKey="type" currentSort={scAtt} onSort={hsAtt}>Tipo</SortableTableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {memberAttendances.slice(0, 20).map((attendance: any) => {
+                      {sortedAttendances.slice(0, 20).map((attendance: any) => {
                         const course = courses?.find(c => c.id === attendance.courseId);
                         return (
                           <TableRow key={attendance.id}>
-                            <TableCell>
+                            <TableCell className={cn(iscAtt("attendanceDate") && "sorted-column-cell")}>
                               {format(new Date(attendance.attendanceDate), "dd/MM/yyyy HH:mm", { locale: it })}
                             </TableCell>
-                            <TableCell>{course?.name || "-"}</TableCell>
-                            <TableCell>
+                            <TableCell className={cn(iscAtt("courseId") && "sorted-column-cell")}>{course?.name || "-"}</TableCell>
+                            <TableCell className={cn(iscAtt("type") && "sorted-column-cell")}>
                               <Badge variant="outline">
                                 {attendance.type === 'manual' ? 'Manuale' :
                                   attendance.type === 'barcode' ? 'Badge' : 'Auto'}
@@ -855,22 +918,22 @@ export default function MemberDashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Corso</TableHead>
-                        <TableHead>Data Iscrizione</TableHead>
-                        <TableHead>Stato</TableHead>
+                        <SortableTableHead sortKey="courseId" currentSort={scEnr} onSort={hsEnr}>Corso</SortableTableHead>
+                        <SortableTableHead sortKey="startDate" currentSort={scEnr} onSort={hsEnr}>Data Iscrizione</SortableTableHead>
+                        <SortableTableHead sortKey="status" currentSort={scEnr} onSort={hsEnr}>Stato</SortableTableHead>
                         <TableHead className="text-right">Azioni</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {memberEnrollments.map((enrollment: any) => {
+                      {sortedEnrollments.map((enrollment: any) => {
                         const course = courses?.find(c => c.id === enrollment.courseId);
                         return (
                           <TableRow key={enrollment.id}>
-                            <TableCell className="font-medium">{course?.name || "-"}</TableCell>
-                            <TableCell>
+                            <TableCell className={cn("font-medium", iscEnr("courseId") && "sorted-column-cell")}>{course?.name || "-"}</TableCell>
+                            <TableCell className={cn(iscEnr("startDate") && "sorted-column-cell")}>
                               {enrollment.startDate ? format(new Date(enrollment.startDate), "dd/MM/yyyy") : "-"}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className={cn(iscEnr("status") && "sorted-column-cell")}>
                               <Badge variant={enrollment.status === "active" ? "default" : "secondary"}>
                                 {enrollment.status === "active" ? "Attivo" : enrollment.status}
                               </Badge>

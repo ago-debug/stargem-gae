@@ -148,6 +148,19 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
     email: data.member.email || '',
   }));
 
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
+
+  const getSortValue = (enrollment: any, key: string) => {
+    switch (key) {
+      case "firstName": return enrollment.firstName || "";
+      case "lastName": return enrollment.lastName || "";
+      case "email": return enrollment.email || "";
+      default: return null;
+    }
+  };
+
+  const sortedEnrollments = sortItems(workshopEnrollments, getSortValue);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -210,18 +223,18 @@ function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Cognome</TableHead>
-                <TableHead>Email</TableHead>
+                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
+                <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
                 <TableHead className="text-right">Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {workshopEnrollments.map((enrollment: any) => (
+              {sortedEnrollments.map((enrollment: any) => (
                 <TableRow key={enrollment.enrollmentId}>
-                  <TableCell className="font-medium">{enrollment.firstName}</TableCell>
-                  <TableCell>{enrollment.lastName}</TableCell>
-                  <TableCell>{enrollment.email || '-'}</TableCell>
+                  <TableCell className={cn("font-medium", isSortedColumn("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
+                  <TableCell className={cn(isSortedColumn("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
+                  <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
@@ -334,6 +347,19 @@ function AttendancesTab({ workshopId }: AttendancesTabProps) {
     .map(e => members?.find(m => m.id === e.memberId))
     .filter((m): m is Member => m !== undefined) || [];
 
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("attendanceDate");
+
+  const getSortValue = (attendance: any, key: string) => {
+    switch (key) {
+      case "member": return attendance.memberName || "";
+      case "attendanceDate": return attendance.attendanceDate || "";
+      case "type": return attendance.type || "";
+      default: return null;
+    }
+  };
+
+  const sortedAttendances = sortItems(workshopAttendances, getSortValue);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -415,20 +441,20 @@ function AttendancesTab({ workshopId }: AttendancesTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Partecipante</TableHead>
-                <TableHead>Data e Ora</TableHead>
-                <TableHead>Tipo</TableHead>
+                <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Partecipante</SortableTableHead>
+                <SortableTableHead sortKey="attendanceDate" currentSort={sortConfig} onSort={handleSort}>Data e Ora</SortableTableHead>
+                <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
                 <TableHead className="text-right">Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {workshopAttendances.map((attendance: any) => (
+              {sortedAttendances.map((attendance: any) => (
                 <TableRow key={attendance.id}>
-                  <TableCell className="font-medium">{attendance.memberName}</TableCell>
-                  <TableCell>
+                  <TableCell className={cn("font-medium", isSortedColumn("member") && "sorted-column-cell")}>{attendance.memberName}</TableCell>
+                  <TableCell className={cn(isSortedColumn("attendanceDate") && "sorted-column-cell")}>
                     {format(new Date(attendance.attendanceDate), "dd/MM/yyyy HH:mm", { locale: it })}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={cn(isSortedColumn("type") && "sorted-column-cell")}>
                     <Badge variant="outline">
                       {attendance.type === 'manual' ? 'Manuale' :
                         attendance.type === 'barcode' ? 'Badge' : 'Auto'}

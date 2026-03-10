@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
 import { Search, Wallet, Check, ChevronsUpDown, Download, Printer, User, Plus, CreditCard, Edit } from "lucide-react";
 import type { Payment, Member, PaymentMethod, InsertPayment } from "@shared/schema";
@@ -42,6 +43,18 @@ export default function AccountingSheet() {
     const [notes, setNotes] = useState("");
     const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
     const [detailsItem, setDetailsItem] = useState<any>(null);
+
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Payment>("paidDate");
+
+    const getSortValue = (p: Payment, key: string) => {
+        switch (key) {
+            case "paidDate": return p.paidDate || p.createdAt;
+            case "amount": return parseFloat((p.amount as string) || "0");
+            case "method": return p.paymentMethod;
+            case "notes": return p.notes;
+            default: return null;
+        }
+    };
 
     const { data: paymentMethods } = useQuery<PaymentMethod[]>({
         queryKey: ["/api/payment-methods"],
@@ -759,64 +772,63 @@ export default function AccountingSheet() {
                             </div>
                         </div>
 
-                        {memberPayments.filter(p =>
-                            (p.status === 'paid' || p.status === 'completed') &&
-                            ((detailsItem?.type === 'course' && p.enrollmentId === detailsItem.dbId) ||
-                                (detailsItem?.type === 'workshop' && p.workshopEnrollmentId === detailsItem.dbId) ||
-                                (detailsItem?.type === 'service_booking' && p.bookingId === detailsItem.dbId) ||
-                                (detailsItem?.type === 'membership' && p.membershipId === detailsItem.dbId))
-                        ).length === 0 ? (
-                            <p className="text-center text-muted-foreground py-8">Nessun pagamento registrato.</p>
-                        ) : (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Data</TableHead>
-                                        <TableHead>Importo</TableHead>
-                                        <TableHead>Metodo e Tracciamento</TableHead>
-                                        <TableHead>Note</TableHead>
-                                        <TableHead className="text-right">Azioni</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {memberPayments.filter(p =>
-                                        (p.status === 'paid' || p.status === 'completed') &&
-                                        ((detailsItem?.type === 'course' && p.enrollmentId === detailsItem.dbId) ||
-                                            (detailsItem?.type === 'workshop' && p.workshopEnrollmentId === detailsItem.dbId) ||
-                                            (detailsItem?.type === 'service_booking' && p.bookingId === detailsItem.dbId) ||
-                                            (detailsItem?.type === 'membership' && p.membershipId === detailsItem.dbId))
-                                    ).map((p: any) => (
-                                        <TableRow key={p.id}>
-                                            <TableCell>{p.paidDate ? new Date(p.paidDate).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : new Date(p.createdAt || '').toLocaleString('it-IT')}</TableCell>
-                                            <TableCell className="font-bold text-green-600">€{parseFloat(p.amount).toFixed(2)}</TableCell>
-                                            <TableCell>
-                                                <div className="flex flex-col gap-1">
-                                                    <span>{p.paymentMethod || "-"}</span>
-                                                    {(p.createdBy || p.updatedBy) && (
-                                                        <div className="text-[10px] text-muted-foreground border-t pt-1 mt-1">
-                                                            {p.createdBy && (
-                                                                <div title="Creato da">👤 {p.createdBy} il {new Date(p.createdAt || '').toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' })}</div>
-                                                            )}
-                                                            {p.updatedBy && (
-                                                                <div title="Ultima modifica" className="italic mt-0.5">
-                                                                    📝 {p.updatedBy} il {p.updatedAt ? new Date(p.updatedAt).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : ''}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate" title={p.notes || ""}>{p.notes || "-"}</TableCell>
-                                            <TableCell className="text-right">
-                                                <Button size="sm" variant="ghost" onClick={() => { setIsDetailsDialogOpen(false); handleEditPayment(p); }}>
-                                                    <Edit className="w-4 h-4 inline" /> Modifica
-                                                </Button>
-                                            </TableCell>
+                        {(() => {
+                            const detailsPaymentsRaw = memberPayments.filter(p =>
+                                (p.status === 'paid' || p.status === 'completed') &&
+                                ((detailsItem?.type === 'course' && p.enrollmentId === detailsItem.dbId) ||
+                                    (detailsItem?.type === 'workshop' && p.workshopEnrollmentId === detailsItem.dbId) ||
+                                    (detailsItem?.type === 'service_booking' && p.bookingId === detailsItem.dbId) ||
+                                    (detailsItem?.type === 'membership' && p.membershipId === detailsItem.dbId))
+                            );
+                            if (detailsPaymentsRaw.length === 0) {
+                                return <p className="text-center text-muted-foreground py-8">Nessun pagamento registrato.</p>;
+                            }
+                            const detailsPayments = sortItems(detailsPaymentsRaw, getSortValue);
+                            return (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <SortableTableHead sortKey="paidDate" currentSort={sortConfig} onSort={handleSort}>Data</SortableTableHead>
+                                            <SortableTableHead sortKey="amount" currentSort={sortConfig} onSort={handleSort}>Importo</SortableTableHead>
+                                            <SortableTableHead sortKey="method" currentSort={sortConfig} onSort={handleSort}>Metodo e Tracciamento</SortableTableHead>
+                                            <SortableTableHead sortKey="notes" currentSort={sortConfig} onSort={handleSort}>Note</SortableTableHead>
+                                            <TableHead className="text-right">Azioni</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        )}
+                                    </TableHeader>
+                                    <TableBody>
+                                        {detailsPayments.map((p: any) => (
+                                            <TableRow key={p.id}>
+                                                <TableCell className={cn(isSortedColumn("paidDate") && "sorted-column-cell")}>{p.paidDate ? new Date(p.paidDate).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : new Date(p.createdAt || '').toLocaleString('it-IT')}</TableCell>
+                                                <TableCell className={cn("font-bold text-green-600", isSortedColumn("amount") && "sorted-column-cell")}>€{parseFloat(p.amount).toFixed(2)}</TableCell>
+                                                <TableCell className={cn(isSortedColumn("method") && "sorted-column-cell")}>
+                                                    <div className="flex flex-col gap-1">
+                                                        <span>{p.paymentMethod || "-"}</span>
+                                                        {(p.createdBy || p.updatedBy) && (
+                                                            <div className="text-[10px] text-muted-foreground border-t pt-1 mt-1">
+                                                                {p.createdBy && (
+                                                                    <div title="Creato da">👤 {p.createdBy} il {new Date(p.createdAt || '').toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' })}</div>
+                                                                )}
+                                                                {p.updatedBy && (
+                                                                    <div title="Ultima modifica" className="italic mt-0.5">
+                                                                        📝 {p.updatedBy} il {p.updatedAt ? new Date(p.updatedAt).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : ''}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className={cn("text-xs text-muted-foreground max-w-[150px] truncate", isSortedColumn("notes") && "sorted-column-cell")} title={p.notes || ""}>{p.notes || "-"}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button size="sm" variant="ghost" onClick={() => { setIsDetailsDialogOpen(false); handleEditPayment(p); }}>
+                                                        <Edit className="w-4 h-4 inline" /> Modifica
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            );
+                        })()}
                     </div>
                 </DialogContent>
             </Dialog>

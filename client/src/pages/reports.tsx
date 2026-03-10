@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -79,6 +81,22 @@ export default function Reports() {
   const [reportDescription, setReportDescription] = useState("");
   const [reportResult, setReportResult] = useState<{ data: any[]; total: number } | null>(null);
   const [executingReportId, setExecutingReportId] = useState<number | null>(null);
+
+  const { sortConfig: scRep, handleSort: hsRep, sortItems: siRep, isSortedColumn: iscRep } = useSortableTable<any>("createdAt");
+  const getSortValueRep = (r: any, key: string) => {
+    switch(key) {
+      case "name": return r.name || "";
+      case "entityType": return r.entityType || "";
+      case "fieldsCount": return r.selectedFields?.length || 0;
+      case "createdAt": return r.createdAt || "";
+      default: return null;
+    }
+  };
+
+  const { sortConfig: scRes, handleSort: hsRes, sortItems: siRes, isSortedColumn: iscRes } = useSortableTable<any>("");
+  const getSortValueRes = (row: any, key: string) => {
+    return row[key] !== undefined && row[key] !== null ? row[key] : "";
+  };
 
   const { data: stats, isLoading } = useQuery<ReportStats>({
     queryKey: ["/api/stats/reports"],
@@ -463,17 +481,17 @@ export default function Reports() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Tipo Dati</TableHead>
-                      <TableHead>Campi</TableHead>
-                      <TableHead>Creato</TableHead>
+                      <SortableTableHead sortKey="name" currentSort={scRep} onSort={hsRep}>Nome</SortableTableHead>
+                      <SortableTableHead sortKey="entityType" currentSort={scRep} onSort={hsRep}>Tipo Dati</SortableTableHead>
+                      <SortableTableHead sortKey="fieldsCount" currentSort={scRep} onSort={hsRep}>Campi</SortableTableHead>
+                      <SortableTableHead sortKey="createdAt" currentSort={scRep} onSort={hsRep}>Creato</SortableTableHead>
                       <TableHead className="text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {customReports.map((report) => (
+                    {siRep(customReports || [], getSortValueRep).map((report: any) => (
                       <TableRow key={report.id} data-testid={`report-row-${report.id}`}>
-                        <TableCell>
+                        <TableCell className={cn(iscRep("name") && "sorted-column-cell")}>
                           <div>
                             <p className="font-medium">{report.name}</p>
                             {report.description && (
@@ -481,13 +499,13 @@ export default function Reports() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={cn(iscRep("entityType") && "sorted-column-cell")}>
                           <Badge variant="secondary">
                             {ENTITY_TYPES.find(e => e.id === report.entityType)?.label || report.entityType}
                           </Badge>
                         </TableCell>
-                        <TableCell>{report.selectedFields?.length || 0} campi</TableCell>
-                        <TableCell>
+                        <TableCell className={cn(iscRep("fieldsCount") && "sorted-column-cell")}>{report.selectedFields?.length || 0} campi</TableCell>
+                        <TableCell className={cn(iscRep("createdAt") && "sorted-column-cell")}>
                           {report.createdAt ? new Date(report.createdAt).toLocaleDateString('it-IT') : '-'}
                         </TableCell>
                         <TableCell className="text-right">
@@ -715,12 +733,12 @@ export default function Reports() {
                 <TableHeader>
                   <TableRow>
                     {Object.keys(reportResult.data[0]).map((key) => (
-                      <TableHead key={key}>{key}</TableHead>
+                      <SortableTableHead key={key} sortKey={key} currentSort={scRes} onSort={hsRes}>{key}</SortableTableHead>
                     ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reportResult.data.slice(0, 100).map((row, index) => (
+                  {siRes(reportResult.data, getSortValueRes).slice(0, 100).map((row: any, index: number) => (
                     <TableRow key={index}>
                       {Object.values(row).map((value: any, colIndex) => (
                         <TableCell key={colIndex}>

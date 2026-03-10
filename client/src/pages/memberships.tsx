@@ -17,6 +17,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, IdCard, FileText, Building2, Check, ChevronsUpDown, UserPlus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
 import type { Membership, InsertMembership, MedicalCertificate, InsertMedicalCertificate, Member } from "@shared/schema";
 
@@ -73,6 +74,44 @@ export default function Memberships() {
     },
     enabled: certMemberSearch.length >= 3,
   });
+
+  const tsMemberships = useSortableTable<any>("expiryDate");
+  const getMembershipSortValue = (item: any, key: string) => {
+    switch (key) {
+      case "member": return getMemberName(item);
+      case "membershipNumber": return item.membershipNumber;
+      case "barcode": return item.barcode;
+      case "type": return item.type;
+      case "expiryDate": return item.expiryDate;
+      case "status": return getExpiryStatus(item.expiryDate).label;
+      default: return null;
+    }
+  };
+
+  const tsCertificates = useSortableTable<any>("expiryDate");
+  const getCertificateSortValue = (item: any, key: string) => {
+    switch (key) {
+      case "member": return getMemberName(item);
+      case "doctor": return item.doctorName;
+      case "issueDate": return item.issueDate;
+      case "expiryDate": return item.expiryDate;
+      case "status": return getExpiryStatus(item.expiryDate).label;
+      default: return null;
+    }
+  };
+
+  const tsEntityCards = useSortableTable<Member>("lastName");
+  const getEntityCardSortValue = (member: Member, key: string) => {
+    switch (key) {
+      case "member": return `${member.lastName} ${member.firstName}`;
+      case "type": return member.entityCardType;
+      case "number": return member.entityCardNumber;
+      case "issueDate": return member.entityCardIssueDate;
+      case "expiryDate": return member.entityCardExpiryDate;
+      case "status": return member.entityCardExpiryDate ? getExpiryStatus(member.entityCardExpiryDate).label : "";
+      default: return null;
+    }
+  };
 
   const createMembershipMutation = useMutation({
     mutationFn: async (data: InsertMembership) => {
@@ -232,13 +271,14 @@ export default function Memberships() {
                   <p className="text-sm">Inizia creando la prima tessera</p>
                 </div>
               ) : (() => {
-                const filteredMemberships = memberships.filter((membership: any) => {
+                const filteredMembershipsRaw = memberships.filter((membership: any) => {
                   if (!membershipSearch || membershipSearch.length < 3) return true;
                   const searchLower = membershipSearch.toLowerCase();
                   const memberName = `${membership.memberFirstName || ""} ${membership.memberLastName || ""}`.toLowerCase();
                   const fiscalCode = membership.memberFiscalCode?.toLowerCase() || "";
                   return memberName.includes(searchLower) || fiscalCode.includes(searchLower);
                 });
+                const filteredMemberships = tsMemberships.sortItems(filteredMembershipsRaw, getMembershipSortValue);
 
                 if (filteredMemberships.length === 0) {
                   return (
@@ -254,12 +294,12 @@ export default function Memberships() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Partecipante</TableHead>
-                        <TableHead>N. Tessera</TableHead>
-                        <TableHead>Barcode</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Scadenza</TableHead>
-                        <TableHead>Stato</TableHead>
+                        <SortableTableHead sortKey="member" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Partecipante</SortableTableHead>
+                        <SortableTableHead sortKey="membershipNumber" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>N. Tessera</SortableTableHead>
+                        <SortableTableHead sortKey="barcode" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Barcode</SortableTableHead>
+                        <SortableTableHead sortKey="type" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Tipo</SortableTableHead>
+                        <SortableTableHead sortKey="expiryDate" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Scadenza</SortableTableHead>
+                        <SortableTableHead sortKey="status" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Stato</SortableTableHead>
                         <TableHead className="text-right">Azioni</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -268,14 +308,14 @@ export default function Memberships() {
                         const expiryInfo = getExpiryStatus(membership.expiryDate);
                         return (
                           <TableRow key={membership.id} data-testid={`membership-row-${membership.id}`}>
-                            <TableCell className="font-medium">
+                            <TableCell className={cn("font-medium", tsMemberships.isSortedColumn("member") && "sorted-column-cell")}>
                               {getMemberName(membership)}
                             </TableCell>
-                            <TableCell>{membership.membershipNumber}</TableCell>
-                            <TableCell className="font-mono text-xs">{membership.barcode}</TableCell>
-                            <TableCell>{membership.type || "-"}</TableCell>
-                            <TableCell>{new Date(membership.expiryDate).toLocaleDateString('it-IT')}</TableCell>
-                            <TableCell>
+                            <TableCell className={cn(tsMemberships.isSortedColumn("membershipNumber") && "sorted-column-cell")}>{membership.membershipNumber}</TableCell>
+                            <TableCell className={cn("font-mono text-xs", tsMemberships.isSortedColumn("barcode") && "sorted-column-cell")}>{membership.barcode}</TableCell>
+                            <TableCell className={cn(tsMemberships.isSortedColumn("type") && "sorted-column-cell")}>{membership.type || "-"}</TableCell>
+                            <TableCell className={cn(tsMemberships.isSortedColumn("expiryDate") && "sorted-column-cell")}>{new Date(membership.expiryDate).toLocaleDateString('it-IT')}</TableCell>
+                            <TableCell className={cn(tsMemberships.isSortedColumn("status") && "sorted-column-cell")}>
                               <Badge variant={expiryInfo.variant}>
                                 {expiryInfo.label}
                               </Badge>
@@ -346,13 +386,14 @@ export default function Memberships() {
                   <p className="text-sm">Inizia aggiungendo il primo certificato</p>
                 </div>
               ) : (() => {
-                const filteredCertificates = certificates.filter((cert: any) => {
+                const filteredCertificatesRaw = certificates.filter((cert: any) => {
                   if (!certificateSearch || certificateSearch.length < 3) return true;
                   const searchLower = certificateSearch.toLowerCase();
                   const memberName = `${cert.memberFirstName || ""} ${cert.memberLastName || ""}`.toLowerCase();
                   const fiscalCode = cert.memberFiscalCode?.toLowerCase() || "";
                   return memberName.includes(searchLower) || fiscalCode.includes(searchLower);
                 });
+                const filteredCertificates = tsCertificates.sortItems(filteredCertificatesRaw, getCertificateSortValue);
 
                 if (filteredCertificates.length === 0) {
                   return (
@@ -368,11 +409,11 @@ export default function Memberships() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Partecipante</TableHead>
-                        <TableHead>Medico</TableHead>
-                        <TableHead>Data Rilascio</TableHead>
-                        <TableHead>Scadenza</TableHead>
-                        <TableHead>Stato</TableHead>
+                        <SortableTableHead sortKey="member" currentSort={tsCertificates.sortConfig} onSort={tsCertificates.handleSort}>Partecipante</SortableTableHead>
+                        <SortableTableHead sortKey="doctor" currentSort={tsCertificates.sortConfig} onSort={tsCertificates.handleSort}>Medico</SortableTableHead>
+                        <SortableTableHead sortKey="issueDate" currentSort={tsCertificates.sortConfig} onSort={tsCertificates.handleSort}>Data Rilascio</SortableTableHead>
+                        <SortableTableHead sortKey="expiryDate" currentSort={tsCertificates.sortConfig} onSort={tsCertificates.handleSort}>Scadenza</SortableTableHead>
+                        <SortableTableHead sortKey="status" currentSort={tsCertificates.sortConfig} onSort={tsCertificates.handleSort}>Stato</SortableTableHead>
                         <TableHead className="text-right">Azioni</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -381,13 +422,13 @@ export default function Memberships() {
                         const expiryInfo = getExpiryStatus(cert.expiryDate);
                         return (
                           <TableRow key={cert.id} data-testid={`certificate-row-${cert.id}`}>
-                            <TableCell className="font-medium">
+                            <TableCell className={cn("font-medium", tsCertificates.isSortedColumn("member") && "sorted-column-cell")}>
                               {getMemberName(cert)}
                             </TableCell>
-                            <TableCell>{cert.doctorName || "-"}</TableCell>
-                            <TableCell>{new Date(cert.issueDate).toLocaleDateString('it-IT')}</TableCell>
-                            <TableCell>{new Date(cert.expiryDate).toLocaleDateString('it-IT')}</TableCell>
-                            <TableCell>
+                            <TableCell className={cn(tsCertificates.isSortedColumn("doctor") && "sorted-column-cell")}>{cert.doctorName || "-"}</TableCell>
+                            <TableCell className={cn(tsCertificates.isSortedColumn("issueDate") && "sorted-column-cell")}>{new Date(cert.issueDate).toLocaleDateString('it-IT')}</TableCell>
+                            <TableCell className={cn(tsCertificates.isSortedColumn("expiryDate") && "sorted-column-cell")}>{new Date(cert.expiryDate).toLocaleDateString('it-IT')}</TableCell>
+                            <TableCell className={cn(tsCertificates.isSortedColumn("status") && "sorted-column-cell")}>
                               <Badge variant={expiryInfo.variant}>
                                 {expiryInfo.label}
                               </Badge>
@@ -440,7 +481,7 @@ export default function Memberships() {
                 </div>
               ) : (() => {
                 const allEntityCardMembers = entityCardMembers || [];
-                const filteredEntityCards = allEntityCardMembers.filter(m => {
+                const filteredEntityCardsRaw = allEntityCardMembers.filter(m => {
                   if (!entityCardSearch || entityCardSearch.length < 3) return true;
                   const searchLower = entityCardSearch.toLowerCase();
                   return (
@@ -449,6 +490,7 @@ export default function Memberships() {
                     m.fiscalCode?.toLowerCase().includes(searchLower)
                   );
                 });
+                const filteredEntityCards = tsEntityCards.sortItems(filteredEntityCardsRaw, getEntityCardSortValue);
 
                 if (filteredEntityCards.length === 0) {
                   return (
@@ -464,12 +506,12 @@ export default function Memberships() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Partecipante</TableHead>
-                        <TableHead>Tipo Ente</TableHead>
-                        <TableHead>Numero Tessera</TableHead>
-                        <TableHead>Data Rilascio</TableHead>
-                        <TableHead>Scadenza</TableHead>
-                        <TableHead>Stato</TableHead>
+                        <SortableTableHead sortKey="member" currentSort={tsEntityCards.sortConfig} onSort={tsEntityCards.handleSort}>Partecipante</SortableTableHead>
+                        <SortableTableHead sortKey="type" currentSort={tsEntityCards.sortConfig} onSort={tsEntityCards.handleSort}>Tipo Ente</SortableTableHead>
+                        <SortableTableHead sortKey="number" currentSort={tsEntityCards.sortConfig} onSort={tsEntityCards.handleSort}>Numero Tessera</SortableTableHead>
+                        <SortableTableHead sortKey="issueDate" currentSort={tsEntityCards.sortConfig} onSort={tsEntityCards.handleSort}>Data Rilascio</SortableTableHead>
+                        <SortableTableHead sortKey="expiryDate" currentSort={tsEntityCards.sortConfig} onSort={tsEntityCards.handleSort}>Scadenza</SortableTableHead>
+                        <SortableTableHead sortKey="status" currentSort={tsEntityCards.sortConfig} onSort={tsEntityCards.handleSort}>Stato</SortableTableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -479,24 +521,24 @@ export default function Memberships() {
                           : { status: "unknown", label: "N/D", variant: "secondary" as const };
                         return (
                           <TableRow key={member.id} data-testid={`entity-card-row-${member.id}`}>
-                            <TableCell className="font-medium">
+                            <TableCell className={cn("font-medium", tsEntityCards.isSortedColumn("member") && "sorted-column-cell")}>
                               {member.lastName} {member.firstName}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className={cn(tsEntityCards.isSortedColumn("type") && "sorted-column-cell")}>
                               <Badge variant="outline">{member.entityCardType || "-"}</Badge>
                             </TableCell>
-                            <TableCell className="font-mono text-xs">{member.entityCardNumber || "-"}</TableCell>
-                            <TableCell>
+                            <TableCell className={cn("font-mono text-xs", tsEntityCards.isSortedColumn("number") && "sorted-column-cell")}>{member.entityCardNumber || "-"}</TableCell>
+                            <TableCell className={cn(tsEntityCards.isSortedColumn("issueDate") && "sorted-column-cell")}>
                               {member.entityCardIssueDate
                                 ? new Date(member.entityCardIssueDate).toLocaleDateString('it-IT')
                                 : "-"}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className={cn(tsEntityCards.isSortedColumn("expiryDate") && "sorted-column-cell")}>
                               {member.entityCardExpiryDate
                                 ? new Date(member.entityCardExpiryDate).toLocaleDateString('it-IT')
                                 : "-"}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className={cn(tsEntityCards.isSortedColumn("status") && "sorted-column-cell")}>
                               <Badge variant={expiryInfo.variant}>
                                 {expiryInfo.label}
                               </Badge>

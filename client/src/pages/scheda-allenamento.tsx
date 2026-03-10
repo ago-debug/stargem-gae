@@ -16,6 +16,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Training, Member, Enrollment, Payment, Attendance } from "@shared/schema";
@@ -107,6 +109,17 @@ export default function SchedaAllenamento() {
         paymentStatusBadge: ReactNode
     }>;
 
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
+    const getSortValue = (data: any, key: string) => {
+        switch (key) {
+            case "firstName": return data.member.firstName || "";
+            case "lastName": return data.member.lastName || "";
+            case "email": return data.member.email || "";
+            case "attendances": return data.attendances.length || 0;
+            default: return null;
+        }
+    };
+    const sortedEnrolledMembersData = sortItems(enrolledMembersData, getSortValue);
     return (
         <div className="p-6 md:p-8 space-y-8 max-w-[1400px] mx-auto">
             {/* Header section with styling adapted from standard category pages */}
@@ -163,18 +176,18 @@ export default function SchedaAllenamento() {
                     <Table>
                         <TableHeader className="bg-slate-50/80 border-b">
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="font-semibold text-slate-700 py-4">Nome</TableHead>
-                                <TableHead className="font-semibold text-slate-700 py-4">Cognome</TableHead>
-                                <TableHead className="font-semibold text-slate-700 py-4">Email</TableHead>
+                                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Nome</SortableTableHead>
+                                <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Cognome</SortableTableHead>
+                                <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Email</SortableTableHead>
                                 <TableHead className="font-semibold text-slate-700 py-4">Scadenza Tessera</TableHead>
                                 <TableHead className="font-semibold text-slate-700 py-4">Certificato Medico</TableHead>
-                                <TableHead className="font-semibold text-slate-700 py-4 text-center">Presenze</TableHead>
+                                <SortableTableHead sortKey="attendances" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4 text-center">Presenze</SortableTableHead>
                                 <TableHead className="font-semibold text-slate-700 py-4 text-center">Pagamenti</TableHead>
                                 <TableHead className="font-semibold text-slate-700 py-4 text-right">Azioni</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {enrolledMembersData.length === 0 ? (
+                            {sortedEnrolledMembersData.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={8} className="text-center py-12 text-slate-500">
                                         <div className="flex flex-col items-center gap-2">
@@ -184,7 +197,7 @@ export default function SchedaAllenamento() {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                enrolledMembersData.map(({ member, attendances, paymentStatusBadge, medicalCertStatus, medicalCertFormattedDate }: any) => {
+                                sortedEnrolledMembersData.map(({ member, attendances, paymentStatusBadge, medicalCertStatus, medicalCertFormattedDate }: any) => {
                                     const today = new Date();
 
                                     // Check card expiry
@@ -213,20 +226,20 @@ export default function SchedaAllenamento() {
 
                                     return (
                                         <TableRow key={member.id} className="hover:bg-slate-50/80 transition-colors">
-                                            <TableCell className="font-medium text-slate-900">
+                                            <TableCell className={cn("font-medium text-slate-900", isSortedColumn("firstName") && "sorted-column-cell")}>
                                                 <Link href={`/?memberId=${member.id}`} className="hover:underline cursor-pointer">
                                                     {member.firstName}
                                                 </Link>
                                             </TableCell>
-                                            <TableCell className="font-medium text-slate-900">
+                                            <TableCell className={cn("font-medium text-slate-900", isSortedColumn("lastName") && "sorted-column-cell")}>
                                                 <Link href={`/?memberId=${member.id}`} className="hover:underline cursor-pointer">
                                                     {member.lastName}
                                                 </Link>
                                             </TableCell>
-                                            <TableCell className="text-slate-600 text-sm">{member.email || '-'}</TableCell>
+                                            <TableCell className={cn("text-slate-600 text-sm", isSortedColumn("email") && "sorted-column-cell")}>{member.email || '-'}</TableCell>
                                             <TableCell>{cardExpiryText}</TableCell>
                                             <TableCell>{certExpiryText}</TableCell>
-                                            <TableCell className="text-center">
+                                            <TableCell className={cn("text-center", isSortedColumn("attendances") && "sorted-column-cell")}>
                                                 <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5">
                                                     {attendances.length}
                                                 </Badge>
