@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Briefcase, ArrowUpDown, ChevronUp, ChevronDown, AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -123,30 +125,31 @@ export default function Instructors() {
     }
   };
 
-  const filteredInstructors = useMemo(() => {
-    let result = instructors?.filter((instructor) => {
+  const filteredInstructorsRaw = useMemo(() => {
+    return instructors?.filter((instructor) => {
       const matchesSearch = `${instructor.lastName} ${instructor.firstName} ${instructor.specialization}`.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === "all" ? true : (statusFilter === "active" ? instructor.active : !instructor.active);
       return matchesSearch && matchesStatus;
     }) || [];
+  }, [instructors, searchQuery, statusFilter]);
 
-    return result.sort((a, b) => {
-      const aVal = (a[sortBy] || "").toLowerCase();
-      const bVal = (b[sortBy] || "").toLowerCase();
-      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [instructors, searchQuery, statusFilter, sortBy, sortOrder]);
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<typeof filteredInstructorsRaw[0]>("lastName");
 
-  const toggleSort = (field: "firstName" | "lastName") => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(field);
-      setSortOrder("asc");
+  const getSortValue = (instructor: typeof filteredInstructorsRaw[0], key: string) => {
+    switch (key) {
+      case "lastName": return instructor.lastName;
+      case "firstName": return instructor.firstName;
+      case "specialization": return instructor.specialization;
+      case "courses": return getInstructorCourses(instructor.id).length;
+      case "email": return instructor.email;
+      case "phone": return instructor.phone;
+      case "hourlyRate": return Number(instructor.hourlyRate) || 0;
+      case "status": return instructor.active;
+      default: return null;
     }
   };
+
+  const filteredInstructors = sortItems(filteredInstructorsRaw, getSortValue);
 
   return (
     <div className="p-6 md:p-8 space-y-6 w-full mx-auto">
@@ -211,24 +214,14 @@ export default function Instructors() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort("lastName")}>
-                    <div className="flex items-center gap-1">
-                      Cognome
-                      {sortBy === "lastName" ? (sortOrder === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
-                    </div>
-                  </TableHead>
-                  <TableHead className="cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort("firstName")}>
-                    <div className="flex items-center gap-1">
-                      Nome
-                      {sortBy === "firstName" ? (sortOrder === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
-                    </div>
-                  </TableHead>
-                  <TableHead>Specializzazione</TableHead>
-                  <TableHead>Corsi Assegnati</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Telefono</TableHead>
-                  <TableHead>Tariffa Oraria</TableHead>
-                  <TableHead>Stato</TableHead>
+                  <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
+                  <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                  <SortableTableHead sortKey="specialization" currentSort={sortConfig} onSort={handleSort}>Specializzazione</SortableTableHead>
+                  <SortableTableHead sortKey="courses" currentSort={sortConfig} onSort={handleSort}>Corsi Assegnati</SortableTableHead>
+                  <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
+                  <SortableTableHead sortKey="phone" currentSort={sortConfig} onSort={handleSort}>Telefono</SortableTableHead>
+                  <SortableTableHead sortKey="hourlyRate" currentSort={sortConfig} onSort={handleSort}>Tariffa Oraria</SortableTableHead>
+                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
@@ -237,14 +230,16 @@ export default function Instructors() {
                   const assignedCourses = getInstructorCourses(instructor.id);
                   return (
                     <TableRow key={instructor.id} data-testid={`instructor-row-${instructor.id}`}>
-                      <TableCell className="font-medium">
+                      <TableCell className={cn("font-medium", isSortedColumn("lastName") && "sorted-column-cell")}>
                         {instructor.lastName}
                       </TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell className={cn("font-medium", isSortedColumn("firstName") && "sorted-column-cell")}>
                         {instructor.firstName}
                       </TableCell>
-                      <TableCell>{instructor.specialization || "-"}</TableCell>
-                      <TableCell>
+                      <TableCell className={cn(isSortedColumn("specialization") && "sorted-column-cell")}>
+                        {instructor.specialization || "-"}
+                      </TableCell>
+                      <TableCell className={cn(isSortedColumn("courses") && "sorted-column-cell")}>
                         <div className="flex flex-wrap gap-1">
                           {assignedCourses.length === 0 ? (
                             <span className="text-sm text-muted-foreground">Nessun corso</span>
@@ -272,7 +267,7 @@ export default function Instructors() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>
                         {instructor.email ? (instructor.email) : (
                           <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
                             <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
@@ -280,7 +275,7 @@ export default function Instructors() {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={cn(isSortedColumn("phone") && "sorted-column-cell")}>
                         {instructor.mobile || instructor.phone ? (instructor.mobile || instructor.phone) : (
                           <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
                             <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
@@ -288,10 +283,10 @@ export default function Instructors() {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={cn(isSortedColumn("hourlyRate") && "sorted-column-cell")}>
                         {instructor.hourlyRate ? `€${instructor.hourlyRate}/h` : "-"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={cn(isSortedColumn("status") && "sorted-column-cell")}>
                         <Badge variant={instructor.active ? "default" : "secondary"}>
                           {instructor.active ? "Attivo" : "Inattivo"}
                         </Badge>

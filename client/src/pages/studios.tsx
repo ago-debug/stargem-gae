@@ -13,6 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -65,6 +67,22 @@ export default function Studios() {
   const { data: studios = [], isLoading } = useQuery<Studio[]>({
     queryKey: ["/api/studios"],
   });
+
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Studio>("name");
+
+  const getSortValue = (studio: Studio, key: string) => {
+    switch (key) {
+      case "name": return studio.name;
+      case "floor": return studio.floor || "";
+      case "capacity": return studio.capacity || 0;
+      case "operatingDays": return parseOperatingDays(studio.operatingDays)?.length || 0;
+      case "calendar": return studio.googleCalendarId || "";
+      case "active": return studio.active ? 1 : 0;
+      default: return null;
+    }
+  };
+
+  const sortedStudios = sortItems(studios, getSortValue);
 
   const form = useForm<InsertStudio>({
     resolver: zodResolver(insertStudioSchema),
@@ -452,22 +470,22 @@ export default function Studios() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Piano</TableHead>
-                  <TableHead>Capienza</TableHead>
-                  <TableHead>Giorni Operativi</TableHead>
-                  <TableHead>Calendar</TableHead>
-                  <TableHead>Stato</TableHead>
+                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                  <SortableTableHead sortKey="floor" currentSort={sortConfig} onSort={handleSort}>Piano</SortableTableHead>
+                  <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Capienza</SortableTableHead>
+                  <SortableTableHead sortKey="operatingDays" currentSort={sortConfig} onSort={handleSort}>Giorni Operativi</SortableTableHead>
+                  <SortableTableHead sortKey="calendar" currentSort={sortConfig} onSort={handleSort}>Calendar</SortableTableHead>
+                  <SortableTableHead sortKey="active" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {studios.map((studio) => (
+                {sortedStudios.map((studio) => (
                   <TableRow key={studio.id} data-testid={`row-studio-${studio.id}`}>
-                    <TableCell className="font-medium">{studio.name}</TableCell>
-                    <TableCell>{studio.floor || "-"}</TableCell>
-                    <TableCell>{studio.capacity || "-"}</TableCell>
-                    <TableCell>
+                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{studio.name}</TableCell>
+                    <TableCell className={cn(isSortedColumn("floor") && "sorted-column-cell")}>{studio.floor || "-"}</TableCell>
+                    <TableCell className={cn(isSortedColumn("capacity") && "sorted-column-cell")}>{studio.capacity || "-"}</TableCell>
+                    <TableCell className={cn(isSortedColumn("operatingDays") && "sorted-column-cell")}>
                       {parseOperatingDays(studio.operatingDays).length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {parseOperatingDays(studio.operatingDays).map((day, idx) => (
@@ -480,7 +498,7 @@ export default function Studios() {
                         "-"
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={cn(isSortedColumn("calendar") && "sorted-column-cell")}>
                       {studio.googleCalendarId ? (
                         <Badge variant="outline" className="font-mono text-[10px]">
                           {studio.googleCalendarId}
@@ -489,7 +507,7 @@ export default function Studios() {
                         <span className="text-muted-foreground text-xs italic">Default</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={cn(isSortedColumn("active") && "sorted-column-cell")}>
                       <Badge variant={studio.active ? "default" : "secondary"}>
                         {studio.active ? "Attivo" : "Inattivo"}
                       </Badge>

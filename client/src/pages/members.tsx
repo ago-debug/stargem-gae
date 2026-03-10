@@ -21,6 +21,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText, ChevronLeft, ChevronRight, ChevronUp, Download, Upload, Camera, Smartphone, Coins, AlertTriangle } from "lucide-react";
 import { MembershipCard } from "@/components/membership-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import type { Member, InsertMember, Attendance } from "@shared/schema";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -162,7 +164,25 @@ export default function Members() {
     staleTime: 300000,
   });
 
-  const members = membersData?.members || [];
+  const membersRaw = membersData?.members || [];
+
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Member>("lastName");
+
+  const getSortValue = (member: Member, key: string) => {
+    switch (key) {
+      case "lastName": return `${member.lastName} ${member.firstName}`;
+      case "fiscalCode": return member.fiscalCode;
+      case "email": return member.email;
+      case "mobile": return member.mobile || member.phone || "";
+      case "cardNumber": return member.cardNumber;
+      case "medicalCert": return member.hasMedicalCertificate ? (member.medicalCertificateExpiry || "9999-12-31") : "";
+      case "status": return member.active ? 1 : 0;
+      case "coursesCount": return (member as any).activeCourseCount || 0;
+      default: return null;
+    }
+  };
+
+  const members = sortItems(membersRaw, getSortValue);
   const totalMembers = membersData?.total || 0;
   const totalPages = Math.ceil(totalMembers / PAGE_SIZE);
 
@@ -1081,15 +1101,15 @@ export default function Members() {
                         aria-label="Seleziona tutti"
                       />
                     </TableHead>
-                    <TableHead>Cognome e Nome</TableHead>
-                    <TableHead>Codice Fiscale</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Mobile</TableHead>
-                    <TableHead>Tessera</TableHead>
-                    <TableHead>Cert. Medico</TableHead>
-                    <TableHead>Stato</TableHead>
+                    <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome e Nome</SortableTableHead>
+                    <SortableTableHead sortKey="fiscalCode" currentSort={sortConfig} onSort={handleSort}>Codice Fiscale</SortableTableHead>
+                    <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
+                    <SortableTableHead sortKey="mobile" currentSort={sortConfig} onSort={handleSort}>Mobile</SortableTableHead>
+                    <SortableTableHead sortKey="cardNumber" currentSort={sortConfig} onSort={handleSort}>Tessera</SortableTableHead>
+                    <SortableTableHead sortKey="medicalCert" currentSort={sortConfig} onSort={handleSort}>Cert. Medico</SortableTableHead>
+                    <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
                     <TableHead className="w-10"></TableHead>
-                    <TableHead className="text-right">Corsi Attivi</TableHead>
+                    <SortableTableHead sortKey="coursesCount" currentSort={sortConfig} onSort={handleSort} className="text-right">Corsi Attivi</SortableTableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1103,7 +1123,7 @@ export default function Members() {
                             aria-label={`Seleziona ${member.lastName} ${member.firstName}`}
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={cn(isSortedColumn("lastName") && "sorted-column-cell")}>
                           <div className="flex items-center gap-2">
                             <Link href={`/?memberId=${member.id}`}>
                               <span
@@ -1134,7 +1154,7 @@ export default function Members() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="font-mono text-sm">
+                        <TableCell className={cn("font-mono text-sm", isSortedColumn("fiscalCode") && "sorted-column-cell")}>
                           {member.fiscalCode ? member.fiscalCode : (
                             <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
                               <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
@@ -1142,7 +1162,7 @@ export default function Members() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>
                           {member.email ? member.email : (
                             <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
                               <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
@@ -1150,7 +1170,7 @@ export default function Members() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={cn(isSortedColumn("mobile") && "sorted-column-cell")}>
                           {member.mobile || member.phone ? (member.mobile || member.phone) : (
                             <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
                               <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
@@ -1158,7 +1178,7 @@ export default function Members() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={cn(isSortedColumn("cardNumber") && "sorted-column-cell")}>
                           {member.cardNumber ? (
                             <div className="text-sm">
                               <div>{member.cardNumber}</div>
@@ -1175,7 +1195,7 @@ export default function Members() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={cn(isSortedColumn("medicalCert") && "sorted-column-cell")}>
                           {member.hasMedicalCertificate ? (
                             <Badge variant={
                               member.medicalCertificateExpiry && new Date(member.medicalCertificateExpiry) < new Date()
@@ -1194,7 +1214,7 @@ export default function Members() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={cn(isSortedColumn("status") && "sorted-column-cell")}>
                           <Badge variant={member.active ? "default" : "secondary"}>
                             {member.active ? "Attivo" : "Inattivo"}
                           </Badge>
@@ -1224,7 +1244,7 @@ export default function Members() {
                             return null;
                           })()}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className={cn("text-right", isSortedColumn("coursesCount") && "sorted-column-cell")}>
                           {(member as any).activeCourseCount > 0 ? (
                             <Badge variant="outline" className="text-xs">
                               {(member as any).activeCourseCount} {(member as any).activeCourseCount === 1 ? "corso" : "corsi"}

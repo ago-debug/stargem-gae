@@ -22,6 +22,8 @@ import { MultiSelectEnrollmentDetails, EnrollmentDetailBadge } from "@/component
 import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
 import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { CourseSelector } from "@/components/course-selector";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Course, Instructor, Category, Studio } from "@shared/schema";
@@ -1076,6 +1078,24 @@ export default function MascheraInputGenerale() {
     },
     enabled: !!selectedMemberId,
   });
+
+  const combinedPayments = [...(Array.isArray(memberPayments) ? memberPayments : []), ...payments];
+
+  const { sortConfig: sortConfigPayments, handleSort: handleSortPayments, sortItems: sortItemsPayments, isSortedColumn: isSortedColumnPayments } = useSortableTable<any>("createdAt");
+
+  const getPaymentSortValue = (payment: any, key: string) => {
+    switch (key) {
+      case "createdAt": return payment.createdAt || payment.paidDate || payment.date || "";
+      case "attivita": return payment.attivita || payment.type || "";
+      case "dettaglio": return payment.dettaglioNome || payment.description || payment.quotaDescription || "";
+      case "dataPagamento": return payment.dataPagamento || payment.paidDate || payment.date || "";
+      case "metodoPagamento": return payment.nota || payment.notes || payment.notePagamento || payment.notaPagamento || "";
+      case "importo": return Number(payment.totaleQuota || payment.totalQuota || payment.amount || 0);
+      default: return null;
+    }
+  };
+
+  const sortedPayments = sortItemsPayments(combinedPayments, getPaymentSortValue);
 
   // Enrollment Mutations
   const addEnrollmentMutation = useMutation({
@@ -3257,17 +3277,17 @@ export default function MascheraInputGenerale() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Data Ins.</TableHead>
-                        <TableHead>Attività</TableHead>
-                        <TableHead>Dettaglio</TableHead>
-                        <TableHead>Data Pagamento</TableHead>
-                        <TableHead>Metodo di Pagamento</TableHead>
-                        <TableHead className="text-right">Importo</TableHead>
+                        <SortableTableHead sortKey="createdAt" currentSort={sortConfigPayments} onSort={handleSortPayments}>Data Ins.</SortableTableHead>
+                        <SortableTableHead sortKey="attivita" currentSort={sortConfigPayments} onSort={handleSortPayments}>Attività</SortableTableHead>
+                        <SortableTableHead sortKey="dettaglio" currentSort={sortConfigPayments} onSort={handleSortPayments}>Dettaglio</SortableTableHead>
+                        <SortableTableHead sortKey="dataPagamento" currentSort={sortConfigPayments} onSort={handleSortPayments}>Data Pagamento</SortableTableHead>
+                        <SortableTableHead sortKey="metodoPagamento" currentSort={sortConfigPayments} onSort={handleSortPayments}>Metodo di Pagamento</SortableTableHead>
+                        <SortableTableHead sortKey="importo" currentSort={sortConfigPayments} onSort={handleSortPayments} className="text-right">Importo</SortableTableHead>
                         <TableHead className="w-[100px]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {[...(Array.isArray(memberPayments) ? memberPayments : []), ...payments].map((payment, idx) => {
+                      {sortedPayments.map((payment, idx) => {
                         const isExistingDBPayment = !!payment.createdAt || !!payment.amount;
                         // For Data Inserimento, use createdAt or similar if available, otherwise fallback
                         const pDataInserimento = payment.createdAt || payment.paidDate || payment.date;
@@ -3279,12 +3299,12 @@ export default function MascheraInputGenerale() {
 
                         return (
                           <TableRow key={payment.id || `db-pay-${idx}`}>
-                            <TableCell>{pDataInserimento ? new Date(pDataInserimento).toLocaleDateString('it-IT') : "-"}</TableCell>
-                            <TableCell className="capitalize">{pAttivita ? pAttivita.replace("-", " ") : "-"}</TableCell>
-                            <TableCell>{pDettaglio || "-"}</TableCell>
-                            <TableCell>{pDataPagamento ? new Date(pDataPagamento).toLocaleDateString('it-IT') : "-"}</TableCell>
-                            <TableCell>{pNote || "-"}</TableCell>
-                            <TableCell className="text-right">€ {Number(pImporto).toFixed(2)}</TableCell>
+                            <TableCell className={cn(isSortedColumnPayments("createdAt") && "sorted-column-cell")}>{pDataInserimento ? new Date(pDataInserimento).toLocaleDateString('it-IT') : "-"}</TableCell>
+                            <TableCell className={cn("capitalize", isSortedColumnPayments("attivita") && "sorted-column-cell")}>{pAttivita ? pAttivita.replace("-", " ") : "-"}</TableCell>
+                            <TableCell className={cn(isSortedColumnPayments("dettaglio") && "sorted-column-cell")}>{pDettaglio || "-"}</TableCell>
+                            <TableCell className={cn(isSortedColumnPayments("dataPagamento") && "sorted-column-cell")}>{pDataPagamento ? new Date(pDataPagamento).toLocaleDateString('it-IT') : "-"}</TableCell>
+                            <TableCell className={cn(isSortedColumnPayments("metodoPagamento") && "sorted-column-cell")}>{pNote || "-"}</TableCell>
+                            <TableCell className={cn("text-right", isSortedColumnPayments("importo") && "sorted-column-cell")}>€ {Number(pImporto).toFixed(2)}</TableCell>
                             <TableCell className="flex items-center gap-2 justify-end">
                               {!isExistingDBPayment && (
                                 <>

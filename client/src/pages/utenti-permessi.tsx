@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -84,6 +86,50 @@ export default function UtentiPermessi() {
   const { data: activityLogs, isLoading: logsLoading } = useQuery<any[]>({
     queryKey: ["/api/activity-logs"],
   });
+
+  // Sorting Hooks
+  const { sortConfig: scUser, handleSort: hsUser, sortItems: siUser, isSortedColumn: iscUser } = useSortableTable<User>("username");
+  const getSortValueUser = (u: User, key: string) => {
+    switch (key) {
+      case "username": return u.username;
+      case "fullName": return `${u.firstName || ""} ${u.lastName || ""}`;
+      case "email": return u.email || "";
+      case "role": return u.role || "";
+      default: return null;
+    }
+  };
+
+  const { sortConfig: scRole, handleSort: hsRole, sortItems: siRole, isSortedColumn: iscRole } = useSortableTable<UserRole>("name");
+  const getSortValueRole = (r: UserRole, key: string) => {
+    switch (key) {
+      case "name": return r.name;
+      case "description": return r.description || "";
+      case "permissions": return Object.keys(r.permissions as any || {}).length;
+      default: return null;
+    }
+  };
+
+  const { sortConfig: scLog, handleSort: hsLog, sortItems: siLog, isSortedColumn: iscLog } = useSortableTable<any>("createdAt");
+  const getSortValueLog = (log: any, key: string) => {
+    switch (key) {
+      case "createdAt": return log.createdAt;
+      case "username": return log.user?.username || "";
+      case "action": return log.action || "";
+      case "entityType": return log.entityType || "";
+      case "details": return log.details ? JSON.stringify(log.details) : "";
+      default: return null;
+    }
+  };
+
+  const { sortConfig: scMenu, handleSort: hsMenu, sortItems: siMenu, isSortedColumn: iscMenu } = useSortableTable<any>("title");
+  const getSortValueMenu = (m: any, key: string) => {
+    switch (key) {
+      case "title": return m.title;
+      case "level": return rolePermissions[m.path] || "hidden";
+      default: return null;
+    }
+  };
+
 
   // User Mutations
   const createUserMutation = useMutation({
@@ -312,27 +358,27 @@ export default function UtentiPermessi() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Utente</TableHead>
-                      <TableHead>Nome Completo</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Ruolo</TableHead>
+                      <SortableTableHead sortKey="username" currentSort={scUser} onSort={hsUser}>Utente</SortableTableHead>
+                      <SortableTableHead sortKey="fullName" currentSort={scUser} onSort={hsUser}>Nome Completo</SortableTableHead>
+                      <SortableTableHead sortKey="email" currentSort={scUser} onSort={hsUser}>Email</SortableTableHead>
+                      <SortableTableHead sortKey="role" currentSort={scUser} onSort={hsUser}>Ruolo</SortableTableHead>
                       <TableHead className="text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users?.map((u) => (
+                    {siUser(users || [], getSortValueUser).map((u: User) => (
                       <TableRow key={u.id}>
-                        <TableCell className="font-medium flex items-center gap-2">
+                        <TableCell className={cn("font-medium flex items-center gap-2", iscUser("username") && "sorted-column-cell")}>
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                             <UserIcon className="w-4 h-4 text-primary" />
                           </div>
                           {u.username}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={cn(iscUser("fullName") && "sorted-column-cell")}>
                           {u.firstName || u.lastName ? `${u.firstName || ""} ${u.lastName || ""}` : "-"}
                         </TableCell>
-                        <TableCell>{u.email || "-"}</TableCell>
-                        <TableCell>
+                        <TableCell className={cn(iscUser("email") && "sorted-column-cell")}>{u.email || "-"}</TableCell>
+                        <TableCell className={cn(iscUser("role") && "sorted-column-cell")}>
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                             }`}>
                             {u.role}
@@ -406,18 +452,18 @@ export default function UtentiPermessi() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Ruolo</TableHead>
-                      <TableHead>Descrizione</TableHead>
-                      <TableHead>Permessi</TableHead>
+                      <SortableTableHead sortKey="name" currentSort={scRole} onSort={hsRole}>Ruolo</SortableTableHead>
+                      <SortableTableHead sortKey="description" currentSort={scRole} onSort={hsRole}>Descrizione</SortableTableHead>
+                      <SortableTableHead sortKey="permissions" currentSort={scRole} onSort={hsRole}>Permessi</SortableTableHead>
                       <TableHead className="text-right">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {roles?.map((r) => (
+                    {siRole(roles || [], getSortValueRole).map((r: UserRole) => (
                       <TableRow key={r.id}>
-                        <TableCell className="font-bold">{r.name}</TableCell>
-                        <TableCell>{r.description || "-"}</TableCell>
-                        <TableCell>
+                        <TableCell className={cn("font-bold", iscRole("name") && "sorted-column-cell")}>{r.name}</TableCell>
+                        <TableCell className={cn(iscRole("description") && "sorted-column-cell")}>{r.description || "-"}</TableCell>
+                        <TableCell className={cn(iscRole("permissions") && "sorted-column-cell")}>
                           <span className="text-xs text-muted-foreground">
                             {Object.keys(r.permissions as any).length} menu configurati
                           </span>
@@ -476,23 +522,23 @@ export default function UtentiPermessi() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Data/Ora</TableHead>
-                      <TableHead>Utente</TableHead>
-                      <TableHead>Operazione</TableHead>
-                      <TableHead>Entità</TableHead>
-                      <TableHead>Dettagli</TableHead>
+                      <SortableTableHead sortKey="createdAt" currentSort={scLog} onSort={hsLog}>Data/Ora</SortableTableHead>
+                      <SortableTableHead sortKey="username" currentSort={scLog} onSort={hsLog}>Utente</SortableTableHead>
+                      <SortableTableHead sortKey="action" currentSort={scLog} onSort={hsLog}>Operazione</SortableTableHead>
+                      <SortableTableHead sortKey="entityType" currentSort={scLog} onSort={hsLog}>Entità</SortableTableHead>
+                      <SortableTableHead sortKey="details" currentSort={scLog} onSort={hsLog}>Dettagli</SortableTableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {activityLogs?.map((log) => (
+                    {siLog(activityLogs || [], getSortValueLog).map((log: any) => (
                       <TableRow key={log.id}>
-                        <TableCell className="text-xs whitespace-nowrap">
+                        <TableCell className={cn("text-xs whitespace-nowrap", iscLog("createdAt") && "sorted-column-cell")}>
                           {format(new Date(log.createdAt), "dd/MM/yyyy HH:mm:ss", { locale: it })}
                         </TableCell>
-                        <TableCell className="font-medium text-xs">
+                        <TableCell className={cn("font-medium text-xs", iscLog("username") && "sorted-column-cell")}>
                           {log.user.username}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className={cn(iscLog("action") && "sorted-column-cell")}>
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${log.action === 'CREATE' ? 'bg-green-100 text-green-700' :
                             log.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' :
                               log.action === 'DELETE' ? 'bg-red-100 text-red-700' :
@@ -502,10 +548,10 @@ export default function UtentiPermessi() {
                             {log.action}
                           </span>
                         </TableCell>
-                        <TableCell className="text-xs uppercase">
+                        <TableCell className={cn("text-xs uppercase", iscLog("entityType") && "sorted-column-cell")}>
                           {log.entityType || "-"}
                         </TableCell>
-                        <TableCell className="text-xs max-w-md truncate">
+                        <TableCell className={cn("text-xs max-w-md truncate", iscLog("details") && "sorted-column-cell")}>
                           {log.details ? JSON.stringify(log.details) : "-"}
                         </TableCell>
                       </TableRow>
@@ -666,15 +712,15 @@ export default function UtentiPermessi() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Menu / Pagina</TableHead>
-                      <TableHead className="w-[300px]">Livello Permesso</TableHead>
+                      <SortableTableHead sortKey="title" currentSort={scMenu} onSort={hsMenu}>Menu / Pagina</SortableTableHead>
+                      <SortableTableHead sortKey="level" currentSort={scMenu} onSort={hsMenu} className="w-[300px]">Livello Permesso</SortableTableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {MENU_PATHS.map((menu) => (
+                    {siMenu(MENU_PATHS, getSortValueMenu).map((menu: any) => (
                       <TableRow key={menu.path}>
-                        <TableCell className="font-medium">{menu.title}</TableCell>
-                        <TableCell>
+                        <TableCell className={cn("font-medium", iscMenu("title") && "sorted-column-cell")}>{menu.title}</TableCell>
+                        <TableCell className={cn(iscMenu("level") && "sorted-column-cell")}>
                           <Select
                             value={rolePermissions[menu.path] || "hidden"}
                             onValueChange={(val) => setRolePermissions(prev => ({ ...prev, [menu.path]: val }))}

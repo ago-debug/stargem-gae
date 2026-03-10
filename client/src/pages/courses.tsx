@@ -85,12 +85,8 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
   });
   const members = membersData?.members || [];
 
-  const { data: searchResults } = useQuery<{ members: Member[], total: number }>({
-    queryKey: ["/api/members", { search: memberSearchQuery }],
-    queryFn: async () => {
-      const res = await fetch(`/api/members?search=${encodeURIComponent(memberSearchQuery)}&pageSize=20`);
-      return res.json();
-    },
+  const { data: searchResults } = useQuery<{ members: Member[] }>({
+    queryKey: ["/api/search/members", memberSearchQuery],
     enabled: memberSearchQuery.length >= 3,
   });
 
@@ -135,6 +131,19 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
       lastName: e.memberLastName || '',
       email: e.memberEmail || '',
     })) || [];
+
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
+
+  const getSortValue = (enrollment: any, key: string) => {
+    switch (key) {
+      case "firstName": return enrollment.firstName || "";
+      case "lastName": return enrollment.lastName || "";
+      case "email": return enrollment.email || "";
+      default: return null;
+    }
+  };
+
+  const sortedEnrollments = sortItems(courseEnrollments, getSortValue);
 
   return (
     <div className="space-y-4">
@@ -199,18 +208,18 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Cognome</TableHead>
-                <TableHead>Email</TableHead>
+                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
+                <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
                 <TableHead className="text-right">Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {courseEnrollments.map((enrollment) => (
+              {sortedEnrollments.map((enrollment) => (
                 <TableRow key={enrollment.enrollmentId}>
-                  <TableCell className="font-medium">{enrollment.firstName}</TableCell>
-                  <TableCell>{enrollment.lastName}</TableCell>
-                  <TableCell>{enrollment.email || '-'}</TableCell>
+                  <TableCell className={cn("font-medium", isSortedColumn("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
+                  <TableCell className={cn(isSortedColumn("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
+                  <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link href={`/anagrafica_a_lista?search=${encodeURIComponent(`${enrollment.lastName} ${enrollment.firstName}`)}`}>
@@ -294,8 +303,8 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
       await apiRequest("DELETE", `/api/attendances/${attendanceId}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/attendances"] });
-      toast({ title: "Presenza eliminata con successo" });
+      queryClient.invalidateQueries({ queryKey: ["/api/attendances", courseId] });
+      toast({ title: "Successo", description: "Presenza eliminata" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -318,6 +327,19 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
     ?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status))
     .map(e => members?.find(m => m.id === e.memberId))
     .filter((m): m is Member => m !== undefined) || [];
+
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("attendanceDate");
+
+  const getSortValue = (attendance: any, key: string) => {
+    switch (key) {
+      case "member": return attendance.memberName || "";
+      case "attendanceDate": return attendance.attendanceDate || "";
+      case "type": return attendance.type || "";
+      default: return null;
+    }
+  };
+
+  const sortedAttendances = sortItems(courseAttendances, getSortValue);
 
   return (
     <div className="space-y-4">
@@ -401,20 +423,20 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Membro</TableHead>
-                <TableHead>Data e Ora</TableHead>
-                <TableHead>Tipo</TableHead>
+                <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Membro</SortableTableHead>
+                <SortableTableHead sortKey="attendanceDate" currentSort={sortConfig} onSort={handleSort}>Data e Ora</SortableTableHead>
+                <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
                 <TableHead className="text-right">Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {courseAttendances.map((attendance: any) => (
+              {sortedAttendances.map((attendance: any) => (
                 <TableRow key={attendance.id}>
-                  <TableCell className="font-medium">{attendance.memberName}</TableCell>
-                  <TableCell>
+                  <TableCell className={cn("font-medium", isSortedColumn("member") && "sorted-column-cell")}>{attendance.memberName}</TableCell>
+                  <TableCell className={cn(isSortedColumn("attendanceDate") && "sorted-column-cell")}>
                     {format(new Date(attendance.attendanceDate), "dd/MM/yyyy HH:mm", { locale: it })}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={cn(isSortedColumn("type") && "sorted-column-cell")}>
                     <Badge variant="outline">
                       {attendance.type === 'manual' ? 'Manuale' :
                         attendance.type === 'barcode' ? 'Badge' : 'Auto'}

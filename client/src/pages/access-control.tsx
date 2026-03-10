@@ -32,6 +32,8 @@ import {
   Edit
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import type {
   AccessLog,
   InsertAccessLog,
@@ -274,6 +276,22 @@ export default function AccessControl() {
 
   const hasErrors = selectedMember?.anomalies.some(a => a.type === 'error');
   const hasWarnings = selectedMember?.anomalies.some(a => a.type === 'warning');
+
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<AccessLog>("accessTime");
+
+  const getSortValue = (log: AccessLog, key: string) => {
+    switch (key) {
+      case "accessTime": return log.accessTime;
+      case "name": return `${(log as any).memberLastName || ''} ${(log as any).memberFirstName || ''}`.trim();
+      case "barcode": return log.barcode;
+      case "type": return log.accessType;
+      case "status": return log.membershipStatus;
+      case "notes": return log.notes;
+      default: return null;
+    }
+  };
+
+  const sortedAccessLogs = sortItems(recentAccesses || [], getSortValue);
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
@@ -771,34 +789,34 @@ export default function AccessControl() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Data/Ora</TableHead>
-                  <TableHead>Cognome e Nome</TableHead>
-                  <TableHead>Barcode</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Stato Tessera</TableHead>
-                  <TableHead>Note</TableHead>
+                  <SortableTableHead sortKey="accessTime" currentSort={sortConfig} onSort={handleSort}>Data/Ora</SortableTableHead>
+                  <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Cognome e Nome</SortableTableHead>
+                  <SortableTableHead sortKey="barcode" currentSort={sortConfig} onSort={handleSort}>Barcode</SortableTableHead>
+                  <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
+                  <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato Tessera</SortableTableHead>
+                  <SortableTableHead sortKey="notes" currentSort={sortConfig} onSort={handleSort}>Note</SortableTableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentAccesses.map((access, index) => (
+                {sortedAccessLogs.map((access, index) => (
                   <TableRow key={index} data-testid={`access-log-${index}`}>
-                    <TableCell>
+                    <TableCell className={cn(isSortedColumn("accessTime") && "sorted-column-cell")}>
                       {new Date(access.accessTime).toLocaleString('it-IT')}
                     </TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>
                       {(access as any).memberFirstName || (access as any).memberLastName
-                        ? `${(access as any).memberFirstName || ''} ${(access as any).memberLastName || ''}`.trim()
+                        ? `${(access as any).memberLastName || ''} ${(access as any).memberFirstName || ''}`.trim()
                         : <span className="text-muted-foreground">-</span>
                       }
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{access.barcode}</TableCell>
-                    <TableCell className="capitalize">{access.accessType}</TableCell>
-                    <TableCell>
+                    <TableCell className={cn("font-mono text-xs", isSortedColumn("barcode") && "sorted-column-cell")}>{access.barcode}</TableCell>
+                    <TableCell className={cn("capitalize", isSortedColumn("type") && "sorted-column-cell")}>{access.accessType}</TableCell>
+                    <TableCell className={cn(isSortedColumn("status") && "sorted-column-cell")}>
                       <Badge variant={access.membershipStatus === 'active' ? 'default' : 'destructive'}>
                         {access.membershipStatus || 'Sconosciuto'}
                       </Badge>
                     </TableCell>
-                    <TableCell>{access.notes || "-"}</TableCell>
+                    <TableCell className={cn(isSortedColumn("notes") && "sorted-column-cell")}>{access.notes || "-"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -9,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useLocation } from "wouter";
 import { EnrollmentDetailBadge } from "@/components/multi-select-enrollment-details";
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
 import {
   Calendar,
   Sparkles,
@@ -51,6 +53,20 @@ export default function IscrittiPerAttivita() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showOnlyWithEnrollments, setShowOnlyWithEnrollments] = useState(false);
   const [, setLocation] = useLocation();
+
+  const { sortConfig: courseSort, handleSort: handleCourseSort, sortItems: sortCourseItems, isSortedColumn: isCourseSorted } = useSortableTable<any>("lastName");
+  const { sortConfig: workshopSort, handleSort: handleWorkshopSort, sortItems: sortWorkshopItems, isSortedColumn: isWorkshopSorted } = useSortableTable<any>("lastName");
+  const { sortConfig: activitySort, handleSort: handleActivitySort, sortItems: sortActivityItems, isSortedColumn: isActivitySorted } = useSortableTable<any>("lastName");
+
+  const getSortValue = (enrollment: any, key: string) => {
+    switch (key) {
+      case "lastName": return enrollment.lastName || enrollment.memberLastName || "";
+      case "firstName": return enrollment.firstName || enrollment.memberFirstName || "";
+      case "email": return enrollment.email || enrollment.memberEmail || "";
+      case "date": return enrollment.startDate || enrollment.enrollmentDate;
+      default: return null;
+    }
+  };
 
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
   const { data: workshops, isLoading: workshopsLoading } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
@@ -363,20 +379,20 @@ export default function IscrittiPerAttivita() {
                                 <Table>
                                   <TableHeader>
                                     <TableRow>
-                                      <TableHead>Cognome</TableHead>
-                                      <TableHead>Nome</TableHead>
-                                      <TableHead>Email</TableHead>
+                                      <SortableTableHead sortKey="lastName" currentSort={courseSort} onSort={handleCourseSort}>Cognome</SortableTableHead>
+                                      <SortableTableHead sortKey="firstName" currentSort={courseSort} onSort={handleCourseSort}>Nome</SortableTableHead>
+                                      <SortableTableHead sortKey="email" currentSort={courseSort} onSort={handleCourseSort}>Email</SortableTableHead>
                                       <TableHead>Dettagli</TableHead>
-                                      <TableHead>Data Iscrizione</TableHead>
+                                      <SortableTableHead sortKey="date" currentSort={courseSort} onSort={handleCourseSort}>Data Iscrizione</SortableTableHead>
                                       <TableHead className="text-right">Azioni</TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {courseEnrollments.map((enrollment) => (
+                                    {sortCourseItems(courseEnrollments, getSortValue).map((enrollment) => (
                                       <TableRow key={enrollment.enrollmentId}>
-                                        <TableCell className="font-medium">{enrollment.lastName}</TableCell>
-                                        <TableCell>{enrollment.firstName}</TableCell>
-                                        <TableCell>{enrollment.email || '-'}</TableCell>
+                                        <TableCell className={cn("font-medium", isCourseSorted("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
+                                        <TableCell className={cn(isCourseSorted("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
+                                        <TableCell className={cn(isCourseSorted("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
                                         <TableCell>
                                           <div className="flex flex-wrap gap-1">
                                             {Array.isArray(enrollment.details) ? enrollment.details.map((detail: string) => (
@@ -384,7 +400,7 @@ export default function IscrittiPerAttivita() {
                                             )) : null}
                                           </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className={cn(isCourseSorted("date") && "sorted-column-cell")}>
                                           {enrollment.startDate
                                             ? new Date(enrollment.startDate).toLocaleDateString('it-IT')
                                             : '-'}
@@ -501,18 +517,18 @@ export default function IscrittiPerAttivita() {
                                 <Table>
                                   <TableHeader>
                                     <TableRow>
-                                      <TableHead>Cognome</TableHead>
-                                      <TableHead>Nome</TableHead>
-                                      <TableHead>Email</TableHead>
+                                      <SortableTableHead sortKey="lastName" currentSort={workshopSort} onSort={handleWorkshopSort}>Cognome</SortableTableHead>
+                                      <SortableTableHead sortKey="firstName" currentSort={workshopSort} onSort={handleWorkshopSort}>Nome</SortableTableHead>
+                                      <SortableTableHead sortKey="email" currentSort={workshopSort} onSort={handleWorkshopSort}>Email</SortableTableHead>
                                       <TableHead className="text-right">Azioni</TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {workshopEnrollments.map((enrollment) => (
+                                    {sortWorkshopItems(workshopEnrollments, getSortValue).map((enrollment) => (
                                       <TableRow key={enrollment.enrollmentId}>
-                                        <TableCell className="font-medium">{enrollment.lastName}</TableCell>
-                                        <TableCell>{enrollment.firstName}</TableCell>
-                                        <TableCell>{enrollment.email || '-'}</TableCell>
+                                        <TableCell className={cn("font-medium", isWorkshopSorted("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
+                                        <TableCell className={cn(isWorkshopSorted("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
+                                        <TableCell className={cn(isWorkshopSorted("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
                                         <TableCell className="text-right">
                                           <Button
                                             variant="ghost"
@@ -644,24 +660,24 @@ export default function IscrittiPerAttivita() {
                                   <Table>
                                     <TableHeader>
                                       <TableRow>
-                                        <TableHead>Cognome</TableHead>
-                                        <TableHead>Nome</TableHead>
-                                        <TableHead>Email</TableHead>
+                                        <SortableTableHead sortKey="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableTableHead>
+                                        <SortableTableHead sortKey="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableTableHead>
+                                        <SortableTableHead sortKey="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableTableHead>
                                         <TableHead>Dettagli</TableHead>
-                                        <TableHead>Data Iscrizione</TableHead>
+                                        <SortableTableHead sortKey="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableTableHead>
                                         <TableHead className="text-right">Azioni</TableHead>
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                      {activityEnrollments.map((enroll: any) => (
+                                      {sortActivityItems(activityEnrollments, getSortValue).map((enroll: any) => (
                                         <TableRow key={enroll.id}>
-                                          <TableCell className="font-medium">{enroll.memberLastName || '-'}</TableCell>
-                                          <TableCell>{enroll.memberFirstName || '-'}</TableCell>
-                                          <TableCell>{enroll.memberEmail || '-'}</TableCell>
+                                          <TableCell className={cn("font-medium", isActivitySorted("lastName") && "sorted-column-cell")}>{enroll.memberLastName || '-'}</TableCell>
+                                          <TableCell className={cn(isActivitySorted("firstName") && "sorted-column-cell")}>{enroll.memberFirstName || '-'}</TableCell>
+                                          <TableCell className={cn(isActivitySorted("email") && "sorted-column-cell")}>{enroll.memberEmail || '-'}</TableCell>
                                           <TableCell>
                                             <span className="text-xs text-muted-foreground">-</span>
                                           </TableCell>
-                                          <TableCell>
+                                          <TableCell className={cn(isActivitySorted("date") && "sorted-column-cell")}>
                                             {enroll.enrollmentDate
                                               ? new Date(enroll.enrollmentDate).toLocaleDateString('it-IT')
                                               : '-'}
