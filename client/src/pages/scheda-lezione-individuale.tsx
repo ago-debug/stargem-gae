@@ -38,7 +38,7 @@ export default function SchedaLezioneIndividuale() {
 
     if (itemsLoading || membersLoading || enrollmentsLoading || paymentsLoading || attendancesLoading) {
         return (
-            <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+            <div className="p-6 md:p-8 space-y-6 mx-auto">
                 <Skeleton className="h-12 w-64" />
                 <Skeleton className="h-[400px] w-full" />
             </div>
@@ -47,7 +47,7 @@ export default function SchedaLezioneIndividuale() {
 
     if (!hasValidId) {
         return (
-            <div className="p-6 md:p-8 max-w-7xl mx-auto">
+            <div className="p-6 md:p-8 mx-auto">
                 <div className="bg-white p-6 rounded-xl border shadow-sm">
                     <h1 className="text-2xl font-bold text-slate-800">Scheda Lezione Individuale</h1>
                     <p className="text-slate-600 mt-2">Parametro <code>activeId</code> mancante o non valido nell’URL.</p>
@@ -65,7 +65,7 @@ export default function SchedaLezioneIndividuale() {
 
     if (!item) {
         return (
-            <div className="p-6 md:p-8 max-w-7xl mx-auto">
+            <div className="p-6 md:p-8 mx-auto">
                 <div className="bg-white p-6 rounded-xl border shadow-sm">
                     <h1 className="text-2xl font-bold text-slate-800">Scheda Lezione Individuale</h1>
                     <p className="text-slate-600 mt-2">Attività non trovata per <code>activityId={String(activeId)}</code>.</p>

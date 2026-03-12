@@ -25,12 +25,14 @@ La palette di CourseManager prevede ruoli specifici per ciascun colore, al fine 
 ## 2. Convenzioni Tipografiche e Layout
 
 *   **Popup Centrali (Blindati):** Quando un'operazione non deve poter essere disturbata (es. Chiusura Pagamento), NON utilizzeremo navigazioni tra pagine esterne. L'interfaccia andrà in overlay (sfondo scuro semitrasparente) sollevando una finestra "Modale" centrale bianca in modo da non perdere il contesto sottostante.
+*   **Campi Obbligatori e Dati Mancanti:** Tutti gli input obbligatori di un form devono essere contrassegnati con un asterisco rosso (`text-destructive`). Qualora un campo obbligatorio non sia compilato, è da preferirsi l'utilizzo di Inline Badges ("Manca Dato") posizionati all'interno del campo stesso, per spingere l'utente all'inserimento senza ricorrere ad alert esterni invasivi.
 *   **Nomenclatura Costante:** Nessun testo o voce di menu dev'essere inserito a mano nei rendering. I bottoni di creazione avranno label uniformi ("Nuova Attività", "Nuovo Iscritto").
 *   **Spicchi e Card:** I dati, specialmente nelle Dashboard e nella Panoramica, non vanno buttati come testo libero. Devono essere racchiusi in "Card" bianche su uno sfondo neutro.
 
 ## 3. Gestione di Tabelle ed Elenchi
 
 *   **Filtri Obbligatori (Lazy Loading):** Nessuna griglia dati (es. Anagrafica da 9.000 righe) deve caricarsi per intero in prima battuta. Di default è richiesto almeno un input (es. "inserisci 3 lettere") oppure un pre-filtro logico (es. "Attivi nell'anno in corso") per non appesantire il rendering del browser.
+*   **Ordinamento e Intestazioni (SortableTableHead):** Le tabelle devono utilizzare il componente standardizzato `SortableTableHead` e l'hook `useSortableTable`. Ogni colonna ordinabile deve mostrare un indicatore coerente (`ArrowUpDown`, `ArrowUp`, `ArrowDown`) che reagisca al click, garantendo uniformità di UX su tutte le view a lista del gestionale.
 *   **Elenchi Semplici vs Elenchi Colorati:** Mantenere un ordinamento coerente visivo (A-Z o cronologico). Le tabelle "Colorate" devono usare sfondi tenui per le singole righe basati sullo Stato dell'utente.
 
 ---

@@ -64,10 +64,10 @@ import {
   insertCustomListSchema,
   insertCustomListItemSchema,
   auditLogs,
-  insertActivityDetailSchema,
-  insertUniversalEnrollmentSchema,
-  activityDetails,
-  universalEnrollments
+  activities,
+  insertActivitySchema,
+  globalEnrollments,
+  insertGlobalEnrollmentSchema
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -3205,25 +3205,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       let validatedData = insertMembershipSchema.parse(req.body);
 
-      // Generate membership number automatically if not provided
+      // Generate membership number automatically if not provided (Format: [memberId]-YYYY/YYYY+1)
       if (!validatedData.membershipNumber) {
-        const existingMemberships = await storage.getMemberships();
-        const currentYear = "2526";
-        const existingNumbers = existingMemberships
-          .map(m => m.membershipNumber)
-          .filter(num => num && typeof num === 'string' && num.startsWith(currentYear))
-          .map(num => parseInt(num.substring(4)) || 0);
-
-        const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
-        validatedData.membershipNumber = `${currentYear}${nextNumber.toString().padStart(6, '0')}`;
+        const currentDate = new Date();
+        const year1 = currentDate.getFullYear();
+        const year2 = year1 + 1;
+        validatedData.membershipNumber = `${validatedData.memberId}-${year1}/${year2}`;
       }
 
-      // Generate barcode if not provided (same as membership number)
+      // Generate barcode if not provided
       if (!validatedData.barcode) {
         validatedData.barcode = validatedData.membershipNumber;
       }
 
       const membership = await storage.createMembership(validatedData);
+
+      // Aggiorniamo l'anagrafica del partecipante con le informazioni dell'Ente se presenti
+      const { entityCardType, entityCardNumber, entityCardIssueDate, entityCardExpiryDate, nuovoRinnovo } = req.body;
+      if (entityCardType || entityCardNumber || entityCardIssueDate || entityCardExpiryDate) {
+        await storage.updateMember(membership.memberId, {
+          ...(entityCardType && { entityCardType }),
+          ...(entityCardNumber && { entityCardNumber }),
+          ...(entityCardIssueDate && { entityCardIssueDate: new Date(entityCardIssueDate) }),
+          ...(entityCardExpiryDate && { entityCardExpiryDate: new Date(entityCardExpiryDate) }),
+        });
+      }
 
       if (membership.memberId) {
         await storage.createPayment({
@@ -3231,7 +3237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           membershipId: membership.id,
           amount: membership.fee || "0",
           type: "membership",
-          description: `Quota associativa: ${membership.membershipNumber}`,
+          description: `Quota associativa (${nuovoRinnovo === 'rinnovo' ? 'Rinnovo' : 'Nuova'}): ${membership.membershipNumber}`,
           status: "pending",
           dueDate: new Date(),
           paidDate: null,
@@ -6457,12 +6463,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==========================================
   app.get("/api/activities", isAuthenticated, async (req, res) => {
     try {
-      const type = req.query.type as string;
-      if (type) {
-        const activities = await storage.getActivityDetailsByType(type);
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      if (categoryId) {
+        const activities = await storage.getActivitiesByCategoryId(categoryId);
         res.json(activities);
       } else {
-        const activities = await storage.getActivityDetails();
+        const activities = await storage.getActivities();
         res.json(activities);
       }
     } catch (error) {
@@ -6473,7 +6479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/activities/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const activity = await storage.getActivityDetail(id);
+      const activity = await storage.getActivity(id);
       if (!activity) return res.status(404).json({ error: "Activity not found" });
       res.json(activity);
     } catch (error) {
@@ -6483,8 +6489,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/activities", isAuthenticated, async (req, res) => {
     try {
-      const parsed = insertActivityDetailSchema.parse(req.body);
-      const activity = await storage.createActivityDetail(parsed);
+      const parsed = insertActivitySchema.parse(req.body);
+      const activity = await storage.createActivity(parsed);
       res.status(201).json(activity);
     } catch (error: any) {
       console.error("error API post", error);
@@ -6495,8 +6501,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/activities/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const parsed = insertActivityDetailSchema.partial().parse(req.body);
-      const activity = await storage.updateActivityDetail(id, parsed);
+      const parsed = insertActivitySchema.partial().parse(req.body);
+      const activity = await storage.updateActivity(id, parsed);
       res.json(activity);
     } catch (error: any) {
       res.status(400).json({ error: "Invalid activity data", details: error.errors || error.message });
@@ -6506,7 +6512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/activities/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      await storage.deleteActivityDetail(id);
+      await storage.deleteActivity(id);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete activity" });
@@ -6516,18 +6522,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==========================================
   // STI: UNIFIED ENROLLMENTS APIS
   // ==========================================
-  app.get("/api/universal-enrollments", isAuthenticated, async (req, res) => {
+  app.get("/api/global-enrollments", isAuthenticated, async (req, res) => {
     try {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
       const activityId = req.query.activityId ? parseInt(req.query.activityId as string) : undefined;
 
       let enrollments = [];
       if (memberId) {
-        enrollments = await storage.getUniversalEnrollmentsByMemberId(memberId);
+        enrollments = await storage.getGlobalEnrollmentsByMemberId(memberId);
       } else if (activityId) {
-        enrollments = await storage.getUniversalEnrollmentsByActivityId(activityId);
+        enrollments = await storage.getGlobalEnrollmentsByActivityId(activityId);
       } else {
-        enrollments = await storage.getUniversalEnrollments();
+        enrollments = await storage.getGlobalEnrollments();
       }
 
       const allMembers = await storage.getMembers();
@@ -6545,49 +6551,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       res.json(enriched);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch universal enrollments" });
+      res.status(500).json({ error: "Failed to fetch global enrollments" });
     }
   });
 
-  app.post("/api/universal-enrollments", isAuthenticated, async (req, res) => {
+  app.post("/api/global-enrollments", isAuthenticated, async (req, res) => {
     try {
-      const parsed = insertUniversalEnrollmentSchema.parse(req.body);
-      const enrollment = await storage.createUniversalEnrollment(parsed);
-
-      // Update cache
-      if (parsed.activityDetailId) {
-        const activity = await storage.getActivityDetail(parsed.activityDetailId);
-        if (activity) {
-          const enrollments = await storage.getUniversalEnrollmentsByActivityId(parsed.activityDetailId);
-          await storage.updateActivityDetail(parsed.activityDetailId, {
-            currentEnrollment: enrollments.length
-          });
-        }
-      }
-
+      const parsed = insertGlobalEnrollmentSchema.parse(req.body);
+      const enrollment = await storage.createGlobalEnrollment(parsed);
       res.status(201).json(enrollment);
     } catch (error: any) {
       res.status(400).json({ error: "Invalid enrollment data", details: error.errors || error.message });
     }
   });
 
-  app.patch("/api/universal-enrollments/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/global-enrollments/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const parsed = insertUniversalEnrollmentSchema.partial().parse(req.body);
-      const enrollment = await storage.updateUniversalEnrollment(id, parsed);
-
-      if (enrollment && parsed.status === 'cancelled') {
-        // Update cache if cancelled
-        const activity = await storage.getActivityDetail(enrollment.activityDetailId);
-        if (activity) {
-          const enrollments = await storage.getUniversalEnrollmentsByActivityId(activity.id);
-          const activeCount = enrollments.filter(e => e.status !== 'cancelled').length;
-          await storage.updateActivityDetail(activity.id, {
-            currentEnrollment: activeCount
-          });
-        }
-      }
+      const parsed = insertGlobalEnrollmentSchema.partial().parse(req.body);
+      const enrollment = await storage.updateGlobalEnrollment(id, parsed);
 
       res.json(enrollment);
     } catch (error: any) {
@@ -6595,23 +6577,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/universal-enrollments/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/global-enrollments/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const enrollment = await db.select().from(universalEnrollments).where(eq(universalEnrollments.id, id)).then(r => r[0]);
-
-      await storage.deleteUniversalEnrollment(id);
-
-      if (enrollment) {
-        const activity = await storage.getActivityDetail(enrollment.activityDetailId);
-        if (activity) {
-          const enrollmentsList = await storage.getUniversalEnrollmentsByActivityId(activity.id);
-          const activeCount = enrollmentsList.filter(e => e.status !== 'cancelled').length;
-          await storage.updateActivityDetail(activity.id, {
-            currentEnrollment: activeCount
-          });
-        }
-      }
+      await storage.deleteGlobalEnrollment(id);
+      
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete enrollment" });
@@ -6624,43 +6594,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/calendar-events", isAuthenticated, async (req, res) => {
     try {
       // Fetch all activity_details representing events
-      const activities = await storage.getActivityDetails();
+      const activitiesList = await storage.getActivities();
 
       // Need studios to populate titles properly
       const studiosList = await storage.getStudios();
       const studioMap = Object.fromEntries(studiosList.map(s => [s.id, s]));
 
       // Map activity details to unified calendar events
-      const events = activities.map(activity => {
+      const events = activitiesList.map((activity: any) => {
         let eventColor = "#3788d8"; // Default blue
-        switch (activity.type) {
-          case 'course': eventColor = "#4CAF50"; break; // Green
-          case 'workshop': eventColor = "#9C27B0"; break; // Purple
-          case 'rental': eventColor = "#FF9800"; break; // Orange
-          case 'internal': eventColor = "#F44336"; break; // Red
-          case 'campus': eventColor = "#00BCD4"; break; // Cyan
+        switch (activity.categoryId) {
+          // Placeholder color mapping until categories are seeded
+          default: eventColor = "#4CAF50"; break; // Green
         }
 
         return {
-          id: `${activity.type}-${activity.id}`,
+          id: `activity-${activity.id}`,
           title: activity.name,
-          start: activity.startDate ? `${activity.startDate}T${activity.startTime || '00:00'}` : null,
-          end: activity.endDate ? `${activity.endDate}T${activity.endTime || '23:59'}` : null,
+          start: activity.startTime ? `${new Date().toISOString().split('T')[0]}T${activity.startTime}` : null,
+          end: activity.endTime ? `${new Date().toISOString().split('T')[0]}T${activity.endTime}` : null,
           backgroundColor: eventColor,
           extendedProps: {
-            activityType: activity.type,
             activityId: activity.id,
             description: activity.description,
-            studioId: activity.studioId,
-            studio: activity.studioId ? studioMap[activity.studioId]?.name : undefined,
+            studioId: activity.locationId,
+            studio: activity.locationId ? studioMap[activity.locationId]?.name : undefined,
             instructorId: activity.instructorId,
             categoryId: activity.categoryId,
-            dayOfWeek: activity.dayOfWeek,
-            currentEnrollment: activity.currentEnrollment,
             maxCapacity: activity.maxCapacity
           }
         };
-      }).filter(event => event.start !== null); // Only return events with a start date/day
+      }).filter((event: any) => event.start !== null); // Only return events with a start date/day
 
       res.json(events);
     } catch (error) {

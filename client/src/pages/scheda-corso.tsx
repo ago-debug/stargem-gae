@@ -38,7 +38,7 @@ export default function SchedaCorso() {
 
     if (coursesLoading || membersLoading || enrollmentsLoading || paymentsLoading || attendancesLoading) {
         return (
-            <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+            <div className="p-6 md:p-8 space-y-6 mx-auto">
                 <Skeleton className="h-12 w-64" />
                 <Skeleton className="h-[400px] w-full" />
             </div>
@@ -47,7 +47,7 @@ export default function SchedaCorso() {
 
     if (!hasValidCourseId) {
         return (
-            <div className="p-6 md:p-8 max-w-7xl mx-auto">
+            <div className="p-6 md:p-8 mx-auto">
                 <div className="bg-white p-6 rounded-xl border shadow-sm">
                     <h1 className="text-2xl font-bold text-slate-800">Scheda Corso</h1>
                     <p className="text-slate-600 mt-2">Parametro <code>courseId</code> mancante o non valido nell’URL.</p>
@@ -65,7 +65,7 @@ export default function SchedaCorso() {
 
     if (!course) {
         return (
-            <div className="p-6 md:p-8 max-w-7xl mx-auto">
+            <div className="p-6 md:p-8 mx-auto">
                 <div className="bg-white p-6 rounded-xl border shadow-sm">
                     <h1 className="text-2xl font-bold text-slate-800">Scheda Corso</h1>
                     <p className="text-slate-600 mt-2">Corso non trovato per <code>courseId={String(courseId)}</code>.</p>

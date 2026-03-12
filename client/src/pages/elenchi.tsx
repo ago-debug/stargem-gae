@@ -638,7 +638,7 @@ function SimpleListsManager() {
 
 export default function Elenchi() {
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-8 mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg icon-gold-bg flex items-center justify-center shadow-sm">

@@ -6,7 +6,13 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
-### 9 Marzo 2026 (Refactoring Duplicati, UI Anagrafica & Fix Checkout)
+### 9 - 10 Marzo 2026 (Standardizzazione UI Tabelle, Maschera Input & Refactoring Duplicati)
+*   **Standardizzazione Tabelle (SortableTableHead):** Implementato il componente universale `SortableTableHead` e l'hook `useSortableTable` per standardizzare l'ordinamento delle colonne con indicatori visivi coerenti (`ArrowUpDown`, `ArrowUp`, `ArrowDown`) in tutte le tabelle dell'applicazione (es. `/attivita/corsi`, Anagrafica, ecc.). Standardizzata la larghezza e l'allineamento.
+*   **Affinamenti Maschera Input & Alert "Manca Dato":**
+    *   Aggiunti asterischi rossi (`text-destructive`) dinamici per segnalare visibilmente tutti i campi di input non opzionali.
+    *   Rimossi i vecchi suffissi testuali (C) e (J) dalle label, pulendo l'interfaccia.
+    *   Introdotto un Badge inline "Manca Dato" (rosso/oro) che compare *dentro* il campo di input vuoto se il dato è obbligatorio, guidando visivamente l'operatore alla compilazione.
+    *   Logica condizionale avanzata: "Codice Fiscale", "Cellulare" ed "Email" diventano istantaneamente obbligatori se l'utente inizia a compilare i dati di "Genitore 1" o "Genitore 2", garantendo la solidità dei contatti per i minorenni.
 *   **Fix Crash Bloccante Server (5001):** Risolto un crash silente del server Vite/Express causato da un errore di tipizzazione TypeScript (`editingPayment` mancante nelle props) nel componente `<NuovoPagamentoModal>` all'interno di `client/src/pages/payments.tsx`, che lasciava la porta 5001 appesa in stato `EADDRINUSE`.
 *   **Checkout Unificato & Payment Module:** Consolidato l'utilizzo del componente `PaymentModuleConnector.tsx` come unica interfaccia autorizzata di checkout.
 *   **Motore Rilevamento Duplicati Intelligente:** Riscritto totalmente l'algoritmo di individuazione duplicati in `server/storage.ts` passando dal semplice conteggio campi a un clustering avanzato. Introdotti filtri rigidi **Anti-Famiglie** (ignora omonimie parziali di contatto se i nomi propri divergono) e **Anti-Omonimi** (richiede almeno un dato di contatto in comune per nomi identici).

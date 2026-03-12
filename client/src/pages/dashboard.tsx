@@ -39,7 +39,7 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-8 mx-auto">
       {/* Removed Logo */}
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard</h1>

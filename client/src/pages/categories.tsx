@@ -94,7 +94,7 @@ export default function Categories() {
   const categoryTree = getCategoryTree();
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-8 mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Corsi</h1>

@@ -1298,35 +1298,71 @@ export default function AnagraficaHome() {
                         value={formData.entityCardNumber || ""}
                         onChange={(e) => setFormData(prev => ({ ...prev, entityCardNumber: e.target.value }))}
                         placeholder="Numero tessera"
-                        data-testid="input-entity-card-number"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="entityCardIssueDate">Data Rilascio</Label>
+                      <Label htmlFor="entityCardIssueDate">Data Rilascio Ente</Label>
                       <Input
                         id="entityCardIssueDate"
                         type="date"
                         value={formData.entityCardIssueDate || ""}
                         onChange={(e) => setFormData(prev => ({ ...prev, entityCardIssueDate: e.target.value }))}
-                        data-testid="input-entity-card-issue-date"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="entityCardExpiryDate">Data Scadenza</Label>
+                      <Label htmlFor="entityCardExpiryDate">Data Scadenza Ente</Label>
                       <Input
                         id="entityCardExpiryDate"
                         type="date"
                         value={formData.entityCardExpiryDate || ""}
                         onChange={(e) => setFormData(prev => ({ ...prev, entityCardExpiryDate: e.target.value }))}
-                        data-testid="input-entity-card-expiry-date"
                       />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Elenco Tessere Attive (da memberships) */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <IdCard className="w-5 h-5" />
+                    Tessere (Gestione Tessere)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!selectedMemberId ? (
+                    <p className="text-sm text-muted-foreground">Seleziona un membro per visualizzare le tessere collegate</p>
+                  ) : loadingMemberships ? (
+                    <Skeleton className="h-16 w-full" />
+                  ) : errorMemberships ? (
+                    <p className="text-sm text-destructive">Errore nel caricamento delle tessere collegate</p>
+                  ) : memberMemberships && memberMemberships.length > 0 ? (
+                    <div className="space-y-2">
+                      {memberMemberships.map((m: any) => (
+                        <div key={m.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+                          <div>
+                            <p className="font-medium text-sm">
+                              {m.membershipNumber} <span className="text-muted-foreground font-normal ml-2">{m.barcode && `(${m.barcode})`}</span>
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Dal {new Date(m.issueDate).toLocaleDateString('it-IT')} al {new Date(m.expiryDate).toLocaleDateString('it-IT')}
+                              {m.type && ` - Tipo: ${m.type}`}
+                            </p>
+                          </div>
+                          <Badge variant={m.status === 'active' && new Date(m.expiryDate) >= new Date() ? 'default' : 'secondary'}>
+                            {m.status === 'active' && new Date(m.expiryDate) >= new Date() ? 'Attiva' : 'Scaduta/Inattiva'}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Il partecipante non ha nessuna tessera registrata nel sistema (Gestione Tessere).</p>
+                  )}
+                </CardContent>
+              </Card>
               {/* Actions */}
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 mt-6">
                 <Button
                   onClick={handleSave}
                   disabled={saveMutation.isPending}

@@ -18,6 +18,7 @@ Durante l'analisi della UI attuale (Marzo 2026), prima di procedere con la ripro
 
 ### A. Frammentazione e Terminologia Confusa
 *   **Gestione a Silos:** Esistono decine di pagine separate per inserire entità simili (Corsi, Workshop, Campus, ecc.), frammentando l'esperienza di inserimento.
+*   **Tabelle e Ordinamenti Disallineati:** In passato ogni tabella gestiva l'ordinamento in modo autonomo. (Risolto: introdotto il modulo universale `useSortableTable` e `SortableTableHead` per governare il sort client-side in maniera unificata).
 *   **Nomenclatura Errata:** Il sistema indicava nel menu "Categorie (Materie)" in modo atecnico. È stato attualmente rinominato in **"Categorie Attività"**. In futuro, "Categoria" indicherà unicamente il contenitore delle materie fisiche (es. Danza, Arti Marziali, Fitness, Gioco Musica).
 
 ### B. Gestione Insegnanti a Compartimenti Stagni
@@ -41,7 +42,7 @@ Durante l'analisi della UI attuale (Marzo 2026), prima di procedere con la ripro
 ### F. Sovraccarico Anagrafica, Filtri e Persistenza Stato
 *   **Caricamento Dati Massivo (Filtri Obbligatori):** La lista anagrafiche base renderizza simultaneamente quasi 10.000 righe. Sarà obbligatorio inserire criteri di visibilità iniziali o filtri attivi (es. "Cerca...", o elenco in Lazy Load) per snellire il sistema.
 *   **Bug di Persistenza (Maschera Input):** Quando si seleziona un partecipante e si naviga verso altre sezioni (Panoramica ecc.), al ritorno la maschera "dimentica" e non mostra più i pagamenti/attività aperti. È necessario implementare un memory cache (es. Zustand) per l'utente esaminato.
-*   **Dati Sensibili Incompleti:** La UI attuale degli istruttori richiede solo Telefono e Mail. Sarà vitale avere la compilazione dei dati anagrafici completi per le questioni fiscali.
+*   **Dati Sensibili Incompleti:** La UI attuale degli istruttori richiede solo Telefono e Mail. Sarà vitale avere la compilazione dei dati anagrafici completi per le questioni fiscali. (Risolto: introdotti asterischi rossi sui campi mandatori e badge "Manca Dato" inline negli input vuoti della Maschera Generale e Insegnanti. L'inserimento di un genitore rende automaticamente obbligatori Email, Cellulare e Codice Fiscale).
 *   **Gestione Duplicati:** Precedentemente il sistema segnalava i duplicati con logica debole (es. 1 punto per stesso Nome e Cognome), inondando la segreteria di "Falsi Positivi" (es. Omonimi, o Familiari con stessa email). Il sistema implementa ora un clustering euristico avanzato con **Filtro Anti-Famiglie** e **Filtro Anti-Omonimi** per validare i "veri" duplicati solo con prove incrociate certe (es. CF uguale o Nome identico + Email identica).
 
 ---

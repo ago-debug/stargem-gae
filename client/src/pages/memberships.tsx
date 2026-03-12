@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,16 +14,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, IdCard, FileText, Building2, Check, ChevronsUpDown, UserPlus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
 import type { Membership, InsertMembership, MedicalCertificate, InsertMedicalCertificate, Member } from "@shared/schema";
+import { useEffect } from "react";
 
 export default function Memberships() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const [membershipSearch, setMembershipSearch] = useState("");
   const [entityCardSearch, setEntityCardSearch] = useState("");
   const [certificateSearch, setCertificateSearch] = useState("");
@@ -31,6 +34,9 @@ export default function Memberships() {
   const [isCertificateFormOpen, setIsCertificateFormOpen] = useState(false);
   const [editingMembership, setEditingMembership] = useState<Membership | null>(null);
   const [editingCertificate, setEditingCertificate] = useState<MedicalCertificate | null>(null);
+
+  const [entityTypeFilter, setEntityTypeFilter] = useState("all");
+  const [showOnlyActive, setShowOnlyActive] = useState(false);
 
   const [membershipMemberOpen, setMembershipMemberOpen] = useState(false);
   const [membershipMemberSearch, setMembershipMemberSearch] = useState("");
@@ -74,6 +80,32 @@ export default function Memberships() {
     },
     enabled: certMemberSearch.length >= 3,
   });
+
+  // Intercept search parameters for external routing
+  useEffect(() => {
+    const urlParams = new URLSearchParams(searchString);
+    const memberIdUrl = urlParams.get('memberId');
+    const actionUrl = urlParams.get('action');
+
+    if (actionUrl === 'new_membership' && memberIdUrl) {
+      const id = parseInt(memberIdUrl);
+      if (!isNaN(id)) {
+        fetch(`/api/members/${id}`)
+          .then(res => {
+            if (res.ok) return res.json();
+            throw new Error('Membro non passato o non trovato');
+          })
+          .then((member: Member) => {
+            setSelectedMembershipMember(member);
+            setIsMembershipFormOpen(true);
+            setMembershipMemberSearch(`${member.lastName} ${member.firstName}`);
+            // Pulisci l'URL per impedire riaperture successive
+            setLocation('/memberships', { replace: true });
+          })
+          .catch(err => console.error("[AutoOpen Membership Modal]", err));
+      }
+    }
+  }, [searchString, setLocation]);
 
   const tsMemberships = useSortableTable<any>("expiryDate");
   const getMembershipSortValue = (item: any, key: string) => {
@@ -160,12 +192,19 @@ export default function Memberships() {
       barcode: formData.get("barcode") as string,
       issueDate: new Date(formData.get("issueDate") as string),
       expiryDate: new Date(formData.get("expiryDate") as string),
-      type: formData.get("type") as string || null,
+      type: "annual",
       fee: formData.get("fee") ? formData.get("fee") as string : null,
       status: "active",
     };
 
-    createMembershipMutation.mutate(data);
+    // Aggiungo campi extra per il backend
+    const extraData = {
+      nuovoRinnovo: formData.get("nuovoRinnovo") as string,
+      entityCardNumber: formData.get("entityCardNumber") as string,
+      entityCardExpiryDate: formData.get("entityCardExpiryDate") as string,
+    };
+
+    createMembershipMutation.mutate({ ...data, ...extraData } as any);
   };
 
   const handleCertificateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -208,17 +247,17 @@ export default function Memberships() {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-6 mx-auto">
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2">Tessere & Certificati Medici</h1>
-        <p className="text-muted-foreground">Gestisci tessere StudioGem e certificati medici</p>
+        <p className="text-muted-foreground">Gestisci tessere e certificati medici</p>
       </div>
 
       <Tabs defaultValue="memberships" className="space-y-6">
         <TabsList>
           <TabsTrigger value="memberships" data-testid="tab-memberships">
             <IdCard className="w-4 h-4 mr-2" />
-            Tessere StudioGem
+            Tessere
           </TabsTrigger>
           <TabsTrigger value="entity-cards" data-testid="tab-entity-cards">
             <Building2 className="w-4 h-4 mr-2" />
@@ -460,8 +499,8 @@ export default function Memberships() {
 
         <TabsContent value="entity-cards" className="space-y-6">
           <Card>
-            <CardHeader>
-              <div className="relative max-w-md">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="relative max-w-md flex-1 w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Cerca per cognome, nome o codice fiscale..."
@@ -470,6 +509,27 @@ export default function Memberships() {
                   className="pl-10"
                   data-testid="input-search-entity-cards"
                 />
+              </div>
+              <div className="flex items-center gap-4 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
+                <Select value={entityTypeFilter} onValueChange={setEntityTypeFilter}>
+                  <SelectTrigger className="w-[180px] shrink-0">
+                    <SelectValue placeholder="Tutti gli enti" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti gli enti</SelectItem>
+                    {Array.from(new Set((entityCardMembers || []).map(m => m.entityCardType).filter(Boolean))).map(type => (
+                      <SelectItem key={type as string} value={type as string}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center space-x-2 shrink-0">
+                  <Checkbox 
+                    id="show-only-active" 
+                    checked={showOnlyActive} 
+                    onCheckedChange={(checked) => setShowOnlyActive(checked === true)} 
+                  />
+                  <Label htmlFor="show-only-active" className="cursor-pointer">Solo tessere attive</Label>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -482,6 +542,13 @@ export default function Memberships() {
               ) : (() => {
                 const allEntityCardMembers = entityCardMembers || [];
                 const filteredEntityCardsRaw = allEntityCardMembers.filter(m => {
+                  if (entityTypeFilter !== "all" && m.entityCardType !== entityTypeFilter) return false;
+                  
+                  if (showOnlyActive) {
+                    const expiryInfo = m.entityCardExpiryDate ? getExpiryStatus(m.entityCardExpiryDate) : null;
+                    if (!expiryInfo || expiryInfo.status !== "active") return false;
+                  }
+
                   if (!entityCardSearch || entityCardSearch.length < 3) return true;
                   const searchLower = entityCardSearch.toLowerCase();
                   return (
@@ -559,7 +626,7 @@ export default function Memberships() {
       <Dialog open={isMembershipFormOpen} onOpenChange={setIsMembershipFormOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Nuova Tessera StudioGem</DialogTitle>
+            <DialogTitle>Nuova Tessera</DialogTitle>
             <DialogDescription>Inserisci i dettagli della tessera</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleMembershipSubmit} className="space-y-4">
@@ -668,12 +735,24 @@ export default function Memberships() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="issueDate">Data Rilascio *</Label>
+                <Label htmlFor="issueDate">Data Rilascio (Pagamento) *</Label>
                 <Input
                   id="issueDate"
                   name="issueDate"
                   type="date"
                   required
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    // Auto-calcolo Scadenza base 1 anno
+                    const expiryInput = document.getElementById('expiryDate') as HTMLInputElement;
+                    if (expiryInput && e.target.value) {
+                       const issueD = new Date(e.target.value);
+                       const expireD = new Date(issueD.getFullYear() + 1, issueD.getMonth(), 1); // 01 / MM / YYYY+1
+                       // Formattazione manuale YYYY-MM-DD per timezone locale
+                       const pad = (n: number) => n.toString().padStart(2, '0');
+                       expiryInput.value = `${expireD.getFullYear()}-${pad(expireD.getMonth() + 1)}-${pad(expireD.getDate())}`;
+                    }
+                  }}
                   data-testid="input-issueDate"
                 />
               </div>
@@ -692,15 +771,14 @@ export default function Memberships() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="type">Tipo Tessera</Label>
-                <Select name="type">
-                  <SelectTrigger data-testid="select-type">
-                    <SelectValue placeholder="Seleziona tipo" />
+                <Label htmlFor="nuovoRinnovo">Nuovo o Rinnovo</Label>
+                <Select name="nuovoRinnovo" defaultValue="nuovo">
+                  <SelectTrigger data-testid="select-nuovo-rinnovo">
+                    <SelectValue placeholder="Seleziona..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="annual">Annuale</SelectItem>
-                    <SelectItem value="monthly">Mensile</SelectItem>
-                    <SelectItem value="seasonal">Stagionale</SelectItem>
+                    <SelectItem value="nuovo">Nuovo</SelectItem>
+                    <SelectItem value="rinnovo">Rinnovo</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -713,7 +791,30 @@ export default function Memberships() {
                   type="number"
                   step="0.01"
                   min="0"
+                  defaultValue="25"
                   data-testid="input-fee"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="entityCardNumber">Tessera Ente</Label>
+                <Input
+                  id="entityCardNumber"
+                  name="entityCardNumber"
+                  placeholder="Se provvisto..."
+                  data-testid="input-entityCardNumber"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="entityCardExpiryDate">Scadenza Tessera Ente</Label>
+                <Input
+                  id="entityCardExpiryDate"
+                  name="entityCardExpiryDate"
+                  type="date"
+                  data-testid="input-entityCardExpiryDate"
                 />
               </div>
             </div>

@@ -36,6 +36,13 @@
       "when": 1773059994829,
       "tag": "0004_small_paladin",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1773337887351,
+      "tag": "0005_rare_talkback",
+      "breakpoints": true
     }
   ]
 }
