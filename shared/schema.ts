@@ -1865,7 +1865,22 @@ export type PaymentMethod = typeof paymentMethods.$inferSelect;
 export const payments = mysqlTable("payments", {
   id: int("id").primaryKey().autoincrement(),
   memberId: int("member_id").references(() => members.id, { onDelete: "set null" }),
+  // Legacy Enrollment FKs (To be removed completely in Phase 3)
   enrollmentId: int("enrollment_id").references(() => enrollments.id, { onDelete: "cascade" }),
+  workshopEnrollmentId: int("ws_enroll_id").references(() => workshopEnrollments.id, { onDelete: "cascade" }),
+  paidTrialEnrollmentId: int("pt_enroll_id").references(() => paidTrialEnrollments.id, { onDelete: "cascade" }),
+  freeTrialEnrollmentId: int("ft_enroll_id").references(() => freeTrialEnrollments.id, { onDelete: "cascade" }),
+  singleLessonEnrollmentId: int("sl_enroll_id").references(() => singleLessonEnrollments.id, { onDelete: "cascade" }),
+  sundayActivityEnrollmentId: int("sa_enroll_id").references(() => sundayActivityEnrollments.id, { onDelete: "cascade" }),
+  trainingEnrollmentId: int("tr_enroll_id").references(() => trainingEnrollments.id, { onDelete: "cascade" }),
+  individualLessonEnrollmentId: int("il_enroll_id").references(() => individualLessonEnrollments.id, { onDelete: "cascade" }),
+  campusEnrollmentId: int("ca_enroll_id").references(() => campusEnrollments.id, { onDelete: "cascade" }),
+  recitalEnrollmentId: int("rec_enroll_id").references(() => recitalEnrollments.id, { onDelete: "cascade" }),
+  vacationStudyEnrollmentId: int("vs_enroll_id").references(() => vacationStudyEnrollments.id, { onDelete: "cascade" }),
+  
+  // NEW STI Enrollment Bridge
+  globalEnrollmentId: int("global_enrollment_id").references(() => globalEnrollments.id, { onDelete: "cascade" }),
+  
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   type: varchar("type", { length: 100 }).notNull(), // 'course', 'membership', 'other'
   description: text("description"),
@@ -1878,16 +1893,6 @@ export const payments = mysqlTable("payments", {
   seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdById: varchar("created_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   updatedById: varchar("updated_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
-  workshopEnrollmentId: int("ws_enroll_id").references(() => workshopEnrollments.id, { onDelete: "cascade" }),
-  paidTrialEnrollmentId: int("pt_enroll_id").references(() => paidTrialEnrollments.id, { onDelete: "cascade" }),
-  freeTrialEnrollmentId: int("ft_enroll_id").references(() => freeTrialEnrollments.id, { onDelete: "cascade" }),
-  singleLessonEnrollmentId: int("sl_enroll_id").references(() => singleLessonEnrollments.id, { onDelete: "cascade" }),
-  sundayActivityEnrollmentId: int("sa_enroll_id").references(() => sundayActivityEnrollments.id, { onDelete: "cascade" }),
-  trainingEnrollmentId: int("tr_enroll_id").references(() => trainingEnrollments.id, { onDelete: "cascade" }),
-  individualLessonEnrollmentId: int("il_enroll_id").references(() => individualLessonEnrollments.id, { onDelete: "cascade" }),
-  campusEnrollmentId: int("ca_enroll_id").references(() => campusEnrollments.id, { onDelete: "cascade" }),
-  recitalEnrollmentId: int("rec_enroll_id").references(() => recitalEnrollments.id, { onDelete: "cascade" }),
-  vacationStudyEnrollmentId: int("vs_enroll_id").references(() => vacationStudyEnrollments.id, { onDelete: "cascade" }),
   bookingId: int("booking_id").references(() => studioBookings.id, { onDelete: "cascade" }),
   membershipId: int("membership_id").references(() => memberships.id, { onDelete: "cascade" }),
 
@@ -1918,13 +1923,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.memberId],
     references: [members.id],
   }),
+  // RELATIONS: Legacy
   enrollment: one(enrollments, {
     fields: [payments.enrollmentId],
     references: [enrollments.id],
-  }),
-  paymentMethodInfo: one(paymentMethods, {
-    fields: [payments.paymentMethodId],
-    references: [paymentMethods.id],
   }),
   paidTrialEnrollment: one(paidTrialEnrollments, { fields: [payments.paidTrialEnrollmentId], references: [paidTrialEnrollments.id] }),
   freeTrialEnrollment: one(freeTrialEnrollments, { fields: [payments.freeTrialEnrollmentId], references: [freeTrialEnrollments.id] }),
@@ -1935,6 +1937,17 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   campusEnrollment: one(campusEnrollments, { fields: [payments.campusEnrollmentId], references: [campusEnrollments.id] }),
   recitalEnrollment: one(recitalEnrollments, { fields: [payments.recitalEnrollmentId], references: [recitalEnrollments.id] }),
   vacationStudyEnrollment: one(vacationStudyEnrollments, { fields: [payments.vacationStudyEnrollmentId], references: [vacationStudyEnrollments.id] }),
+  
+  // RELATIONS: STI V2
+  globalEnrollment: one(globalEnrollments, {
+    fields: [payments.globalEnrollmentId],
+    references: [globalEnrollments.id],
+  }),
+
+  paymentMethodInfo: one(paymentMethods, {
+    fields: [payments.paymentMethodId],
+    references: [paymentMethods.id],
+  }),
 }));
 
 export const insertPaymentSchema = createInsertSchema(payments, {
@@ -2479,77 +2492,207 @@ export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 
 // ============================================================================
-// SINGLE TABLE INHERITANCE (STI) - UNIFIED ACTIVITY SCHEMA
+// SINGLE TABLE INHERITANCE (STI) - SAAS V2
 // ============================================================================
 
-export const activityDetails = mysqlTable("activity_details", {
+// 1. TENANT SETTINGS
+export const tenants = mysqlTable("tenants", {
   id: int("id").primaryKey().autoincrement(),
-
-  // Il "motore" del Single Table Inheritance: definisce la tipologia logica
-  type: varchar("type", { length: 50 }).notNull(), // E.g., 'course', 'workshop', 'rental', 'internal', 'campus'
-
-  // Metadati di Base
   name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  sku: varchar("sku", { length: 100 }),
-  active: boolean("active").default(true),
-
-  // Relazioni Strutturali
-  categoryId: int("category_id"), // FK to activity_categories (se applicabile)
-  instructorId: int("instructor_id"), // FK to instructors
-  studioId: int("studio_id"), // FK to studios
-
-  // Scheduling & Timing
-  dayOfWeek: varchar("day_of_week", { length: 50 }),
-  startDate: date("start_date", { mode: "string" }),
-  endDate: date("end_date", { mode: "string" }),
-  startTime: varchar("start_time", { length: 5 }), // HH:mm
-  endTime: varchar("end_time", { length: 5 }),     // HH:mm
-
-  // Logiche Finanziarie e Spazi
-  price: decimal("price", { precision: 10, scale: 2 }), // Prezzo base
-  maxCapacity: int("max_capacity"),                     // Capienza massima
-  currentEnrollment: int("current_enrollment").default(0), // Contatore cache
-
-  // Estensione Flessibile (Per campi unici come 'campus_theme' o 'recital_costumes')
-  extraInfo: json("extra_info"), // Payload JSON dinamico
-
+  logoUrl: varchar("logo_url", { length: 500 }),
+  primaryColor: varchar("primary_color", { length: 50 }).default("#6366f1"),
+  customMenuConfig: json("custom_menu_config"),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow()
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const insertActivityDetailSchema = createInsertSchema(activityDetails).omit({
+export const insertTenantSchema = createInsertSchema(tenants).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export type InsertActivityDetail = z.infer<typeof insertActivityDetailSchema>;
-export type ActivityDetail = typeof activityDetails.$inferSelect;
+export type InsertTenant = z.infer<typeof insertTenantSchema>;
+export type Tenant = typeof tenants.$inferSelect;
 
-export const universalEnrollments = mysqlTable("universal_enrollments", {
+// 2. ACTIVITY MACRO-CATEGORIES
+export const activityCategories = mysqlTable("activity_categories", {
   id: int("id").primaryKey().autoincrement(),
-
-  memberId: int("member_id").notNull(), // FK to members
-  activityDetailId: int("activity_detail_id").notNull(), // FK to activity_details
-
-  // Stato Iscrizione
-  status: varchar("status", { length: 50 }).default('active'), // 'active', 'suspended', 'waiting_list', 'cancelled'
-  enrollmentDate: date("enrollment_date", { mode: "string" }),
-
-  // Logiche Avanzate (Carnet e Note)
-  residualEntries: int("residual_entries"), // Per iscrizioni a scalare (es. Carnet 10 lezioni)
-  notes: text("notes"),
-  extraData: json("extra_data"), // Metadata specifici dell'iscritto (es. "Taglia maglietta" per campus)
-
+  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  uiRenderingType: varchar("ui_rendering_type", { length: 100 }).notNull(),
+  extraInfoSchema: json("extra_info_schema"),
+  isSystemDefault: boolean("is_system_default").default(false),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow()
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const insertUniversalEnrollmentSchema = createInsertSchema(universalEnrollments).omit({
+export const insertActivityCategorySchema = createInsertSchema(activityCategories).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export type InsertUniversalEnrollment = z.infer<typeof insertUniversalEnrollmentSchema>;
-export type UniversalEnrollment = typeof universalEnrollments.$inferSelect;
+export type InsertActivityCategory = z.infer<typeof insertActivityCategorySchema>;
+export type ActivityCategory = typeof activityCategories.$inferSelect;
+
+// 3. LA SUPER-TABELLA: ACTIVITIES (Unifies 11 Silos)
+export const activities = mysqlTable("activities", {
+  id: int("id").primaryKey().autoincrement(),
+  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  categoryId: int("category_id").references(() => activityCategories.id, { onDelete: "set null" }),
+  locationId: int("location_id").references(() => studios.id, { onDelete: "set null" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  
+  // Condivisi
+  startTime: timestamp("start_time"),
+  endTime: timestamp("end_time"),
+  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
+  
+  // Business Rules
+  maxCapacity: int("max_capacity"),
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  isPunchCard: boolean("is_punch_card").default(false),
+  punchCardTotalAccesses: int("punch_card_total_accesses"),
+  
+  // Extra Metadata
+  extraInfoOverrides: json("extra_info_overrides"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const activitiesRelations = relations(activities, ({ one, many }) => ({
+  tenant: one(tenants, { fields: [activities.tenantId], references: [tenants.id] }),
+  category: one(activityCategories, { fields: [activities.categoryId], references: [activityCategories.id] }),
+  location: one(studios, { fields: [activities.locationId], references: [studios.id] }),
+  instructor: one(members, { fields: [activities.instructorId], references: [members.id] }),
+  globalEnrollments: many(globalEnrollments),
+}));
+
+export const insertActivitySchema = createInsertSchema(activities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertActivity = z.infer<typeof insertActivitySchema>;
+export type Activity = typeof activities.$inferSelect;
+
+// 4. LA SUPER-TABELLA: GLOBAL ENROLLMENTS 
+export const globalEnrollments = mysqlTable("global_enrollments", {
+  id: int("id").primaryKey().autoincrement(),
+  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  activityId: int("activity_id").references(() => activities.id, { onDelete: "cascade" }),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  
+  status: varchar("status", { length: 50 }).notNull().default("active"),
+  
+  remainingPunchCards: int("remaining_punch_cards"),
+  walletCredit: decimal("wallet_credit", { precision: 10, scale: 2 }).default("0.00"),
+  
+  extraInfoData: json("extra_info_data"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const globalEnrollmentsRelations = relations(globalEnrollments, ({ one, many }) => ({
+  tenant: one(tenants, { fields: [globalEnrollments.tenantId], references: [tenants.id] }),
+  activity: one(activities, { fields: [globalEnrollments.activityId], references: [activities.id] }),
+  member: one(members, { fields: [globalEnrollments.memberId], references: [members.id] }),
+  payments: many(payments),
+}));
+
+export const insertGlobalEnrollmentSchema = createInsertSchema(globalEnrollments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertGlobalEnrollment = z.infer<typeof insertGlobalEnrollmentSchema>;
+export type GlobalEnrollment = typeof globalEnrollments.$inferSelect;
+
+// ============================================================================
+// HR / STAFF MODULE
+// ============================================================================
+
+export const teamShifts = mysqlTable("team_shifts", {
+  id: int("id").primaryKey().autoincrement(),
+  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+  locationId: int("location_id").references(() => studios.id, { onDelete: "set null" }),
+  shiftStart: timestamp("shift_start").notNull(),
+  shiftEnd: timestamp("shift_end").notNull(),
+  isAttendanceVerified: boolean("is_attendance_verified").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertTeamShiftSchema = createInsertSchema(teamShifts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTeamShift = z.infer<typeof insertTeamShiftSchema>;
+export type TeamShift = typeof teamShifts.$inferSelect;
+
+export const maintenanceTickets = mysqlTable("maintenance_tickets", {
+  id: int("id").primaryKey().autoincrement(),
+  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  locationId: int("location_id").references(() => studios.id, { onDelete: "set null" }),
+  title: varchar("title", { length: 255 }).notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("open"),
+  reportedBy: varchar("reported_by", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertMaintenanceTicketSchema = createInsertSchema(maintenanceTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMaintenanceTicket = z.infer<typeof insertMaintenanceTicketSchema>;
+export type MaintenanceTicket = typeof maintenanceTickets.$inferSelect;
+
+// ============================================================================
+// CRM & MARKETING MODULE
+// ============================================================================
+
+export const crmLeads = mysqlTable("crm_leads", {
+  id: int("id").primaryKey().autoincrement(),
+  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  firstName: varchar("first_name", { length: 255 }).notNull(),
+  lastName: varchar("last_name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }),
+  source: varchar("source", { length: 100 }),
+  status: varchar("status", { length: 50 }).default("new"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertCrmLeadSchema = createInsertSchema(crmLeads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCrmLead = z.infer<typeof insertCrmLeadSchema>;
+export type CrmLead = typeof crmLeads.$inferSelect;
+
+export const crmCampaigns = mysqlTable("crm_campaigns", {
+  id: int("id").primaryKey().autoincrement(),
+  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { length: 50 }).notNull(),
+  status: varchar("status", { length: 50 }).default("draft"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertCrmCampaignSchema = createInsertSchema(crmCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCrmCampaign = z.infer<typeof insertCrmCampaignSchema>;
+export type CrmCampaign = typeof crmCampaigns.$inferSelect;
 

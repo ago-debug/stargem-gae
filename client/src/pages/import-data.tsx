@@ -587,7 +587,7 @@ export default function ImportData() {
     const filteredConfigs = savedConfigs.filter(c => c.entityType === entityType);
 
     return (
-      <div className="p-6 md:p-8 space-y-6 max-w-6xl mx-auto">
+      <div className="p-6 md:p-8 space-y-6 mx-auto">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-semibold text-foreground mb-2">Mappatura Campi</h1>

@@ -191,12 +191,12 @@ import {
   auditLogs,
   type AuditLog,
   type InsertAuditLog,
-  activityDetails,
-  type ActivityDetail,
-  type InsertActivityDetail,
-  universalEnrollments,
-  type UniversalEnrollment,
-  type InsertUniversalEnrollment,
+  activities,
+  type Activity,
+  type InsertActivity,
+  globalEnrollments,
+  type GlobalEnrollment,
+  type InsertGlobalEnrollment,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -715,21 +715,21 @@ export interface IStorage {
   getCourseQuotesGrid(activityType?: string): Promise<CourseQuotesGrid[]>;
   upsertCourseQuotesGridBulk(quotes: InsertCourseQuotesGrid[], activityType?: string): Promise<void>;
 
-  // Activity Details (STI Phase 2)
-  getActivityDetails(): Promise<ActivityDetail[]>;
-  getActivityDetailsByType(type: string): Promise<ActivityDetail[]>;
-  getActivityDetail(id: number): Promise<ActivityDetail | undefined>;
-  createActivityDetail(data: InsertActivityDetail): Promise<ActivityDetail>;
-  updateActivityDetail(id: number, data: Partial<InsertActivityDetail>): Promise<ActivityDetail | undefined>;
-  deleteActivityDetail(id: number): Promise<void>;
+  // Activities (STI Phase 1)
+  getActivities(): Promise<Activity[]>;
+  getActivitiesByCategoryId(categoryId: number): Promise<Activity[]>;
+  getActivity(id: number): Promise<Activity | undefined>;
+  createActivity(data: InsertActivity): Promise<Activity>;
+  updateActivity(id: number, data: Partial<InsertActivity>): Promise<Activity | undefined>;
+  deleteActivity(id: number): Promise<void>;
 
-  // Universal Enrollments (STI Phase 2)
-  getUniversalEnrollments(): Promise<UniversalEnrollment[]>;
-  getUniversalEnrollmentsByMemberId(memberId: number): Promise<UniversalEnrollment[]>;
-  getUniversalEnrollmentsByActivityId(activityId: number): Promise<UniversalEnrollment[]>;
-  createUniversalEnrollment(data: InsertUniversalEnrollment): Promise<UniversalEnrollment>;
-  updateUniversalEnrollment(id: number, data: Partial<InsertUniversalEnrollment>): Promise<UniversalEnrollment | undefined>;
-  deleteUniversalEnrollment(id: number): Promise<void>;
+  // Global Enrollments (STI Phase 1)
+  getGlobalEnrollments(): Promise<GlobalEnrollment[]>;
+  getGlobalEnrollmentsByMemberId(memberId: number): Promise<GlobalEnrollment[]>;
+  getGlobalEnrollmentsByActivityId(activityId: number): Promise<GlobalEnrollment[]>;
+  createGlobalEnrollment(data: InsertGlobalEnrollment): Promise<GlobalEnrollment>;
+  updateGlobalEnrollment(id: number, data: Partial<InsertGlobalEnrollment>): Promise<GlobalEnrollment | undefined>;
+  deleteGlobalEnrollment(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4433,62 +4433,62 @@ export class DatabaseStorage implements IStorage {
     await db.delete(todos).where(eq(todos.id, id));
   }
 
-  // ==== Activity Details (STI Phase 2) ====
-  async getActivityDetails(): Promise<ActivityDetail[]> {
-    return await db.select().from(activityDetails).orderBy(desc(activityDetails.createdAt));
+  // ==== Activities (STI Phase 1) ====
+  async getActivities(): Promise<Activity[]> {
+    return await db.select().from(activities).orderBy(desc(activities.createdAt));
   }
 
-  async getActivityDetailsByType(type: string): Promise<ActivityDetail[]> {
-    return await db.select().from(activityDetails).where(eq(activityDetails.type, type)).orderBy(desc(activityDetails.createdAt));
+  async getActivitiesByCategoryId(categoryId: number): Promise<Activity[]> {
+    return await db.select().from(activities).where(eq(activities.categoryId, categoryId)).orderBy(desc(activities.createdAt));
   }
 
-  async getActivityDetail(id: number): Promise<ActivityDetail | undefined> {
-    const [detail] = await db.select().from(activityDetails).where(eq(activityDetails.id, id));
-    return detail;
+  async getActivity(id: number): Promise<Activity | undefined> {
+    const [activity] = await db.select().from(activities).where(eq(activities.id, id));
+    return activity;
   }
 
-  async createActivityDetail(data: InsertActivityDetail): Promise<ActivityDetail> {
-    const [result] = await db.insert(activityDetails).values(data as any);
-    const [newDetail] = await db.select().from(activityDetails).where(eq(activityDetails.id, result.insertId));
-    return newDetail;
+  async createActivity(data: InsertActivity): Promise<Activity> {
+    const [result] = await db.insert(activities).values(data as any);
+    const [newActivity] = await db.select().from(activities).where(eq(activities.id, result.insertId));
+    return newActivity;
   }
 
-  async updateActivityDetail(id: number, data: Partial<InsertActivityDetail>): Promise<ActivityDetail | undefined> {
-    await db.update(activityDetails).set({ ...data, updatedAt: new Date() } as any).where(eq(activityDetails.id, id));
-    return this.getActivityDetail(id);
+  async updateActivity(id: number, data: Partial<InsertActivity>): Promise<Activity | undefined> {
+    await db.update(activities).set({ ...data, updatedAt: new Date() } as any).where(eq(activities.id, id));
+    return this.getActivity(id);
   }
 
-  async deleteActivityDetail(id: number): Promise<void> {
-    await db.delete(activityDetails).where(eq(activityDetails.id, id));
+  async deleteActivity(id: number): Promise<void> {
+    await db.delete(activities).where(eq(activities.id, id));
   }
 
-  // ==== Universal Enrollments (STI Phase 2) ====
-  async getUniversalEnrollments(): Promise<UniversalEnrollment[]> {
-    return await db.select().from(universalEnrollments).orderBy(desc(universalEnrollments.createdAt));
+  // ==== Global Enrollments (STI Phase 1) ====
+  async getGlobalEnrollments(): Promise<GlobalEnrollment[]> {
+    return await db.select().from(globalEnrollments).orderBy(desc(globalEnrollments.createdAt));
   }
 
-  async getUniversalEnrollmentsByMemberId(memberId: number): Promise<UniversalEnrollment[]> {
-    return await db.select().from(universalEnrollments).where(eq(universalEnrollments.memberId, memberId)).orderBy(desc(universalEnrollments.createdAt));
+  async getGlobalEnrollmentsByMemberId(memberId: number): Promise<GlobalEnrollment[]> {
+    return await db.select().from(globalEnrollments).where(eq(globalEnrollments.memberId, memberId)).orderBy(desc(globalEnrollments.createdAt));
   }
 
-  async getUniversalEnrollmentsByActivityId(activityId: number): Promise<UniversalEnrollment[]> {
-    return await db.select().from(universalEnrollments).where(eq(universalEnrollments.activityDetailId, activityId)).orderBy(desc(universalEnrollments.createdAt));
+  async getGlobalEnrollmentsByActivityId(activityId: number): Promise<GlobalEnrollment[]> {
+    return await db.select().from(globalEnrollments).where(eq(globalEnrollments.activityId, activityId)).orderBy(desc(globalEnrollments.createdAt));
   }
 
-  async createUniversalEnrollment(data: InsertUniversalEnrollment): Promise<UniversalEnrollment> {
-    const [result] = await db.insert(universalEnrollments).values(data as any);
-    const [newEnroll] = await db.select().from(universalEnrollments).where(eq(universalEnrollments.id, result.insertId));
+  async createGlobalEnrollment(data: InsertGlobalEnrollment): Promise<GlobalEnrollment> {
+    const [result] = await db.insert(globalEnrollments).values(data as any);
+    const [newEnroll] = await db.select().from(globalEnrollments).where(eq(globalEnrollments.id, result.insertId));
     return newEnroll;
   }
 
-  async updateUniversalEnrollment(id: number, data: Partial<InsertUniversalEnrollment>): Promise<UniversalEnrollment | undefined> {
-    await db.update(universalEnrollments).set({ ...data, updatedAt: new Date() } as any).where(eq(universalEnrollments.id, id));
-    const [updatedEnroll] = await db.select().from(universalEnrollments).where(eq(universalEnrollments.id, id));
+  async updateGlobalEnrollment(id: number, data: Partial<InsertGlobalEnrollment>): Promise<GlobalEnrollment | undefined> {
+    await db.update(globalEnrollments).set({ ...data, updatedAt: new Date() } as any).where(eq(globalEnrollments.id, id));
+    const [updatedEnroll] = await db.select().from(globalEnrollments).where(eq(globalEnrollments.id, id));
     return updatedEnroll;
   }
 
-  async deleteUniversalEnrollment(id: number): Promise<void> {
-    await db.delete(universalEnrollments).where(eq(universalEnrollments.id, id));
+  async deleteGlobalEnrollment(id: number): Promise<void> {
+    await db.delete(globalEnrollments).where(eq(globalEnrollments.id, id));
   }
 }
 

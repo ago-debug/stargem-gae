@@ -294,7 +294,7 @@ export default function AccessControl() {
   const sortedAccessLogs = sortItems(recentAccesses || [], getSortValue);
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-6 mx-auto">
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2">Controllo Accessi</h1>
         <p className="text-muted-foreground">Registra accessi tramite barcode o ricerca anagrafica</p>

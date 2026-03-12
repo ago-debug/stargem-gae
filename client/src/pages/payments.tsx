@@ -230,7 +230,7 @@ export default function Payments() {
   const nowLocalISO = formatLocalISO(new Date());
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-6 mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Pagamenti</h1>
