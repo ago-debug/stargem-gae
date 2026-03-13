@@ -157,6 +157,11 @@ const secretariatItems = [
     icon: StickyNote,
   },
   {
+    title: "Commenti Team",
+    url: "/commenti",
+    icon: MessageSquarePlus,
+  },
+  {
     title: "Knowledge",
     url: "/knowledge-base",
     icon: BookOpen,
