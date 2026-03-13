@@ -331,9 +331,8 @@ export default function CalendarPage() {
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
     const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
     const [editingBooking, setEditingBooking] = useState<any | null>(null);
+    const [createType, setCreateType] = useState<"course" | "booking" | null>(null);
     const [selectionContext, setSelectionContext] = useState<{ dayId: string, studioId: number | null, hour: number } | null>(null);
-    const [unifiedFormOpen, setUnifiedFormOpen] = useState(false);
-    const [unifiedFormType, setUnifiedFormType] = useState<"course" | "workshop" | "booking">("course");
     const [instructorSearchOpen, setInstructorSearchOpen] = useState(false);
     const [showFreeSlots, setShowFreeSlots] = useState(false);
     const { toast } = useToast();
@@ -834,7 +833,6 @@ export default function CalendarPage() {
     });
 
     const handleEditCourse = (course: Course) => {
-        setUnifiedFormType("course");
         setEditingCourse(course);
         setEditForm(course);
     };
@@ -862,7 +860,7 @@ export default function CalendarPage() {
         e.preventDefault();
 
         // Ensure all dates are strings or null before sending
-        const dataToSave: any = { ...editForm, type: unifiedFormType };
+        const dataToSave: any = { ...editForm, type: 'course' };
         if (dataToSave.startDate instanceof Date) {
             dataToSave.startDate = dataToSave.startDate.toISOString().split('T')[0];
         } else if (dataToSave.startDate === "") {
@@ -875,51 +873,14 @@ export default function CalendarPage() {
             dataToSave.endDate = null;
         }
 
-        if (unifiedFormType === "course") {
-            if (editingCourse?.id) {
-                updateCourseMutation.mutate({ id: editingCourse.id, data: dataToSave });
-            } else {
-                createCourseMutation.mutate(dataToSave as any);
-            }
-        } else if (unifiedFormType === "workshop") {
-            if (editingWorkshop?.id) {
-                updateWorkshopMutation.mutate({ id: editingWorkshop.id, data: dataToSave });
-            } else {
-                createWorkshopMutation.mutate(dataToSave as any);
-            }
+        if (editingCourse?.id) {
+            updateCourseMutation.mutate({ id: editingCourse.id, data: dataToSave });
+        } else {
+            // Create new course
+            createCourseMutation.mutate(dataToSave as any);
         }
-        setUnifiedFormOpen(false);
     };
 
-    const createWorkshopMutation = useMutation({
-        mutationFn: async (data: any) => {
-            return await apiRequest("POST", "/api/workshops", data);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
-            toast({ title: "Workshop creato", description: "Il nuovo workshop è stato aggiunto con successo." });
-            setUnifiedFormOpen(false);
-            setEditingWorkshop(null);
-        },
-        onError: (err: Error) => {
-            toast({ title: "Errore", description: err.message, variant: "destructive" });
-        }
-    });
-
-    const updateWorkshopMutation = useMutation({
-        mutationFn: async ({ id, data }: { id: number; data: any }) => {
-            return await apiRequest("PATCH", `/api/workshops/${id}`, data);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
-            toast({ title: "Workshop aggiornato", description: "Le modifiche scritte con successo." });
-            setUnifiedFormOpen(false);
-            setEditingWorkshop(null);
-        },
-        onError: (err: Error) => {
-            toast({ title: "Errore", description: err.message, variant: "destructive" });
-        }
-    });
     const createCourseMutation = useMutation({
         mutationFn: async (data: any) => {
             return await apiRequest("POST", "/api/courses", data);
@@ -1009,18 +970,11 @@ export default function CalendarPage() {
     };
 
     const handleEditBooking = (booking: any) => {
-        setUnifiedFormType("booking");
         setEditingBooking(booking);
         setBookingForm({
             ...booking,
             bookingDate: new Date(booking.bookingDate)
         });
-    };
-
-    const handleEditWorkshop = (workshop: Workshop) => {
-        setUnifiedFormType("workshop");
-        setEditingWorkshop(workshop);
-        setEditForm(workshop);
     };
 
     const handleSaveBooking = (e: React.FormEvent) => {
@@ -1400,7 +1354,7 @@ export default function CalendarPage() {
                                                 return (
                                                     <div
                                                         key={`workshop-daily-${workshop.id}`}
-                                                        onClick={(e) => { e.stopPropagation(); handleEditWorkshop(workshop); }}
+                                                        onClick={(e) => { e.stopPropagation(); setLocation(`/workshops?search=${encodeURIComponent(workshop.name)}`); }}
                                                         className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-between items-center text-center ${colorData.className || ''}`}
                                                         style={{
                                                             top: `${startMin + 3}px`,
@@ -1562,7 +1516,7 @@ export default function CalendarPage() {
                                                 return (
                                                     <div
                                                         key={`workshop-daily-${workshop.id}`}
-                                                        onClick={(e) => { e.stopPropagation(); handleEditWorkshop(workshop); }}
+                                                        onClick={(e) => { e.stopPropagation(); setLocation(`/workshops?search=${encodeURIComponent(workshop.name)}`); }}
                                                         className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-between items-center text-center ${colorData.className || ''}`}
                                                         style={{
                                                             top: `${startMin + 3}px`,
@@ -2533,7 +2487,7 @@ export default function CalendarPage() {
                             Scegli cosa desideri creare alle ore {selectionContext?.hour}:00
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 py-6">
+                    <div className="grid grid-cols-2 gap-4 py-6">
                         <Button
                             variant="outline"
                             className="h-40 flex flex-col items-center justify-center gap-4 border-2 hover:border-primary hover:bg-primary/5 transition-all group"
@@ -2541,8 +2495,6 @@ export default function CalendarPage() {
                                 if (selectionContext) {
                                     const sId = selectionContext.studioId || (studios?.[0]?.id || 1);
                                     handleCreateCourse(selectionContext.dayId, sId, selectionContext.hour);
-                                    setUnifiedFormType("course");
-                                    setUnifiedFormOpen(true);
                                     setSelectionContext(null);
                                 }
                             }}
@@ -2563,8 +2515,6 @@ export default function CalendarPage() {
                                 if (selectionContext) {
                                     const sId = selectionContext.studioId || (studios?.[0]?.id || 1);
                                     handleCreateBooking(selectionContext.dayId, sId, selectionContext.hour);
-                                    setUnifiedFormType("booking");
-                                    setUnifiedFormOpen(true);
                                     setSelectionContext(null);
                                 }
                             }}
@@ -2575,48 +2525,6 @@ export default function CalendarPage() {
                             <div className="text-center">
                                 <span className="block font-bold text-lg">Prenotazione</span>
                                 <span className="text-xs text-muted-foreground">Affitto o PT singolo</span>
-                            </div>
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            className="h-40 flex flex-col items-center justify-center gap-4 border-2 hover:border-primary hover:bg-primary/5 transition-all group lg:col-span-1"
-                            onClick={() => {
-                                if (selectionContext) {
-                                    const sId = selectionContext.studioId || (studios?.[0]?.id || 1);
-                                    // handleCreateWorkshop equivalent
-                                    const timeStr = `${selectionContext.hour.toString().padStart(2, "0")}:00`;
-                                    const endTimeStr = `${(selectionContext.hour + 1).toString().padStart(2, "0")}:00`;
-                                    setEditingWorkshop({
-                                        name: "",
-                                        dayOfWeek: selectionContext.dayId,
-                                        studioId: sId,
-                                        startTime: timeStr,
-                                        endTime: endTimeStr,
-                                        active: true,
-                                        maxCapacity: 20
-                                    } as any);
-                                    setEditForm({
-                                        name: "",
-                                        dayOfWeek: selectionContext.dayId,
-                                        studioId: sId,
-                                        startTime: timeStr,
-                                        endTime: endTimeStr,
-                                        active: true,
-                                        maxCapacity: 20
-                                    });
-                                    setUnifiedFormType("workshop");
-                                    setUnifiedFormOpen(true);
-                                    setSelectionContext(null);
-                                }
-                            }}
-                        >
-                            <div className="p-4 rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                                <Sparkles className="w-8 h-8 text-blue-600" />
-                            </div>
-                            <div className="text-center">
-                                <span className="block font-bold text-lg">Nuovo Workshop</span>
-                                <span className="text-xs text-muted-foreground">Evento singolo o stage</span>
                             </div>
                         </Button>
                     </div>
@@ -2745,48 +2653,6 @@ export default function CalendarPage() {
                         >
                             {createMemberMutation.isPending ? "Salvataggio in corso..." : "Salva e Seleziona"}
                         </Button>
-
-                        <Button
-                            variant="outline"
-                            className="h-40 flex flex-col items-center justify-center gap-4 border-2 hover:border-primary hover:bg-primary/5 transition-all group lg:col-span-1"
-                            onClick={() => {
-                                if (selectionContext) {
-                                    const sId = selectionContext.studioId || (studios?.[0]?.id || 1);
-                                    // handleCreateWorkshop equivalent
-                                    const timeStr = `${selectionContext.hour.toString().padStart(2, "0")}:00`;
-                                    const endTimeStr = `${(selectionContext.hour + 1).toString().padStart(2, "0")}:00`;
-                                    setEditingWorkshop({
-                                        name: "",
-                                        dayOfWeek: selectionContext.dayId,
-                                        studioId: sId,
-                                        startTime: timeStr,
-                                        endTime: endTimeStr,
-                                        active: true,
-                                        maxCapacity: 20
-                                    } as any);
-                                    setEditForm({
-                                        name: "",
-                                        dayOfWeek: selectionContext.dayId,
-                                        studioId: sId,
-                                        startTime: timeStr,
-                                        endTime: endTimeStr,
-                                        active: true,
-                                        maxCapacity: 20
-                                    });
-                                    setUnifiedFormType("workshop");
-                                    setUnifiedFormOpen(true);
-                                    setSelectionContext(null);
-                                }
-                            }}
-                        >
-                            <div className="p-4 rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                                <Sparkles className="w-8 h-8 text-blue-600" />
-                            </div>
-                            <div className="text-center">
-                                <span className="block font-bold text-lg">Nuovo Workshop</span>
-                                <span className="text-xs text-muted-foreground">Evento singolo o stage</span>
-                            </div>
-                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>
@@ -2812,48 +2678,6 @@ export default function CalendarPage() {
                         </div>
                         <Button className="w-full bg-[#f43f5e] hover:bg-[#e11d48] text-white" onClick={() => createServiceMutation.mutate({ ...newServiceForm, price: parseFloat(newServiceForm.price) })} disabled={createServiceMutation.isPending}>
                             {createServiceMutation.isPending ? "Salvataggio..." : "Crea e Seleziona"}
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            className="h-40 flex flex-col items-center justify-center gap-4 border-2 hover:border-primary hover:bg-primary/5 transition-all group lg:col-span-1"
-                            onClick={() => {
-                                if (selectionContext) {
-                                    const sId = selectionContext.studioId || (studios?.[0]?.id || 1);
-                                    // handleCreateWorkshop equivalent
-                                    const timeStr = `${selectionContext.hour.toString().padStart(2, "0")}:00`;
-                                    const endTimeStr = `${(selectionContext.hour + 1).toString().padStart(2, "0")}:00`;
-                                    setEditingWorkshop({
-                                        name: "",
-                                        dayOfWeek: selectionContext.dayId,
-                                        studioId: sId,
-                                        startTime: timeStr,
-                                        endTime: endTimeStr,
-                                        active: true,
-                                        maxCapacity: 20
-                                    } as any);
-                                    setEditForm({
-                                        name: "",
-                                        dayOfWeek: selectionContext.dayId,
-                                        studioId: sId,
-                                        startTime: timeStr,
-                                        endTime: endTimeStr,
-                                        active: true,
-                                        maxCapacity: 20
-                                    });
-                                    setUnifiedFormType("workshop");
-                                    setUnifiedFormOpen(true);
-                                    setSelectionContext(null);
-                                }
-                            }}
-                        >
-                            <div className="p-4 rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                                <Sparkles className="w-8 h-8 text-blue-600" />
-                            </div>
-                            <div className="text-center">
-                                <span className="block font-bold text-lg">Nuovo Workshop</span>
-                                <span className="text-xs text-muted-foreground">Evento singolo o stage</span>
-                            </div>
                         </Button>
                     </div>
                 </DialogContent>
