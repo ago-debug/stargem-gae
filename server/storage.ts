@@ -1105,14 +1105,47 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMembersWithEntityCards(): Promise<Member[]> {
-    return await db.select().from(members)
+    const list = await db.select().from(members)
       .where(
         or(
           isNotNull(members.entityCardNumber),
-          isNotNull(members.entityCardType)
+          isNotNull(members.entityCardType),
+          sql`JSON_EXTRACT(${members.tessereMetadata}, '$.tesseraEnte') IS NOT NULL AND JSON_EXTRACT(${members.tessereMetadata}, '$.tesseraEnte') != '""' AND JSON_EXTRACT(${members.tessereMetadata}, '$.tesseraEnte') != ''`,
+          sql`JSON_EXTRACT(${members.attachmentMetadata}, '$.tesseraEnte.ente') IS NOT NULL AND JSON_EXTRACT(${members.attachmentMetadata}, '$.tesseraEnte.ente') != '""' AND JSON_EXTRACT(${members.attachmentMetadata}, '$.tesseraEnte.ente') != ''`
         )
       )
       .orderBy(members.lastName, members.firstName);
+
+    return list.map(m => {
+      // Decode tessereMetadata for Num and Expiry
+      if (m.tessereMetadata) {
+        try {
+          const meta = typeof m.tessereMetadata === 'string' ? JSON.parse(m.tessereMetadata) : m.tessereMetadata;
+          if (meta.tesseraEnte && !m.entityCardNumber) {
+            m.entityCardNumber = meta.tesseraEnte;
+          }
+          if (meta.scadenzaTesseraEnte && !m.entityCardExpiryDate) {
+            m.entityCardExpiryDate = new Date(meta.scadenzaTesseraEnte);
+          }
+        } catch (e) {
+          console.error("Failed to parse tessereMetadata for entity card fallback", e);
+        }
+      }
+      
+      // Decode attachmentMetadata for Type/Ente Name
+      if (m.attachmentMetadata) {
+        try {
+          const att = typeof m.attachmentMetadata === 'string' ? JSON.parse(m.attachmentMetadata) : m.attachmentMetadata;
+          if (att?.tesseraEnte?.ente && !m.entityCardType) {
+            m.entityCardType = att.tesseraEnte.ente;
+          }
+        } catch (e) {
+          console.error("Failed to parse attachmentMetadata for entity card type fallback", e);
+        }
+      }
+      
+      return m;
+    });
   }
 
   async getMembersPaginated(
@@ -1300,7 +1333,12 @@ export class DatabaseStorage implements IStorage {
       activeCourseCount: row.active_course_count || 0,
       privacyAccepted: row.privacy_accepted,
       regulationsAccepted: row.regulations_accepted,
-      membershipApplicationSigned: row.membership_application_signed
+      membershipApplicationSigned: row.membership_application_signed,
+      tessereMetadata: row.tessere_metadata,
+      certificatoMedicoMetadata: row.certificato_medico_metadata,
+      giftMetadata: row.gift_metadata,
+      attachmentMetadata: row.attachment_metadata,
+      paymentMetadata: row.payment_metadata
     }));
 
     return { members: membersList as (Member & { activeCourseCount: number })[], total };
@@ -1988,7 +2026,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(memberships).orderBy(desc(memberships.expiryDate));
   }
 
-  async getMembershipsWithMembers(): Promise<(Membership & { memberFirstName?: string; memberLastName?: string; memberFiscalCode?: string })[]> {
+  async getMembershipsWithMembers(): Promise<(Membership & { memberFirstName?: string; memberLastName?: string; memberFiscalCode?: string; paymentDate?: string | Date | null; paymentStatus?: string | null })[]> {
     const result = await db
       .select({
         id: memberships.id,
@@ -2006,9 +2044,12 @@ export class DatabaseStorage implements IStorage {
         memberFirstName: members.firstName,
         memberLastName: members.lastName,
         memberFiscalCode: members.fiscalCode,
+        paymentDate: payments.paidDate,
+        paymentStatus: payments.status,
       })
       .from(memberships)
       .leftJoin(members, eq(memberships.memberId, members.id))
+      .leftJoin(payments, eq(memberships.id, payments.membershipId))
       .orderBy(desc(memberships.expiryDate));
     return result as any;
   }

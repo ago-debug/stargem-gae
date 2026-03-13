@@ -17,6 +17,7 @@ import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollme
 import { PaymentModuleConnector } from "@/components/PaymentModuleConnector";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import type { Member, PriceList, Course, Quote, PriceListItem } from "@shared/schema";
 
 export function NuovoPagamentoModal({
@@ -31,6 +32,7 @@ export function NuovoPagamentoModal({
     editingPayment?: any;
 }) {
     const { toast } = useToast();
+    const { user } = useAuth();
     const [, setLocation] = useLocation();
     const searchString = useSearch();
 
@@ -137,6 +139,39 @@ export function NuovoPagamentoModal({
 
     const isLoadingDebts = !payments || !enrollments || !courses;
 
+    // Delete Pending Debt (Admin Only)
+    const deletePendingDebtMutation = useMutation({
+        mutationFn: async ({ type, id }: { type: string; id: number }) => {
+            let endpoint = "";
+            switch (type) {
+                case "course": endpoint = `/api/enrollments/${id}`; break;
+                case "workshop": endpoint = `/api/workshop-enrollments/${id}`; break;
+                case "service_booking": endpoint = `/api/studio-bookings/${id}`; break;
+                case "membership": endpoint = `/api/memberships/${id}`; break;
+                default: throw new Error(`Tipo debito sconosciuto: ${type}`);
+            }
+            await apiRequest("DELETE", endpoint);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/studio-bookings"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/memberships"] });
+            toast({ title: "Debito annullato", description: "L'iscrizione/tessera pendente è stata rimossa dal sistema." });
+        },
+        onError: (error: Error) => {
+            toast({ title: "Errore durante l'annullamento", description: error.message, variant: "destructive" });
+        }
+    });
+
+    const handleDeleteDebt = (e: React.MouseEvent, type: string, idString: string) => {
+        e.stopPropagation();
+        const id = parseInt(idString.split('-')[1]);
+        if (confirm("Sei sicuro di voler eliminare questa voce da pagare? Questa operazione annullerà del tutto l'iscrizione/tessera dal database e NON è reversibile.")) {
+            deletePendingDebtMutation.mutate({ type, id });
+        }
+    };
+
     // Auto-load specific debt from URL if present
     useEffect(() => {
         if (isOpen && calculatedDebts.length > 0) {
@@ -232,7 +267,7 @@ export function NuovoPagamentoModal({
                     };
 
                     const createEnrollmentAndPay = async (endpoint: string, payload: any, entityKey: string, pTypeVal: string) => {
-                        const res = await apiRequest("POST", endpoint, payload);
+                        const res = await apiRequest("POST", `${endpoint}?skipPayment=true`, payload);
                         const data = await res.json();
                         paymentPayload[entityKey] = data.id;
                         paymentPayload.type = pTypeVal;
@@ -281,6 +316,74 @@ export function NuovoPagamentoModal({
                             break;
                     }
                 }
+            }
+
+            // === INTEGRAZIONE TESSERA AUTO-GEN ===
+            if (includeTessera) {
+                // Determine season and new/renewal
+                const paymentDate = new Date();
+                const nextYear = paymentDate.getFullYear() + 1;
+                const paymentMonthStr = String(paymentDate.getMonth() + 1).padStart(2, '0');
+                const expiryDateStr = `${nextYear}-${paymentMonthStr}-01`;
+
+                // Try to find if user already has an old active membership (for renewal vs nuovo)
+                const hasExistingMembership = memberMemberships && memberMemberships.length > 0;
+                
+                // Construct logic for season prefix (e.g., 2025 -> 2526 if before Aug, etc. Approximating with current year + 1)
+                const currentYearShort = paymentDate.getFullYear().toString().slice(2);
+                const nextYearShort = (paymentDate.getFullYear() + 1).toString().slice(2);
+                const seasonPrefix = `${currentYearShort}${nextYearShort}`;
+                const memberIdPrefix = String(selectedMemberId || "0000001").padStart(6, '0');
+                const generatedMembershipNumber = `${seasonPrefix}-${memberIdPrefix}`;
+
+                // Create the Membership core entry
+                const membershipPayload = {
+                    memberId: parseInt(selectedMemberId),
+                    membershipNumber: generatedMembershipNumber,
+                    barcode: generatedMembershipNumber,
+                    issueDate: paymentDate.toISOString(),
+                    expiryDate: new Date(expiryDateStr).toISOString(),
+                    type: "annual",
+                    fee: "25.00",
+                    status: "active",
+                    nuovoRinnovo: hasExistingMembership ? "rinnovo" : "nuovo"
+                };
+
+                const tesseraRes = await apiRequest("POST", "/api/memberships?skipPayment=true", membershipPayload);
+                const tesseraData = await tesseraRes.json();
+
+                // Create the Payment logging
+                const tesseraPaymentPayload = {
+                    memberId: parseInt(selectedMemberId),
+                    amount: "25.00",
+                    paymentMethod: checkoutData.paymentMethod,
+                    type: "membership",
+                    status: checkoutData.isPaid ? "paid" : "pending",
+                    notes: `Creato da Checkout Unificato. ${checkoutData.paymentNotes || ''}`,
+                    quotaDescription: "Quota Tessera",
+                    period: "Custom",
+                    paidDate: paymentDate.toISOString(),
+                    membershipId: tesseraData.id
+                };
+
+                await apiRequest("POST", "/api/payments", tesseraPaymentPayload);
+            }
+
+            if (includeProva) {
+                // Aggiungiamo solo una riga negativa/rimborso per bilanciare i conti (se necessario al DB).
+                // Altrimenti, viene solo stornato dal conto finale visivo. Registriamo lo storno.
+                const provaPaymentPayload = {
+                    memberId: parseInt(selectedMemberId),
+                    amount: "-20.00",
+                    paymentMethod: checkoutData.paymentMethod,
+                    type: "other",
+                    status: checkoutData.isPaid ? "paid" : "pending",
+                    notes: `Sconto Lezione Prova stornato dal Checkout Unificato. ${checkoutData.paymentNotes || ''}`,
+                    quotaDescription: "Sconto Lezione di Prova",
+                    period: "Custom",
+                    paidDate: new Date().toISOString()
+                };
+                await apiRequest("POST", "/api/payments", provaPaymentPayload);
             }
         },
         onSuccess: () => {
@@ -564,16 +667,30 @@ export function NuovoPagamentoModal({
                                                     <span className="font-bold text-slate-800 text-sm">{debt.description}</span>
                                                     <span className="text-[10px] text-muted-foreground uppercase">{debt.date ? new Date(debt.date).toLocaleDateString('it-IT') : ""} - {debt.type}</span>
                                                 </div>
-                                                <div>
-                                                    {debt.remaining <= 0.01 ? (
-                                                        <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border border-green-200">PAGATO</div>
-                                                    ) : debt.paid > 0.01 ? (
-                                                        <div className="bg-black text-white px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase text-center flex flex-col leading-none">
-                                                            <span>Da pagare: €{debt.remaining.toFixed(2)}</span>
-                                                            <span className="text-[8px] text-orange-300">Parziale</span>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="bg-black text-white px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase">Da pagare: €{debt.remaining.toFixed(2)}</div>
+                                                <div className="flex items-center gap-2">
+                                                    <div>
+                                                        {debt.remaining <= 0.01 ? (
+                                                            <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border border-green-200">PAGATO</div>
+                                                        ) : debt.paid > 0.01 ? (
+                                                            <div className="bg-black text-white px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase text-center flex flex-col leading-none">
+                                                                <span>Da pagare: €{debt.remaining.toFixed(2)}</span>
+                                                                <span className="text-[8px] text-orange-300">Parziale</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="bg-black text-white px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase">Da pagare: €{debt.remaining.toFixed(2)}</div>
+                                                        )}
+                                                    </div>
+                                                    {user?.role === 'admin' && debt.remaining > 0.01 && (
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="icon" 
+                                                            onClick={(e) => handleDeleteDebt(e, debt.type, debt.id)}
+                                                            className="h-7 w-7 text-muted-foreground hover:text-red-600 hover:bg-red-50 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                                            title="Annulla ed elimina voce pendente dal Database"
+                                                            disabled={deletePendingDebtMutation.isPending}
+                                                        >
+                                                            {deletePendingDebtMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                                        </Button>
                                                     )}
                                                 </div>
                                             </div>

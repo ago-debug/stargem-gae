@@ -5,9 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Lock, Unlock } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Lock, Unlock, Check, ChevronsUpDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import type { PaymentMethod } from "@shared/schema";
+import { cn } from "@/lib/utils";
+import type { PaymentNote } from "@shared/schema";
 
 interface PaymentModuleProps {
   basePrice: number;
@@ -20,10 +23,11 @@ interface PaymentModuleProps {
 export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete, onCancel, isPending }: PaymentModuleProps) {
   const [amount, setAmount] = useState<number>(basePrice);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethodOpen, setPaymentMethodOpen] = useState(false);
   const [receiptNumber, setReceiptNumber] = useState("");
   const [isPaid, setIsPaid] = useState(false);
 
-  const { data: paymentMethods } = useQuery<PaymentMethod[]>({ queryKey: ["/api/payment-methods"] });
+  const { data: paymentNotes } = useQuery<PaymentNote[]>({ queryKey: ["/api/payment-notes"] });
 
   // Scudo Manager (PIN Override)
   const [showPinDialog, setShowPinDialog] = useState(false);
@@ -92,14 +96,63 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
 
           <div className="space-y-2">
             <Label>Metodo Pagamento</Label>
-            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-              <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
-              <SelectContent>
-                {paymentMethods?.map(pm => (
-                  <SelectItem key={pm.id} value={pm.name}>{pm.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={paymentMethodOpen} onOpenChange={setPaymentMethodOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={paymentMethodOpen}
+                  className="w-full justify-between font-normal"
+                >
+                  {paymentMethod ? (
+                    <div className="flex items-center">
+                      {paymentNotes?.find((pm) => pm.name === paymentMethod)?.color && (
+                        <span 
+                          className="w-3 h-3 rounded-full mr-2 border border-border/50 shadow-sm"
+                          style={{ backgroundColor: paymentNotes?.find((pm) => pm.name === paymentMethod)?.color! }}
+                        />
+                      )}
+                      {paymentNotes?.find((pm) => pm.name === paymentMethod)?.name}
+                    </div>
+                  ) : "Seleziona..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Cerca metodo..." />
+                  <CommandList>
+                    <CommandEmpty>Nessun metodo trovato.</CommandEmpty>
+                    <CommandGroup>
+                      {paymentNotes?.map((pm) => (
+                        <CommandItem
+                          key={pm.id}
+                          value={pm.name}
+                          onSelect={(currentValue) => {
+                            setPaymentMethod(currentValue === paymentMethod ? "" : currentValue);
+                            setPaymentMethodOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              paymentMethod === pm.name ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {pm.color && (
+                            <span 
+                              className="w-3 h-3 rounded-full mr-2 border border-border/50 shadow-sm"
+                              style={{ backgroundColor: pm.color }}
+                            />
+                          )}
+                          {pm.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 

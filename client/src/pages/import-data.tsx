@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -929,6 +930,15 @@ export default function ImportData() {
           Importa dati da file CSV/Excel o direttamente da Google Sheets
         </p>
       </div>
+
+      <Alert className="bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/50 dark:border-amber-900 dark:text-amber-200">
+        <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+        <AlertTitle className="text-amber-800 dark:text-amber-300 font-bold ml-2">Attenzione Importante: Campi Vuoti e Storico Pagamenti</AlertTitle>
+        <AlertDescription className="text-amber-700/90 dark:text-amber-400/90 mt-2 ml-2">
+          Le righe importate con costi o pagamenti vuoti (o a zero) verranno classificate automaticamente dal sistema come <strong>Dati Storici ("IMPORTA DATI DATABASE")</strong>, eludendo i controlli formali del residuo contabile ("Da Saldare").<br/><br/>
+          I campi mancanti devono essere segnalati e sanati <strong>prima dell'importazione</strong> (ad es. impostando il costo corretto della tessera nel file), in caso contrario questi movimenti importati non figureranno come debiti pendenti.
+        </AlertDescription>
+      </Alert>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card

@@ -84,10 +84,11 @@ export default function Memberships() {
   // Intercept search parameters for external routing
   useEffect(() => {
     const urlParams = new URLSearchParams(searchString);
-    const memberIdUrl = urlParams.get('memberId');
+    const memberIdUrl = urlParams.get('memberId') || urlParams.get('memberid');
     const actionUrl = urlParams.get('action');
+    const isNewTessera = urlParams.get('newTessera') === 'true';
 
-    if (actionUrl === 'new_membership' && memberIdUrl) {
+    if ((actionUrl === 'new_membership' || isNewTessera) && memberIdUrl) {
       const id = parseInt(memberIdUrl);
       if (!isNaN(id)) {
         fetch(`/api/members/${id}`)
@@ -99,15 +100,15 @@ export default function Memberships() {
             setSelectedMembershipMember(member);
             setIsMembershipFormOpen(true);
             setMembershipMemberSearch(`${member.lastName} ${member.firstName}`);
-            // Pulisci l'URL per impedire riaperture successive
-            setLocation('/memberships', { replace: true });
+            // Pulisci l'URL per impedire riaperture successive e resta su /tessere
+            setLocation('/tessere', { replace: true });
           })
           .catch(err => console.error("[AutoOpen Membership Modal]", err));
       }
     }
   }, [searchString, setLocation]);
 
-  const tsMemberships = useSortableTable<any>("expiryDate");
+  const tsMemberships = useSortableTable<any>("member");
   const getMembershipSortValue = (item: any, key: string) => {
     switch (key) {
       case "member": return getMemberName(item);
@@ -115,12 +116,20 @@ export default function Memberships() {
       case "barcode": return item.barcode;
       case "type": return item.type;
       case "expiryDate": return item.expiryDate;
+      case "paymentDate": return item.paymentDate;
+      case "paymentStatus": {
+        if (item.paymentStatus === 'paid') return 2;
+        const isZeroFee = !item.fee || parseFloat(item.fee.toString()) === 0;
+        const isActive = getExpiryStatus(item.expiryDate).variant === 'default';
+        if (isZeroFee && isActive) return 1;
+        return 0;
+      }
       case "status": return getExpiryStatus(item.expiryDate).label;
       default: return null;
     }
   };
 
-  const tsCertificates = useSortableTable<any>("expiryDate");
+  const tsCertificates = useSortableTable<any>("member");
   const getCertificateSortValue = (item: any, key: string) => {
     switch (key) {
       case "member": return getMemberName(item);
@@ -132,7 +141,7 @@ export default function Memberships() {
     }
   };
 
-  const tsEntityCards = useSortableTable<Member>("lastName");
+  const tsEntityCards = useSortableTable<Member>("member");
   const getEntityCardSortValue = (member: Member, key: string) => {
     switch (key) {
       case "member": return `${member.lastName} ${member.firstName}`;
@@ -156,6 +165,19 @@ export default function Memberships() {
       setEditingMembership(null);
       setSelectedMembershipMember(null);
       setMembershipMemberSearch("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteMembershipMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/memberships/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/memberships"] });
+      toast({ title: "Tessera eliminata con successo" });
     },
     onError: (error: Error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -190,16 +212,16 @@ export default function Memberships() {
       memberId: selectedMembershipMember.id,
       membershipNumber: formData.get("membershipNumber") as string,
       barcode: formData.get("barcode") as string,
-      issueDate: new Date(formData.get("issueDate") as string),
-      expiryDate: new Date(formData.get("expiryDate") as string),
+      issueDate: new Date(),
+      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
       type: "annual",
-      fee: formData.get("fee") ? formData.get("fee") as string : null,
+      fee: "25",
       status: "active",
     };
 
     // Aggiungo campi extra per il backend
     const extraData = {
-      nuovoRinnovo: formData.get("nuovoRinnovo") as string,
+      nuovoRinnovo: formData.get("renewalType") as string,
       entityCardNumber: formData.get("entityCardNumber") as string,
       entityCardExpiryDate: formData.get("entityCardExpiryDate") as string,
     };
@@ -338,6 +360,8 @@ export default function Memberships() {
                         <SortableTableHead sortKey="barcode" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Barcode</SortableTableHead>
                         <SortableTableHead sortKey="type" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Tipo</SortableTableHead>
                         <SortableTableHead sortKey="expiryDate" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Scadenza</SortableTableHead>
+                        <SortableTableHead sortKey="paymentDate" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Data Pagamento</SortableTableHead>
+                        <SortableTableHead sortKey="paymentStatus" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Pagato</SortableTableHead>
                         <SortableTableHead sortKey="status" currentSort={tsMemberships.sortConfig} onSort={tsMemberships.handleSort}>Stato</SortableTableHead>
                         <TableHead className="text-right">Azioni</TableHead>
                       </TableRow>
@@ -345,8 +369,34 @@ export default function Memberships() {
                     <TableBody>
                       {filteredMemberships.map((membership) => {
                         const expiryInfo = getExpiryStatus(membership.expiryDate);
+                        
+                        const getPaymentBadgeConfig = () => {
+                          if (membership.paymentStatus === 'paid') {
+                            return { className: 'bg-green-100 text-green-800 border-green-200', label: 'Saldato' };
+                          }
+                          const isZeroFee = !membership.fee || parseFloat(membership.fee.toString()) === 0;
+                          if (isZeroFee && expiryInfo.variant === 'default') {
+                            return { className: 'bg-slate-100 text-slate-800 border-slate-300', label: 'IMPORTA DATI DATABASE' };
+                          }
+                          return { className: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Da Saldare' };
+                        };
+                        const badgeConfig = getPaymentBadgeConfig();
+
                         return (
-                          <TableRow key={membership.id} data-testid={`membership-row-${membership.id}`}>
+                          <TableRow 
+                            key={membership.id} 
+                            data-testid={`membership-row-${membership.id}`}
+                            className="cursor-pointer hover:bg-amber-50/50 transition-colors"
+                            onClick={() => {
+                                const mem = membersData?.members?.find(m => m.id === membership.memberId);
+                                if (mem) {
+                                    setSelectedMembershipMember(mem);
+                                    setEditingMembership(null);
+                                    setMembershipMemberSearch(`${mem.lastName} ${mem.firstName}`);
+                                    setIsMembershipFormOpen(true);
+                                }
+                            }}
+                          >
                             <TableCell className={cn("font-medium", tsMemberships.isSortedColumn("member") && "sorted-column-cell")}>
                               {getMemberName(membership)}
                             </TableCell>
@@ -354,6 +404,14 @@ export default function Memberships() {
                             <TableCell className={cn("font-mono text-xs", tsMemberships.isSortedColumn("barcode") && "sorted-column-cell")}>{membership.barcode}</TableCell>
                             <TableCell className={cn(tsMemberships.isSortedColumn("type") && "sorted-column-cell")}>{membership.type || "-"}</TableCell>
                             <TableCell className={cn(tsMemberships.isSortedColumn("expiryDate") && "sorted-column-cell")}>{new Date(membership.expiryDate).toLocaleDateString('it-IT')}</TableCell>
+                            <TableCell className={cn(tsMemberships.isSortedColumn("paymentDate") && "sorted-column-cell")}>
+                              {membership.paymentDate ? new Date(membership.paymentDate).toLocaleDateString('it-IT') : "-"}
+                            </TableCell>
+                            <TableCell className={cn(tsMemberships.isSortedColumn("paymentStatus") && "sorted-column-cell")}>
+                              <Badge variant="outline" className={badgeConfig.className}>
+                                {badgeConfig.label}
+                              </Badge>
+                            </TableCell>
                             <TableCell className={cn(tsMemberships.isSortedColumn("status") && "sorted-column-cell")}>
                               <Badge variant={expiryInfo.variant}>
                                 {expiryInfo.label}
@@ -363,14 +421,18 @@ export default function Memberships() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => {
-                                  if (confirm("Sei sicuro di voler eliminare questa tessera?")) {
-                                    // Delete mutation here
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const codice = prompt("ATTENZIONE: Eliminazione riga.\nQuesta operazione rimuoverà definitivamente la tessera.\nInserisci il codice di sicurezza per confermare:");
+                                  if (codice === "1234") {
+                                    deleteMembershipMutation.mutate(membership.id);
+                                  } else if (codice !== null) {
+                                    toast({ title: "Errore", description: "Codice di sicurezza errato.", variant: "destructive" });
                                   }
                                 }}
                                 data-testid={`button-delete-membership-${membership.id}`}
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4 text-muted-foreground hover:text-red-600 transition-colors" />
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -624,218 +686,283 @@ export default function Memberships() {
 
       {/* Membership Form Dialog */}
       <Dialog open={isMembershipFormOpen} onOpenChange={setIsMembershipFormOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Nuova Tessera</DialogTitle>
-            <DialogDescription>Inserisci i dettagli della tessera</DialogDescription>
+            <DialogDescription>Inserisci i dettagli della tessera generica</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleMembershipSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Partecipante *</Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setIsMembershipFormOpen(false);
-                    setLocation("/anagrafica?action=new");
-                  }}
-                  data-testid="button-new-member-membership"
-                >
-                  <UserPlus className="w-4 h-4 mr-1" />
-                  Nuovo Partecipante
-                </Button>
-              </div>
-              <Popover open={membershipMemberOpen} onOpenChange={setMembershipMemberOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={membershipMemberOpen}
-                    className="w-full justify-between"
-                    data-testid="select-member"
-                  >
-                    {selectedMembershipMember
-                      ? `${selectedMembershipMember.lastName} ${selectedMembershipMember.firstName}`
-                      : "Cerca partecipante (min. 3 caratteri)..."
-                    }
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[300px] p-0" align="start">
-                  <Command shouldFilter={false}>
-                    <CommandInput
-                      placeholder="Cerca per cognome, nome o codice fiscale..."
-                      value={membershipMemberSearch}
-                      onValueChange={setMembershipMemberSearch}
-                      data-testid="input-search-member-membership"
-                    />
-                    <CommandList>
-                      {membershipMemberSearch.length < 3 ? (
-                        <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
-                      ) : !membershipSearchResults?.members?.length ? (
-                        <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
-                      ) : (
-                        <CommandGroup>
-                          {membershipSearchResults.members.map((member) => (
-                            <CommandItem
-                              key={member.id}
-                              value={member.id.toString()}
-                              onSelect={() => {
-                                setSelectedMembershipMember(member);
-                                setMembershipMemberOpen(false);
-                              }}
-                              data-testid={`member-option-${member.id}`}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedMembershipMember?.id === member.id ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              <div className="flex flex-col">
-                                <span className="font-medium">{member.lastName} {member.firstName}</span>
-                                {member.fiscalCode && (
-                                  <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
-                                )}
-                              </div>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
+          <form key={selectedMembershipMember?.id || 'new'} onSubmit={handleMembershipSubmit} className="space-y-4">
+            {(() => {
+              let tessereMeta: any = null;
+              if (selectedMembershipMember && selectedMembershipMember.tessereMetadata) {
+                try {
+                  tessereMeta = typeof selectedMembershipMember.tessereMetadata === 'string'
+                    ? JSON.parse(selectedMembershipMember.tessereMetadata)
+                    : selectedMembershipMember.tessereMetadata;
+                } catch (e) {
+                  console.error("Failed parsing tessereMetadata", e);
+                }
+              }
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="membershipNumber">Numero Tessera *</Label>
-                <Input
-                  id="membershipNumber"
-                  name="membershipNumber"
-                  required
-                  data-testid="input-membershipNumber"
-                />
-              </div>
+              // Incorporate actual memberships DB logic
+              let latestMembership = null;
+              if (selectedMembershipMember && memberships) {
+                latestMembership = memberships
+                  .filter(m => m.memberId === selectedMembershipMember.id)
+                  .sort((a, b) => new Date(b.expiryDate).getTime() - new Date(a.expiryDate).getTime())[0];
+              }
 
-              <div className="space-y-2">
-                <Label htmlFor="barcode">Barcode *</Label>
-                <Input
-                  id="barcode"
-                  name="barcode"
-                  required
-                  placeholder="Generato automaticamente se lasciato vuoto"
-                  data-testid="input-barcode"
-                />
-              </div>
-            </div>
+              let defMembershipNum = latestMembership?.membershipNumber || tessereMeta?.numero || "";
+              let defExpiryDate = latestMembership?.expiryDate
+                ? new Date(latestMembership.expiryDate).toISOString().split('T')[0]
+                : tessereMeta?.dataScad || "";
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="issueDate">Data Rilascio (Pagamento) *</Label>
-                <Input
-                  id="issueDate"
-                  name="issueDate"
-                  type="date"
-                  required
-                  defaultValue={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => {
-                    // Auto-calcolo Scadenza base 1 anno
-                    const expiryInput = document.getElementById('expiryDate') as HTMLInputElement;
-                    if (expiryInput && e.target.value) {
-                       const issueD = new Date(e.target.value);
-                       const expireD = new Date(issueD.getFullYear() + 1, issueD.getMonth(), 1); // 01 / MM / YYYY+1
-                       // Formattazione manuale YYYY-MM-DD per timezone locale
-                       const pad = (n: number) => n.toString().padStart(2, '0');
-                       expiryInput.value = `${expireD.getFullYear()}-${pad(expireD.getMonth() + 1)}-${pad(expireD.getDate())}`;
-                    }
-                  }}
-                  data-testid="input-issueDate"
-                />
-              </div>
+              // Only auto-calculate a future date if we have absolutely NO previous expiry date context
+              if (!defExpiryDate && selectedMembershipMember && !latestMembership) {
+                const nextYear = new Date().getFullYear() + 1;
+                const month = String(new Date().getMonth() + 1).padStart(2,'0');
+                defExpiryDate = `${nextYear}-${month}-01`;
+              }
+              if (!defMembershipNum && selectedMembershipMember && !latestMembership) {
+                defMembershipNum = `2526-${String(selectedMembershipMember.id).padStart(6, '0')}`;
+              }
 
-              <div className="space-y-2">
-                <Label htmlFor="expiryDate">Data Scadenza *</Label>
-                <Input
-                  id="expiryDate"
-                  name="expiryDate"
-                  type="date"
-                  required
-                  data-testid="input-expiryDate"
-                />
-              </div>
-            </div>
+              const defFee = latestMembership?.fee || tessereMeta?.quota || "25";
+              const defPaymentDate = latestMembership?.issueDate 
+                  ? new Date(latestMembership.issueDate).toISOString().split('T')[0]
+                  : tessereMeta?.pagamento || new Date().toISOString().split('T')[0];
+              const defRenewal = latestMembership ? "rinnovo" : (tessereMeta?.numero ? "rinnovo" : "nuovo");
+              const defBarcode = latestMembership?.barcode || (defMembershipNum ? `T${defMembershipNum.replace('-', '')}` : "");
+              
+              const safeIsoDate = (val: any) => {
+                if (!val) return "";
+                const d = new Date(val);
+                return isNaN(d.getTime()) ? "" : d.toISOString().split('T')[0];
+              };
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="nuovoRinnovo">Nuovo o Rinnovo</Label>
-                <Select name="nuovoRinnovo" defaultValue="nuovo">
-                  <SelectTrigger data-testid="select-nuovo-rinnovo">
-                    <SelectValue placeholder="Seleziona..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nuovo">Nuovo</SelectItem>
-                    <SelectItem value="rinnovo">Rinnovo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              const defEntityNum = latestMembership?.entityCardNumber || tessereMeta?.tesseraEnte || selectedMembershipMember?.entityCardNumber || (latestMembership ? "Libertas" : "");
+              const defEntityExpiry = safeIsoDate(latestMembership?.entityCardExpiryDate) 
+                                        || safeIsoDate(tessereMeta?.scadenzaTesseraEnte) 
+                                        || safeIsoDate(selectedMembershipMember?.entityCardExpiryDate);
 
-              <div className="space-y-2">
-                <Label htmlFor="fee">Quota (€)</Label>
-                <Input
-                  id="fee"
-                  name="fee"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  defaultValue="25"
-                  data-testid="input-fee"
-                />
-              </div>
-            </div>
+              return (
+                <>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="flex items-center gap-3">
+                        Partecipante *
+                        {selectedMembershipMember && (
+                          <Badge 
+                            variant={(defExpiryDate && new Date(defExpiryDate).setHours(0,0,0,0) >= new Date().setHours(0,0,0,0)) ? 'default' : 'secondary'} 
+                            className={(defExpiryDate && new Date(defExpiryDate).setHours(0,0,0,0) >= new Date().setHours(0,0,0,0)) ? "bg-green-50 text-green-700 hover:bg-green-50 border-green-300 pointer-events-none shadow-sm" : "bg-red-50 text-red-600 hover:bg-red-50 border-red-300 pointer-events-none shadow-sm"}
+                          >
+                            {defExpiryDate ? ((new Date(defExpiryDate).setHours(0,0,0,0) >= new Date().setHours(0,0,0,0)) ? 'Attiva' : 'Scaduta') : 'Nessuna'}
+                          </Badge>
+                        )}
+                      </Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setIsMembershipFormOpen(false);
+                          setLocation("/?action=new");
+                        }}
+                        data-testid="button-new-member-membership"
+                      >
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Nuovo Partecipante
+                      </Button>
+                    </div>
+                    <Popover open={membershipMemberOpen} onOpenChange={setMembershipMemberOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={membershipMemberOpen}
+                          className="w-full justify-between"
+                          data-testid="select-member"
+                        >
+                          {selectedMembershipMember
+                            ? `${selectedMembershipMember.lastName} ${selectedMembershipMember.firstName}`
+                            : "Cerca partecipante (min. 3 caratteri)..."
+                          }
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[300px] p-0" align="start">
+                        <Command shouldFilter={false}>
+                          <CommandInput
+                            placeholder="Cerca per cognome, nome o codice fiscale..."
+                            value={membershipMemberSearch}
+                            onValueChange={setMembershipMemberSearch}
+                            data-testid="input-search-member-membership"
+                          />
+                          <CommandList>
+                            {membershipMemberSearch.length < 3 ? (
+                              <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
+                            ) : !membershipSearchResults?.members?.length ? (
+                              <CommandEmpty>Nessun partecipante trovato</CommandEmpty>
+                            ) : (
+                              <CommandGroup>
+                                {membershipSearchResults.members.map((member) => (
+                                  <CommandItem
+                                    key={member.id}
+                                    value={member.id.toString()}
+                                    onSelect={() => {
+                                      setSelectedMembershipMember(member);
+                                      setMembershipMemberOpen(false);
+                                    }}
+                                    data-testid={`member-option-${member.id}`}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedMembershipMember?.id === member.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{member.lastName} {member.firstName}</span>
+                                      {member.fiscalCode && (
+                                        <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
+                                      )}
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            )}
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="entityCardNumber">Tessera Ente</Label>
-                <Input
-                  id="entityCardNumber"
-                  name="entityCardNumber"
-                  placeholder="Se provvisto..."
-                  data-testid="input-entityCardNumber"
-                />
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="space-y-2 flex flex-col justify-end pb-1 pr-4">
+                      <div className="flex items-center gap-4">
+                        <Label className="text-muted-foreground">Quota (€)</Label>
+                        <Button 
+                          type="button" 
+                          variant="default"
+                          className="bg-warning text-warning-foreground hover:bg-warning/90 h-8 font-bold"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (selectedMembershipMember) {
+                              setIsMembershipFormOpen(false);
+                              // Route to Maschera Input with action=payment trigger for instant SPA transition
+                              setLocation(`/?memberId=${selectedMembershipMember.id}&action=payment`);
+                            } else {
+                              toast({ title: "Attenzione", description: "Seleziona prima un partecipante", variant: "destructive" });
+                            }
+                          }}
+                        >
+                          Paga
+                        </Button>
+                      </div>
+                    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="entityCardExpiryDate">Scadenza Tessera Ente</Label>
-                <Input
-                  id="entityCardExpiryDate"
-                  name="entityCardExpiryDate"
-                  type="date"
-                  data-testid="input-entityCardExpiryDate"
-                />
-              </div>
-            </div>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsMembershipFormOpen(false)}
-                data-testid="button-cancel"
-              >
-                Annulla
-              </Button>
-              <Button
-                type="submit"
-                disabled={createMembershipMutation.isPending}
-                data-testid="button-submit-membership"
-              >
-                Crea Tessera
-              </Button>
-            </DialogFooter>
+
+                    <div className="space-y-2">
+                       <Label>Pagamento Tessera</Label>
+                       <Input
+                         type="date"
+                         value={defPaymentDate}
+                         disabled
+                         readOnly
+                         className="bg-muted text-muted-foreground opacity-100"
+                       />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="renewalType">Nuovo o Rinnovo</Label>
+                      <Select name="renewalType" defaultValue={defRenewal === "nuovo" ? "nuovo" : "rinnovo"}>
+                        <SelectTrigger id="renewalType" data-testid="select-renewal-type">
+                          <SelectValue placeholder="Seleziona..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="nuovo">Nuovo</SelectItem>
+                          <SelectItem value="rinnovo">Rinnovo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Data Scad. Quota Tessera</Label>
+                      <Input
+                        type="date"
+                        value={defExpiryDate}
+                        disabled
+                        readOnly
+                        className="bg-muted text-muted-foreground opacity-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="membershipNumber">N. Tessera *</Label>
+                      <Input
+                        id="membershipNumber"
+                        name="membershipNumber"
+                        placeholder="Inserisci numero"
+                        defaultValue={defMembershipNum}
+                        required
+                        data-testid="input-membershipNumber"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="barcode">Barcode *</Label>
+                      <Input
+                        id="barcode"
+                        name="barcode"
+                        placeholder="Generato automaticamente"
+                        defaultValue={defBarcode}
+                        data-testid="input-barcode"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="entityCardNumber">Tessera Ente</Label>
+                      <Input
+                        id="entityCardNumber"
+                        name="entityCardNumber"
+                        placeholder="Se provvisto..."
+                        defaultValue={defEntityNum}
+                        data-testid="input-entityCardNumber"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="entityCardExpiryDate">Scadenza Tessera Ente</Label>
+                      <Input
+                        id="entityCardExpiryDate"
+                        name="entityCardExpiryDate"
+                        type="date"
+                        defaultValue={defEntityExpiry}
+                        data-testid="input-entityCardExpiryDate"
+                      />
+                    </div>
+                  </div>
+
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsMembershipFormOpen(false)}
+                      data-testid="button-cancel"
+                    >
+                      Annulla
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createMembershipMutation.isPending}
+                      data-testid="button-submit-membership"
+                    >
+                      Crea Tessera
+                    </Button>
+                  </DialogFooter>
+                </>
+              );
+            })()}
           </form>
         </DialogContent>
       </Dialog>

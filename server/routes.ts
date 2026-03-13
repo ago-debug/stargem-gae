@@ -2969,18 +2969,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentEnrollment: (workshop.currentEnrollment || 0) + 1,
         } as any);
 
-        // CREATE AUTOMATIC DEBT (Pending Payment)
-        await storage.createPayment({
-          memberId: enrollment.memberId,
-          workshopEnrollmentId: enrollment.id,
-          amount: workshop.price || "0",
-          type: "workshop",
-          description: `Debito iscrizione workshop: ${workshop.name}`,
-          status: "pending",
-          dueDate: new Date(),
-          paidDate: null,
-          transferConfirmationDate: null,
-        });
+        if (req.query.skipPayment !== 'true') {
+          // CREATE AUTOMATIC DEBT (Pending Payment)
+          await storage.createPayment({
+            memberId: enrollment.memberId,
+            workshopEnrollmentId: enrollment.id,
+            amount: workshop.price || "0",
+            type: "workshop",
+            description: `Debito iscrizione workshop: ${workshop.name}`,
+            status: "pending",
+            dueDate: new Date(),
+            paidDate: null,
+            transferConfirmationDate: null,
+          });
+        }
       }
 
       res.status(201).json(enrollment);
@@ -3122,19 +3124,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentEnrollment: (course.currentEnrollment || 0) + 1,
         } as any);
 
-        // CREATE AUTOMATIC DEBT (Pending Payment)
-        await storage.createPayment({
-          memberId: enrollment.memberId,
-          enrollmentId: enrollment.id,
-          amount: course.price || "0",
-          type: "course",
-          description: `Debito iscrizione corso: ${course.name}`,
-          status: "pending",
-          dueDate: new Date(),
-          paidDate: null,
-          transferConfirmationDate: null,
-          createdById: (req.user as any).id,
-        });
+        if (req.query.skipPayment !== 'true') {
+          // CREATE AUTOMATIC DEBT (Pending Payment)
+          await storage.createPayment({
+            memberId: enrollment.memberId,
+            enrollmentId: enrollment.id,
+            amount: course.price || "0",
+            type: "course",
+            description: `Debito iscrizione corso: ${course.name}`,
+            status: "pending",
+            dueDate: new Date(),
+            paidDate: null,
+            transferConfirmationDate: null,
+            createdById: (req.user as any).id,
+          });
+        }
       }
 
       res.status(201).json(enrollment);
@@ -3220,18 +3224,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const membership = await storage.createMembership(validatedData);
 
-      // Aggiorniamo l'anagrafica del partecipante con le informazioni dell'Ente se presenti
+      // Aggiorniamo l'anagrafica del partecipante con le informazioni dell'Ente se presenti e il Metadata compatibile
       const { entityCardType, entityCardNumber, entityCardIssueDate, entityCardExpiryDate, nuovoRinnovo } = req.body;
-      if (entityCardType || entityCardNumber || entityCardIssueDate || entityCardExpiryDate) {
-        await storage.updateMember(membership.memberId, {
-          ...(entityCardType && { entityCardType }),
-          ...(entityCardNumber && { entityCardNumber }),
-          ...(entityCardIssueDate && { entityCardIssueDate: new Date(entityCardIssueDate) }),
-          ...(entityCardExpiryDate && { entityCardExpiryDate: new Date(entityCardExpiryDate) }),
-        });
-      }
+      
+      const tessereMetadataObj = {
+          numero: membership.membershipNumber,
+          dataScad: membership.expiryDate instanceof Date 
+            ? membership.expiryDate.toISOString().split('T')[0] 
+            : new Date(membership.expiryDate as string).toISOString().split('T')[0],
+          pagamento: membership.issueDate instanceof Date 
+            ? membership.issueDate.toISOString().split('T')[0] 
+            : new Date(membership.issueDate as string).toISOString().split('T')[0],
+          quota: membership.fee?.toString() || "25",
+          nuovoRinnovo: nuovoRinnovo || "nuovo"
+      };
 
-      if (membership.memberId) {
+      await storage.updateMember(membership.memberId, {
+        ...(entityCardType && { entityCardType }),
+        ...(entityCardNumber && { entityCardNumber }),
+        ...(entityCardIssueDate && { entityCardIssueDate: new Date(entityCardIssueDate) }),
+        ...(entityCardExpiryDate && { entityCardExpiryDate: new Date(entityCardExpiryDate) }),
+        tessereMetadata: JSON.stringify(tessereMetadataObj)
+      });
+
+      if (membership.memberId && req.query.skipPayment !== 'true') {
         await storage.createPayment({
           memberId: membership.memberId,
           membershipId: membership.id,
@@ -3864,6 +3880,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Dati anagrafica mancanti" });
       }
 
+      // Map entity card data from JSON metadata backward into legacy database columns for unified generic tables
+      if (memberData.tessereMetadata) {
+        if (memberData.tessereMetadata.tesseraEnte) {
+          memberData.entityCardNumber = memberData.tessereMetadata.tesseraEnte;
+        }
+        if (memberData.tessereMetadata.scadenzaTesseraEnte) {
+          memberData.entityCardExpiryDate = new Date(memberData.tessereMetadata.scadenzaTesseraEnte);
+        }
+      }
+
       // 1. Upsert Member
       let member;
       if (memberData.id) {
@@ -3884,6 +3910,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         memberData.createdBy = (req.user as any)?.username || 'System';
         member = await storage.createMember(memberData);
+      }
+
+      // 1.5 Patch Historical Membership Data
+      // If the UI unlocked the inputs for missing historical data, apply those fixes to the latest active membership without creating duplicates.
+      if (memberData.tessereMetadata) {
+          const quota = memberData.tessereMetadata.quota;
+          const tesseraEnte = memberData.tessereMetadata.tesseraEnte;
+          
+          if (quota || tesseraEnte) {
+              const activeMemberships = await storage.getMembershipsByMemberId(member.id);
+              // Find the primary active membership
+              const currentMembership = activeMemberships?.find(m => 
+                  !m.expiryDate || new Date(m.expiryDate) > new Date()
+              );
+              
+              if (currentMembership) {
+                  let needsUpdate = false;
+                  const updates: Partial<any> = {};
+                  
+                  // Check if historical quota was missing but is now provided
+                  if (quota && (!currentMembership.fee || currentMembership.fee.toString() === "0")) {
+                      updates.fee = quota;
+                      needsUpdate = true;
+                  }
+                  
+                  // Check if historical entity card was missing but is now provided
+                  if (tesseraEnte && !currentMembership.entityCardNumber) {
+                      updates.entityCardNumber = tesseraEnte;
+                      needsUpdate = true;
+                  }
+                  
+                  if (needsUpdate) {
+                      await storage.updateMembership(currentMembership.id, updates);
+                  }
+              }
+          }
       }
 
       // 2. Process Enrollments and Payments
