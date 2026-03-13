@@ -86,7 +86,7 @@ const teachingItems = [
   },
   */
   {
-    title: "Calendario Corsi",
+    title: "Calendario Attività",
     url: "/calendario",
     icon: CalendarFold,
   },

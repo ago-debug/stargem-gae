@@ -39,7 +39,7 @@ const MENU_PATHS = [
   { path: "/anagrafica_a_lista", title: "Anagrafica a Lista" },
   { path: "/membro", title: "Dettaglio Membro" },
   { path: "/corsi", title: "Corsi" },
-  { path: "/calendario", title: "Calendario Corsi" },
+  { path: "/calendario", title: "Calendario Attività" },
   { path: "/workshops", title: "Workshops" },
   { path: "/iscritti-corsi", title: "Iscritti per Corso" },
   { path: "/insegnanti", title: "Insegnanti" },
