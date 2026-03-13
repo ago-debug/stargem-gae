@@ -373,12 +373,9 @@ export default function CalendarPage() {
     const [location] = useLocation();
 
     // Queries
-    const { data: activities, isLoading: activitiesLoading } = useQuery<any[]>({
-        queryKey: ["/api/activities"],
+    const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
+        queryKey: ["/api/courses"],
     });
-
-    const courses = activities?.filter(a => a.type === 'course') || [];
-    const coursesLoading = activitiesLoading;
 
     const { data: studios, isLoading: studiosLoading } = useQuery<Studio[]>({
         queryKey: ["/api/studios"],
@@ -412,7 +409,9 @@ export default function CalendarPage() {
         queryKey: ["/api/payment-methods"],
     });
 
-    const workshops = activities?.filter(a => a.type === 'workshop') || [];
+    const { data: workshops } = useQuery<Workshop[]>({
+        queryKey: ["/api/workshops"],
+    });
 
 
 
@@ -807,11 +806,11 @@ export default function CalendarPage() {
 
     const updateCourseMutation = useMutation({
         mutationFn: async ({ id, data }: { id: number; data: any }) => {
-            return await apiRequest("PATCH", `/api/activities/${id}`, data);
+            return await apiRequest("PATCH", `/api/courses/${id}`, data);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
-            toast({ title: "Attività aggiornata", description: "Le modifiche sono state salvate correttamente." });
+            queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+            toast({ title: "Corso aggiornato", description: "Le modifiche sono state salvate correttamente." });
             setEditingCourse(null);
         },
         onError: (err: Error) => {
@@ -821,11 +820,11 @@ export default function CalendarPage() {
 
     const deleteCourseMutation = useMutation({
         mutationFn: async (id: number) => {
-            return await apiRequest("DELETE", `/api/activities/${id}`);
+            return await apiRequest("DELETE", `/api/courses/${id}`);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
-            toast({ title: "Attività eliminata", description: "L'attività è stata rimossa correttamente." });
+            queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+            toast({ title: "Corso eliminato", description: "Il corso è stato rimosso correttamente." });
             setEditingCourse(null);
         },
         onError: (err: Error) => {
@@ -884,11 +883,11 @@ export default function CalendarPage() {
 
     const createCourseMutation = useMutation({
         mutationFn: async (data: any) => {
-            return await apiRequest("POST", "/api/activities", data);
+            return await apiRequest("POST", "/api/courses", data);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
-            toast({ title: "Attività creata", description: "La nuova attività è stata aggiunta con successo." });
+            queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+            toast({ title: "Corso creato", description: "Il nuovo corso è stato aggiunto con successo." });
             setEditingCourse(null);
         },
         onError: (err: Error) => {
