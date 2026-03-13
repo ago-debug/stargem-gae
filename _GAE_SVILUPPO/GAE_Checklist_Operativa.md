@@ -18,6 +18,8 @@ Questi task servono a risolvere i "dolori" dell'applicazione odierna prima di tu
 ## 2. Unificazione Componenti React (SaaS V2 Builder)
 I due componenti universali che sostituiranno le decine di form sparsi.
 
+- [x] **Unificazione Modale Calendario:** 
+  Creato il popup universale "Nuova Attività" in `calendar.tsx` con routing condizionale verso i silos legacy, simulando l'esperienza STI senza alterare il DB.
 - [x] **Creare `TimeSlotPicker.tsx`:** 
   Un unico componente per selezionare Orario Inizio, Fine, Sala e Insegnante, con validazione anti-conflitto. Sostituirà le maschere duplicate nelle pagine "Crea Corso", "Crea Workshop", "Calendario".
 - [x] **Creare `PaymentModuleConnector.tsx`:** 

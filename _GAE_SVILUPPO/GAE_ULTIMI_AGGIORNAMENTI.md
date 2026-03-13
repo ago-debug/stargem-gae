@@ -6,6 +6,16 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 13 Marzo 2026 (Refactoring Calendario & Unificazione Modali Attività - Mimetismo STI)
+* **Unificazione Interfaccia Calendario:**
+  * Sostituiti i molteplici popup frammentati ("Nuovo Corso", "Nuova Prenotazione") con un'unica modale centralizzata **"Nuova Attività"**.
+  * Introdotta una Select Dinamica "Categoria Attività" (Corso, Workshop, Prenotazione) che adatta condizionalmente l'interfaccia mostrando solo i campi strettamente necessari alla specifica tipologia.
+  * Mimetismo Architetturale (STI Phase 1): La nuova UI unificata simula l'esperienza utente finale del Single Table Inheritance, ma l'inoltro dati mantiene la retrocompatibilità disaccoppiando il payload e re-indirizzandolo trasparentemente ai 3 legacy endpoint corretti (`/api/courses`, `/api/workshops`, `/api/studio-bookings`) preservando l'integrità dei dati a "11 Silos".
+* **Supporto Workshop su Griglia:** Aggiunto il supporto nativo per la visualizzazione e creazione di Workshop direttamente con click rapido sugli slot vuoti del calendario.
+* **Aggiornamento Nomenclatura:** Rinominata l'etichetta del menu laterale e delle direttrici da "Calendario Corsi" a "Calendario Attività", per riflettere la natura generalista del nuovo hub.
+
+---
+
 ### 12 - 13 Marzo 2026 (Refactoring Tessere, Modal UX & Fix Routing)
 *   **Fix Routing & Modal Auto-Open (`/tessere`):** Risolto il bug 404 (Pagina in allestimento) causato dal reindirizzamento legacy a `/memberships`. Ora, cliccando il pulsante "+ Nuova Tessera" in Maschera Input o cliccando sull'intera riga di un partecipante nella tabella Tessere, la Single Page Application esegue un salto istantaneo al Modale "Nuova Tessera", pre-caricando i dati dell'utente specifico senza ricaricare la pagina.
 *   **Restyling UI Badge "Scaduta/Attiva":** Rimosso il badge grigio standard e introdotto un design custom (sfondi pastello rosso/verde, bordi e testi ad alto contrasto) per lo stato delle tessere nell'Intestazione (Maschera Input) e all'interno del Modale Tessere, perfettamente allineato al mockup grafico richiesto.
