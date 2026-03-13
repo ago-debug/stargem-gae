@@ -1768,6 +1768,9 @@ export const memberships = mysqlTable("memberships", {
   status: varchar("status", { length: 50 }).notNull().default("active"), // 'active', 'expired', 'suspended'
   type: varchar("type", { length: 100 }), // 'annual', 'monthly', etc.
   fee: decimal("fee", { precision: 10, scale: 2 }),
+  renewalType: varchar("renewal_type", { length: 50 }), // 'nuovo' or 'rinnovo'
+  entityCardNumber: varchar("entity_card_number", { length: 100 }), 
+  entityCardExpiryDate: date("entity_card_expiry_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1786,6 +1789,8 @@ export const insertMembershipSchema = createInsertSchema(memberships).omit({
 }).extend({
   membershipNumber: z.string().optional(),
   barcode: z.string().optional(),
+  issueDate: z.coerce.date(),
+  expiryDate: z.coerce.date(),
 });
 export type InsertMembership = z.infer<typeof insertMembershipSchema>;
 export type Membership = typeof memberships.$inferSelect;

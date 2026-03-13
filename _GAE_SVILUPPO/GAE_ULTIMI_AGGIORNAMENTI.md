@@ -1,8 +1,16 @@
 # Ultimi Aggiornamenti Progetto "CourseManager"
 
-**Periodo di riferimento:** 23 Febbraio 2026 - 9 Marzo 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 13 Marzo 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
+
+---
+
+### 12 - 13 Marzo 2026 (Refactoring Tessere, Modal UX & Fix Routing)
+*   **Fix Routing & Modal Auto-Open (`/tessere`):** Risolto il bug 404 (Pagina in allestimento) causato dal reindirizzamento legacy a `/memberships`. Ora, cliccando il pulsante "+ Nuova Tessera" in Maschera Input o cliccando sull'intera riga di un partecipante nella tabella Tessere, la Single Page Application esegue un salto istantaneo al Modale "Nuova Tessera", pre-caricando i dati dell'utente specifico senza ricaricare la pagina.
+*   **Restyling UI Badge "Scaduta/Attiva":** Rimosso il badge grigio standard e introdotto un design custom (sfondi pastello rosso/verde, bordi e testi ad alto contrasto) per lo stato delle tessere nell'Intestazione (Maschera Input) e all'interno del Modale Tessere, perfettamente allineato al mockup grafico richiesto.
+*   **Sicurezza Eliminazione Righe (Codice Admin):** Aggiunto un layer di sicurezza per il pulsante cestino (Trash) nella tabella Tessere. L'eliminazione diretta ora richiede esplicitamente l'inserimento del PIN di sicurezza (`1234`) tramite prompt prima di lanciare la mutation `DELETE`.
+*   **Historical Data Interceptor (Fix Date Modale):** Corretto un bug logico in `memberships.tsx` dove l'apertura del modale sovrascriveva le date di tessere *scadute* con finte date future auto-generate. Ora il popup pesca sempre cronologicamente la vera "ultima tessera" registrata nel DB per quel membro (attiva o meno), rispettando lo storico esatto.
 
 ---
 
@@ -91,4 +99,4 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Avvio Refactoring Corsi:** Riorganizzazione della struttura a componente `courses.tsx` per ospitare componenti modulari riutilizzabili ed espansione dati di iscrizione (gettoni, rimborsi, log) a scomparsa, avviando il ciclo di aggiornamenti conclusi il 25 Febbraio.
 
 ---
-*Documento generato e aggiornato al 9 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
+*Documento generato e aggiornato al 13 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*

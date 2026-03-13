@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -1356,8 +1358,40 @@ export default function MascheraInputGenerale() {
     // Rehydrate bottom sections
     setBottomSectionsData((prev) => {
       let gift = typeof member.giftMetadata === 'string' ? JSON.parse(member.giftMetadata) : (member.giftMetadata || prev.gift);
-      const tessere = typeof member.tessereMetadata === 'string' ? JSON.parse(member.tessereMetadata) : (member.tessereMetadata || prev.tessere);
-      const certificatoMedico = typeof member.certificatoMedicoMetadata === 'string' ? JSON.parse(member.certificatoMedicoMetadata) : (member.certificatoMedicoMetadata || prev.certificatoMedico);
+      if (typeof gift === 'string') {
+        try { gift = JSON.parse(gift); } catch(e) {}
+      }
+      
+      const defaultTessere = {
+        quota: "",
+        pagamento: "",
+        nuovoRinnovo: "",
+        dataScad: "",
+        numero: "",
+        fileInput: null,
+        tesseraEnte: "",
+        scadenzaTesseraEnte: ""
+      };
+      
+      const defaultCertificato = {
+        dataEmissione: "",
+        dataScadenza: "",
+        fileInput: null
+      };
+
+      let tessere = member.tessereMetadata 
+        ? (typeof member.tessereMetadata === 'string' ? JSON.parse(member.tessereMetadata) : member.tessereMetadata) 
+        : defaultTessere;
+      if (typeof tessere === 'string') {
+        try { tessere = JSON.parse(tessere); } catch(e) {}
+      }
+        
+      let certificatoMedico = member.certificatoMedicoMetadata 
+        ? (typeof member.certificatoMedicoMetadata === 'string' ? JSON.parse(member.certificatoMedicoMetadata) : member.certificatoMedicoMetadata) 
+        : defaultCertificato;
+      if (typeof certificatoMedico === 'string') {
+        try { certificatoMedico = JSON.parse(certificatoMedico); } catch(e) {}
+      }
 
       // Convert legacy single object to array
       if (gift && !Array.isArray(gift)) {
@@ -1628,8 +1662,6 @@ export default function MascheraInputGenerale() {
     if (payment.attivita && payment.dettaglioId) {
       const corso = corsiDB.find(c => String(c.id) === payment.dettaglioId);
       if (corso) {
-        // This assumes payment.attivita is a valid key. If not, it won't update.
-        // We cast to string for index access, but should be careful.
         if (Object.keys(attivitaCorso).includes(payment.attivita)) {
           const key = payment.attivita as AttivitaKey;
           setAttivitaCorso(prev => ({ ...prev, [key]: String(corso.id) }));
@@ -1637,6 +1669,37 @@ export default function MascheraInputGenerale() {
         }
       }
     }
+
+    // --- Tessere Legacy Auto-fill Logic ---
+    // If a payment related to a membership (Tessera) is added
+    if (payment.descrizioneQuota?.toLowerCase().includes("tessera") || payment.dettaglioNome?.toLowerCase().includes("tessera")) {
+      const paymentDateStr = payment.dataPagamento || new Date().toISOString().split('T')[0];
+      const paymentDate = new Date(paymentDateStr);
+      const nextYear = paymentDate.getFullYear() + 1;
+      const paymentMonthStr = String(paymentDate.getMonth() + 1).padStart(2, '0');
+      
+      // Data in CA e CB: auto-calc expiry date (01/MM/YYYY+1)
+      const expiryDateStr = `${nextYear}-${paymentMonthStr}-01`;
+
+      // Assign the ID: Anagrafica ID + Season
+      let seasonPrefix = formData.stagione ? formData.stagione.replace("-", "").slice(2, 6) : "2526";
+      let memberIdPrefix = String(selectedMemberId || "0000001").padStart(6, '0');
+      const generatedMembershipNumber = `${seasonPrefix}-${memberIdPrefix}`;
+
+      setBottomSectionsData((prev: any) => ({
+        ...prev,
+        tessere: {
+          ...prev.tessere,
+          quota: payment.totaleQuota?.toString() || "25",
+          pagamento: paymentDateStr,
+          dataScad: expiryDateStr,
+          numero: prev.tessere.numero || generatedMembershipNumber,
+          nuovoRinnovo: prev.tessere.numero ? "rinnovo" : "nuovo"
+        }
+      }));
+      setDirtyFields(prev => ({ ...prev, tessere: true }));
+    }
+
     setEditingPaymentId(null);
   };
 
@@ -1767,6 +1830,20 @@ export default function MascheraInputGenerale() {
 
   const isGen1Active = formData.nomeGen1.trim() !== "" || formData.cognomeGen1.trim() !== "";
   const isGen2Active = formData.nomeGen2.trim() !== "" || formData.cognomeGen2.trim() !== "";
+
+  // Top Tessera Info Computation
+  const topTesseraMembership = memberMemberships && memberMemberships.length > 0 
+    ? [...memberMemberships].sort((a: any, b: any) => new Date(b.expiryDate).getTime() - new Date(a.expiryDate).getTime())[0]
+    : null;
+  const topTesseraNumero = topTesseraMembership ? topTesseraMembership.membershipNumber : bottomSectionsData.tessere.numero;
+  let topTesseraScad = topTesseraMembership ? topTesseraMembership.expiryDate : bottomSectionsData.tessere.dataScad;
+  if (topTesseraScad && topTesseraScad.includes('T')) {
+      topTesseraScad = topTesseraScad.split('T')[0];
+  }
+  const isTesseraExpired = topTesseraScad && new Date(topTesseraScad) < new Date();
+  const topTesseraClass = isTesseraExpired
+    ? "bg-red-50 text-red-600 border-red-300 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800" 
+    : "bg-transparent opacity-80 cursor-default";
 
   return (
     <div className="flex flex-col h-full" data-testid="page-maschera-input-generale">
@@ -1967,11 +2044,25 @@ export default function MascheraInputGenerale() {
               </div>
               <div className="space-y-2">
                 <Label>Tessera</Label>
-                <Input value={bottomSectionsData.tessere.numero} readOnly disabled className={`bg-transparent opacity-80 cursor-default`} />
+                <Input value={topTesseraNumero || ''} readOnly disabled className={topTesseraClass} />
               </div>
               <div className="space-y-2">
-                <Label>Scadenza Tessera</Label>
-                <Input type="date" value={bottomSectionsData.tessere.dataScad} readOnly disabled className={`bg-transparent opacity-80 cursor-default`} />
+                <Label className="flex items-center gap-2">
+                  Scadenza Tessera
+                  {topTesseraScad && (
+                    <div 
+                      className={cn(
+                        "px-2 py-0.5 text-[11px] font-bold rounded-md border tracking-wide uppercase transition-colors",
+                        isTesseraExpired 
+                          ? "bg-red-50 text-red-600 border-red-300 shadow-sm shadow-red-100" 
+                          : "bg-emerald-50 text-emerald-600 border-emerald-300 shadow-sm shadow-emerald-100"
+                      )}
+                    >
+                      {isTesseraExpired ? "Scaduta" : "Attiva"}
+                    </div>
+                  )}
+                </Label>
+                <Input type="date" value={topTesseraScad || ''} readOnly disabled className={topTesseraClass} />
               </div>
               <div className="space-y-2">
                 <Label>Tipo Certificato</Label>
@@ -3502,111 +3593,119 @@ export default function MascheraInputGenerale() {
                 Salva o seleziona un partecipante per sbloccare questa sezione
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* Gestione Tessere (dal database centrale) */}
-                <div className="space-y-4 pt-2">
-                  <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
-                    <Database className="w-4 h-4" />
-                    Tessere Database Centrale
-                  </h4>
-                  {loadingMemberships ? (
-                    <Skeleton className="h-16 w-full" />
-                  ) : errorMemberships ? (
-                    <p className="text-sm text-destructive">Errore nel caricamento delle tessere collegate</p>
-                  ) : memberMemberships && memberMemberships.length > 0 ? (
-                    <div className="space-y-2">
-                       <div className="flex justify-end mb-2">
-                        <Button variant="outline" size="sm" onClick={() => window.location.href = `/memberships?memberId=${selectedMemberId}&action=new_membership`} className="gap-2">
-                          <Plus className="w-4 h-4" />
-                          Nuova Tessera
-                        </Button>
-                      </div>
-                      {memberMemberships.map((m: any) => (
-                        <div key={m.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-muted/50 rounded-lg border">
-                          <div>
-                            <p className="font-medium text-sm">
-                              Tessera {m.membershipNumber} <span className="text-muted-foreground font-normal ml-1 border px-1.5 py-0.5 rounded-sm bg-background text-xs">{m.type || 'N/D'}</span>
-                              {m.barcode && <span className="text-muted-foreground font-normal ml-2 text-xs">Barcode: {m.barcode}</span>}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Valida dal <span className="font-medium">{new Date(m.issueDate).toLocaleDateString('it-IT')}</span> al <span className="font-medium">{new Date(m.expiryDate).toLocaleDateString('it-IT')}</span>
-                            </p>
-                          </div>
-                          <Badge variant={m.status === 'active' && new Date(m.expiryDate) >= new Date() ? 'default' : 'secondary'} className="mt-2 sm:mt-0 shadow-sm">
-                            {m.status === 'active' && new Date(m.expiryDate) >= new Date() ? 'Attiva' : 'Scaduta/Inattiva'}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center p-6 border rounded-lg bg-muted/30">
-                      <IdCard className="w-8 h-8 mx-auto mb-3 text-muted-foreground opacity-50" />
-                      <p className="text-sm font-medium mb-1">Nessuna tessera attiva</p>
-                      <p className="text-xs text-muted-foreground mb-4">
-                        Il partecipante non possiede tessere nel nuovo database centralizzato.
-                      </p>
-                      <Button variant="default" size="sm" onClick={() => window.location.href = `/memberships?memberId=${selectedMemberId}&action=new_membership`} className="gap-2 mx-auto">
-                        <Plus className="w-4 h-4" />
-                        Aggiungi Nuova Tessera
-                      </Button>
-                    </div>
+              <div className="space-y-6 pt-2">
+                <div className="flex justify-end items-center mb-4">
+                  {selectedMemberId && (
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      className="gap-2"
+                      onClick={() => setLocation(`/tessere?newTessera=true&memberId=${selectedMemberId}`)}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Nuova Tessera
+                    </Button>
                   )}
                 </div>
-
-                <div className="border-t border-dashed my-4" />
-
-                <h4 className="text-sm font-semibold text-muted-foreground mb-4">Campi Tessere Legacy (Manuali)</h4>
                 
                 <div className="space-y-4">
                   {(() => {
-                    const activeMembership = memberMemberships?.find((m: any) => m.status === 'active' && new Date(m.expiryDate) >= new Date());
-                    
-                    const isReadOnly = !!activeMembership;
-                    const hasEntityCard = !!(formData.tesseraEnte || formData.scadenzaTesseraEnte);
+                    const isReadOnly = !!topTesseraMembership;
+                    const isEntityCardReadOnly = topTesseraMembership && !!topTesseraMembership.entityCardNumber;
+                    const hasEntityCard = !!(formData.tesseraEnte || formData.scadenzaTesseraEnte || topTesseraMembership?.entityCardNumber);
                     
                     return (
                       <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                           <div className="space-y-2">
                             <Label>Quota Tessera</Label>
-                            <Input type="number" value={activeMembership ? activeMembership.fee || '' : bottomSectionsData.tessere.quota} readOnly={isReadOnly} disabled={isReadOnly} onChange={(e) => handleBottomSectionChange('tessere', 'quota', e.target.value)} className={getBottomSectionClassName('tessere', 'quota')} />
+                            <Input 
+                              type={isNaN(Number(
+                                (!topTesseraMembership?.fee || Number(topTesseraMembership.fee) === 0) && !isTesseraExpired && topTesseraMembership
+                                  ? "importa dati db" 
+                                  : (topTesseraMembership?.fee || bottomSectionsData.tessere.quota)
+                              )) ? "text" : "number"} 
+                              value={
+                                (!topTesseraMembership?.fee || Number(topTesseraMembership.fee) === 0) && !isTesseraExpired && topTesseraMembership
+                                  ? "importa dati db" 
+                                  : (topTesseraMembership?.fee || bottomSectionsData.tessere.quota)
+                              } 
+                              readOnly={isReadOnly} 
+                              disabled={isReadOnly} 
+                              onChange={(e) => handleBottomSectionChange('tessere', 'quota', e.target.value)} 
+                              className={getBottomSectionClassName('tessere', 'quota')} 
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label>Pagamento Tessera</Label>
-                            <Input type="date" value={activeMembership ? activeMembership.issueDate.split('T')[0] : bottomSectionsData.tessere.pagamento} readOnly={isReadOnly} disabled={isReadOnly} onChange={(e) => handleBottomSectionChange('tessere', 'pagamento', e.target.value)} className={getBottomSectionClassName('tessere', 'pagamento')} />
+                            <Input type="date" value={topTesseraMembership?.issueDate ? new Date(topTesseraMembership.issueDate).toISOString().split('T')[0] : bottomSectionsData.tessere.pagamento} readOnly={true} disabled={true} onChange={(e) => handleBottomSectionChange('tessere', 'pagamento', e.target.value)} className="bg-muted text-muted-foreground opacity-100" />
                           </div>
                           <div className="space-y-2">
                             <Label>Nuovo o Rinnovo</Label>
-                            <Select value={bottomSectionsData.tessere.nuovoRinnovo} disabled={isReadOnly} onValueChange={(v) => handleBottomSectionChange('tessere', 'nuovoRinnovo', v)}>
-                              <SelectTrigger className={getBottomSectionClassName('tessere', 'nuovoRinnovo')}>
-                                <SelectValue placeholder="Seleziona" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="nuovo">Nuovo</SelectItem>
-                                <SelectItem value="rinnovo">Rinnovo</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Input 
+                              type="text"
+                              value={topTesseraMembership?.renewalType || bottomSectionsData.tessere.nuovoRinnovo || ''} 
+                              readOnly={true} 
+                              disabled={true} 
+                              onChange={(e) => handleBottomSectionChange('tessere', 'nuovoRinnovo', e.target.value)}
+                              className="bg-muted text-muted-foreground opacity-100 capitalize"
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label>Data Scad. Quota Tessera</Label>
-                            <Input type="date" value={activeMembership ? activeMembership.expiryDate.split('T')[0] : bottomSectionsData.tessere.dataScad} readOnly={isReadOnly} disabled={isReadOnly} onChange={(e) => handleBottomSectionChange('tessere', 'dataScad', e.target.value)} className={getBottomSectionClassName('tessere', 'dataScad')} />
+                            <Input 
+                              type="date" 
+                              value={
+                                (topTesseraMembership?.expiryDate ? new Date(topTesseraMembership.expiryDate).toISOString().split('T')[0] : null) 
+                                || topTesseraScad 
+                                || bottomSectionsData.tessere.dataScad
+                              } 
+                              readOnly={true} 
+                              disabled={true} 
+                              onChange={(e) => handleBottomSectionChange('tessere', 'dataScad', e.target.value)} 
+                              className="bg-muted text-muted-foreground opacity-100" 
+                            />
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-2">
                           <div className="space-y-2">
                             <Label>N. Tessera</Label>
-                            <Input value={activeMembership ? activeMembership.membershipNumber : bottomSectionsData.tessere.numero} readOnly={isReadOnly} disabled={isReadOnly} onChange={(e) => handleBottomSectionChange('tessere', 'numero', e.target.value)} className={getBottomSectionClassName('tessere', 'numero')} />
+                            <Input value={topTesseraNumero || bottomSectionsData.tessere.numero} readOnly={isReadOnly} disabled={isReadOnly} onChange={(e) => handleBottomSectionChange('tessere', 'numero', e.target.value)} className={getBottomSectionClassName('tessere', 'numero')} />
                           </div>
                           <div className="space-y-2">
-                            {/* Empty block to match screenshot */}
+                             <Label>Barcode</Label>
+                             <Input value={topTesseraMembership?.barcode || (topTesseraNumero ? `T${topTesseraNumero.replace('-', '')}` : '')} readOnly disabled className={`bg-transparent opacity-80 cursor-default`} />
+                          </div>
+                          <div className="space-y-2">
+                             <Label>Stato</Label>
+                             <div className="h-10 flex items-center">
+                               {topTesseraMembership ? (
+                                 <Badge variant={!isTesseraExpired ? 'default' : 'secondary'} className={isTesseraExpired ? "bg-red-50 text-red-600 border-red-300" : "shadow-sm"}>
+                                   {!isTesseraExpired ? 'Attiva' : 'Scaduta'}
+                                 </Badge>
+                               ) : (
+                                 <span className="text-sm text-muted-foreground italic">Nessuna</span>
+                               )}
+                             </div>
                           </div>
                           <div className="space-y-2">
                             <Label>Tessera Ente</Label>
-                            <Input value={hasEntityCard ? formData.tesseraEnte : bottomSectionsData.tessere.tesseraEnte} readOnly={hasEntityCard} disabled={hasEntityCard} onChange={(e) => handleBottomSectionChange('tessere', 'tesseraEnte', e.target.value)} className={getBottomSectionClassName('tessere', 'tesseraEnte')} />
+                            <Input 
+                              value={
+                                topTesseraMembership?.entityCardNumber 
+                                || formData.tesseraEnte 
+                                || bottomSectionsData.tessere.tesseraEnte 
+                                || ((!topTesseraMembership?.entityCardNumber && !isTesseraExpired && topTesseraMembership) ? "Libertas" : "")
+                              } 
+                              readOnly={isEntityCardReadOnly} 
+                              disabled={isEntityCardReadOnly} 
+                              onChange={(e) => handleBottomSectionChange('tessere', 'tesseraEnte', e.target.value)} 
+                              className={getBottomSectionClassName('tessere', 'tesseraEnte')} 
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label>Scadenza Tessera Ente</Label>
-                            <Input type="date" value={hasEntityCard && formData.scadenzaTesseraEnte ? new Date(formData.scadenzaTesseraEnte).toISOString().split('T')[0] : bottomSectionsData.tessere.scadenzaTesseraEnte} readOnly={hasEntityCard} disabled={hasEntityCard} onChange={(e) => handleBottomSectionChange('tessere', 'scadenzaTesseraEnte', e.target.value)} className={getBottomSectionClassName('tessere', 'scadenzaTesseraEnte')} />
+                            <Input type="date" value={hasEntityCard ? (topTesseraMembership?.entityCardExpiryDate ? new Date(topTesseraMembership.entityCardExpiryDate).toISOString().split('T')[0] : (formData.scadenzaTesseraEnte ? new Date(formData.scadenzaTesseraEnte).toISOString().split('T')[0] : '')) : bottomSectionsData.tessere.scadenzaTesseraEnte} readOnly={true} disabled={true} onChange={(e) => handleBottomSectionChange('tessere', 'scadenzaTesseraEnte', e.target.value)} className={getBottomSectionClassName('tessere', 'scadenzaTesseraEnte')} />
                           </div>
                         </div>
                       </>
@@ -3644,19 +3743,46 @@ export default function MascheraInputGenerale() {
                   </div>
                   <div className="space-y-2">
                     <Label>Rilasciato Da</Label>
-                    <Input value={bottomSectionsData.certificatoMedico.rilasciatoDa} onChange={(e) => handleBottomSectionChange('certificatoMedico', 'rilasciatoDa', e.target.value)} className={getBottomSectionClassName('certificatoMedico', 'rilasciatoDa')} />
+                    <Input 
+                      value={
+                        bottomSectionsData.certificatoMedico.rilasciatoDa
+                      } 
+                      onChange={(e) => handleBottomSectionChange('certificatoMedico', 'rilasciatoDa', e.target.value)} 
+                      className={getBottomSectionClassName('certificatoMedico', 'rilasciatoDa')} 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Pagamento</Label>
-                    <Input type="number" placeholder="€ 40" value={bottomSectionsData.certificatoMedico.pagamento} onChange={(e) => handleBottomSectionChange('certificatoMedico', 'pagamento', e.target.value)} className={getBottomSectionClassName('certificatoMedico', 'pagamento')} />
+                    <Input 
+                      type="number" 
+                      placeholder="€ 40" 
+                      value={
+                        bottomSectionsData.certificatoMedico.pagamento
+                      } 
+                      onChange={(e) => handleBottomSectionChange('certificatoMedico', 'pagamento', e.target.value)} 
+                      className={getBottomSectionClassName('certificatoMedico', 'pagamento')} 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>A Noi</Label>
-                    <Input type="number" placeholder="12,5" value={bottomSectionsData.certificatoMedico.aNoi} onChange={(e) => handleBottomSectionChange('certificatoMedico', 'aNoi', e.target.value)} className={getBottomSectionClassName('certificatoMedico', 'aNoi')} />
+                    <Input 
+                      type="number" 
+                      placeholder="12,5" 
+                      value={
+                        bottomSectionsData.certificatoMedico.aNoi
+                      } 
+                      onChange={(e) => handleBottomSectionChange('certificatoMedico', 'aNoi', e.target.value)} 
+                      className={getBottomSectionClassName('certificatoMedico', 'aNoi')} 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Tipo Certificato</Label>
-                    <Select value={bottomSectionsData.certificatoMedico.tipo} onValueChange={(v) => handleBottomSectionChange('certificatoMedico', 'tipo', v)}>
+                    <Select 
+                      value={
+                        bottomSectionsData.certificatoMedico.tipo
+                      } 
+                      onValueChange={(v) => handleBottomSectionChange('certificatoMedico', 'tipo', v)}
+                    >
                       <SelectTrigger className={getBottomSectionClassName('certificatoMedico', 'tipo')}>
                         <SelectValue placeholder="Seleziona tipo" />
                       </SelectTrigger>
