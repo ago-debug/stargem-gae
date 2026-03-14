@@ -39,7 +39,7 @@ Le 12 tipologie (tutte con struttura fisica identica per la parte didattica, ma 
 12. **Servizi Extra / Prenotazioni** (`booking_services`, `studio_bookings`) - *Spesso contato come il 12° "Silo" ad uso non propriamente didattico, ma con proprio flusso pagamenti.*
 
 💡 **REGOLA D'ORO:** L'idea di unificare ora tutte e 12 le tabelle in una sola sarebbe un disastro informatico (refactoring totale impensabile). Qualsiasi nuova funzionalità logica (es. "aggiungere limitazioni sull'età") **deve essere propagata e considerata su tutte le tabelle simultaneamente** per non creare squilibri nell'interfaccia. 
-Inoltre, quando si fa un inserimento da Front-End (es. tramite la *Maschera Input Generale*), questa funge da smistatore che reindirizza il salvataggio nella tabella corretta a seconda di quale attività l'operatore seleziona dalla tendina.
+Inoltre, quando si fa un inserimento da Front-End (es. tramite la *Maschera Input* o la nuova Modale Unificata del *Calendario*), questa funge da smistatore (Mimetismo STI) che disaccoppia il payload e reindirizza trasparentemente il salvataggio ai legacy endpoint corretti a seconda di quale attività l'operatore seleziona dalla tendina, preservando l'integrità dei silos.
 
 ### B. Il sistema Centrale dei Pagamenti (`payments`)
 La tabella `payments` è l'**Hub di interscambio** ("Junction Table") del comparto economico.

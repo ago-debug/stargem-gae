@@ -42,7 +42,7 @@ Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro
 ## 2. Moduli Amministrativi e Finanziari *(21 Tabelle)*
 | Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
 |---|---|---|---|---|
-| **Pannello Iscrizioni Rapide** | `/maschera-generale` | 🟡 **Maschera Input** | `members`, `[x]_enrollments`, `payments`, `price_list_items` | Il vero concentratore di azioni. (Es. scrive l'anagrafica, la collega al corso, genera il dovuto e incassa). |
+| **Pannello Iscrizioni Rapide** | `/maschera-input` | 🟡 **Maschera Input** | `members`, `[x]_enrollments`, `payments`, `price_list_items` | Il vero concentratore di azioni. (Es. scrive l'anagrafica, la collega al corso, genera il dovuto e incassa). |
 | **Iscrizioni e Pagamenti** | `/iscrizioni-pagamenti` | 🟡 **Iscrizioni e Pagamenti** | Lettura combinata `members`, `enrollments` | Interfaccia d'appoggio per gestione logistica |
 | **Nuovo Pagamento** | `/pagamenti` | 🟡 **Lista Pagamenti** | `payments`, `payment_methods`, `pay_notes` | Scrive in `payments`, lega una FK al memberId. |
 | **Scheda Contabile** | `/scheda-contabile` | 🟡 **Scheda Contabile** | Lettura: `payments`, `price_list_items`, `members` | Sola LETTURA. Incrocia il dovuto col versato. |
@@ -68,7 +68,7 @@ Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro
 |---|---|---|---|---|
 | **Sale e Aule** | `/studios` | 🟡 **Studios/Sale** | `studios` | Scrive la sala (Capienza, Orari Base). |
 | **Prenotazioni Sale** | `/prenotazioni-sale` | 🟡 **Prenotazioni Sale** | `studio_bookings` | Booking eventi spot. |
-| **Calendario Planning** | `/calendario` | 🟡 **Calendario Corsi** | Lettura: 11 tabelle attività + `studios` | Sola lettura grafica delle ore programmate. |
+| **Calendario Planning** | `/calendario` | 🟡 **Calendario Attività** | Lettura: 11 tabelle attività + `studios` | Sola lettura grafica delle ore programmate. Supporto modale unificata 'Nuova Attività'. |
 | **Todo List Task** | `/todo-list` | 🟡 **ToDoList** | `todos` | Task collaborative per lo staff. |
 | **Note Team / Chat** | `/commenti`, `/note-team` | 🟡 **Commenti Log / Note** | `team_comments`, `team_notes`, `messages` | Chat intercom della segreteria e post-it globali. |
 | **Categorie Anagrafiche** | `/categoria-partecipante` | 🟡 **Categoria Partecipante**| `cli_cats` | Scrive gerarchie su cui raggruppare i clienti. |

@@ -85,10 +85,12 @@ app.use((req, res, next) => {
       try {
         // DEBUG_GLOBAL_ERROR disabled
       } catch (e) { }
+    } else {
+       console.error(`[API Error ${status}]:`, err.message);
     }
 
     res.status(status).json({ message, details: err.message });
-    throw err;
+    // throw err; // RIMOSSO: Prevenzione crash Node.js
   });
 
   // importantly only setup vite in development and after

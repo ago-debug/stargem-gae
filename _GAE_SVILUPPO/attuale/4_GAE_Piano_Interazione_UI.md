@@ -31,9 +31,10 @@ Durante l'analisi della UI attuale (Marzo 2026), prima di procedere con la ripro
 *   **Bug ("Pagamento Non Concluso"):** Mancata concatenazione degli eventi in Cassa (es. schermate che mostrano saldi ma non finalizzano la ricevuta).
 *   **Listini e Prezzi Bloccati (PIN Sicurezza):** Il prezzo base pescato dai listini/quote dovrà apparire in automatico. La forzatura/modifica manuale degli importi in Cassa (da parte della segreteria) sarà *bloccata*, e consentita unicamente previa autorizzazione (inserimento PIN/Codice Personale del manager).
 
-### D. Calendario Limitato e Non Universale
-*   **Da "Calendario Corsi" a "Calendario Attività":** Il flusso UI dovrà permettere prima la selezione di una delle 13 attività, poi dei dettagli.
-*   **Slot Orari Disallineati:** Nelle pagine di creazione dei corsi, il dropdown permette salti rigidi (es. 7:00, 7:30). Di contro, il Calendario ha una gestione diversa. L'inserimento orari deve essere uniformato per supportare durate flessibili (50 min, 1h30m, ecc.) coerentemente ovunque, consentendo l'inserimento di tutte le entità (Corsi, Workshop, Affitti) direttamente dal Super-Planning.
+### D. Calendario Unificato (STI Mimetismo Phase 1)
+*   **Da "Calendario Corsi" a "Calendario Attività":** L'etichetta è stata aggiornata per riflettere la natura generalista dell'Hub.
+*   **Modale Unificata "Nuova Attività":** Eliminati i molteplici popup frammentati. Ora il Calendario funge da Hub Centrale con un'unica modale dotata di Select Dinamica "Categoria Attività" (Corso, Workshop, Prenotazione) che adatta l'interfaccia condizionalmente. Il payload viene poi disaccoppiato e re-indirizzato ai legacy endpoint corretti.
+*   **Supporto Nativo Entità Multiple:** È ora possibile visualizzare e creare Workshop e altre entità con click rapido sugli slot vuoti della griglia. E' stata unificata la logica di inserimento slot orari per tutte queste entità.
 
 ### E. Rigidità nella Tipologia di Erogazione
 *   **Separazione Logica:** "Allenamenti" va separato da "Affitti". I servizi di Personal Training/Affitto necessitano di focus nominale sul cliente e sui pacchetti (es. "Pacchetto 10 ingressi Cugge").
@@ -108,8 +109,8 @@ Per evitare interruzioni al team di segreteria, adotteremo questo approccio chir
 
 1. **Creazione Silente:** Sviluppo iniziale dei due componenti nella libreria locale `src/components/`, senza importarli in nessuna pagina attiva. [COMPLETATO]
 2. **Sostituzione Pilota (A/B Test):** Sostituiremo il form orari e pagamenti unicamente in **1 silo a basso traffico** (Esempio: "Attività Domenicali" o "Prove a Pagamento"). [COMPLETATO per i pagamenti tramite `NuovoPagamentoModal`]
-3. **Validazione:** Testiamo che il salvataggio sul DB funzioni perfettamente usando i nuovi Micro-Form e che il dato sia identico al vecchio metodo. [IN CORSO]
-4. **Sostituzione Massiva:** Una volta approvato il Pilota, applicheremo un Find&Replace architetturale, iniettando i due Micro-Form nelle restanti 10 pagine (Corsi, Workshop, Campus, ecc.), cancellando per sempre le migliaia di righe Frontend duplicate. [DA FARE]
+3. **Validazione:** Testiamo che il salvataggio sul DB funzioni perfettamente usando i nuovi Micro-Form e che il dato sia identico al vecchio metodo. [COMPLETATO parzialmente]
+4. **Sostituzione Massiva:** Una volta approvato il Pilota, applicheremo un Find&Replace architetturale, iniettando i due Micro-Form nelle restanti 10 pagine (Corsi, Workshop, Campus, ecc.), cancellando per sempre le migliaia di righe Frontend duplicate. [IN CORSO - Calendario e Checkout Unificato completati]
 
 ---
 
