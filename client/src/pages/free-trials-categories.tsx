@@ -13,7 +13,7 @@ import { ArrowLeft, Plus, Edit, Trash2, FolderTree } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Category, InsertCategory } from "@shared/schema";
 
-export default function Categories() {
+export default function FreeTrialsCategories() {
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -101,8 +101,8 @@ export default function Categories() {
             <ArrowLeft className="w-4 h-4 text-white" />
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Corsi</h1>
-            <p className="text-muted-foreground text-sm">Organizza i corsi per categorie e sottocategorie</p>
+            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Prove Gratuite</h1>
+            <p className="text-muted-foreground text-sm">Organizza le prove gratuite per categorie e sottocategorie</p>
           </div>
         </div>
         <Button

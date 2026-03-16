@@ -9,25 +9,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Edit, Trash2, FolderTree } from "lucide-react";
+import { Plus, Edit, Trash2, FolderTree, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { Category, InsertCategory } from "@shared/schema";
+import type { BookingServiceCategory, InsertBookingServiceCategory } from "@shared/schema";
 
-export default function Categories() {
+export default function RentalsCategories() {
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingCategory, setEditingCategory] = useState<BookingServiceCategory | null>(null);
 
-  const { data: categories, isLoading } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
+  const { data: categories, isLoading } = useQuery<BookingServiceCategory[]>({
+    queryKey: ["/api/booking-service-categories"],
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: InsertCategory) => {
-      await apiRequest("POST", "/api/categories", data);
+    mutationFn: async (data: InsertBookingServiceCategory) => {
+      await apiRequest("POST", "/api/booking-service-categories", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/booking-service-categories"] });
       toast({ title: "Categoria creata con successo" });
       setIsFormOpen(false);
       setEditingCategory(null);
@@ -38,11 +38,11 @@ export default function Categories() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: InsertCategory }) => {
-      await apiRequest("PATCH", `/api/categories/${id}`, data);
+    mutationFn: async ({ id, data }: { id: number; data: InsertBookingServiceCategory }) => {
+      await apiRequest("PATCH", `/api/booking-service-categories/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/booking-service-categories"] });
       toast({ title: "Categoria aggiornata con successo" });
       setIsFormOpen(false);
       setEditingCategory(null);
@@ -54,10 +54,10 @@ export default function Categories() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/categories/${id}`, undefined);
+      await apiRequest("DELETE", `/api/booking-service-categories/${id}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/booking-service-categories"] });
       toast({ title: "Categoria eliminata con successo" });
     },
     onError: (error: Error) => {
@@ -68,7 +68,7 @@ export default function Categories() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data: InsertCategory = {
+    const data: InsertBookingServiceCategory = {
       name: formData.get("name") as string,
       description: formData.get("description") as string || null,
       parentId: formData.get("parentId") && formData.get("parentId") !== "none" ? parseInt(formData.get("parentId") as string) : null,
@@ -101,8 +101,8 @@ export default function Categories() {
             <ArrowLeft className="w-4 h-4 text-white" />
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Corsi</h1>
-            <p className="text-muted-foreground text-sm">Organizza i corsi per categorie e sottocategorie</p>
+            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Affitti</h1>
+            <p className="text-muted-foreground text-sm">Organizza gli affitti per categorie e sottocategorie</p>
           </div>
         </div>
         <Button
@@ -111,7 +111,7 @@ export default function Categories() {
             setIsFormOpen(true);
           }}
           className="gold-3d-button px-4"
-          data-testid="button-add-category"
+          data-testid="button-add-booking-service-category"
         >
           <Plus className="w-4 h-4 mr-2" />
           Nuova Categoria
@@ -122,7 +122,7 @@ export default function Categories() {
         <CardHeader className="border-b border-border/40 pb-4">
           <div className="flex items-center gap-2">
             <FolderTree className="w-5 h-5 text-muted-foreground" />
-            <h2 className="text-lg font-bold">Struttura Categorie</h2>
+            <h2 className="text-lg font-bold">Struttura Categorie Affitti</h2>
           </div>
         </CardHeader>
         <CardContent className="pt-6">
@@ -146,7 +146,7 @@ export default function Categories() {
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-[15px] font-bold text-foreground truncate">{category.name}</p>
+                        <p className="text-[15px] font-bold text-foreground truncate" data-testid={`text-category-name-${category.id}`}>{category.name}</p>
                         {category.description && (
                           <p className="text-xs text-muted-foreground truncate italic">{category.description}</p>
                         )}
@@ -157,14 +157,14 @@ export default function Categories() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                       <Button
-                        variant="ghost"
                         size="icon"
+                        variant="ghost"
                         className="h-8 w-8 bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
                         onClick={() => {
                           setEditingCategory(category);
                           setIsFormOpen(true);
                         }}
-                        data-testid={`button-edit-category-${category.id}`}
+                        data-testid={`button-edit-booking-service-category-${category.id}`}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -177,7 +177,7 @@ export default function Categories() {
                             deleteMutation.mutate(category.id);
                           }
                         }}
-                        data-testid={`button-delete-category-${category.id}`}
+                        data-testid={`button-delete-booking-service-category-${category.id}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -199,7 +199,7 @@ export default function Categories() {
                               />
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold truncate">{child.name}</p>
+                              <p className="text-sm font-semibold truncate" data-testid={`text-category-name-${child.id}`}>{child.name}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0 ml-4">
@@ -211,7 +211,7 @@ export default function Categories() {
                                 setEditingCategory(child);
                                 setIsFormOpen(true);
                               }}
-                              data-testid={`button-edit-category-${child.id}`}
+                              data-testid={`button-edit-booking-service-category-${child.id}`}
                             >
                               <Edit className="w-3.5 h-3.5" />
                             </Button>
@@ -224,7 +224,7 @@ export default function Categories() {
                                   deleteMutation.mutate(child.id);
                                 }
                               }}
-                              data-testid={`button-delete-category-${child.id}`}
+                              data-testid={`button-delete-booking-service-category-${child.id}`}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
@@ -256,7 +256,7 @@ export default function Categories() {
                 name="name"
                 defaultValue={editingCategory?.name}
                 required
-                data-testid="input-name"
+                data-testid="input-booking-service-category-name"
               />
             </div>
 
@@ -267,14 +267,14 @@ export default function Categories() {
                 name="description"
                 defaultValue={editingCategory?.description || ""}
                 rows={3}
-                data-testid="input-description"
+                data-testid="input-booking-service-category-description"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="parentId">Categoria Padre (opzionale)</Label>
               <Select name="parentId" defaultValue={editingCategory?.parentId?.toString() || "none"}>
-                <SelectTrigger data-testid="select-parent">
+                <SelectTrigger data-testid="select-booking-service-category-parent">
                   <SelectValue placeholder="Nessuna (categoria principale)" />
                 </SelectTrigger>
                 <SelectContent>
@@ -295,7 +295,7 @@ export default function Categories() {
                 name="color"
                 type="color"
                 defaultValue={editingCategory?.color || "#3b82f6"}
-                data-testid="input-color"
+                data-testid="input-booking-service-category-color"
               />
             </div>
 
@@ -304,14 +304,14 @@ export default function Categories() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsFormOpen(false)}
-                data-testid="button-cancel"
+                data-testid="button-cancel-booking-service-category"
               >
                 Annulla
               </Button>
               <Button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                data-testid="button-submit-category"
+                data-testid="button-submit-booking-service-category"
               >
                 {editingCategory ? "Salva Modifiche" : "Crea Categoria"}
               </Button>

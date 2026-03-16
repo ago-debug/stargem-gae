@@ -92,7 +92,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     isActive: true,
     isPlaceholder: false,
     routeUrl: "/attivita/prove-pagamento",
-    categoryManagementUrl: "/categorie-corsi",
+    categoryManagementUrl: "/categorie-prove-pagamento",
     apiEndpoint: "/api/categories",
     visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
     design: { icon: CreditCard, colorClass: "icon-gold-bg", description: "Lezioni di prova a pagamento" }
@@ -105,7 +105,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     isActive: true,
     isPlaceholder: false,
     routeUrl: "/attivita/prove-gratuite",
-    categoryManagementUrl: "/categorie-corsi",
+    categoryManagementUrl: "/categorie-prove-gratuite",
     apiEndpoint: "/api/categories",
     visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
     design: { icon: Gift, colorClass: "icon-gold-bg", description: "Lezioni di prova gratuite" }
@@ -118,7 +118,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     isActive: true,
     isPlaceholder: false,
     routeUrl: "/attivita/lezioni-singole",
-    categoryManagementUrl: "/categorie-corsi",
+    categoryManagementUrl: "/categorie-lezioni-singole",
     apiEndpoint: "/api/categories",
     visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
     design: { icon: BookOpen, colorClass: "icon-gold-bg", description: "Lezioni singole o drop-in" }
@@ -171,7 +171,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     isPlaceholder: false,
     routeUrl: "/prenotazioni-sale",
     apiEndpoint: "/api/booking-service-categories",
-    categoryManagementUrl: "/categorie-servizi",
+    categoryManagementUrl: "/categorie-affitti",
     visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
     design: { icon: Building2, colorClass: "icon-gold-bg", description: "Prenotazione Sale / Affitto Generico" }
   },
@@ -223,7 +223,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     isPlaceholder: false,
     routeUrl: "/attivita/servizi",
     apiEndpoint: "/api/booking-service-categories",
-    categoryManagementUrl: "/categorie-servizi",
+    categoryManagementUrl: "/categorie-eventi-esterni",
     visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
     design: { icon: Globe, colorClass: "icon-gold-bg", description: "Eventi extra non a listino e contabilità" }
   },

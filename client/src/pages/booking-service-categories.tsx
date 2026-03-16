@@ -71,7 +71,7 @@ export default function BookingServiceCategories() {
     const data: InsertBookingServiceCategory = {
       name: formData.get("name") as string,
       description: formData.get("description") as string || null,
-      parentId: formData.get("parentId") ? parseInt(formData.get("parentId") as string) : null,
+      parentId: formData.get("parentId") && formData.get("parentId") !== "none" ? parseInt(formData.get("parentId") as string) : null,
       color: formData.get("color") as string || null,
     };
 

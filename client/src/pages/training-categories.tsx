@@ -101,8 +101,8 @@ export default function TrainingCategories() {
             <ArrowLeft className="w-4 h-4 text-white" />
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Allenamenti/Affitti</h1>
-            <p className="text-muted-foreground text-sm">Organizza gli allenamenti e affitti per categorie e sottocategorie</p>
+            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Allenamenti</h1>
+            <p className="text-muted-foreground text-sm">Organizza gli allenamenti per categorie e sottocategorie</p>
           </div>
         </div>
         <Button
@@ -122,7 +122,7 @@ export default function TrainingCategories() {
         <CardHeader className="border-b border-border/40 pb-4">
           <div className="flex items-center gap-2">
             <FolderTree className="w-5 h-5 text-muted-foreground" />
-            <h2 className="text-lg font-bold">Struttura Categorie Allenamenti/Affitti</h2>
+            <h2 className="text-lg font-bold">Struttura Categorie Allenamenti</h2>
           </div>
         </CardHeader>
         <CardContent className="pt-6">

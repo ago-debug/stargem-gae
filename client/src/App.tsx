@@ -78,6 +78,10 @@ import IndividualLessonCategories from "@/pages/individual-lesson-categories";
 import CampusCategories from "@/pages/campus-categories";
 import RecitalCategories from "@/pages/recital-categories";
 import VacationCategories from "@/pages/vacation-categories";
+import PaidTrialsCategories from "@/pages/paid-trials-categories";
+import FreeTrialsCategories from "@/pages/free-trials-categories";
+import SingleLessonsCategories from "@/pages/single-lessons-categories";
+import RentalsCategories from "@/pages/rentals-categories";
 
 import { NotificationCenter } from "@/components/notification-center";
 import { TodoNotification } from "@/components/todo-notification";
@@ -182,6 +186,10 @@ function Router() {
       <ProtectedRoute path="/attivita" component={Attivita} />
       <ProtectedRoute path="/categorie-attivita" component={ActivityCategories} />
       <ProtectedRoute path="/categorie-corsi" component={Categories} />
+      <ProtectedRoute path="/categorie-prove-pagamento" component={PaidTrialsCategories} />
+      <ProtectedRoute path="/categorie-prove-gratuite" component={FreeTrialsCategories} />
+      <ProtectedRoute path="/categorie-lezioni-singole" component={SingleLessonsCategories} />
+      <ProtectedRoute path="/categorie-affitti" component={RentalsCategories} />
       <ProtectedRoute path="/categorie-workshop" component={WorkshopCategories} />
       <ProtectedRoute path="/categorie-domeniche" component={SundayCategories} />
       <ProtectedRoute path="/categorie-allenamenti" component={TrainingCategories} />
@@ -189,7 +197,7 @@ function Router() {
       <ProtectedRoute path="/categorie-campus" component={CampusCategories} />
       <ProtectedRoute path="/categorie-saggi" component={RecitalCategories} />
       <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
-      <ProtectedRoute path="/categorie-servizi" component={BookingServiceCategories} />
+      <ProtectedRoute path="/categorie-eventi-esterni" component={BookingServiceCategories} />
       <ProtectedRoute path="/categorie-merchandising" component={StubCategorieMerchandising} />
       <ProtectedRoute path="/promo-sconti" component={StubPromoSconti} />
       <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
