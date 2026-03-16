@@ -232,7 +232,7 @@ export default function AdminPanel() {
                             Integrazione Google Calendar
                         </CardTitle>
                         <CardDescription>
-                            Sincronizza prenotazioni sale e corsi con un calendario esterno.
+                            Sincronizza affitti e corsi con un calendario esterno.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">

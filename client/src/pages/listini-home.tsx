@@ -20,6 +20,7 @@ import {
     BookOpen,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { getActiveActivities } from "@/config/activities";
 
 interface CategoryInfo {
     id: string;
@@ -28,22 +29,10 @@ interface CategoryInfo {
     color: string;
 }
 
-const listiniCategories: CategoryInfo[] = [
-    { id: "corsi", label: "Corsi", icon: Calendar, color: "icon-gold-bg" },
-    { id: "workshop", label: "Workshop", icon: Sparkles, color: "icon-gold-bg" },
-    { id: "domeniche", label: "Domeniche in Movimento", icon: Sun, color: "icon-gold-bg" },
-    { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, color: "icon-gold-bg" },
-    { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, color: "icon-gold-bg" },
-    { id: "campus", label: "Campus", icon: Users, color: "icon-gold-bg" },
-    { id: "saggi", label: "Saggi", icon: Award, color: "icon-gold-bg" },
-    { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, color: "icon-gold-bg" },
-    { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, color: "icon-gold-bg" },
-    { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, color: "icon-gold-bg" },
-    { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, color: "icon-gold-bg" },
-    { id: "servizi", label: "Servizi Extra", icon: Database, color: "icon-gold-bg" },
-];
+// L'array statico listiniCategories è stato rimosso;
+// utilizziamo ora getActiveActivities() dalla Single Source of Truth
 
-function CategoryListinoCard({ info, basePath }: { info: CategoryInfo, basePath: string }) {
+function CategoryListinoCard({ info, basePath }: { info: any, basePath: string }) {
     const url = `${basePath}/${info.id}`;
     return (
         <Link href={url}>
@@ -98,16 +87,16 @@ export default function ListiniHome() {
 
                 <TabsContent value="q1c" className="mt-0">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {listiniCategories.map((info) => (
-                            <CategoryListinoCard key={`q1c-${info.id}`} info={info} basePath="/quote-listini" />
+                        {getActiveActivities().filter(a => a.visibility.listini).map((info) => (
+                            <CategoryListinoCard key={`q1c-${info.id}`} info={{ id: info.id, label: info.labelUI, color: info.design.colorClass, icon: info.design.icon }} basePath="/quote-listini" />
                         ))}
                     </div>
                 </TabsContent>
 
                 <TabsContent value="base" className="mt-0">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {listiniCategories.map((info) => (
-                            <CategoryListinoCard key={`base-${info.id}`} info={info} basePath="/listini-base" />
+                        {getActiveActivities().filter(a => a.visibility.listini).map((info) => (
+                            <CategoryListinoCard key={`base-${info.id}`} info={{ id: info.id, label: info.labelUI, color: info.design.colorClass, icon: info.design.icon }} basePath="/listini-base" />
                         ))}
                     </div>
                 </TabsContent>

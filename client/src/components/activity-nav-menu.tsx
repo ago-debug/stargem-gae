@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Activity, Calendar, Sparkles, CreditCard, Gift, BookOpen,
-  Sun, Dumbbell, UserCheck, Users, Award, Music, Database
+  Sun, Dumbbell, UserCheck, Users, Award, Music, Building2, Globe, ShoppingBag
 } from "lucide-react";
 
 const activityMenuItems = [
@@ -13,14 +13,16 @@ const activityMenuItems = [
   { id: "workshop", label: "Workshop", icon: Sparkles, url: "/attivita/workshops" },
   { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, url: "/attivita/prove-pagamento" },
   { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, url: "/attivita/prove-gratuite" },
-  { id: "servizi", label: "Servizi Extra", icon: Database, url: "/attivita/servizi" },
   { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, url: "/attivita/lezioni-singole" },
-  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, url: "/attivita/domeniche-movimento" },
-  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, url: "/attivita/allenamenti" },
   { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, url: "/attivita/lezioni-individuali" },
+  { id: "domeniche-movimento", label: "Domenica in Movimento", icon: Sun, url: "/attivita/domeniche-movimento" },
+  { id: "allenamenti", label: "Allenamenti", icon: Dumbbell, url: "/attivita/allenamenti" },
+  { id: "affitti", label: "Affitti", icon: Building2, url: "/prenotazioni-sale" },
   { id: "campus", label: "Campus", icon: Users, url: "/attivita/campus" },
   { id: "saggi", label: "Saggi", icon: Award, url: "/attivita/saggi" },
   { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, url: "/attivita/vacanze-studio" },
+  { id: "eventi-esterni", label: "Eventi Esterni", icon: Globe, url: "/attivita/servizi" },
+  { id: "merchandising", label: "Merchandising", icon: ShoppingBag, url: "/gestione-attivita-stub" },
 ];
 
 export function ActivityNavMenu() {

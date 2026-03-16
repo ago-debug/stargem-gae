@@ -35,6 +35,7 @@ import {
   Layers,
   UserPlus,
   Trash2,
+  ChevronRight,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
@@ -46,98 +47,43 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { getActiveActivities } from "@/config/activities";
 import { Button } from "@/components/ui/button";
 import { StarGemCopilot } from "@/components/star-gem-copilot";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 
+// 1. SEGRETERIA OPERATIVA
 const registrationItems = [
   {
-    title: "Maschera Input",
+    title: "Dashboard",
     url: "/",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Maschera Input",
+    url: "/maschera-input",
     icon: Users,
   },
   {
-    title: "Anagrafica a Lista",
-    url: "/anagrafica_a_lista",
-    icon: Users,
+    title: "Anagrafica Generale",
+    url: "/anagrafica-generale",
+    icon: IdCard,
   },
   {
-    title: "Attività",
-    url: "/attivita",
-    icon: Activity,
-  },
-  {
-    title: "Iscritti per Attività",
-    url: "/iscritti_per_attivita",
-    icon: Activity,
-  },
-];
-
-const teachingItems = [
-  /*
-  {
-    title: "Corsi",
-    url: "/corsi",
-    icon: Calendar,
-  },
-  */
-  {
-    title: "Calendario Attività",
-    url: "/calendario",
-    icon: CalendarFold,
-  },
-  /*
-  {
-    title: "Workshops",
-    url: "/workshops",
-    icon: Sparkles,
-  },
-  */
-  {
-    title: "Studios/Sale",
-    url: "/studios",
-    icon: Building2,
-  },
-  {
-    title: "Affitto Studio Medico",
-    url: "/affitto-studio",
-    icon: Stethoscope,
-  },
-  {
-    title: "Prenotazioni Sale",
-    url: "/prenotazioni-sale",
-    icon: CalendarFold,
-  },
-  {
-    title: "Planning",
-    url: "/planning",
-    icon: CalendarRange,
-  },
-  {
-    title: "Date/Programmazione",
-    url: "/programmazione",
-    icon: Clock,
-  },
-  {
-    title: "Servizi Prenotabili",
-    url: "/booking-services",
-    icon: Sparkles,
-  },
-];
-
-const secretariatItems = [
-  {
-    title: "Staff/Insegnanti",
-    url: "/insegnanti",
-    icon: Briefcase,
-  },
-  {
-    title: "Tessere & Certificati",
-    url: "/tessere",
+    title: "Tessere e Certificati Medici",
+    url: "/tessere-certificati",
     icon: IdCard,
   },
   {
@@ -148,9 +94,85 @@ const secretariatItems = [
   {
     title: "Controllo Accessi",
     url: "/accessi",
-    icon: ScanBarcode,
+    icon: ShieldCheck,
   },
+];
 
+// 2. AMMINISTRAZIONE & CASSA
+const accountingItems = [
+  {
+    title: "Lista Pagamenti",
+    url: "/pagamenti",
+    icon: Wallet,
+  },
+  {
+    title: "Scheda Contabile",
+    url: "/scheda-contabile",
+    icon: CreditCard,
+  },
+  {
+    title: "Report & Statistiche",
+    url: "/report",
+    icon: BarChart3,
+  },
+];
+
+// 3. ATTIVITÀ E DIDATTICA
+const teachingItems = [
+  {
+    title: "Attività",
+    url: "/attivita",
+    icon: Layers,
+    subItems: [
+      { title: "Panoramica Attività", url: "/attivita" },
+      // Generazione dinamica dal Registro Centrale, limitata a chi ha il flag visivo acceso
+      ...getActiveActivities()
+        .filter(a => a.visibility.sidebarMenu)
+        .map(a => ({
+          title: a.labelUI,
+          url: a.routeUrl
+        }))
+    ]
+  },
+  {
+    title: "Iscritti per Attività",
+    url: "/iscritti_per_attivita",
+    icon: ClipboardList,
+  },
+  {
+    title: "Categorie Attività",
+    url: "/categorie-attivita",
+    icon: FolderTree,
+  },
+  {
+    title: "Calendario Attività",
+    url: "/calendario-attivita",
+    icon: CalendarFold,
+  },
+  {
+    title: "Planning",
+    url: "/planning",
+    icon: CalendarRange,
+  },
+  {
+    title: "Studios/Sale",
+    url: "/studios",
+    icon: Building2,
+  },
+  {
+    title: "Affitto Studio Medico",
+    url: "/affitto-studio",
+    icon: Stethoscope,
+  },
+];
+
+// 4. RISORSE UMANE & TEAM
+const secretariatItems = [
+  {
+    title: "Staff e Insegnanti",
+    url: "/staff",
+    icon: Briefcase,
+  },
   {
     title: "Inserisci Nota",
     url: "/inserisci-nota",
@@ -162,83 +184,41 @@ const secretariatItems = [
     icon: MessageSquarePlus,
   },
   {
-    title: "Knowledge",
-    url: "/knowledge-base",
-    icon: BookOpen,
-  },
-  {
     title: "ToDoList",
     url: "/todo-list",
     icon: FileText,
   },
-];
-
-const analysisItems = [
   {
-    title: "Dashboard Statistiche",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Report & Statistiche",
-    url: "/report",
-    icon: BarChart3,
+    title: "Knowledge Base",
+    url: "/knowledge-base",
+    icon: BookOpen,
   },
 ];
 
-const accountingItems = [
-
-  {
-    title: "Scheda Contabile",
-    url: "/scheda-contabile",
-    icon: Wallet,
-  },
-  {
-    title: "Lista Pagamenti",
-    url: "/pagamenti",
-    icon: CreditCard,
-  },
-];
-
+// 5. CONFIGURAZIONI CORE
 const configItems = [
-  {
-    title: "Elenchi",
-    url: "/elenchi",
-    icon: List, // Si potrebbe usare una matitina ma la list va bene. O custom class.
-  },
-  {
-    title: "Quote/Listini old",
-    url: "/listini-old",
-    icon: Database,
-  },
   {
     title: "Listini e Quote",
     url: "/listini",
     icon: Database,
   },
   {
-    title: "Categorie Attività",
-    url: "/categorie-attivita",
-    icon: Layers,
-  },
-  {
-    title: "Servizi Extra",
-    url: "/attivita/servizi",
-    icon: Database,
-  },
-  {
-    title: "Promo/Codici Sconto",
+    title: "Promo / Sconti",
     url: "/promo-sconti",
     icon: Ticket,
   },
 ];
 
-
 const adminItems = [
   {
-    title: "Pannello Admin",
+    title: "Pannello Admin Global",
     url: "/admin",
-    icon: ShieldCheck,
+    icon: Settings,
+  },
+  {
+    title: "Elenchi Custom",
+    url: "/elenchi",
+    icon: List,
   },
   {
     title: "Importazione Dati",
@@ -288,9 +268,13 @@ export function AppSidebar() {
     : 0;
 
   const filteredRegistration = registrationItems.filter(item => hasPermission(user, item.url));
-  const filteredTeaching = teachingItems.filter(item => hasPermission(user, item.url));
+  const filteredTeaching = teachingItems
+    .filter(item => hasPermission(user, item.url))
+    .map(item => ({
+      ...item,
+      subItems: item.subItems ? item.subItems.filter(sub => hasPermission(user, sub.url)) : undefined
+    }));
   const filteredSecretariat = secretariatItems.filter(item => hasPermission(user, item.url));
-  const filteredAnalysis = analysisItems.filter(item => hasPermission(user, item.url));
   const filteredAccounting = accountingItems.filter(item => hasPermission(user, item.url));
   const filteredConfig = configItems.filter(item => hasPermission(user, item.url));
   const filteredAdminItems = adminItems.filter(item => hasPermission(user, item.url));
@@ -310,20 +294,20 @@ export function AppSidebar() {
       <SidebarContent>
         {filteredRegistration.length > 0 && (
           <SidebarGroup>
-            {/* <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Gestione Anagrafica</SidebarGroupLabel> */}
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">SEGRETERIA OPERATIVA</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredRegistration.map((item) => {
-                  const isActive = location === item.url || (item.url === "/attivita" && location.startsWith("/attivita"));
+                  const isActive = location === item.url;
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
                         isActive={isActive}
-                        data-testid={`nav-${item.url.slice(1) || 'anagrafica'}`}
+                        data-testid={`nav-${item.url.slice(1)}`}
                       >
-                        <Link href={item.url} className="flex items-center w-full">
-                          <item.icon className="w-4 h-4 mr-2" />
+                        <Link href={item.url}>
+                          <item.icon className="w-4 h-4" />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -337,7 +321,7 @@ export function AppSidebar() {
 
         {filteredAccounting.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Contabilità</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">AMMINISTRAZIONE & CASSA</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredAccounting.map((item) => {
@@ -364,21 +348,54 @@ export function AppSidebar() {
 
         {filteredTeaching.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Didattica e Sale</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">ATTIVITÀ E DIDATTICA</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredTeaching.map((item) => {
-                  const isActive = location === item.url;
+                  const isParentActive = location === item.url || (item.subItems && item.subItems.some(sub => location === sub.url));
+
+                  if (item.subItems && item.subItems.length > 0) {
+                    return (
+                      <Collapsible key={item.title} defaultOpen={isParentActive} className="group/collapsible">
+                        <SidebarMenuItem>
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuButton
+                              isActive={isParentActive}
+                              data-testid={`nav-${item.url.slice(1)}`}
+                            >
+                              <item.icon className="w-4 h-4" />
+                              <span className="font-semibold">{item.title}</span>
+                              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 w-4 h-4" />
+                            </SidebarMenuButton>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub>
+                              {item.subItems.map((sub) => (
+                                <SidebarMenuSubItem key={sub.title}>
+                                  <SidebarMenuSubButton asChild isActive={location === sub.url} className={location === sub.url ? "font-bold" : ""}>
+                                    <Link href={sub.url}>
+                                      <span>{sub.title}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </SidebarMenuItem>
+                      </Collapsible>
+                    );
+                  }
+
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
-                        isActive={isActive}
+                        isActive={isParentActive}
                         data-testid={`nav-${item.url.slice(1)}`}
                       >
                         <Link href={item.url}>
                           <item.icon className="w-4 h-4" />
-                          <span>{item.title}</span>
+                          <span className={item.subItems ? "font-semibold" : ""}>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -391,7 +408,7 @@ export function AppSidebar() {
 
         {filteredSecretariat.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Segreteria</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">RISORSE UMANE & TEAM</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredSecretariat.map((item) => {
@@ -418,37 +435,10 @@ export function AppSidebar() {
 
         {filteredConfig.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Configurazione</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">CONFIGURAZIONI CORE</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredConfig.map((item) => {
-                  const isActive = location === item.url;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        data-testid={`nav-${item.url.slice(1)}`}
-                      >
-                        <Link href={item.url}>
-                          <item.icon className="w-4 h-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {filteredAnalysis.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Analisi e Report</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {filteredAnalysis.map((item) => {
                   const isActive = location === item.url;
                   return (
                     <SidebarMenuItem key={item.title}>
@@ -475,17 +465,6 @@ export function AppSidebar() {
             <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">ADMIN / TECNICO</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <div className="flex items-center gap-2 px-2 py-1.5 w-full justify-start cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
-                      <StarGemCopilot className="h-4 w-4 bg-transparent outline-none ring-0 shadow-none border-0 p-0" />
-                      {/* The StarGemCopilot component itself contains the dropdown structure. 
-                           It defaults to just showing the icon. To make "StarGem CoPilot" text visible and clickable alongside it,
-                           we apply some styling. */}
-                      <span className="text-sm font-medium">StarGem CoPilot</span>
-                    </div>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 {filteredAdminItems.map((item) => {
                   const isActive = location === item.url;
                   return (
@@ -504,6 +483,14 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                   );
                 })}
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/copilot" className="flex items-center gap-2 px-2 py-1.5 w-full justify-start cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
+                      <StarGemCopilot className="h-4 w-4 bg-transparent outline-none ring-0 shadow-none border-0 p-0" />
+                      <span className="text-sm font-medium">StarGem Copilot</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -28,7 +28,6 @@ import ResetStagione from "@/pages/reset-stagione";
 import AuditLogs from "@/pages/audit-logs";
 import MemberDashboard from "@/pages/member-dashboard";
 import AnagraficaHome from "@/pages/anagrafica-home";
-import TestGae from "@/pages/test-gae";
 import CardGenerator from "@/pages/card-generator";
 import AdminPanel from "@/pages/admin-panel";
 import CalendarPage from "@/pages/calendar";
@@ -37,6 +36,7 @@ import BookingServices from "@/pages/booking-services";
 import StudioBookings from "@/pages/studio-bookings";
 import AccountingSheet from "@/pages/accounting-sheet";
 import MascheraInputGenerale from "@/pages/maschera-input-generale";
+import GestioneAttivitaStub from "@/pages/gestione-attivita-stub";
 import IscrizioniPagamenti from "@/pages/iscrizioni-pagamenti";
 import PriceLists from "@/pages/listini";
 import ListiniHome from "@/pages/listini-home";
@@ -59,6 +59,7 @@ import SchedaLezioneIndividuale from "@/pages/scheda-lezione-individuale";
 import SchedaCampus from "@/pages/scheda-campus";
 import SchedaSaggio from "@/pages/scheda-saggio";
 import SchedaVacanzaStudio from "@/pages/scheda-vacanza-studio";
+import Planning from "@/pages/planning";
 
 import FreeTrials from "@/pages/free-trials";
 import PaidTrials from "@/pages/paid-trials";
@@ -130,19 +131,38 @@ function ProtectedRoute({ path, component: Component }: { path: string, componen
   );
 }
 
+const StubPlanning = () => <GestioneAttivitaStub title="Planning" description="La sezione Planning è in fase di realizzazione o manutenzione." />;
+const StubAttivitaLista = () => <GestioneAttivitaStub title="Attività a Lista" description="Visualizzazione alternativa delle attività in fase di sviluppo." />;
+const StubAffittoStudio = () => <GestioneAttivitaStub title="Affitto Studio Medico" description="Modulo di gestione affitto studi medici in arrivo." />;
+const StubCopilot = () => <GestioneAttivitaStub title="StarGem Copilot" description="Pannello di controllo dell'assistente AI in costruzione." />;
+const StubPromoSconti = () => <GestioneAttivitaStub title="Promo e Sconti" description="Motore di gestione regole promozionali in sviluppo." />;
+const StubKnowledgeBase = () => <GestioneAttivitaStub title="Knowledge Base" description="Base di conoscenza interna in fase di redazione." />;
+const StubMerchandising = () => <GestioneAttivitaStub title="Merchandising" description="Modulo di gestione e vendita merchandising in arrivo." />;
+const StubCategorieMerchandising = () => <GestioneAttivitaStub title="Categorie Merchandising" description="Gestione categorie per articoli di merchandising in sviluppo." />;
+
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={MascheraInputGenerale} />
+      <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
-      <ProtectedRoute path="/anagrafica_a_lista" component={Members} />
-      <ProtectedRoute path="/corsi" component={Courses} />
-      <ProtectedRoute path="/workshops" component={Workshops} />
-      <ProtectedRoute path="/calendario" component={CalendarPage} />
-      <ProtectedRoute path="/categorie-corsi" component={Categories} />
-      <ProtectedRoute path="/insegnanti" component={Instructors} />
+      <ProtectedRoute path="/maschera-input" component={MascheraInputGenerale} />
+      <ProtectedRoute path="/anagrafica-generale" component={Members} />
+      <Route path="/corsi">
+        <Redirect to="/attivita/corsi" />
+      </Route>
+      <Route path="/workshops">
+        <Redirect to="/attivita/workshops" />
+      </Route>
+      <Route path="/tessere">
+        <Redirect to="/tessere-certificati" />
+      </Route>
+      <ProtectedRoute path="/calendario-attivita" component={CalendarPage} />
+      <ProtectedRoute path="/planning" component={Planning} />
+      <ProtectedRoute path="/attivita-a-lista" component={StubAttivitaLista} />
+      <ProtectedRoute path="/staff" component={Instructors} />
       <ProtectedRoute path="/studios" component={Studios} />
-      <ProtectedRoute path="/tessere" component={Memberships} />
+      <ProtectedRoute path="/affitto-studio" component={StubAffittoStudio} />
+      <ProtectedRoute path="/tessere-certificati" component={Memberships} />
       <ProtectedRoute path="/pagamenti" component={Payments} />
       <ProtectedRoute path="/accessi" component={AccessControl} />
       <ProtectedRoute path="/report" component={Reports} />
@@ -151,9 +171,9 @@ function Router() {
       <ProtectedRoute path="/reset-stagione" component={ResetStagione} />
       <ProtectedRoute path="/audit-logs" component={AuditLogs} />
       <ProtectedRoute path="/membro/:id" component={MemberDashboard} />
-      <ProtectedRoute path="/test-gae" component={TestGae} />
       <ProtectedRoute path="/generazione-tessere" component={CardGenerator} />
       <ProtectedRoute path="/admin" component={AdminPanel} />
+      <ProtectedRoute path="/copilot" component={StubCopilot} />
       <ProtectedRoute path="/booking-services" component={BookingServices} />
       <ProtectedRoute path="/prenotazioni-sale" component={StudioBookings} />
       <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
@@ -161,6 +181,17 @@ function Router() {
       <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
       <ProtectedRoute path="/attivita" component={Attivita} />
       <ProtectedRoute path="/categorie-attivita" component={ActivityCategories} />
+      <ProtectedRoute path="/categorie-corsi" component={Categories} />
+      <ProtectedRoute path="/categorie-workshop" component={WorkshopCategories} />
+      <ProtectedRoute path="/categorie-domeniche" component={SundayCategories} />
+      <ProtectedRoute path="/categorie-allenamenti" component={TrainingCategories} />
+      <ProtectedRoute path="/categorie-lezioni-individuali" component={IndividualLessonCategories} />
+      <ProtectedRoute path="/categorie-campus" component={CampusCategories} />
+      <ProtectedRoute path="/categorie-saggi" component={RecitalCategories} />
+      <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
+      <ProtectedRoute path="/categorie-servizi" component={BookingServiceCategories} />
+      <ProtectedRoute path="/categorie-merchandising" component={StubCategorieMerchandising} />
+      <ProtectedRoute path="/promo-sconti" component={StubPromoSconti} />
       <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
       <ProtectedRoute path="/scheda-workshop" component={SchedaWorkshop} />
       <ProtectedRoute path="/scheda-prova-pagamento" component={SchedaProvaPagamento} />
@@ -184,22 +215,15 @@ function Router() {
       <ProtectedRoute path="/attivita/saggi" component={Recitals} />
       <ProtectedRoute path="/attivita/vacanze-studio" component={VacationStudies} />
       <ProtectedRoute path="/attivita/servizi" component={BookingServices} />
+      <ProtectedRoute path="/attivita/merchandising" component={StubMerchandising} />
 
-      <ProtectedRoute path="/categorie-workshop" component={WorkshopCategories} />
-      <ProtectedRoute path="/categorie-domeniche" component={SundayCategories} />
-      <ProtectedRoute path="/categorie-allenamenti" component={TrainingCategories} />
-      <ProtectedRoute path="/categorie-lezioni-individuali" component={IndividualLessonCategories} />
-      <ProtectedRoute path="/categorie-campus" component={CampusCategories} />
-      <ProtectedRoute path="/categorie-saggi" component={RecitalCategories} />
-      <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
-      <ProtectedRoute path="/categorie-servizi" component={BookingServiceCategories} />
       <ProtectedRoute path="/quote-listini/:activityType" component={QuoteListini} />
       <ProtectedRoute path="/listini-old" component={ListiniHome} />
       <ProtectedRoute path="/listini" component={PriceLists} />
       <ProtectedRoute path="/listini-base/:activityType" component={PriceLists} />
       <ProtectedRoute path="/elenchi" component={Elenchi} />
       <ProtectedRoute path="/todo-list" component={TodoList} />
-      <ProtectedRoute path="/note-team" component={NoteTeam} />
+      <ProtectedRoute path="/knowledge-base" component={StubKnowledgeBase} />
       <ProtectedRoute path="/inserisci-nota" component={NoteTeam} />
       <ProtectedRoute path="/commenti" component={Commenti} />
       <Route component={NotFound} />

@@ -3209,17 +3209,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       let validatedData = insertMembershipSchema.parse(req.body);
 
-      // Generate membership number automatically if not provided (Format: [memberId]-YYYY/YYYY+1)
-      if (!validatedData.membershipNumber) {
-        const currentDate = new Date();
-        const year1 = currentDate.getFullYear();
-        const year2 = year1 + 1;
-        validatedData.membershipNumber = `${validatedData.memberId}-${year1}/${year2}`;
-      }
+      // --- MULTIPLEXER: Tessere Refactoring (Task 4) ---
+      if (validatedData.membershipType && validatedData.seasonCompetence) {
+        // [A] NEW PAYLOAD LOGIC (Strict Season Control)
+        const { buildMembershipPayload } = await import("./utils/season");
+        
+        try {
+          const payloadData = buildMembershipPayload(
+            validatedData.memberId,
+            validatedData.membershipType as "NUOVO" | "RINNOVO",
+            validatedData.seasonCompetence as "CORRENTE" | "SUCCESSIVA",
+            validatedData.issueDate ? new Date(validatedData.issueDate) : new Date(),
+            validatedData.fee || 25
+          );
 
-      // Generate barcode if not provided
-      if (!validatedData.barcode) {
-        validatedData.barcode = validatedData.membershipNumber;
+          // Uniqueness check: One membership per member per season
+          // Nota: La "Stagione Effettiva" viene identificata in modo univoco dal suo anno di fine (seasonEndYear).
+          const existingMemberships = await storage.getMembershipsByMemberId(validatedData.memberId);
+          const hasExistingForSeason = existingMemberships.some(m => m.seasonEndYear === payloadData.seasonEndYear);
+          if (hasExistingForSeason) {
+            return res.status(400).json({ message: `Errore: L'utente possiede già una tessera per la stagione sportiva ${payloadData.seasonStartYear}/${payloadData.seasonEndYear}.` });
+          }
+
+          // Merge generated fields back into validatedData
+          Object.assign(validatedData, payloadData);
+        } catch (error: any) {
+          return res.status(400).json({ message: error.message });
+        }
+      } else {
+        // [B] LEGACY PAYLOAD LOGIC (Fallback for untouched UIs)
+        // Generate membership number automatically if not provided (Format: [memberId]-YYYY/YYYY+1)
+        if (!validatedData.membershipNumber) {
+          const currentDate = new Date();
+          const year1 = currentDate.getFullYear();
+          const year2 = year1 + 1;
+          validatedData.membershipNumber = `${validatedData.memberId}-${year1}/${year2}`;
+        }
+
+        // Generate barcode if not provided
+        if (!validatedData.barcode) {
+          validatedData.barcode = validatedData.membershipNumber;
+        }
       }
 
       const membership = await storage.createMembership(validatedData);
@@ -3912,13 +3942,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         member = await storage.createMember(memberData);
       }
 
-      // 1.5 Patch Historical Membership Data
-      // If the UI unlocked the inputs for missing historical data, apply those fixes to the latest active membership without creating duplicates.
+      // 1.5 Gestione Tesseramento Centrale + Storico
       if (memberData.tessereMetadata) {
           const quota = memberData.tessereMetadata.quota;
           const tesseraEnte = memberData.tessereMetadata.tesseraEnte;
+          const membershipType = memberData.tessereMetadata.membershipType;
+          const seasonCompetence = memberData.tessereMetadata.seasonCompetence;
           
-          if (quota || tesseraEnte) {
+          if (membershipType && seasonCompetence && memberData.tessereMetadata.pagamento) {
+              // Create the new membership officially through the shared generator factory.
+              const issueDate = new Date(memberData.tessereMetadata.pagamento);
+              const { buildMembershipPayload } = await import("./utils/season");
+              try {
+                  const payloadData = buildMembershipPayload(
+                      member.id,
+                      membershipType as "NUOVO" | "RINNOVO",
+                      seasonCompetence as "CORRENTE" | "SUCCESSIVA",
+                      issueDate,
+                      quota || 25
+                  );
+                  
+                  if (tesseraEnte) {
+                      payloadData.entityCardNumber = tesseraEnte;
+                  }
+
+                  // Uniqueness check: One membership per member per season
+                  const existingMemberships = await storage.getMembershipsByMemberId(member.id);
+                  const hasExistingForSeason = existingMemberships.some(m => m.seasonEndYear === payloadData.seasonEndYear);
+                  if (!hasExistingForSeason) {
+                      const newlyCreated = await storage.createMembership(payloadData);
+                      
+                      // INIEZIONE ATOMICA: Passiamo il membershipId direttamente al carrello acquisti frontend
+                      if (paymentItems && Array.isArray(paymentItems)) {
+                          const referenceKeyMatch = member.id?.toString() || memberData.fiscalCode;
+                          const tesseraPayment = paymentItems.find(p => p.tempId === "membership_fee" && (p.referenceKey === referenceKeyMatch || !p.referenceKey));
+                          if (tesseraPayment) {
+                              tesseraPayment.membershipId = newlyCreated.id;
+                          }
+                      }
+                  }
+              } catch (error) {
+                  console.error("Failed to dynamically create membership from Maschera Generale payload:", error);
+              }
+          } else if (quota || tesseraEnte) {
               const activeMemberships = await storage.getMembershipsByMemberId(member.id);
               // Find the primary active membership
               const currentMembership = activeMemberships?.find(m => 
@@ -4061,7 +4127,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 paymentData.bookingId ||
                 paymentData.membershipId;
 
-              if (!hasValidRelation) {
+              if (!hasValidRelation && paymentData.tempId !== "membership_fee") {
+                // Ignore membership fees that didn't trigger full matching if quota was zero, etc.
                 throw new Error("Salvataggio bloccato: Impossibile salvare un pagamento orfano senza alcuna attività associata.");
               }
 
@@ -4089,6 +4156,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: error.message || "Failed to save data" });
     }
   });
+
+
 
   // Keep existing routes below
   // ==== Access Logs Routes ====

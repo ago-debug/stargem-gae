@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Sparkles } from "lucide-react";
+import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import type { BookingService, InsertBookingService, BookingServiceCategory } from "@shared/schema";
 
 export default function BookingServices() {
@@ -97,10 +98,13 @@ export default function BookingServices() {
 
     return (
         <div className="p-6 md:p-8 space-y-6 mx-auto">
+            <div className="mb-6">
+                <ActivityNavMenu />
+            </div>
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                    <h1 className="text-3xl font-semibold text-foreground mb-2">Servizi Prenotabili</h1>
-                    <p className="text-muted-foreground">Configura i servizi per le prenotazioni delle sale</p>
+                    <h1 className="text-3xl font-semibold text-foreground mb-2">Eventi Esterni</h1>
+                    <p className="text-muted-foreground">Configura e gestisci gli eventi extra e non a listino</p>
                 </div>
                 <Button
                     onClick={() => {

@@ -538,12 +538,12 @@ export default function AnagraficaHome() {
     setSelectedMemberId(null);
     setFormData({ country: "Italia" });
     // Clear URL param when creating new member
-    setLocation("/");
+    setLocation("/maschera-input");
   };
 
   const handleMemberSelect = (member: Member) => {
     setSelectedMemberId(member.id);
-    setLocation(`/?memberId=${member.id}`);
+    setLocation(`/maschera-input?memberId=${member.id}`);
 
     // Popola immediatamente tutti i campi del form
     setFormData({

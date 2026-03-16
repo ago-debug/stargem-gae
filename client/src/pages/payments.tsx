@@ -253,15 +253,14 @@ export default function Payments() {
             <Download className="w-4 h-4 mr-2" />
             Esporta CSV
           </Button>
-          <Link href="/?action=payment">
-            <Button
-              data-testid="button-add-payment"
-              className="gold-3d-button"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nuovo Pagamento
-            </Button>
-          </Link>
+          <Button
+            data-testid="button-add-payment"
+            className="gold-3d-button"
+            onClick={() => setIsFormOpen(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuovo Pagamento
+          </Button>
         </div>
       </div>
 

@@ -34,7 +34,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
 const MENU_PATHS = [
-  { path: "/", title: "Anagrafica" },
+  { path: "/maschera-input", title: "Maschera Input" },
   { path: "/dashboard", title: "Dashboard Statistiche" },
   { path: "/anagrafica_a_lista", title: "Anagrafica a Lista" },
   { path: "/membro", title: "Dettaglio Membro" },
@@ -44,15 +44,15 @@ const MENU_PATHS = [
   { path: "/iscritti-corsi", title: "Iscritti per Corso" },
   { path: "/insegnanti", title: "Insegnanti" },
   { path: "/studios", title: "Studios/Sale" },
-  { path: "/tessere", title: "Tessere & Certificati" },
+  { path: "/tessere-certificati", title: "Tessere & Certificati" },
   { path: "/generazione-tessere", title: "Generazione Tessere" },
   { path: "/pagamenti", title: "Pagamenti" },
   { path: "/accessi", title: "Controllo Accessi" },
   { path: "/report", title: "Report & Statistiche" },
-  { path: "/prenotazioni-sale", title: "Prenotazioni Sale" },
+  { path: "/prenotazioni-sale", title: "Affitti" },
   { path: "/categorie-corsi", title: "Categorie Corsi" },
   { path: "/elenchi", title: "Metodi di Pagamento" },
-  { path: "/booking-services", title: "Servizi Prenotabili" },
+  { path: "/booking-services", title: "Eventi Esterni" },
   { path: "/admin", title: "Pannello Admin" },
   { path: "/importa", title: "Importazione Dati" },
   { path: "/utenti-permessi", title: "Utenti e Permessi" },

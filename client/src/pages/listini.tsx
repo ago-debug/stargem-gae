@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertPriceListSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Calendar, Database, Search, Coins, Tag, Star, User, Users, Sun, Music, Plane, Dumbbell, PlayCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, Database, Search, Coins, Tag, Star, User, Users, Sun, Music, Plane, Dumbbell, PlayCircle, Building2, Globe, ShoppingBag } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
+import { getActiveActivities } from "@/config/activities";
 export default function PriceLists() {
     const { toast } = useToast();
     const [selectedList, setSelectedList] = useState<PriceList | null>(null);
@@ -239,7 +240,7 @@ function PriceListForm({ onSubmit, initialData }: { onSubmit: (data: InsertPrice
 
 function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () => void }) {
     const { toast } = useToast();
-    const [activeTab, setActiveTab] = useState("courses");
+    const [activeTab, setActiveTab] = useState("corsi");
 
     const { data: items, isLoading: isLoadingItems } = useQuery<PriceListItem[]>({
         queryKey: [`/api/price-lists/${list.id}/items`],
@@ -312,46 +313,18 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                     <div className="w-full relative">
                         <TabsList className="bg-muted w-full flex justify-start p-1 h-12 overflow-x-auto scrollbar-hide shrink-0 pb-1 touch-pan-x">
-                            <TabsTrigger value="courses" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <Calendar className="w-4 h-4" /> Corsi
-                            </TabsTrigger>
-                            <TabsTrigger value="workshops" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <Star className="w-4 h-4" /> Workshops
-                            </TabsTrigger>
-                            <TabsTrigger value="services" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <Database className="w-4 h-4" /> Servizi Extra
-                            </TabsTrigger>
-                            <TabsTrigger value="paid_trials" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <Tag className="w-4 h-4" /> Prove a Pagamento
-                            </TabsTrigger>
-                            <TabsTrigger value="free_trials" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <PlayCircle className="w-4 h-4" /> Prove Gratuite
-                            </TabsTrigger>
-                            <TabsTrigger value="single_lessons" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <User className="w-4 h-4" /> Lezioni Singole
-                            </TabsTrigger>
-                            <TabsTrigger value="sunday_activities" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <Sun className="w-4 h-4" /> Domeniche in M.
-                            </TabsTrigger>
-                            <TabsTrigger value="trainings" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <Dumbbell className="w-4 h-4" /> Allenamenti
-                            </TabsTrigger>
-                            <TabsTrigger value="individual_lessons" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <User className="w-4 h-4" /> Lez. Individuali
-                            </TabsTrigger>
-                            <TabsTrigger value="campus" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <Users className="w-4 h-4" /> Campus
-                            </TabsTrigger>
-                            <TabsTrigger value="recitals" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <Music className="w-4 h-4" /> Saggi
-                            </TabsTrigger>
-                            <TabsTrigger value="vacation_studies" className="h-full gap-2 whitespace-nowrap min-w-max">
-                                <Plane className="w-4 h-4" /> Vacanze Studio
-                            </TabsTrigger>
+                            {getActiveActivities().filter(a => a.visibility.listini).map(item => {
+                                const Icon = item.design.icon;
+                                return (
+                                    <TabsTrigger key={item.id} value={item.id} className="h-full gap-2 whitespace-nowrap min-w-max">
+                                        <Icon className="w-4 h-4" /> {item.labelUI}
+                                    </TabsTrigger>
+                                );
+                            })}
                         </TabsList>
                     </div>
 
-                    <TabsContent value="courses" className="space-y-4">
+                    <TabsContent value="corsi" className="space-y-4">
                         <PriceItemManager
                             type="course"
                             entities={courses || []}
@@ -362,7 +335,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="workshops" className="space-y-4">
+                    <TabsContent value="workshop" className="space-y-4">
                         <PriceItemManager
                             type="workshop"
                             entities={workshops || []}
@@ -373,7 +346,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="services" className="space-y-4">
+                    <TabsContent value="eventi-esterni" className="space-y-4">
                         <PriceItemManager
                             type="booking_service"
                             entities={services || []}
@@ -384,7 +357,29 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="paid_trials" className="space-y-4">
+                    <TabsContent value="affitti" className="space-y-4">
+                        <PriceItemManager
+                            type="affitto"
+                            entities={[]}
+                            activeItems={getItemsByType("affitto")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => {}}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="merchandising" className="space-y-4">
+                        <PriceItemManager
+                            type="merchandising"
+                            entities={[]}
+                            activeItems={getItemsByType("merchandising")}
+                            quotes={quotes || []}
+                            onUpsert={(id, price, quoteId) => {}}
+                            onDelete={(itemId) => deleteItemMutation.mutate(itemId)}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="prove-pagamento" className="space-y-4">
                         <PriceItemManager
                             type="paid_trial"
                             entities={paidTrials || []}
@@ -395,7 +390,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="free_trials" className="space-y-4">
+                    <TabsContent value="prove-gratuite" className="space-y-4">
                         <PriceItemManager
                             type="free_trial"
                             entities={freeTrials || []}
@@ -406,7 +401,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="single_lessons" className="space-y-4">
+                    <TabsContent value="lezioni-singole" className="space-y-4">
                         <PriceItemManager
                             type="single_lesson"
                             entities={singleLessons || []}
@@ -417,7 +412,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="sunday_activities" className="space-y-4">
+                    <TabsContent value="domeniche" className="space-y-4">
                         <PriceItemManager
                             type="sunday_activity"
                             entities={sundayActivities || []}
@@ -428,7 +423,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="trainings" className="space-y-4">
+                    <TabsContent value="allenamenti" className="space-y-4">
                         <PriceItemManager
                             type="training"
                             entities={trainings || []}
@@ -439,7 +434,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="individual_lessons" className="space-y-4">
+                    <TabsContent value="lezioni-individuali" className="space-y-4">
                         <PriceItemManager
                             type="individual_lesson"
                             entities={individualLessons || []}
@@ -461,7 +456,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="recitals" className="space-y-4">
+                    <TabsContent value="saggi" className="space-y-4">
                         <PriceItemManager
                             type="recital"
                             entities={recitals || []}
@@ -472,7 +467,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                         />
                     </TabsContent>
 
-                    <TabsContent value="vacation_studies" className="space-y-4">
+                    <TabsContent value="vacanze-studio" className="space-y-4">
                         <PriceItemManager
                             type="vacation_study"
                             entities={vacationStudies || []}

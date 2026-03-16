@@ -18,10 +18,15 @@ export function MembershipCard({ member }: MembershipCardProps) {
     const cardRef = useRef<HTMLDivElement>(null);
     const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
 
+    const activeMembership = (member as any).activeMembership;
+    const barcodeData = activeMembership?.barcode || member.cardNumber || member.fiscalCode || "";
+    const cardNumber = activeMembership?.membershipNumber || member.cardNumber || "--- ---";
+    const issueDate = activeMembership?.issueDate || member.cardIssueDate;
+    const expiryDate = activeMembership?.expiryDate || member.cardExpiryDate;
+
     useEffect(() => {
-        if (member.cardNumber || member.fiscalCode) {
-            const data = member.cardNumber || member.fiscalCode || "";
-            QRCode.toDataURL(data, {
+        if (barcodeData) {
+            QRCode.toDataURL(barcodeData, {
                 width: 400,
                 margin: 0,
                 color: {
@@ -32,7 +37,7 @@ export function MembershipCard({ member }: MembershipCardProps) {
                 if (!err) setQrCodeUrl(url);
             });
         }
-    }, [member]);
+    }, [barcodeData]);
 
     const formatDate = (dateInput: any) => {
         if (!dateInput) return "--/--/----";
@@ -129,16 +134,16 @@ export function MembershipCard({ member }: MembershipCardProps) {
                             {/* Card Details */}
                             <div className="space-y-0.5">
                                 <div className="text-[7px] uppercase text-gray-400 font-bold leading-none tracking-tighter italic">Numero Tessera</div>
-                                <div className="text-sm font-black text-[#e11d48] leading-none">{member.cardNumber || "--- ---"}</div>
+                                <div className="text-sm font-black text-[#e11d48] leading-none">{cardNumber}</div>
 
                                 <div className="flex justify-center gap-4 mt-1">
                                     <div className="flex flex-col">
                                         <span className="text-[6px] uppercase text-gray-400 font-bold leading-none">Rilascio</span>
-                                        <span className="text-[8px] font-bold text-gray-800">{formatDate(member.cardIssueDate)}</span>
+                                        <span className="text-[8px] font-bold text-gray-800">{formatDate(issueDate)}</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-[6px] uppercase text-gray-400 font-bold leading-none">Scadenza</span>
-                                        <span className="text-[8px] font-bold text-[#e11d48]">{formatDate(member.cardExpiryDate)}</span>
+                                        <span className="text-[8px] font-bold text-[#e11d48]">{formatDate(expiryDate)}</span>
                                     </div>
                                 </div>
                             </div>

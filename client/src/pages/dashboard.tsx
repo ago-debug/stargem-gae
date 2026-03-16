@@ -156,7 +156,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setLocation('/tessere')}
+                    onClick={() => setLocation('/tessere-certificati')}
                     data-testid="button-view-memberships"
                   >
                     Vedi tutti
@@ -176,7 +176,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setLocation('/tessere')}
+                    onClick={() => setLocation('/tessere-certificati')}
                     data-testid="button-view-certificates"
                   >
                     Vedi tutti

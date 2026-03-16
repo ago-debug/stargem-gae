@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +59,7 @@ import type {
     Workshop,
     Quote, // Import Quote
 } from "@shared/schema";
+import { ACTIVITY_REGISTRY, getActiveActivities } from "@/config/activities";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -100,16 +101,43 @@ const CATEGORY_COLORS: Record<number, string> = {
 };
 
 const COLORS = [
-    "bg-blue-500/10 border-blue-500/50 text-blue-700",
-    "bg-purple-500/10 border-purple-500/50 text-purple-700",
-    "bg-emerald-500/10 border-emerald-500/50 text-emerald-700",
-    "bg-rose-500/10 border-rose-500/50 text-rose-700",
-    "bg-amber-500/10 border-amber-500/50 text-amber-900",
-    "bg-indigo-500/10 border-indigo-500/50 text-indigo-700",
-    "bg-teal-500/10 border-teal-500/50 text-teal-700",
-    "bg-cyan-500/10 border-cyan-500/50 text-cyan-700",
-    "bg-fuchsia-500/10 border-fuchsia-500/50 text-fuchsia-700",
+    "bg-blue-100 border-blue-500 text-blue-900 shadow-md opacity-95 hover:opacity-100",
+    "bg-purple-100 border-purple-500 text-purple-900 shadow-md opacity-95 hover:opacity-100",
+    "bg-emerald-100 border-emerald-500 text-emerald-900 shadow-md opacity-95 hover:opacity-100",
+    "bg-rose-100 border-rose-500 text-rose-900 shadow-md opacity-95 hover:opacity-100",
+    "bg-amber-100 border-amber-500 text-amber-900 shadow-md opacity-95 hover:opacity-100",
+    "bg-indigo-100 border-indigo-500 text-indigo-900 shadow-md opacity-95 hover:opacity-100",
+    "bg-teal-100 border-teal-500 text-teal-900 shadow-md opacity-95 hover:opacity-100",
+    "bg-cyan-100 border-cyan-500 text-cyan-900 shadow-md opacity-95 hover:opacity-100",
+    "bg-fuchsia-100 border-fuchsia-500 text-fuchsia-900 shadow-md opacity-95 hover:opacity-100",
 ];
+
+export interface CalendarEvent {
+    id: string; // Hybrid ID (e.g. "course_1", "workshop_2", "booking_3")
+    sourceType: "course" | "workshop" | "studioBookings" | string;
+    sourceId: number;
+    title: string;
+    description?: string;
+    startTime: string;
+    endTime: string;
+    dayOfWeek: string; // "LUN", "MAR"...
+    startDate?: string | null;
+    endDate?: string | null;
+    instructorId?: number | null;
+    instructorName?: string;
+    studioId?: number | null;
+    categoryId?: number | null;
+    registryKey?: string; // Corresponds to ACTIVITY_REGISTRY keys
+    registryLabel?: string;
+    active: boolean;
+    colorProps: {
+        className?: string;
+        backgroundColor?: string;
+        borderLeftColor?: string;
+        color?: string;
+    };
+    rawPayload: any; // Keep origin
+}
 
 function EnrollmentsTab({ courseId }: { courseId: number }) {
     const { toast } = useToast();
@@ -321,11 +349,28 @@ function AttendancesTab({ courseId }: { courseId: number }) {
 
 export default function CalendarPage() {
     const [, setLocation] = useLocation();
-    const [viewDate, setViewDate] = useState(new Date());
+
+    // Estrae param date= per il deep linking dal Planning Strategico
+    const initialDate = useMemo(() => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const dateParam = params.get('date');
+            if (dateParam) {
+                const parsed = new Date(dateParam);
+                if (!isNaN(parsed.getTime())) return parsed;
+            }
+        } catch(e) {}
+        return new Date();
+    }, []);
+
+    const [viewDate, setViewDate] = useState(initialDate);
     const [selectedStudio, setSelectedStudio] = useState<string>("all");
     const [selectedInstructor, setSelectedInstructor] = useState<string>("all");
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
-    const [selectedDay, setSelectedDay] = useState<string>("all");
+    const [selectedDay, setSelectedDay] = useState<string>(() => {
+        const dayIdx = new Date().getDay();
+        return WEEKDAYS[dayIdx === 0 ? 6 : dayIdx - 1].id;
+    });
     const [searchQuery, setSearchQuery] = useState("");
     const [conflictInfo, setConflictInfo] = useState<{ message: string, data: any, isUpdate: boolean } | null>(null);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -334,9 +379,25 @@ export default function CalendarPage() {
     const [selectionContext, setSelectionContext] = useState<{ dayId: string, studioId: number | null, hour: number } | null>(null);
     const [unifiedFormOpen, setUnifiedFormOpen] = useState(false);
     const [unifiedFormType, setUnifiedFormType] = useState<"course" | "workshop" | "booking">("course");
+    const [selectedEventType, setSelectedEventType] = useState<string>("all");
     const [instructorSearchOpen, setInstructorSearchOpen] = useState(false);
     const [showFreeSlots, setShowFreeSlots] = useState(false);
     const { toast } = useToast();
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (scrollContainerRef.current) {
+            const currentHour = new Date().getHours();
+            if (currentHour >= 8 && currentHour <= 22) {
+                // Calcola l'offset basandosi su ROW_HEIGHT = 120 e scrolla ammorbidendo di 1 ora
+                const targetScroll = Math.max(0, (currentHour - 8 - 1) * 120);
+                // Utilizza un piccolo timeout per assicurarsi che i children e il DOM layout siano completi
+                setTimeout(() => {
+                    scrollContainerRef.current?.scrollTo({ top: targetScroll, behavior: 'smooth' });
+                }, 100);
+            }
+        }
+    }, [selectedDay, viewDate]);
 
     const currentWeekStart = startOfWeek(viewDate, { weekStartsOn: 1 });
     const currentWeekEnd = addDays(currentWeekStart, 6);
@@ -754,7 +815,7 @@ export default function CalendarPage() {
     }, [workshops, selectedStudio, selectedInstructor, selectedCategory, selectedDay, searchQuery, instructors]);
 
     // Helper to get color for course
-    const getCourseColor = (course: Course) => {
+    const getCourseColor = (course: any) => {
         const category = categories?.find(c => c.id === course.categoryId);
         if (category?.color) {
             const hex = category.color;
@@ -778,6 +839,106 @@ export default function CalendarPage() {
         };
     };
 
+    // --- UNIFIED EVENT MAPPER (Registro Centrale Source of Truth) ---
+    const unifiedEvents = useMemo<CalendarEvent[]>(() => {
+        const events: CalendarEvent[] = [];
+        const activities = getActiveActivities(); // Full registry
+
+        // 1. Map Courses
+        filteredCourses.forEach(c => {
+            const registryConf = activities.find(a => a.id === 'courses');
+            const colorPropsValue = getCourseColor(c);
+            events.push({
+                id: `course_${c.id}`,
+                sourceType: "course",
+                sourceId: c.id,
+                title: c.name,
+                description: c.description || undefined,
+                startTime: c.startTime || "",
+                endTime: c.endTime || "",
+                dayOfWeek: c.dayOfWeek || "",
+                startDate: c.startDate ? new Date(c.startDate).toISOString() : undefined,
+                endDate: c.endDate ? new Date(c.endDate).toISOString() : undefined,
+                instructorId: c.instructorId,
+                instructorName: instructors?.find(i => i.id === c.instructorId)?.lastName,
+                studioId: c.studioId,
+                categoryId: c.categoryId,
+                registryKey: "courses",
+                registryLabel: registryConf?.labelUI || "Corso",
+                active: c.active !== false,
+                colorProps: colorPropsValue,
+                rawPayload: c
+            });
+        });
+
+        // 2. Map Workshops
+        filteredWorkshops.forEach(w => {
+            const registryConf = activities.find(a => a.id === 'workshops');
+            const colorPropsValue = getCourseColor(w);
+            events.push({
+                id: `workshop_${w.id}`,
+                sourceType: "workshop",
+                sourceId: w.id,
+                title: w.name,
+                description: w.description || undefined,
+                startTime: w.startTime || "",
+                endTime: w.endTime || "",
+                dayOfWeek: w.dayOfWeek || "",
+                startDate: w.startDate ? new Date(w.startDate).toISOString() : undefined,
+                endDate: w.endDate ? new Date(w.endDate).toISOString() : undefined,
+                instructorId: w.instructorId,
+                instructorName: instructors?.find(i => i.id === w.instructorId)?.lastName,
+                studioId: w.studioId,
+                categoryId: w.categoryId,
+                registryKey: "workshops",
+                registryLabel: registryConf?.labelUI || "Workshop",
+                active: w.active !== false,
+                colorProps: colorPropsValue,
+                rawPayload: w
+            });
+        });
+
+        // 3. Map Studio Bookings (Approximation for Date -> Day)
+        const relevantBookings = (studioBookings || []).filter(b => b.status !== 'cancelled' && b.studioId);
+        relevantBookings.forEach(b => {
+             // For bookings to show on the weekly grid, let's derive dayOfWeek
+             const bDate = new Date(b.bookingDate);
+             const dayId = getDayId(bDate);
+             
+             // Check if it belongs to current week view (Optional optimization, but UI handles days placement)
+             
+             const registryConf = activities.find(a => a.id === 'studioBookings');
+             const colorPropsValue = getBookingColor(b);
+            
+             events.push({
+                 id: `booking_${b.id}`,
+                 sourceType: "studioBookings",
+                 sourceId: b.id,
+                 title: b.title || "Prenotazione Sala",
+                 description: b.notes || undefined,
+                 startTime: stripSeconds(b.startTime) || "",
+                 endTime: stripSeconds(b.endTime) || "",
+                 dayOfWeek: dayId,
+                 startDate: b.bookingDate ? new Date(b.bookingDate).toISOString() : undefined,
+                 endDate: b.bookingDate ? new Date(b.bookingDate).toISOString() : undefined,
+                 instructorId: null,
+                 instructorName: "",
+                 studioId: b.studioId,
+                 categoryId: null,
+                 registryKey: "studioBookings",
+                 registryLabel: registryConf?.labelUI || "Affitti/Service",
+                 active: true,
+                 colorProps: colorPropsValue,
+                 rawPayload: b
+             });
+        });
+
+        if (selectedEventType !== "all") {
+             return events.filter(e => e.registryKey === selectedEventType);
+        }
+
+        return events;
+    }, [filteredCourses, filteredWorkshops, studioBookings, bookingServices, instructors, selectedEventType]);
 
     const ROW_HEIGHT = 120; // Increased from 60
     const PX_PER_MIN = ROW_HEIGHT / 60;
@@ -860,6 +1021,59 @@ export default function CalendarPage() {
 
     const handleSaveEdit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // VALIDAZIONE CONFLITTO D'ORARIO (FRONTEND SIDE)
+        const checkConflict = () => {
+             const { studioId, dayOfWeek, startTime, endTime, id } = editForm as any;
+             if (!studioId || !startTime || !endTime) return false;
+
+             const newStart = timeToMinutes(startTime);
+             const newEnd = timeToMinutes(endTime) || newStart + 60;
+
+             // Estrai la data per i workshop
+             const wsDate = unifiedFormType === "workshop" && editForm.startDate ? new Date(editForm.startDate) : null;
+
+             for (const evt of unifiedEvents) {
+                 // Skip se è lo stesso evento in modifica
+                 if (evt.sourceId === id && evt.sourceType === unifiedFormType) continue;
+                 
+                 // Devono essere nella stessa sala
+                 if (evt.studioId !== studioId) continue;
+                 
+                 // Verifica match temporale (giorno della settimana O data specifica se workshop)
+                 let matchDay = false;
+                 if (unifiedFormType === "course") {
+                     // I corsi collidono se si ripetono nello stesso giorno
+                     matchDay = evt.dayOfWeek === dayOfWeek;
+                 } else if (wsDate) {
+                     // I workshop hanno date fisse, quindi cerchiamo di capire se evt incrocia quella data
+                     matchDay = Boolean(evt.dayOfWeek === getDayId(wsDate) || (evt.startDate && new Date(evt.startDate).toISOString().split('T')[0] === wsDate.toISOString().split('T')[0]));
+                 } else {
+                     matchDay = evt.dayOfWeek === dayOfWeek;
+                 }
+
+                 if (!matchDay) continue;
+
+                 // Verifica di sovrapposizione d'orario pura (newStart < oldEnd && newEnd > oldStart)
+                 const oldStart = timeToMinutes(evt.startTime);
+                 const oldEnd = timeToMinutes(evt.endTime) || oldStart + 60;
+
+                 if (newStart < oldEnd && newEnd > oldStart) {
+                     return { conflictedEvt: evt };
+                 }
+             }
+             return false;
+        };
+
+        const conflict = checkConflict();
+        if (conflict) {
+             toast({ 
+                 title: "Conflitto d'Orario Rilevato", 
+                 description: `La Sala selezionata è già occupata da "${conflict.conflictedEvt.title}" (dalle ${conflict.conflictedEvt.startTime} alle ${conflict.conflictedEvt.endTime}). Scegli un altro orario o un'altra sala.`, 
+                 variant: "destructive" 
+             });
+             return;
+        }
 
         // Ensure all dates are strings or null before sending
         const dataToSave: any = { ...editForm, type: unifiedFormType };
@@ -1025,6 +1239,57 @@ export default function CalendarPage() {
 
     const handleSaveBooking = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // VALIDAZIONE CONFLITTO D'ORARIO BOOKING (FRONTEND SIDE)
+        const checkBookingConflict = () => {
+             const { studioId, bookingDate, startTime, endTime, id } = bookingForm as any;
+             if (!studioId || !startTime || !endTime || !bookingDate) return false;
+
+             const bDate = new Date(bookingDate);
+             const bDateStr = bDate.toISOString().split('T')[0];
+             const bDayId = getDayId(bDate);
+
+             const newStart = timeToMinutes(startTime);
+             const newEnd = timeToMinutes(endTime) || newStart + 60;
+
+             for (const evt of unifiedEvents) {
+                 // Skip sé stesso
+                 if (evt.sourceId === id && evt.sourceType === "studioBookings") continue;
+                 
+                 if (evt.studioId !== studioId) continue;
+
+                 let matchDay = false;
+                 // Se l'evento a db è un corso, si applica in base al giorno della settimana.
+                 // Se è un workshop o booking, verifichiamo la data per maggiore esattezza, 
+                 // oppure il dayOfWeek fall-back mappato
+                 if (evt.sourceType === "course") {
+                     matchDay = evt.dayOfWeek === bDayId;
+                 } else {
+                     matchDay = Boolean((evt.startDate && evt.startDate.split('T')[0] === bDateStr) || evt.dayOfWeek === bDayId);
+                 }
+
+                 if (!matchDay) continue;
+
+                 const oldStart = timeToMinutes(evt.startTime);
+                 const oldEnd = timeToMinutes(evt.endTime) || oldStart + 60;
+
+                 if (newStart < oldEnd && newEnd > oldStart) {
+                     return { conflictedEvt: evt };
+                 }
+             }
+             return false;
+        };
+
+        const conflict = checkBookingConflict();
+        if (conflict) {
+             toast({ 
+                 title: "Conflitto d'Orario Rilevato", 
+                 description: `La Sala selezionata è già occupata da "${conflict.conflictedEvt.title}" (dalle ${conflict.conflictedEvt.startTime} alle ${conflict.conflictedEvt.endTime}). Scegli un altro orario o un'altra sala.`, 
+                 variant: "destructive" 
+             });
+             return;
+        }
+
         if (editingBooking?.id) {
             updateBookingMutation.mutate({ id: editingBooking.id, data: bookingForm });
         } else {
@@ -1067,7 +1332,12 @@ export default function CalendarPage() {
                         <CalendarIcon className="w-8 h-8 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold">Calendario</h1>
+                        <div className="flex flex-col md:flex-row md:items-center gap-4">
+                            <h1 className="text-3xl font-bold">Calendario Attività</h1>
+                            <div className="hidden md:inline-flex items-center px-3 py-1 bg-yellow-100/80 border border-yellow-300 text-yellow-800 text-sm font-bold rounded-md shadow-sm">
+                                Oggi: {format(new Date(), "EEEE d MMMM", { locale: it })}
+                            </div>
+                        </div>
                         <div className="flex items-center gap-2 mt-1">
                             <Button variant="outline" size="icon" className="h-7 w-7" onClick={prevWeek}>
                                 <ChevronLeft className="h-4 w-4" />
@@ -1178,6 +1448,21 @@ export default function CalendarPage() {
                     </div>
 
                     <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Tipo Attività</Label>
+                        <Select value={selectedEventType} onValueChange={setSelectedEventType}>
+                            <SelectTrigger className="w-[160px] h-10 border-slate-300">
+                                <SelectValue placeholder="Tutte le Attività" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tutte le Attività</SelectItem>
+                                {getActiveActivities().filter(a => a.id !== 'dashboard').map(act => (
+                                    <SelectItem key={act.id} value={act.id}>{act.labelUI}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-1.5 text-left">
                         <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Categoria</Label>
                         <Popover>
                             <PopoverTrigger asChild>
@@ -1259,7 +1544,7 @@ export default function CalendarPage() {
             </div>
 
             <Card className="border-none shadow-xl bg-card overflow-hidden">
-                <CardContent className="p-0 overflow-auto max-h-[calc(100vh-220px)] relative">
+                <CardContent ref={scrollContainerRef} className="p-0 overflow-auto max-h-[calc(100vh-220px)] relative scroll-smooth">
                     <div className="min-w-full flex flex-col relative">
                         {/* Header: Ore | (Days or Studios) */}
                         <div className="sticky top-0 z-40 bg-white shadow-sm">
@@ -1277,8 +1562,8 @@ export default function CalendarPage() {
                                         const dayDate = addDays(currentWeekStart, idx);
                                         return (
                                             <div key={day.id} className="p-3 text-center border-r last:border-r-0 font-bold text-[12px] uppercase tracking-tight text-[#333] bg-white min-w-[120px] flex flex-col items-center">
-                                                <span>{day.label}</span>
-                                                <span className="text-[10px] font-normal text-muted-foreground">{format(dayDate, "dd/MM")}</span>
+                                                <span>{day.label} {format(dayDate, "d")}</span>
+                                                <span className="text-[10px] font-normal text-muted-foreground">{format(dayDate, "MMMM", { locale: it })}</span>
                                             </div>
                                         );
                                     })
@@ -1341,326 +1626,278 @@ export default function CalendarPage() {
 
                             {/* Content Columns */}
                             {selectedDay === 'all' ? (
-                                WEEKDAYS.map(day => (
-                                    <div key={day.id} className="relative pointer-events-none min-w-[120px]">
-                                        {filteredCourses
-                                            .filter(c => normalizeDay(c.dayOfWeek) === day.id)
-                                            .map(course => {
-                                                const startMin = timeToMinutes(course.startTime || undefined);
-                                                const endMin = timeToMinutes(course.endTime || undefined);
-                                                const duration = (endMin || startMin + 60) - startMin;
-                                                const colorData = getCourseColor(course);
-                                                const stats = getCourseStats(course.id);
-                                                const availability = course.maxCapacity ? Math.max(0, course.maxCapacity - stats.total) : null;
+                                WEEKDAYS.map(day => {
+                                    // 1. Filtraggio eventi del giorno
+                                    const dayEvents = unifiedEvents.filter(evt => evt.dayOfWeek === day.id);
+                                    
+                                    // 2. Ordinamento per startTime (necessario per l'algoritmo di overlap)
+                                    const sortedEvents = [...dayEvents].sort((a, b) => {
+                                        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+                                    });
+
+                                    // 3. Raggruppamento per "colonne" (Collision/Overlap Algorithm O(N^2))
+                                    const columns: typeof sortedEvents[] = [];
+                                    sortedEvents.forEach(evt => {
+                                        const eventStart = timeToMinutes(evt.startTime);
+                                        const eventEnd = timeToMinutes(evt.endTime) || eventStart + 60;
+                                        let placed = false;
+                                        
+                                        for (const col of columns) {
+                                            const lastEventInCol = col[col.length - 1];
+                                            const lastEventEnd = timeToMinutes(lastEventInCol.endTime) || timeToMinutes(lastEventInCol.startTime) + 60;
+                                            // Se c'è spazio sufficiente (<= prevEnd) lo metto in questa colonna
+                                            if (eventStart >= lastEventEnd) {
+                                                col.push(evt);
+                                                placed = true;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if (!placed) {
+                                            columns.push([evt]); // Crea nuova sub-colonna per l'overflow parallelo
+                                        }
+                                    });
+
+                                    // Applichiamo la mappatura visiva
+                                    const layoutEvents = columns.flatMap((col, colIndex) => {
+                                        const colWidth = 100 / columns.length;
+                                        const leftPos = colIndex * colWidth;
+                                        
+                                        return col.map(evt => {
+                                            const startMin = timeToMinutes(evt.startTime);
+                                            const endMin = timeToMinutes(evt.endTime) || startMin + 60;
+                                            const duration = endMin - startMin;
+                                            return { ...evt, layoutLeft: leftPos, layoutWidth: colWidth, duration, startMin };
+                                        });
+                                    });
+
+                                    return (
+                                        <div key={day.id} className="relative pointer-events-none min-w-[120px]">
+                                            {layoutEvents.map(evt => {
+                                                const { layoutLeft, layoutWidth, duration, startMin } = evt;
+                                                // Event type handlers map (preserved legacy form-modals compatibility without backend impact)
+                                                const handleEdit = () => {
+                                                    if (evt.sourceType === "course") handleEditCourse(evt.rawPayload);
+                                                    if (evt.sourceType === "workshop") handleEditWorkshop(evt.rawPayload);
+                                                    if (evt.sourceType === "studioBookings") handleEditBooking(evt.rawPayload);
+                                                };
+
+                                                const stats = evt.sourceType === "course" ? getCourseStats(evt.sourceId) :
+                                                             (evt.sourceType === "workshop" ? getWorkshopStats(evt.sourceId) : null);
+                                                
+                                                const maxCap = evt.rawPayload?.maxCapacity;
+                                                const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
+
+                                                const codeLabel = evt.rawPayload?.code || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
+                                                const statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
+                                                const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "Nessun ins.");
+                                                const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondInstructorId);
+                                                const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
 
                                                 return (
                                                     <div
-                                                        key={course.id}
-                                                        onClick={(e) => { e.stopPropagation(); handleEditCourse(course); }}
-                                                        className={`absolute left-0.5 right-0.5 p-2 rounded-lg border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col items-center justify-center text-center ${colorData.className || ''}`}
+                                                        key={`${evt.sourceType}-${evt.sourceId}`}
+                                                        onClick={(e) => { e.stopPropagation(); handleEdit(); }}
+                                                        className={`absolute left-0.5 right-0.5 p-1.5 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-start items-start text-left overflow-hidden min-h-[80px] ${evt.colorProps.className || ''}`}
                                                         style={{
                                                             top: `${startMin + 3}px`,
-                                                            height: `${duration - 3}px`,
+                                                            height: `${duration - 6}px`,
+                                                            left: `calc(${layoutLeft}% + 4px)`,
+                                                            width: `calc(${layoutWidth}% - 8px)`,
                                                             fontSize: "10px",
-                                                            ...colorData
+                                                            backgroundColor: evt.colorProps.backgroundColor,
+                                                            borderLeftColor: evt.colorProps.borderLeftColor,
+                                                            color: "#0f172a"
                                                         }}
                                                     >
-                                                        {course.sku && <span className="text-[6px] opacity-40 absolute top-1 right-1">{course.sku}</span>}
+                                                        {evt.registryKey === "workshops" && (
+                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-indigo-800">
+                                                                <Sparkles className="w-2 h-2" /> WKS
+                                                            </div>
+                                                        )}
+                                                        {evt.registryKey === "courses" && (
+                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-blue-800">
+                                                                <CalendarIcon className="w-2 h-2" /> CRS
+                                                            </div>
+                                                        )}
+                                                        {evt.registryKey === "studioBookings" && (
+                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-slate-800">
+                                                                <MapPin className="w-2 h-2" /> AFFITTO
+                                                            </div>
+                                                        )}
 
-                                                        <div className="bg-black/5 px-1.5 py-0.5 rounded-full text-[8px] font-bold mb-1">
-                                                            {course.startTime}-{course.endTime}
-                                                        </div>
-
-                                                        <span className="font-extrabold truncate w-full uppercase leading-tight mb-0.5">{course.name}</span>
-                                                        <span className="truncate opacity-90 font-semibold mb-1.5">{instructors?.find(i => i.id === course.instructorId)?.lastName}</span>
-
-                                                        <div className="flex gap-2 text-[8px] font-bold mt-auto pt-1 border-t border-black/5 w-full justify-center">
-                                                            <span className="text-blue-600">U:{stats.men}</span>
-                                                            <span className="text-pink-600">D:{stats.women}</span>
-                                                            {availability !== null && (
-                                                                <span className={availability <= 2 ? "text-red-600" : "text-green-600"}>
-                                                                    Disp:{availability}
-                                                                </span>
+                                                        <div className="font-bold text-[9px] mb-0.5 opacity-90">{evt.startTime} - {evt.endTime}</div>
+                                                        <div className="font-extrabold text-[11px] leading-tight truncate w-full uppercase">{evt.title}</div>
+                                                        <div className="font-semibold text-[9px] truncate w-full opacity-90 mt-0.5">{ins1}</div>
+                                                        {ins2 && <div className="font-semibold text-[9px] truncate w-full opacity-90">{ins2}</div>}
+                                                        
+                                                        <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-0.5">
+                                                            <span className="text-[7px] font-bold uppercase tracking-wider">{statusLabel}</span>
+                                                            
+                                                            {stats && (
+                                                                <div className="flex gap-1.5 text-[7px] font-bold w-full bg-white/50 px-1 py-0.5 rounded border border-black/5 mt-0.5">
+                                                                    <span className="text-blue-700">U:{stats.men}</span>
+                                                                    <span className="text-pink-700">D:{stats.women}</span>
+                                                                    {availability !== null && (
+                                                                        <span className={availability <= 2 ? "text-red-700" : "text-emerald-700 ml-auto"}>Disp:{availability}</span>
+                                                                    )}
+                                                                </div>
                                                             )}
+                                                            {codeLabel && <span className="text-[7px] font-mono opacity-80 truncate bg-white/40 px-1 mt-0.5 rounded">{codeLabel}</span>}
                                                         </div>
-                                                    </div>
-                                                );
-                                            })}
-
-                                        {filteredWorkshops
-                                            .filter(w => normalizeDay(w.dayOfWeek) === day.id)
-                                            .map(workshop => {
-                                                const startMin = timeToMinutes(workshop.startTime || undefined);
-                                                const endMin = timeToMinutes(workshop.endTime || undefined);
-                                                const duration = (endMin || startMin + 60) - startMin;
-                                                const colorData = getCourseColor(workshop as any);
-                                                const stats = getWorkshopStats(workshop.id);
-                                                const availability = workshop.maxCapacity ? Math.max(0, workshop.maxCapacity - stats.total) : null;
-
-                                                return (
-                                                    <div
-                                                        key={`workshop-daily-${workshop.id}`}
-                                                        onClick={(e) => { e.stopPropagation(); handleEditWorkshop(workshop); }}
-                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-between items-center text-center ${colorData.className || ''}`}
-                                                        style={{
-                                                            top: `${startMin + 3}px`,
-                                                            height: `${duration - 6}px`,
-                                                            fontSize: "10px",
-                                                            ...colorData
-                                                        }}
-                                                    >
-                                                        <div className="w-full flex flex-col items-center">
-                                                            <div className="bg-primary/20 px-1.5 py-0.5 rounded-full text-[8px] font-bold mb-1 flex items-center justify-center gap-1 w-fit">
-                                                                <Sparkles className="w-2 h-2 text-primary" />
-                                                                <span>WORKSHOP</span>
-                                                            </div>
-                                                            <span className="font-bold uppercase leading-none mt-1 px-1 text-[11px]">{workshop.name}</span>
-                                                            <span className="opacity-80 text-[10px] mt-1 font-medium">{instructors?.find(i => i.id === workshop.instructorId)?.lastName}</span>
-                                                        </div>
-
-                                                        <div className="flex flex-col items-center gap-1.5 w-full">
-                                                            <div className="flex gap-2.5 text-[8px] font-bold">
-                                                                <span className="text-blue-600">U:{stats.men}</span>
-                                                                <span className="text-pink-600">D:{stats.women}</span>
-                                                                {availability !== null && (
-                                                                    <span className={availability <= 2 ? "text-red-600 font-extrabold" : "text-green-600"}>
-                                                                        Disp:{availability}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-
-                                                            <div className="bg-black/5 px-2 py-0.5 rounded-full text-[8px] font-bold text-black/60">
-                                                                {workshop.startTime}-{workshop.endTime}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-
-
-                                        {Array.isArray(studioBookings) && studioBookings
-                                            ?.filter(booking => {
-                                                if (!booking || !booking.bookingDate) return false;
-                                                const bDate = new Date(booking.bookingDate);
-                                                const dayIdx = WEEKDAYS.findIndex(d => d.id === day.id);
-                                                const targetDate = addDays(currentWeekStart, dayIdx);
-                                                const matchDate = isSameDay(bDate, targetDate) && (selectedStudio === "all" || booking.studioId.toString() === selectedStudio);
-
-                                                if (!matchDate) return false;
-
-                                                if (searchQuery) {
-                                                    const s = searchQuery.toLowerCase();
-                                                    return (booking.serviceName?.toLowerCase().includes(s) ||
-                                                        `${booking.memberFirstName} ${booking.memberLastName}`.toLowerCase().includes(s) ||
-                                                        booking.title?.toLowerCase().includes(s));
-                                                }
-                                                return true;
-                                            })
-                                            .map(booking => {
-                                                const startMin = timeToMinutes(booking.startTime || undefined);
-                                                const endMin = timeToMinutes(booking.endTime || undefined);
-                                                const duration = (endMin || startMin + 60) - startMin;
-                                                const colorData = getBookingColor(booking);
-
-                                                return (
-                                                    <div
-                                                        key={`booking-${booking.id}`}
-                                                        onClick={(e) => { e.stopPropagation(); handleEditBooking(booking); }}
-                                                        className={`absolute left-0.5 right-0.5 p-2 rounded-lg border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col items-center justify-center text-center`}
-                                                        style={{
-                                                            top: `${startMin + 3}px`,
-                                                            height: `${duration - 6}px`,
-                                                            fontSize: "10px",
-                                                            ...colorData
-                                                        }}
-                                                    >
-                                                        <div className="bg-black/10 px-1.5 py-0.5 rounded-full text-[8px] font-bold mb-1 flex items-center gap-1">
-                                                            <MapPin className="w-2 h-2" />
-                                                            {booking.startTime}-{booking.endTime}
-                                                        </div>
-                                                        <span className="font-extrabold truncate w-full uppercase leading-tight mb-0.5">
-                                                            {booking.serviceName || "PRENOTAZIONE"}
-                                                        </span>
-                                                        <span className="truncate opacity-90 text-[10px] font-medium leading-tight">
-                                                            {booking.memberFirstName ? `${booking.memberFirstName} ${booking.memberLastName}` : booking.title}
-                                                        </span>
-                                                        {booking.amount && (
-                                                            <span className="text-[9px] font-bold mt-1 bg-white/50 px-1.5 py-0.5 rounded shadow-sm">
-                                                                €{Number(booking.amount).toFixed(2)}
+                                                        
+                                                        {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
+                                                            <span className="text-[9px] font-bold absolute bottom-1 right-1 bg-white/80 px-1.5 py-0.5 rounded shadow-sm text-slate-800">
+                                                                €{Number(evt.rawPayload.amount).toFixed(2)}
                                                             </span>
                                                         )}
-                                                        {booking.paid && (
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )
+                                })
+                            ) : (
+                                studios?.map(studio => {
+                                    // 1. Filtraggio eventi in sala per il giorno prescelto
+                                    const studioEvents = unifiedEvents.filter(evt => evt.studioId === studio.id && evt.dayOfWeek === selectedDay);
+                                    
+                                    // 2. Ordinamento per startTime
+                                    const sortedEvents = [...studioEvents].sort((a, b) => {
+                                        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+                                    });
+
+                                    // 3. Bucket Columns Builder
+                                    const columns: typeof sortedEvents[] = [];
+                                    sortedEvents.forEach(evt => {
+                                        const eventStart = timeToMinutes(evt.startTime);
+                                        const eventEnd = timeToMinutes(evt.endTime) || eventStart + 60;
+                                        let placed = false;
+                                        
+                                        for (const col of columns) {
+                                            const lastEventInCol = col[col.length - 1];
+                                            const lastEventEnd = timeToMinutes(lastEventInCol.endTime) || timeToMinutes(lastEventInCol.startTime) + 60;
+                                            if (eventStart >= lastEventEnd) {
+                                                col.push(evt);
+                                                placed = true;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if (!placed) {
+                                            columns.push([evt]);
+                                        }
+                                    });
+
+                                    const layoutEvents = columns.flatMap((col, colIndex) => {
+                                        const colWidth = 100 / columns.length;
+                                        const leftPos = colIndex * colWidth;
+                                        
+                                        return col.map(evt => {
+                                            const startMin = timeToMinutes(evt.startTime);
+                                            const endMin = timeToMinutes(evt.endTime) || startMin + 60;
+                                            const duration = endMin - startMin;
+                                            return { ...evt, layoutLeft: leftPos, layoutWidth: colWidth, duration, startMin };
+                                        });
+                                    });
+
+                                    return (
+                                        <div key={studio.id} className="relative pointer-events-none min-w-[140px]">
+                                            {layoutEvents.map(evt => {
+                                                const { layoutLeft, layoutWidth, duration, startMin } = evt;
+
+                                                const handleEdit = () => {
+                                                    if (evt.sourceType === "course") handleEditCourse(evt.rawPayload);
+                                                    if (evt.sourceType === "workshop") handleEditWorkshop(evt.rawPayload);
+                                                    if (evt.sourceType === "studioBookings") handleEditBooking(evt.rawPayload);
+                                                };
+
+                                                const stats = evt.sourceType === "course" ? getCourseStats(evt.sourceId) :
+                                                             (evt.sourceType === "workshop" ? getWorkshopStats(evt.sourceId) : null);
+                                                
+                                                const maxCap = evt.rawPayload?.maxCapacity;
+                                                const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
+
+                                                const codeLabel = evt.rawPayload?.code || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
+                                                const statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
+                                                const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "Nessun ins.");
+                                                const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondInstructorId);
+                                                const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
+
+                                                return (
+                                                    <div
+                                                        key={`${evt.sourceType}-${evt.sourceId}-studio`}
+                                                        onClick={(e) => { e.stopPropagation(); handleEdit(); }}
+                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-start items-start text-left overflow-hidden min-h-[85px] ${evt.colorProps.className || ''}`}
+                                                        style={{
+                                                            top: `${startMin + 3}px`,
+                                                            height: `${duration - 6}px`,
+                                                            left: `calc(${layoutLeft}% + 4px)`,
+                                                            width: `calc(${layoutWidth}% - 8px)`,
+                                                            fontSize: "10px",
+                                                            backgroundColor: evt.colorProps.backgroundColor,
+                                                            borderLeftColor: evt.colorProps.borderLeftColor,
+                                                            color: "#0f172a"
+                                                        }}
+                                                    >
+                                                        {evt.registryKey === "workshops" && (
+                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-indigo-800">
+                                                                <Sparkles className="w-2 h-2" /> WKS
+                                                            </div>
+                                                        )}
+                                                        {evt.registryKey === "courses" && (
+                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-blue-800">
+                                                                <CalendarIcon className="w-2 h-2" /> CRS
+                                                            </div>
+                                                        )}
+                                                        {evt.registryKey === "studioBookings" && (
+                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-slate-800">
+                                                                <MapPin className="w-2 h-2" /> AFFITTO
+                                                            </div>
+                                                        )}
+
+                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full">{evt.startTime} - {evt.endTime}</div>
+                                                        <div className="font-extrabold text-[12px] leading-tight truncate w-full uppercase">{evt.title}</div>
+                                                        <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5">{ins1}</div>
+                                                        {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90">{ins2}</div>}
+                                                        
+                                                        <div className="mt-auto pt-1 w-full flex flex-col items-start gap-1">
+                                                            <span className="text-[8px] font-bold uppercase tracking-wider">{statusLabel}</span>
+                                                            
+                                                            {stats && (
+                                                                <div className="flex gap-2 text-[8px] font-bold w-full bg-white/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
+                                                                    <span className="text-blue-700">U:{stats.men}</span>
+                                                                    <span className="text-pink-700">D:{stats.women}</span>
+                                                                    {availability !== null && (
+                                                                        <span className={availability <= 2 ? "text-red-700 font-extrabold" : "text-emerald-700 ml-auto"}>Disp:{availability}</span>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                            {codeLabel && <span className="text-[8px] font-mono opacity-80 truncate bg-white/40 px-1 mt-0.5 rounded">{codeLabel}</span>}
+                                                        </div>
+                                                        
+                                                        {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
+                                                            <span className="text-[9px] font-bold mt-1 bg-white/50 px-1.5 py-0.5 rounded shadow-sm">
+                                                                €{Number(evt.rawPayload.amount).toFixed(2)}
+                                                            </span>
+                                                        )}
+                                                        {evt.registryKey === "studioBookings" && evt.rawPayload?.paid && (
                                                             <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5 text-white shadow-sm">
                                                                 <Check className="w-2 h-2" />
                                                             </div>
                                                         )}
+                                                        {evt.registryKey === "studioBookings" && (
+                                                            <div className="bg-black/5 px-2 py-0.5 rounded-full text-[8px] font-bold text-black/60 mt-auto">
+                                                                {evt.startTime}-{evt.endTime}
+                                                            </div>
+                                                        )}
+                                                        
                                                     </div>
                                                 );
                                             })}
-                                    </div>
-                                ))
-                            ) : (
-                                studios?.map(studio => (
-                                    <div key={studio.id} className="relative pointer-events-none min-w-[140px]">
-                                        {filteredCourses
-                                            .filter(c => c.studioId === studio.id)
-                                            .map(course => {
-                                                const startMin = timeToMinutes(course.startTime || undefined);
-                                                const endMin = timeToMinutes(course.endTime || undefined);
-                                                const duration = (endMin || startMin + 60) - startMin;
-                                                const colorData = getCourseColor(course);
-                                                const stats = getCourseStats(course.id);
-                                                const availability = course.maxCapacity ? Math.max(0, course.maxCapacity - stats.total) : null;
-
-                                                return (
-                                                    <div
-                                                        key={course.id}
-                                                        onClick={(e) => { e.stopPropagation(); handleEditCourse(course); }}
-                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-between items-center text-center ${colorData.className || ''}`}
-                                                        style={{
-                                                            top: `${startMin + 3}px`,
-                                                            height: `${duration - 6}px`,
-                                                            fontSize: "10px",
-                                                            ...colorData
-                                                        }}
-                                                    >
-                                                        <div className="w-full flex flex-col items-center">
-                                                            {course.sku && <span className="text-[7px] opacity-40 absolute top-1 right-2">{course.sku}</span>}
-                                                            <span className="font-bold uppercase leading-none mt-2 px-1 text-[11px]">{course.name}</span>
-                                                            <span className="opacity-80 text-[10px] mt-1 font-medium">{instructors?.find(i => i.id === course.instructorId)?.lastName}</span>
-                                                        </div>
-
-                                                        <div className="flex flex-col items-center gap-1.5 w-full">
-                                                            <div className="flex gap-2.5 text-[8px] font-bold">
-                                                                <span className="text-blue-600">U:{stats.men}</span>
-                                                                <span className="text-pink-600">D:{stats.women}</span>
-                                                                {availability !== null && (
-                                                                    <span className={availability <= 2 ? "text-red-600 font-extrabold" : "text-green-600"}>
-                                                                        Disp:{availability}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-
-                                                            <div className="bg-black/5 px-2 py-0.5 rounded-full text-[8px] font-bold text-black/60">
-                                                                {course.startTime}-{course.endTime}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        {/* Workshops */}
-                                        {filteredWorkshops
-                                            .filter(w => w.studioId === studio.id && normalizeDay(w.dayOfWeek) === selectedDay)
-                                            .map(workshop => {
-                                                const startMin = timeToMinutes(workshop.startTime || undefined);
-                                                const endMin = timeToMinutes(workshop.endTime || undefined);
-                                                const duration = (endMin || startMin + 60) - startMin;
-                                                const colorData = getCourseColor(workshop as any);
-                                                const stats = getWorkshopStats(workshop.id);
-                                                const availability = workshop.maxCapacity ? Math.max(0, workshop.maxCapacity - stats.total) : null;
-
-                                                return (
-                                                    <div
-                                                        key={`workshop-daily-${workshop.id}`}
-                                                        onClick={(e) => { e.stopPropagation(); handleEditWorkshop(workshop); }}
-                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-between items-center text-center ${colorData.className || ''}`}
-                                                        style={{
-                                                            top: `${startMin + 3}px`,
-                                                            height: `${duration - 6}px`,
-                                                            fontSize: "10px",
-                                                            ...colorData
-                                                        }}
-                                                    >
-                                                        <div className="w-full flex flex-col items-center">
-                                                            <div className="bg-primary/20 px-1.5 py-0.5 rounded-full text-[8px] font-bold mb-1 flex items-center justify-center gap-1 w-fit">
-                                                                <Sparkles className="w-2 h-2 text-primary" />
-                                                                <span>WORKSHOP</span>
-                                                            </div>
-                                                            <span className="font-bold uppercase leading-none mt-1 px-1 text-[11px]">{workshop.name}</span>
-                                                            <span className="opacity-80 text-[10px] mt-1 font-medium">{instructors?.find(i => i.id === workshop.instructorId)?.lastName}</span>
-                                                        </div>
-
-                                                        <div className="flex flex-col items-center gap-1.5 w-full">
-                                                            <div className="flex gap-2.5 text-[8px] font-bold">
-                                                                <span className="text-blue-600">U:{stats.men}</span>
-                                                                <span className="text-pink-600">D:{stats.women}</span>
-                                                                {availability !== null && (
-                                                                    <span className={availability <= 2 ? "text-red-600 font-extrabold" : "text-green-600"}>
-                                                                        Disp:{availability}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-
-                                                            <div className="bg-black/5 px-2 py-0.5 rounded-full text-[8px] font-bold text-black/60">
-                                                                {workshop.startTime}-{workshop.endTime}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-
-                                        {Array.isArray(studioBookings) && studioBookings
-                                            ?.filter(booking => {
-                                                if (!booking || !booking.bookingDate) return false;
-                                                const bDate = new Date(booking.bookingDate);
-                                                const dayIdx = WEEKDAYS.findIndex(d => d.id === selectedDay);
-                                                const targetDate = addDays(currentWeekStart, dayIdx);
-                                                const matchDate = isSameDay(bDate, targetDate) && (booking.studioId === studio.id);
-
-                                                if (!matchDate) return false;
-
-                                                if (searchQuery) {
-                                                    const s = searchQuery.toLowerCase();
-                                                    return (booking.serviceName?.toLowerCase().includes(s) ||
-                                                        `${booking.memberFirstName} ${booking.memberLastName}`.toLowerCase().includes(s) ||
-                                                        booking.title?.toLowerCase().includes(s));
-                                                }
-                                                return true;
-                                            })
-                                            .map(booking => {
-                                                const startMin = timeToMinutes(booking.startTime || undefined);
-                                                const endMin = timeToMinutes(booking.endTime || undefined);
-                                                const duration = (endMin || startMin + 60) - startMin;
-                                                const colorData = getBookingColor(booking);
-
-                                                return (
-                                                    <div
-                                                        key={`booking-studio-${booking.id}`}
-                                                        onClick={(e) => { e.stopPropagation(); handleEditBooking(booking); }}
-                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-between items-center text-center`}
-                                                        style={{
-                                                            top: `${startMin + 3}px`,
-                                                            height: `${duration - 6}px`,
-                                                            fontSize: "10px",
-                                                            ...colorData
-                                                        }}
-                                                    >
-                                                        <div className="w-full flex flex-col items-center">
-                                                            <span className="font-bold uppercase leading-none mt-2 px-1 text-[11px]">
-                                                                {booking.serviceName || "PRENOTAZIONE"}
-                                                            </span>
-                                                            <span className="opacity-80 text-[10px] mt-1 font-medium leading-tight">
-                                                                {booking.memberFirstName ? `${booking.memberFirstName} ${booking.memberLastName}` : booking.title}
-                                                            </span>
-                                                            {booking.amount && (
-                                                                <span className="text-[9px] font-bold mt-1 bg-white/50 px-1.5 py-0.5 rounded shadow-sm">
-                                                                    €{Number(booking.amount).toFixed(2)}
-                                                                </span>
-                                                            )}
-                                                            {booking.paid && (
-                                                                <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5 text-white shadow-sm">
-                                                                    <Check className="w-2.5 h-2.5" />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="bg-black/5 px-2 py-0.5 rounded-full text-[8px] font-bold text-black/60 mt-auto">
-                                                            {booking.startTime}-{booking.endTime}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                    </div>
-                                ))
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
 
@@ -1992,11 +2229,18 @@ export default function CalendarPage() {
                                     />
                                 </div>
 
-                                <DialogFooter className="sticky bottom-0 bg-background pt-4 border-t">
-                                    <Button type="button" variant="outline" onClick={() => setEditingCourse(null)}>Annulla</Button>
-                                    <Button type="submit" disabled={updateCourseMutation.isPending || createCourseMutation.isPending}>
-                                        {updateCourseMutation.isPending || createCourseMutation.isPending ? "Salvataggio..." : (editForm.id ? "Salva Modifiche" : "Crea Corso")}
-                                    </Button>
+                                <DialogFooter className="sticky bottom-0 bg-background pt-4 border-t flex items-center w-full mt-6">
+                                    {editForm.id && (
+                                        <Button type="button" variant="secondary" asChild className="mr-auto">
+                                            <Link to={`/attivita/corsi`}>Vai alla scheda Corsi</Link>
+                                        </Button>
+                                    )}
+                                    <div className="flex gap-2">
+                                        <Button type="button" variant="outline" onClick={() => setEditingCourse(null)}>Annulla</Button>
+                                        <Button type="submit" disabled={updateCourseMutation.isPending || createCourseMutation.isPending}>
+                                            {updateCourseMutation.isPending || createCourseMutation.isPending ? "Salvataggio..." : (editForm.id ? "Salva Modifiche" : "Crea Corso")}
+                                        </Button>
+                                    </div>
                                 </DialogFooter>
                             </form>
                         </TabsContent>
@@ -2500,125 +2744,126 @@ export default function CalendarPage() {
                             </div>
                         </div>
 
-                        <DialogFooter className="gap-2 pt-6">
+                        <DialogFooter className="gap-2 pt-4 border-t mt-4 flex w-full items-center">
                             {bookingForm.id && (
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => {
-                                        if (confirm("Eliminare questa prenotazione?")) {
-                                            deleteBookingMutation.mutate(bookingForm.id!);
-                                        }
-                                    }}
-                                >
-                                    Elimina
+                                <Button type="button" variant="secondary" asChild className="mr-auto">
+                                    <Link to={`/prenotazioni-sale`}>Vai alla scheda Affitti</Link>
                                 </Button>
                             )}
-                            <Button type="button" variant="outline" onClick={() => setEditingBooking(null)}>Annulla</Button>
-                            <Button type="submit" disabled={createBookingMutation.isPending || updateBookingMutation.isPending} className="bg-[#f43f5e] hover:bg-[#e11d48] text-white">
-                                {bookingForm.id ? "Salva" : "Crea"}
-                            </Button>
+                            <div className="flex gap-2 ml-auto items-center">
+                                {bookingForm.id && (
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => {
+                                            if (confirm("Eliminare questa prenotazione?")) {
+                                                deleteBookingMutation.mutate(bookingForm.id!);
+                                            }
+                                        }}
+                                    >
+                                        Elimina
+                                    </Button>
+                                )}
+                                <Button type="button" variant="outline" onClick={() => setEditingBooking(null)}>Annulla</Button>
+                                <Button type="submit" disabled={createBookingMutation.isPending || updateBookingMutation.isPending} className="bg-[#f43f5e] hover:bg-[#e11d48] text-white">
+                                    {bookingForm.id ? "Salva" : "Crea"}
+                                </Button>
+                            </div>
                         </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
 
             {/* Selection Choice Dialog */}
-            <Dialog open={!!selectionContext} onOpenChange={(open) => !open && setSelectionContext(null)}>
-                <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <Dialog open={!!selectionContext} onOpenChange={(open) => {
+                if (!open) {
+                    setSelectionContext(null);
+                    setSelectedEventType("");
+                }
+            }}>
+                <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>Nuovo Inserimento</DialogTitle>
                         <DialogDescription>
-                            Scegli cosa desideri creare alle ore {selectionContext?.hour}:00
+                            Scegli il tipo di attività da inserire alle ore {selectionContext?.hour}:00
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 py-6">
-                        <Button
-                            variant="outline"
-                            className="h-40 flex flex-col items-center justify-center gap-4 border-2 hover:border-primary hover:bg-primary/5 transition-all group"
+                    
+                    <div className="py-6 space-y-4">
+                        <div className="space-y-2">
+                            <Label>Tipologia Evento Operativo</Label>
+                            <Select value={selectedEventType} onValueChange={setSelectedEventType}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Seleziona dal dominio..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="course">Corso</SelectItem>
+                                    <SelectItem value="workshop">Workshop</SelectItem>
+                                    <SelectItem value="prova_pagamento">Prova a pagamento</SelectItem>
+                                    <SelectItem value="prova_gratuita">Prova gratuita</SelectItem>
+                                    <SelectItem value="lezione_singola">Lezione singola</SelectItem>
+                                    <SelectItem value="lezione_individuale">Lezione individuale</SelectItem>
+                                    <SelectItem value="domenica">Domenica in movimento</SelectItem>
+                                    <SelectItem value="allenamento">Allenamento</SelectItem>
+                                    <SelectItem value="affitto">Affitto</SelectItem>
+                                    <SelectItem value="campus">Campus</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        
+                        <Button 
+                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" 
+                            disabled={!selectedEventType}
                             onClick={() => {
-                                if (selectionContext) {
+                                if (selectionContext && selectedEventType) {
                                     const sId = selectionContext.studioId || (studios?.[0]?.id || 1);
-                                    handleCreateCourse(selectionContext.dayId, sId, selectionContext.hour);
-                                    setUnifiedFormType("course");
-                                    setUnifiedFormOpen(true);
-                                    setSelectionContext(null);
-                                }
-                            }}
-                        >
-                            <div className="p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                                <CalendarPlus className="w-8 h-8 text-primary" />
-                            </div>
-                            <div className="text-center">
-                                <span className="block font-bold text-lg">Nuovo Corso</span>
-                                <span className="text-xs text-muted-foreground">Palinsesto settimanale</span>
-                            </div>
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            className="h-40 flex flex-col items-center justify-center gap-4 border-2 hover:border-primary hover:bg-primary/5 transition-all group"
-                            onClick={() => {
-                                if (selectionContext) {
-                                    const sId = selectionContext.studioId || (studios?.[0]?.id || 1);
-                                    handleCreateBooking(selectionContext.dayId, sId, selectionContext.hour);
-                                    setUnifiedFormType("booking");
-                                    setUnifiedFormOpen(true);
-                                    setSelectionContext(null);
-                                }
-                            }}
-                        >
-                            <div className="p-4 rounded-full bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors">
-                                <MapPin className="w-8 h-8 text-amber-600" />
-                            </div>
-                            <div className="text-center">
-                                <span className="block font-bold text-lg">Prenotazione</span>
-                                <span className="text-xs text-muted-foreground">Affitto o PT singolo</span>
-                            </div>
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            className="h-40 flex flex-col items-center justify-center gap-4 border-2 hover:border-primary hover:bg-primary/5 transition-all group lg:col-span-1"
-                            onClick={() => {
-                                if (selectionContext) {
-                                    const sId = selectionContext.studioId || (studios?.[0]?.id || 1);
-                                    // handleCreateWorkshop equivalent
                                     const timeStr = `${selectionContext.hour.toString().padStart(2, "0")}:00`;
                                     const endTimeStr = `${(selectionContext.hour + 1).toString().padStart(2, "0")}:00`;
-                                    setEditingWorkshop({
-                                        name: "",
-                                        dayOfWeek: selectionContext.dayId,
-                                        studioId: sId,
-                                        startTime: timeStr,
-                                        endTime: endTimeStr,
-                                        active: true,
-                                        maxCapacity: 20
-                                    } as any);
-                                    setEditForm({
-                                        name: "",
-                                        dayOfWeek: selectionContext.dayId,
-                                        studioId: sId,
-                                        startTime: timeStr,
-                                        endTime: endTimeStr,
-                                        active: true,
-                                        maxCapacity: 20
-                                    });
-                                    setUnifiedFormType("workshop");
+
+                                    if (selectedEventType === "course") {
+                                        handleCreateCourse(selectionContext.dayId, sId, selectionContext.hour);
+                                        setUnifiedFormType("course");
+                                    } else if (selectedEventType === "workshop" || selectedEventType === "domenica" || selectedEventType === "campus") {
+                                        setEditingWorkshop({
+                                            name: "",
+                                            dayOfWeek: selectionContext.dayId,
+                                            studioId: sId,
+                                            startTime: timeStr,
+                                            endTime: endTimeStr,
+                                            active: true,
+                                            maxCapacity: 20
+                                        } as any);
+                                        setEditForm({
+                                            name: "",
+                                            dayOfWeek: selectionContext.dayId,
+                                            studioId: sId,
+                                            startTime: timeStr,
+                                            endTime: endTimeStr,
+                                            active: true,
+                                            maxCapacity: 20
+                                        });
+                                        // TODO: Pass actual chosen type so the form can default the category
+                                        setUnifiedFormType("workshop");
+                                    } else {
+                                        handleCreateBooking(selectionContext.dayId, sId, selectionContext.hour);
+                                        setUnifiedFormType("booking");
+                                    }
+                                    
                                     setUnifiedFormOpen(true);
                                     setSelectionContext(null);
+                                    setSelectedEventType("");
                                 }
                             }}
                         >
-                            <div className="p-4 rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                                <Sparkles className="w-8 h-8 text-blue-600" />
-                            </div>
-                            <div className="text-center">
-                                <span className="block font-bold text-lg">Nuovo Workshop</span>
-                                <span className="text-xs text-muted-foreground">Evento singolo o stage</span>
-                            </div>
+                            Procedi con l'inserimento &rarr;
                         </Button>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-md text-xs text-slate-600 mt-2">
+                        <strong className="block text-slate-800 mb-1">Regole di Dominio Operativo:</strong>
+                        Quest'area è designata ad ospitare l'inserimento rapido delle 10 attività day-by-day.<br/>
+                        <em>Nota: L'inserimento di eventi strategici (Saggi, Vacanze Studio, Eventi Esterni) non è permesso qui, e andrà pilotato dal Planning.</em>
                     </div>
                 </DialogContent>
             </Dialog>

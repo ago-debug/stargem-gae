@@ -155,7 +155,7 @@ export default function Instructors() {
     <div className="p-6 md:p-8 space-y-6 w-full mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Staff / Insegnanti</h1>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Staff e Insegnanti</h1>
           <p className="text-muted-foreground">Gestisci lo staff di insegnanti e le loro tariffe</p>
         </div>
         <Button

@@ -1253,7 +1253,20 @@ export class DatabaseStorage implements IStorage {
           SELECT COUNT(*) 
           FROM enrollments e 
           WHERE e.member_id = m.id AND e.status = 'active'
-        ), 0) as active_course_count
+        ), 0) as active_course_count,
+        (
+          SELECT JSON_OBJECT(
+            'id', mm.id,
+            'membershipNumber', mm.membership_number,
+            'barcode', mm.barcode,
+            'issueDate', mm.issue_date,
+            'expiryDate', mm.expiry_date
+          )
+          FROM memberships mm
+          WHERE mm.member_id = m.id AND mm.status = 'active'
+          ORDER BY mm.expiry_date DESC
+          LIMIT 1
+        ) as active_membership
       FROM members m
       ORDER BY m.last_name, m.first_name
       LIMIT ${pageSize}
@@ -1265,7 +1278,20 @@ export class DatabaseStorage implements IStorage {
           SELECT COUNT(*) 
           FROM enrollments e 
           WHERE e.member_id = m.id AND e.status = 'active'
-        ), 0) as active_course_count
+        ), 0) as active_course_count,
+        (
+          SELECT JSON_OBJECT(
+            'id', mm.id,
+            'membershipNumber', mm.membership_number,
+            'barcode', mm.barcode,
+            'issueDate', mm.issue_date,
+            'expiryDate', mm.expiry_date
+          )
+          FROM memberships mm
+          WHERE mm.member_id = m.id AND mm.status = 'active'
+          ORDER BY mm.expiry_date DESC
+          LIMIT 1
+        ) as active_membership
       FROM members m
       WHERE ${searchCondition}
       ORDER BY m.last_name, m.first_name
@@ -1338,7 +1364,8 @@ export class DatabaseStorage implements IStorage {
       certificatoMedicoMetadata: row.certificato_medico_metadata,
       giftMetadata: row.gift_metadata,
       attachmentMetadata: row.attachment_metadata,
-      paymentMetadata: row.payment_metadata
+      paymentMetadata: row.payment_metadata,
+      activeMembership: row.active_membership ? (typeof row.active_membership === 'string' ? JSON.parse(row.active_membership) : row.active_membership) : null,
     }));
 
     return { members: membersList as (Member & { activeCourseCount: number })[], total };
@@ -2072,7 +2099,7 @@ export class DatabaseStorage implements IStorage {
     const [result] = await db.insert(memberships).values({
       ...membership,
       issueDate: membership.issueDate instanceof Date ? membership.issueDate : new Date(membership.issueDate),
-      expiryDate: membership.expiryDate instanceof Date ? membership.expiryDate : new Date(membership.expiryDate),
+      expiryDate: membership.expiryDate ? (membership.expiryDate instanceof Date ? membership.expiryDate : new Date(membership.expiryDate)) : undefined,
     } as any);
 
     const [newMembership] = await db.select().from(memberships).where(eq(memberships.id, result.insertId));
