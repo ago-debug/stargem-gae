@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, FolderTree } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, FolderTree } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Category, InsertCategory } from "@shared/schema";
 
@@ -71,7 +71,7 @@ export default function Categories() {
     const data: InsertCategory = {
       name: formData.get("name") as string,
       description: formData.get("description") as string || null,
-      parentId: formData.get("parentId") ? parseInt(formData.get("parentId") as string) : null,
+      parentId: formData.get("parentId") && formData.get("parentId") !== "none" ? parseInt(formData.get("parentId") as string) : null,
       color: formData.get("color") as string || null,
     };
 
@@ -96,9 +96,14 @@ export default function Categories() {
   return (
     <div className="p-6 md:p-8 space-y-8 mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Corsi</h1>
-          <p className="text-muted-foreground text-sm">Organizza i corsi per categorie e sottocategorie</p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
+            <ArrowLeft className="w-4 h-4 text-white" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-page-title">Categorie Corsi</h1>
+            <p className="text-muted-foreground text-sm">Organizza i corsi per categorie e sottocategorie</p>
+          </div>
         </div>
         <Button
           onClick={() => {

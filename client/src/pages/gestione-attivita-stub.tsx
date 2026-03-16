@@ -13,11 +13,9 @@ export default function GestioneAttivitaStub({ title, description }: GestioneAtt
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <Link href="/gestione">
-            <Button variant="ghost" size="icon" className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back-gestione">
-              <ArrowLeft className="w-4 h-4 text-white" />
-            </Button>
-          </Link>
+          <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back-gestione">
+            <ArrowLeft className="w-4 h-4 text-white" />
+          </Button>
           <div>
             <h1 className="text-2xl font-semibold text-foreground" data-testid="text-activity-title">
               {title}
