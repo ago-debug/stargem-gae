@@ -48,7 +48,7 @@ Ogni sviluppatore che contribuisce a CourseManager deve aderire a questi princip
 ---
 
 ## 1. Il Nucleo "Intoccabile" (o "Rischioso")
-L'architettura ha alcune colonne portanti che strutturano l'intero gestionale. Se modificate pesantemente in modo improprio, si va a rompere il funzionamento di incassi, ricevute ed elenchi in tutto il software (Frontend e Backend).
+L'architettura ha alcune colonne portanti che strutturano l'intero gestionale. Se modificate pesantemente in modo improprio, si va a rompere il funzionamento di incassi, ricevute ed elenchi in tutto il software (Frontend e Backend). In particolare i vocabolari a tendina (`custom_lists`) agiscono da vettori logici iniettabili traversalmente a tutte le entità tramite incrocio JSON (`linked_activities`).
 
 ### A. La divisione in 12 Moduli "A Silos" (Didattica + Affitti)
 

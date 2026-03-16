@@ -82,7 +82,7 @@ Questa astrazione strategica permette agli sviluppatori di ragionare per "compar
 | **Gestione Listini Rate** | `/listini` | 🟡 **Listini e Quote** | `price_lists`, `price_list_items`, `quotes` | Configuratore abbonamenti economico SaaS, sia rateali che slegati (Indipendenti). |
 | **Categorie Anagrafiche** | `/categoria-partecipante` | 🟡 **Categorie Attività**| `cli_cats` | Tab UI per categorie clienti. Messo dentro un mega-menu "Categorie". |
 | **Categorie Attività Multi**| `/categorie-*` | 🟡 **(Dentro Categorie Attività)** | Tutte le `*_cats`, `booking_service_categories`, `rental_categories`, `merchandising_categories` | Gestisce gli alberi divisori didattici e fisici (Corsi, Workshop, Campus, Domeniche, Affitti Sale, Merchandising...). |
-| **Elenchi Dropdown Custom**| `/elenchi` | 🟡 **(Dentro Categorie Attività)** | `custom_lists`, `custom_list_items` | Controlla i menù a tendina custom via DB. |
+| **Elenchi Dropdown Custom**| `/elenchi` | 🟡 **(Dentro Categorie Attività)** | `custom_lists`, `custom_list_items` | Controlla i menù a tendina custom via DB. Supporta l'aggancio diretto e multiplo verso le 14 attività base. |
 | **Dizionari Promo**| `/promo-sconti` | 🟡 **Servizi e Sconti** | Ticket/Coupon | Database codici sconto. |
 
 ---
