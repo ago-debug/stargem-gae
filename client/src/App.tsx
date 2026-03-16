@@ -82,6 +82,7 @@ import PaidTrialsCategories from "@/pages/paid-trials-categories";
 import FreeTrialsCategories from "@/pages/free-trials-categories";
 import SingleLessonsCategories from "@/pages/single-lessons-categories";
 import RentalsCategories from "@/pages/rentals-categories";
+import MerchandisingCategories from "@/pages/merchandising-categories";
 
 import { NotificationCenter } from "@/components/notification-center";
 import { TodoNotification } from "@/components/todo-notification";
@@ -198,7 +199,7 @@ function Router() {
       <ProtectedRoute path="/categorie-saggi" component={RecitalCategories} />
       <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
       <ProtectedRoute path="/categorie-eventi-esterni" component={BookingServiceCategories} />
-      <ProtectedRoute path="/categorie-merchandising" component={StubCategorieMerchandising} />
+      <ProtectedRoute path="/categorie-merchandising" component={MerchandisingCategories} />
       <ProtectedRoute path="/promo-sconti" component={StubPromoSconti} />
       <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
       <ProtectedRoute path="/scheda-workshop" component={SchedaWorkshop} />

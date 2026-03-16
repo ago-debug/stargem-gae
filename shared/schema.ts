@@ -2160,6 +2160,31 @@ export type InsertTodo = z.infer<typeof insertTodoSchema>;
 export type Todo = typeof todos.$inferSelect;
 
 // ============================================================================
+// MERCHANDISING
+// ============================================================================
+
+export const merchandisingCategories = mysqlTable("merchandising_categories", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  color: varchar("color", { length: 50 }),
+  sortOrder: int("sort_order").default(0),
+  active: boolean("active").default(true),
+  parentId: int("parent_id"), // Self-referencing relative ID
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertMerchandisingCategorySchema = createInsertSchema(merchandisingCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMerchandisingCategory = z.infer<typeof insertMerchandisingCategorySchema>;
+export type MerchandisingCategory = typeof merchandisingCategories.$inferSelect;
+
+
+// ============================================================================
 // BOOKING TABLES & ACTIVITY LOGS (From V59)
 // ============================================================================
 

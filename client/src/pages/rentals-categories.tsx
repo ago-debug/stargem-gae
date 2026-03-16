@@ -28,12 +28,12 @@ export default function RentalsCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/booking-service-categories"] });
-      toast({ title: "Categoria creata con successo" });
+      toast({ title: "Categoria Affitti creata con successo", description: "La categoria è salvata." });
       setIsFormOpen(false);
       setEditingCategory(null);
     },
     onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      toast({ title: "Errore", description: "Impossibile creare la categoria Affitti.", variant: "destructive" });
     },
   });
 
@@ -43,12 +43,12 @@ export default function RentalsCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/booking-service-categories"] });
-      toast({ title: "Categoria aggiornata con successo" });
+      toast({ title: "Categoria Affitti aggiornata con successo" });
       setIsFormOpen(false);
       setEditingCategory(null);
     },
     onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      toast({ title: "Errore", description: "Impossibile aggiornare la categoria Affitti.", variant: "destructive" });
     },
   });
 
@@ -58,10 +58,10 @@ export default function RentalsCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/booking-service-categories"] });
-      toast({ title: "Categoria eliminata con successo" });
+      toast({ title: "Categoria Affitti eliminata" });
     },
     onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      toast({ title: "Errore", description: "Impossibile eliminare la categoria Affitti.", variant: "destructive" });
     },
   });
 
