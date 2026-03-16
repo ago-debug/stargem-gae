@@ -170,7 +170,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     isActive: true,
     isPlaceholder: false,
     routeUrl: "/prenotazioni-sale",
-    apiEndpoint: "/api/booking-service-categories",
+    apiEndpoint: "/api/rental-categories",
     categoryManagementUrl: "/categorie-affitti",
     visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
     design: { icon: Building2, colorClass: "icon-gold-bg", description: "Prenotazione Sale / Affitto Generico" }

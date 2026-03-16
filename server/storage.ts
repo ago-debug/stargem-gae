@@ -200,6 +200,9 @@ import {
   merchandisingCategories,
   type MerchandisingCategory,
   type InsertMerchandisingCategory,
+  rentalCategories,
+  type RentalCategory,
+  type InsertRentalCategory,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -645,6 +648,13 @@ export interface IStorage {
   updateMerchandisingCategory(id: number, merchandisingCategory: Partial<InsertMerchandisingCategory>): Promise<MerchandisingCategory>;
   deleteMerchandisingCategory(id: number): Promise<void>;
 
+  // RentalCategories (Affitti)
+  getRentalCategories(): Promise<RentalCategory[]>;
+  getRentalCategory(id: number): Promise<RentalCategory | undefined>;
+  createRentalCategory(rentalCategory: InsertRentalCategory): Promise<RentalCategory>;
+  updateRentalCategory(id: number, rentalCategory: Partial<InsertRentalCategory>): Promise<RentalCategory>;
+  deleteRentalCategory(id: number): Promise<void>;
+
   // FreeTrials
   getFreeTrials(): Promise<FreeTrial[]>;
   getFreeTrial(id: number): Promise<FreeTrial | undefined>;
@@ -1035,6 +1045,37 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMerchandisingCategory(id: number): Promise<void> {
     await db.delete(merchandisingCategories).where(eq(merchandisingCategories.id, id));
+  }
+
+  // ==== Rental Categories (Affitti) ====
+  async getRentalCategories(): Promise<RentalCategory[]> {
+    return await db.select().from(rentalCategories).orderBy(rentalCategories.sortOrder);
+  }
+
+  async getRentalCategory(id: number): Promise<RentalCategory | undefined> {
+    const [category] = await db.select().from(rentalCategories).where(eq(rentalCategories.id, id));
+    return category;
+  }
+
+  async createRentalCategory(category: InsertRentalCategory): Promise<RentalCategory> {
+    const [result] = await db.insert(rentalCategories).values(category as any);
+    const id = (result as any).insertId || (result as any).id;
+    const fetched = await this.getRentalCategory(id);
+    return fetched!;
+  }
+
+  async updateRentalCategory(id: number, category: Partial<InsertRentalCategory>): Promise<RentalCategory> {
+    await db
+      .update(rentalCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(rentalCategories.id, id));
+
+    const updated = await this.getRentalCategory(id);
+    return updated!;
+  }
+
+  async deleteRentalCategory(id: number): Promise<void> {
+    await db.delete(rentalCategories).where(eq(rentalCategories.id, id));
   }
 
   // ==== Studio Bookings ====

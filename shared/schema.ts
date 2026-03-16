@@ -2183,6 +2183,31 @@ export const insertMerchandisingCategorySchema = createInsertSchema(merchandisin
 export type InsertMerchandisingCategory = z.infer<typeof insertMerchandisingCategorySchema>;
 export type MerchandisingCategory = typeof merchandisingCategories.$inferSelect;
 
+// ============================================================================
+// RENTAL CATEGORIES (Affitti)
+// ============================================================================
+
+export const rentalCategories = mysqlTable("rental_categories", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  color: varchar("color", { length: 50 }),
+  sortOrder: int("sort_order").default(0),
+  active: boolean("active").default(true),
+  parentId: int("parent_id"), // Self-referencing relative ID
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertRentalCategorySchema = createInsertSchema(rentalCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertRentalCategory = z.infer<typeof insertRentalCategorySchema>;
+export type RentalCategory = typeof rentalCategories.$inferSelect;
+
 
 // ============================================================================
 // BOOKING TABLES & ACTIVITY LOGS (From V59)
