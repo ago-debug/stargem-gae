@@ -1,8 +1,19 @@
 # Ultimi Aggiornamenti Progetto "CourseManager"
-
-**Periodo di riferimento:** 23 Febbraio 2026 - 13 Marzo 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 15 Marzo 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
+
+---
+
+### 15 Marzo 2026 (Refactoring Architettura Tessere & Maschera Input - Task 7)
+* **Centralizzazione Logica Stagionale (`server/utils/season.ts`):**
+  * Spostata tutta la logica di calcolo delle date, degli anni di inizio/fine della stagione sportiva (1 Settembre - 31 Agosto), e la generazione formale dei Codici Tessera (`2526-XYZ`) e Barcode (`T2526XYZ`) dal client React ad una Factory unificata e pura nel backend.
+* **Multiplexer Controller Tessere (`/api/memberships` & `/api/maschera-generale/save`):**
+  * Entrambi gli endpoint di salvataggio ora utilizzano la stessa identica *Source of Truth* (`buildMembershipPayload`). Questo azzera la possibilità di regressioni o differenze semantiche tra chi emette la tessera da Checkout e chi lo fa dalla UI Anagrafica.
+  * Aggiunto un layer di sicurezza che impedisce la creazione di più tessere attive per un singolo membro per lo stesso specifico anno di competenza.
+* **Revisione Frontend Maschera Input (`maschera-input-generale.tsx`):**
+  * Sostituiti gli input e logiche legacy di "Nuovo/Rinnovo" con due `Select` formali per inviare i flag stringata al server: **Tipo** (`NUOVO`, `RINNOVO`) e **Competenza** (`CORRENTE`, `SUCCESSIVA`).
+  * Inibita visivamente (Read-Only) la manipolazione manuale e fuorviante lato UI di "N. Tessera", "Barcode" e "Scadenza", inserendovi dei segnaposti che spiegano l'autogenerazione lato server post-salvataggio.
 
 ---
 
@@ -109,4 +120,4 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Avvio Refactoring Corsi:** Riorganizzazione della struttura a componente `courses.tsx` per ospitare componenti modulari riutilizzabili ed espansione dati di iscrizione (gettoni, rimborsi, log) a scomparsa, avviando il ciclo di aggiornamenti conclusi il 25 Febbraio.
 
 ---
-*Documento generato e aggiornato al 13 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
+*Documento generato e aggiornato al 15 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*

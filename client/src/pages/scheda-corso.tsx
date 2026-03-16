@@ -36,6 +36,7 @@ export default function SchedaCorso() {
     const { data: payments, isLoading: paymentsLoading } = useQuery<Payment[]>({ queryKey: ["/api/payments"] });
     const { data: attendances, isLoading: attendancesLoading } = useQuery<Attendance[]>({ queryKey: ["/api/attendances"] });
 
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
     if (coursesLoading || membersLoading || enrollmentsLoading || paymentsLoading || attendancesLoading) {
         return (
             <div className="p-6 md:p-8 space-y-6 mx-auto">
@@ -87,12 +88,12 @@ export default function SchedaCorso() {
         attendances: attendances || []
     });
 
-    const enrolledMembersData = enrichedData.map((data: { member: Member, enrollment: Enrollment, payments: Payment[], attendances: Attendance[] }) => {
-        // Simple payment status logic: check if there's at least one paid payment (can be refined based on actual requirements)
-        const hasPaidPayments = data.payments.some((p: Payment) => p.status === 'paid');
+    const enrolledMembersData = enrichedData.filter(Boolean).map((data: any) => {
+        // Simple payment status logic: check if there's at least one paid payment
+        const hasPaidPayments = data?.payments?.some((p: Payment) => p.status === 'paid');
         const paymentStatusBadge = hasPaidPayments ?
             <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none">Regolare</Badge> :
-            (data.payments.length > 0 ?
+            (data?.payments?.length > 0 ?
                 <Badge variant="destructive" className="bg-red-500/10 text-red-700 hover:bg-red-500/20 shadow-none border-0">In Sospeso</Badge> :
                 <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30 shadow-none">Dati Assenti</Badge>);
 
@@ -100,21 +101,15 @@ export default function SchedaCorso() {
             ...data,
             paymentStatusBadge
         };
-    }) as Array<{
-        member: Member,
-        enrollment: Enrollment,
-        payments: Payment[],
-        attendances: Attendance[],
-        paymentStatusBadge: ReactNode
-    }>;
+    });
 
-    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
     const getSortValue = (data: any, key: string) => {
+        if (!data) return "";
         switch (key) {
-            case "firstName": return data.member.firstName || "";
-            case "lastName": return data.member.lastName || "";
-            case "email": return data.member.email || "";
-            case "attendances": return data.attendances.length || 0;
+            case "firstName": return data?.member?.firstName || "";
+            case "lastName": return data?.member?.lastName || "";
+            case "email": return data?.member?.email || "";
+            case "attendances": return data?.attendances?.length || 0;
             default: return null;
         }
     };

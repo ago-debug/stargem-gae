@@ -476,7 +476,7 @@ export function PaymentDialog({
                                             <SelectItem value="campus">Campus</SelectItem>
                                             <SelectItem value="saggi">Saggi</SelectItem>
                                             <SelectItem value="vacanze-studio">Vacanze Studio</SelectItem>
-                                            <SelectItem value="servizi-extra">Servizi Extra</SelectItem>
+                                            <SelectItem value="servizi-extra">Eventi Esterni</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -629,10 +629,10 @@ export function PaymentDialog({
                         <div className="space-y-4 bg-slate-50/50 p-5 rounded-lg border border-slate-200/60 shadow-inner">
                             <h3 className="text-lg font-bold text-slate-800 border-b pb-2 flex items-center gap-2 border-slate-200">
                                 <span className="bg-primary/20 text-primary w-6 h-6 rounded-full flex items-center justify-center text-sm">4</span>
-                                Servizi Extra e Chiusura
+                                Eventi Esterni e Chiusura
                             </h3>
 
-                            {/* Servizi Extra Header */}
+                            {/* Eventi Esterni Header */}
                             <div className="flex flex-col xl:flex-row gap-6 bg-white p-4 rounded-md border shadow-sm">
                                 <div className="flex items-center space-x-2">
                                     <Checkbox id="quotaTessera" checked={formData.quotaTesseraCheck} onCheckedChange={(c) => handleChange("quotaTesseraCheck", c === true)} />

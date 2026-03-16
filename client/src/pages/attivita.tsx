@@ -21,6 +21,9 @@ import {
   ArrowLeft,
   Database,
   Plus,
+  Building2,
+  Globe,
+  ShoppingBag,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -37,6 +40,7 @@ import type {
   SundayCategory, TrainingCategory, IndividualLessonCategory,
   CampusCategory, RecitalCategory, VacationCategory,
 } from "@shared/schema";
+import { getActiveActivities } from "../config/activities";
 
 const WEEKDAYS: Record<string, string> = {
   LUN: "Lunedì",
@@ -48,10 +52,10 @@ const WEEKDAYS: Record<string, string> = {
   DOM: "Domenica",
 };
 
-interface ActivitySection {
+export interface ActivitySection {
   id: string;
   label: string;
-  icon: typeof Calendar;
+  icon: any;
   description: string;
   type: "corsi" | "workshop" | "other";
   color: string;
@@ -60,20 +64,19 @@ interface ActivitySection {
   managementUrl?: string;
 }
 
-const activitySections: ActivitySection[] = [
-  { id: "corsi", label: "Corsi", icon: Calendar, description: "Corsi regolari settimanali", type: "corsi", color: "icon-gold-bg", categoryApiEndpoint: "/api/categories", categoryManagementUrl: "/categorie-corsi", managementUrl: "/attivita/corsi" },
-  { id: "workshop", label: "Workshop", icon: Sparkles, description: "Workshop ed eventi speciali", type: "workshop", color: "icon-gold-bg", categoryApiEndpoint: "/api/workshop-categories", categoryManagementUrl: "/categorie-workshop", managementUrl: "/attivita/workshops" },
-  { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, description: "Lezioni di prova a pagamento", type: "other", color: "icon-gold-bg", managementUrl: "/attivita/prove-pagamento" },
-  { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, description: "Lezioni di prova gratuite", type: "other", color: "icon-gold-bg", managementUrl: "/attivita/prove-gratuite" },
-  { id: "servizi", label: "Servizi Extra", icon: Database, description: "Servizi aggiuntivi (es. Fisioterapia)", type: "other", color: "icon-gold-bg", managementUrl: "/attivita/servizi" },
-  { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, description: "Lezioni singole o drop-in", type: "other", color: "icon-gold-bg", managementUrl: "/attivita/lezioni-singole" },
-  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, description: "Attività domenicali speciali", type: "other", color: "icon-gold-bg", categoryApiEndpoint: "/api/sunday-categories", categoryManagementUrl: "/categorie-domeniche", managementUrl: "/attivita/domeniche-movimento" },
-  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell, description: "Sessioni di allenamento libero e affitti", type: "other", color: "icon-gold-bg", categoryApiEndpoint: "/api/training-categories", categoryManagementUrl: "/categorie-allenamenti", managementUrl: "/attivita/allenamenti" },
-  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, description: "Lezioni private one-to-one", type: "other", color: "icon-gold-bg", categoryApiEndpoint: "/api/individual-lesson-categories", categoryManagementUrl: "/categorie-lezioni-individuali", managementUrl: "/attivita/lezioni-individuali" },
-  { id: "campus", label: "Campus", icon: Users, description: "Campus e programmi intensivi", type: "other", color: "icon-gold-bg", categoryApiEndpoint: "/api/campus-categories", categoryManagementUrl: "/categorie-campus", managementUrl: "/attivita/campus" },
-  { id: "saggi", label: "Saggi", icon: Award, description: "Saggi e spettacoli", type: "other", color: "icon-gold-bg", categoryApiEndpoint: "/api/recital-categories", categoryManagementUrl: "/categorie-saggi", managementUrl: "/attivita/saggi" },
-  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, description: "Vacanze studio e viaggi formativi", type: "other", color: "icon-gold-bg", categoryApiEndpoint: "/api/vacation-categories", categoryManagementUrl: "/categorie-vacanze-studio", managementUrl: "/attivita/vacanze-studio" },
-];
+const activitySections: ActivitySection[] = getActiveActivities()
+    .filter(a => a.visibility.hubAttivita)
+    .map(a => ({
+      id: a.id,
+      label: a.labelUI,
+      icon: a.design.icon,
+      description: a.design.description,
+      type: (a.id === "corsi" ? "corsi" : (a.id === "workshop" ? "workshop" : "other")) as "corsi" | "workshop" | "other",
+      color: a.design.colorClass,
+      categoryApiEndpoint: a.apiEndpoint,
+      categoryManagementUrl: a.categoryManagementUrl,
+      managementUrl: a.routeUrl
+    }));
 
 function CourseCard({ course, categories, instructors }: { course: Course; categories?: Category[]; instructors?: Instructor[] }) {
   const category = categories?.find(c => c.id === course.categoryId);

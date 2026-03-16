@@ -5,6 +5,11 @@ Questo documento mappa criticamente ogni singola rotta / pagina dell'applicazion
 
 ---
 
+### ⚠️ Differenza Importante con il file "1_database_map_now.md"
+Mentre questo documento (File 3) mappa il viaggio dei dati **"Dal click dell'utente nella Schermata React -> A quale Tabella finisco"**, il file `1_database_map_now.md` è il puro dizionario tecnico Backend (ERD).
+* Usa **questo file (3)** per capire: *"Dov'è il codice React che gestisce i pagamenti?"* o *"Da dove leggo le presenze in UI?"*
+* Usa **l'altro file (1)** per capire: *"Quali foreign keys devo unire (JOIN) su Drizzle per estrarre la tabella payments?"*
+
 ## La Logica dei 5 Moduli (73 Tabelle Fisiche)
 Il gestionale poggia su un solido database relazionale (scritto tramite Drizzle ORM su database MySQL) che conta attualmente un totale di **73 Tabelle Fisiche**. 
 Per evitare di interagire con un elenco dispersivo, piatto e di difficile manutenzione, l'architettura tecnica è stata logicamente segmentata in **5 Macro-Aree**. 
@@ -18,76 +23,67 @@ Questa astrazione strategica permette agli sviluppatori di ragionare per "compar
 
 ---
 
-## 1. Moduli Core (Attività, Corsi e Lezioni) *(22 Tabelle)*
-Queste 11 pagine gestiscono la configurazione delle attività erogate nel centro. Tutte condividono l'identica struttura logica e salvano gli orari allo stesso modo (`dayOfWeek`, `startTime`, `endTime`).
-
-| Pagina Web | Rotta React | Menu Sidebar (UI) | Tabella Database Target | Note |
+## 1. Segreteria Operativa (Check-in Rapido)
+*L'ordine di cosa serve a chi sta al Front-Desk.*
+| Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
 |---|---|---|---|---|
-| **Corsi** | `/attivita/corsi` | 🟡 **Attività** (Tab Corsi) | `courses` | Modello matrice clonata 10 volte |
-| **Workshop** | `/attivita/workshops` | 🟡 **Attività** (Tab Workshop) | `workshops` | |
-| **Prove a Pagamento** | `/attivita/prove-pagamento` | 🟡 **Attività** (Tab Prove) | `paid_trials` | |
-| **Prove Gratuite** | `/attivita/prove-gratuite` | 🟡 **Attività** (Tab Prove) | `free_trials` | |
-| **Lezioni Singole** | `/attivita/lezioni-singole` | 🟡 **Attività** (Tab Lez. Sing.) | `single_lessons` | |
-| **Attività Domenicali** | `/attivita/domeniche-movimento`| 🟡 **Attività** (Tab Domeniche) | `sunday_activities` | |
-| **Allenamenti** | `/attivita/allenamenti` | 🟡 **Attività** (Tab Allenam.) | `trainings` | |
-| **Lez. Individuali** | `/attivita/lezioni-individuali` | 🟡 **Attività** (Tab Lez. Indiv.) | `individual_lessons` | |
-| **Campus** | `/attivita/campus` | 🟡 **Attività** (Tab Campus) | `campus_activities` | |
-| **Saggi / Spettacoli** | `/attivita/saggi` | 🟡 **Attività** (Tab Saggi) | `recitals` | |
-| **Vacanze Studio** | `/attivita/vacanze-studio` | 🟡 **Attività** (Tab Vacanze) | `vacation_studies` | |
-| **Schede Attività Specifiche** | `/scheda-corso` ecc. | Da click su singola riga | `attendances`, `ws_attendances` | Gestione interna delle presenze all'interno delle attività (Appello). |
-| **Servizi Extras** | `/booking-services` | 🟡 **Servizi Prenotabili** | `booking_services` | Tabella specifica per extra prestazionali. |
+| **Pannello Iscrizioni Rapide** | `/maschera-input` | 🟡 **Maschera Input** | `members`, `[x]_enrollments`, `payments`, `price_list_items` | Central Bank: Il vero concentratore del Carrello Unificato multi-persona. Ex home-page. |
+| **Iscritti/Anagrafica** | `/anagrafica-generale` | 🟡 **Anagrafica Generale** | Lettura: `members`, `memberships` | Elenco puro (Ex Anagrafica a Lista). |
+| **Dashboard Membro Singolo** | `/membro/:id` | (Si apre da Anagrafica) | Lettura: `members`, `member_relationships`, `medical_certificates` | Hub di gestione scheda singola (es. genitore/figlio). Legge i Certificati Medici. |
+| **Generazione Tessere** | `/generazione-tessere`| 🟡 **Tessere & Certificati** | Lettura: `members`, `memberships` | Creazione stampe/PDF. Applica fallback ibrido tra il nodo *activeMembership* reale e i campi ombra obsoleti dell'anagrafica per back-compatibility. |
+| **Controllo Ingressi** | `/accessi` | 🟡 **Controllo Accessi** | Lettura/Scrittura gate passaggi tornello/tablet. |
 
 ---
 
-## 2. Moduli Amministrativi e Finanziari *(21 Tabelle)*
+## 2. Amministrazione & Cassa
+*Posizionata in area ad altissima visibilità per chi opera il check-in e incassa.*
+> **Nota UI Pagamenti:** Il modulo "Nuovo Pagamento" non è più bindato alle sole 12 tabelle/DB legacy didattici. La Select "Attività" espone dinamicamente le **14 voci dell'`ACTIVITY_REGISTRY`**, permettendo vendite custom ("Merchandising" o "Eventi Esterni") scrivendo genericamente in `payments` bypassando i silos classici.
 | Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
 |---|---|---|---|---|
-| **Pannello Iscrizioni Rapide** | `/maschera-input` | 🟡 **Maschera Input** | `members`, `[x]_enrollments`, `payments`, `price_list_items` | Il vero concentratore di azioni. (Es. scrive l'anagrafica, la collega al corso, genera il dovuto e incassa). |
-| **Iscrizioni e Pagamenti** | `/iscrizioni-pagamenti` | 🟡 **Iscrizioni e Pagamenti** | Lettura combinata `members`, `enrollments` | Interfaccia d'appoggio per gestione logistica |
-| **Nuovo Pagamento** | `/pagamenti` | 🟡 **Lista Pagamenti** | `payments`, `payment_methods`, `pay_notes` | Scrive in `payments`, lega una FK al memberId. |
-| **Scheda Contabile** | `/scheda-contabile` | 🟡 **Scheda Contabile** | Lettura: `payments`, `price_list_items`, `members` | Sola LETTURA. Incrocia il dovuto col versato. |
-| **Gestione Listini Rate** | `/listini` | 🟡 **Listini e Quote** | `price_lists`, `price_list_items` | Scrive i "template" economici (le rate) per le attività. |
-| **Quote Indipendenti** | `/quote-listini/:type`| 🟡 **Gestione Quote** | `quotes`, `course_quotes_grid` | Definizione delle quote di pagamento slegate (indipendenti). |
-| **Tessere Nazionali** | `/tessere` | 🟡 **Tessere & Certificati** | `memberships`, `sub_types` | Tessere CSEN, FGI, ecc. Indipendente dall'anagrafica. |
+| **Nuovo Pagamento** | `/pagamenti` | 🟡 **Lista Pagamenti** | `payments`, `payment_methods`, `pay_notes` | Scrive in `payments`, lega una FK al memberId. Storico Ricevute e cassa reale. |
+| **Scheda Contabile** | `/scheda-contabile` | 🟡 **Scheda Contabile** | Lettura: `payments`, `price_list_items`, `members` | Sola LETTURA. Incrocia il dovuto col versato. Controllo posizioni debitorie. |
+| **Iscrizioni e Pagamenti** | `/iscrizioni-pagamenti` | 🟡 (Pulsante interno) | Lettura `members`, `enrollments` | Interfaccia d'appoggio per logistica interna. |
+| **Dashboard Statistiche** | `/` (Home) e `/dashboard` | 🟡 **Dashboard & Statistiche** | Aggregazione Dati | Vera pagina di approdo all'apertura del gestionale. Aggregazione KPI iscritti e cassa. |
+| **Report Avanzato** | `/report` | 🟡 **(Tab interno Reportistica)** | `custom_reports` | SQL Custom in lettura su richiesta e salvataggio query. |
 
 ---
 
-## 3. Gestione Anagrafica (Utenti e Staff) *(7 Tabelle)*
+## 3. Attività e Didattica
+*Le Viste restano intatte (sui rispettivi Silos Tabellari), ma raggruppate per separare l'erogazione dalla pianificazione strategica.*
 | Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
 |---|---|---|---|---|
-| **Elenco Anagrafiche** | `/anagrafica_a_lista` | 🟡 **Anagrafica a Lista** | `members` | Lista passiva e ricerca soci / tesserati. |
-| **Dashboard Membro Singolo** | `/membro/:id` | (Si apre da Anagrafica) | Lettura: `members`, `member_relationships`, `medical_certificates`, `*_enrollments` | Hub di gestione scheda singola (es. genitore/figlio). Legge i Certificati Medici. |
-| **Insegnanti** | `/insegnanti` | 🟡 **Staff/Insegnanti** | `members` (STI), `instr_rates` | Anagrafica Docenti e listino compensi. Utilizza `participantType: 'INSEGNANTE'`. Ex tabella `instructors`. |
-| **Utenti System / Permessi** | `/utenti-permessi` | 🟡 **Utenti e Permessi** | `users`, `user_roles` | Account per accesso al Gestionale. (Email + Password) |
-| **Generazione Tessere** | `/generazione-tessere`| 🟡 **Genera Tessere PVC** | Lettura: `members`, `memberships` | Creazione stampe / PDF per le card RFID. |
+| **Area Corsi** | `/attivita` | 🟡 **Attività** | Vari silos db (courses, workshop, ecc.) | Gestione erogabile: Anagrafica Corsi e Listini base. |
+| **Calendario Corsi (Vista Tattica)** | `/calendario-attivita` | 🟡 **Calendario Attività** | Lettura combinata | **Mappa a Slot (Day-by-Day).** Operativa oraria strutturata a 5 righe (Orario, Titolo, Istruttori, Stato, Codice). Menu Nuovo Inserimento limitato a: Corsi, Workshop, Prove, Lezioni, Domeniche, Allenamenti, Affitti, Campus. |
+| **Planning di Regia** | `/planning` | 🟡 **Planning** | Lettura combinata | **Mappa Plurigiornaliera (Stagionale).** Sintetica annuale (Set-Ago). Evidenzia Oggi e Mese Corrente. Include aggregati Corsi(N); e in blocchi estesi: Workshop, Domenica, Campus, Saggi, Vacanze, Esterni. |
+| **Dashboard Iscrizioni** | `/iscritti_per_attivita` | 🟡 **Iscritti per Attività** | Lettura `enrollments` + joins | Vista appelli testuale/listare (Monitor visuale lista iscritti). |
+| **Lista Sale e Patrimonio** | `/studios` | 🟡 **Studios/Sale** | `studios` | Scrive la sala (Capienza, Orari Base). |
+| **Gestione Esterni (Spazi e Servizi)**| `/prenotazioni-sale`| 🟡 **Prenotazione Sale / Esterni** | `studio_bookings`, `booking_services` | **Debito Tecnico Temporaneo:** Area attualmente molto confusa che incrocia Booking per Affitti esterni di Sale, e tab random di "Servizi Prenotabili" rimossi transitoriamente dal menu Sidebar (rotta `/booking-services` silente finché non unificata in SaaS V2). |
 
 ---
 
-## 4. Gestione Struttura e Utility *(19 Tabelle)*
+## 4. Risorse Umane & Team
+*Materiale orizzontale non destinato al cliente ma allo staff o all'admin framework.*  
 | Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
 |---|---|---|---|---|
-| **Sale e Aule** | `/studios` | 🟡 **Studios/Sale** | `studios` | Scrive la sala (Capienza, Orari Base). |
-| **Prenotazioni Sale** | `/prenotazioni-sale` | 🟡 **Prenotazioni Sale** | `studio_bookings` | Booking eventi spot. |
-| **Calendario Planning** | `/calendario` | 🟡 **Calendario Attività** | Lettura: 11 tabelle attività + `studios` | Sola lettura grafica delle ore programmate. Supporto modale unificata 'Nuova Attività'. |
-| **Todo List Task** | `/todo-list` | 🟡 **ToDoList** | `todos` | Task collaborative per lo staff. |
-| **Note Team / Chat** | `/commenti`, `/note-team` | 🟡 **Commenti Log / Note** | `team_comments`, `team_notes`, `messages` | Chat intercom della segreteria e post-it globali. |
-| **Categorie Anagrafiche** | `/categoria-partecipante` | 🟡 **Categoria Partecipante**| `cli_cats` | Scrive gerarchie su cui raggruppare i clienti. |
-| **Categorie Attività Multi**| `/categorie-*` | 🟡 **Categorie Attività** | Tutte le `*_cats` e `booking_service_categories` | Gestisce gli alberi (Corsi, Workshop, Campus, Domeniche, ...). |
-| **Elenchi Dropdown Custom**| `/elenchi` | 🟡 **Elenchi** | `custom_lists`, `custom_list_items`, `act_statuses`, `enroll_details` | Controlla i menù a tendina custom in tutto il gestionale. |
-| **Controllo Ingressi** | `/accessi` | 🟡 **Controllo Accessi** | `access_logs` | Lettura/Scrittura gate passaggi tornello/tablet. |
-| **Reset Stagione** | `/reset-stagione` | 🟡 **Reset Database Anno**| `seasons` (+ truncate su DB) | Imposta l'anno accademico e resetta dati vecchi. |
-
----
-
-## 5. Dashboard e Reportistica *(4 Tabelle Logiche)*
-| Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
-|---|---|---|---|---|
-| **Dashboard Iniziale** | `/dashboard` | 🟡 **Dashboard Statistiche** | Tutte le entità (Lettura) | Statistiche in tempo reale, incassi, kpi. |
-| **Iscritti Per Attività** | `/iscritti_per_attivita`| 🟡 **Iscritti per Attività** | 11 Tabelle `*_enrollments` | Aggregazione degli iscritti ispezionando tutto il database. |
-| **Report Avanzato** | `/report` | 🟡 **Report & Statistiche** | `custom_reports` | SQL Custom in lettura su richiesta e salvataggio query. |
+| **Insegnanti** | `/insegnanti` | 🟡 **Staff / Insegnanti** | `members` (STI), `instr_rates` | Anagrafica Docenti e listino compensi. (Ruolo flessibile: un tesserato può anche esssere Staff in contemporanea). |
+| **Chat e Task Condivisi** | `/todo-list` | 🟡 **Comunicazioni Team** | `todos`, `team_comments`, `notes`, `messages` | Lavagna interna operativa (Fusi i vecchi sottomenu Todo, Log e Post-It in un'unica dashboard di raccordo team per snellire). |
+| **Manuali e Linee Guida**| `/knowledge-base`| 🟡 **Knowledge Base** | Tabella wiki | Manuali d'uso / Wiki per operatori nuovi al desk. |
 | **Importazione Dati** | `/importa` | 🟡 **Importa CSV** | Scrittura massiva + `import_configs` | Importazione di massa di DB legacy e mapping CSV. |
-| **Centro Notifiche** | Header Campanella | 🟡 (Non in sidebar) | `notifications` | Notifiche interne al framework UI. |
-| **Admin Panel** | `/admin` | 🟡 **Pannello Admin** | `system_configs`, `knowledge`, `user_activity_logs` | Settaggi globali, tooltips base, e audit del gestionale. |
+| **Utenti System / Permessi** | `/utenti-permessi` | 🟡 **Utenti e Permessi** | `users`, `user_roles` | Account per accesso al Gestionale via login. |
+| **Admin Panel Global** | `/admin` | 🟡 **Pannello Admin Global** | `system_configs`, `knowledge`, `user_activity_logs` | Settaggi globali, tooltips base, audit del gestionale e svuotamento/Reset della Stagione Logica (`seasons`). |
+| **AI Layer & Assistant** | `/copilot` | 🟡 **StarGem Copilot** | `N/D` | Modulo di interazione AI (posizionato sotto il blocco Admin). |
+
+---
+
+## 5. Configurazioni Core
+*Tariffe e Strumenti di Business Tecnici per il management.*
+| Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
+|---|---|---|---|---|
+| **Gestione Listini Rate** | `/listini` | 🟡 **Listini e Quote** | `price_lists`, `price_list_items`, `quotes` | Configuratore abbonamenti economico SaaS, sia rateali che slegati (Indipendenti). |
+| **Categorie Anagrafiche** | `/categoria-partecipante` | 🟡 **Categorie Attività**| `cli_cats` | Tab UI per categorie clienti. Messo dentro un mega-menu "Categorie". |
+| **Categorie Attività Multi**| `/categorie-*` | 🟡 **(Dentro Categorie Attività)** | Tutte le `*_cats` e `booking_service_categories` | Gestisce gli alberi divisori didattici (Corsi, Workshop, Campus, Domeniche, ...). |
+| **Elenchi Dropdown Custom**| `/elenchi` | 🟡 **(Dentro Categorie Attività)** | `custom_lists`, `custom_list_items` | Controlla i menù a tendina custom via DB. |
+| **Dizionari Promo**| `/promo-sconti` | 🟡 **Servizi e Sconti** | Ticket/Coupon | Database codici sconto. |
 
 ---
 

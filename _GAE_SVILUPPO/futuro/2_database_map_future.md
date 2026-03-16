@@ -58,11 +58,14 @@ Tutto l'apprendimento, insegnamento e l'offerta al pubblico si condenserà in so
    - Registra le partecipazioni di chiunque a qualsiasi `activity_id`.
    - *Key Columns:* `status` (active, waiting_list, frozen), `remaining_punch_cards` (Carnet ingressi), `wallet_credit` (Buoni Rimborso), prelevando il metadata JSON dalla categoria padre.
 
-### 8. Gestione Operative & HR (Il Modulo Staff e Ticketing)
-In ottica Enterprise, il sistema astrae la logica del team da quella didattica tramite moduli dedicati alla comunicazione inter-team e facility:
-- **`team_shifts`**: Griglia temporale dedicata all'amministrazione per le timbrature presenze (Payroll).
+### 8. Gestione Operativa, HR & Evoluzione Periferica
+In ottica Enterprise, il sistema astrae la logica del team da quella didattica tramite moduli dedicati alla comunicazione inter-team e facility. Il gestionale è progettato nativamente per assorbire un'espansione perimetrale progressiva:
+- **`team_shifts`**: Griglia temporale dedicata all'amministrazione per le timbrature presenze (Payroll) e sostituzioni docenti.
 - **`maintenance_tickets`**: Segnalazioni guasti sale/facilities gestibili dallo Staff con transizioni di stato.
 - **`team_comments`** e **`todos`**: Workspace di comunicazione a thread nidificati (nested chat) e chore-list collaborativa per connettere operativamente la segreteria.
+- **Suite Amministrativa (Contabilità V2):** Oltre alle receipts di base, il db V2 ospiterà **Prima Nota**, bilancio incassi/uscite periodici, compensi docenti a ROI e Controllo di Gestione avanzato.
+- **Ecosistema App Decentralizzate:** La lettura del database verrà esposta ad interfacce atomiche per l'**App Cliente** (Self-service e acquisti Stripe), l'**App Staff/Insegnanti** (Timbratura, visualizzazione quote compensi) e App **Front-Desk/Totem** (Acquisti snelli da ingresso palestra).
+- **Access Control Evoluto:** Il layer accessi non si fermerà al check del "barcode". I tornelli domotici/app-desk interrogheranno il db per emettere stati compositi valutando simultaneamente: *stato tessera, validità certificato medico, controllo quote pendenti insolute e note operative d'emergenza*. Supporto futuro a QR Code dinamici e tessere dematerializzate in Wallet iOS/Android.
 
 ### 9. Finances & Payments (Rivoluzionato)
 - **`payments`**: La transazione contabile. Nel nuovo sistema **non avrà più 12 colonne FK orfane**.
@@ -103,11 +106,13 @@ Tutto il traffico didattico converge nelle `ENROLLMENTS` (Iscrizioni), le quali 
 
 ```mermaid
 erDiagram
-    MEMBERS ||--o{ ENROLLMENTS : "1. Si iscrive a"
-    ACTIVITIES ||--o{ ENROLLMENTS : "2. Riceve partecipanti"
+    MEMBERS ||--o{ MEMBERSHIPS : "1. Rinnova Associazione"
+    MEMBERS ||--o{ ENROLLMENTS : "2. Si prenota a (Subordinato a Tessera)"
+    ACTIVITIES ||--o{ ENROLLMENTS : "3. Riceve iscritti validi"
 
-    MEMBERS ||--o{ PAYMENTS : "3. Paga"
-    ENROLLMENTS ||--o{ PAYMENTS : "4. Salda Iscrizione"
+    MEMBERS ||--o{ PAYMENTS : "4. Paga il Carrello"
+    ENROLLMENTS ||--o{ PAYMENTS : "5. Salda Dettaglio Iscrizione"
+    MEMBERSHIPS ||--o{ PAYMENTS : "6. Salda Dettaglio Quota"
     PAYMENT_METHODS ||--o{ PAYMENTS : "tramite"
 ```
 

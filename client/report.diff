@@ -1,0 +1,496 @@
+diff --git a/client/src/App.tsx b/client/src/App.tsx
+index 8066b5a..642a0b5 100644
+--- a/client/src/App.tsx
++++ b/client/src/App.tsx
+@@ -37,6 +37,7 @@ import BookingServices from "@/pages/booking-services";
+ import StudioBookings from "@/pages/studio-bookings";
+ import AccountingSheet from "@/pages/accounting-sheet";
+ import MascheraInputGenerale from "@/pages/maschera-input-generale";
++import GestioneAttivitaStub from "@/pages/gestione-attivita-stub";
+ import IscrizioniPagamenti from "@/pages/iscrizioni-pagamenti";
+ import PriceLists from "@/pages/listini";
+ import ListiniHome from "@/pages/listini-home";
+@@ -133,16 +134,19 @@ function ProtectedRoute({ path, component: Component }: { path: string, componen
+ function Router() {
+   return (
+     <Switch>
+-      <ProtectedRoute path="/" component={MascheraInputGenerale} />
++      <ProtectedRoute path="/" component={Dashboard} />
+       <ProtectedRoute path="/dashboard" component={Dashboard} />
+-      <ProtectedRoute path="/anagrafica_a_lista" component={Members} />
++      <ProtectedRoute path="/maschera-input" component={MascheraInputGenerale} />
++      <ProtectedRoute path="/anagrafica-generale" component={Members} />
+       <ProtectedRoute path="/corsi" component={Courses} />
+       <ProtectedRoute path="/workshops" component={Workshops} />
+-      <ProtectedRoute path="/calendario" component={CalendarPage} />
++      <ProtectedRoute path="/calendario-attivita" component={CalendarPage} />
++      <ProtectedRoute path="/planning" component={GestioneAttivitaStub} />
+       <ProtectedRoute path="/categorie-corsi" component={Categories} />
+-      <ProtectedRoute path="/insegnanti" component={Instructors} />
++      <ProtectedRoute path="/staff" component={Instructors} />
+       <ProtectedRoute path="/studios" component={Studios} />
+-      <ProtectedRoute path="/tessere" component={Memberships} />
++      <ProtectedRoute path="/affitto-studio" component={GestioneAttivitaStub} />
++      <ProtectedRoute path="/tessere-certificati" component={Memberships} />
+       <ProtectedRoute path="/pagamenti" component={Payments} />
+       <ProtectedRoute path="/accessi" component={AccessControl} />
+       <ProtectedRoute path="/report" component={Reports} />
+@@ -154,6 +158,7 @@ function Router() {
+       <ProtectedRoute path="/test-gae" component={TestGae} />
+       <ProtectedRoute path="/generazione-tessere" component={CardGenerator} />
+       <ProtectedRoute path="/admin" component={AdminPanel} />
++      <ProtectedRoute path="/copilot" component={GestioneAttivitaStub} />
+       <ProtectedRoute path="/booking-services" component={BookingServices} />
+       <ProtectedRoute path="/prenotazioni-sale" component={StudioBookings} />
+       <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
+@@ -161,6 +166,7 @@ function Router() {
+       <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
+       <ProtectedRoute path="/attivita" component={Attivita} />
+       <ProtectedRoute path="/categorie-attivita" component={ActivityCategories} />
++      <ProtectedRoute path="/promo-sconti" component={GestioneAttivitaStub} />
+       <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
+       <ProtectedRoute path="/scheda-workshop" component={SchedaWorkshop} />
+       <ProtectedRoute path="/scheda-prova-pagamento" component={SchedaProvaPagamento} />
+diff --git a/client/src/components/app-sidebar.tsx b/client/src/components/app-sidebar.tsx
+index 4b6e4cc..ef1988b 100644
+--- a/client/src/components/app-sidebar.tsx
++++ b/client/src/components/app-sidebar.tsx
+@@ -54,73 +54,100 @@ import { StarGemCopilot } from "@/components/star-gem-copilot";
+ import { useAuth } from "@/hooks/use-auth";
+ import { useQuery } from "@tanstack/react-query";
+ 
++// 1. SEGRETERIA OPERATIVA
+ const registrationItems = [
+   {
+-    title: "Maschera Input",
++    title: "Dashboard",
+     url: "/",
+-    icon: Users,
++    icon: LayoutDashboard,
+   },
+   {
+-    title: "Anagrafica a Lista",
+-    url: "/anagrafica_a_lista",
++    title: "Maschera Input",
++    url: "/maschera-input",
+     icon: Users,
+   },
++  {
++    title: "Anagrafica Generale",
++    url: "/anagrafica-generale",
++    icon: IdCard,
++  },
++  {
++    title: "Tessere e Certificati Medici",
++    url: "/tessere-certificati",
++    icon: IdCard,
++  },
++  {
++    title: "Generazione Tessere",
++    url: "/generazione-tessere",
++    icon: ScanBarcode,
++  },
++  {
++    title: "Controllo Accessi",
++    url: "/accessi",
++    icon: ShieldCheck,
++  },
++];
++
++// 2. AMMINISTRAZIONE & CASSA
++const accountingItems = [
++  {
++    title: "Lista Pagamenti",
++    url: "/pagamenti",
++    icon: Wallet,
++  },
++  {
++    title: "Scheda Contabile",
++    url: "/scheda-contabile",
++    icon: CreditCard,
++  },
++  {
++    title: "Report & Statistiche",
++    url: "/report",
++    icon: BarChart3,
++  },
++];
++
++// 3. ATTIVITÀ E DIDATTICA
++const teachingItems = [
+   {
+     title: "Attività",
+     url: "/attivita",
+-    icon: Activity,
++    icon: Layers,
+   },
+   {
+     title: "Iscritti per Attività",
+     url: "/iscritti_per_attivita",
+-    icon: Activity,
++    icon: ClipboardList,
+   },
+-];
+-
+-const teachingItems = [
+-  /*
+   {
+-    title: "Corsi",
+-    url: "/corsi",
+-    icon: Calendar,
++    title: "Categorie Attività",
++    url: "/categorie-attivita",
++    icon: FolderTree,
+   },
+-  */
+   {
+     title: "Calendario Attività",
+-    url: "/calendario",
++    url: "/calendario-attivita",
+     icon: CalendarFold,
+   },
+-  /*
+   {
+-    title: "Workshops",
+-    url: "/workshops",
+-    icon: Sparkles,
++    title: "Planning",
++    url: "/planning",
++    icon: CalendarRange,
+   },
+-  */
+   {
+     title: "Studios/Sale",
+     url: "/studios",
+     icon: Building2,
+   },
+-  {
+-    title: "Affitto Studio Medico",
+-    url: "/affitto-studio",
+-    icon: Stethoscope,
+-  },
+   {
+     title: "Prenotazioni Sale",
+     url: "/prenotazioni-sale",
+     icon: CalendarFold,
+   },
+   {
+-    title: "Planning",
+-    url: "/planning",
+-    icon: CalendarRange,
+-  },
+-  {
+-    title: "Date/Programmazione",
+-    url: "/programmazione",
+-    icon: Clock,
++    title: "Affitto Studio Medico",
++    url: "/affitto-studio",
++    icon: Stethoscope,
+   },
+   {
+     title: "Servizi Prenotabili",
+@@ -129,116 +156,59 @@ const teachingItems = [
+   },
+ ];
+ 
++// 4. RISORSE UMANE & TEAM
+ const secretariatItems = [
+   {
+-    title: "Staff/Insegnanti",
+-    url: "/insegnanti",
++    title: "Staff e Insegnanti",
++    url: "/staff",
+     icon: Briefcase,
+   },
+-  {
+-    title: "Tessere & Certificati",
+-    url: "/tessere",
+-    icon: IdCard,
+-  },
+-  {
+-    title: "Generazione Tessere",
+-    url: "/generazione-tessere",
+-    icon: ScanBarcode,
+-  },
+-  {
+-    title: "Controllo Accessi",
+-    url: "/accessi",
+-    icon: ScanBarcode,
+-  },
+-
+   {
+     title: "Inserisci Nota",
+     url: "/inserisci-nota",
+     icon: StickyNote,
+   },
+   {
+-    title: "Commenti Team",
++    title: "Commenti log",
+     url: "/commenti",
+     icon: MessageSquarePlus,
+   },
+-  {
+-    title: "Knowledge",
+-    url: "/knowledge-base",
+-    icon: BookOpen,
+-  },
+   {
+     title: "ToDoList",
+     url: "/todo-list",
+     icon: FileText,
+   },
+-];
+-
+-const analysisItems = [
+-  {
+-    title: "Dashboard Statistiche",
+-    url: "/dashboard",
+-    icon: LayoutDashboard,
+-  },
+-  {
+-    title: "Report & Statistiche",
+-    url: "/report",
+-    icon: BarChart3,
+-  },
+-];
+-
+-const accountingItems = [
+-
+-  {
+-    title: "Scheda Contabile",
+-    url: "/scheda-contabile",
+-    icon: Wallet,
+-  },
+   {
+-    title: "Lista Pagamenti",
+-    url: "/pagamenti",
+-    icon: CreditCard,
++    title: "Knowledge Base",
++    url: "/knowledge-base",
++    icon: BookOpen,
+   },
+ ];
+ 
++// 5. CONFIGURAZIONI CORE
+ const configItems = [
+-  {
+-    title: "Elenchi",
+-    url: "/elenchi",
+-    icon: List, // Si potrebbe usare una matitina ma la list va bene. O custom class.
+-  },
+-  {
+-    title: "Quote/Listini old",
+-    url: "/listini-old",
+-    icon: Database,
+-  },
+   {
+     title: "Listini e Quote",
+     url: "/listini",
+     icon: Database,
+   },
+   {
+-    title: "Categorie Attività",
+-    url: "/categorie-attivita",
+-    icon: Layers,
+-  },
+-  {
+-    title: "Servizi Extra",
+-    url: "/attivita/servizi",
+-    icon: Database,
+-  },
+-  {
+-    title: "Promo/Codici Sconto",
++    title: "Promo / Sconti",
+     url: "/promo-sconti",
+     icon: Ticket,
+   },
+ ];
+ 
+-
+ const adminItems = [
+   {
+-    title: "Pannello Admin",
++    title: "Pannello Admin Global",
+     url: "/admin",
+-    icon: ShieldCheck,
++    icon: Settings,
++  },
++  {
++    title: "Elenchi Custom",
++    url: "/elenchi",
++    icon: List,
+   },
+   {
+     title: "Importazione Dati",
+@@ -290,7 +260,6 @@ export function AppSidebar() {
+   const filteredRegistration = registrationItems.filter(item => hasPermission(user, item.url));
+   const filteredTeaching = teachingItems.filter(item => hasPermission(user, item.url));
+   const filteredSecretariat = secretariatItems.filter(item => hasPermission(user, item.url));
+-  const filteredAnalysis = analysisItems.filter(item => hasPermission(user, item.url));
+   const filteredAccounting = accountingItems.filter(item => hasPermission(user, item.url));
+   const filteredConfig = configItems.filter(item => hasPermission(user, item.url));
+   const filteredAdminItems = adminItems.filter(item => hasPermission(user, item.url));
+@@ -310,20 +279,20 @@ export function AppSidebar() {
+       <SidebarContent>
+         {filteredRegistration.length > 0 && (
+           <SidebarGroup>
+-            {/* <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Gestione Anagrafica</SidebarGroupLabel> */}
++            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">SEGRETERIA OPERATIVA</SidebarGroupLabel>
+             <SidebarGroupContent>
+               <SidebarMenu>
+                 {filteredRegistration.map((item) => {
+-                  const isActive = location === item.url || (item.url === "/attivita" && location.startsWith("/attivita"));
++                  const isActive = location === item.url;
+                   return (
+                     <SidebarMenuItem key={item.title}>
+                       <SidebarMenuButton
+                         asChild
+                         isActive={isActive}
+-                        data-testid={`nav-${item.url.slice(1) || 'anagrafica'}`}
++                        data-testid={`nav-${item.url.slice(1)}`}
+                       >
+-                        <Link href={item.url} className="flex items-center w-full">
+-                          <item.icon className="w-4 h-4 mr-2" />
++                        <Link href={item.url}>
++                          <item.icon className="w-4 h-4" />
+                           <span>{item.title}</span>
+                         </Link>
+                       </SidebarMenuButton>
+@@ -337,7 +306,7 @@ export function AppSidebar() {
+ 
+         {filteredAccounting.length > 0 && (
+           <SidebarGroup>
+-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Contabilità</SidebarGroupLabel>
++            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">AMMINISTRAZIONE & CASSA</SidebarGroupLabel>
+             <SidebarGroupContent>
+               <SidebarMenu>
+                 {filteredAccounting.map((item) => {
+@@ -364,7 +333,7 @@ export function AppSidebar() {
+ 
+         {filteredTeaching.length > 0 && (
+           <SidebarGroup>
+-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Didattica e Sale</SidebarGroupLabel>
++            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">ATTIVITÀ E DIDATTICA</SidebarGroupLabel>
+             <SidebarGroupContent>
+               <SidebarMenu>
+                 {filteredTeaching.map((item) => {
+@@ -391,7 +360,7 @@ export function AppSidebar() {
+ 
+         {filteredSecretariat.length > 0 && (
+           <SidebarGroup>
+-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Segreteria</SidebarGroupLabel>
++            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">RISORSE UMANE & TEAM</SidebarGroupLabel>
+             <SidebarGroupContent>
+               <SidebarMenu>
+                 {filteredSecretariat.map((item) => {
+@@ -418,7 +387,7 @@ export function AppSidebar() {
+ 
+         {filteredConfig.length > 0 && (
+           <SidebarGroup>
+-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Configurazione</SidebarGroupLabel>
++            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">CONFIGURAZIONI CORE</SidebarGroupLabel>
+             <SidebarGroupContent>
+               <SidebarMenu>
+                 {filteredConfig.map((item) => {
+@@ -443,33 +412,6 @@ export function AppSidebar() {
+           </SidebarGroup>
+         )}
+ 
+-        {filteredAnalysis.length > 0 && (
+-          <SidebarGroup>
+-            <SidebarGroupLabel className="text-primary font-semibold uppercase tracking-wider text-[11px]">Analisi e Report</SidebarGroupLabel>
+-            <SidebarGroupContent>
+-              <SidebarMenu>
+-                {filteredAnalysis.map((item) => {
+-                  const isActive = location === item.url;
+-                  return (
+-                    <SidebarMenuItem key={item.title}>
+-                      <SidebarMenuButton
+-                        asChild
+-                        isActive={isActive}
+-                        data-testid={`nav-${item.url.slice(1)}`}
+-                      >
+-                        <Link href={item.url}>
+-                          <item.icon className="w-4 h-4" />
+-                          <span>{item.title}</span>
+-                        </Link>
+-                      </SidebarMenuButton>
+-                    </SidebarMenuItem>
+-                  );
+-                })}
+-              </SidebarMenu>
+-            </SidebarGroupContent>
+-          </SidebarGroup>
+-        )}
+-
+         {filteredAdminItems.length > 0 && (
+           <SidebarGroup>
+             <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">ADMIN / TECNICO</SidebarGroupLabel>
+@@ -477,13 +419,13 @@ export function AppSidebar() {
+               <SidebarMenu>
+                 <SidebarMenuItem>
+                   <SidebarMenuButton asChild>
+-                    <div className="flex items-center gap-2 px-2 py-1.5 w-full justify-start cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
++                    <Link href="/copilot" className="flex items-center gap-2 px-2 py-1.5 w-full justify-start cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
+                       <StarGemCopilot className="h-4 w-4 bg-transparent outline-none ring-0 shadow-none border-0 p-0" />
+                       {/* The StarGemCopilot component itself contains the dropdown structure. 
+                            It defaults to just showing the icon. To make "StarGem CoPilot" text visible and clickable alongside it,
+                            we apply some styling. */}
+                       <span className="text-sm font-medium">StarGem CoPilot</span>
+-                    </div>
++                    </Link>
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+                 {filteredAdminItems.map((item) => {
+diff --git a/client/src/pages/gestione-attivita-stub.tsx b/client/src/pages/gestione-attivita-stub.tsx
+index ec94ae4..e4dbee6 100644
+--- a/client/src/pages/gestione-attivita-stub.tsx
++++ b/client/src/pages/gestione-attivita-stub.tsx
+@@ -20,7 +20,7 @@ export default function GestioneAttivitaStub({ title, description }: GestioneAtt
+           </Link>
+           <div>
+             <h1 className="text-2xl font-semibold text-foreground" data-testid="text-activity-title">
+-              Gestione {title}
++              {title}
+             </h1>
+             <p className="text-muted-foreground text-sm">{description}</p>
+           </div>
+@@ -36,8 +36,8 @@ export default function GestioneAttivitaStub({ title, description }: GestioneAtt
+         </CardHeader>
+         <CardContent>
+           <p className="text-muted-foreground">
+-            La pagina di gestione per <strong>{title}</strong> è in fase di sviluppo. 
+-            Presto sarà disponibile con tutte le funzionalità di gestione complete.
++            L'area <strong>{title}</strong> è in sviluppo o attualmente in manutenzione strutturale. 
++            Presto sarà disponibile con tutte le funzionalità complete.
+           </p>
+         </CardContent>
+       </Card>
+diff --git a/client/src/pages/instructors.tsx b/client/src/pages/instructors.tsx
+index 7f1c916..307a2e1 100644
+--- a/client/src/pages/instructors.tsx
++++ b/client/src/pages/instructors.tsx
+@@ -155,7 +155,7 @@ export default function Instructors() {
+     <div className="p-6 md:p-8 space-y-6 w-full mx-auto">
+       <div className="flex items-center justify-between gap-4 flex-wrap">
+         <div>
+-          <h1 className="text-3xl font-semibold text-foreground mb-2">Gestione Staff / Insegnanti</h1>
++          <h1 className="text-3xl font-semibold text-foreground mb-2">Staff e Insegnanti</h1>
+           <p className="text-muted-foreground">Gestisci lo staff di insegnanti e le loro tariffe</p>
+         </div>
+         <Button
+diff --git a/client/src/pages/members.tsx b/client/src/pages/members.tsx
+index ee3dc75..49f67e5 100644
+--- a/client/src/pages/members.tsx
++++ b/client/src/pages/members.tsx
+@@ -808,8 +808,8 @@ export default function Members() {
+     <div className="p-6 md:p-8 space-y-6">
+       <div className="flex items-center justify-between gap-4 flex-wrap">
+         <div>
+-          <h1 className="text-3xl font-semibold text-foreground mb-2">Anagrafica a Lista</h1>
+-          <p className="text-muted-foreground">Anagrafica completa</p>
++          <h1 className="text-3xl font-semibold text-foreground mb-2">Anagrafica Generale</h1>
++          <p className="text-muted-foreground">Gestisci clienti, istruttori e staff</p>
+         </div>
+         <div className="flex items-center gap-2 flex-wrap">
+           <Button

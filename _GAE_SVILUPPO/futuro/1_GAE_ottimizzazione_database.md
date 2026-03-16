@@ -74,6 +74,10 @@ A seguito dell'intervista diretta con l'amministrazione (Marzo 2026), sono emers
 Il sistema è in fase di re-ingegnerizzazione non solo per ottimizzare le prestazioni locali, ma con l'obiettivo commerciale di diventare un prodotto scalabile e rivendibile ad altre scuole/centri (Multi-tenant).
 Le 4 Macro Tabelle (`activities`, `activity_categories`, `activity_details`, `enrollments`) e il comparto contabile dovranno essere progettati in modo da non avere *nessuna logica hardcoded* (es. vietato scrivere nel codice *"se è Danza fai X"*), demandando alla UI la creazione libera di regole e settaggi profilati per il futuro cliente finale.
 
+> [!WARNING]
+> **Vincolo di Dominio: Non siamo un E-Commerce Puro**
+> Nonostante l'agilità SaaS, il software resta un Gestionale Sportivo. Lo sbarramento istituzionale (Tessera Associativa, Certificato Medico, Assicurazioni) DEVE precedere obbligatoriamente lo sblocco dei carrelli e delle erogazioni delle attività. La tessera sblocca il carrello. I pagamenti sono uniti in transazioni multi-persona.
+
 ### A. Corsi Annuali e Capienze
 *   **Ciclo Annuale:** Abbonamento fisso (Settembre-Giugno). Disdetta assente, consentita pura sospensione.
 *   **Capienza Rigorosa:** Le tabelle necessitano di un cap limit (`max_capacity`).
@@ -126,6 +130,10 @@ Le 4 Macro Tabelle (`activities`, `activity_categories`, `activity_details`, `en
 *   **Shift Management (Turni):** Creazione della tabella `team_shifts` associata ad aule/reception per cadenzare gli orari di lavoro del personale dipendente tramite l'App o Portale a loro dedicato.
 *   **Manutenzione Strutturale:** Istanziazione della tabella `maintenance_tickets` connessa alle Aule/Studi. Permetterà all'App del personale ispettivo di aprire segnalazioni tecniche (es. guasti) con stati d'avanzamento, isolando il workflow dalla messaggistica generale o dai Todo standard.
 *   **Comunicazioni Broadcast:** Potenziamento delle attuali tabelle `messages`, `todos` e `team_comments` per trasformare l'interfaccia dell'App Dipendenti nel vero *cuore comunicativo* a circuito chiuso.
+
+### P. Checkout Orientato all'Affiliazione 
+*   **Priorità della Membership:** Nessuna ricevuta commerciale può essere chiusa in assenza di uno status assicurativo/sportivo "Active".
+*   **Carrello Multi-Persona:** Il Checkout non è intestato a chi preme il tasto "Paga", ma supporta l'aggregazione di figli/familiari. Il matchin contabile avviene tramite UUID temporanei (es. `membership_fee_12A4`) che sciolgono il legame a valle nel Database SQL in modo atomico.
 
 ---
 *(La fase di pre-analisi e mappatura dei logici aziendali è conclusa. In base a queste specifiche inizierà il Coding Drizzle ORM).*

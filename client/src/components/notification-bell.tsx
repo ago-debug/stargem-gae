@@ -50,7 +50,7 @@ export function NotificationBell() {
     if (notification.type === "comment") {
       setLocation("/commenti");
     } else if (notification.type === "note") {
-      setLocation("/note-team");
+      setLocation("/inserisci-nota");
     }
     setIsOpen(false);
   };

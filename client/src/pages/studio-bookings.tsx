@@ -462,7 +462,7 @@ export default function StudioBookings() {
         <div className="p-6 md:p-8 space-y-6 mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-semibold text-foreground mb-2">Prenotazioni Sale</h1>
+                    <h1 className="text-3xl font-semibold text-foreground mb-2">Affitti</h1>
                     <p className="text-muted-foreground">Gestione completa delle prenotazioni e affitti</p>
                 </div>
                 <Button onClick={handleCreateBooking}>

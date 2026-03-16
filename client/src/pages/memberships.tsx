@@ -100,8 +100,8 @@ export default function Memberships() {
             setSelectedMembershipMember(member);
             setIsMembershipFormOpen(true);
             setMembershipMemberSearch(`${member.lastName} ${member.firstName}`);
-            // Pulisci l'URL per impedire riaperture successive e resta su /tessere
-            setLocation('/tessere', { replace: true });
+            // Pulisci l'URL per impedire riaperture successive e resta su /tessere-certificati
+            setLocation('/tessere-certificati', { replace: true });
           })
           .catch(err => console.error("[AutoOpen Membership Modal]", err));
       }
@@ -208,12 +208,14 @@ export default function Memberships() {
       return;
     }
     const formData = new FormData(e.currentTarget);
-    const data: InsertMembership = {
+    const data = {
       memberId: selectedMembershipMember.id,
-      membershipNumber: formData.get("membershipNumber") as string,
-      barcode: formData.get("barcode") as string,
-      issueDate: new Date(),
-      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      // Passiamo volutamente undefined affinché il backend nel Multiplexer sia l'unico sovrano a calcolarlo
+      membershipNumber: undefined,
+      barcode: undefined,
+      // Leggiamo la Data Emissione/Pagamento dal form (che viene pre-compilata coerentemente dalla UI)
+      issueDate: new Date(formData.get("paymentDate") as string),
+      // L'API Multiplexer sovrascriverà questi tre campi inferiori
       type: "annual",
       fee: "25",
       status: "active",
@@ -221,6 +223,10 @@ export default function Memberships() {
 
     // Aggiungo campi extra per il backend
     const extraData = {
+      // --- MULTIPLEXER NUOVI CAMPI TASK 6 ---
+      membershipType: formData.get("membershipType") as string,
+      seasonCompetence: formData.get("seasonCompetence") as string,
+      
       nuovoRinnovo: formData.get("renewalType") as string,
       entityCardNumber: formData.get("entityCardNumber") as string,
       entityCardExpiryDate: formData.get("entityCardExpiryDate") as string,
@@ -717,22 +723,23 @@ export default function Memberships() {
                 ? new Date(latestMembership.expiryDate).toISOString().split('T')[0]
                 : tessereMeta?.dataScad || "";
 
-              // Only auto-calculate a future date if we have absolutely NO previous expiry date context
+              // Eliminiamo il calcolo client-side fittizio della data futura di scadenza per non disallineare il Backend
               if (!defExpiryDate && selectedMembershipMember && !latestMembership) {
-                const nextYear = new Date().getFullYear() + 1;
-                const month = String(new Date().getMonth() + 1).padStart(2,'0');
-                defExpiryDate = `${nextYear}-${month}-01`;
+                defExpiryDate = "";
               }
+              // Idem per il numero tessera provvisorio "2526-000XXX" che confondeva la UI
               if (!defMembershipNum && selectedMembershipMember && !latestMembership) {
-                defMembershipNum = `2526-${String(selectedMembershipMember.id).padStart(6, '0')}`;
+                defMembershipNum = "";
               }
 
               const defFee = latestMembership?.fee || tessereMeta?.quota || "25";
               const defPaymentDate = latestMembership?.issueDate 
                   ? new Date(latestMembership.issueDate).toISOString().split('T')[0]
                   : tessereMeta?.pagamento || new Date().toISOString().split('T')[0];
-              const defRenewal = latestMembership ? "rinnovo" : (tessereMeta?.numero ? "rinnovo" : "nuovo");
+              const defRenewal = latestMembership ? "RINNOVO" : (tessereMeta?.numero ? "RINNOVO" : "NUOVO");
               const defBarcode = latestMembership?.barcode || (defMembershipNum ? `T${defMembershipNum.replace('-', '')}` : "");
+              
+              const defCompetence = (new Date().getMonth() >= 4 && new Date().getMonth() <= 7) ? "SUCCESSIVA" : "CORRENTE";
               
               const safeIsoDate = (val: any) => {
                 if (!val) return "";
@@ -867,6 +874,7 @@ export default function Memberships() {
                        <Label>Pagamento Tessera</Label>
                        <Input
                          type="date"
+                         name="paymentDate"
                          value={defPaymentDate}
                          disabled
                          readOnly
@@ -875,50 +883,65 @@ export default function Memberships() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="renewalType">Nuovo o Rinnovo</Label>
-                      <Select name="renewalType" defaultValue={defRenewal === "nuovo" ? "nuovo" : "rinnovo"}>
-                        <SelectTrigger id="renewalType" data-testid="select-renewal-type">
+                      <Label htmlFor="membershipType">Tipologia Tessera *</Label>
+                      <Select name="membershipType" defaultValue={defRenewal} required>
+                        <SelectTrigger id="membershipType" data-testid="select-membership-type">
                           <SelectValue placeholder="Seleziona..." />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="nuovo">Nuovo</SelectItem>
-                          <SelectItem value="rinnovo">Rinnovo</SelectItem>
+                          <SelectItem value="NUOVO">Nuovo Tesseramento</SelectItem>
+                          <SelectItem value="RINNOVO">Rinnovo</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Data Scad. Quota Tessera</Label>
+                      <Label htmlFor="seasonCompetence">Competenza Stagionale *</Label>
+                      <Select name="seasonCompetence" defaultValue={defCompetence} required>
+                        <SelectTrigger id="seasonCompetence" data-testid="select-season-competence">
+                          <SelectValue placeholder="Seleziona..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CORRENTE">Stagione Corrente</SelectItem>
+                          <SelectItem value="SUCCESSIVA">Stagione Successiva</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Stagione / Scadenza</Label>
                       <Input
-                        type="date"
-                        value={defExpiryDate}
+                        type="text"
+                        value="Calcolata automaticamente dal sistema al salvataggio"
                         disabled
                         readOnly
-                        className="bg-muted text-muted-foreground opacity-100"
+                        className="bg-muted text-muted-foreground opacity-100 text-xs text-ellipsis"
+                        title="Il backend calcolerà automaticamente l'anno sportivo e la data di scadenza (31 Agosto) incrociando emissione e competenza."
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="membershipNumber">N. Tessera *</Label>
+                      <Label htmlFor="membershipNumber">N. Tessera</Label>
                       <Input
                         id="membershipNumber"
                         name="membershipNumber"
-                        placeholder="Inserisci numero"
-                        defaultValue={defMembershipNum}
-                        required
-                        data-testid="input-membershipNumber"
+                        placeholder="Assegnato post-salvataggio"
+                        disabled
+                        readOnly
+                        className="bg-muted text-muted-foreground font-mono text-xs"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="barcode">Barcode *</Label>
+                      <Label htmlFor="barcode">Barcode</Label>
                       <Input
                         id="barcode"
                         name="barcode"
                         placeholder="Generato automaticamente"
-                        defaultValue={defBarcode}
-                        data-testid="input-barcode"
+                        disabled
+                        readOnly
+                        className="bg-muted text-muted-foreground font-mono text-xs"
                       />
                     </div>
                     <div className="space-y-2">

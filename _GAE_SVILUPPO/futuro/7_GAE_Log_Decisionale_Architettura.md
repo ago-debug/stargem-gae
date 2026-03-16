@@ -90,3 +90,23 @@ Avere uno storico nero su bianco delle risposte del cliente è vitale per giusti
     *   *R (Utente):* Esatto. Un docente potrebbe operare in realtà completamente esterne. La sua "scheda insegnante" nel nostro DB deve includere "blocchi rossi/indisponibilità" per i giorni/orari in cui lui lavora in un'altra scuola (non nostra), in modo da avere un Calendario Condiviso perfetto.
 *   **D: Gestione HR e Timbrature Staff?**
     *   *R (Utente):* Basilare. Bisogna tracciare rigorosamente presenze, assenze e sostituzioni degli Insegnanti per permettere all'amministrazione di erogare il pagamento (cedolini) a fine mese. Serve un sotto-modulo di timbratura/smarcamento ore.
+
+---
+
+## Intervista 5: Carrello Sportivo, Precondizioni Tesseramento e Certificati Medici
+**Data:** 15 Marzo 2026
+**Topic:** Vincoli strutturali del Checkout rispetto a un E-commerce puro e Prerequisiti Assicurativi.
+
+*   **D: Contesto Naturale del Checkout (E-commerce vs Sport)?**
+    *   *R (Utente):* Il gestionale è per una società sportiva, non per un e-commerce puro. Le regole di ingaggio (assicurazioni, salute) dominano sull'impulso di acquisto.
+*   **D: Priorità e Visibilità del Tesseramento?**
+    *   *R (Utente):* La tessera è una **precondizione prioritaria assoluta** rispetto all’acquisto delle attività. Il sistema, ovunque si trovi l'utente, deve sempre verificare in tempo reale lo stato in 4 casistiche: (1) ha tessera valida, (2) ha tessera scaduta, (3) non è tesserato, (4) deve rinnovare.
+*   **D: Come si formula la "Domanda di Tesseramento"?**
+    *   *R (Utente):* Non è un semplice toggle. È parte integrante del flusso e può richiedere la compilazione esplicita, la firma digitale, un allegato cartaceo scansionato e l'invio digitale per la conservazione legale.
+*   **D: Qual è il peso legale del Certificato Medico nel gestionale?**
+    *   *R (Utente):* È un prerequisito fondamentale. Non basta un flag "Sì/No", il sistema deve gestire uno stato macchina a 5 fasi: (1) presente e valido, (2) mancante, (3) promesso entro una certa data, (4) prenotato presso lo studio medico interno, (5) scaduto.
+*   **D: Modalità di Carrello (Multi-Utente e Multi-Articolo)?**
+    *   *R (Utente):* Il modello corretto è il *Carrello WooCommerce*, ma asseverato da prerequisiti sportivi. **Scenario tipo:** Una madre deve poter acquistare iscrizioni per più figli simultaneamente in un'unica transazione. Si possono acquistare più attività e tessere in uno stesso carrello. Inoltre, l’esperienza Desk (Segreteria), Remoto (Da casa) e Totem (Self-Service) deve poggiare sulle medesime logiche di validazione.
+*   **D: L'Atomo Tessera-Pagamento?**
+    *   *R (Architettura Stabilita):* Data la natura del Carrello Multi-Persona descritto al punto sopra, il legame tra Pagamento (Master) e Membership associata deve essere garantito da un framework di "Matching Forte". Il Frontend inietta nei carrelli una label dinamica (`referenceKey`, che possiede per priorità: id statico carrello, ID utente o Fiscale) accoppiata a `tempId: membership_fee`. Il backend raccoglie la firma transazionale in `routes.ts`, esegue il lookup incrociato e salda l'`id` univoco al pagamento. L'Endpoint `/api/memberships` è stato svestito della facoltà di emettere "fake-debts" per forzare rigorosamente il passaggio contabile dall'hub unico di Checkout.
+    *   *R (Utente):* Vincolo inviolabile: la *membership* non può fluttuare nel vuoto scissa dal pagamento. La tessera nasce solo all’interno di un flusso coerente con il pagamento effettivo registrato nel database. In un carrello complesso, la quota associativa è la voce prioritaria e mandataria.

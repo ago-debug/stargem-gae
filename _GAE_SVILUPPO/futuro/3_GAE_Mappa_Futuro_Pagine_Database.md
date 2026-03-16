@@ -23,14 +23,22 @@ La UI React continuerà ad avere menu espliciti (personalizzabili dal Cliente tr
 
 | Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
 |---|---|---|---|---|
-| **Pannello Iscrizioni Rapide** | `/maschera-generale` | 🟡 **Maschera Input** | `members`, `enrollments`, `payments` | Il vero concentratore di azioni. (Es. scrive l'anagrafica, la collega all'attività generica, genera il dovuto e incassa). |
+| **Pannello Iscrizioni Rapide** | `/maschera-generale` | 🟡 **Maschera Input** | `members`, `enrollments`, `payments` | Hub Unificato. Non esegue push isolati, ma compila in RAM un carrello annidato JSON (Multi-Persona/Multi-Tessera) elaborato backend in transazione atomica. |
 | **Iscrizioni e Pagamenti** | `/iscrizioni-pagamenti` | 🟡 **Iscrizioni e Pagamenti** | Lettura combinata `members`, `enrollments` | Interfaccia d'appoggio per gestione logistica |
-| **Nuovo Pagamento** | `/pagamenti` | 🟡 **Lista Pagamenti** | `payments` (Master) | Scrive in `payments`, lega una FK al `member_id` e all'`enrollment_id`. |
+| **Nuovo Pagamento** | `/pagamenti` | 🟡 **Lista Pagamenti** | `payments` (Master) | Interfaccia estesa per lo storico saldo e ricevute. Funge da estensione documentale asservita al Carrello. |
 | **Scheda Contabile** | `/scheda-contabile` | 🟡 **Scheda Contabile** | Lettura: `payments`, `members` | Sola LETTURA. Incrocia il dovuto col versato. |
 
 ---
 
-## 3. Gestione Anagrafica (Utenti e Staff)
+## 3. Moduli Pianificazione e Aule *(11 Tabelle)*
+| Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
+|---|---|---|---|---|
+| **Pianificazione Attività (Planning vs Calendario)** | `/calendario` | 🟡 **Calendario Corsi** | `activities` (SaaS), `course_schedules` (SaaS), `studios` | *Biforcazione UX Cruciale:* Il **Calendario** è la vista operativa a slot "day-by-day" per l'App Receptionist (prenotazioni realtime). Il **Planning** è la vista mensile/stagionale "Master" per la Regia Aziendale (spostamento corsi base). Si alimentano dallo stesso source. |
+| **Pianificazione Sale** | `/prenotazione-sale`| 🟡 **Prenotazione Sale** | `studio_bookings` | Booking per affitti esterni / eventi. (Orfano, andrà annesso ad activities). |
+
+---
+
+## 4. Gestione Anagrafica (Utenti e Staff)
 
 | Pagina Web | Rotta React | Menu Sidebar (UI) | Tabelle Database Target | Note |
 |---|---|---|---|---|

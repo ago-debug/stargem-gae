@@ -7,6 +7,10 @@
 Questo documento illustra la struttura completa delle tabelle del database e le loro relazioni, così come definite in `shared/schema.ts`. 
 Il database utilizza un modello relazionale gestito tramite Drizzle ORM e MySQL.
 
+### ⚠️ Differenza Importante con il file "3_GAE_Mappa_Now_Pagine_Database.md"
+*   **Questo File (1_)**: È il dizionario puramente **BackEnd e Architetturale (ERD)**. Da leggere quando si vuole capire come le tabelle sono legate tra loro a livello SQL (Relazioni, Chiavi Esterne, Drizzle ORM).
+*   **Il File (3_)**: È la documentazione **FrontEnd e Navigazionale**. Da leggere quando si vuole capire "Se l'utente preme il bottone X sulla pagina `/calendario` o `/pagamenti`, in quale tabella finiranno i suoi dati?".
+
 ### 🔗 Documenti di Riferimento Architetturale (Da Leggere)
 Per avere la visione d'insieme prima, durante e dopo i futuri refactoring, fai affidamento ai seguenti documenti analitici stilati:
 * 🛡️ **[Progetto, Architettura e Collegamenti (Regole Auree)](2_GAE_progetto_architettura_e_collegamenti_database.md)** -> Manuale per sviluppatori che spiega il nucleo "intoccabile" e le zone "sicure" dove espandere funzionalità oggi senza rompere nulla.
@@ -75,7 +79,7 @@ I modelli parificati dei suddetti "11 silos" sono:
 ### 7. Tesseramenti & Servizi Extra (Bookings)
 - **`booking_service_categories`** -> **`booking_services`**: Dizionario e Categorie Attività degli elementi extra-didattici prenotabili (come "Affitto Sala Medica" o "Personal Trainer").
 - **`studio_bookings`**: Gli slot calendarizzati per prenotare fisicamente uno spazio ("studio") legato ad un servizio.
-- **`memberships`**: Assicurazioni o tessere associative annuali (il "Tesseramento"), dotati di barcode.
+- **`memberships`**: Assicurazioni o tessere associative annuali (il "Tesseramento"). Include informazioni sul `membershipType` (Nuovo vs Rinnovo), la `seasonCompetence` (Corrente o Successiva) e autogenera i codici Barcode fisici.
 - **`sub_types`**: Modelli e tipologie predefinite dei tesseramenti e abbonamenti (Subscription Types).
 - **`medical_certificates`**: Tabella di raccordo per tracciare l'idoneità, le scadenze o le mancate consegne dei certificati medici degli atleti.
 - **`access_logs`**: Tracce di passaggio derivanti dai tornelli e lettori barcode, indicanti entrata/uscita.
@@ -85,7 +89,7 @@ I modelli parificati dei suddetti "11 silos" sono:
 - **`quotes`**: Quote svincolate da importo standard fisso ("Quote Indipendenti").
 - **`course_quotes_grid`**: Griglia per calcolo e creazione automatica delle matrici prezzi mensili per il modulo Q1C.
 - **`payment_methods`**: Opzioni di transazione in fase di saldo (es. Cassa, Pos, Bonifico, PayPal).
-- **`payments`**: **Il cuore vivo di ogni transazione economica.** Ciascun pagamento è vincolato forzatamente a un `member`, ed è costretto a dichiarare il proprio traguardo in una - e solo una - delle svariate Foreign Keys a disposizione (es., puntando formalmente il dito verso `enrollment_id`, oppure `ws_enroll_id`, o ancora `booking_id`).
+- **`payments`**: **Il cuore vivo di ogni transazione economica.** Ciascun pagamento è vincolato forzatamente a un `member`, ed è costretto a dichiarare il proprio traguardo in una - e solo una - delle svariate Foreign Keys a disposizione (es., puntando formalmente verso `enrollment_id`, `ws_enroll_id`, o obbligatoriamente al `membership_id` per le quote sociali).
 
 ---
 
@@ -143,6 +147,7 @@ erDiagram
     PAYMENT_METHODS ||--o{ PAYMENTS : "Mezzo (Pos, Contanti...)"
     
     %% Le Foreign Keys Opzionali sui Pagamenti:
+    MEMBERSHIPS ||--o{ PAYMENTS : "FK (Se paga Tessera Associativa)"
     ENROLLMENTS ||--o{ PAYMENTS : "FK (Se paga Corso)"
     WS_ENROLLMENTS ||--o{ PAYMENTS : "FK (Se paga Workshop)"
     STUDIO_BOOKINGS ||--o{ PAYMENTS : "FK (Se paga Affitto Sala)"

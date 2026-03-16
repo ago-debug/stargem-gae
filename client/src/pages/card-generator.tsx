@@ -48,11 +48,11 @@ export default function CardGenerator() {
 
     const members = membersData?.members || [];
 
-    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Member>("name");
-    const getSortValue = (member: Member, key: string) => {
+    const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Member & { activeMembership?: any }>("name");
+    const getSortValue = (member: Member & { activeMembership?: any }, key: string) => {
         switch (key) {
             case "name": return member.lastName + " " + member.firstName;
-            case "cardNumber": return member.cardNumber || "";
+            case "cardNumber": return member.activeMembership?.membershipNumber || member.cardNumber || "";
             case "fiscalCode": return member.fiscalCode || "";
             default: return null;
         }
@@ -217,7 +217,9 @@ export default function CardGenerator() {
                                                 />
                                             </TableCell>
                                             <TableCell className={cn("font-bold", isSortedColumn("name") && "sorted-column-cell")}>{member.lastName} {member.firstName}</TableCell>
-                                            <TableCell className={cn("font-mono text-[#e11d48] text-sm", isSortedColumn("cardNumber") && "sorted-column-cell")}>{member.cardNumber || "--"}</TableCell>
+                                            <TableCell className={cn("font-mono text-[#e11d48] text-sm", isSortedColumn("cardNumber") && "sorted-column-cell")}>
+                                                {(member as any).activeMembership?.membershipNumber || member.cardNumber || "--"}
+                                            </TableCell>
                                             <TableCell className={cn("font-mono text-xs text-muted-foreground", isSortedColumn("fiscalCode") && "sorted-column-cell")}>{member.fiscalCode}</TableCell>
                                             <TableCell className="text-right">
                                                 <Button
@@ -277,14 +279,19 @@ import QRCode from "qrcode";
 function MembershipCardInternal({ member }: { member: Member }) {
     const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
 
+    const activeMembership = (member as any).activeMembership;
+    const barcodeData = activeMembership?.barcode || member.cardNumber || member.fiscalCode || "";
+    const cardNumber = activeMembership?.membershipNumber || member.cardNumber || "--- ---";
+    const issueDate = activeMembership?.issueDate || member.cardIssueDate;
+    const expiryDate = activeMembership?.expiryDate || member.cardExpiryDate;
+
     useEffect(() => {
-        if (member.cardNumber || member.fiscalCode) {
-            const data = member.cardNumber || member.fiscalCode || "";
-            QRCode.toDataURL(data, { width: 400, margin: 0 }, (err, url) => {
+        if (barcodeData) {
+            QRCode.toDataURL(barcodeData, { width: 400, margin: 0 }, (err, url) => {
                 if (!err) setQrCodeUrl(url);
             });
         }
-    }, [member]);
+    }, [barcodeData]);
 
     const formatDate = (date: any) => {
         if (!date) return "--/--/----";
@@ -307,15 +314,15 @@ function MembershipCardInternal({ member }: { member: Member }) {
                 <div className="w-full text-center space-y-1.5">
                     <div className="space-y-0.5">
                         <div className="text-[7px] uppercase text-gray-400 font-bold">Numero Tessera</div>
-                        <div className="text-sm font-black text-[#e11d48]">{member.cardNumber || "--- ---"}</div>
+                        <div className="text-sm font-black text-[#e11d48]">{cardNumber}</div>
                         <div className="flex justify-center gap-4 mt-1">
                             <div className="flex flex-col">
                                 <span className="text-[6px] uppercase text-gray-400 font-bold">Rilascio</span>
-                                <span className="text-[8px] font-bold">{formatDate(member.cardIssueDate)}</span>
+                                <span className="text-[8px] font-bold">{formatDate(issueDate)}</span>
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-[6px] uppercase text-gray-400 font-bold">Scadenza</span>
-                                <span className="text-[8px] font-bold text-[#e11d48]">{formatDate(member.cardExpiryDate)}</span>
+                                <span className="text-[8px] font-bold text-[#e11d48]">{formatDate(expiryDate)}</span>
                             </div>
                         </div>
                     </div>

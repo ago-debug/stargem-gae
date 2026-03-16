@@ -808,8 +808,8 @@ export default function Members() {
     <div className="p-6 md:p-8 space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Anagrafica a Lista</h1>
-          <p className="text-muted-foreground">Anagrafica completa</p>
+          <h1 className="text-3xl font-semibold text-foreground mb-2">Anagrafica Generale</h1>
+          <p className="text-muted-foreground">Gestisci clienti, istruttori e staff</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button

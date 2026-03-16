@@ -14,36 +14,19 @@ import {
   FolderTree,
   ArrowLeft,
   Database,
+  CreditCard,
+  Gift,
+  BookOpen,
+  Building2,
+  ShoppingBag,
 } from "lucide-react";
 import { Link } from "wouter";
-
-interface CategoryInfo {
-  id: string;
-  label: string;
-  icon: typeof Calendar;
-  color: string;
-  url: string;
-  apiEndpoint: string;
-}
-
-const categoryPages: CategoryInfo[] = [
-  { id: "corsi", label: "Categorie Corsi", icon: Calendar, color: "icon-gold-bg", url: "/categorie-corsi", apiEndpoint: "/api/categories" },
-  { id: "workshop", label: "Categorie Workshop", icon: Sparkles, color: "icon-gold-bg", url: "/categorie-workshop", apiEndpoint: "/api/workshop-categories" },
-  { id: "domeniche", label: "Categorie Domeniche in Movimento", icon: Sun, color: "icon-gold-bg", url: "/categorie-domeniche", apiEndpoint: "/api/sunday-categories" },
-  { id: "allenamenti", label: "Categorie Allenamenti/Affitti", icon: Dumbbell, color: "icon-gold-bg", url: "/categorie-allenamenti", apiEndpoint: "/api/training-categories" },
-  { id: "lezioni", label: "Categorie Lezioni Individuali", icon: UserCheck, color: "icon-gold-bg", url: "/categorie-lezioni-individuali", apiEndpoint: "/api/individual-lesson-categories" },
-  { id: "campus", label: "Categorie Campus", icon: Users, color: "icon-gold-bg", url: "/categorie-campus", apiEndpoint: "/api/campus-categories" },
-  { id: "saggi", label: "Categorie Saggi", icon: Award, color: "icon-gold-bg", url: "/categorie-saggi", apiEndpoint: "/api/recital-categories" },
-  { id: "vacanze", label: "Categorie Vacanze Studio", icon: Music, color: "icon-gold-bg", url: "/categorie-vacanze-studio", apiEndpoint: "/api/vacation-categories" },
-  { id: "servizi", label: "Categorie Servizi Extra", icon: Database, color: "icon-gold-bg", url: "/categorie-servizi", apiEndpoint: "/api/booking-service-categories" },
-  { id: "prove-pagamento", label: "Categorie Prove a Pagamento", icon: Award, color: "icon-gold-bg", url: "/categorie-corsi", apiEndpoint: "/api/categories" },
-  { id: "prove-gratuite", label: "Categorie Prove Gratuite", icon: Award, color: "icon-gold-bg", url: "/categorie-corsi", apiEndpoint: "/api/categories" },
-  { id: "lezioni-singole", label: "Categorie Lezioni Singole", icon: UserCheck, color: "icon-gold-bg", url: "/categorie-corsi", apiEndpoint: "/api/categories" },
-];
+import { getActiveActivities } from "@/config/activities";
+// Interfaccia definita storicamente qui eliminata per favorire la Single Source of Truth
 
 type AnyCategory = { id: number; name: string; parentId?: number | null };
 
-function CategoryCard({ info }: { info: CategoryInfo }) {
+function CategoryCard({ info }: { info: any }) {
   const { data: categories } = useQuery<AnyCategory[]>({
     queryKey: [info.apiEndpoint],
   });
@@ -100,8 +83,17 @@ export default function ActivityCategories() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {categoryPages.map((info) => (
-          <CategoryCard key={info.id} info={info} />
+        {getActiveActivities()
+          .filter(a => a.visibility.categoriePanel)
+          .map((a) => (
+            <CategoryCard key={a.id} info={{
+              id: a.id,
+              label: `Categorie ${a.labelUI}`,
+              icon: a.design.icon,
+              color: a.design.colorClass,
+              url: a.categoryManagementUrl || a.routeUrl,
+              apiEndpoint: a.apiEndpoint || ""
+            }} />
         ))}
       </div>
     </div>

@@ -29,23 +29,21 @@ import {
   GraduationCap,
   Edit,
   Database,
+  Building2,
+  ShoppingBag,
 } from "lucide-react";
 import type { Course, Workshop, Member, PaidTrial, FreeTrial, SingleLesson, SundayActivity, Training, IndividualLesson, CampusActivity, Recital, VacationStudy, BookingService } from "@shared/schema";
+import { getActiveActivities } from "@/config/activities";
 
 const activityMenuItems = [
   { id: "panoramica", label: "Panoramica", icon: Activity },
-  { id: "corsi", label: "Corsi", icon: Calendar },
-  { id: "workshop", label: "Workshop", icon: Sparkles },
-  { id: "servizi", label: "Servizi Extra", icon: Database },
-  { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard },
-  { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift },
-  { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen },
-  { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun },
-  { id: "allenamenti", label: "Allenamenti/Affitti", icon: Dumbbell },
-  { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck },
-  { id: "campus", label: "Campus", icon: Users },
-  { id: "saggi", label: "Saggi", icon: Award },
-  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music },
+  ...getActiveActivities()
+    .filter(a => a.visibility.iscrittiPanel)
+    .map(a => ({
+      id: a.id,
+      label: a.labelUI,
+      icon: a.design.icon
+    }))
 ];
 
 export default function IscrittiPerAttivita() {
@@ -105,16 +103,18 @@ export default function IscrittiPerAttivita() {
   }
 
   const extraActivitiesMap: Record<string, ExtraDataConfig> = {
-    "servizi": { data: bookingServices, loading: servLoading, link: "/scheda-servizio", enrollments: servEnrollments, enrollLoading: servEnrLoading, foreignKey: "serviceId" },
+    "servizi": { data: bookingServices, loading: servLoading, link: "/gestione-attivita-stub", enrollments: servEnrollments, enrollLoading: servEnrLoading, foreignKey: "serviceId" },
     "prove-pagamento": { data: paidTrials, loading: ptLoading, link: "/scheda-prova-pagamento", enrollments: ptEnrollments, enrollLoading: ptEnrLoading, foreignKey: "paidTrialId" },
     "prove-gratuite": { data: freeTrials, loading: ftLoading, link: "/scheda-prova-gratuita", enrollments: ftEnrollments, enrollLoading: ftEnrLoading, foreignKey: "freeTrialId" },
     "lezioni-singole": { data: singleLessons, loading: slLoading, link: "/scheda-lezione-singola", enrollments: slEnrollments, enrollLoading: slEnrLoading, foreignKey: "singleLessonId" },
     "domeniche-movimento": { data: sundayActivities, loading: saLoading, link: "/scheda-domenica", enrollments: saEnrollments, enrollLoading: saEnrLoading, foreignKey: "sundayActivityId" },
     "allenamenti": { data: trainings, loading: trLoading, link: "/scheda-allenamento", enrollments: trEnrollments, enrollLoading: trEnrLoading, foreignKey: "trainingId" },
+    "affitti": { data: [], loading: false, link: "/prenotazioni-sale", enrollments: [], enrollLoading: false, foreignKey: "id" },
     "lezioni-individuali": { data: individualLessons, loading: ilLoading, link: "/scheda-lezione-individuale", enrollments: ilEnrollments, enrollLoading: ilEnrLoading, foreignKey: "individualLessonId" },
     "campus": { data: campusActivities, loading: caLoading, link: "/scheda-campus", enrollments: caEnrollments, enrollLoading: caEnrLoading, foreignKey: "campusActivityId" },
     "saggi": { data: recitals, loading: recLoading, link: "/scheda-saggio", enrollments: recEnrollments, enrollLoading: recEnrLoading, foreignKey: "recitalId" },
     "vacanze-studio": { data: vacationStudies, loading: vsLoading, link: "/scheda-vacanza-studio", enrollments: vsEnrollments, enrollLoading: vsEnrLoading, foreignKey: "vacationStudyId" },
+    "merchandising": { data: [], loading: false, link: "/gestione-attivita-stub", enrollments: [], enrollLoading: false, foreignKey: "merchandisingId" },
   };
 
   const isExtraLoading = Object.values(extraActivitiesMap).some(config => config.loading || config.enrollLoading);

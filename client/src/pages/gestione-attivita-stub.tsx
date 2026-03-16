@@ -20,7 +20,7 @@ export default function GestioneAttivitaStub({ title, description }: GestioneAtt
           </Link>
           <div>
             <h1 className="text-2xl font-semibold text-foreground" data-testid="text-activity-title">
-              Gestione {title}
+              {title}
             </h1>
             <p className="text-muted-foreground text-sm">{description}</p>
           </div>
@@ -36,8 +36,8 @@ export default function GestioneAttivitaStub({ title, description }: GestioneAtt
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            La pagina di gestione per <strong>{title}</strong> è in fase di sviluppo. 
-            Presto sarà disponibile con tutte le funzionalità di gestione complete.
+            L'area <strong>{title}</strong> è in sviluppo o attualmente in manutenzione strutturale. 
+            Presto sarà disponibile con tutte le funzionalità complete.
           </p>
         </CardContent>
       </Card>

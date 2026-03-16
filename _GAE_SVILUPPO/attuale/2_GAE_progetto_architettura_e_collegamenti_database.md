@@ -11,10 +11,39 @@ Per avere una visione completa dello stato del software e della sua evoluzione, 
 1. **[Registro Ultimi Aggiornamenti](../../GAE_ULTIMI_AGGIORNAMENTI.md)** -> Contiene lo storico dettagliato (Changelog) di tutte le modifiche, fix e nuove feature sviluppate di recente.
 2. **[Piano Architettura Futura (Single Table Inheritance)](../futuro/2_database_map_future.md)** -> Contiene l'analisi avanzata (Entity-Relationship Diagram e Vocabolario) su come trasformare l'attuale struttura a "12 silos" in un unico motore dinamico in caso di refactoring totale.
 
----
-
 Questo documento spiega le **logiche portanti** ("intoccabili") del database e i **margini di flessibilità** (dove è possibile e sicuro intervenire), allo scopo di guidare gli sviluppatori futuri su come estendere il software senza corrompere o frammentare l'ecosistema esistente.
 Il database è interamente definito nel file `/shared/schema.ts` (Drizzle ORM + MySQL).
+
+---
+
+## 0. STRATEGIA OPERATIVA E CHANGE CONTROL (Stop & Go)
+In virtù dell'approccio di Sviluppo Modulare Veloce e della potenziale alta distruttività di refactoring non calcolati in un gestionale SaaS con 73 tabelle, vige una **Regola Permanente di Change Control** applicabile a qualsivoglia sviluppatore o Agente AI.
+
+Prima di procedere con modifiche che impatteranno o refattorizzeranno l'architettura viva, file sorgenti, JSX components critici o il database, **È OBBLIGATORIO FERMARSI E PRODURRE QUESTO REPORT ANALITICO ALL'UTENTE:**
+1. **Modifica proposta** (il piano d'azione).
+2. **Perché serve** (il razionale pratico).
+3. **File coinvolti** (sorgenti in lettura e scrittura).
+4. **Impatti previsti** (cosa cambierà all'utente segreteria).
+5. **Rischi / regressioni possibili** (i side-effect su vecchi record o rotte limitrofe).
+6. **Cosa NON verrà toccato** (il perimetro d'azione da salvaguardare).
+
+> **🛑 REGOLA INFRANGIBILE (Stop & Go):**
+> È fatto assoluto divieto procedere alla modifica reale del codice una volta presentato il report in implementation_plan. Lo sviluppatore o l'AI deve mettersi **in attesa passiva di approvazione esplicita** da parte del CTO/Project Manager. Niente salti in avanti per "efficienza presunta". 
+
+---
+
+## A. Manifesto Architetturale e Visione Prodotto
+Ogni sviluppatore che contribuisce a CourseManager deve aderire a questi principi:
+1. **Nessun "Cappotto su Misura":** Il gestionale risolve oggi i problemi di StarGem, ma **non** deve essere limitato dalle regole di un singolo centro. L'architettura deve rimanere modulare, scalabile, estendibile, multi-sede e multi-tenant (SaaS).
+2. **Evoluzione Controllata (Nessun Rewrite Totale):** L’obiettivo primario è portare il gestionale in produzione in tempi brevi, tutelando il lavoro svolto. Sono vietate le riscritture totali da zero o l'over-engineering prematuro. La priorità è: stabilizzare i flussi core, chiudere le falle architetturali gravi (es. Pagamenti Orfani) e accettare esplicitamente il resto come debito tecnico documentato per future iterazioni.
+3. **Sviluppo Parallelo:** Il DB e le interfacce devono poter essere toccate da più team simultaneamente. Questa cartella `_GAE_SVILUPPO` è la costituzione che garantisce la non-collisione (es. usando il Pattern Factory / Drizzle Router unificati).
+4. **Coerenza Evolutiva (Pragmatismo):** Nei nuovi task la prima domanda è: *"Cosa serve davvero per lavorare presto?"*. Le decisioni devono risolvere il blocco odierno, unificare i data-source sparsi (es. Tessere vs members), lasciando però intatti e inalterati i settori funzionanti non essenziali. Progetta per il futuro, ma implementa solo ciò che serve ora.
+5. **Modello Persone Fluido:** Non esistono tabelle isolate per "Collaboratori", "Studenti" o "Affittuari". In CourseManager un `member` o uno `user` può essere simultaneamente Tesserato, Insegnante, Staff, Esterno, tramite etichette di ruolo dinamiche.
+
+## B. Contesto Operativo Reale (Stato Dati)
+*   **Gestione Non in Produzione Estesa:** Il gestionale sta venendo costruito ad-hoc su database vivi. I dati anagrafici attualmente immessi sono **record ibridi** importati a scopo di stress-test. Possono risultare storpiati o orfani.
+*   **Integrazione Attesa:** La bonifica formale del DB di produzione avverrà prelevando gli storici reali da fonti decentralizzate (fogli G-Sheet, export PDF, Athena Portal, TeamSystem).
+*   **Ecosistema Allargato:** Nei quarter futuri il CMS `studio-gem.it` (WooCommerce/WordPress) verrà integrato al db, rendendo i listini comunicanti.
 
 ---
 
@@ -22,7 +51,10 @@ Il database è interamente definito nel file `/shared/schema.ts` (Drizzle ORM + 
 L'architettura ha alcune colonne portanti che strutturano l'intero gestionale. Se modificate pesantemente in modo improprio, si va a rompere il funzionamento di incassi, ricevute ed elenchi in tutto il software (Frontend e Backend).
 
 ### A. La divisione in 12 Moduli "A Silos" (Didattica + Affitti)
-Il progetto non ha un'unica macro orizzontale tabella `activities` in cui un campo definisce se è un "Corso" o un "Workshop". Inizialmente o nel corso del tempo, per assecondare business logic molto separate, il sistema è nato con **tabelle separate** per ogni tipologia erogata.
+
+> [!NOTE]
+> **Disallineamento Architettura DB vs UI Pagamenti (Aggiornamento)**
+> Sebbene l'architettura database conti empiricamente 12 moduli tabellari fisici per iscrizioni/prenotazioni, l'**UI Frontend (Modale Pagamenti ed elenchi hub)** è guidata dall'`ACTIVITY_REGISTRY` che espone **14 Entità Logiche** distinte (separando nettamente "Allenamenti" da "Affitti", e includendo placeholder puramente contabili senza tabella di enrollment come "Merchandising"). Il sistema di pagamento gestisce fluidamente le voci extra tramite fallback su transazioni generiche (`type: "other"`) slegate dai silos didattici.
 
 Le 12 tipologie (tutte con struttura fisica identica per la parte didattica, ma tabelle DB separate) sono:
 1.  **Corsi** (`courses`, `enrollments`)
@@ -47,6 +79,13 @@ La tabella `payments` è l'**Hub di interscambio** ("Junction Table") del compar
 * Quando un pagamento viene registrato, contiene un *Foreign Key* (id esterno) che lo ancora fisicamente alla sua origine.
 * Poiché esistono 12 tipologie di prenotazione/iscrizione, la tabella dei pagamenti contiene 12 colonne relazionali diverse (es. `enrollment_id` per i corsi, `ws_enroll_id` per i workshop, `booking_id` per le sale mediche, ecc.).
 * Modificare come i pagamenti si allacciano a sconti/iscrizioni è l'operazione più a rischio bug per l'intera parte contabile.
+
+### C. Il Nodo "Tessere" (`memberships`) e il Checkout
+La tessera associativa in CourseManager **non** è una banale etichetta testuale, né un "Prodotto E-Commerce", ma un oggetto transazionale primario.
+* **Priorità Assoluta:** La tessera sblocca il carrello. Niente pagamento quota, niente erogazione dell'attività. Le due cose sono asservite l'una all'altra.
+* **Vincolo Assoluto:** La `membership` deve nascere solo ed esclusivamente all'interno di un flusso coerente con un Pagamento effettivo (registrato in `payments` con la foreign key `membership_id` debitamente popolata e agganciata). Non possono esistere tessere slegate dal flusso economico.
+* **Problema Attuale (Marzo 2026) [RISOLTO!]:** Attualmente la `Maschera Input` creava tessere "orfane" dal carrello. Il salvataggio del modulo iniettava l'incasso nel Libro Mastro (`payments`), fallendo nell'agganciare tale record all'ID della nuova tessera. Il bug è stato **risolto in via definitiva** istruendo il framework transazionale a eseguire un "Incrocio ID" forte. Il Frontend ora emette `tempId: membership_fee` abbinato a un `referenceKey` fiscale. Il Backend (`routes.ts`) recupera al volo il `membershipId` nativo e salda i record assieme in parentesi atomica. Se si cancella il pagamento, la tessera ora decade propriamente a pending. Questo Matcher Multi-Persona risolve specialmente i checkout parentali (es. genitore che paga 2 tessere distinte per i 2 figli nello stesso carrello).
+* **Dipendenze:** La validità del tesseramento sblocca o meno l'erogazione delle restanti attività.
 
 ---
 
@@ -120,8 +159,42 @@ In base all'analisi della struttura a 12 moduli (11 attività + Servizi Extra/Pr
 
 ### B. Prevenire i "Pagamenti Orfani" (Strict Validation)
 *   **Problema:** Se la Maschera Input ha un'anomalia, si rischia di inviare un pagamento valido ma senza allegare l'ID dell'attività corrispondente. I soldi risultano in cassa, ma non si sa a cosa sono riferiti.
-*   **Soluzione Backend:** Nel blocco `POST /api/payments` del server, aggiungere una validazione ferrea (tramite `zod` o if-statement manuale). Il sistema deve **rifiutare fisicamente** la ricezione di un pagamento se tutte le 12 `foreign_key` (es. `enrollment_id`, `booking_id`, `ws_enroll_id`...) sono vuote.
-*   **Soluzione Frontend:** Disabilitare il bottone "Salva Pagamento" in `maschera-input-generale.tsx` finché il payload non contiene l'ID esatto del corso/servizio selezionato. Meno codice opaco, più sicurezza contabile.
+*   **Soluzione Backend:** Nel blocco `POST /api/payments` del server, aggiungere una validazione ferrea (tramite `zod` o if-statement manuale). Il sistema deve **rifiutare fisicamente** la ricezione di un pagamento se tutte le 12 `foreign_key` (es. `enrollment_id`, `membership_id`, `ws_enroll_id`...) sono vuote. L'unica eccezione validata è un caricamento "borsellino elettronico" generico.
+*   **Soluzione Frontend:** Disabilitare il bottone "Salva Pagamento" in `maschera-input-generale.tsx` finché il payload non contiene l'ID esatto del corso/servizio selezionato. Meno codice opaco, più sicurezza contabile. La maschera produce il match anche su carrelli multi-utente inviando il `referenceKey`.
+
+---
+
+## 6-bis. Calendario Operativo ↔ Regia Planning (Mapping 2026)
+Nell'operatività reale front-desk, il tempo non viene visualizzato in unico calderone, ma segue uno schema gerarchico a 3 layer da preservare senza refactoring distruttivi:
+1. **Modulo Sorgente Attività (SQL):** I dati reali nascono sempre dalle tabelle silenziose (`courses`, `campuses` ecc.). Nessun dato nasce dal Calendario UI.
+2. **Calendario Attività (Route `/calendario-attivita`):** È la **Vista Tattica a Slot (Day-by-Day)**. Serve puramente al front-desk per l'operatività immediata: vedere chi è prenotato e dove nel dettaglio orario. 
+3. **Planning (Route `/planning`):** È la **Vista Strategica e di Regia**. Serve alla Direzione per governare il macro-scheduling. Ragiona per mesi.
+
+### Classificazione delle 14 Attività Ufficiali
+Come concordato, queste sono le regole di rendering per evitare forzature a frontend:
+
+| # | Attività | Calendario (Orario/Daily)? | Planning (Stagionale)? | Natura |
+|---|---|:---:|:---:|---|
+| 1 | **Corsi** | ✅ SI | ✅ SI (Aggregati) | Strutturale fissa |
+| 2 | **Workshop** | ✅ SI | ✅ SI | Evento mirato orario |
+| 3 | **Prove a pagamento** | ✅ SI | ❌ NO | Occasionale/Tattico |
+| 4 | **Prove gratuite** | ✅ SI | ❌ NO | Occasionale/Tattico |
+| 5 | **Lezioni singole** | ✅ SI | ❌ NO | Prenotazione oraria |
+| 6 | **Lezioni individuali** | ✅ SI | ❌ NO | Slot personalizzato |
+| 7 | **Domenica in movimento**| ✅ SI | ✅ SI | Flash Event orario |
+| 8 | **Allenamenti** | ✅ SI | ❌ NO | Slot affitto libero orario |
+| 9 | **Affitti** | ✅ SI | ❌ NO | Spazio orario / Booking |
+| 10| **Campus** | ✅ SI | ✅ SI | Strutturale Plurigiornaliero |
+| 11| **Saggi** | ❌ NO | ✅ SI | Evento Macro |
+| 12| **Vacanze studio** | ❌ NO | ✅ SI | Esterno Plurigiornaliero |
+| 13| **Eventi esterni** | ❌ NO | ✅ SI | Evento / Trasferta |
+| 14| **Merchandising** | ❌ NO | ❌ NO | **Solo hub vendita.** |
+
+*Diagnosi Attuale:* Il Calendario carica già molto bene Corsi, Workshop e Affitti grazie ad `unifiedEvents`. Il resto è ancora affidato parzialmente a listini e backend legacy separati.
+*Prossimo step prudente:* Completare l'import in `calendar.tsx` (`unifiedEvents`) per agganciare Lezioni Singole/Individuali e Allenamenti al grid tattico. Evitare refactoring DB, mappare e normalizzare solo lato JSX.
+
+**Debito Tecnico Tollerato (Prenotazione Spazi ed Esterni):**
+*In nome dell'"Evoluzione Controllata", le schermate "Prenotazione Sale" (es. `studio_bookings`) e roba esterna (es. `booking_services`), pur essendo logicamente assimilabili alle attività core, **RESTANO COME SONO** e in voci di menu a sé stanti. Non si deve tentare un rewrite totale per fonderle forzatamente nel Calendario Attività SQL. La loro lettura unificata avverrà per interpolazione Software in React (es. `CalendarEvent[]`), prestando attenzione a non usare classi CSS compilate dinamicamente (altrimenti Tailwind PurgeCSS le sopprime) ma mappando i colori per via statica o inline hex.*
 
 ---
 

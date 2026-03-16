@@ -18,6 +18,7 @@ import { PaymentModuleConnector } from "@/components/PaymentModuleConnector";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { getActiveActivities } from "@/config/activities";
 import type { Member, PriceList, Course, Quote, PriceListItem } from "@shared/schema";
 
 export function NuovoPagamentoModal({
@@ -103,6 +104,7 @@ export function NuovoPagamentoModal({
     const { data: recitals } = useQuery<any[]>({ queryKey: ["/api/recitals"] });
     const { data: vacationStudies } = useQuery<any[]>({ queryKey: ["/api/vacation-studies"] });
     const { data: studios } = useQuery<any[]>({ queryKey: ["/api/studios"] });
+    const { data: bookingServices } = useQuery<any[]>({ queryKey: ["/api/booking-services"] });
     const { data: studioBookings } = useQuery<any[]>({ queryKey: ["/api/studio-bookings", { memberId: selectedMemberId }], enabled: !!selectedMemberId, queryFn: async () => { const res = await fetch(`/api/studio-bookings?memberId=${selectedMemberId}`); return res.ok ? res.json() : []; } });
     const { data: membershipsDataList } = useQuery<any[]>({ queryKey: ["/api/memberships", { memberId: selectedMemberId }], enabled: !!selectedMemberId, queryFn: async () => { const res = await fetch(`/api/memberships?memberId=${selectedMemberId}`); return res.ok ? res.json() : []; } });
 
@@ -277,16 +279,16 @@ export function NuovoPagamentoModal({
                     };
 
                     switch (row.activityType) {
-                        case 'eventi':
+                        case 'workshops':
                             await createEnrollmentAndPay("/api/workshop-enrollments", { ...basePayload, workshopId: parsedId }, "workshopEnrollmentId", "workshop");
                             break;
-                        case 'prove_pagamento':
+                        case 'paid-trials':
                             await createEnrollmentAndPay("/api/paid-trial-enrollments", { ...basePayload, paidTrialId: parsedId }, "paidTrialEnrollmentId", "paid_trial");
                             break;
-                        case 'prove_gratuite':
+                        case 'free-trials':
                             await createEnrollmentAndPay("/api/free-trial-enrollments", { ...basePayload, freeTrialId: parsedId }, "freeTrialEnrollmentId", "free_trial");
                             break;
-                        case 'lezioni_singole':
+                        case 'single-lessons':
                             await createEnrollmentAndPay("/api/single-lesson-enrollments", { ...basePayload, singleLessonId: parsedId }, "singleLessonEnrollmentId", "single_lesson");
                             break;
                         case 'domeniche':
@@ -295,7 +297,7 @@ export function NuovoPagamentoModal({
                         case 'allenamenti':
                             await createEnrollmentAndPay("/api/training-enrollments", { ...basePayload, trainingId: parsedId }, "trainingEnrollmentId", "training");
                             break;
-                        case 'lezioni_individuali':
+                        case 'individual-lessons':
                             await createEnrollmentAndPay("/api/individual-lesson-enrollments", { ...basePayload, individualLessonId: parsedId }, "individualLessonEnrollmentId", "individual_lesson");
                             break;
                         case 'campus':
@@ -304,13 +306,22 @@ export function NuovoPagamentoModal({
                         case 'saggi':
                             await createEnrollmentAndPay("/api/recital-enrollments", { ...basePayload, recitalId: parsedId }, "recitalEnrollmentId", "recital");
                             break;
-                        case 'vacanze_studio':
+                        case 'vacanze-studio':
                             await createEnrollmentAndPay("/api/vacation-study-enrollments", { ...basePayload, vacationStudyId: parsedId }, "vacationStudyEnrollmentId", "vacation_study");
                             break;
-                        case 'servizi_extra':
+                        case 'studioBookings':
                             await createEnrollmentAndPay("/api/studio-bookings", { ...basePayload, studioId: parsedId, bookingDate: new Date().toISOString(), startTime: "12:00", endTime: "13:00", amount: row.basePrice.toString() }, "bookingId", "service_booking");
                             break;
-                        case 'corsi':
+                        case 'servizi':
+                        case 'merchandising':
+                            // Vendita Diretta (Merchandising o Eventi Esterni / Booking Services) che non usa tabelle di Enrollment specifiche
+                            paymentPayload.type = row.activityType === 'merchandising' ? "other" : "service_booking";
+                            paymentPayload.notes = `${row.activityType === 'merchandising' ? 'Merchandising' : 'Servizio Esterno'} - (SKU ID: ${parsedId || 'N/A'}). ${paymentPayload.notes}`;
+                            if (parseFloat(row.subtotal) > 0) {
+                                await apiRequest("POST", "/api/payments", paymentPayload);
+                            }
+                            break;
+                        case 'courses':
                         default:
                             await createEnrollmentAndPay("/api/enrollments", { ...basePayload, courseId: parsedId }, "enrollmentId", "course");
                             break;
@@ -731,6 +742,7 @@ export function NuovoPagamentoModal({
                                                 recitals={recitals || []}
                                                 vacationStudies={vacationStudies || []}
                                                 studios={studios || []}
+                                                bookingServices={bookingServices || []}
                                                 priceLists={priceLists || []}
                                                 quotes={quotes || []}
                                                 updateRow={updateRow}
@@ -847,13 +859,13 @@ export function NuovoPagamentoModal({
 function CartTableRow({
     row, courses, workshops, paidTrials, freeTrials, singleLessons,
     sundayActivities, trainings, individualLessons, campusActivities,
-    recitals, vacationStudies, studios, priceLists, quotes,
+    recitals, vacationStudies, studios, bookingServices, priceLists, quotes,
     updateRow, updateRowBatch, removeCartRow, index
 }: {
     row: any, courses: Course[], workshops: any[], paidTrials: any[],
     freeTrials: any[], singleLessons: any[], sundayActivities: any[],
     trainings: any[], individualLessons: any[], campusActivities: any[],
-    recitals: any[], vacationStudies: any[], studios: any[],
+    recitals: any[], vacationStudies: any[], studios: any[], bookingServices: any[],
     priceLists: PriceList[], quotes: Quote[], updateRow: any,
     updateRowBatch: any, removeCartRow: any, index: number
 }) {
@@ -870,17 +882,19 @@ function CartTableRow({
             const entityId = parseInt(row.skus[0]);
             let entityType = "course";
             switch (row.activityType) {
-                case "eventi": entityType = "workshop"; break;
-                case "prove_pagamento": entityType = "paid_trial"; break;
-                case "prove_gratuite": entityType = "free_trial"; break;
-                case "lezioni_singole": entityType = "single_lesson"; break;
+                case "courses": entityType = "course"; break;
+                case "workshops": entityType = "workshop"; break;
+                case "paid-trials": entityType = "paid_trial"; break;
+                case "free-trials": entityType = "free_trial"; break;
+                case "single-lessons": entityType = "single_lesson"; break;
                 case "domeniche": entityType = "sunday_activity"; break;
                 case "allenamenti": entityType = "training"; break;
-                case "lezioni_individuali": entityType = "individual_lesson"; break;
+                case "individual-lessons": entityType = "individual_lesson"; break;
                 case "campus": entityType = "campus_activity"; break;
                 case "saggi": entityType = "recital"; break;
-                case "vacanze_studio": entityType = "vacation_study"; break;
-                case "servizi_extra": entityType = "booking_service"; break;
+                case "vacanze-studio": entityType = "vacation_study"; break;
+                case "studioBookings": entityType = "booking_service"; break; // Sale mapping old system
+                case "servizi": entityType = "booking_service"; break; // Eventi esterni
             }
 
             const item = listinoItems.find(i => i.entityType === entityType && i.entityId === entityId);
@@ -901,22 +915,27 @@ function CartTableRow({
         }
     }, [row.skus, row.periodId, listinoItems, row.activityType, quotes.length, row.id, lastAutoPricedCombo]);
 
-    const availableActivityTypes = ["corsi", "eventi", "prove_pagamento", "prove_gratuite", "lezioni_singole", "domeniche", "allenamenti", "lezioni_individuali", "campus", "saggi", "vacanze_studio", "servizi_extra"];
-
-    let currentCatalog: any[] = courses || [];
-    switch (row.activityType) {
-        case "eventi": currentCatalog = workshops || []; break;
-        case "prove_pagamento": currentCatalog = paidTrials || []; break;
-        case "prove_gratuite": currentCatalog = freeTrials || []; break;
-        case "lezioni_singole": currentCatalog = singleLessons || []; break;
-        case "domeniche": currentCatalog = sundayActivities || []; break;
-        case "allenamenti": currentCatalog = trainings || []; break;
-        case "lezioni_individuali": currentCatalog = individualLessons || []; break;
-        case "campus": currentCatalog = campusActivities || []; break;
-        case "saggi": currentCatalog = recitals || []; break;
-        case "vacanze_studio": currentCatalog = vacationStudies || []; break;
-        case "servizi_extra": currentCatalog = studios || []; break;
-    }
+    const currentCatalog = useMemo(() => {
+        let catalog: any[] = [];
+        switch (row.activityType) {
+            case "courses": catalog = courses || []; break;
+            case "workshops": catalog = workshops || []; break;
+            case "paid-trials": catalog = paidTrials || []; break;
+            case "free-trials": catalog = freeTrials || []; break;
+            case "single-lessons": catalog = singleLessons || []; break;
+            case "domeniche": catalog = sundayActivities || []; break;
+            case "allenamenti": catalog = trainings || []; break;
+            case "individual-lessons": catalog = individualLessons || []; break;
+            case "campus": catalog = campusActivities || []; break;
+            case "saggi": catalog = recitals || []; break;
+            case "vacanze-studio": catalog = vacationStudies || []; break;
+            case "studioBookings": catalog = studios || []; break; // "Affitti" maps to the rooms catalog
+            case "servizi": catalog = bookingServices || []; break; // "Eventi Esterni" maps to specific external services
+            case "merchandising": catalog = []; break; // Placeholder manuale 
+            default: catalog = courses || []; break;
+        }
+        return catalog;
+    }, [row.activityType, courses, workshops, paidTrials, freeTrials, singleLessons, sundayActivities, trainings, individualLessons, campusActivities, recitals, vacationStudies, studios, bookingServices]);
 
     if (row.isDebt) {
         return (
@@ -996,18 +1015,11 @@ function CartTableRow({
                                 <SelectValue placeholder="Seleziona..." />
                             </SelectTrigger>
                             <SelectContent>
-                                {availableActivityTypes.includes("corsi") && <SelectItem value="corsi">Corsi</SelectItem>}
-                                {availableActivityTypes.includes("prove_pagamento") && <SelectItem value="prove_pagamento">Prove a Pagamento</SelectItem>}
-                                {availableActivityTypes.includes("prove_gratuite") && <SelectItem value="prove_gratuite">Prove Gratuite</SelectItem>}
-                                {availableActivityTypes.includes("lezioni_singole") && <SelectItem value="lezioni_singole">Lezioni Singole</SelectItem>}
-                                {availableActivityTypes.includes("eventi") && <SelectItem value="eventi">Workshop</SelectItem>}
-                                {availableActivityTypes.includes("domeniche") && <SelectItem value="domeniche">Domeniche in Movimento</SelectItem>}
-                                {availableActivityTypes.includes("allenamenti") && <SelectItem value="allenamenti">Allenamenti/Affitti</SelectItem>}
-                                {availableActivityTypes.includes("lezioni_individuali") && <SelectItem value="lezioni_individuali">Lezioni Individuali</SelectItem>}
-                                {availableActivityTypes.includes("campus") && <SelectItem value="campus">Campus</SelectItem>}
-                                {availableActivityTypes.includes("saggi") && <SelectItem value="saggi">Saggi</SelectItem>}
-                                {availableActivityTypes.includes("vacanze_studio") && <SelectItem value="vacanze_studio">Vacanze Studio</SelectItem>}
-                                {availableActivityTypes.includes("servizi_extra") && <SelectItem value="servizi_extra">Servizi Extra</SelectItem>}
+                                {getActiveActivities().map((act) => (
+                                    <SelectItem key={act.id} value={act.id}>
+                                        {act.labelUI}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
