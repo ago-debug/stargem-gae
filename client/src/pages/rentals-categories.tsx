@@ -11,23 +11,23 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, FolderTree, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { BookingServiceCategory, InsertBookingServiceCategory } from "@shared/schema";
+import type { RentalCategory, InsertRentalCategory } from "@shared/schema";
 
 export default function RentalsCategories() {
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<BookingServiceCategory | null>(null);
+  const [editingCategory, setEditingCategory] = useState<RentalCategory | null>(null);
 
-  const { data: categories, isLoading } = useQuery<BookingServiceCategory[]>({
-    queryKey: ["/api/booking-service-categories"],
+  const { data: categories, isLoading } = useQuery<RentalCategory[]>({
+    queryKey: ["/api/rental-categories"],
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: InsertBookingServiceCategory) => {
-      await apiRequest("POST", "/api/booking-service-categories", data);
+    mutationFn: async (data: InsertRentalCategory) => {
+      await apiRequest("POST", "/api/rental-categories", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/booking-service-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rental-categories"] });
       toast({ title: "Categoria Affitti creata con successo", description: "La categoria è salvata." });
       setIsFormOpen(false);
       setEditingCategory(null);
@@ -38,11 +38,11 @@ export default function RentalsCategories() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: InsertBookingServiceCategory }) => {
-      await apiRequest("PATCH", `/api/booking-service-categories/${id}`, data);
+    mutationFn: async ({ id, data }: { id: number; data: InsertRentalCategory }) => {
+      await apiRequest("PATCH", `/api/rental-categories/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/booking-service-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rental-categories"] });
       toast({ title: "Categoria Affitti aggiornata con successo" });
       setIsFormOpen(false);
       setEditingCategory(null);
@@ -54,10 +54,10 @@ export default function RentalsCategories() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/booking-service-categories/${id}`, undefined);
+      await apiRequest("DELETE", `/api/rental-categories/${id}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/booking-service-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rental-categories"] });
       toast({ title: "Categoria Affitti eliminata" });
     },
     onError: (error: Error) => {
@@ -68,7 +68,7 @@ export default function RentalsCategories() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data: InsertBookingServiceCategory = {
+    const data: InsertRentalCategory = {
       name: formData.get("name") as string,
       description: formData.get("description") as string || null,
       parentId: formData.get("parentId") && formData.get("parentId") !== "none" ? parseInt(formData.get("parentId") as string) : null,
@@ -111,7 +111,7 @@ export default function RentalsCategories() {
             setIsFormOpen(true);
           }}
           className="gold-3d-button px-4"
-          data-testid="button-add-booking-service-category"
+          data-testid="button-add-rental-category"
         >
           <Plus className="w-4 h-4 mr-2" />
           Nuova Categoria
@@ -164,7 +164,7 @@ export default function RentalsCategories() {
                           setEditingCategory(category);
                           setIsFormOpen(true);
                         }}
-                        data-testid={`button-edit-booking-service-category-${category.id}`}
+                        data-testid={`button-edit-rental-category-${category.id}`}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -177,7 +177,7 @@ export default function RentalsCategories() {
                             deleteMutation.mutate(category.id);
                           }
                         }}
-                        data-testid={`button-delete-booking-service-category-${category.id}`}
+                        data-testid={`button-delete-rental-category-${category.id}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -211,7 +211,7 @@ export default function RentalsCategories() {
                                 setEditingCategory(child);
                                 setIsFormOpen(true);
                               }}
-                              data-testid={`button-edit-booking-service-category-${child.id}`}
+                              data-testid={`button-edit-rental-category-${child.id}`}
                             >
                               <Edit className="w-3.5 h-3.5" />
                             </Button>
@@ -224,7 +224,7 @@ export default function RentalsCategories() {
                                   deleteMutation.mutate(child.id);
                                 }
                               }}
-                              data-testid={`button-delete-booking-service-category-${child.id}`}
+                              data-testid={`button-delete-rental-category-${child.id}`}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
@@ -256,7 +256,7 @@ export default function RentalsCategories() {
                 name="name"
                 defaultValue={editingCategory?.name}
                 required
-                data-testid="input-booking-service-category-name"
+                data-testid="input-rental-category-name"
               />
             </div>
 
@@ -267,14 +267,14 @@ export default function RentalsCategories() {
                 name="description"
                 defaultValue={editingCategory?.description || ""}
                 rows={3}
-                data-testid="input-booking-service-category-description"
+                data-testid="input-rental-category-description"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="parentId">Categoria Padre (opzionale)</Label>
               <Select name="parentId" defaultValue={editingCategory?.parentId?.toString() || "none"}>
-                <SelectTrigger data-testid="select-booking-service-category-parent">
+                <SelectTrigger data-testid="select-rental-category-parent">
                   <SelectValue placeholder="Nessuna (categoria principale)" />
                 </SelectTrigger>
                 <SelectContent>
@@ -295,7 +295,7 @@ export default function RentalsCategories() {
                 name="color"
                 type="color"
                 defaultValue={editingCategory?.color || "#3b82f6"}
-                data-testid="input-booking-service-category-color"
+                data-testid="input-rental-category-color"
               />
             </div>
 
@@ -304,14 +304,14 @@ export default function RentalsCategories() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsFormOpen(false)}
-                data-testid="button-cancel-booking-service-category"
+                data-testid="button-cancel-rental-category"
               >
                 Annulla
               </Button>
               <Button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                data-testid="button-submit-booking-service-category"
+                data-testid="button-submit-rental-category"
               >
                 {editingCategory ? "Salva Modifiche" : "Crea Categoria"}
               </Button>

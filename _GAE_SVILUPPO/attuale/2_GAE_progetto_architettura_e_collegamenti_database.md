@@ -68,7 +68,7 @@ Le 12 tipologie (tutte con struttura fisica identica per la parte didattica, ma 
 9.  **Campus** (`campus_activities`, `ca_enrollments`)
 10. **Saggi / Spettacoli** (`recitals`, `rec_enrollments`)
 11. **Vacanze Studio** (`vacation_studies`, `vs_enrollments`)
-12. **Servizi Extra / Prenotazioni** (`booking_services`, `studio_bookings`) - *Spesso contato come il 12° "Silo" ad uso non propriamente didattico, ma con proprio flusso pagamenti.*
+12. **Eventi Esterni / Prenotazioni** (`booking_services`, `studio_bookings`) - *Spesso contato come il 12° "Silo" ad uso non didattico, ma con proprio flusso pagamenti. Nota (Marzo 2026): A livello di categorie, "Affitti" (Rentals) e "Merchandising" sono stati estratti in tabelle indipendenti (`rental_categories` e `merchandising_categories`) smantellando il sovraccarico legacy su Eventi Esterni.*
 
 💡 **REGOLA D'ORO:** L'idea di unificare ora tutte e 12 le tabelle in una sola sarebbe un disastro informatico (refactoring totale impensabile). Qualsiasi nuova funzionalità logica (es. "aggiungere limitazioni sull'età") **deve essere propagata e considerata su tutte le tabelle simultaneamente** per non creare squilibri nell'interfaccia. 
 Inoltre, quando si fa un inserimento da Front-End (es. tramite la *Maschera Input* o la nuova Modale Unificata del *Calendario*), questa funge da smistatore (Mimetismo STI) che disaccoppia il payload e reindirizza trasparentemente il salvataggio ai legacy endpoint corretti a seconda di quale attività l'operatore seleziona dalla tendina, preservando l'integrità dei silos.

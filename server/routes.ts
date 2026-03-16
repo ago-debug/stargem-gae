@@ -68,7 +68,8 @@ import {
   insertActivitySchema,
   globalEnrollments,
   insertGlobalEnrollmentSchema,
-  insertMerchandisingCategorySchema
+  insertMerchandisingCategorySchema,
+  insertRentalCategorySchema
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -6010,6 +6011,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete merchandising category" });
+    }
+  });
+
+  // ==== Rental Categories (Affitti) ====
+  app.get("/api/rental-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getRentalCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to fetch rental categories" });
+    }
+  });
+
+  app.post("/api/rental-categories", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertRentalCategorySchema.parse(req.body);
+      const category = await storage.createRentalCategory(data);
+      res.status(201).json(category);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to create rental category" });
+    }
+  });
+
+  app.patch("/api/rental-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateRentalCategory(id, req.body);
+      res.json(category);
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to update rental category" });
+    }
+  });
+
+  app.delete("/api/rental-categories/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteRentalCategory(id);
+      res.status(204).end();
+    } catch (error) {
+      console.error("[API Error] Caught explicitly:", error);
+      res.status(500).json({ message: "Failed to delete rental category" });
     }
   });
 

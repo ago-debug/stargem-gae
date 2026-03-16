@@ -347,3 +347,8 @@ Queste check list documentano i cambi di policy applicati in `_GAE_SVILUPPO`:
   - File toccati: `nuovo-pagamento-modal.tsx`, `App.tsx`, `app-sidebar.tsx`
   - Fatto: 1. Controllato e blindato il redirect da `/tessere` a `/tessere-certificati` (`<Redirect>` salvaguarda il routing utente). 2. Verificato che "Nuovo Pagamento" apra ovunque `<NuovoPagamentoModal>` (14 attività supportate in CartTableRow) senza balzi di pagina verso Anagrafica inopportuni. 
   - Manca: Nulla. Flow approvato.
+
+- [x] Task 12.3: Separazione e Fix Categorie Attività (Urgente)
+  - File toccati: `App.tsx`, `client/src/pages/*-categories.tsx`, `server/routes.ts`, `server/storage.ts`, `shared/schema.ts`
+  - Fatto: Completata la diagnosi tecnica: `Affitti` (Rentals) ed `Eventi Esterni` (Booking Services) collidevano sulla stessa tabella/endpoint scatenando crash UI e stringe hardcoded errate. Affitti è stato dotato di una tabella `rental_categories` separata, endpoint `/api/rental-categories` e frontend 100% indipendente. Eventi Esterni ha riassunto l'esclusiva su `booking_service_categories` patchata. Implementato schema fisico e route CRUD completi anche per `merchandising_categories` (eliminata la UI Stub). Eliminati i toast-error non pertinenti. Test direct DB effettuati.
+  - Manca: Completare test finali in QA. Intervento architetturale completato a zero debito tecnico.

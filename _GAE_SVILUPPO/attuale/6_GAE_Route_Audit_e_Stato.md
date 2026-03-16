@@ -55,8 +55,8 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Cour
 | Categorie Prove a Pagamento | `/categorie-prove-pagamento` | `PaidTrialsCategories` | canonico | Componente autonomo ma collegato ad `api/categories`. |
 | Categorie Prove Gratuite | `/categorie-prove-gratuite` | `FreeTrialsCategories` | canonico | Componente autonomo ma collegato ad `api/categories`. |
 | Categorie Lezioni Singole | `/categorie-lezioni-singole` | `SingleLessonsCategories` | canonico | Componente autonomo ma collegato ad `api/categories`. |
-| Categorie Affitti | `/categorie-affitti` | `RentalsCategories` | canonico | Componente autonomo ma collegato ad `api/booking-service-categories`. |
-| Categorie Merchandising | `/categorie-merchandising` | `StubCategorieMerchandising` | placeholder | Architettura categorie nativa per il nuovo modulo Attività. |
+| Categorie Affitti | `/categorie-affitti` | `RentalsCategories` | canonico | Componente autonomo completamente staccato, basato su `api/rental-categories` e db table `rental_categories`. |
+| Categorie Merchandising | `/categorie-merchandising` | `MerchandisingCategories` | canonico | Componente e root API attivati su `/api/merchandising-categories`. Eliminato il placeholder. |
 | Schede Legacy (Varie) | `/scheda-corso`, ecc. | `SchedaCorso`, `SchedaWorkshop`, ecc. | legacy tollerato | Vecchie schede agganciate a params in attesa di redesign |
 | Viste Interne (Varie) | `/attivita/prove-pagamento`, ecc. | `PaidTrials`, `FreeTrials`, ecc. | legacy tollerato | Componenti isolati che andranno fusi in un'unica master view |
 | Eventi Esterni (Orfana) | `/booking-services` | `BookingServices` | candidato a eliminazione futura | Orfana storicizzata dismessa dalla root, ri-inglobata correttamente in `/attivita/servizi`. |
