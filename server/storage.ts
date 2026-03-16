@@ -197,6 +197,9 @@ import {
   globalEnrollments,
   type GlobalEnrollment,
   type InsertGlobalEnrollment,
+  merchandisingCategories,
+  type MerchandisingCategory,
+  type InsertMerchandisingCategory,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -635,6 +638,13 @@ export interface IStorage {
   updateVacationCategory(id: number, vacationCategory: Partial<InsertVacationCategory>): Promise<VacationCategory>;
   deleteVacationCategory(id: number): Promise<void>;
 
+  // MerchandisingCategories
+  getMerchandisingCategories(): Promise<MerchandisingCategory[]>;
+  getMerchandisingCategory(id: number): Promise<MerchandisingCategory | undefined>;
+  createMerchandisingCategory(merchandisingCategory: InsertMerchandisingCategory): Promise<MerchandisingCategory>;
+  updateMerchandisingCategory(id: number, merchandisingCategory: Partial<InsertMerchandisingCategory>): Promise<MerchandisingCategory>;
+  deleteMerchandisingCategory(id: number): Promise<void>;
+
   // FreeTrials
   getFreeTrials(): Promise<FreeTrial[]>;
   getFreeTrial(id: number): Promise<FreeTrial | undefined>;
@@ -994,6 +1004,37 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBookingService(id: number): Promise<void> {
     await db.delete(bookingServices).where(eq(bookingServices.id, id));
+  }
+
+  // ==== Merchandising Categories ====
+  async getMerchandisingCategories(): Promise<MerchandisingCategory[]> {
+    return await db.select().from(merchandisingCategories).orderBy(merchandisingCategories.sortOrder);
+  }
+
+  async getMerchandisingCategory(id: number): Promise<MerchandisingCategory | undefined> {
+    const [category] = await db.select().from(merchandisingCategories).where(eq(merchandisingCategories.id, id));
+    return category;
+  }
+
+  async createMerchandisingCategory(category: InsertMerchandisingCategory): Promise<MerchandisingCategory> {
+    const [result] = await db.insert(merchandisingCategories).values(category as any);
+    const id = (result as any).insertId || (result as any).id;
+    const fetched = await this.getMerchandisingCategory(id);
+    return fetched!;
+  }
+
+  async updateMerchandisingCategory(id: number, category: Partial<InsertMerchandisingCategory>): Promise<MerchandisingCategory> {
+    await db
+      .update(merchandisingCategories)
+      .set({ ...category, updatedAt: new Date() })
+      .where(eq(merchandisingCategories.id, id));
+
+    const updated = await this.getMerchandisingCategory(id);
+    return updated!;
+  }
+
+  async deleteMerchandisingCategory(id: number): Promise<void> {
+    await db.delete(merchandisingCategories).where(eq(merchandisingCategories.id, id));
   }
 
   // ==== Studio Bookings ====
