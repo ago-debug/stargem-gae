@@ -170,7 +170,9 @@ export const customLists = mysqlTable("custom_lists", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   systemName: varchar("system_name", { length: 100 }).unique().notNull(), // e.g., 'course_names'
+  systemCode: varchar("system_code", { length: 50 }),
   description: text("description"),
+  linkedActivities: json("linked_activities").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

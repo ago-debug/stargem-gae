@@ -5,9 +5,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, GripVertical, ListChecks, Plus, Edit, ClipboardPaste } from "lucide-react";
+import { Trash2, GripVertical, ListChecks, Plus, Edit, ClipboardPaste, Settings, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { CustomList, CustomListItem } from "@shared/schema";
+
+const ACTIVITY_TYPES = [
+  { id: "courses", label: "Corsi" },
+  { id: "workshops", label: "Workshop" },
+  { id: "paid_trials", label: "Prove a pagamento" },
+  { id: "free_trials", label: "Prove gratuite" },
+  { id: "single_lessons", label: "Lezioni singole" },
+  { id: "individual_lessons", label: "Lezioni individuali" },
+  { id: "sunday_activities", label: "Domenica in movimento" },
+  { id: "trainings", label: "Allenamenti" },
+  { id: "rentals", label: "Affitti" },
+  { id: "campus", label: "Campus" },
+  { id: "recitals", label: "Saggi" },
+  { id: "vacation_studies", label: "Vacanze studio" },
+  { id: "external_events", label: "Eventi esterni" },
+  { id: "merchandising", label: "Merchandising" }
+];
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -281,7 +298,7 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
 }
 
 interface SimpleListSectionProps {
-  list: CustomList & { items: CustomListItem[] };
+  list: CustomList & { items: CustomListItem[]; linkedActivities?: string[] };
 }
 
 function SimpleListSection({ list }: SimpleListSectionProps) {
@@ -291,6 +308,25 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
   const [editingValue, setEditingValue] = useState("");
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkValues, setBulkValues] = useState("");
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editName, setEditName] = useState(list.name);
+  const [editDescription, setEditDescription] = useState(list.description || "");
+  const [editActivities, setEditActivities] = useState<string[]>(list.linkedActivities || []);
+
+  const updateListSettingsMutation = useMutation({
+    mutationFn: async (data: { name: string; description?: string; linkedActivities: string[] }) => {
+      await apiRequest("PATCH", `/api/custom-lists/${list.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
+      setSettingsOpen(false);
+      toast({ title: "Impostazioni elenco aggiornate" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
 
   const bulkCreateMutation = useMutation({
     mutationFn: async (values: string[]) => {
@@ -373,11 +409,93 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
             {list.name}
           </CardTitle>
           {list.description && <p className="text-xs text-muted-foreground mt-1">{list.description}</p>}
+          <div className="flex flex-wrap gap-1 mt-2">
+            {(typeof list.linkedActivities === 'string' ? JSON.parse(list.linkedActivities || '[]') : (list.linkedActivities || [])).map((act: string) => {
+              const label = ACTIVITY_TYPES.find(a => a.id === act)?.label || act;
+              return <Badge key={act} variant="outline" className="text-[9px] px-1.5 py-0 bg-muted/30 border-border/50 text-muted-foreground">{label}</Badge>
+            })}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-[10px] font-bold bg-muted/60 h-5">
             {list.items?.length || 0} voci
           </Badge>
+
+          <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+            <DialogTrigger asChild>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-6 w-6 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-foreground transition-opacity"
+                title="Impostazioni Elenco"
+                onClick={() => {
+                  setEditName(list.name);
+                  setEditDescription(list.description || "");
+                  const acts = typeof list.linkedActivities === 'string' ? JSON.parse(list.linkedActivities || '[]') : (list.linkedActivities || []);
+                  setEditActivities(Array.isArray(acts) ? acts : []);
+                }}
+              >
+                <Settings className="w-3.5 h-3.5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-xl">
+              <DialogHeader>
+                <DialogTitle>Impostazioni Elenco "{list.name}"</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                 <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-1.5 box-border">
+                     <label className="text-xs font-semibold text-muted-foreground">Nome Elenco</label>
+                     <Input value={editName} onChange={e => setEditName(e.target.value)} />
+                   </div>
+                   <div className="space-y-1.5 box-border">
+                     <label className="text-xs font-semibold text-muted-foreground">Descrizione</label>
+                     <Input value={editDescription} onChange={e => setEditDescription(e.target.value)} />
+                   </div>
+                 </div>
+                 
+                 <div className="pt-4 border-t border-border">
+                   <h4 className="text-sm font-semibold mb-3">Attività Collegate</h4>
+                   <p className="text-xs text-muted-foreground mb-4">Seleziona in quali sottomoduli (attività) i valori di questo elenco devono essere disponibili per la selezione.</p>
+                   
+                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                     {ACTIVITY_TYPES.map(act => {
+                       const isActive = editActivities.includes(act.id);
+                       return (
+                         <div 
+                           key={act.id} 
+                           onClick={() => {
+                             setEditActivities(prev => isActive ? prev.filter(id => id !== act.id) : [...prev, act.id])
+                           }}
+                           className={`flex items-center gap-2 p-2 rounded-md border cursor-pointer text-sm transition-colors ${isActive ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-white border-border hover:bg-muted/50 text-muted-foreground'}`}
+                         >
+                           <div className={`w-4 h-4 rounded-sm border flex items-center justify-center flex-shrink-0 ${isActive ? 'bg-amber-500 border-amber-500' : 'bg-white border-input'}`}>
+                             {isActive && <Check className="w-3 h-3 text-white" />}
+                           </div>
+                           <span className="truncate">{act.label}</span>
+                         </div>
+                       )
+                     })}
+                   </div>
+                 </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setSettingsOpen(false)}>Annulla</Button>
+                <Button className="gold-3d-button px-6" onClick={() => {
+                  if (editName.trim()) {
+                    updateListSettingsMutation.mutate({
+                      name: editName.trim(),
+                      description: editDescription.trim() || undefined,
+                      linkedActivities: editActivities
+                    })
+                  }
+                }} disabled={!editName.trim() || updateListSettingsMutation.isPending}>
+                  {updateListSettingsMutation.isPending ? "Salvataggio..." : "Salva Modifiche"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <Button
             type="button"
             size="icon"
@@ -556,19 +674,21 @@ function SimpleListsManager() {
   const { toast } = useToast();
   const [newListName, setNewListName] = useState("");
   const [newListDescription, setNewListDescription] = useState("");
+  const [newListActivities, setNewListActivities] = useState<string[]>([]);
 
-  const { data: lists } = useQuery<(CustomList & { items: CustomListItem[] })[]>({
+  const { data: lists } = useQuery<(CustomList & { items: CustomListItem[]; linkedActivities?: string[] })[]>({
     queryKey: ["/api/custom-lists"],
   });
 
   const createListMutation = useMutation({
-    mutationFn: async (data: { name: string; description?: string }) => {
+    mutationFn: async (data: { name: string; description?: string; linkedActivities: string[] }) => {
       await apiRequest("POST", "/api/custom-lists", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
       setNewListName("");
       setNewListDescription("");
+      setNewListActivities([]);
       toast({ title: "Nuovo elenco semplice creato con successo" });
     },
     onError: (error: Error) => {
@@ -586,36 +706,64 @@ function SimpleListsManager() {
       </div>
 
       <Card className="border-border/60 shadow-sm bg-muted/20">
-        <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4 items-end">
-          <div className="w-full sm:flex-1 space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase">Nome Nuovo Elenco</label>
-            <Input
-              placeholder="es. Nomi Corsi"
-              value={newListName}
-              onChange={(e) => setNewListName(e.target.value)}
-              className="h-10 border-border/50 shadow-sm"
-            />
+        <CardContent className="p-4 sm:p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-end">
+            <div className="w-full sm:flex-1 space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase">Nome Nuovo Elenco</label>
+              <Input
+                placeholder="es. Livelli Avanzati"
+                value={newListName}
+                onChange={(e) => setNewListName(e.target.value)}
+                className="h-10 border-border/50 shadow-sm"
+              />
+            </div>
+            <div className="w-full sm:flex-[1.5] space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase">Descrizione (Opzionale)</label>
+              <Input
+                placeholder="es. Usato nelle impostazioni corsi"
+                value={newListDescription}
+                onChange={(e) => setNewListDescription(e.target.value)}
+                className="h-10 border-border/50 shadow-sm"
+              />
+            </div>
+            <Button
+              className="w-full sm:w-auto h-10 px-8 gold-3d-button font-medium whitespace-nowrap"
+              onClick={() => {
+                if (newListName.trim()) {
+                  createListMutation.mutate({ 
+                    name: newListName.trim(), 
+                    description: newListDescription.trim() || undefined,
+                    linkedActivities: newListActivities
+                  });
+                }
+              }}
+              disabled={!newListName.trim() || createListMutation.isPending}
+            >
+              Crea Elenco Semplice
+            </Button>
           </div>
-          <div className="w-full sm:flex-[1.5] space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase">Descrizione (Opzionale)</label>
-            <Input
-              placeholder="es. Usato nelle impostazioni corsi"
-              value={newListDescription}
-              onChange={(e) => setNewListDescription(e.target.value)}
-              className="h-10 border-border/50 shadow-sm"
-            />
+          
+          <div className="pt-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">Assegnazione Rapida Attività Collegate</label>
+            <div className="flex flex-wrap gap-2">
+              {ACTIVITY_TYPES.map(act => {
+                const isActive = newListActivities.includes(act.id);
+                return (
+                  <Badge 
+                    key={act.id} 
+                    variant={isActive ? "default" : "outline"}
+                    className={`cursor-pointer px-3 py-1 font-medium text-[11px] select-none ${isActive ? 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200' : 'bg-white hover:bg-muted/50 border-border/50 text-muted-foreground'}`}
+                    onClick={() => {
+                      setNewListActivities(prev => isActive ? prev.filter(id => id !== act.id) : [...prev, act.id])
+                    }}
+                  >
+                     {isActive && <Check className="w-3 h-3 mr-1 inline-block" />}
+                     {act.label}
+                  </Badge>
+                )
+              })}
+            </div>
           </div>
-          <Button
-            className="w-full sm:w-auto h-10 px-8 gold-3d-button font-medium whitespace-nowrap"
-            onClick={() => {
-              if (newListName.trim()) {
-                createListMutation.mutate({ name: newListName.trim(), description: newListDescription.trim() || undefined });
-              }
-            }}
-            disabled={!newListName.trim() || createListMutation.isPending}
-          >
-            Crea Elenco Semplice
-          </Button>
         </CardContent>
       </Card>
 

@@ -5122,6 +5122,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/custom-lists/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const list = await storage.updateCustomList(id, req.body);
+      res.json(list);
+    } catch (error) {
+      console.error("[API Error] Failed to update custom list:", error);
+      res.status(500).json({ message: "Failed to update custom list" });
+    }
+  });
+
   app.delete("/api/custom-lists/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);

@@ -279,6 +279,7 @@ export interface IStorage {
   getCustomLists(): Promise<(CustomList & { items: CustomListItem[] })[]>;
   getCustomListBySystemName(systemName: string): Promise<(CustomList & { items: CustomListItem[] }) | undefined>;
   createCustomList(list: InsertCustomList): Promise<CustomList>;
+  updateCustomList(id: number, list: Partial<InsertCustomList>): Promise<CustomList>;
   deleteCustomList(id: number): Promise<void>;
 
   createCustomListItem(item: InsertCustomListItem): Promise<CustomListItem>;
@@ -3808,6 +3809,12 @@ export class DatabaseStorage implements IStorage {
     const [result] = await db.insert(customLists).values(list);
     const [inserted] = await db.select().from(customLists).where(eq(customLists.id, result.insertId));
     return inserted;
+  }
+
+  async updateCustomList(id: number, list: Partial<InsertCustomList>): Promise<CustomList> {
+    await db.update(customLists).set(list).where(eq(customLists.id, id));
+    const [updated] = await db.select().from(customLists).where(eq(customLists.id, id));
+    return updated;
   }
 
   async deleteCustomList(id: number): Promise<void> {
