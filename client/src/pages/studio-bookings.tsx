@@ -70,6 +70,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { StudioBooking, Member, Studio, BookingService, PaymentMethod, Instructor } from "@shared/schema";
 import { format, isSameDay } from "date-fns";
 import { it } from "date-fns/locale";
+import { Combobox } from "@/components/ui/combobox";
 
 const WEEKDAYS = [
     { id: "LUN", label: "Lunedì", short: "Lun" },
@@ -770,19 +771,13 @@ export default function StudioBookings() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Metodo di Pagamento</Label>
-                                    <Select
+                                    <Combobox
+                                        name="paymentMethodId"
                                         value={bookingForm.paymentMethodId?.toString()}
-                                        onValueChange={(val) => setBookingForm((prev: any) => ({ ...prev, paymentMethodId: parseInt(val) }))}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Seleziona metodo..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {paymentMethods?.map(pm => (
-                                                <SelectItem key={pm.id} value={pm.id.toString()}>{pm.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        onValueChange={(val) => setBookingForm((prev: any) => ({ ...prev, paymentMethodId: val ? parseInt(val) : undefined }))}
+                                        options={(paymentMethods || []).map(pm => ({ value: pm.id.toString(), label: pm.name }))}
+                                        placeholder="Seleziona metodo..."
+                                    />
                                 </div>
                             </div>
                         )}
@@ -910,54 +905,13 @@ export default function StudioBookings() {
 
                         <div className="space-y-2">
                             <Label>Insegnante</Label>
-                            <Popover open={instructorSearchOpen} onOpenChange={setInstructorSearchOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" role="combobox" className="w-full justify-between font-normal text-left h-auto py-2">
-                                        <div className="flex items-center truncate">
-                                            <User className="w-4 h-4 mr-2 shrink-0 opacity-50" />
-                                            {bookingForm.instructorId
-                                                ? <span className="font-medium">{(() => {
-                                                    const i = sortedInstructors.find(i => i.id === bookingForm.instructorId);
-                                                    return i ? `${i.lastName} ${i.firstName}` : "Insegnante";
-                                                })()}</span>
-                                                : <span className="text-muted-foreground">Seleziona insegnante...</span>
-                                            }
-                                        </div>
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-                                    <Command>
-                                        <CommandInput placeholder="Cerca insegnante..." />
-                                        <CommandList>
-                                            <CommandEmpty>Nessun insegnante trovato.</CommandEmpty>
-                                            <CommandGroup>
-                                                <CommandItem
-                                                    onSelect={() => {
-                                                        setBookingForm((prev: any) => ({ ...prev, instructorId: null }));
-                                                        setInstructorSearchOpen(false);
-                                                    }}
-                                                >
-                                                    <Check className={`mr-2 h-4 w-4 ${!bookingForm.instructorId ? "opacity-100" : "opacity-0"}`} />
-                                                    Nessuno
-                                                </CommandItem>
-                                                {sortedInstructors.map(i => (
-                                                    <CommandItem
-                                                        key={i.id}
-                                                        onSelect={() => {
-                                                            setBookingForm((prev: any) => ({ ...prev, instructorId: i.id }));
-                                                            setInstructorSearchOpen(false);
-                                                        }}
-                                                    >
-                                                        <Check className={`mr-2 h-4 w-4 ${bookingForm.instructorId === i.id ? "opacity-100" : "opacity-0"}`} />
-                                                        {i.lastName} {i.firstName}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
+                            <Combobox
+                                name="instructorId"
+                                value={bookingForm.instructorId?.toString() || "none"}
+                                onValueChange={(val) => setBookingForm((prev: any) => ({ ...prev, instructorId: val === "none" ? null : parseInt(val) }))}
+                                options={[{value: "none", label: "Nessuno"}, ...sortedInstructors.map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))]}
+                                placeholder="Seleziona insegnante..."
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -989,19 +943,13 @@ export default function StudioBookings() {
 
                         <div className="space-y-2">
                             <Label>Studio</Label>
-                            <Select
+                            <Combobox
+                                name="studioId"
                                 value={bookingForm.studioId?.toString()}
                                 onValueChange={v => setBookingForm((prev: any) => ({ ...prev, studioId: parseInt(v) }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Studio" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {studios?.map(s => (
-                                        <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                options={(studios || []).map(s => ({ value: s.id.toString(), label: s.name }))}
+                                placeholder="Studio"
+                            />
                         </div>
 
                         <div className="mt-2 text-center">
@@ -1063,21 +1011,23 @@ export default function StudioBookings() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Inizio</Label>
-                                <Select value={bookingForm.startTime} onValueChange={v => setBookingForm((prev: any) => ({ ...prev, startTime: v }))}>
-                                    <SelectTrigger><SelectValue placeholder="Inizio" /></SelectTrigger>
-                                    <SelectContent>
-                                        {TIME_SLOTS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
+                                <Combobox
+                                    name="startTime"
+                                    value={bookingForm.startTime}
+                                    onValueChange={v => setBookingForm((prev: any) => ({ ...prev, startTime: v }))}
+                                    options={TIME_SLOTS.map(t => ({ value: t, label: t }))}
+                                    placeholder="Inizio"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Fine</Label>
-                                <Select value={bookingForm.endTime} onValueChange={v => setBookingForm((prev: any) => ({ ...prev, endTime: v }))}>
-                                    <SelectTrigger><SelectValue placeholder="Fine" /></SelectTrigger>
-                                    <SelectContent>
-                                        {TIME_SLOTS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
+                                <Combobox
+                                    name="endTime"
+                                    value={bookingForm.endTime}
+                                    onValueChange={v => setBookingForm((prev: any) => ({ ...prev, endTime: v }))}
+                                    options={TIME_SLOTS.map(t => ({ value: t, label: t }))}
+                                    placeholder="Fine"
+                                />
                             </div>
                         </div>
 

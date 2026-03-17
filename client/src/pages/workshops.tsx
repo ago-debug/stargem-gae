@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCustomListValues } from "@/hooks/use-custom-list";
+import { Combobox } from "@/components/ui/combobox";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -505,6 +507,8 @@ export default function Workshops() {
 
   const [selectedQuoteId, setSelectedQuoteId] = useState<string>("");
   const [price, setPrice] = useState<string>("");
+
+  const formItems = useCustomListValues("genere");
 
   const { data: quotes } = useQuery<Quote[]>({
     queryKey: ["/api/quotes"],
@@ -1025,13 +1029,13 @@ export default function Workshops() {
                   <form onSubmit={handleSubmit} id="edit-workshop-form" className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="name">Nome Workshop *</Label>
-                        <Input
-                          id="name"
+                        <Label htmlFor="name">Genere *</Label>
+                        <Combobox
                           name="name"
+                          value={editingWorkshop.name}
+                          options={(formItems || []).map(val => ({ value: val, label: val }))}
+                          placeholder="Cerca genere..."
                           required
-                          defaultValue={editingWorkshop.name}
-                          data-testid="input-name"
                         />
                       </div>
 
@@ -1068,34 +1072,22 @@ export default function Workshops() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="categoryId">Categoria</Label>
-                        <Select name="categoryId" defaultValue={editingWorkshop.categoryId?.toString()}>
-                          <SelectTrigger data-testid="select-category">
-                            <SelectValue placeholder="Seleziona categoria" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories?.map((category) => (
-                              <SelectItem key={category.id} value={category.id.toString()}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Combobox
+                          name="categoryId"
+                          value={editingWorkshop.categoryId?.toString()}
+                          options={(categories || []).map(c => ({ value: c.id.toString(), label: c.name }))}
+                          placeholder="Cerca..."
+                        />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="studioId">Studio/Sala</Label>
-                        <Select name="studioId" defaultValue={editingWorkshop.studioId?.toString()}>
-                          <SelectTrigger data-testid="select-studio">
-                            <SelectValue placeholder="Seleziona studio" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {studios?.map((studio) => (
-                              <SelectItem key={studio.id} value={studio.id.toString()}>
-                                {studio.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Combobox
+                          name="studioId"
+                          value={editingWorkshop.studioId?.toString()}
+                          options={(studios || []).map(s => ({ value: s.id.toString(), label: s.name }))}
+                          placeholder="Cerca..."
+                        />
                       </div>
                     </div>
 
@@ -1104,34 +1096,22 @@ export default function Workshops() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
-                          <Select name="instructorId" defaultValue={editingWorkshop.instructorId?.toString()}>
-                            <SelectTrigger data-testid="select-instructor">
-                              <SelectValue placeholder="Seleziona" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {instructors?.map((instructor) => (
-                                <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                                  {instructor.lastName} {instructor.firstName}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <Combobox
+                            name="instructorId"
+                            value={editingWorkshop.instructorId?.toString()}
+                            options={(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))}
+                            placeholder="Cerca..."
+                          />
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
-                          <Select name="secondaryInstructor1Id" defaultValue={editingWorkshop.secondaryInstructor1Id?.toString()}>
-                            <SelectTrigger data-testid="select-secondary-instructor-1">
-                              <SelectValue placeholder="Nessuno" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {instructors?.map((instructor) => (
-                                <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                                  {instructor.lastName} {instructor.firstName}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <Combobox
+                            name="secondaryInstructor1Id"
+                            value={editingWorkshop.secondaryInstructor1Id?.toString()}
+                            options={(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))}
+                            placeholder="Cerca..."
+                          />
                         </div>
 
                       </div>
@@ -1323,12 +1303,12 @@ export default function Workshops() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nome Workshop *</Label>
-                    <Input
-                      id="name"
+                    <Label htmlFor="name">Genere *</Label>
+                    <Combobox
                       name="name"
+                      options={(formItems || []).map(val => ({ value: val, label: val }))}
+                      placeholder="Cerca genere..."
                       required
-                      data-testid="input-name"
                     />
                   </div>
 
@@ -1363,34 +1343,20 @@ export default function Workshops() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="categoryId">Categoria</Label>
-                    <Select name="categoryId">
-                      <SelectTrigger data-testid="select-category">
-                        <SelectValue placeholder="Seleziona categoria" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories?.map((category) => (
-                          <SelectItem key={category.id} value={category.id.toString()}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Combobox
+                      name="categoryId"
+                      options={(categories || []).map(c => ({ value: c.id.toString(), label: c.name }))}
+                      placeholder="Cerca..."
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="studioId">Studio/Sala</Label>
-                    <Select name="studioId">
-                      <SelectTrigger data-testid="select-studio">
-                        <SelectValue placeholder="Seleziona studio" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {studios?.map((studio) => (
-                          <SelectItem key={studio.id} value={studio.id.toString()}>
-                            {studio.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Combobox
+                      name="studioId"
+                      options={(studios || []).map(s => ({ value: s.id.toString(), label: s.name }))}
+                      placeholder="Cerca..."
+                    />
                   </div>
                 </div>
 
@@ -1399,34 +1365,20 @@ export default function Workshops() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
-                      <Select name="instructorId">
-                        <SelectTrigger data-testid="select-instructor">
-                          <SelectValue placeholder="Seleziona" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {instructors?.map((instructor) => (
-                            <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                              {instructor.lastName} {instructor.firstName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        name="instructorId"
+                        options={(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))}
+                        placeholder="Cerca..."
+                      />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1 (opzionale)</Label>
-                      <Select name="secondaryInstructor1Id">
-                        <SelectTrigger data-testid="select-secondary-instructor-1">
-                          <SelectValue placeholder="Nessuno" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {instructors?.map((instructor) => (
-                            <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                              {instructor.lastName} {instructor.firstName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
+                      <Combobox
+                        name="secondaryInstructor1Id"
+                        options={(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))}
+                        placeholder="Cerca..."
+                      />
                     </div>
 
                   </div>

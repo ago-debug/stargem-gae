@@ -405,15 +405,20 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
     <Card className="border-border/60 shadow-sm bg-card/30" data-testid={`card-custom-list-${list.id}`}>
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-6 group">
         <div>
-          <CardTitle className="text-base font-bold text-foreground">
-            {list.name}
+          <CardTitle className="text-base font-bold text-foreground flex flex-col gap-1">
+            <span>{list.name}</span>
           </CardTitle>
           {list.description && <p className="text-xs text-muted-foreground mt-1">{list.description}</p>}
-          <div className="flex flex-wrap gap-1 mt-2">
-            {(typeof list.linkedActivities === 'string' ? JSON.parse(list.linkedActivities || '[]') : (list.linkedActivities || [])).map((act: string) => {
-              const label = ACTIVITY_TYPES.find(a => a.id === act)?.label || act;
-              return <Badge key={act} variant="outline" className="text-[9px] px-1.5 py-0 bg-muted/30 border-border/50 text-muted-foreground">{label}</Badge>
-            })}
+          <div className="mt-4 pt-3 border-t border-border/40">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-1.5 tracking-wider">
+              {list.linkedActivities && list.linkedActivities.length > 0 ? "Collegato a:" : "Nessun collegamento attivo"}
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {(typeof list.linkedActivities === 'string' ? JSON.parse(list.linkedActivities || '[]') : (list.linkedActivities || [])).map((act: string) => {
+                const label = ACTIVITY_TYPES.find(a => a.id === act)?.label || act;
+                return <Badge key={act} variant="outline" className="text-[10px] px-2 py-0.5 bg-amber-50/50 border-amber-200 text-amber-900 shadow-sm">{label}</Badge>
+              })}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -810,7 +815,7 @@ export default function Elenchi() {
               Elenchi Semplici
             </TabsTrigger>
             <TabsTrigger value="colorati" className="py-2.5 px-4 rounded font-semibold text-sm">
-              Elenchi Colorati
+              Elenchi Colorati Multi
             </TabsTrigger>
           </TabsList>
         </div>

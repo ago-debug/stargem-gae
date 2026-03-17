@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql, or, isNotNull, inArray } from "drizzle-orm";
+import { eq, or, desc, sql, asc, inArray, isNull, isNotNull, and, gte, lte, sum, sql as dql, aliasedTable } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
 import { ilike } from "drizzle-orm";
 import {
@@ -1090,6 +1090,7 @@ export class DatabaseStorage implements IStorage {
     instructorLastName?: string | null;
     specialization?: string | null;
   })[]> {
+    const instructorMembers = aliasedTable(members, 'instructorMembers');
     let query = db
       .select({
         id: studioBookings.id,
@@ -1117,16 +1118,16 @@ export class DatabaseStorage implements IStorage {
         serviceName: bookingServices.name,
         serviceColor: bookingServices.color,
         instructorId: studioBookings.instructorId,
-        instructorFirstName: members.firstName,
-        instructorLastName: members.lastName,
-        specialization: members.specialization,
+        instructorFirstName: instructorMembers.firstName,
+        instructorLastName: instructorMembers.lastName,
+        specialization: instructorMembers.specialization,
         seasonId: studioBookings.seasonId,
       })
       .from(studioBookings)
       .leftJoin(members, eq(studioBookings.memberId, members.id))
       .leftJoin(studios, eq(studioBookings.studioId, studios.id))
       .leftJoin(bookingServices, eq(studioBookings.serviceId, bookingServices.id))
-      .leftJoin(members, eq(studioBookings.instructorId, members.id));
+      .leftJoin(instructorMembers, eq(studioBookings.instructorId, instructorMembers.id));
 
     const conditions = [];
     if (startDate && endDate) {

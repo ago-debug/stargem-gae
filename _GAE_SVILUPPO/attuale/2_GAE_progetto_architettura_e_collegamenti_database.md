@@ -56,6 +56,11 @@ L'architettura ha alcune colonne portanti che strutturano l'intero gestionale. S
 > **Disallineamento Architettura DB vs UI Pagamenti (Aggiornamento)**
 > Sebbene l'architettura database conti empiricamente 12 moduli tabellari fisici per iscrizioni/prenotazioni, l'**UI Frontend (Modale Pagamenti ed elenchi hub)** è guidata dall'`ACTIVITY_REGISTRY` che espone **14 Entità Logiche** distinte (separando nettamente "Allenamenti" da "Affitti", e includendo placeholder puramente contabili senza tabella di enrollment come "Merchandising"). Il sistema di pagamento gestisce fluidamente le voci extra tramite fallback su transazioni generiche (`type: "other"`) slegate dai silos didattici.
 
+> [!CAUTION]
+> **Policy Obbligatoria di Migrazione Dati (Update in-place)**
+> Le tabelle strutturali (come `custom_lists` e `custom_list_items`) dipendono rigorosamente da vincoli *ON DELETE CASCADE*. In **Produzione**, per alterare il significato di liste storiche, è **tassativamente vietato** eseguire script di "Delete + Recreate", in quanto l'eliminazione del padre vaporizzerebbe istantaneamente i valori storicamente collegati.
+> La migrazione corretta e obbligatoria per prevenire perdite dati DEVE avvenire tramite **Rename / Update in-place** condizionato (Es: `UPDATE custom_lists SET name='Generi', system_code='generi' WHERE name='Nomi Corsi'`). Solo dopo aver blindato i dati esistenti, si creano i nuovi rami.
+
 Le 12 tipologie (tutte con struttura fisica identica per la parte didattica, ma tabelle DB separate) sono:
 1.  **Corsi** (`courses`, `enrollments`)
 2.  **Workshop** (`workshops`, `ws_enrollments`)
@@ -162,6 +167,13 @@ In base all'analisi della struttura a 12 moduli (11 attività + Servizi Extra/Pr
 *   **Soluzione Backend:** Nel blocco `POST /api/payments` del server, aggiungere una validazione ferrea (tramite `zod` o if-statement manuale). Il sistema deve **rifiutare fisicamente** la ricezione di un pagamento se tutte le 12 `foreign_key` (es. `enrollment_id`, `membership_id`, `ws_enroll_id`...) sono vuote. L'unica eccezione validata è un caricamento "borsellino elettronico" generico.
 *   **Soluzione Frontend:** Disabilitare il bottone "Salva Pagamento" in `maschera-input-generale.tsx` finché il payload non contiene l'ID esatto del corso/servizio selezionato. Meno codice opaco, più sicurezza contabile. La maschera produce il match anche su carrelli multi-utente inviando il `referenceKey`.
 
+### C. Normalizzazione Selettori UI (Esito Audit Blocco 4)
+*   **Problema:** L'interfaccia utente soffriva (e in parte soffre) di "Hardcoding Mockup". Molte tendine fondamentali per il business (es. `Dettaglio Iscr.` in Nuovo Pagamento, `Province` in Maschera Input, `Tipologia` in Planning) non pescavano i dati da un database reale, ma da array statici fittizi.
+*   **Soluzione Architetturale:** Ogni "Select" o "Combobox" applicativo è stato diviso in 4 matrici (Condiviso, Specifico, Amministrativo, Mockup).
+    *   Le **Costanti Temporali/Amministrative** (`WEEKDAYS`, `Tipologia Tessera`) restano hardcoded in frontend per efficienza e immutabilità.
+    *   Le **Entità Fisiche** (`Categorie`, `Sale`, `Istruttori`, `Quote`) usano il fetch diretto dalle rispettive tabelle API.
+    *   I **Vocabolari Dinamici** (es. `Genere` attività) usano il sistema centralizzato `custom_lists` e `custom_list_items` per garantire uniformità cross-modulo in preparazione alla STI (Single Table Inheritance). I futuri Mockup (es. Dettagli Fiscali checkout) dovranno obbligatoriamente migrare su questi dizionari dinamici.
+
 ---
 
 ## 6-bis. Calendario Operativo ↔ Regia Planning (Mapping 2026)
@@ -231,3 +243,5 @@ Per evitare fraintendimenti di dominio, la struttura deve seguire questi nomi es
 
 4.  **Iscritti (`enrollments`)**
     Le persone si legano **esclusivamente** al Livello 3 (Dettaglio). Se pagano il Dettaglio, il sistema sa già implicitamente a quale Categoria e a quale Macro-Attività appartiene l'incasso.
+
+> **Aggiornamento Architetturale (Naming Consistency):** Il termine legacy "Nomi Corsi" è completamente deprecato in favore di **"Genere"** (System Code: `genere`). Tutte le 14 attività implementano la tendina dinamica `Combobox` agganciata a questa singola sorgente lista.

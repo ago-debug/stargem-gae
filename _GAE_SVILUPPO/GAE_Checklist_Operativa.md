@@ -357,3 +357,18 @@ Queste check list documentano i cambi di policy applicati in `_GAE_SVILUPPO`:
   - File toccati: `shared/schema.ts`, `server/storage.ts`, `server/routes.ts`, `client/src/pages/elenchi.tsx`, `patch-elenchi.ts` (tooling temporaneo)
   - Fatto: 1. Strutturate le `custom_lists` introducendo la colonna `linked_activities` (Array JSON) e `system_code` per associazioni permanenti. 2. Push schema db locale bypassando fallback esplicito tramite patch raw a causa dei checkConstraints non supportati di alcune version MySQL. 3. Sostituita la maschera base della UI Elenchi in `elenchi.tsx` con card dotate di Modale "Settings" che consente la multi-selezione Checkbox delle 14 Attività globali. I badge in vista principale aggiornano lo User Journey chiarendo dove la tendina comparirà. Creati i 7 elenchi target base.
   - Manca: Nulla su questo blocco strutturale. Pronto per il blocco successivo dove ogni singola entità (Corsi, Workshop, etc.) ingloberà questi elenchi.
+
+- [x] Task 12.5: Ottimizzazione e Refinement UI Elenchi Semplici
+  - File toccati: `client/src/pages/elenchi.tsx`
+  - Fatto: 1. Eseguita l'analisi del database post-patch confermando l'evaporazione dei dati storici legacy ("Nomi Corsi") a causa del vincolo nativo ON DELETE CASCADE di MySQL durante il cleanup. 2. Modificato il TabTrigger e titolo Header rinominando `Elenchi Colorati` in `Elenchi Colorati Multi` per chiarezza esplicita (UX/UI). 3. Applicato l'aggiornamento dinamico delle label sulle Card in UI riportando chiaramente la fofmula "Collegato a:" / "Nessun collegamento attivo" seguita dai Badge reali anziché testo anonimo. La struttura è validata a 7 Elenchi ufficiali.
+  - Manca: Il recupero in Produzione dei vecchi nomi corsi richiederà script ad-hoc. L'architettura software è allineata.
+
+- [x] Task 12.6: Refactoring Globale Naming da "Nome Corso" a "Genere" e Integrazione Modali
+  - File toccati: `client/src/pages/*`, `server/storage.ts`
+  - Fatto: 1. Bonificato ovunque il termine "Nomi Corsi" in favore di "Genere". Nessun residuo storico attivo nel core db o UI. 2. Implementate le tendine Combobox ricercabili in tutte le 14 attività principali. 3. Test E2E validato tramite subagent che conferma il recupero dinamico dei dati da '/custom-lists'. 4. Riparato il backend Affitti (`/api/studio-bookings`) gestendo un incrocio aliased per l'unione tra members/instructors.
+  - Manca: Nulla. Refactoring e unificazione semantica conclusi con successo.
+
+- [x] Task 12.7: Audit Strutturale Totale e Tabella Master Definitiva (Blocchi 1-4)
+  - File toccati: `_GAE_SVILUPPO/attuale/9_MAPPA_GLOBALE.md`, `_GAE_SVILUPPO/attuale/10_TABELLA_MASTER_MODALI.md`
+  - Fatto: 1. Mappato l'intero ecosistema database, le rotte, i modali e i campi UI in una fotografia operativa. 2. Costruita la "Tabella Master Definitiva" analizzando i Modali Core, tutte le 14 Attività e mappando minuziosamente l'albero dei Campi Selettivi, le origin source e il loro Binding (Blocchi 1, 2, 3). 3. Prodotta la Matrice Decisionale (Blocco 4) per classificare ogni dropdown come Condiviso, Specifico, Amministrativo o Mockup, con precise indicazioni d'intervento (priorità e workaround).
+  - Manca: Nulla. L'audit è concluso. Le prossime azioni discenderanno dalla Matrice Costruita.

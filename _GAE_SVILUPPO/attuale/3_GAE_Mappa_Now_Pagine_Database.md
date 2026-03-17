@@ -91,3 +91,5 @@ Questa astrazione strategica permette agli sviluppatori di ragionare per "compar
 La tabella sopra mostra chiaramente la vastità orizzontale del gestionale: decine di pagine interrogano e scrivono in tabelle SQL identiche strutturalmente. Le differenze visive o asimmetrie nel salvataggio dei **campi Orario** (giorno, HH:MM inizio, HH:MM fine) o nella **scelta dei moduli pagamento**, se presenti, sono anomalie unicamente imputabili ai **componenti Frontend React** ("le tendine della web app") non unificati nel tempo. 
 
 Il backend SQL aspetta standard rigidi. Pertanto, l'implementazione visiva deve convergere verso "Micro Form" (o Componenti) Centralizzati Singoli da importare identici all'interno di ognuna delle pagine elencate, scongiurando bug di salvataggio.
+
+> **Aggiornamento Architetturale (Naming Consistency):** Il termine legacy "Nomi Corsi" è completamente deprecato in favore di **"Genere"** (System Code: `genere`). Tutte le 14 attività implementano la tendina dinamica `Combobox` agganciata a questa singola sorgente lista.

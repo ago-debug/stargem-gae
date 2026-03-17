@@ -93,3 +93,5 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Cour
 |---|---|---|---|---|
 | *Nessuno* | `/test-gae` | *(Variabile)* | candidato a eliminazione futura | Tool di collaudo sviluppatore. Nessun link UI |
 | *Nessuno* | `*` (Es: `/pippo`) | `NotFound` | canonico | Route di Fallback puro 404 (Alert Giallo) totalmente disaccoppiata dagli Stub in allestimento |
+
+> **Aggiornamento Architetturale (Naming Consistency):** Il termine legacy "Nomi Corsi" è completamente deprecato in favore di **"Genere"** (System Code: `genere`). Tutte le 14 attività implementano la tendina dinamica `Combobox` agganciata a questa singola sorgente lista.
