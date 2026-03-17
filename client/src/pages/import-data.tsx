@@ -74,7 +74,7 @@ const MEMBER_FIELDS = [
 
 // Course fields for mapping
 const COURSE_FIELDS = [
-  { key: "name", label: "Nome Corso", required: true },
+  { key: "name", label: "Genere", required: true },
   { key: "sku", label: "SKU (Codice Univoco)" },
   { key: "description", label: "Descrizione" },
   { key: "categoryName", label: "Categoria (Nome)" },
@@ -117,7 +117,7 @@ const MEMBER_IMPORT_KEY_OPTIONS = [
 // Import key options for courses
 const COURSE_IMPORT_KEY_OPTIONS = [
   { key: "sku", label: "SKU" },
-  { key: "name", label: "Nome Corso" },
+  { key: "name", label: "Genere" },
 ];
 
 // Import key options for instructors
@@ -480,7 +480,7 @@ export default function ImportData() {
       if (activeMapping.name === undefined) {
         toast({
           title: "Errore",
-          description: "Nome Corso è obbligatorio",
+          description: "Genere è obbligatorio",
           variant: "destructive"
         });
         return;
@@ -566,7 +566,7 @@ export default function ImportData() {
   const downloadTemplate = (type: string) => {
     const templates: Record<string, string> = {
       members: "cognome, nome,Email,Telefono,Data di Nascita,Indirizzo,Città,CAP,Codice Fiscale,Note\nMario,Rossi,mario.rossi@email.com,3331234567,1990-01-15,Via Roma 1,Milano,20100,RSSMRA90A15F205X,\n",
-      courses: "Nome Corso,Descrizione,Prezzo,Capienza Massima,Orario\nYoga Base,Corso di yoga per principianti,50.00,20,Lun-Mer 18:00-19:30\n",
+      courses: "Genere,Descrizione,Prezzo,Capienza Massima,Orario\nYoga Base,Corso di yoga per principianti,50.00,20,Lun-Mer 18:00-19:30\n",
       instructors: "cognome, nome,Email,Telefono,Specializzazione,Tariffa Oraria\nGiovanni,Bianchi,g.bianchi@email.com,3339876543,Yoga,35.00\n",
     };
 

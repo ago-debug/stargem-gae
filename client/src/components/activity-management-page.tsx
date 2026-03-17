@@ -20,6 +20,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
 import type { Instructor, Studio, ActivityStatus, Quote } from "@shared/schema";
+import { Combobox } from "@/components/ui/combobox";
+import { useCustomListValues } from "@/hooks/use-custom-list";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -141,6 +143,8 @@ export default function ActivityManagementPage({
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({
     queryKey: ["/api/activity-statuses"],
   });
+
+  const generi = useCustomListValues("genere");
 
   const createMutation = useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
@@ -318,13 +322,12 @@ export default function ActivityManagementPage({
     <form onSubmit={handleSubmit} id={defaultItem ? `edit-${testIdPrefix}-form` : undefined} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Nome *</Label>
-          <Input
-            id="name"
-            name="name"
-            required
-            defaultValue={defaultItem?.name || ""}
-            data-testid={`input-${testIdPrefix}-name`}
+          <Label htmlFor="name">Genere *</Label>
+          <Combobox
+             name="name"
+             value={defaultItem?.name || ""}
+             options={(generi || []).map((g: any) => ({ value: g, label: g }))}
+             placeholder="Seleziona o scrivi genere..."
           />
         </div>
 
@@ -360,34 +363,22 @@ export default function ActivityManagementPage({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="categoryId">Categoria</Label>
-          <Select name="categoryId" defaultValue={defaultItem?.categoryId?.toString()}>
-            <SelectTrigger data-testid={`select-${testIdPrefix}-category`}>
-              <SelectValue placeholder="Seleziona categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories?.map((category) => (
-                <SelectItem key={category.id} value={category.id.toString()}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Combobox
+             name="categoryId"
+             value={defaultItem?.categoryId?.toString()}
+             options={(categories || []).map(c => ({ value: c.id.toString(), label: c.name }))}
+             placeholder="Seleziona categoria"
+          />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="studioId">Studio/Sala</Label>
-          <Select name="studioId" defaultValue={defaultItem?.studioId?.toString()}>
-            <SelectTrigger data-testid={`select-${testIdPrefix}-studio`}>
-              <SelectValue placeholder="Seleziona studio" />
-            </SelectTrigger>
-            <SelectContent>
-              {studios?.map((studio) => (
-                <SelectItem key={studio.id} value={studio.id.toString()}>
-                  {studio.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Combobox
+             name="studioId"
+             value={defaultItem?.studioId?.toString()}
+             options={(studios || []).map(s => ({ value: s.id.toString(), label: s.name }))}
+             placeholder="Seleziona studio"
+          />
         </div>
       </div>
 
@@ -396,34 +387,22 @@ export default function ActivityManagementPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
-            <Select name="instructorId" defaultValue={defaultItem?.instructorId?.toString()}>
-              <SelectTrigger data-testid={`select-${testIdPrefix}-instructor`}>
-                <SelectValue placeholder="Seleziona" />
-              </SelectTrigger>
-              <SelectContent>
-                {instructors?.map((instructor) => (
-                  <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                    {instructor.lastName} {instructor.firstName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+               name="instructorId"
+               value={defaultItem?.instructorId?.toString() || "none"}
+               options={[{value: "none", label: "Seleziona"}, ...(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))]}
+               placeholder="Seleziona"
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1{!defaultItem ? " (opzionale)" : ""}</Label>
-            <Select name="secondaryInstructor1Id" defaultValue={defaultItem?.secondaryInstructor1Id?.toString()}>
-              <SelectTrigger data-testid={`select-${testIdPrefix}-secondary-instructor-1`}>
-                <SelectValue placeholder="Nessuno" />
-              </SelectTrigger>
-              <SelectContent>
-                {instructors?.map((instructor) => (
-                  <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                    {instructor.lastName} {instructor.firstName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+               name="secondaryInstructor1Id"
+               value={defaultItem?.secondaryInstructor1Id?.toString() || "none"}
+               options={[{value: "none", label: "Nessuno"}, ...(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))]}
+               placeholder="Nessuno"
+            />
           </div>
         </div>
       </div>

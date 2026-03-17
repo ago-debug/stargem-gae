@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { useCustomListValues } from "@/hooks/use-custom-list";
+import { Combobox } from "@/components/ui/combobox";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -406,7 +408,10 @@ export default function CalendarPage() {
     const prevWeek = () => setViewDate(prev => addDays(prev, -7));
     const resetToToday = () => setViewDate(new Date());
 
-    // Form state for editing
+    // Get Lists for standard Comboboxes
+    const formItems = useCustomListValues("genere");
+
+    // Modal forms state for editing
     const [editForm, setEditForm] = useState<Partial<Course>>({});
     const [bookingForm, setBookingForm] = useState<any>({});
     const [memberSearchOpen, setMemberSearchOpen] = useState(false);
@@ -1949,11 +1954,13 @@ export default function CalendarPage() {
                             <form onSubmit={handleSaveEdit} className="space-y-6 pt-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="edit-name">Nome Corso *</Label>
-                                        <Input
-                                            id="edit-name"
+                                        <Label htmlFor="edit-name">Genere *</Label>
+                                        <Combobox
+                                            name="name"
                                             value={editForm.name || ""}
-                                            onChange={e => setEditForm((prev: any) => ({ ...prev, name: e.target.value }))}
+                                            options={(formItems || []).map(val => ({ value: val, label: val }))}
+                                            onValueChange={(val) => setEditForm((prev: any) => ({ ...prev, name: val }))}
+                                            placeholder="Cerca genere..."
                                             required
                                         />
                                     </div>
@@ -2000,37 +2007,23 @@ export default function CalendarPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>Categoria</Label>
-                                        <Select
+                                        <Combobox
+                                            name="categoryId"
                                             value={editForm.categoryId?.toString() || "none"}
                                             onValueChange={val => setEditForm((prev: any) => ({ ...prev, categoryId: val === "none" ? null : parseInt(val) }))}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleziona categoria" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none">Nessuna categoria</SelectItem>
-                                                {categories?.map(c => (
-                                                    <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                            options={[{value: "none", label: "Nessuna categoria"}, ...(categories || []).map(c => ({ value: c.id.toString(), label: c.name }))]}
+                                            placeholder="Seleziona categoria"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Studio/Sala</Label>
-                                        <Select
+                                        <Combobox
+                                            name="studioId"
                                             value={editForm.studioId?.toString() || "none"}
                                             onValueChange={val => setEditForm((prev: any) => ({ ...prev, studioId: val === "none" ? null : parseInt(val) }))}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleziona studio" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none">Nessuno studio</SelectItem>
-                                                {studios?.map(s => (
-                                                    <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                            options={[{value: "none", label: "Nessuno studio"}, ...(studios || []).map(s => ({ value: s.id.toString(), label: s.name }))]}
+                                            placeholder="Seleziona studio"
+                                        />
                                     </div>
                                 </div>
 
@@ -2039,37 +2032,23 @@ export default function CalendarPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="space-y-2">
                                             <Label className="text-sm text-muted-foreground">Principale</Label>
-                                            <Select
+                                            <Combobox
+                                                name="instructorId"
                                                 value={editForm.instructorId?.toString() || "none"}
                                                 onValueChange={val => setEditForm((prev: any) => ({ ...prev, instructorId: val === "none" ? null : parseInt(val) }))}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Seleziona" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="none">Nessuno</SelectItem>
-                                                    {instructors?.map(i => (
-                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                                options={[{value: "none", label: "Nessuno"}, ...(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))]}
+                                                placeholder="Cerca..."
+                                            />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-sm text-muted-foreground">Secondario 1 (opzionale)</Label>
-                                            <Select
+                                            <Label className="text-sm text-muted-foreground">Secondario 1</Label>
+                                            <Combobox
+                                                name="secondaryInstructor1Id"
                                                 value={editForm.secondaryInstructor1Id?.toString() || "none"}
                                                 onValueChange={val => setEditForm((prev: any) => ({ ...prev, secondaryInstructor1Id: val === "none" ? null : parseInt(val) }))}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Nessuno" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="none">Nessuno</SelectItem>
-                                                    {instructors?.map(i => (
-                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                                options={[{value: "none", label: "Nessuno"}, ...(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))]}
+                                                placeholder="Cerca..."
+                                            />
                                         </div>
                                     </div>
                                 </div>
