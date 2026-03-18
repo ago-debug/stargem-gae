@@ -167,12 +167,12 @@ In base all'analisi della struttura a 12 moduli (11 attività + Servizi Extra/Pr
 *   **Soluzione Backend:** Nel blocco `POST /api/payments` del server, aggiungere una validazione ferrea (tramite `zod` o if-statement manuale). Il sistema deve **rifiutare fisicamente** la ricezione di un pagamento se tutte le 12 `foreign_key` (es. `enrollment_id`, `membership_id`, `ws_enroll_id`...) sono vuote. L'unica eccezione validata è un caricamento "borsellino elettronico" generico.
 *   **Soluzione Frontend:** Disabilitare il bottone "Salva Pagamento" in `maschera-input-generale.tsx` finché il payload non contiene l'ID esatto del corso/servizio selezionato. Meno codice opaco, più sicurezza contabile. La maschera produce il match anche su carrelli multi-utente inviando il `referenceKey`.
 
-### C. Normalizzazione Selettori UI (Esito Audit Blocco 4)
+### C. Normalizzazione Selettori UI (Esito Audit e Blocco 5)
 *   **Problema:** L'interfaccia utente soffriva (e in parte soffre) di "Hardcoding Mockup". Molte tendine fondamentali per il business (es. `Dettaglio Iscr.` in Nuovo Pagamento, `Province` in Maschera Input, `Tipologia` in Planning) non pescavano i dati da un database reale, ma da array statici fittizi.
-*   **Soluzione Architetturale:** Ogni "Select" o "Combobox" applicativo è stato diviso in 4 matrici (Condiviso, Specifico, Amministrativo, Mockup).
-    *   Le **Costanti Temporali/Amministrative** (`WEEKDAYS`, `Tipologia Tessera`) restano hardcoded in frontend per efficienza e immutabilità.
-    *   Le **Entità Fisiche** (`Categorie`, `Sale`, `Istruttori`, `Quote`) usano il fetch diretto dalle rispettive tabelle API.
-    *   I **Vocabolari Dinamici** (es. `Genere` attività) usano il sistema centralizzato `custom_lists` e `custom_list_items` per garantire uniformità cross-modulo in preparazione alla STI (Single Table Inheritance). I futuri Mockup (es. Dettagli Fiscali checkout) dovranno obbligatoriamente migrare su questi dizionari dinamici.
+*   **Soluzione Architetturale e Piano Esecutivo:** Ogni "Select" o "Combobox" applicativo è stato diviso in 4 matrici (Condiviso, Specifico, Amministrativo, Mockup) che hanno dettato il **Piano Esecutivo di Normalizzazione (Blocco 5)**:
+    *   **Quick Wins (Consentiti):** Creazione nuovi vocabolari dinamici sicuri come `Livello` (in `custom_lists`), aggancio tabelle esistenti (es. `client_categories`), pulizia form dummies (`Comuni`).
+    *   **Costanti Temporali/Amministrative (Lasciati tali):** Elementi fissi (`WEEKDAYS`, `Tipologia Tessera`) restano hardcoded in frontend per efficienza e immutabilità. Non verranno db-izzati.
+    *   **STOP & GO Finanziario (Congelati):** Tutte le select della Cassa (`Metodo Pagamento`, `Dettaglio Iscr. Mockup`) sono tassativamente congelate per non rischiare regressioni sui salvataggi JSON legati alle fees tessere. Qualsiasi refactor al carrello richiederà un task blindato a parte.
 
 ---
 

@@ -531,9 +531,10 @@ export default function CalendarPage() {
     }, [location, studios]);
 
     const getDayId = (date: Date) => {
+        if (!date || isNaN(date.getTime())) return "";
         const day = date.getDay();
         const index = day === 0 ? 6 : day - 1;
-        return WEEKDAYS[index].id;
+        return WEEKDAYS[index]?.id || "";
     };
 
     const sortedInstructors = useMemo(() => {
@@ -904,7 +905,7 @@ export default function CalendarPage() {
         });
 
         // 3. Map Studio Bookings (Approximation for Date -> Day)
-        const relevantBookings = (studioBookings || []).filter(b => b.status !== 'cancelled' && b.studioId);
+        const relevantBookings = (studioBookings || []).filter(b => b.status !== 'cancelled' && b.studioId && b.bookingDate);
         relevantBookings.forEach(b => {
              // For bookings to show on the weekly grid, let's derive dayOfWeek
              const bDate = new Date(b.bookingDate);
@@ -958,10 +959,11 @@ export default function CalendarPage() {
         return ((hours * 60 + minutes) - (8 * 60)) * PX_PER_MIN;
     };
 
-    const stripSeconds = (timeStr?: string | null) => {
+    // Hoisted function per prevenire ReferenceError (TDZ) negli useMemo richiamati prima della dichiarazione originale
+    function stripSeconds(timeStr?: string | null) {
         if (!timeStr) return "";
         return timeStr.substring(0, 5);
-    };
+    }
 
     const resetFilters = () => {
         setSelectedStudio("all");

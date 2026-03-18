@@ -372,3 +372,29 @@ Queste check list documentano i cambi di policy applicati in `_GAE_SVILUPPO`:
   - File toccati: `_GAE_SVILUPPO/attuale/9_MAPPA_GLOBALE.md`, `_GAE_SVILUPPO/attuale/10_TABELLA_MASTER_MODALI.md`
   - Fatto: 1. Mappato l'intero ecosistema database, le rotte, i modali e i campi UI in una fotografia operativa. 2. Costruita la "Tabella Master Definitiva" analizzando i Modali Core, tutte le 14 Attività e mappando minuziosamente l'albero dei Campi Selettivi, le origin source e il loro Binding (Blocchi 1, 2, 3). 3. Prodotta la Matrice Decisionale (Blocco 4) per classificare ogni dropdown come Condiviso, Specifico, Amministrativo o Mockup, con precise indicazioni d'intervento (priorità e workaround).
   - Manca: Nulla. L'audit è concluso. Le prossime azioni discenderanno dalla Matrice Costruita.
+
+---
+
+## 7. Normalizzazione Elenchi e Binding (Esecuzione Blocco 5)
+Sulla base del Blocco 5 generato nella "Tabella Master Modali", seguiamo questo piano di normalizzazione progressivo, salvaguardando il core finanziario.
+
+- [ ] Implementazione QW-1: Tabella "Livello" in Custom Lists
+  - File toccati: UI Modali Unificati
+  - Fatto: Nulla.
+  - Manca: Inserire il dictionary dei Livelli nel nuovo motore base.
+- [ ] Implementazione QW-3: Replace Mockup "Tipo Partecipante"
+  - File toccati: `maschera-input-generale.tsx`
+  - Fatto: Nulla.
+  - Manca: Collegare l'endpoint `client_categories` per rimuovere mockup UI.
+- [ ] Implementazione QW-4: Pulizia Mockup "Comune/Provincia"
+  - File toccati: `maschera-input-generale.tsx`
+  - Fatto: Nulla.
+  - Manca: Transizione field dummy verso un text field sicuro.
+- [ ] Risoluzione MED-1: Old Courses Binding
+  - File toccati: DB Script
+  - Fatto: Nulla.
+  - Manca: Data pump per recuperare eventuali old-course IDs.
+- [ ] Freeze di HR-1, HR-2, HR-3 confermato
+  - File toccati: Pagamenti, Tessere
+  - Fatto: Applicata etichetta STOP & GO.
+  - Manca: Sviluppo futuro del calcolatore listini.
