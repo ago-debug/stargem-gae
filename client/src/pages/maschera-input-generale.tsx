@@ -1848,6 +1848,8 @@ export default function MascheraInputGenerale() {
 
   return (
     <div className="flex flex-col h-full" data-testid="page-maschera-input-generale">
+      <datalist id="province-list">{["AG","AL","AN","AO","AP","AQ","AR","AT","AV","BA","BG","BI","BL","BN","BO","BR","BS","BT","BZ","CA","CB","CE","CH","CL","CN","CO","CR","CS","CT","CZ","EN","FC","FE","FG","FI","FM","FR","GE","GO","GR","IM","IS","KR","LC","LE","LI","LO","LT","LU","MB","MC","ME","MI","MN","MO","MS","MT","NA","NO","NU","OR","PA","PC","PD","PE","PG","PI","PN","PO","PR","PT","PU","PV","PZ","RA","RC","RE","RG","RI","RM","RN","RO","SA","SI","SO","SP","SR","SS","SU","SV","TA","TE","TN","TO","TP","TR","TS","TV","UD","VA","VB","VC","VE","VI","VR","VT","VV"].map(p => <option key={p} value={p} />)}</datalist>
+      <datalist id="comuni-list">{["Roma", "Milano", "Napoli", "Torino", "Palermo", "Genova", "Bologna", "Firenze", "Bari", "Catania", "Venezia", "Verona", "Messina", "Padova", "Trieste", "Brescia", "Terni", "Taranto", "Prato", "Parma", "Modena", "Reggio Calabria", "Reggio Emilia", "Perugia", "Ravenna", "Livorno", "Cagliari", "Foggia", "Rimini", "Salerno", "Ferrara", "Sassari", "Latina", "Giugliano in Campania", "Monza", "Siracusa", "Pescara", "Bergamo", "Forlì", "Trento", "Vicenza", "Bolzano", "Novara", "Piacenza", "Ancona", "Andria", "Arezzo", "Udine", "Cesena", "Lecce"].map(c => <option key={c} value={c} />)}</datalist>
       {/* Header fisso con navigazione */}
       <div className="border-b bg-muted/30 sticky top-0 z-10">
         <div className="p-4 space-y-4">
@@ -2948,13 +2950,13 @@ export default function MascheraInputGenerale() {
                   <div className="space-y-2">
                     <Label className="flex items-center">Città <span className="text-red-500 ml-1">*</span></Label>
                     <div className="relative">
-                      <Input value={formData.citta} onChange={(e) => handleChange("citta", e.target.value)} data-testid="input-citta" className={getInputClassName("citta", true)} />
+                      <Input value={formData.citta} list="comuni-list" onChange={(e) => handleChange("citta", e.target.value)} data-testid="input-citta" className={getInputClassName("citta", true)} />
                       {renderMancaDato(formData.citta)}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Provincia</Label>
-                    <Input value={formData.provincia} onChange={(e) => handleChange("provincia", e.target.value)} data-testid="input-provincia" className={getInputClassName("provincia", false)} />
+                    <Input value={formData.provincia} list="province-list" onChange={(e) => handleChange("provincia", e.target.value)} data-testid="input-provincia" className={getInputClassName("provincia", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Cod. Comune</Label>
@@ -2988,7 +2990,7 @@ export default function MascheraInputGenerale() {
                     <Label className="flex items-center line-clamp-1">Prov. Nascita <span className="text-red-500 ml-1">*</span></Label>
                     <div className="relative">
                       <Input
-                        value={formData.provinciaNascita}
+                        value={formData.provinciaNascita} list="province-list"
                         readOnly
                         className={getInputClassName("provinciaNascita", true, true)}
                       />
@@ -3127,11 +3129,11 @@ export default function MascheraInputGenerale() {
                   </div>
                   <div className="space-y-2">
                     <Label>Città</Label>
-                    <Input value={formData.cittaGen1} onChange={(e) => handleChange("cittaGen1", e.target.value)} data-testid="input-citta-gen1" className={getInputClassName("cittaGen1", false)} />
+                    <Input value={formData.cittaGen1} list="comuni-list" onChange={(e) => handleChange("cittaGen1", e.target.value)} data-testid="input-citta-gen1" className={getInputClassName("cittaGen1", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Provincia</Label>
-                    <Input value={formData.provinciaGen1} onChange={(e) => handleChange("provinciaGen1", e.target.value)} data-testid="input-provincia-gen1" className={getInputClassName("provinciaGen1", false)} />
+                    <Input value={formData.provinciaGen1} list="province-list" onChange={(e) => handleChange("provinciaGen1", e.target.value)} data-testid="input-provincia-gen1" className={getInputClassName("provinciaGen1", false)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Cod. Comune</Label>
@@ -3158,7 +3160,7 @@ export default function MascheraInputGenerale() {
                   <div className="space-y-2">
                     <Label>Prov. Nascita</Label>
                     <Input
-                      value={formData.provinciaNascitaGen1}
+                      value={formData.provinciaNascitaGen1} list="province-list"
                       readOnly
                       className={`${getInputClassName("provinciaNascitaGen1", false, true)} ${!formData.cfGen1 && 'border-destructive400 bg-destructive/50'}`}
                     />
@@ -3286,11 +3288,11 @@ export default function MascheraInputGenerale() {
                   </div>
                   <div className="space-y-2">
                     <Label>Città</Label>
-                    <Input value={formData.cittaGen2} onChange={(e) => handleChange("cittaGen2", e.target.value)} data-testid="input-citta-gen2" />
+                    <Input value={formData.cittaGen2} list="comuni-list" onChange={(e) => handleChange("cittaGen2", e.target.value)} data-testid="input-citta-gen2" />
                   </div>
                   <div className="space-y-2">
                     <Label>Provincia</Label>
-                    <Input value={formData.provinciaGen2} onChange={(e) => handleChange("provinciaGen2", e.target.value)} data-testid="input-provincia-gen2" />
+                    <Input value={formData.provinciaGen2} list="province-list" onChange={(e) => handleChange("provinciaGen2", e.target.value)} data-testid="input-provincia-gen2" />
                   </div>
                   <div className="space-y-2">
                     <Label>Cod. Comune</Label>
@@ -3317,7 +3319,7 @@ export default function MascheraInputGenerale() {
                   <div className="space-y-2">
                     <Label>Prov. Nascita</Label>
                     <Input
-                      value={formData.provinciaNascitaGen2}
+                      value={formData.provinciaNascitaGen2} list="province-list"
                       readOnly
                       className={`${formData.cfGen2 ? 'bg-warning/50 border-warning300' : 'border-destructive400 bg-destructive/50'} `}
                     />
