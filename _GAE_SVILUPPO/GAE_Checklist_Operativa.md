@@ -53,6 +53,11 @@ I due componenti universali che sostituiranno le decine di form sparsi.
   - Fatto: Creato il popup universale "Nuova Attività" in `calendar.tsx` con routing condizionale verso i silos legacy. Unificato l'engine virtuale di map per generare la grid su un nuovo array intermedio `unifiedEvents` che simula la Single Table Inheritance frontend senza alterare API DB.
   - Manca: Completato 100%. Nessun TypeScript Error (`npx tsc --noEmit` validato).
 
+- [x] Hardening Runtime Calendario
+  - File toccati: `calendar.tsx`
+  - Fatto: Inseriti fail-safe (`safeIsoString`, `Array.isArray`) per isolare il parsing Date e Time da record del database corrotti.
+  - Manca: Nulla.
+
 - [x] Creare `TimeSlotPicker.tsx`
   - File toccati: `TimeSlotPicker.tsx`, `Crea Corso`, `Crea Workshop`, `Calendario`
   - Fatto: Un unico componente per selezionare Orario Inizio, Fine, Sala e Insegnante, con validazione anti-conflitto. Sostituisce le maschere duplicate.
@@ -380,16 +385,16 @@ Sulla base del Blocco 5 generato nella "Tabella Master Modali", seguiamo questo 
 
 - [ ] Implementazione QW-1: Tabella "Livello" in Custom Lists
   - File toccati: UI Modali Unificati
-  - Fatto: Nulla.
-  - Manca: Inserire il dictionary dei Livelli nel nuovo motore base.
-- [ ] Implementazione QW-3: Replace Mockup "Tipo Partecipante"
+  - Fatto: Nulla (Rollback di tentativo locale poiché non persistito da DB nativo).
+  - Manca: Aggiungere logica Livello POST-Migrazione DB Drizzle/Custom Lists.
+- [x] Implementazione QW-3: Replace Mockup "Tipo Partecipante"
+  - File toccati: `maschera-input-generale.tsx`, `multi-select-participant-type.tsx`
+  - Fatto: Collegato endpoint `/api/client-categories` bypassando vecchi dummy.
+  - Manca: Completato.
+- [x] Implementazione QW-4: Pulizia Mockup "Comune/Provincia"
   - File toccati: `maschera-input-generale.tsx`
-  - Fatto: Nulla.
-  - Manca: Collegare l'endpoint `client_categories` per rimuovere mockup UI.
-- [ ] Implementazione QW-4: Pulizia Mockup "Comune/Provincia"
-  - File toccati: `maschera-input-generale.tsx`
-  - Fatto: Nulla.
-  - Manca: Transizione field dummy verso un text field sicuro.
+  - Fatto: Rimosso mockup limitativo, applicati `<datalist>` auto-completanti.
+  - Manca: Completato.
 - [ ] Risoluzione MED-1: Old Courses Binding
   - File toccati: DB Script
   - Fatto: Nulla.

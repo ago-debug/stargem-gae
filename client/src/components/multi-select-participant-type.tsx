@@ -39,7 +39,7 @@ export function MultiSelectParticipantType({ value, onChange, className }: Multi
     const [searchQuery, setSearchQuery] = useState("");
 
     const { data: dbTypes = [] } = useQuery<ParticipantType[]>({
-        queryKey: ["/api/participant-types"],
+        queryKey: ["/api/client-categories"],
     });
 
     // Convert comma-separated string to array

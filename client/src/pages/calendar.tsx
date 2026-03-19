@@ -45,6 +45,7 @@ import {
     Mail,
     Phone,
     Sparkles,
+    Edit2,
 } from "lucide-react";
 import { format, startOfWeek, addDays, isSameDay, parse, startOfDay, addMinutes, isWithinInterval } from "date-fns";
 import { it } from "date-fns/locale";
@@ -129,6 +130,7 @@ export interface CalendarEvent {
     instructorName?: string;
     studioId?: number | null;
     categoryId?: number | null;
+    categoryName?: string;
     registryKey?: string; // Corresponds to ACTIVITY_REGISTRY keys
     registryLabel?: string;
     active: boolean;
@@ -566,8 +568,8 @@ export default function CalendarPage() {
             if (!c.dayOfWeek || !c.dayOfWeek.toUpperCase().startsWith(dayId)) return false;
 
             // Check date range if present
-            if (c.startDate && new Date(c.startDate).toISOString().split('T')[0] > dateStr) return false;
-            if (c.endDate && new Date(c.endDate).toISOString().split('T')[0] < dateStr) return false;
+            if (c.startDate && getSafeDateStr(c.startDate) > dateStr) return false;
+            if (c.endDate && getSafeDateStr(c.endDate) < dateStr) return false;
 
             return true;
         });
@@ -587,8 +589,8 @@ export default function CalendarPage() {
             if (!w.dayOfWeek || !w.dayOfWeek.toUpperCase().startsWith(dayId)) return false;
 
             // Check date range
-            if (w.startDate && new Date(w.startDate).toISOString().split('T')[0] > dateStr) return false;
-            if (w.endDate && new Date(w.endDate).toISOString().split('T')[0] < dateStr) return false;
+            if (w.startDate && getSafeDateStr(w.startDate) > dateStr) return false;
+            if (w.endDate && getSafeDateStr(w.endDate) < dateStr) return false;
 
             return true;
         });
@@ -770,7 +772,7 @@ export default function CalendarPage() {
 
     // Filtered Courses
     const filteredCourses = useMemo(() => {
-        if (!courses) return [];
+        if (!courses || !Array.isArray(courses)) return [];
         const search = searchQuery.toLowerCase().trim();
         return courses.filter(course => {
             const courseDay = normalizeDay(course.dayOfWeek);
@@ -785,9 +787,11 @@ export default function CalendarPage() {
             if (search) {
                 const instr = instructors?.find(i => i.id === course.instructorId);
                 const instrName = instr ? `${instr.lastName} ${instr.firstName}`.toLowerCase() : "";
-                matchSearch = course.name.toLowerCase().includes(search) ||
+                const sku = (course.sku || "").toLowerCase();
+                const stato = (course.active === true || Number(course.active) === 1 || course.active === null || course.active === undefined) ? "attivo" : "inattivo";
+                matchSearch = (course.name || "").toLowerCase().includes(search) ||
                     (course.description?.toLowerCase().includes(search) || false) ||
-                    instrName.includes(search);
+                    instrName.includes(search) || sku.includes(search) || stato.includes(search);
             }
 
             return matchStudio && matchInstructor && matchCategory && matchDay && isActive && matchSearch;
@@ -796,7 +800,7 @@ export default function CalendarPage() {
 
     // Filtered Workshops
     const filteredWorkshops = useMemo(() => {
-        if (!workshops) return [];
+        if (!workshops || !Array.isArray(workshops)) return [];
         const search = searchQuery.toLowerCase().trim();
         return workshops.filter(workshop => {
             const workshopDay = normalizeDay(workshop.dayOfWeek);
@@ -811,9 +815,11 @@ export default function CalendarPage() {
             if (search) {
                 const instr = instructors?.find(i => i.id === workshop.instructorId);
                 const instrName = instr ? `${instr.lastName} ${instr.firstName}`.toLowerCase() : "";
-                matchSearch = workshop.name.toLowerCase().includes(search) ||
+                const sku = (workshop.sku || "").toLowerCase();
+                const stato = (workshop.active === true || Number(workshop.active) === 1 || workshop.active === null || workshop.active === undefined) ? "attivo" : "inattivo";
+                matchSearch = (workshop.name || "").toLowerCase().includes(search) ||
                     (workshop.description?.toLowerCase().includes(search) || false) ||
-                    instrName.includes(search);
+                    instrName.includes(search) || sku.includes(search) || stato.includes(search);
             }
 
             return matchStudio && matchInstructor && matchCategory && matchDay && isActive && matchSearch;
@@ -854,21 +860,24 @@ export default function CalendarPage() {
         filteredCourses.forEach(c => {
             const registryConf = activities.find(a => a.id === 'courses');
             const colorPropsValue = getCourseColor(c);
+            const cat = categories?.find(cat => cat.id === c.categoryId);
+            const ins1Obj = instructors?.find(i => i.id === c.instructorId);
             events.push({
                 id: `course_${c.id}`,
                 sourceType: "course",
                 sourceId: c.id,
-                title: c.name,
+                title: c.name || cat?.name || "CORSO",
                 description: c.description || undefined,
                 startTime: c.startTime || "",
                 endTime: c.endTime || "",
                 dayOfWeek: c.dayOfWeek || "",
-                startDate: c.startDate ? new Date(c.startDate).toISOString() : undefined,
-                endDate: c.endDate ? new Date(c.endDate).toISOString() : undefined,
+                startDate: safeIsoString(c.startDate),
+                endDate: safeIsoString(c.endDate),
                 instructorId: c.instructorId,
-                instructorName: instructors?.find(i => i.id === c.instructorId)?.lastName,
+                instructorName: ins1Obj ? `${ins1Obj.lastName} ${ins1Obj.firstName}` : undefined,
                 studioId: c.studioId,
                 categoryId: c.categoryId,
+                categoryName: cat?.name,
                 registryKey: "courses",
                 registryLabel: registryConf?.labelUI || "Corso",
                 active: c.active !== false,
@@ -881,21 +890,24 @@ export default function CalendarPage() {
         filteredWorkshops.forEach(w => {
             const registryConf = activities.find(a => a.id === 'workshops');
             const colorPropsValue = getCourseColor(w);
+            const cat = categories?.find(cat => cat.id === w.categoryId);
+            const ins1Obj = instructors?.find(i => i.id === w.instructorId);
             events.push({
                 id: `workshop_${w.id}`,
                 sourceType: "workshop",
                 sourceId: w.id,
-                title: w.name,
+                title: w.name || cat?.name || "WORKSHOP",
                 description: w.description || undefined,
                 startTime: w.startTime || "",
                 endTime: w.endTime || "",
                 dayOfWeek: w.dayOfWeek || "",
-                startDate: w.startDate ? new Date(w.startDate).toISOString() : undefined,
-                endDate: w.endDate ? new Date(w.endDate).toISOString() : undefined,
+                startDate: safeIsoString(w.startDate),
+                endDate: safeIsoString(w.endDate),
                 instructorId: w.instructorId,
-                instructorName: instructors?.find(i => i.id === w.instructorId)?.lastName,
+                instructorName: ins1Obj ? `${ins1Obj.lastName} ${ins1Obj.firstName}` : undefined,
                 studioId: w.studioId,
                 categoryId: w.categoryId,
+                categoryName: cat?.name,
                 registryKey: "workshops",
                 registryLabel: registryConf?.labelUI || "Workshop",
                 active: w.active !== false,
@@ -905,7 +917,7 @@ export default function CalendarPage() {
         });
 
         // 3. Map Studio Bookings (Approximation for Date -> Day)
-        const relevantBookings = (studioBookings || []).filter(b => b.status !== 'cancelled' && b.studioId && b.bookingDate);
+        const relevantBookings = (Array.isArray(studioBookings) ? studioBookings : []).filter(b => b.status !== 'cancelled' && b.studioId && b.bookingDate);
         relevantBookings.forEach(b => {
              // For bookings to show on the weekly grid, let's derive dayOfWeek
              const bDate = new Date(b.bookingDate);
@@ -920,17 +932,18 @@ export default function CalendarPage() {
                  id: `booking_${b.id}`,
                  sourceType: "studioBookings",
                  sourceId: b.id,
-                 title: b.title || "Prenotazione Sala",
+                 title: b.title || b.notes || "Affitto/Servizio",
                  description: b.notes || undefined,
                  startTime: stripSeconds(b.startTime) || "",
                  endTime: stripSeconds(b.endTime) || "",
                  dayOfWeek: dayId,
-                 startDate: b.bookingDate ? new Date(b.bookingDate).toISOString() : undefined,
-                 endDate: b.bookingDate ? new Date(b.bookingDate).toISOString() : undefined,
+                 startDate: safeIsoString(b.bookingDate),
+                 endDate: safeIsoString(b.bookingDate),
                  instructorId: null,
                  instructorName: "",
                  studioId: b.studioId,
                  categoryId: null,
+                 categoryName: "AFFITTO",
                  registryKey: "studioBookings",
                  registryLabel: registryConf?.labelUI || "Affitti/Service",
                  active: true,
@@ -944,25 +957,40 @@ export default function CalendarPage() {
         }
 
         return events;
-    }, [filteredCourses, filteredWorkshops, studioBookings, bookingServices, instructors, selectedEventType]);
+    }, [filteredCourses, filteredWorkshops, studioBookings, bookingServices, instructors, selectedEventType, categories]);
 
     const ROW_HEIGHT = 120; // Increased from 60
     const PX_PER_MIN = ROW_HEIGHT / 60;
 
     // Helper to parse time string (HH:mm) to minutes from 08:00
-    const timeToMinutes = (timeStr?: string) => {
-        if (!timeStr) return 0;
-        // Handle HH:mm or HH:mm:ss
+    function timeToMinutes(timeStr?: string) {
+        if (!timeStr || typeof timeStr !== 'string') return 0;
         const parts = timeStr.split(":");
-        const hours = parseInt(parts[0], 10);
-        const minutes = parseInt(parts[1], 10);
+        if (parts.length < 2) return 0;
+        const hours = parseInt(parts[0], 10) || 0;
+        const minutes = parseInt(parts[1], 10) || 0;
         return ((hours * 60 + minutes) - (8 * 60)) * PX_PER_MIN;
-    };
+    }
 
     // Hoisted function per prevenire ReferenceError (TDZ) negli useMemo richiamati prima della dichiarazione originale
     function stripSeconds(timeStr?: string | null) {
-        if (!timeStr) return "";
+        if (!timeStr || typeof timeStr !== 'string') return "";
         return timeStr.substring(0, 5);
+    }
+
+    function safeIsoString(dateVal: any) {
+        if (!dateVal) return undefined;
+        try {
+            const d = new Date(dateVal);
+            return isNaN(d.getTime()) ? undefined : d.toISOString();
+        } catch {
+            return undefined;
+        }
+    }
+
+    function getSafeDateStr(dateVal: any) {
+        const iso = safeIsoString(dateVal);
+        return iso ? iso.split('T')[0] : "";
     }
 
     const resetFilters = () => {
@@ -1054,7 +1082,7 @@ export default function CalendarPage() {
                      matchDay = evt.dayOfWeek === dayOfWeek;
                  } else if (wsDate) {
                      // I workshop hanno date fisse, quindi cerchiamo di capire se evt incrocia quella data
-                     matchDay = Boolean(evt.dayOfWeek === getDayId(wsDate) || (evt.startDate && new Date(evt.startDate).toISOString().split('T')[0] === wsDate.toISOString().split('T')[0]));
+                     matchDay = Boolean(evt.dayOfWeek === getDayId(wsDate) || (evt.startDate && getSafeDateStr(evt.startDate) === getSafeDateStr(wsDate)));
                  } else {
                      matchDay = evt.dayOfWeek === dayOfWeek;
                  }
@@ -1462,7 +1490,7 @@ export default function CalendarPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">Tutte le Attività</SelectItem>
-                                {getActiveActivities().filter(a => a.id !== 'dashboard').map(act => (
+                                {getActiveActivities().filter(a => ['corsi', 'workshop', 'lezioni-individuali', 'domeniche-movimento', 'allenamenti', 'affitti', 'campus'].includes(a.id)).map(act => (
                                     <SelectItem key={act.id} value={act.id}>{act.labelUI}</SelectItem>
                                 ))}
                             </SelectContent>
@@ -1683,10 +1711,21 @@ export default function CalendarPage() {
                                             {layoutEvents.map(evt => {
                                                 const { layoutLeft, layoutWidth, duration, startMin } = evt;
                                                 // Event type handlers map (preserved legacy form-modals compatibility without backend impact)
-                                                const handleEdit = () => {
+                                                const handleEdit = (e: React.MouseEvent) => {
+                                                    e.stopPropagation();
                                                     if (evt.sourceType === "course") handleEditCourse(evt.rawPayload);
                                                     if (evt.sourceType === "workshop") handleEditWorkshop(evt.rawPayload);
                                                     if (evt.sourceType === "studioBookings") handleEditBooking(evt.rawPayload);
+                                                };
+
+                                                const handleCardClick = () => {
+                                                    if (evt.registryKey === "courses") setLocation(`/scheda-corso?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "workshops") setLocation(`/scheda-workshop?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "lezione_individuale") setLocation(`/scheda-lezione-individuale?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "domenica") setLocation(`/scheda-domenica?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "allenamento") setLocation(`/scheda-allenamento?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "campus") setLocation(`/scheda-campus?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "studioBookings") setLocation(`/prenotazioni-sale?edit=${evt.sourceId}`);
                                                 };
 
                                                 const stats = evt.sourceType === "course" ? getCourseStats(evt.sourceId) :
@@ -1695,20 +1734,22 @@ export default function CalendarPage() {
                                                 const maxCap = evt.rawPayload?.maxCapacity;
                                                 const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
 
-                                                const codeLabel = evt.rawPayload?.code || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
+                                                const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
                                                 const statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
-                                                const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "Nessun ins.");
-                                                const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondInstructorId);
+                                                const statusColorClass = statusLabel === "ATTIVO" ? "text-green-700" : "text-red-700";
+                                                const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
+                                                const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
                                                 const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
 
                                                 return (
                                                     <div
                                                         key={`${evt.sourceType}-${evt.sourceId}`}
-                                                        onClick={(e) => { e.stopPropagation(); handleEdit(); }}
-                                                        className={`absolute left-0.5 right-0.5 p-1.5 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-start items-start text-left overflow-hidden min-h-[80px] ${evt.colorProps.className || ''}`}
+                                                        onClick={handleCardClick}
+                                                        className={`absolute left-0.5 right-0.5 p-1.5 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 flex flex-col justify-start items-start text-left min-h-[80px] ${evt.colorProps.className || ''}`}
                                                         style={{
                                                             top: `${startMin + 3}px`,
-                                                            height: `${duration - 6}px`,
+                                                            minHeight: `${duration - 6}px`,
+                                                            height: "max-content",
                                                             left: `calc(${layoutLeft}% + 4px)`,
                                                             width: `calc(${layoutWidth}% - 8px)`,
                                                             fontSize: "10px",
@@ -1717,29 +1758,28 @@ export default function CalendarPage() {
                                                             color: "#0f172a"
                                                         }}
                                                     >
-                                                        {evt.registryKey === "workshops" && (
-                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-indigo-800">
-                                                                <Sparkles className="w-2 h-2" /> WKS
-                                                            </div>
-                                                        )}
-                                                        {evt.registryKey === "courses" && (
-                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-blue-800">
-                                                                <CalendarIcon className="w-2 h-2" /> CRS
-                                                            </div>
-                                                        )}
-                                                        {evt.registryKey === "studioBookings" && (
-                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-slate-800">
-                                                                <MapPin className="w-2 h-2" /> AFFITTO
-                                                            </div>
-                                                        )}
+                                                        <div className="absolute top-1 right-1 flex gap-1 z-30">
+                                                            <button onClick={handleEdit} className="bg-white/70 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm" title="Modifica rapida">
+                                                                <Edit2 className="w-2 h-2" />
+                                                            </button>
+                                                            {evt.registryKey === "workshops" && (
+                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-indigo-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "WKS"}><Sparkles className="w-2 h-2" /> {evt.categoryName || "WKS"}</div>
+                                                            )}
+                                                            {evt.registryKey === "courses" && (
+                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-blue-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "CRS"}><CalendarIcon className="w-2 h-2" /> {evt.categoryName || "CRS"}</div>
+                                                            )}
+                                                            {evt.registryKey === "studioBookings" && (
+                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-slate-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "AFFITTO"}><MapPin className="w-2 h-2" /> {evt.categoryName || "AFFITTO"}</div>
+                                                            )}
+                                                        </div>
 
                                                         <div className="font-bold text-[9px] mb-0.5 opacity-90">{evt.startTime} - {evt.endTime}</div>
                                                         <div className="font-extrabold text-[11px] leading-tight truncate w-full uppercase">{evt.title}</div>
-                                                        <div className="font-semibold text-[9px] truncate w-full opacity-90 mt-0.5">{ins1}</div>
+                                                        {ins1 && <div className="font-semibold text-[9px] truncate w-full opacity-90 mt-0.5">{ins1}</div>}
                                                         {ins2 && <div className="font-semibold text-[9px] truncate w-full opacity-90">{ins2}</div>}
                                                         
                                                         <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-0.5">
-                                                            <span className="text-[7px] font-bold uppercase tracking-wider">{statusLabel}</span>
+                                                            <span className={`text-[7px] font-bold uppercase tracking-wider ${statusColorClass}`}>{statusLabel}</span>
                                                             
                                                             {stats && (
                                                                 <div className="flex gap-1.5 text-[7px] font-bold w-full bg-white/50 px-1 py-0.5 rounded border border-black/5 mt-0.5">
@@ -1750,7 +1790,6 @@ export default function CalendarPage() {
                                                                     )}
                                                                 </div>
                                                             )}
-                                                            {codeLabel && <span className="text-[7px] font-mono opacity-80 truncate bg-white/40 px-1 mt-0.5 rounded">{codeLabel}</span>}
                                                         </div>
                                                         
                                                         {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
@@ -1758,6 +1797,7 @@ export default function CalendarPage() {
                                                                 €{Number(evt.rawPayload.amount).toFixed(2)}
                                                             </span>
                                                         )}
+                                                        {codeLabel && <div className="absolute bottom-1 left-1.5 text-[8px] font-mono opacity-80 font-semibold tracking-wider bg-white/60 px-1 rounded shadow-sm z-10">{codeLabel}</div>}
                                                     </div>
                                                 );
                                             })}
@@ -1813,10 +1853,21 @@ export default function CalendarPage() {
                                             {layoutEvents.map(evt => {
                                                 const { layoutLeft, layoutWidth, duration, startMin } = evt;
 
-                                                const handleEdit = () => {
+                                                const handleEdit = (e: React.MouseEvent) => {
+                                                    e.stopPropagation();
                                                     if (evt.sourceType === "course") handleEditCourse(evt.rawPayload);
                                                     if (evt.sourceType === "workshop") handleEditWorkshop(evt.rawPayload);
                                                     if (evt.sourceType === "studioBookings") handleEditBooking(evt.rawPayload);
+                                                };
+
+                                                const handleCardClick = () => {
+                                                    if (evt.registryKey === "courses") setLocation(`/scheda-corso?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "workshops") setLocation(`/scheda-workshop?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "lezione_individuale") setLocation(`/scheda-lezione-individuale?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "domenica") setLocation(`/scheda-domenica?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "allenamento") setLocation(`/scheda-allenamento?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "campus") setLocation(`/scheda-campus?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "studioBookings") setLocation(`/prenotazioni-sale?edit=${evt.sourceId}`);
                                                 };
 
                                                 const stats = evt.sourceType === "course" ? getCourseStats(evt.sourceId) :
@@ -1825,20 +1876,22 @@ export default function CalendarPage() {
                                                 const maxCap = evt.rawPayload?.maxCapacity;
                                                 const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
 
-                                                const codeLabel = evt.rawPayload?.code || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
+                                                const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
                                                 const statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
-                                                const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "Nessun ins.");
-                                                const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondInstructorId);
+                                                const statusColorClass = statusLabel === "ATTIVO" ? "text-green-700" : "text-red-700";
+                                                const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
+                                                const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
                                                 const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
 
                                                 return (
                                                     <div
                                                         key={`${evt.sourceType}-${evt.sourceId}-studio`}
-                                                        onClick={(e) => { e.stopPropagation(); handleEdit(); }}
-                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 flex flex-col justify-start items-start text-left overflow-hidden min-h-[85px] ${evt.colorProps.className || ''}`}
+                                                        onClick={handleCardClick}
+                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 flex flex-col justify-start items-start text-left min-h-[85px] ${evt.colorProps.className || ''}`}
                                                         style={{
                                                             top: `${startMin + 3}px`,
-                                                            height: `${duration - 6}px`,
+                                                            minHeight: `${duration - 6}px`,
+                                                            height: "max-content",
                                                             left: `calc(${layoutLeft}% + 4px)`,
                                                             width: `calc(${layoutWidth}% - 8px)`,
                                                             fontSize: "10px",
@@ -1847,29 +1900,28 @@ export default function CalendarPage() {
                                                             color: "#0f172a"
                                                         }}
                                                     >
-                                                        {evt.registryKey === "workshops" && (
-                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-indigo-800">
-                                                                <Sparkles className="w-2 h-2" /> WKS
-                                                            </div>
-                                                        )}
-                                                        {evt.registryKey === "courses" && (
-                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-blue-800">
-                                                                <CalendarIcon className="w-2 h-2" /> CRS
-                                                            </div>
-                                                        )}
-                                                        {evt.registryKey === "studioBookings" && (
-                                                            <div className="absolute top-1 right-1 bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-slate-800">
-                                                                <MapPin className="w-2 h-2" /> AFFITTO
-                                                            </div>
-                                                        )}
+                                                        <div className="absolute top-1 right-1 flex gap-1 z-30">
+                                                            <button onClick={handleEdit} className="bg-white/70 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm" title="Modifica rapida">
+                                                                <Edit2 className="w-2.5 h-2.5" />
+                                                            </button>
+                                                            {evt.registryKey === "workshops" && (
+                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-indigo-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "WKS"}><Sparkles className="w-2 h-2" /> {evt.categoryName || "WKS"}</div>
+                                                            )}
+                                                            {evt.registryKey === "courses" && (
+                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-blue-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "CRS"}><CalendarIcon className="w-2 h-2" /> {evt.categoryName || "CRS"}</div>
+                                                            )}
+                                                            {evt.registryKey === "studioBookings" && (
+                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-slate-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "AFFITTO"}><MapPin className="w-2 h-2" /> {evt.categoryName || "AFFITTO"}</div>
+                                                            )}
+                                                        </div>
 
                                                         <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full">{evt.startTime} - {evt.endTime}</div>
                                                         <div className="font-extrabold text-[12px] leading-tight truncate w-full uppercase">{evt.title}</div>
-                                                        <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5">{ins1}</div>
+                                                        {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5">{ins1}</div>}
                                                         {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90">{ins2}</div>}
                                                         
                                                         <div className="mt-auto pt-1 w-full flex flex-col items-start gap-1">
-                                                            <span className="text-[8px] font-bold uppercase tracking-wider">{statusLabel}</span>
+                                                            <span className={`text-[8px] font-bold uppercase tracking-wider ${statusColorClass}`}>{statusLabel}</span>
                                                             
                                                             {stats && (
                                                                 <div className="flex gap-2 text-[8px] font-bold w-full bg-white/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
@@ -1880,8 +1932,9 @@ export default function CalendarPage() {
                                                                     )}
                                                                 </div>
                                                             )}
-                                                            {codeLabel && <span className="text-[8px] font-mono opacity-80 truncate bg-white/40 px-1 mt-0.5 rounded">{codeLabel}</span>}
                                                         </div>
+                                                        
+                                                        {codeLabel && <div className="absolute bottom-1.5 left-1.5 text-[8px] font-mono opacity-80 font-semibold tracking-wider bg-white/60 px-1 rounded shadow-sm z-10">{codeLabel}</div>}
                                                         
                                                         {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
                                                             <span className="text-[9px] font-bold mt-1 bg-white/50 px-1.5 py-0.5 rounded shadow-sm">
@@ -2029,6 +2082,7 @@ export default function CalendarPage() {
                                     </div>
                                 </div>
 
+
                                 <div className="space-y-4">
                                     <Label>Insegnanti</Label>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -2116,7 +2170,7 @@ export default function CalendarPage() {
                                         <Input
                                             id="edit-startDate"
                                             type="date"
-                                            value={editForm.startDate ? (editForm.startDate instanceof Date ? editForm.startDate : new Date(editForm.startDate)).toISOString().split('T')[0] : ""}
+                                            value={getSafeDateStr(editForm.startDate)}
                                             onChange={e => setEditForm((prev: any) => ({ ...prev, startDate: e.target.value || null } as any))}
                                         />
                                     </div>
@@ -2125,7 +2179,7 @@ export default function CalendarPage() {
                                         <Input
                                             id="edit-endDate"
                                             type="date"
-                                            value={editForm.endDate ? (editForm.endDate instanceof Date ? editForm.endDate : new Date(editForm.endDate)).toISOString().split('T')[0] : ""}
+                                            value={getSafeDateStr(editForm.endDate)}
                                             onChange={e => setEditForm((prev: any) => ({ ...prev, endDate: e.target.value || null } as any))}
                                         />
                                     </div>
@@ -2581,7 +2635,7 @@ export default function CalendarPage() {
                                 <Label>Data</Label>
                                 <Input
                                     type="date"
-                                    value={bookingForm.bookingDate ? new Date(bookingForm.bookingDate).toISOString().split('T')[0] : ""}
+                                    value={getSafeDateStr(bookingForm.bookingDate)}
                                     onChange={e => setBookingForm((prev: any) => ({ ...prev, bookingDate: new Date(e.target.value) }))}
                                 />
                             </div>
@@ -2781,9 +2835,6 @@ export default function CalendarPage() {
                                 <SelectContent>
                                     <SelectItem value="course">Corso</SelectItem>
                                     <SelectItem value="workshop">Workshop</SelectItem>
-                                    <SelectItem value="prova_pagamento">Prova a pagamento</SelectItem>
-                                    <SelectItem value="prova_gratuita">Prova gratuita</SelectItem>
-                                    <SelectItem value="lezione_singola">Lezione singola</SelectItem>
                                     <SelectItem value="lezione_individuale">Lezione individuale</SelectItem>
                                     <SelectItem value="domenica">Domenica in movimento</SelectItem>
                                     <SelectItem value="allenamento">Allenamento</SelectItem>

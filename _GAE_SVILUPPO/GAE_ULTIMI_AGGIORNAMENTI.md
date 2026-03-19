@@ -5,6 +5,29 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 18 Marzo 2026 (Quick Wins UI Elenchi e Hardening Calendario)
+* **Quick Wins UI e Selettori Anagrafici (`calendar.tsx`, `maschera-input-generale.tsx`, `multi-select-participant-type.tsx`):**
+  * Dirottato il componente MultiSelect `Tipo Partecipante` dalla vecchia logica stub/errata `participant-types` alla corretta API `/api/client-categories`.
+  * Rimosso il mockup massivo sui campi testuali `Comune di Residenza` e `Provincia`, agganciando nativamente tag auto-completanti HTML5 `<datalist>` snelli e JSON-costanti per i Capoluoghi principali e Sigle Provinciali, in ottica zero-fetch sulle librerie.
+* **Evoluzione UX, Mapping e Navigazione Calendario (V3.1):**
+  * Divelti i cruscotti asfittici: rimosso l'`overflow-hidden` e l'`height` fissa dalle Card a favore di un perimetro elastico (`max-content`) con base `min-height` proporzionale al tempo. Le card esplodono verticalmente permettendo a 6 righe di testo di esistere senza troncamenti (`hover:z-50`).
+  * Architettura Doppio Click introdotta: il box gigante esegue *Deep Linking* routerato agganciando le Schede Attività singole (`/scheda-corso`, `/prenotazioni-sale`), ma senza rubare l'Edit rapido, mappato alla Matita isolata (`stopPropagation`).
+  * Restaurata la gerarchia semantica Genere/Categoria: Il Titolo torna ad essere nativamente il "Genere" (che risiede testualmente in `course.name` via ComboBox). La "Categoria" non asfalta più il Genere ma sale elegantemente al rango di Badge identificativo nell'angolo testuale della Card al posto dei vetusti stub "CRS/WKS".
+  * Potenziamento del Motore di Ricerca In-Memory (`searchQuery`): Il text parser front-end scorre ora agilmente anche su "SKU" e "Stato Verbale", coprendo il 100% dell'esigenza di filtro rapido da segreteria.
+  * Restaurato l'`ACTIVITY_REGISTRY` esatto per la Whitelist: i menu a tendina rispettano rigidamente i 7 slug ufficiali (`corsi`, `workshop`, `lezioni-individuali`, `domeniche-movimento`, `allenamenti`, `affitti`, `campus`), sbloccando le query.
+  * UI dello SKU incrementata di taglia e intensità luminosa (`opacity-80 font-semibold text-[8px]`) scollata fisicamente dal blocco capienze U/D.
+* **Standardizzazione Event Card Calendario (`client/src/pages/calendar.tsx`, V2 Definitiva):**
+  * Risolto il bug "Titoli Codificati": a seguito dell'adozione tecnica architetturale del "Refactor Genere", il nome delle attività non giace più nel label fallback `name`, bensì viene ora estratto in reactive join sull'anagrafica centralizzata delle `Categories`.
+  * Ristabilita la dignità del Primo Insegnante: corretto il fetch monco che prelevava il solo cognome, allineandolo alla formula (Nome + Cognome) esattamente come per il secondo, restituendo uniformità alla cattedra.
+  * Fixato chirurgicamente l'ingombro dello SKU/Lotto: rimosso dal contenitore centrale delle notifiche e ri-proiettato come *absolute watermark* isolato a sinistra in miniatura (6px opaco), azzerando l'invasività grafica.
+  * (Si confermano attivi anche i fix precedenti: `secondaryInstructor1Id` per il modulo supplenti, auto-collasso orizzontale al posto del dummy "Nessun ins." e Color-Coding di Status su testo Verde/Rosso).
+* **Prevenzione Crash di Rendering (`client/src/pages/calendar.tsx`):**
+  * Risolto in via definitiva il bug critico della schermata bianca frameless ("White Screen of Death") sulla rotte del calendario. Il crash derivava da eccezioni sincrone in `useMemo` dovute a `Temporal Dead Zone` di helper non allocati e al parsing forzato di `Invalid Date` da database con `toISOString()`.
+  * Inniettata la function failure-safe diagnostica `safeIsoString` integrata agli algoritmi base di date-picking per intercettare costrutti malformati/nulli senza far propagare l'errore al master component.
+  * Assicurato i pool mapper dei backend fall-back `filteredCourses` ed `studioBookings` al vincolo stringente `Array.isArray` per gestire serenamente responsi network vuoti o disallineati.
+
+---
+
 ### 15 Marzo 2026 (Refactoring Architettura Tessere & Maschera Input - Task 7)
 * **Centralizzazione Logica Stagionale (`server/utils/season.ts`):**
   * Spostata tutta la logica di calcolo delle date, degli anni di inizio/fine della stagione sportiva (1 Settembre - 31 Agosto), e la generazione formale dei Codici Tessera (`2526-XYZ`) e Barcode (`T2526XYZ`) dal client React ad una Factory unificata e pura nel backend.
