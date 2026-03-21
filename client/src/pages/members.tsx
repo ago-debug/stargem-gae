@@ -177,6 +177,7 @@ export default function Members() {
       case "cardNumber": return member.cardNumber;
       case "medicalCert": return member.hasMedicalCertificate ? (member.medicalCertificateExpiry || "9999-12-31") : "";
       case "status": return member.active ? 1 : 0;
+      case "crm": return member.crmProfileScore || 0;
       case "coursesCount": return (member as any).activeCourseCount || 0;
       default: return null;
     }
@@ -1107,6 +1108,7 @@ export default function Members() {
                     <SortableTableHead sortKey="mobile" currentSort={sortConfig} onSort={handleSort}>Mobile</SortableTableHead>
                     <SortableTableHead sortKey="cardNumber" currentSort={sortConfig} onSort={handleSort}>Tessera</SortableTableHead>
                     <SortableTableHead sortKey="medicalCert" currentSort={sortConfig} onSort={handleSort}>Cert. Medico</SortableTableHead>
+                    <SortableTableHead sortKey="crm" currentSort={sortConfig} onSort={handleSort}>Livello CRM</SortableTableHead>
                     <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
                     <TableHead className="w-10"></TableHead>
                     <SortableTableHead sortKey="coursesCount" currentSort={sortConfig} onSort={handleSort} className="text-right">Corsi Attivi</SortableTableHead>
@@ -1115,8 +1117,12 @@ export default function Members() {
                 <TableBody>
                   {members.map((member) => (
                     <Fragment key={member.id}>
-                      <TableRow data-testid={`member-row-${member.id}`} className="border-b-0 hover:bg-muted/10">
-                        <TableCell>
+                      <TableRow 
+                        data-testid={`member-row-${member.id}`} 
+                        className="border-b-0 hover:bg-muted/10 cursor-pointer"
+                        onClick={() => setLocation(`/maschera-input?memberId=${member.id}`)}
+                      >
+                        <TableCell onClick={(e) => e.stopPropagation()}>
                           <Checkbox
                             checked={selectedMembers.includes(member.id)}
                             onCheckedChange={() => toggleMemberSelection(member.id)}
@@ -1125,7 +1131,7 @@ export default function Members() {
                         </TableCell>
                         <TableCell className={cn(isSortedColumn("lastName") && "sorted-column-cell")}>
                           <div className="flex items-center gap-2">
-                            <Link href={`/?memberId=${member.id}`}>
+                            <Link href={`/maschera-input?memberId=${member.id}`}>
                               <span
                                 className="font-bold hover:underline cursor-pointer"
                                 data-testid={`link-member-${member.id}`}
@@ -1213,6 +1219,17 @@ export default function Members() {
                               <span>Manca Dato</span>
                             </div>
                           )}
+                        </TableCell>
+                        <TableCell className={cn(isSortedColumn("crm") && "sorted-column-cell")}>
+                          {member.crmProfileLevel && member.crmProfileLevel !== "NONE" ? (
+                            <Badge className={
+                              member.crmProfileLevel === 'PLATINUM' ? 'bg-slate-900 border-slate-900 text-white' : 
+                              member.crmProfileLevel === 'GOLD' ? 'bg-amber-500 border-amber-500 text-white' : 
+                              'bg-slate-200 border-slate-300 text-slate-700 hover:bg-slate-300'
+                            }>
+                              {member.crmProfileLevel}
+                            </Badge>
+                          ) : <span className="text-muted-foreground text-xs font-mono">-</span>}
                         </TableCell>
                         <TableCell className={cn(isSortedColumn("status") && "sorted-column-cell")}>
                           <Badge variant={member.active ? "default" : "secondary"}>
@@ -1314,7 +1331,7 @@ export default function Members() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setLocation(`/?memberId=${member.id}`)}
+                              onClick={() => setLocation(`/maschera-input?memberId=${member.id}`)}
                               className="h-8"
                               disabled={!canWrite}
                             >

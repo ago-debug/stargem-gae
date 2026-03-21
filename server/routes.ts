@@ -964,6 +964,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==== Members Routes ====
+
+  // CRM Profiling routes
+  app.post("/api/crm/profile/recalculate-all", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
+    try {
+      const { recalculateAllActiveMembers } = await import("./utils/crm-profiling");
+      const updatedCount = await recalculateAllActiveMembers();
+      await logUserActivity(req, "UPDATE", "crm_profiling", "all", { count: updatedCount });
+      res.json({ success: true, updatedCount });
+    } catch (error: any) {
+      console.error("[API Error] Failed to recalculate CRM profiles:", error);
+      res.status(500).json({ message: "Failed to recalculate profiles" });
+    }
+  });
+
+  app.post("/api/crm/profile/:memberId/recalculate", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
+    try {
+      const memberId = parseInt(req.params.memberId);
+      const { calculateCrmProfileForMember } = await import("./utils/crm-profiling");
+      const result = await calculateCrmProfileForMember(memberId);
+      await logUserActivity(req, "UPDATE", "crm_profiling", memberId.toString(), { action: "manual_recalculation", result });
+      
+      const updatedMember = await storage.getMember(memberId);
+      res.json(updatedMember);
+    } catch (error: any) {
+      console.error("[API Error] Failed to recalculate CRM profile for member:", error);
+      res.status(500).json({ message: "Failed to recalculate profile" });
+    }
+  });
+
+  app.post("/api/crm/profile/:memberId/override", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
+    try {
+      const memberId = parseInt(req.params.memberId);
+      const { level, reason, override } = req.body;
+      
+      const updatedMember = await storage.updateMember(memberId, {
+        crmProfileLevel: level || null,
+        crmProfileReason: reason || null,
+        crmProfileOverride: override,
+      } as any);
+      
+      await logUserActivity(req, "UPDATE", "crm_profiling", memberId.toString(), { level, reason });
+      res.json(updatedMember);
+    } catch (error: any) {
+      console.error("[API Error] Failed to override CRM profile:", error);
+      res.status(500).json({ message: "Failed to update profile override" });
+    }
+  });
+
   app.get("/api/members", isAuthenticated, checkPermission("/anagrafica_a_lista", "read"), async (req, res) => {
     try {
       const page = parseInt(req.query.page as string) || 1;

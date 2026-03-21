@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   User, CreditCard, Gift, IdCard, FileText, Trophy, Users, Dumbbell,
   BookOpen, Sun, Plus, Settings, Download, Upload, Save, ChevronLeft,
-  Trash2, Calendar, X, Coins
+  Trash2, Calendar, X, Coins, RefreshCw, Edit3
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -52,6 +52,9 @@ export default function MemberDashboard() {
   const [formData, setFormData] = useState<MemberFormData>({});
   const [isGSheetsDialogOpen, setIsGSheetsDialogOpen] = useState(false);
   const [gSheetsSpreadsheetId, setGSheetsSpreadsheetId] = useState("");
+  
+  const [isCrmOverrideOpen, setIsCrmOverrideOpen] = useState(false);
+  const [crmOverrideData, setCrmOverrideData] = useState({ level: "NONE", reason: "", override: false });
 
   const { data: member, isLoading: memberLoading } = useQuery<Member>({
     queryKey: ["/api/members", memberId],
@@ -141,6 +144,44 @@ export default function MemberDashboard() {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
     },
   });
+
+  const recalculateCrmMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", `/api/crm/profile/${memberId}/recalculate`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/members", memberId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      toast({ title: "Profilo CRM ricalcolato con successo" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore Ricalcolo", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const overrideCrmMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", `/api/crm/profile/${memberId}/override`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/members", memberId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      toast({ title: "Forzatura CRM salvata" });
+      setIsCrmOverrideOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const handleOpenCrmOverride = () => {
+    setCrmOverrideData({
+      level: member?.crmProfileLevel || "NONE",
+      reason: member?.crmProfileReason || "",
+      override: member?.crmProfileOverride || false
+    });
+    setIsCrmOverrideOpen(true);
+  };
 
   const handleSave = () => {
     if (!formData.firstName || !formData.lastName) {
@@ -480,6 +521,68 @@ export default function MemberDashboard() {
                       <Badge variant={formData.active !== false ? "default" : "secondary"}>
                         {formData.active !== false ? "Attivo" : "Inattivo"}
                       </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-4 bg-slate-50 p-4 rounded-lg border">
+                  <div className="space-y-2 col-span-4">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Profilazione Segreteria (CRM)</Label>
+                      {memberId && !isNewMember && (
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 text-xs bg-white" 
+                            onClick={(e) => { e.preventDefault(); recalculateCrmMutation.mutate(); }}
+                            disabled={recalculateCrmMutation.isPending}
+                          >
+                            <RefreshCw className={cn("w-3 h-3 mr-1", recalculateCrmMutation.isPending && "animate-spin")} /> 
+                            Ricalcola
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 text-xs bg-white" 
+                            onClick={(e) => { e.preventDefault(); handleOpenCrmOverride(); }}
+                          >
+                            <Edit3 className="w-3 h-3 mr-1" /> 
+                            Forzatura
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      {member?.crmProfileLevel && member.crmProfileLevel !== "NONE" ? (
+                        <Badge className={
+                          member.crmProfileLevel === 'PLATINUM' ? 'bg-slate-900 border-slate-900 text-white w-[100px] text-center flex justify-center' : 
+                          member.crmProfileLevel === 'GOLD' ? 'bg-amber-500 border-amber-500 text-white w-[100px] text-center flex justify-center' : 
+                          'bg-slate-200 border-slate-300 text-slate-700 w-[100px] text-center flex justify-center'
+                        }>
+                          {member.crmProfileLevel}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground">Da Calcolare</Badge>
+                      )}
+                      
+                      {member?.crmProfileLevel && member.crmProfileLevel !== "NONE" && (
+                        <Badge variant="outline" className="font-mono text-muted-foreground">
+                          {member.crmProfileScore || 0} pts
+                        </Badge>
+                      )}
+                      
+                      {member?.crmProfileReason && (
+                        <span className="text-sm font-mono text-muted-foreground px-2 py-0.5 border rounded bg-white">
+                          {member.crmProfileReason}
+                        </span>
+                      )}
+
+                      {member?.crmProfileOverride && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 ml-auto">
+                          Forzatura Manuale Attiva
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1000,6 +1103,67 @@ export default function MemberDashboard() {
               setIsGSheetsDialogOpen(false);
             }}>
               Salva
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isCrmOverrideOpen} onOpenChange={setIsCrmOverrideOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Forzatura Profilo CRM</DialogTitle>
+            <DialogDescription>
+              Modifica manualmente il livello CRM di questo partecipante. Selezionando un livello, il calcolo automatico verrà disattivato finché la forzatura resta attiva.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-4">
+              <input 
+                type="checkbox" 
+                id="override-active"
+                className="w-4 h-4"
+                checked={crmOverrideData.override}
+                onChange={(e) => setCrmOverrideData(prev => ({ ...prev, override: e.target.checked }))}
+              />
+              <Label htmlFor="override-active" className="cursor-pointer font-medium">Attiva Forzatura Manuale</Label>
+            </div>
+            
+            {crmOverrideData.override && (
+              <>
+                <div className="space-y-2">
+                  <Label>Livello Forzato</Label>
+                  <Select
+                    value={crmOverrideData.level}
+                    onValueChange={(v) => setCrmOverrideData(prev => ({ ...prev, level: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona Livello" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PLATINUM">PLATINUM</SelectItem>
+                      <SelectItem value="GOLD">GOLD</SelectItem>
+                      <SelectItem value="SILVER">SILVER</SelectItem>
+                      <SelectItem value="NONE">Nessuno</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Motivazione / Note</Label>
+                  <Input 
+                    placeholder="Es. Forzato da direzione" 
+                    value={crmOverrideData.reason}
+                    onChange={(e) => setCrmOverrideData(prev => ({ ...prev, reason: e.target.value }))}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCrmOverrideOpen(false)}>Annulla</Button>
+            <Button 
+              onClick={() => overrideCrmMutation.mutate(crmOverrideData)}
+              disabled={overrideCrmMutation.isPending}
+            >
+              Salva Forzatura
             </Button>
           </DialogFooter>
         </DialogContent>

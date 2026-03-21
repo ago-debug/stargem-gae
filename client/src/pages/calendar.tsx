@@ -1719,12 +1719,12 @@ export default function CalendarPage() {
                                                 };
 
                                                 const handleCardClick = () => {
-                                                    if (evt.registryKey === "courses") setLocation(`/scheda-corso?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "workshops") setLocation(`/scheda-workshop?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "lezione_individuale") setLocation(`/scheda-lezione-individuale?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "domenica") setLocation(`/scheda-domenica?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "allenamento") setLocation(`/scheda-allenamento?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "campus") setLocation(`/scheda-campus?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "courses") setLocation(`/scheda-corso?courseId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "workshops") setLocation(`/scheda-workshop?workshopId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "lezione_individuale") setLocation(`/scheda-lezione-individuale?activityId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "domenica") setLocation(`/scheda-domenica?activityId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "allenamento") setLocation(`/scheda-allenamento?activityId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "campus") setLocation(`/scheda-campus?activityId=${evt.sourceId}`);
                                                     if (evt.registryKey === "studioBookings") setLocation(`/prenotazioni-sale?edit=${evt.sourceId}`);
                                                 };
 
@@ -1745,11 +1745,11 @@ export default function CalendarPage() {
                                                     <div
                                                         key={`${evt.sourceType}-${evt.sourceId}`}
                                                         onClick={handleCardClick}
-                                                        className={`absolute left-0.5 right-0.5 p-1.5 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 flex flex-col justify-start items-start text-left min-h-[80px] ${evt.colorProps.className || ''}`}
+                                                        className={`absolute left-0.5 right-0.5 p-1.5 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 flex flex-col justify-start items-start text-left min-h-[80px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${evt.colorProps.className || ''}`}
                                                         style={{
                                                             top: `${startMin + 3}px`,
                                                             minHeight: `${duration - 6}px`,
-                                                            height: "max-content",
+                                                            overflow: "hidden",
                                                             left: `calc(${layoutLeft}% + 4px)`,
                                                             width: `calc(${layoutWidth}% - 8px)`,
                                                             fontSize: "10px",
@@ -1758,46 +1758,52 @@ export default function CalendarPage() {
                                                             color: "#0f172a"
                                                         }}
                                                     >
-                                                        <div className="absolute top-1 right-1 flex gap-1 z-30">
-                                                            <button onClick={handleEdit} className="bg-white/70 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm" title="Modifica rapida">
-                                                                <Edit2 className="w-2 h-2" />
-                                                            </button>
-                                                            {evt.registryKey === "workshops" && (
-                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-indigo-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "WKS"}><Sparkles className="w-2 h-2" /> {evt.categoryName || "WKS"}</div>
-                                                            )}
-                                                            {evt.registryKey === "courses" && (
-                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-blue-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "CRS"}><CalendarIcon className="w-2 h-2" /> {evt.categoryName || "CRS"}</div>
-                                                            )}
-                                                            {evt.registryKey === "studioBookings" && (
-                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 text-slate-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "AFFITTO"}><MapPin className="w-2 h-2" /> {evt.categoryName || "AFFITTO"}</div>
-                                                            )}
+                                                        <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 z-30">
+                                                            <div className={`bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`} title={evt.categoryName || "CAT"}>
+                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2 h-2" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2 h-2" /> : <MapPin className="w-2 h-2" />}
+                                                                {evt.categoryName || (evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO")}
+                                                            </div>
+                                                            <div className={`bg-white/80 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5 ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`}>
+                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2 h-2" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2 h-2" /> : <MapPin className="w-2 h-2" />}
+                                                                {evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO"}
+                                                            </div>
                                                         </div>
 
                                                         <div className="font-bold text-[9px] mb-0.5 opacity-90">{evt.startTime} - {evt.endTime}</div>
-                                                        <div className="font-extrabold text-[11px] leading-tight truncate w-full uppercase">{evt.title}</div>
+                                                        <div className="font-extrabold text-[11px] leading-tight line-clamp-2 w-full uppercase break-words">{evt.title}</div>
                                                         {ins1 && <div className="font-semibold text-[9px] truncate w-full opacity-90 mt-0.5">{ins1}</div>}
                                                         {ins2 && <div className="font-semibold text-[9px] truncate w-full opacity-90">{ins2}</div>}
                                                         
-                                                        <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-0.5">
-                                                            <span className={`text-[7px] font-bold uppercase tracking-wider ${statusColorClass}`}>{statusLabel}</span>
-                                                            
+                                                        <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-1 shrink-0">
                                                             {stats && (
-                                                                <div className="flex gap-1.5 text-[7px] font-bold w-full bg-white/50 px-1 py-0.5 rounded border border-black/5 mt-0.5">
+                                                                <div className="flex justify-between text-[7px] font-bold w-full bg-white/50 px-1 py-0.5 rounded border border-black/5">
                                                                     <span className="text-blue-700">U:{stats.men}</span>
                                                                     <span className="text-pink-700">D:{stats.women}</span>
                                                                     {availability !== null && (
-                                                                        <span className={availability <= 2 ? "text-red-700" : "text-emerald-700 ml-auto"}>Disp:{availability}</span>
+                                                                        <span className={availability <= 2 ? "text-red-700 font-extrabold" : "text-emerald-700 ml-auto"}>Disp:{availability}</span>
                                                                     )}
+                                                                </div>
+                                                            )}
+                                                            
+                                                            <div className="flex w-full items-center justify-between mt-0.5 gap-1">
+                                                                <div className={`text-[7px] font-bold uppercase tracking-wider ${statusColorClass} leading-none truncate`}>{statusLabel}</div>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm shrink-0 border border-black/5" title="Modifica rapida">
+                                                                    <Edit2 className="w-2 h-2" />
+                                                                </button>
+                                                            </div>
+                                                            
+                                                            {codeLabel && (
+                                                                <div className="text-[7px] font-mono opacity-90 font-semibold tracking-wider bg-white/70 px-1.5 py-0.5 rounded shadow-sm w-full text-left truncate leading-none border border-black/5 mt-0.5">
+                                                                    {codeLabel}
                                                                 </div>
                                                             )}
                                                         </div>
                                                         
                                                         {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
-                                                            <span className="text-[9px] font-bold absolute bottom-1 right-1 bg-white/80 px-1.5 py-0.5 rounded shadow-sm text-slate-800">
+                                                            <span className="text-[8px] font-bold absolute top-1 right-1 bg-white/90 px-1.5 py-0.5 rounded shadow-sm text-slate-800 border-black/5 border z-40">
                                                                 €{Number(evt.rawPayload.amount).toFixed(2)}
                                                             </span>
                                                         )}
-                                                        {codeLabel && <div className="absolute bottom-1 left-1.5 text-[8px] font-mono opacity-80 font-semibold tracking-wider bg-white/60 px-1 rounded shadow-sm z-10">{codeLabel}</div>}
                                                     </div>
                                                 );
                                             })}
@@ -1861,12 +1867,12 @@ export default function CalendarPage() {
                                                 };
 
                                                 const handleCardClick = () => {
-                                                    if (evt.registryKey === "courses") setLocation(`/scheda-corso?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "workshops") setLocation(`/scheda-workshop?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "lezione_individuale") setLocation(`/scheda-lezione-individuale?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "domenica") setLocation(`/scheda-domenica?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "allenamento") setLocation(`/scheda-allenamento?id=${evt.sourceId}`);
-                                                    if (evt.registryKey === "campus") setLocation(`/scheda-campus?id=${evt.sourceId}`);
+                                                    if (evt.registryKey === "courses") setLocation(`/scheda-corso?courseId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "workshops") setLocation(`/scheda-workshop?workshopId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "lezione_individuale") setLocation(`/scheda-lezione-individuale?activityId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "domenica") setLocation(`/scheda-domenica?activityId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "allenamento") setLocation(`/scheda-allenamento?activityId=${evt.sourceId}`);
+                                                    if (evt.registryKey === "campus") setLocation(`/scheda-campus?activityId=${evt.sourceId}`);
                                                     if (evt.registryKey === "studioBookings") setLocation(`/prenotazioni-sale?edit=${evt.sourceId}`);
                                                 };
 
@@ -1887,11 +1893,11 @@ export default function CalendarPage() {
                                                     <div
                                                         key={`${evt.sourceType}-${evt.sourceId}-studio`}
                                                         onClick={handleCardClick}
-                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 flex flex-col justify-start items-start text-left min-h-[85px] ${evt.colorProps.className || ''}`}
+                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 flex flex-col justify-start items-start text-left min-h-[85px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${evt.colorProps.className || ''}`}
                                                         style={{
                                                             top: `${startMin + 3}px`,
                                                             minHeight: `${duration - 6}px`,
-                                                            height: "max-content",
+                                                            overflow: "hidden",
                                                             left: `calc(${layoutLeft}% + 4px)`,
                                                             width: `calc(${layoutWidth}% - 8px)`,
                                                             fontSize: "10px",
@@ -1900,31 +1906,31 @@ export default function CalendarPage() {
                                                             color: "#0f172a"
                                                         }}
                                                     >
-                                                        <div className="absolute top-1 right-1 flex gap-1 z-30">
-                                                            <button onClick={handleEdit} className="bg-white/70 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm" title="Modifica rapida">
-                                                                <Edit2 className="w-2.5 h-2.5" />
-                                                            </button>
-                                                            {evt.registryKey === "workshops" && (
-                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-indigo-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "WKS"}><Sparkles className="w-2 h-2" /> {evt.categoryName || "WKS"}</div>
-                                                            )}
-                                                            {evt.registryKey === "courses" && (
-                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-blue-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "CRS"}><CalendarIcon className="w-2 h-2" /> {evt.categoryName || "CRS"}</div>
-                                                            )}
-                                                            {evt.registryKey === "studioBookings" && (
-                                                                <div className="bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 text-slate-800 uppercase max-w-[65px] truncate" title={evt.categoryName || "AFFITTO"}><MapPin className="w-2 h-2" /> {evt.categoryName || "AFFITTO"}</div>
-                                                            )}
+                                                        <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 z-30">
+                                                            <div className={`bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`} title={evt.categoryName || "CAT"}>
+                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2 h-2" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2 h-2" /> : <MapPin className="w-2 h-2" />}
+                                                                {evt.categoryName || (evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO")}
+                                                            </div>
+                                                            <div className={`bg-white/80 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5 ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`}>
+                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2 h-2" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2 h-2" /> : <MapPin className="w-2 h-2" />}
+                                                                {evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO"}
+                                                            </div>
                                                         </div>
 
                                                         <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full">{evt.startTime} - {evt.endTime}</div>
-                                                        <div className="font-extrabold text-[12px] leading-tight truncate w-full uppercase">{evt.title}</div>
+                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase break-words">{evt.title}</div>
                                                         {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5">{ins1}</div>}
                                                         {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90">{ins2}</div>}
                                                         
-                                                        <div className="mt-auto pt-1 w-full flex flex-col items-start gap-1">
-                                                            <span className={`text-[8px] font-bold uppercase tracking-wider ${statusColorClass}`}>{statusLabel}</span>
+                                                        <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-1 shrink-0 z-10 bg-inherit w-full">
+                                                            {evt.registryKey === "studioBookings" && (
+                                                                <div className="bg-black/5 px-2 py-0.5 rounded-full text-[8px] font-bold text-black/60 mb-1 w-fit">
+                                                                    {evt.startTime}-{evt.endTime}
+                                                                </div>
+                                                            )}
                                                             
                                                             {stats && (
-                                                                <div className="flex gap-2 text-[8px] font-bold w-full bg-white/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
+                                                                <div className="flex justify-between text-[8px] font-bold w-full bg-white/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
                                                                     <span className="text-blue-700">U:{stats.men}</span>
                                                                     <span className="text-pink-700">D:{stats.women}</span>
                                                                     {availability !== null && (
@@ -1932,26 +1938,31 @@ export default function CalendarPage() {
                                                                     )}
                                                                 </div>
                                                             )}
+                                                            
+                                                            <div className="flex w-full items-center justify-between mt-0.5 gap-1">
+                                                                <div className={`text-[8px] font-bold uppercase tracking-wider ${statusColorClass} leading-none truncate`}>{statusLabel}</div>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm shrink-0 border border-black/5" title="Modifica rapida">
+                                                                    <Edit2 className="w-2.5 h-2.5" />
+                                                                </button>
+                                                            </div>
+                                                            
+                                                            {codeLabel && (
+                                                                <div className="text-[8px] font-mono opacity-90 font-semibold tracking-wider bg-white/70 px-1.5 py-0.5 rounded shadow-sm w-full text-left truncate leading-none border border-black/5 mt-0.5 mb-0.5">
+                                                                    {codeLabel}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         
-                                                        {codeLabel && <div className="absolute bottom-1.5 left-1.5 text-[8px] font-mono opacity-80 font-semibold tracking-wider bg-white/60 px-1 rounded shadow-sm z-10">{codeLabel}</div>}
-                                                        
                                                         {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
-                                                            <span className="text-[9px] font-bold mt-1 bg-white/50 px-1.5 py-0.5 rounded shadow-sm">
+                                                            <span className="text-[10px] font-bold absolute top-1 right-8 bg-white/90 px-1.5 py-0.5 rounded shadow-sm text-slate-800 border-black/5 border z-40">
                                                                 €{Number(evt.rawPayload.amount).toFixed(2)}
                                                             </span>
                                                         )}
                                                         {evt.registryKey === "studioBookings" && evt.rawPayload?.paid && (
-                                                            <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5 text-white shadow-sm">
-                                                                <Check className="w-2 h-2" />
+                                                            <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5 text-white shadow-sm z-40">
+                                                                <Check className="w-3 h-3" />
                                                             </div>
                                                         )}
-                                                        {evt.registryKey === "studioBookings" && (
-                                                            <div className="bg-black/5 px-2 py-0.5 rounded-full text-[8px] font-bold text-black/60 mt-auto">
-                                                                {evt.startTime}-{evt.endTime}
-                                                            </div>
-                                                        )}
-                                                        
                                                     </div>
                                                 );
                                             })}

@@ -1412,6 +1412,12 @@ export const members = mysqlTable("members", {
   bio: text("bio"),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
 
+  // CRM Profiling
+  crmProfileLevel: varchar("crm_profile_level", { length: 20 }), // PLATINUM, GOLD, SILVER, or NONE
+  crmProfileScore: int("crm_profile_score").default(0),
+  crmProfileOverride: boolean("crm_profile_override").default(false),
+  crmProfileReason: varchar("crm_profile_reason", { length: 255 }),
+
   active: boolean("active").default(true),
   createdBy: varchar("created_by", { length: 255 }),
   updatedBy: varchar("updated_by", { length: 255 }),
