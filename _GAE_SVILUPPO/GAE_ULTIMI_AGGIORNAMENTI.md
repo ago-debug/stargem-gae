@@ -15,6 +15,12 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Fix Bloccante Navigazione UX (Anagrafica Generale):**
   * Risolto il bug di reindirizzamento errato verso la Dashboard cliccando i clienti in Anagrafica. Tutte le invocazioni di route sul `<TableRow>`, `<Link>` testuale (Nome/Cognome) e bottone "Modifica Completa" (`/?memberId=X`) in `members.tsx` sono state corrette puntando in modo chirurgico all'unica vera scheda partecipante (`/maschera-input?memberId=X`).
   * Implementata la cliccabilità dell'intera griglia (Row Clickable) con `cursor-pointer` per migliorare l'UX, proteggendo contestualmente i Checkbox di selezione multipla tramite un `stopPropagation()` sull'evento. Non ci sono stati impatti né modifiche al backend.
+* **Integrazione Definitiva CRM in Maschera Input (`maschera-input-generale.tsx`):**
+  * Spostata con successo tutta la logica di profilazione visiva e operativa (Livello, Punteggio, Motivazione) dalla vecchia dashboard alla scheda cliente ufficiale ("Maschera Input").
+  * Iniettata una query dedicata (`/api/members/current`) per mantenere i dati CRM sincronizzati in tempo reale senza intaccare il massivo stato persistente dei form legacy `formData`.
+  * La sezione "Attività di marketing" è stata reimpaginata con un respiro a larghezza piena, uscendo dalla stretta colonna sinistra degli Allegati, ed è ora disposta orizzontalmente in fondo al blocco Anagrafica. Questa visualizzazione widescreen permette ai badge, alle motivazioni e ai bottoni interattivi di affiancarsi ordinatamente senza compressioni.
+  * L'algoritmo CRM scala a **4 livelli**: `Silver`, `Gold`, `Platinum`, e `Diamond` (Score >= 100).
+  * Inserito un Tooltip di spiegazione vicino all'etichetta Livello per demotivare la forzatura manuale ove non necessaria, educando il team alla profilazione automatica.
 
 ---
 

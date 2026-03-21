@@ -79,7 +79,8 @@ export async function calculateCrmProfileForMember(memberId: number) {
   let crmLevel = "SILVER";
   let reason = `Score: ${totalScore} (Spesa: ${totalSpent}€, Attività: ${totalActiveEnrollments})`;
 
-  if (totalScore >= 80) crmLevel = "PLATINUM";
+  if (totalScore >= 100) crmLevel = "DIAMOND";
+  else if (totalScore >= 80) crmLevel = "PLATINUM";
   else if (totalScore >= 50) crmLevel = "GOLD";
   else if (isNew) {
     crmLevel = "SILVER";
