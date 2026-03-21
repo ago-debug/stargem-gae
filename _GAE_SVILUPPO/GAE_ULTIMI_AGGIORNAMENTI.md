@@ -1,7 +1,20 @@
 # Ultimi Aggiornamenti Progetto "CourseManager"
-**Periodo di riferimento:** 23 Febbraio 2026 - 15 Marzo 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 21 Marzo 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
+
+---
+
+### 21 Marzo 2026 (Attivazione Profilazione CRM su Scheda Cliente)
+* **Sblocco e Ricalcolo Backfill Motore CRM:**
+  * Diagnosticato lo stato di inattività del modulo CRM: i campi (`crmProfileLevel`, `crmProfileScore`, ecc.) erano correttamente posati su Drizzle ma totalmente vuoti nel DB locale. Eseguito un job node di backfill avviando la funzione nativa `recalculateAllActiveMembers()` calcolando lo storico per tutti i ~9500 contatti attivi.
+  * Fix Algoritmo: rimosso un lookup fallace su `globalEnrollments` dentro `server/utils/crm-profiling.ts` che generava `DrizzleQueryError` non trovando la fantomatica tabella STI non ancora migrata.
+* **UI/UX Interattiva CRM su Scheda Cliente (`member-dashboard.tsx`):**
+  * Aggiunto bottone "Forzatura" che scatena una nuova Dialog nativa collegata all'endpoint React Query `POST /api/crm/profile/:memberId/override`. Permette l'impostazione manuale del livello, isolando il record dai calcoli automatici notturni (flag `crmProfileOverride = true`).
+  * Creata nuova rotta selettiva `POST /api/crm/profile/:memberId/recalculate` nel backend (`server/routes.ts`) ed esposta via Bottone "Ricalcola" in HUD. Permette di saggiare lo score utente singolo in tempo reale in O(1) anziché richiamare pesanti /recalculate-all indiscriminati su 9000 righe.
+* **Fix Bloccante Navigazione UX (Anagrafica Generale):**
+  * Risolto il bug di reindirizzamento errato verso la Dashboard cliccando i clienti in Anagrafica. Tutte le invocazioni di route sul `<TableRow>`, `<Link>` testuale (Nome/Cognome) e bottone "Modifica Completa" (`/?memberId=X`) in `members.tsx` sono state corrette puntando in modo chirurgico all'unica vera scheda partecipante (`/maschera-input?memberId=X`).
+  * Implementata la cliccabilità dell'intera griglia (Row Clickable) con `cursor-pointer` per migliorare l'UX, proteggendo contestualmente i Checkbox di selezione multipla tramite un `stopPropagation()` sull'evento. Non ci sono stati impatti né modifiche al backend.
 
 ---
 
@@ -143,4 +156,4 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Avvio Refactoring Corsi:** Riorganizzazione della struttura a componente `courses.tsx` per ospitare componenti modulari riutilizzabili ed espansione dati di iscrizione (gettoni, rimborsi, log) a scomparsa, avviando il ciclo di aggiornamenti conclusi il 25 Febbraio.
 
 ---
-*Documento generato e aggiornato al 15 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
+*Documento generato e aggiornato al 21 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*

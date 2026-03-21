@@ -163,7 +163,7 @@ I due componenti universali che sostituiranno le decine di form sparsi.
 - [!] Endpoint Nuovi Moduli
   - File toccati: `server/routes.ts`
   - Fatto: Nulla, in attesa Sblocco V2.
-  - Manca: Predisporre i backend per lo Staff App, Team App e moduli CRM.
+  - Manca: Predisporre i backend per lo Staff App, Team App. I moduli profilazione CRM Anagrafica sono completati.
 
 ---
 
@@ -403,3 +403,17 @@ Sulla base del Blocco 5 generato nella "Tabella Master Modali", seguiamo questo 
   - File toccati: Pagamenti, Tessere
   - Fatto: Applicata etichetta STOP & GO.
   - Manca: Sviluppo futuro del calcolatore listini.
+
+---
+
+## 8. Integrazione CRM Esterno (Progetto "Clarissa") - Fase 2 Roadmap
+I seguenti passaggi diventeranno attivi solo previa autorizzazione esplicita ad iniziare lo sviluppo dell'integrazione. Documento strategico di riferimento: `_GAE_SVILUPPO/futuro/11_GAE_Strategic_Plan_Clarissa_CRM.md`.
+
+- [ ] Fase 0: Setup e Autorizzazione
+  - Manca: Ricevere le chiavi API di Clarissa e studiarne la documentazione ufficiale.
+- [ ] Fase 1: Sincronizzazione Master Base (Gem -> Clarissa)
+  - Manca: Creazione del modulo `server/integrations/clarissa.ts` e trigger su inserimento/modifica anagrafiche e aggiornamento livelli/score CRM.
+- [ ] Fase 1.1: Agganciamento Eventi CRM Interno
+  - Manca: Far emettere il push verso Clarissa alla funzione `calculateCrmProfileForMember`.
+- [ ] Fase 2: Webhooks Operativi
+  - Manca: Ricezione push da Clarissa per agganciare Opt-Out o Disiscrizioni mailing list.
