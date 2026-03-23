@@ -1,7 +1,7 @@
 import { db } from "../db";
 import { members, payments, enrollments } from "../../shared/schema";
 import { and, gte, desc, eq, sql } from "drizzle-orm";
-
+import { CRM_CONFIG, getScoreFromThresholds, getRecencyScore } from "../../shared/crm-config";
 export async function calculateCrmProfileForMember(memberId: number) {
   // 1. Fetch member
   const [member] = await db.select().from(members).where(eq(members.id, memberId));
@@ -12,7 +12,7 @@ export async function calculateCrmProfileForMember(memberId: number) {
     return member;
   }
 
-  // Calculate Monetary (Last 12 months paid)
+  // 1. Spesa Recente (Ultimi 12 mesi) - Peso MAX: 40
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
@@ -28,12 +28,13 @@ export async function calculateCrmProfileForMember(memberId: number) {
 
   const totalSpent = memberPayments.reduce((acc, p) => acc + parseFloat(p.amount?.toString() || "0"), 0);
 
-  let monetaryScore = 0;
-  if (totalSpent >= 1000) monetaryScore = 50;
-  else if (totalSpent >= 500) monetaryScore = 30;
-  else if (totalSpent >= 150) monetaryScore = 15;
-  else if (totalSpent > 0) monetaryScore = 5;
+  let monetaryScore = getScoreFromThresholds(totalSpent, CRM_CONFIG.SPESA_THRESHOLDS);
 
+  // 2. Continuità / Frequenza - Peso MAX: 25
+  const numPayments = memberPayments.length;
+  let frequencyScore = getScoreFromThresholds(numPayments, CRM_CONFIG.FREQUENZA_THRESHOLDS);
+
+  // 3. Numero Attività / Servizi acquistati - Peso MAX: 20
   const activeLegacyEnrollments = await db.select()
     .from(enrollments)
     .where(
@@ -45,46 +46,41 @@ export async function calculateCrmProfileForMember(memberId: number) {
 
   const totalActiveEnrollments = activeLegacyEnrollments.length;
 
-  let frequencyScore = 0;
-  if (totalActiveEnrollments >= 3) frequencyScore = 30;
-  else if (totalActiveEnrollments === 2) frequencyScore = 20;
-  else if (totalActiveEnrollments === 1) frequencyScore = 10;
+  let activityScore = getScoreFromThresholds(totalActiveEnrollments, CRM_CONFIG.ATTIVITA_THRESHOLDS);
 
-  // Calculate Recency 
+  // 4. Recency (Attività Recente) - Peso MAX: 15
   let recencyScore = 0;
   let lastActivityDate: Date | null = null;
   if (memberPayments.length > 0) {
-    // Sort descending
     memberPayments.sort((a, b) => new Date(b.paidDate || 0).getTime() - new Date(a.paidDate || 0).getTime());
     lastActivityDate = new Date(memberPayments[0].paidDate || 0);
   }
   
   if (lastActivityDate) {
     const monthsSinceLastActivity = (new Date().getTime() - lastActivityDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
-    if (monthsSinceLastActivity <= 1) recencyScore = 20;
-    else if (monthsSinceLastActivity <= 3) recencyScore = 10;
-    else if (monthsSinceLastActivity <= 6) recencyScore = 5;
-    else recencyScore = 0;
+    recencyScore = getRecencyScore(monthsSinceLastActivity, CRM_CONFIG.RECENCY_THRESHOLDS);
   }
 
-  // Is neo-iscritto?
+  // Neo-iscritto check
   let isNew = false;
   if (member.insertionDate) {
     const monthsSinceInsertion = (new Date().getTime() - new Date(member.insertionDate).getTime()) / (1000 * 60 * 60 * 24 * 30);
     if (monthsSinceInsertion <= 3) isNew = true;
   }
 
-  const totalScore = monetaryScore + frequencyScore + recencyScore;
+  const totalScore = monetaryScore + frequencyScore + activityScore + recencyScore;
   
-  let crmLevel = "SILVER";
-  let reason = `Score: ${totalScore} (Spesa: ${totalSpent}€, Attività: ${totalActiveEnrollments})`;
+  let crmLevel = CRM_CONFIG.LEVELS.SILVER.label;
+  let reason = `Score: ${totalScore} (Spesa: ${monetaryScore}, Freq: ${frequencyScore}, Attività: ${activityScore}, Recency: ${recencyScore})`;
 
-  if (totalScore >= 100) crmLevel = "DIAMOND";
-  else if (totalScore >= 80) crmLevel = "PLATINUM";
-  else if (totalScore >= 50) crmLevel = "GOLD";
-  else if (isNew) {
-    crmLevel = "SILVER";
-    reason = "Neo-Iscritto (Score < 50)";
+  if (totalScore >= CRM_CONFIG.LEVELS.DIAMOND.minScore) crmLevel = CRM_CONFIG.LEVELS.DIAMOND.label;
+  else if (totalScore >= CRM_CONFIG.LEVELS.PLATINUM.minScore) crmLevel = CRM_CONFIG.LEVELS.PLATINUM.label;
+  else if (totalScore >= CRM_CONFIG.LEVELS.GOLD.minScore) crmLevel = CRM_CONFIG.LEVELS.GOLD.label;
+  else {
+    crmLevel = CRM_CONFIG.LEVELS.SILVER.label;
+    if (isNew) {
+      reason += " - Neo-Iscritto";
+    }
   }
 
   // Update DB
