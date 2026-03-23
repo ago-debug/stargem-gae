@@ -1528,8 +1528,16 @@ export default function CalendarPage() {
                                                 const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
 
                                                 const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
-                                                const statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
-                                                const statusColorClass = statusLabel === "ATTIVO" ? "text-green-700" : "text-red-700";
+                                                let statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
+                                                let statusColorClass = statusLabel === "ATTIVO" ? "text-green-700" : "text-red-700";
+
+                                                if (evt.rawPayload?.statusTags && Array.isArray(evt.rawPayload.statusTags)) {
+                                                    const stateTag = evt.rawPayload.statusTags.find((t: string) => t.startsWith("STATE:"));
+                                                    if (stateTag) {
+                                                        statusLabel = stateTag.replace("STATE:", "");
+                                                        statusColorClass = statusLabel === "ANNULLATO" ? "text-red-700" : (statusLabel === "COMPLETO" ? "text-amber-600" : "text-green-700");
+                                                    }
+                                                }
                                                 const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
                                                 const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
                                                 const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
@@ -1676,8 +1684,16 @@ export default function CalendarPage() {
                                                 const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
 
                                                 const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
-                                                const statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
-                                                const statusColorClass = statusLabel === "ATTIVO" ? "text-green-700" : "text-red-700";
+                                                let statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
+                                                let statusColorClass = statusLabel === "ATTIVO" ? "text-green-700" : "text-red-700";
+
+                                                if (evt.rawPayload?.statusTags && Array.isArray(evt.rawPayload.statusTags)) {
+                                                    const stateTag = evt.rawPayload.statusTags.find((t: string) => t.startsWith("STATE:"));
+                                                    if (stateTag) {
+                                                        statusLabel = stateTag.replace("STATE:", "");
+                                                        statusColorClass = statusLabel === "ANNULLATO" ? "text-red-700" : (statusLabel === "COMPLETO" ? "text-amber-600" : "text-green-700");
+                                                    }
+                                                }
                                                 const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
                                                 const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
                                                 const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";

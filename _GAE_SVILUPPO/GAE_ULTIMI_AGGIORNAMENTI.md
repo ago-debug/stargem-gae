@@ -5,6 +5,17 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 23 Marzo 2026 (Centralizzazione Elenchi e Universal Quick-Add - [AG-ELENCHI-001])
+* **Masterizzazione Area Elenchi (Source of Truth):**
+  * Eseguito un mini-audit che ha sancito due classi di elenchi a database: le *Core Custom Lists* (es. genere, canali acquisizione, destrutturate in `custom_lists`) e i *System Vocabularies Multi-Color* (es. stati, tipopartecipante, su logiche dedicate).
+  * Risolti gli orfani testuali all'interno dei modali principali (`maschera-input-generale.tsx`), rimuovendo i valori nativi di fallback per i Canali Acquisizione ("Web", "Passaparola") e per i gradi CRM ("Silver", "Gold"). Sostituiti in favore degli hook `useCustomListValues`. 
+* **Componente Combobox Intelligente (Quick-Add Orizzontale):**
+  * Integrato un behaviour astratto `<Combobox onQuickAdd />` in grado di catchare stringhe non presenti in tendina, visualizzando un action button "+ Crea nuova voce: [testo]". All'uso, una mutation pusha in background la voce alla tabella specifica (`customListItems` / systemName) senza distruggere i dati dirty del form o esigere il ricaricamento della pagina.
+  * Inclusa la hook helper `useQuickAddCustomList` accessibile globalmente.
+* **Seeding Dinamico System Custom Lists:**
+  * Implementato eseguibile isolato lato server `seed-custom-lists.ts` per far nascere automaticamente stringhe vincolanti (Es: "livello_crm" / "provenienza_marketing") al fine di mantenere il DB robusto ancor prima dell'integrazione SAAS aziendale reale.
+
+
 ### 23 Marzo 2026 (Rifinitura UX e Nuovo Algoritmo Motore CRM)
 * **Nuovo Algoritmo Base 100 per CRM (`server/utils/crm-profiling.ts`):**
   * Sostituita la precedente logica di calcolo del livello di marketing con un algoritmo a pesi centesimali: Spesa Recente (MAX 40pt), Frequenza (MAX 25pt), Servizi Attivi (MAX 20pt) e Recency (MAX 15pt).

@@ -27,6 +27,8 @@ import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
+import { Combobox } from "@/components/ui/combobox";
+import { useCustomListValues, useQuickAddCustomList } from "@/hooks/use-custom-list";
 import { CourseSelector } from "@/components/course-selector";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Course, Instructor, Category, Studio } from "@shared/schema";
@@ -134,6 +136,11 @@ export default function MascheraInputGenerale() {
   const memberIdFromUrl = urlParams.get('memberId') || urlParams.get('editMemberId');
   const actionFromUrl = urlParams.get('action');
   const { user } = useAuth();
+  
+  const canaliAcquisizione = useCustomListValues("provenienza_marketing");
+  const quickAddCanale = useQuickAddCustomList("provenienza_marketing");
+  const livelliCrm = useCustomListValues("livello_crm");
+  const quickAddLivello = useQuickAddCustomList("livello_crm");
 
   useBarcodeScanner((barcode) => {
     if (/^[A-Z0-9]{16}$/i.test(barcode)) {
@@ -3409,17 +3416,17 @@ export default function MascheraInputGenerale() {
               {/* Da Dove Arriva */}
               <div className="space-y-2 col-span-1">
                 <Label className="uppercase text-xs font-semibold text-muted-foreground">Canale di Acquisizione</Label>
-                <Select value={formData.daDoveArriva} onValueChange={(v) => handleChange("daDoveArriva", v)}>
-                  <SelectTrigger className={`bg-white dark:bg-transparent ${getInputClassName("daDoveArriva", false)}`}>
-                    <SelectValue placeholder="Seleziona..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="web">Web</SelectItem>
-                    <SelectItem value="passaparola">Passaparola</SelectItem>
-                    <SelectItem value="social">Social</SelectItem>
-                    <SelectItem value="altro">Altro</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Combobox
+                  name="daDoveArriva"
+                  value={formData.daDoveArriva || ""}
+                  onValueChange={(v) => handleChange("daDoveArriva", v)}
+                  options={canaliAcquisizione.map((c: string) => ({ value: c, label: c }))}
+                  placeholder="Seleziona o cerca..."
+                  emptyText="Nessun canale trovato"
+                  className={`bg-white dark:bg-transparent ${getInputClassName("daDoveArriva", false)}`}
+                  onQuickAdd={(v) => quickAddCanale.mutate(v)}
+                  isQuickAddPending={quickAddCanale.isPending}
+                />
               </div>
 
               {/* Dati CRM Real-Time */}
@@ -4300,21 +4307,16 @@ export default function MascheraInputGenerale() {
               <div className="space-y-4 pt-4 border-t border-border">
                 <div className="space-y-2">
                   <Label>Livello</Label>
-                  <Select 
-                    value={crmOverrideData.level}
+                  <Combobox
+                    name="livelloCrm"
+                    value={crmOverrideData.level || ""}
                     onValueChange={(v) => setCrmOverrideData(prev => ({ ...prev, level: v }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona livello..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="NONE">Nessun livello</SelectItem>
-                      <SelectItem value="SILVER">Silver</SelectItem>
-                      <SelectItem value="GOLD">Gold</SelectItem>
-                      <SelectItem value="PLATINUM">Platinum</SelectItem>
-                      <SelectItem value="DIAMOND">Diamond</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    options={[{value: "NONE", label: "Nessun livello"}, ...livelliCrm.map((l: string) => ({ value: l.toUpperCase(), label: l }))]}
+                    placeholder="Seleziona livello..."
+                    emptyText="Nessun livello trovato"
+                    onQuickAdd={(v) => quickAddLivello.mutate(v)}
+                    isQuickAddPending={quickAddLivello.isPending}
+                  />
                 </div>
 
                 <div className="space-y-2">

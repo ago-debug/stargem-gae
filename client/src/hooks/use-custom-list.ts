@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import type { CustomList, CustomListItem } from "@shared/schema";
 
 /**
@@ -32,4 +33,30 @@ export function useCustomListValues(systemName: string): string[] {
         .filter(item => item.active !== false)
         .map(item => item.value)
         .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
+
+/**
+ * Hook to quickly add a new value to a specific custom list by system name.
+ */
+export function useQuickAddCustomList(systemName: string) {
+    const queryClient = useQueryClient();
+    const { data: list } = useCustomList(systemName);
+
+    return useMutation({
+        mutationFn: async (value: string) => {
+            if (!list?.id) throw new Error("List not loaded yet");
+            const maxOrder = list.items?.reduce((max, i) => Math.max(max, i.sortOrder || 0), 0) || 0;
+            // Eseguiamo la post direttamente al core API
+            const res = await apiRequest("POST", `/api/custom-lists/${list.id}/items`, {
+                value,
+                sortOrder: maxOrder + 1,
+                active: true
+            });
+            return res;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`/api/custom-lists/${systemName}`] });
+            queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
+        }
+    });
 }

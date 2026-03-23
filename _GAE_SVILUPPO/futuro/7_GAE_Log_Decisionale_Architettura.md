@@ -110,3 +110,16 @@ Avere uno storico nero su bianco delle risposte del cliente è vitale per giusti
 *   **D: L'Atomo Tessera-Pagamento?**
     *   *R (Architettura Stabilita):* Data la natura del Carrello Multi-Persona descritto al punto sopra, il legame tra Pagamento (Master) e Membership associata deve essere garantito da un framework di "Matching Forte". Il Frontend inietta nei carrelli una label dinamica (`referenceKey`, che possiede per priorità: id statico carrello, ID utente o Fiscale) accoppiata a `tempId: membership_fee`. Il backend raccoglie la firma transazionale in `routes.ts`, esegue il lookup incrociato e salda l'`id` univoco al pagamento. L'Endpoint `/api/memberships` è stato svestito della facoltà di emettere "fake-debts" per forzare rigorosamente il passaggio contabile dall'hub unico di Checkout.
     *   *R (Utente):* Vincolo inviolabile: la *membership* non può fluttuare nel vuoto scissa dal pagamento. La tessera nasce solo all’interno di un flusso coerente con il pagamento effettivo registrato nel database. In un carrello complesso, la quota associativa è la voce prioritaria e mandataria.
+
+---
+
+## Intervista 6: Rigidità dei Vocabolari e Menù a Tendina (Elenchi)
+**Data:** 23 Marzo 2026
+**Topic:** Creazione incontrollata via form vs Rigidità gestionale (Database Consistency).
+
+*   **D: Possiamo lasciare che la segreteria scriva a testo libero i "gradi" dei corsi o "come ci hanno conosciuto"?**
+    *   *R (Utente):* No, altrimenti a fine anno mi ritrovo stringhe come "livello avanzato", "AVANZATO", "avanzatissimo" e i report aziendali o esportazioni Excel impazziscono.
+*   **D: Se usiamo elenchi fissi al DB, ogni volta che manca una voce, la segreteria deve uscire dal modulo per andare nelle Impostazioni a crearla?**
+    *   *R (Utente):* Sarebbe infernale. Devono poterla aggiungere *direttamente lì* (dalla tendina), ma il sistema deve prima controllare la lista ufficiale, e salvarla nel DB centralizzato (Quick-Add).
+*   **D: Tipi Pagamento o Livelli CRM: Chi ha lo scettro su questi?**
+    *   *R (Architettura Stabilita - AG-ELENCHI-001):* È stato attuato lo split a 2 livelli: I **System Vocabularies** (es. Note Pagamento, Metodologie incasso, Status attività) sono ancorati visceralmente e non permettono l'inserzione on-the-fly cross modale per non sfasare fatture. Le **Core Custom Lists** (es. Genere, Provenienza Marketing, CRM Tiers) invece supportano il *Quick-Add Universal Combobox*, consentendo agilità totale ma salvaguardando il vincolo database.

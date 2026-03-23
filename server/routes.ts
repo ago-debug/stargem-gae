@@ -2845,7 +2845,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startDate,
             startTime,
             endTime,
-            id
+            undefined, // no booking ID
+            id // current course ID
           );
           if (conflict) {
             const conflictTypeLabel =

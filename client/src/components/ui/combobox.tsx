@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +30,8 @@ interface ComboboxProps {
   name?: string; // For form integration
   className?: string;
   required?: boolean;
+  onQuickAdd?: (value: string) => void;
+  isQuickAddPending?: boolean;
 }
 
 export function Combobox({
@@ -40,11 +42,14 @@ export function Combobox({
   emptyText = "Nessun risultato trovato.",
   name,
   className,
-  required
+  required,
+  onQuickAdd,
+  isQuickAddPending
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
   // Internal state fallback if not controlled
   const [internalValue, setInternalValue] = React.useState(value || "")
+  const [searchValue, setSearchValue] = React.useState("")
 
   const currentValue = value !== undefined ? value : internalValue;
 
@@ -60,7 +65,7 @@ export function Combobox({
 
   return (
     <>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen} modal={true}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -76,7 +81,7 @@ export function Combobox({
         </PopoverTrigger>
         <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
           <Command>
-            <CommandInput placeholder="Cerca digitando..." />
+            <CommandInput placeholder="Cerca digitando..." value={searchValue} onValueChange={setSearchValue} />
             <CommandList className="max-h-[250px] overflow-y-auto">
               <CommandEmpty>{emptyText}</CommandEmpty>
               <CommandGroup>
@@ -95,6 +100,21 @@ export function Combobox({
                     {option.label}
                   </CommandItem>
                 ))}
+                
+                {onQuickAdd && searchValue && !options.some(o => o.label.toLowerCase() === searchValue.trim().toLowerCase()) && (
+                  <CommandItem 
+                    key="quick-add-new-auto" 
+                    onSelect={() => { 
+                      onQuickAdd(searchValue.trim()); 
+                      setSearchValue(""); 
+                    }}
+                    className="text-amber-700 bg-amber-50 cursor-pointer border-t font-semibold mt-1"
+                    disabled={isQuickAddPending}
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> 
+                    {isQuickAddPending ? "Avvio Creazione..." : `Crea nuova voce: "${searchValue.trim()}"`}
+                  </CommandItem>
+                )}
               </CommandGroup>
             </CommandList>
           </Command>

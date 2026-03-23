@@ -24,7 +24,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { hasWritePermission } from "@/App";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { useCustomListValues } from "@/hooks/use-custom-list";
-import type { Course, InsertCourse, Category, Instructor, Studio, Quote, Attendance, Member } from "@shared/schema";
+import type { Course, InsertCourse, Category, Instructor, Studio, Quote, Attendance, Member, ActivityStatus } from "@shared/schema";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -333,6 +333,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   // Dati da Liste e DB
   const nomiCorsi = useCustomListValues("genere");
   const postiDisponibili = useCustomListValues("posti_disponibili");
+  const { data: activityStatuses } = useQuery<ActivityStatus[]>({ queryKey: ["/api/activity-statuses"] });
+  const baseStati = ["ATTIVO", "IN PROGRAMMA", "COMPLETO", "ANNULLATO"];
+  const finalStati = activityStatuses && activityStatuses.length > 0 ? activityStatuses.filter(s => s.active).map(s => s.name) : baseStati;
   const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
@@ -507,10 +510,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="ATTIVO">ATTIVO</SelectItem>
-                      <SelectItem value="IN PROGRAMMA">IN PROGRAMMA</SelectItem>
-                      <SelectItem value="COMPLETO">COMPLETO</SelectItem>
-                      <SelectItem value="ANNULLATO" className="text-red-600">ANNULLATO</SelectItem>
+                      {finalStati.map(stato => (
+                        <SelectItem key={stato} value={stato} className={stato === "ANNULLATO" ? "text-red-600" : ""}>{stato}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

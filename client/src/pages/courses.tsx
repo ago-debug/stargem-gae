@@ -30,6 +30,19 @@ import { useCustomListValues } from "@/hooks/use-custom-list";
 import { Combobox } from "@/components/ui/combobox";
 import type { Course, InsertCourse, Category, Instructor, Studio, Attendance, Member, Quote, ActivityStatus } from "@shared/schema";
 
+export function formatStatusBadge(tag: string) {
+  if (!tag) return tag;
+  if (tag.startsWith("STATE:")) return tag.replace("STATE:", "");
+  if (tag.startsWith("PROMO:")) {
+    const p = tag.replace("PROMO:", "");
+    if (p === "GRATUITA") return "Prova gratuita";
+    if (p === "ONLINE") return "Iscrizione online";
+    if (p === "PROMO") return "Promo";
+    return p;
+  }
+  return tag;
+}
+
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
   { id: "MAR", label: "Martedì" },
@@ -596,13 +609,13 @@ export default function Courses() {
                         <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : ""}>
                           <div className="flex flex-col gap-1 items-start">
                             {parseStatusTags(course.statusTags).length > 0 ? (
-                              parseStatusTags(course.statusTags).map((tag) => (
-                                <StatusBadge
-                                  key={tag}
-                                  name={tag}
-                                  color={getStatusColor(tag, activityStatuses)}
-                                />
-                              ))
+                                parseStatusTags(course.statusTags).map((tag) => (
+                                  <StatusBadge
+                                    key={tag}
+                                    name={formatStatusBadge(tag)}
+                                    color={getStatusColor(formatStatusBadge(tag), activityStatuses)}
+                                  />
+                                ))
                             ) : (
                               <span className="text-xs italic text-muted-foreground">(Nessuno stato)</span>
                             )}

@@ -18,7 +18,7 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 ## 2. Anagrafica / Maschera Input
 **Stato Attuale:** 🟢 CHIUSO
 **Sintesi:** La "Maschera Input" è stabilmente concepita come l'unica e formale Dashboard utente (la scheda partecipante autentica a 360°), consolidando ogni operazione di back-office.
-* **Cosa è già stato fatto:** Ricablati tutti i path per far atterrare l'utenza su `/maschera-input?memberId=X` partendo da griglie e elenchi (`members.tsx`). Tutte le appendici come iscritti, allegati, marketing e pagamenti giacciono ordinate in sezioni chiudibili/visibili full-width.
+* **Cosa è già stato fatto:** Ricablati tutti i path per far atterrare l'utenza su `/maschera-input?memberId=X` partendo da griglie e elenchi (`members.tsx`). Tutte le appendici come iscritti, allegati, marketing e pagamenti giacciono ordinate in sezioni chiudibili/visibili full-width. **Completata la rimozione the fallback testuali (es: Livelli CRM e Canali di acquisizione), interamente sostituiti da `<Combobox>` alimentate nativamente dagli Elenchi server, dotate di funzione Quick-Add.**
 * **Cosa manca:** Rifiniture minori future per documentazione fiscale PDF.
 * **Rischi / Attenzioni:** Form React di dimensioni colossali che ingloba molte `mutations` concomitanti. Bisogna vigilare sui form state e sui re-render indesiderati al salvataggio.
 * **Prossimo Step Consigliato:** Nessuno strategico. L'UX è aderente alle aspettative. Non toccare.
@@ -28,7 +28,7 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 ## 3. Attività di marketing / CRM interno
 **Stato Attuale:** 🔵 CONGELATO (In attesa Dati Reali)
 **Sintesi:** Il motore CRM integrativo è stato eretto per la segmentazione VIP. Frontend e Backend comunicano impeccabilmente ma il set di dati storici del database per le validazioni non è idoneo a restituire valutazioni logiche.
-* **Cosa è già stato fatto:** Rinominata sezione UI esplicitamente in "Attività di marketing". Popolato Modale di forzatura eccezionale integrando spiegazione fattori (Spesa, Freq, Att, Recency). Astratto il file core `crm-config.ts` per scalare a base 100 il punteggio automatico Silver, Gold, Platinum e Diamond.
+* **Cosa è già stato fatto:** Rinominata sezione UI esplicitamente in "Attività di marketing". Popolato Modale di forzatura eccezionale integrando spiegazione fattori (Spesa, Freq, Att, Recency). Astratto il file core `crm-config.ts` per scalare a base 100 il punteggio automatico Silver, Gold, Platinum e Diamond. **I livelli manuali risiedono ora nell'ecosistema Elenchi come System Custom List `livello_crm`.**
 * **Cosa manca:** Validazione "Business" in Real Life. Senza storico solido pagamenti le automazioni assegneranno forzosamente e falsamente `Silver` quasi a tuta la sandbox.
 * **Rischi / Attenzioni:** Evitare di assumere i rank automatici locali come validi: le regole imposte sono alte (es. Spesa 1500) impossibili da colpire senza dataset maturo.
 * **Prossimo Step Consigliato:** Scaricare o macinare dal vero server live i `payments`. Affinare le tolleranze delle soglie di `crm-config.ts`. Scongelare.
