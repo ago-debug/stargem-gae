@@ -3368,8 +3368,8 @@ export default function MascheraInputGenerale() {
         </div>
 
         
-        {/* MARKETING & CRM (FULL WIDTH ROW) */}
-        <Card id="marketing-crm" className="bg-amber-50 dark:bg-amber-900/10 border-amber-200 scroll-mt-32">
+        {/* ATTIVITÀ DI MARKETING (FULL WIDTH ROW) */}
+        <Card id="attivita-marketing" className="bg-amber-50 dark:bg-amber-900/10 border-amber-200 scroll-mt-32">
           <CardHeader className="pb-3 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg border-b border-amber-200/50">
             <CardTitle className="flex items-center justify-between text-lg font-bold text-amber-800 dark:text-amber-200">
               <div className="flex items-center gap-2">
@@ -3384,7 +3384,7 @@ export default function MascheraInputGenerale() {
                     className="h-8 bg-white dark:bg-transparent"
                     onClick={(e) => { e.preventDefault(); recalculateCrmMutation.mutate(); }}
                     disabled={recalculateCrmMutation.isPending}
-                    title="Ricalcola Scoring CRM"
+                    title="Ricalcola Scoring"
                   >
                     <RefreshCw className={cn("w-4 h-4 mr-2", recalculateCrmMutation.isPending && "animate-spin")} />
                     Ricalcola
@@ -3394,7 +3394,7 @@ export default function MascheraInputGenerale() {
                     size="sm"
                     className="h-8 bg-white dark:bg-transparent border-amber-300 hover:bg-amber-100"
                     onClick={(e) => { e.preventDefault(); handleOpenCrmOverride(); }}
-                    title="Forzatura CRM Manuale"
+                    title="Impostazioni Manuali"
                   >
                     <Settings2 className="w-4 h-4 mr-2 text-muted-foreground" />
                     Forzatura
@@ -3437,11 +3437,19 @@ export default function MascheraInputGenerale() {
                           </TooltipTrigger>
                           <TooltipContent className="max-w-[280px] bg-white dark:bg-slate-900 border-amber-200">
                             <p className="text-xs text-slate-600 dark:text-slate-300">
-                              Il livello marketing viene assegnato automaticamente in base all’attività del partecipante e può essere aggiornato dal sistema nel tempo. 
+                              Il livello marketing viene assegnato automaticamente in base a spesa, continuità, numero di attività e recente partecipazione. Il modello può essere aggiornato nel tempo per migliorare la classificazione.
                               <br/><br/>
-                              Livelli previsti: <strong>Silver, Gold, Platinum, Diamond</strong>.
+                              Fattori considerati (Score 0-100):
+                              <ul className="list-disc ml-4 my-1">
+                                <li>Spesa ultimi 12 mesi</li>
+                                <li>Continuità (Frequenza)</li>
+                                <li>Numero attività/servizi</li>
+                                <li>Recency (Attività recente)</li>
+                              </ul>
+                              <br/>
+                              I livelli previsti sono: <strong>Silver, Gold, Platinum, Diamond</strong>.
                               <br/><br/>
-                              La modifica manuale è consentita solo per eccezioni amministrative.
+                              La forzatura manuale è solo eccezione amministrativa e riposizione questo calcolo automatico.
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -4260,17 +4268,25 @@ export default function MascheraInputGenerale() {
         </DialogContent>
       </Dialog>
       
-      {/* Modale Forzatura Profilo CRM */}
+      {/* Modale Forzatura livello marketing */}
       <Dialog open={isCrmOverrideOpen} onOpenChange={setIsCrmOverrideOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Forzatura Profilo CRM</DialogTitle>
+            <DialogTitle>Forzatura livello marketing</DialogTitle>
             <DialogDescription className="text-sm">
-              Modifica manualmente il livello CRM di questo partecipante. Selezionando un livello, il calcolo automatico verrà disattivato finché la forzatura resta attiva.
+              Modifica manualmente il livello assegnato a questo partecipante. Selezionando un livello, il calcolo automatico verrà disattivato finché la forzatura resta attiva.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="bg-amber-50 dark:bg-amber-900/10 p-3 rounded-md border border-amber-200/50 flex flex-col sm:flex-row justify-between sm:items-center gap-2 mt-4 text-sm">
+            <span className="text-amber-800 dark:text-amber-200 font-medium whitespace-nowrap">Stato attuale a sistema:</span>
+            <div className="flex gap-4">
+              <span className="text-slate-700 dark:text-slate-300"><span className="font-semibold">{currentMember?.crmProfileLevel && currentMember.crmProfileLevel !== "NONE" ? currentMember.crmProfileLevel : "Nessuno"}</span></span>
+              <span className="text-amber-700 dark:text-amber-400 font-bold">{currentMember?.crmProfileScore || 0} pts</span>
+            </div>
+          </div>
+
+          <div className="space-y-4 py-2">
             <div className="flex items-center gap-2">
               <Checkbox 
                 id="crm-override-toggle"
@@ -4281,9 +4297,9 @@ export default function MascheraInputGenerale() {
             </div>
 
             {crmOverrideData.override && (
-              <div className="space-y-4 pt-4 border-t">
+              <div className="space-y-4 pt-4 border-t border-border">
                 <div className="space-y-2">
-                  <Label>Livello CRM</Label>
+                  <Label>Livello</Label>
                   <Select 
                     value={crmOverrideData.level}
                     onValueChange={(v) => setCrmOverrideData(prev => ({ ...prev, level: v }))}
@@ -4296,12 +4312,13 @@ export default function MascheraInputGenerale() {
                       <SelectItem value="SILVER">Silver</SelectItem>
                       <SelectItem value="GOLD">Gold</SelectItem>
                       <SelectItem value="PLATINUM">Platinum</SelectItem>
+                      <SelectItem value="DIAMOND">Diamond</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Motivazione Forzatura (Opzionale)</Label>
+                  <Label>Motivazione Forzatura <span className="text-red-500">*</span></Label>
                   <Input 
                     placeholder="Es: Cliente storico VIP inserito manualmente..."
                     value={crmOverrideData.reason}
@@ -4316,7 +4333,7 @@ export default function MascheraInputGenerale() {
             <Button variant="outline" onClick={() => setIsCrmOverrideOpen(false)}>Annulla</Button>
             <Button 
               onClick={() => overrideCrmMutation.mutate(crmOverrideData as any)}
-              disabled={overrideCrmMutation.isPending}
+              disabled={overrideCrmMutation.isPending || (crmOverrideData.override && !crmOverrideData.reason.trim())}
             >
               <Save className="w-4 h-4 mr-2" />
               Salva Impostazioni

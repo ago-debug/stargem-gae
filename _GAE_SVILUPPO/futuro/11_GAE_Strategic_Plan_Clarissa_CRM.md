@@ -1,5 +1,9 @@
 # PROPOSTA TECNICO-STRATEGICA: INTEGRAZIONE STUDIO GEM ↔ CLARISSA CRM
 
+> [!NOTE]
+> **FASE 2 STRATEGICA NON ATTIVA**
+> L'integrazione delineata in questo documento è strutturalmente posta in *stand-by*. Essa rappresenta la "Fase 2", uno studio teorico per i prossimi trimestri. Il task ad oggi attivo e concluso tecnicamente riguarda *unicamente* la classificazione anagrafica autonoma del gestionale (CRM Interno a 4 livelli). Nessun codice relativo a Clarissa deve essere invocato od istanziato al momento.
+
 ## 1. ARCHITETTURA CONSIGLIATA: LA "SOURCE OF TRUTH"
 Il principio cardine per evitare disastri architetturali è stabilire la "Verità Assoluta" per ogni dominio.
 

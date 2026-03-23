@@ -406,7 +406,21 @@ Sulla base del Blocco 5 generato nella "Tabella Master Modali", seguiamo questo 
 
 ---
 
-## 8. Integrazione CRM Esterno (Progetto "Clarissa") - Fase 2 Roadmap
+## 8. CRM Interno e Punteggi Maschera Input
+Sviluppato il motore CRM locale e integrata l'estetica operativa, propedeutico ma indipendente dal Phase 2 Clarissa.
+
+- [x] Restyling Maschera Input
+  - Fatto: Spostata e allargata la sezione, rinominata univocamente in "Attività di marketing" e collocata saldamente sotto l'Anagrafica principale.
+- [x] Navigazione Contesto Globale
+  - Fatto: Ripristinato al 100% il routing interattivo sulla view a lista: cliccando sui nomi dei partecipanti si atterra correttamente in `/maschera-input?memberId=X`.
+- [x] Logica 4 Livelli Configuarabile
+  - Fatto: Smantellato il legacy. Astrazione in `crm-config.ts` della matematica su base 100 per assegnare regolarmente: Silver, Gold, Platinum e Diamond.
+- [!] Validazione Punteggi Reale
+  - Manca: In sospeso per assenza di dati transazionali pregressi. Congelata in attesa dell'approdo o della simulazione di un dump massivo di pagamenti.
+
+---
+
+## 9. Integrazione CRM Esterno (Progetto "Clarissa") - Fase 2 Roadmap
 I seguenti passaggi diventeranno attivi solo previa autorizzazione esplicita ad iniziare lo sviluppo dell'integrazione. Documento strategico di riferimento: `_GAE_SVILUPPO/futuro/11_GAE_Strategic_Plan_Clarissa_CRM.md`.
 
 - [ ] Fase 0: Setup e Autorizzazione

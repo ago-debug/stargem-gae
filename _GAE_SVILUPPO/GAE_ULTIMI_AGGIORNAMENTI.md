@@ -1,7 +1,21 @@
 # Ultimi Aggiornamenti Progetto "CourseManager"
-**Periodo di riferimento:** 23 Febbraio 2026 - 21 Marzo 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 23 Marzo 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
+
+---
+
+### 23 Marzo 2026 (Rifinitura UX e Nuovo Algoritmo Motore CRM)
+* **Nuovo Algoritmo Base 100 per CRM (`server/utils/crm-profiling.ts`):**
+  * Sostituita la precedente logica di calcolo del livello di marketing con un algoritmo a pesi centesimali: Spesa Recente (MAX 40pt), Frequenza (MAX 25pt), Servizi Attivi (MAX 20pt) e Recency (MAX 15pt).
+  * Interpolarizzate le nuove soglie d'acciaio per l'assegnazione: Silver (<40), Gold (40-64), Platinum (65-84) e Diamond (85-100).
+* **Affinamento Modale Forzatura CRM (`maschera-input-generale.tsx`):**
+  * Rinominato ID e label in "Forzatura livello marketing", debellando visivamente le sigle "CRM" da tooltip intestazione.
+  * Inserito un banner informativo ad alta visibilità nel popup di override per mostrare all'operatore lo status corrente calcolato dal backend (Tier attuale e Score crudo).
+  * Aggiunto il livello Diamond tra le opzioni manuali.
+  * Irrobustita l'interfaccia rendendo la Motivazione di override un dato categoricamente obbligatorio prima del root POST di salvataggio.
+* **Recalibration Task:** Lanciato in background il worker `recalc-crm.ts` per l'allineamento storico di +9000 righe sulla base dei nuovi paramentri scalari.
+* **Status Check Validazione:** La logica di scoring è stata preparata e resa scalabile (Silver, Gold, Platinum, Diamond). La navigazione (routing corretto `/maschera-input`) e la UI "Attività di marketing" sotto l'Anagrafica sono funzionanti chiudendo l'interfaccia. Tuttavia, **la validazione reale e l'assessment dei livelli calcolati sono congelati in attesa dell'import storico massivo** dei dati economici e di frequenza, insufficienti nell'attuale DB di sviluppo.
 
 ---
 
@@ -162,4 +176,4 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Avvio Refactoring Corsi:** Riorganizzazione della struttura a componente `courses.tsx` per ospitare componenti modulari riutilizzabili ed espansione dati di iscrizione (gettoni, rimborsi, log) a scomparsa, avviando il ciclo di aggiornamenti conclusi il 25 Febbraio.
 
 ---
-*Documento generato e aggiornato al 21 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
+*Documento generato e aggiornato al 23 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
