@@ -217,11 +217,13 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
               >
                 (Nessuno stato)
               </div>
-              {statuses?.filter(s => s.active)?.map((status) => {
-                const isSelected = selectedStatuses.includes(status.name);
-                return (
-                  <div
-                    key={status.id}
+              {[...(statuses?.filter(s => s.active) || [])]
+                .sort((a, b) => String(a.name).localeCompare(String(b.name), undefined, { numeric: true }))
+                .map((status) => {
+                  const isSelected = selectedStatuses.includes(status.name);
+                  return (
+                    <div
+                      key={status.id}
                     className={`px-3 py-1.5 text-sm cursor-pointer rounded hover-elevate flex items-center justify-between gap-2 ${isSelected ? "bg-accent/50 font-medium" : ""}`}
                     onClick={() => toggleStatus(status.name)}
                     data-testid={`option-${testIdPrefix}-${status.id}`}
@@ -302,7 +304,9 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
             </div>
 
             <div className="space-y-1 max-h-60 overflow-y-auto">
-              {statuses?.map((status) => (
+              {[...(statuses || [])]
+                .sort((a, b) => String(a.name).localeCompare(String(b.name), undefined, { numeric: true }))
+                .map((status) => (
                 <div key={status.id} className="flex items-center gap-2 py-1 px-2 rounded hover-elevate group">
                   <GripVertical className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                   {editingStatusId === status.id ? (

@@ -5,6 +5,13 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 23 Marzo 2026 (Fix Nomenclatura Livelli Corsi vs Livelli CRM)
+* **Distinzione netta Custom Lists (Bugfix Semantica Modale e UI):**
+  * Corretta l'etichetta testuale fuorviante nel `CourseUnifiedModal.tsx` che riportava la dicitura "Livello CRM" al posto di "Livello".
+  * Il binding dei dati puntava già alla Custom List nativa `livello`, tuttavia l'etichetta creava forte incomprensione per l'operatore. Il fix ribadisce e cristallizza formalmente la seguente distinzione nei modali:
+    * `livello` = Livello tecnico del corso (Base, Intermedio, Avanzato...). Viene gestito dal relativo pennino sul Modale Corso.
+    * `livello_crm` = Livello interno di Marketing (Silver, Gold, Platinum, Diamond). Viene gestito dalle automazioni o forzato su `/maschera-input` nella singola scheda cliente.
+
 ### 23 Marzo 2026 (Redirect Parametrico & Stati Operativi Multipli - [AG-ELENCHI-002] & [AG-NAV-001])
 * **Nuovo Flusso Modifica Corsi (Redirect Parametrico):**
   * Implementato il pulsante Edit (Pennino) in `scheda-corso.tsx`.

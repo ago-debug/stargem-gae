@@ -25,7 +25,7 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
   const { data: listData } = useCustomList(listType);
 
   const listId = listData?.id;
-  const items = (listData?.items || []).filter((i: any) => i.active !== false).sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  const items = (listData?.items || []).filter((i: any) => i.active !== false).sort((a: any, b: any) => String(a.value).localeCompare(String(b.value), undefined, { numeric: true }));
 
   const createMutation = useMutation({
     mutationFn: async (value: string) => {
