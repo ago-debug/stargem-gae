@@ -2813,7 +2813,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const course = await storage.createCourse(validatedData);
 
       // Sync to Google Calendar (async)
-      syncCourseToGoogle(course);
+      try {
+        syncCourseToGoogle(course);
+      } catch (err) {
+        console.error("[API Error] Failed to sync to Google Calendar:", err);
+      }
       await logUserActivity(req, "CREATE", "courses", course.id.toString(), { name: course.name });
       res.status(201).json(course);
     } catch (error: any) {
@@ -2830,10 +2834,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const existingCourse = await storage.getCourse(id);
       if (existingCourse && !force) {
-        const studioId = validatedData.studioId || existingCourse.studioId;
-        const startDate = validatedData.startDate || existingCourse.startDate;
-        const startTime = validatedData.startTime || existingCourse.startTime;
-        const endTime = validatedData.endTime || existingCourse.endTime;
+        const studioId = validatedData.studioId !== undefined ? validatedData.studioId : existingCourse.studioId;
+        const startDate = validatedData.startDate !== undefined ? validatedData.startDate : existingCourse.startDate;
+        const startTime = validatedData.startTime !== undefined ? validatedData.startTime : existingCourse.startTime;
+        const endTime = validatedData.endTime !== undefined ? validatedData.endTime : existingCourse.endTime;
 
         if (studioId && startDate && startTime && endTime) {
           const conflict = await storage.checkStudioConflict(
@@ -2865,7 +2869,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const course = await storage.updateCourse(id, validatedData);
 
       // Sync to Google Calendar (async)
-      syncCourseToGoogle(course);
+      try {
+        syncCourseToGoogle(course);
+      } catch (err) {
+        console.error("[API Error] Failed to sync to Google Calendar:", err);
+      }
       await logUserActivity(req, "UPDATE", "courses", id.toString(), { name: course.name });
       res.json(course);
     } catch (error: any) {
