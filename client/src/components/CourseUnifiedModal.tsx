@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useLocation, Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
-import { Calendar, Users, MapPin, X, UserPlus, CalendarPlus, Trash2 } from "lucide-react";
+import { Calendar, Users, MapPin, X, UserPlus, CalendarPlus, Trash2, Edit2 } from "lucide-react";
 import { cn, parseStatusTags } from "@/lib/utils";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -24,6 +24,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { hasWritePermission } from "@/App";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { useCustomListValues } from "@/hooks/use-custom-list";
+import { MultiSelectStatus } from "@/components/multi-select-status";
+import { CustomListManagerDialog } from "@/components/custom-list-manager-dialog";
+import { CategoryManagerDialog } from "@/components/category-manager-dialog";
 import type { Course, InsertCourse, Category, Instructor, Studio, Quote, Attendance, Member, ActivityStatus } from "@shared/schema";
 
 const WEEKDAYS = [
@@ -307,7 +310,6 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
   );
 }
 
-
 // ============================================
 // MAIN COMPONENT: CourseUnifiedModal
 // ============================================
@@ -325,13 +327,18 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const canWrite = hasWritePermission(user, "/corsi");
 
   const [activeTab, setActiveTab] = useState("details");
   const isEdit = !!course?.id;
 
+  const [isGenereModalOpen, setIsGenereModalOpen] = useState(false);
+  const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
+  const [isPostiModalOpen, setIsPostiModalOpen] = useState(false);
+
   // Dati da Liste e DB
-  const nomiCorsi = useCustomListValues("genere");
+  const nomiCorsi = useCustomListValues("nomi_corsi");
   const postiDisponibili = useCustomListValues("posti_disponibili");
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({ queryKey: ["/api/activity-statuses"] });
   const baseStati = ["ATTIVO", "IN PROGRAMMA", "COMPLETO", "ANNULLATO"];
@@ -344,8 +351,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   // State della Form
   const [formData, setFormData] = useState<Partial<InsertCourse>>({});
   
-  // State Operativo (Singolo) e Flags Promo
-  const [opState, setOpState] = useState<string>("ATTIVO");
+  // State Operativo (Multi) e Flags Promo
+  const [opStates, setOpStates] = useState<string[]>(["ATTIVO"]);
   const [promoFlags, setPromoFlags] = useState<string[]>([]);
 
   useEffect(() => {
@@ -355,17 +362,17 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         setActiveTab("details");
         // Estrazione Op State e Promos
         const tags = parseStatusTags(course.statusTags);
-        const opTag = tags.find(t => t.startsWith("STATE:"));
-        if (opTag) {
-          setOpState(opTag.replace("STATE:", ""));
+        const opTags = tags.filter(t => t.startsWith("STATE:")).map(t => t.replace("STATE:", ""));
+        if (opTags.length > 0) {
+          setOpStates(opTags);
         } else {
-          setOpState(course.active === false || tags.includes("ANNULLATO") || tags.includes("INATTIVO") ? "ANNULLATO" : "ATTIVO");
+          setOpStates(course.active === false || tags.includes("ANNULLATO") || tags.includes("INATTIVO") ? ["ANNULLATO"] : ["ATTIVO"]);
         }
         setPromoFlags(tags.filter(t => t.startsWith("PROMO:")).map(t => t.replace("PROMO:", "")));
       } else {
         setFormData(defaultValues || {});
         setActiveTab("details");
-        setOpState("ATTIVO");
+        setOpStates(["ATTIVO"]);
         setPromoFlags([]);
       }
     }
@@ -444,9 +451,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Costruiamo statusTags in formato consistente
-    const mergedTags = [`STATE:${opState}`, ...promoFlags.map(p => `PROMO:${p}`)];
-    const isActive = opState !== "ANNULLATO";
+    // Costruiamo statusTags in formato consistente multi-stato
+    const mergedTags = [...opStates.map(s => `STATE:${s}`), ...promoFlags.map(p => `PROMO:${p}`)];
+    const isActive = !opStates.includes("ANNULLATO");
 
     const payload: InsertCourse = {
       sku: formData.sku || null,
@@ -482,8 +489,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const selectedEndTime = stripSeconds(formData.endTime);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-full">
+    <>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-full">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Modifica Corso" : "Nuovo Corso"}</DialogTitle>
           <DialogDescription>
@@ -503,19 +511,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           <TabsContent value="details" className="pt-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="flex justify-between items-center gap-2 flex-wrap bg-slate-50 p-3 rounded-md border text-sm">
-                <div className="flex items-center gap-3">
-                  <Label className="font-semibold text-slate-800 shrink-0">Stato Operativo:</Label>
-                  <Select value={opState} onValueChange={setOpState}>
-                    <SelectTrigger className="w-40 h-8 border-slate-300">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {finalStati.map(stato => (
-                        <SelectItem key={stato} value={stato} className={stato === "ANNULLATO" ? "text-red-600" : ""}>{stato}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
 
                 <div className="flex items-center gap-4 border-l border-slate-300 pl-4 shrink-0 flex-wrap">
                   <Label className="font-semibold text-slate-800">Flags Marketing:</Label>
@@ -536,7 +532,17 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Genere / Nome Corso *</Label>
+                  <div className="flex items-center gap-2">
+                  <Label className="font-semibold text-slate-800 shrink-0">Genere / Nome Corso *</Label>
+                  <Edit2 
+                    className="w-3 h-3 text-amber-500 cursor-pointer hover:text-amber-600 transition-colors" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsGenereModalOpen(true);
+                    }} 
+                  />
+                </div>
                   <Combobox
                     name="name"
                     value={formData.name || ""}
@@ -554,7 +560,17 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Categoria</Label>
+                  <div className="flex items-center gap-2">
+                  <Label className="font-semibold text-slate-800 shrink-0">Categoria</Label>
+                  <Edit2 
+                    className="w-3 h-3 text-amber-500 cursor-pointer hover:text-amber-600 transition-colors" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsCategoriaModalOpen(true);
+                    }} 
+                  />
+                </div>
                   <Combobox
                     name="categoryId"
                     value={formData.categoryId?.toString() || "none"}
@@ -619,7 +635,17 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="maxCapacity">Posti Disponibili</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="maxCapacity" className="font-semibold text-slate-800 shrink-0">Posti Disponibili</Label>
+                    <Edit2 
+                      className="w-3 h-3 text-amber-500 cursor-pointer hover:text-amber-600 transition-colors" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsPostiModalOpen(true);
+                      }} 
+                    />
+                  </div>
                   <Select value={formData.maxCapacity?.toString() || "none"} onValueChange={v => updateForm("maxCapacity", v === "none" ? null : parseInt(v))}>
                     <SelectTrigger><SelectValue placeholder="Posti" /></SelectTrigger>
                     <SelectContent>
@@ -715,5 +741,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         </Tabs>
       </DialogContent>
     </Dialog>
+    <CustomListManagerDialog listType="nomi_corsi" title="Gestione Generi / Nomi Corsi" open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
+    <CategoryManagerDialog open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} />
+    <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
+    </>
   );
 }

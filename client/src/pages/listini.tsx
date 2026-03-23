@@ -249,9 +249,6 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
     const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
     const { data: workshops } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
     const { data: services } = useQuery<BookingService[]>({ queryKey: ["/api/booking-services"] });
-    const { data: paidTrials } = useQuery<PaidTrial[]>({ queryKey: ["/api/paid-trials"] });
-    const { data: freeTrials } = useQuery<FreeTrial[]>({ queryKey: ["/api/free-trials"] });
-    const { data: singleLessons } = useQuery<SingleLesson[]>({ queryKey: ["/api/single-lessons"] });
     const { data: sundayActivities } = useQuery<SundayActivity[]>({ queryKey: ["/api/sunday-activities"] });
     const { data: trainings } = useQuery<Training[]>({ queryKey: ["/api/trainings"] });
     const { data: individualLessons } = useQuery<IndividualLesson[]>({ queryKey: ["/api/individual-lessons"] });
@@ -382,7 +379,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                     <TabsContent value="prove-pagamento" className="space-y-4">
                         <PriceItemManager
                             type="paid_trial"
-                            entities={paidTrials || []}
+                            entities={[]}
                             activeItems={getItemsByType("paid_trial")}
                             quotes={quotes || []}
                             onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "paid_trial", entityId: id, price: price.toString(), quoteId })}
@@ -393,7 +390,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                     <TabsContent value="prove-gratuite" className="space-y-4">
                         <PriceItemManager
                             type="free_trial"
-                            entities={freeTrials || []}
+                            entities={[]}
                             activeItems={getItemsByType("free_trial")}
                             quotes={quotes || []}
                             onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "free_trial", entityId: id, price: price.toString(), quoteId })}
@@ -404,7 +401,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                     <TabsContent value="lezioni-singole" className="space-y-4">
                         <PriceItemManager
                             type="single_lesson"
-                            entities={singleLessons || []}
+                            entities={[]}
                             activeItems={getItemsByType("single_lesson")}
                             quotes={quotes || []}
                             onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "single_lesson", entityId: id, price: price.toString(), quoteId })}

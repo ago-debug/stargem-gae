@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import {
     Building2, Calendar, FileText, CheckCircle2,
-    CalendarRange, Tag, Clock, Users, ArrowLeft, ArrowRight, XCircle, AlertTriangle
+    CalendarRange, Tag, Clock, Users, ArrowLeft, ArrowRight, XCircle, AlertTriangle, Edit2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -143,6 +143,15 @@ export default function SchedaCorso() {
                                 </p>
                             </div>
                         </div>
+                        {course && (
+                            <Button 
+                                variant="outline" 
+                                className="gap-2 shrink-0 border-slate-200 hover:bg-slate-50 text-slate-600"
+                                onClick={() => setLocation(`/attivita/corsi?editId=${course.id}`)}
+                            >
+                                <Edit2 className="w-4 h-4" /> Modifica
+                            </Button>
+                        )}
                     </div>
 
                     {course && (

@@ -50,9 +50,6 @@ import Commenti from "@/pages/commenti";
 import NoteTeam from "@/pages/note-team";
 import SchedaCorso from "@/pages/scheda-corso";
 import SchedaWorkshop from "@/pages/scheda-workshop";
-import SchedaProvaPagamento from "@/pages/scheda-prova-pagamento";
-import SchedaProvaGratuita from "@/pages/scheda-prova-gratuita";
-import SchedaLezioneSingola from "@/pages/scheda-lezione-singola";
 import SchedaDomenica from "@/pages/scheda-domenica";
 import SchedaAllenamento from "@/pages/scheda-allenamento";
 import SchedaLezioneIndividuale from "@/pages/scheda-lezione-individuale";
@@ -61,9 +58,6 @@ import SchedaSaggio from "@/pages/scheda-saggio";
 import SchedaVacanzaStudio from "@/pages/scheda-vacanza-studio";
 import Planning from "@/pages/planning";
 
-import FreeTrials from "@/pages/free-trials";
-import PaidTrials from "@/pages/paid-trials";
-import SingleLessons from "@/pages/single-lessons";
 import SundayActivities from "@/pages/sunday-activities";
 import Trainings from "@/pages/trainings";
 import IndividualLessons from "@/pages/individual-lessons";
@@ -78,9 +72,6 @@ import IndividualLessonCategories from "@/pages/individual-lesson-categories";
 import CampusCategories from "@/pages/campus-categories";
 import RecitalCategories from "@/pages/recital-categories";
 import VacationCategories from "@/pages/vacation-categories";
-import PaidTrialsCategories from "@/pages/paid-trials-categories";
-import FreeTrialsCategories from "@/pages/free-trials-categories";
-import SingleLessonsCategories from "@/pages/single-lessons-categories";
 import RentalsCategories from "@/pages/rentals-categories";
 import MerchandisingCategories from "@/pages/merchandising-categories";
 
@@ -187,9 +178,6 @@ function Router() {
       <ProtectedRoute path="/attivita" component={Attivita} />
       <ProtectedRoute path="/categorie-attivita" component={ActivityCategories} />
       <ProtectedRoute path="/categorie-corsi" component={Categories} />
-      <ProtectedRoute path="/categorie-prove-pagamento" component={PaidTrialsCategories} />
-      <ProtectedRoute path="/categorie-prove-gratuite" component={FreeTrialsCategories} />
-      <ProtectedRoute path="/categorie-lezioni-singole" component={SingleLessonsCategories} />
       <ProtectedRoute path="/categorie-affitti" component={RentalsCategories} />
       <ProtectedRoute path="/categorie-workshop" component={WorkshopCategories} />
       <ProtectedRoute path="/categorie-domeniche" component={SundayCategories} />
@@ -203,9 +191,6 @@ function Router() {
       <ProtectedRoute path="/promo-sconti" component={StubPromoSconti} />
       <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
       <ProtectedRoute path="/scheda-workshop" component={SchedaWorkshop} />
-      <ProtectedRoute path="/scheda-prova-pagamento" component={SchedaProvaPagamento} />
-      <ProtectedRoute path="/scheda-prova-gratuita" component={SchedaProvaGratuita} />
-      <ProtectedRoute path="/scheda-lezione-singola" component={SchedaLezioneSingola} />
       <ProtectedRoute path="/scheda-domenica" component={SchedaDomenica} />
       <ProtectedRoute path="/scheda-allenamento" component={SchedaAllenamento} />
       <ProtectedRoute path="/scheda-lezione-individuale" component={SchedaLezioneIndividuale} />
@@ -214,9 +199,6 @@ function Router() {
       <ProtectedRoute path="/scheda-vacanza-studio" component={SchedaVacanzaStudio} />
       <ProtectedRoute path="/attivita/corsi" component={Courses} />
       <ProtectedRoute path="/attivita/workshops" component={Workshops} />
-      <ProtectedRoute path="/attivita/prove-pagamento" component={PaidTrials} />
-      <ProtectedRoute path="/attivita/prove-gratuite" component={FreeTrials} />
-      <ProtectedRoute path="/attivita/lezioni-singole" component={SingleLessons} />
       <ProtectedRoute path="/attivita/domeniche-movimento" component={SundayActivities} />
       <ProtectedRoute path="/attivita/allenamenti" component={Trainings} />
       <ProtectedRoute path="/attivita/lezioni-individuali" component={IndividualLessons} />
