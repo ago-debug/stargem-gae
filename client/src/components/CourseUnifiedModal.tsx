@@ -16,7 +16,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
-import { Calendar, Users, MapPin, X, UserPlus, CalendarPlus, Trash2, Edit2 } from "lucide-react";
+import { Calendar, Users, MapPin, X, UserPlus, CalendarPlus, Trash2, Edit2, Edit } from "lucide-react";
 import { cn, parseStatusTags } from "@/lib/utils";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -336,14 +336,19 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [isGenereModalOpen, setIsGenereModalOpen] = useState(false);
   const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
   const [isPostiModalOpen, setIsPostiModalOpen] = useState(false);
+  const [isLivelloModalOpen, setIsLivelloModalOpen] = useState(false);
+  const [isFasciaEtaModalOpen, setIsFasciaEtaModalOpen] = useState(false);
 
   // Dati da Liste e DB
   const nomiCorsi = useCustomListValues("nomi_corsi");
   const postiDisponibili = useCustomListValues("posti_disponibili");
+  const livelli = useCustomListValues("livello");
+  const fasceEta = useCustomListValues("fascia_eta");
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({ queryKey: ["/api/activity-statuses"] });
   const baseStati = ["ATTIVO", "IN PROGRAMMA", "COMPLETO", "ANNULLATO"];
-  const finalStati = activityStatuses && activityStatuses.length > 0 ? activityStatuses.filter(s => s.active).map(s => s.name) : baseStati;
-  const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
+  const finalStati = activityStatuses && activityStatuses.length > 0 ? [...activityStatuses].filter(s => s.active).sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})).map(s => s.name) : baseStati;
+  const { data: rawCategories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
+  const categories = rawCategories ? [...rawCategories].sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})) : [];
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
@@ -472,6 +477,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       schedule: formData.schedule || null,
       startDate: formData.startDate ? new Date(formData.startDate) : null,
       endDate: formData.endDate ? new Date(formData.endDate) : null,
+      level: formData.level || null,
+      ageGroup: formData.ageGroup || null,
       statusTags: mergedTags,
       active: isActive,
       quoteId: formData.quoteId || null,
@@ -534,14 +541,19 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                   <Label className="font-semibold text-slate-800 shrink-0">Genere / Nome Corso *</Label>
-                  <Edit2 
-                    className="w-3 h-3 text-amber-500 cursor-pointer hover:text-amber-600 transition-colors" 
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-5 w-5"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       setIsGenereModalOpen(true);
-                    }} 
-                  />
+                    }}
+                  >
+                    <Edit className="w-3 h-3 sidebar-icon-gold" />
+                  </Button>
                 </div>
                   <Combobox
                     name="name"
@@ -562,14 +574,19 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                   <Label className="font-semibold text-slate-800 shrink-0">Categoria</Label>
-                  <Edit2 
-                    className="w-3 h-3 text-amber-500 cursor-pointer hover:text-amber-600 transition-colors" 
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-5 w-5"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       setIsCategoriaModalOpen(true);
-                    }} 
-                  />
+                    }}
+                  >
+                    <Edit className="w-3 h-3 sidebar-icon-gold" />
+                  </Button>
                 </div>
                   <Combobox
                     name="categoryId"
@@ -587,6 +604,35 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     onValueChange={val => updateForm("studioId", val === "none" ? null : parseInt(val))}
                     options={[{value: "none", label: "Nessuno studio"}, ...(studios || []).map(s => ({ value: s.id.toString(), label: s.name }))]}
                     placeholder="Seleziona studio"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label className="font-semibold text-slate-800 shrink-0">Livello</Label>
+                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsLivelloModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button>
+                  </div>
+                  <Combobox
+                    name="level"
+                    value={formData.level || "none"}
+                    onValueChange={(val) => updateForm("level", val === "none" ? null : val)}
+                    options={[{value: "none", label: "Nessun livello"}, ...(livelli || []).map(val => ({ value: val, label: val }))]}
+                    placeholder="Seleziona livello..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label className="font-semibold text-slate-800 shrink-0">Fascia d'età</Label>
+                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsFasciaEtaModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button>
+                  </div>
+                  <Combobox
+                    name="ageGroup"
+                    value={formData.ageGroup || "none"}
+                    onValueChange={(val) => updateForm("ageGroup", val === "none" ? null : val)}
+                    options={[{value: "none", label: "Nessuna fascia"}, ...(fasceEta || []).map(val => ({ value: val, label: val }))]}
+                    placeholder="Seleziona fascia..."
                   />
                 </div>
               </div>
@@ -637,14 +683,19 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="maxCapacity" className="font-semibold text-slate-800 shrink-0">Posti Disponibili</Label>
-                    <Edit2 
-                      className="w-3 h-3 text-amber-500 cursor-pointer hover:text-amber-600 transition-colors" 
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-5 w-5"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         setIsPostiModalOpen(true);
-                      }} 
-                    />
+                      }}
+                    >
+                      <Edit className="w-3 h-3 sidebar-icon-gold" />
+                    </Button>
                   </div>
                   <Select value={formData.maxCapacity?.toString() || "none"} onValueChange={v => updateForm("maxCapacity", v === "none" ? null : parseInt(v))}>
                     <SelectTrigger><SelectValue placeholder="Posti" /></SelectTrigger>
@@ -744,6 +795,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     <CustomListManagerDialog listType="nomi_corsi" title="Gestione Generi / Nomi Corsi" open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
     <CategoryManagerDialog open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} />
     <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
+    <CustomListManagerDialog listType="livello" title="Gestione Livelli" open={isLivelloModalOpen} onOpenChange={setIsLivelloModalOpen} />
+    <CustomListManagerDialog listType="fascia_eta" title="Gestione Fasce d'Età" open={isFasciaEtaModalOpen} onOpenChange={setIsFasciaEtaModalOpen} />
     </>
   );
 }

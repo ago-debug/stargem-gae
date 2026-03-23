@@ -619,6 +619,8 @@ export const courses = mysqlTable("courses", {
   schedule: text("schedule"), // JSON: {day: "LUN", startTime: "15:00", endTime: "16:30", repeat: "weekly"} - legacy
   startDate: date("start_date"),
   endDate: date("end_date"),
+  level: varchar("level", { length: 100 }), // Livello (es. Base, Intermedio, Avanzato)
+  ageGroup: varchar("age_group", { length: 100 }), // Fascia d'età (es. Bambini 3-5 anni)
   statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   googleEventId: varchar("google_event_id", { length: 255 }),

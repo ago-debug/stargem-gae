@@ -4925,20 +4925,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       let list = await storage.getCustomListBySystemName(req.params.systemName);
       if (!list) {
-        // Auto-create list if it doesn't exist
-        const formattedName = req.params.systemName
-          .split('_')
-          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-
-        const newList = await storage.createCustomList({
-          name: formattedName,
-          systemName: req.params.systemName,
-          description: `Auto-generated list for ${formattedName}`
-        });
-
-        // Return with empty items array for newly created list
-        return res.json({ ...newList, items: [] });
+        // Rimosso blocco auto-creazione disastroso che generava duplicati: AG-CLEANUP-002B
+        // Restituiamo semplicemente un JSON vuoto corretto per la vista frontend.
+        return res.json({ items: [] });
       }
       res.json(list);
     } catch (error) {
