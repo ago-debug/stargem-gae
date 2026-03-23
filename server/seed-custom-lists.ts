@@ -17,8 +17,7 @@ async function seedCustomLists() {
             await db.insert(customLists).values({
                 name: "Canale di Acquisizione",
                 systemName: "provenienza_marketing",
-                description: "Canali marketing da cui arrivano i clienti",
-                isSystem: true
+                description: "Canali marketing da cui arrivano i clienti"
             });
             provList = await db.query.customLists.findFirst({
                 where: eq(customLists.systemName, "provenienza_marketing")
@@ -27,8 +26,9 @@ async function seedCustomLists() {
 
         const provItems = ["Web", "Passaparola", "Social", "Altro"];
         for (let i = 0; i < provItems.length; i++) {
+            if (!provList) continue;
             const existingItem = await db.query.customListItems.findFirst({
-                where: (items, { and, eq }) => and(eq(items.listId, provList!.id), eq(items.value, provItems[i]))
+                where: (items, { and, eq }) => and(eq(items.listId, provList.id), eq(items.value, provItems[i]))
             });
             if (!existingItem) {
                 await db.insert(customListItems).values({
@@ -51,8 +51,7 @@ async function seedCustomLists() {
             await db.insert(customLists).values({
                 name: "Livello CRM",
                 systemName: "livello_crm",
-                description: "Tiers di classificazione automatica e manuale clienti",
-                isSystem: true
+                description: "Tiers di classificazione automatica e manuale clienti"
             });
             crmList = await db.query.customLists.findFirst({
                 where: eq(customLists.systemName, "livello_crm")
@@ -61,8 +60,9 @@ async function seedCustomLists() {
 
         const crmItems = ["Silver", "Gold", "Platinum", "Diamond"];
         for (let i = 0; i < crmItems.length; i++) {
+            if (!crmList) continue;
             const existingItem = await db.query.customListItems.findFirst({
-                where: (items, { and, eq }) => and(eq(items.listId, crmList!.id), eq(items.value, crmItems[i]))
+                where: (items, { and, eq }) => and(eq(items.listId, crmList.id), eq(items.value, crmItems[i]))
             });
             if (!existingItem) {
                 await db.insert(customListItems).values({

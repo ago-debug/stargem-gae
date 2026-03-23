@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import { useCustomListValues } from "@/hooks/use-custom-list";
 import { Combobox } from "@/components/ui/combobox";
+import { getStatusColor } from "@/components/multi-select-status";
+import type { ActivityStatus } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -73,7 +75,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Separator } from "@/components/ui/separator";
 import { validateFiscalCode, parseFiscalCode, getPlaceName } from "@/lib/fiscalCodeUtils";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { cn } from "@/lib/utils";
+import { cn, parseStatusTags } from "@/lib/utils";
 
 const WEEKDAYS = [
     { id: "LUN", label: "Lunedì", short: "Lun" },
@@ -273,6 +275,10 @@ export default function CalendarPage() {
 
     const { data: workshops } = useQuery<Workshop[]>({
         queryKey: ["/api/workshops"],
+    });
+
+    const { data: activityStatuses } = useQuery<ActivityStatus[]>({
+        queryKey: ["/api/activity-statuses"],
     });
 
 
@@ -1528,15 +1534,15 @@ export default function CalendarPage() {
                                                 const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
 
                                                 const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
-                                                let statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
-                                                let statusColorClass = statusLabel === "ATTIVO" ? "text-green-700" : "text-red-700";
-
-                                                if (evt.rawPayload?.statusTags && Array.isArray(evt.rawPayload.statusTags)) {
-                                                    const stateTag = evt.rawPayload.statusTags.find((t: string) => t.startsWith("STATE:"));
-                                                    if (stateTag) {
-                                                        statusLabel = stateTag.replace("STATE:", "");
-                                                        statusColorClass = statusLabel === "ANNULLATO" ? "text-red-700" : (statusLabel === "COMPLETO" ? "text-amber-600" : "text-green-700");
-                                                    }
+                                                const parsedTags = parseStatusTags(evt.rawPayload?.statusTags);
+                                                let statusLabels: string[] = [];
+                                                if (parsedTags && parsedTags.length > 0) {
+                                                    statusLabels = parsedTags
+                                                        .filter((t: string) => t.startsWith("STATE:"))
+                                                        .map((t: string) => t.replace("STATE:", ""));
+                                                }
+                                                if (statusLabels.length === 0) {
+                                                    statusLabels = [evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO"];
                                                 }
                                                 const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
                                                 const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
@@ -1587,7 +1593,16 @@ export default function CalendarPage() {
                                                             )}
                                                             
                                                             <div className="flex w-full items-center justify-between mt-0.5 gap-1">
-                                                                <div className={`text-[7px] font-bold uppercase tracking-wider ${statusColorClass} leading-none truncate`}>{statusLabel}</div>
+                                                                <div className="flex gap-1 overflow-hidden" title={statusLabels.join(", ")}>
+                                                                    {statusLabels.map(s => {
+                                                                        const color = getStatusColor(s, activityStatuses);
+                                                                        return (
+                                                                            <div key={s} className="text-[7px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: `${color}15`, color, border: `0.5px solid ${color}40` } : { color: s === "ATTIVO" ? "#15803d" : "#b91c1c" }}>
+                                                                                {s}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
                                                                 <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm shrink-0 border border-black/5" title="Modifica rapida">
                                                                     <Edit2 className="w-2 h-2" />
                                                                 </button>
@@ -1684,15 +1699,15 @@ export default function CalendarPage() {
                                                 const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
 
                                                 const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
-                                                let statusLabel = evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO";
-                                                let statusColorClass = statusLabel === "ATTIVO" ? "text-green-700" : "text-red-700";
-
-                                                if (evt.rawPayload?.statusTags && Array.isArray(evt.rawPayload.statusTags)) {
-                                                    const stateTag = evt.rawPayload.statusTags.find((t: string) => t.startsWith("STATE:"));
-                                                    if (stateTag) {
-                                                        statusLabel = stateTag.replace("STATE:", "");
-                                                        statusColorClass = statusLabel === "ANNULLATO" ? "text-red-700" : (statusLabel === "COMPLETO" ? "text-amber-600" : "text-green-700");
-                                                    }
+                                                const parsedTags = parseStatusTags(evt.rawPayload?.statusTags);
+                                                let statusLabels: string[] = [];
+                                                if (parsedTags && parsedTags.length > 0) {
+                                                    statusLabels = parsedTags
+                                                        .filter((t: string) => t.startsWith("STATE:"))
+                                                        .map((t: string) => t.replace("STATE:", ""));
+                                                }
+                                                if (statusLabels.length === 0) {
+                                                    statusLabels = [evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO"];
                                                 }
                                                 const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
                                                 const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
@@ -1749,7 +1764,16 @@ export default function CalendarPage() {
                                                             )}
                                                             
                                                             <div className="flex w-full items-center justify-between mt-0.5 gap-1">
-                                                                <div className={`text-[8px] font-bold uppercase tracking-wider ${statusColorClass} leading-none truncate`}>{statusLabel}</div>
+                                                                <div className="flex gap-1 overflow-hidden" title={statusLabels.join(", ")}>
+                                                                    {statusLabels.map(s => {
+                                                                        const color = getStatusColor(s, activityStatuses);
+                                                                        return (
+                                                                            <div key={s} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: `${color}15`, color, border: `0.5px solid ${color}40` } : { color: s === "ATTIVO" ? "#15803d" : "#b91c1c" }}>
+                                                                                {s}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
                                                                 <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm shrink-0 border border-black/5" title="Modifica rapida">
                                                                     <Edit2 className="w-2.5 h-2.5" />
                                                                 </button>

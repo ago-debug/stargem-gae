@@ -104,9 +104,6 @@ import {
   quotes,
   type Quote,
   type InsertQuote,
-  paidTrials,
-  type PaidTrial,
-  type InsertPaidTrial,
   workshopCategories,
   type WorkshopCategory,
   type InsertWorkshopCategory,
@@ -128,12 +125,6 @@ import {
   vacationCategories,
   type VacationCategory,
   type InsertVacationCategory,
-  freeTrials,
-  type FreeTrial,
-  type InsertFreeTrial,
-  singleLessons,
-  type SingleLesson,
-  type InsertSingleLesson,
   sundayActivities,
   type SundayActivity,
   type InsertSundayActivity,
@@ -167,9 +158,6 @@ import {
   todos,
   type Todo,
   type InsertTodo,
-  InsertPaidTrialEnrollment, PaidTrialEnrollment, paidTrialEnrollments,
-  InsertFreeTrialEnrollment, FreeTrialEnrollment, freeTrialEnrollments,
-  InsertSingleLessonEnrollment, SingleLessonEnrollment, singleLessonEnrollments,
   InsertSundayActivityEnrollment, SundayActivityEnrollment, sundayActivityEnrollments,
   InsertTrainingEnrollment, TrainingEnrollment, trainingEnrollments,
   InsertIndividualLessonEnrollment, IndividualLessonEnrollment, individualLessonEnrollments,
@@ -288,11 +276,6 @@ export interface IStorage {
   deleteCustomListItem(id: number): Promise<void>;
 
   // Paid Trials
-  getPaidTrials(): Promise<PaidTrial[]>;
-  createPaidTrial(trial: InsertPaidTrial): Promise<PaidTrial>;
-  updatePaidTrial(id: number, trial: Partial<InsertPaidTrial>): Promise<PaidTrial>;
-  deletePaidTrial(id: number): Promise<void>;
-
   // Members
   getMembers(): Promise<Member[]>;
   getMembersPaginated(
@@ -468,28 +451,6 @@ export interface IStorage {
   deleteWorkshopAttendance(id: number): Promise<void>;
 
   // --- EXTRA ENROLLMENTS --- 
-
-  getPaidTrialEnrollments(): Promise<any[]>;
-  getPaidTrialEnrollmentsByMember(memberId: number): Promise<any[]>;
-  getPaidTrialEnrollment(id: number): Promise<PaidTrialEnrollment | undefined>;
-  createPaidTrialEnrollment(enrollment: InsertPaidTrialEnrollment): Promise<PaidTrialEnrollment>;
-  updatePaidTrialEnrollment(id: number, enrollment: Partial<InsertPaidTrialEnrollment>): Promise<PaidTrialEnrollment>;
-  deletePaidTrialEnrollment(id: number): Promise<void>;
-
-  getFreeTrialEnrollments(): Promise<any[]>;
-  getFreeTrialEnrollmentsByMember(memberId: number): Promise<any[]>;
-  getFreeTrialEnrollment(id: number): Promise<FreeTrialEnrollment | undefined>;
-  createFreeTrialEnrollment(enrollment: InsertFreeTrialEnrollment): Promise<FreeTrialEnrollment>;
-  updateFreeTrialEnrollment(id: number, enrollment: Partial<InsertFreeTrialEnrollment>): Promise<FreeTrialEnrollment>;
-  deleteFreeTrialEnrollment(id: number): Promise<void>;
-
-  getSingleLessonEnrollments(): Promise<any[]>;
-  getSingleLessonEnrollmentsByMember(memberId: number): Promise<any[]>;
-  getSingleLessonEnrollment(id: number): Promise<SingleLessonEnrollment | undefined>;
-  createSingleLessonEnrollment(enrollment: InsertSingleLessonEnrollment): Promise<SingleLessonEnrollment>;
-  updateSingleLessonEnrollment(id: number, enrollment: Partial<InsertSingleLessonEnrollment>): Promise<SingleLessonEnrollment>;
-  deleteSingleLessonEnrollment(id: number): Promise<void>;
-
   getSundayActivityEnrollments(): Promise<any[]>;
   getSundayActivityEnrollmentsByMember(memberId: number): Promise<any[]>;
   getSundayActivityEnrollment(id: number): Promise<SundayActivityEnrollment | undefined>;
@@ -657,19 +618,7 @@ export interface IStorage {
   deleteRentalCategory(id: number): Promise<void>;
 
   // FreeTrials
-  getFreeTrials(): Promise<FreeTrial[]>;
-  getFreeTrial(id: number): Promise<FreeTrial | undefined>;
-  createFreeTrial(freeTrial: InsertFreeTrial): Promise<FreeTrial>;
-  updateFreeTrial(id: number, freeTrial: Partial<InsertFreeTrial>): Promise<FreeTrial>;
-  deleteFreeTrial(id: number): Promise<void>;
-
   // SingleLessons
-  getSingleLessons(): Promise<SingleLesson[]>;
-  getSingleLesson(id: number): Promise<SingleLesson | undefined>;
-  createSingleLesson(singleLesson: InsertSingleLesson): Promise<SingleLesson>;
-  updateSingleLesson(id: number, singleLesson: Partial<InsertSingleLesson>): Promise<SingleLesson>;
-  deleteSingleLesson(id: number): Promise<void>;
-
   // SundayActivities
   getSundayActivities(): Promise<SundayActivity[]>;
   getSundayActivity(id: number): Promise<SundayActivity | undefined>;
@@ -2909,189 +2858,6 @@ export class DatabaseStorage implements IStorage {
 
   // --- EXTRA ENROLLMENTS IMPLEMENTATION --- 
 
-  async getPaidTrialEnrollments(): Promise<any[]> {
-    return await db.select({
-      id: paidTrialEnrollments.id,
-      memberId: paidTrialEnrollments.memberId,
-      status: paidTrialEnrollments.status,
-      enrollmentDate: paidTrialEnrollments.enrollmentDate,
-      notes: paidTrialEnrollments.notes,
-      memberFirstName: members.firstName,
-      memberLastName: members.lastName,
-      memberEmail: members.email,
-      memberFiscalCode: members.fiscalCode
-    })
-      .from(paidTrialEnrollments)
-      .leftJoin(members, eq(paidTrialEnrollments.memberId, members.id))
-      .orderBy(desc(paidTrialEnrollments.enrollmentDate));
-  }
-
-  async getPaidTrialEnrollmentsByMember(memberId: number): Promise<any[]> {
-    return await db.select({
-      id: paidTrialEnrollments.id,
-      memberId: paidTrialEnrollments.memberId,
-      status: paidTrialEnrollments.status,
-      enrollmentDate: paidTrialEnrollments.enrollmentDate,
-      notes: paidTrialEnrollments.notes,
-      memberFirstName: members.firstName,
-      memberLastName: members.lastName,
-      memberEmail: members.email,
-      memberFiscalCode: members.fiscalCode
-    })
-      .from(paidTrialEnrollments)
-      .leftJoin(members, eq(paidTrialEnrollments.memberId, members.id))
-      .where(eq(paidTrialEnrollments.memberId, memberId))
-      .orderBy(desc(paidTrialEnrollments.enrollmentDate));
-  }
-
-  async getPaidTrialEnrollment(id: number): Promise<PaidTrialEnrollment | undefined> {
-    const [enrollment] = await db.select().from(paidTrialEnrollments).where(eq(paidTrialEnrollments.id, id));
-    return enrollment;
-  }
-
-  async createPaidTrialEnrollment(enrollment: InsertPaidTrialEnrollment): Promise<PaidTrialEnrollment> {
-    const activeSeason = await this.getActiveSeason();
-    const dataWithSeason = {
-      ...enrollment,
-      seasonId: enrollment.seasonId || activeSeason?.id || null
-    };
-    const [result] = await db.insert(paidTrialEnrollments).values(dataWithSeason as any);
-    const [newEnrollment] = await db.select().from(paidTrialEnrollments).where(eq(paidTrialEnrollments.id, result.insertId));
-    return newEnrollment;
-  }
-
-  async updatePaidTrialEnrollment(id: number, enrollment: Partial<InsertPaidTrialEnrollment>): Promise<PaidTrialEnrollment> {
-    await db.update(paidTrialEnrollments).set(enrollment as any).where(eq(paidTrialEnrollments.id, id));
-    const [updated] = await db.select().from(paidTrialEnrollments).where(eq(paidTrialEnrollments.id, id));
-    return updated;
-  }
-
-  async deletePaidTrialEnrollment(id: number): Promise<void> {
-    await db.delete(paidTrialEnrollments).where(eq(paidTrialEnrollments.id, id));
-  }
-
-  async getFreeTrialEnrollments(): Promise<any[]> {
-    return await db.select({
-      id: freeTrialEnrollments.id,
-      memberId: freeTrialEnrollments.memberId,
-      status: freeTrialEnrollments.status,
-      enrollmentDate: freeTrialEnrollments.enrollmentDate,
-      notes: freeTrialEnrollments.notes,
-      memberFirstName: members.firstName,
-      memberLastName: members.lastName,
-      memberEmail: members.email,
-      memberFiscalCode: members.fiscalCode
-    })
-      .from(freeTrialEnrollments)
-      .leftJoin(members, eq(freeTrialEnrollments.memberId, members.id))
-      .orderBy(desc(freeTrialEnrollments.enrollmentDate));
-  }
-
-  async getFreeTrialEnrollmentsByMember(memberId: number): Promise<any[]> {
-    return await db.select({
-      id: freeTrialEnrollments.id,
-      memberId: freeTrialEnrollments.memberId,
-      status: freeTrialEnrollments.status,
-      enrollmentDate: freeTrialEnrollments.enrollmentDate,
-      notes: freeTrialEnrollments.notes,
-      memberFirstName: members.firstName,
-      memberLastName: members.lastName,
-      memberEmail: members.email,
-      memberFiscalCode: members.fiscalCode
-    })
-      .from(freeTrialEnrollments)
-      .leftJoin(members, eq(freeTrialEnrollments.memberId, members.id))
-      .where(eq(freeTrialEnrollments.memberId, memberId))
-      .orderBy(desc(freeTrialEnrollments.enrollmentDate));
-  }
-
-  async getFreeTrialEnrollment(id: number): Promise<FreeTrialEnrollment | undefined> {
-    const [enrollment] = await db.select().from(freeTrialEnrollments).where(eq(freeTrialEnrollments.id, id));
-    return enrollment;
-  }
-
-  async createFreeTrialEnrollment(enrollment: InsertFreeTrialEnrollment): Promise<FreeTrialEnrollment> {
-    const activeSeason = await this.getActiveSeason();
-    const dataWithSeason = {
-      ...enrollment,
-      seasonId: enrollment.seasonId || activeSeason?.id || null
-    };
-    const [result] = await db.insert(freeTrialEnrollments).values(dataWithSeason as any);
-    const [newEnrollment] = await db.select().from(freeTrialEnrollments).where(eq(freeTrialEnrollments.id, result.insertId));
-    return newEnrollment;
-  }
-
-  async updateFreeTrialEnrollment(id: number, enrollment: Partial<InsertFreeTrialEnrollment>): Promise<FreeTrialEnrollment> {
-    await db.update(freeTrialEnrollments).set(enrollment as any).where(eq(freeTrialEnrollments.id, id));
-    const [updated] = await db.select().from(freeTrialEnrollments).where(eq(freeTrialEnrollments.id, id));
-    return updated;
-  }
-
-  async deleteFreeTrialEnrollment(id: number): Promise<void> {
-    await db.delete(freeTrialEnrollments).where(eq(freeTrialEnrollments.id, id));
-  }
-
-  async getSingleLessonEnrollments(): Promise<any[]> {
-    return await db.select({
-      id: singleLessonEnrollments.id,
-      memberId: singleLessonEnrollments.memberId,
-      status: singleLessonEnrollments.status,
-      enrollmentDate: singleLessonEnrollments.enrollmentDate,
-      notes: singleLessonEnrollments.notes,
-      memberFirstName: members.firstName,
-      memberLastName: members.lastName,
-      memberEmail: members.email,
-      memberFiscalCode: members.fiscalCode
-    })
-      .from(singleLessonEnrollments)
-      .leftJoin(members, eq(singleLessonEnrollments.memberId, members.id))
-      .orderBy(desc(singleLessonEnrollments.enrollmentDate));
-  }
-
-  async getSingleLessonEnrollmentsByMember(memberId: number): Promise<any[]> {
-    return await db.select({
-      id: singleLessonEnrollments.id,
-      memberId: singleLessonEnrollments.memberId,
-      status: singleLessonEnrollments.status,
-      enrollmentDate: singleLessonEnrollments.enrollmentDate,
-      notes: singleLessonEnrollments.notes,
-      memberFirstName: members.firstName,
-      memberLastName: members.lastName,
-      memberEmail: members.email,
-      memberFiscalCode: members.fiscalCode
-    })
-      .from(singleLessonEnrollments)
-      .leftJoin(members, eq(singleLessonEnrollments.memberId, members.id))
-      .where(eq(singleLessonEnrollments.memberId, memberId))
-      .orderBy(desc(singleLessonEnrollments.enrollmentDate));
-  }
-
-  async getSingleLessonEnrollment(id: number): Promise<SingleLessonEnrollment | undefined> {
-    const [enrollment] = await db.select().from(singleLessonEnrollments).where(eq(singleLessonEnrollments.id, id));
-    return enrollment;
-  }
-
-  async createSingleLessonEnrollment(enrollment: InsertSingleLessonEnrollment): Promise<SingleLessonEnrollment> {
-    const activeSeason = await this.getActiveSeason();
-    const dataWithSeason = {
-      ...enrollment,
-      seasonId: enrollment.seasonId || activeSeason?.id || null
-    };
-    const [result] = await db.insert(singleLessonEnrollments).values(dataWithSeason as any);
-    const [newEnrollment] = await db.select().from(singleLessonEnrollments).where(eq(singleLessonEnrollments.id, result.insertId));
-    return newEnrollment;
-  }
-
-  async updateSingleLessonEnrollment(id: number, enrollment: Partial<InsertSingleLessonEnrollment>): Promise<SingleLessonEnrollment> {
-    await db.update(singleLessonEnrollments).set(enrollment as any).where(eq(singleLessonEnrollments.id, id));
-    const [updated] = await db.select().from(singleLessonEnrollments).where(eq(singleLessonEnrollments.id, id));
-    return updated;
-  }
-
-  async deleteSingleLessonEnrollment(id: number): Promise<void> {
-    await db.delete(singleLessonEnrollments).where(eq(singleLessonEnrollments.id, id));
-  }
-
   async getSundayActivityEnrollments(): Promise<any[]> {
     return await db.select({
       id: sundayActivityEnrollments.id,
@@ -3866,27 +3632,6 @@ export class DatabaseStorage implements IStorage {
     await db.delete(customListItems).where(eq(customListItems.id, id));
   }
 
-  async getPaidTrials(): Promise<PaidTrial[]> {
-    return await db.select().from(paidTrials).orderBy(desc(paidTrials.createdAt));
-  }
-
-  async createPaidTrial(trial: InsertPaidTrial): Promise<PaidTrial> {
-    const [result] = await db.insert(paidTrials).values(trial);
-    const [inserted] = await db.select().from(paidTrials).where(eq(paidTrials.id, result.insertId));
-    return inserted;
-  }
-
-  async updatePaidTrial(id: number, trial: Partial<InsertPaidTrial>): Promise<PaidTrial> {
-    await db.update(paidTrials).set(trial).where(eq(paidTrials.id, id));
-    const [updated] = await db.select().from(paidTrials).where(eq(paidTrials.id, id));
-    if (!updated) throw new Error("Paid Trial not found");
-    return updated;
-  }
-
-  async deletePaidTrial(id: number): Promise<void> {
-    await db.delete(paidTrials).where(eq(paidTrials.id, id));
-  }
-
   async deletePriceListItem(id: number): Promise<void> {
     await db.delete(priceListItems).where(eq(priceListItems.id, id));
   }
@@ -4344,50 +4089,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== FreeTrials ====
-  async getFreeTrials(): Promise<FreeTrial[]> {
-    return await db.select().from(freeTrials).orderBy(freeTrials.name);
-  }
-  async getFreeTrial(id: number): Promise<FreeTrial | undefined> {
-    const [item] = await db.select().from(freeTrials).where(eq(freeTrials.id, id));
-    return item;
-  }
-  async createFreeTrial(data: InsertFreeTrial): Promise<FreeTrial> {
-    const [result] = await db.insert(freeTrials).values(data as any);
-    const [newItem] = await db.select().from(freeTrials).where(eq(freeTrials.id, result.insertId));
-    return newItem;
-  }
-  async updateFreeTrial(id: number, data: Partial<InsertFreeTrial>): Promise<FreeTrial> {
-    await db.update(freeTrials).set({ ...data, updatedAt: new Date() } as any).where(eq(freeTrials.id, id));
-    const [item] = await db.select().from(freeTrials).where(eq(freeTrials.id, id));
-    if (!item) throw new Error("FreeTrial not found");
-    return item;
-  }
-  async deleteFreeTrial(id: number): Promise<void> {
-    await db.delete(freeTrials).where(eq(freeTrials.id, id));
-  }
+
+
 
   // ==== SingleLessons ====
-  async getSingleLessons(): Promise<SingleLesson[]> {
-    return await db.select().from(singleLessons).orderBy(singleLessons.name);
-  }
-  async getSingleLesson(id: number): Promise<SingleLesson | undefined> {
-    const [item] = await db.select().from(singleLessons).where(eq(singleLessons.id, id));
-    return item;
-  }
-  async createSingleLesson(data: InsertSingleLesson): Promise<SingleLesson> {
-    const [result] = await db.insert(singleLessons).values(data as any);
-    const [newItem] = await db.select().from(singleLessons).where(eq(singleLessons.id, result.insertId));
-    return newItem;
-  }
-  async updateSingleLesson(id: number, data: Partial<InsertSingleLesson>): Promise<SingleLesson> {
-    await db.update(singleLessons).set({ ...data, updatedAt: new Date() } as any).where(eq(singleLessons.id, id));
-    const [item] = await db.select().from(singleLessons).where(eq(singleLessons.id, id));
-    if (!item) throw new Error("SingleLesson not found");
-    return item;
-  }
-  async deleteSingleLesson(id: number): Promise<void> {
-    await db.delete(singleLessons).where(eq(singleLessons.id, id));
-  }
+
+
 
   // ==== SundayActivities ====
   async getSundayActivities(): Promise<SundayActivity[]> {

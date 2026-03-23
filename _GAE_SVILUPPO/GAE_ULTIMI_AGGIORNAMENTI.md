@@ -5,8 +5,26 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 23 Marzo 2026 (Redirect Parametrico & Stati Operativi Multipli - [AG-ELENCHI-002] & [AG-NAV-001])
+* **Nuovo Flusso Modifica Corsi (Redirect Parametrico):**
+  * Implementato il pulsante Edit (Pennino) in `scheda-corso.tsx`.
+  * Il click reindirizza in modo non invasivo alla root della tabella principale (`/attivita/corsi?editId=xxx`).
+  * Inserito un listener automatizzato in `courses.tsx` che apre il `CourseUnifiedModal` al caricamento della query URL e ne pulisce la cronologia alla chiusura (`onOpenChange`), prevenendo auto-aperture ricorsive.
+* **Componente CourseUnifiedModal**:
+  * Inserite icone "Pencil" di fianco alle `Label` Genere e Categoria, intercettando il click per sbloccare l'inoltro ai rispettivi pannelli di lookup anagrafico (`/elenchi` e `/categorie-attivita`).
+* **Sostituzione Engine Stati Operativi (Corsi):**
+  * Rimosso l'hardcoding in `CourseUnifiedModal.tsx` per la dropdown di Stato (legacy logic `Select`).
+  * Adottata logica array-native tramite `MultiSelectStatus`, così che il corso legga array colori e opzioni direttamente dal core API (sorgente `activity_statuses`). E' ora possibile far convivere più marker strutturali (es. `COMPLETO`, `ULTIMI POSTI`).
+* **Allineamento Colori e Badge Multi-Stato in Calendario:**
+  * Bonificato `calendar.tsx` dall'if-else fallace che deduceva solo "Attivo/Inattivo".
+  * **[BUGFIX AG-FIX-006D]**: Le card della Grid Settimanale e del List View facevano fallire silenziosamente `Array.isArray` perché Postgres restituiva l'array `statusTags` come JSON serializzato. L'errore causava una ricaduta forzata sul dummy "ATTIVO". Risolto implementando nativamente `parseStatusTags()` e sbloccando i Multi-Badge colorati direttamente all'interno della griglia per tutti gli appuntamenti.
+
 ### 23 Marzo 2026 (Centralizzazione Elenchi e Universal Quick-Add - [AG-ELENCHI-001])
 * **Masterizzazione Area Elenchi (Source of Truth):**
+  * Spostata totalmente la logica di fallback Hardcoded sulle chiamate in vivo da `useCustomList()`.
+  * **Deep Linking / Tab Routing (Elenchi):**
+  * **[BUGFIX AG-FIX-006E / 006F]**: La pagina `/elenchi` è stata dotata dell'hook `useLocation` e di un `useEffect` nativo in grado di interpretare i query params dal GET HTTP (`?tab=colorati`, `?tab=semplici`) e agganciati ad Anchor ID (`?focus=list-genere`) per invocare lo *smooth scroll* esatto sul componente a schermo in base alla stringa passata.
+  * Questo ha sbloccato il "salto volante in-place" nel modulo `CourseUnifiedModal.tsx`, di cui contestualmente si sono armonizzate e uniformate le Icone Edit ("Pennini") – estendendole anche a *Posti Disponibili* – per fargli puntare le destinazioni millimetriche all'interno dei listini.
   * Eseguito un mini-audit che ha sancito due classi di elenchi a database: le *Core Custom Lists* (es. genere, canali acquisizione, destrutturate in `custom_lists`) e i *System Vocabularies Multi-Color* (es. stati, tipopartecipante, su logiche dedicate).
   * Risolti gli orfani testuali all'interno dei modali principali (`maschera-input-generale.tsx`), rimuovendo i valori nativi di fallback per i Canali Acquisizione ("Web", "Passaparola") e per i gradi CRM ("Silver", "Gold"). Sostituiti in favore degli hook `useCustomListValues`. 
 * **Componente Combobox Intelligente (Quick-Add Orizzontale):**

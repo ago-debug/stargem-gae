@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -143,7 +144,7 @@ function EditableListSection({ title, queryKey, apiPath, emptyMessage, testIdPre
   });
 
   return (
-    <Card className="border-border/60 shadow-sm bg-card/30" data-testid={`card-elenchi-${testIdPrefix}`}>
+    <Card id={title.toLowerCase().replace(/ /g, '-')} className="border-border/60 shadow-sm bg-card/30" data-testid={`card-elenchi-${testIdPrefix}`}>
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-6">
         <CardTitle className="text-base font-bold text-foreground" data-testid={`text-elenchi-title-${testIdPrefix}`}>
           {title}
@@ -402,7 +403,7 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
   });
 
   return (
-    <Card className="border-border/60 shadow-sm bg-card/30" data-testid={`card-custom-list-${list.id}`}>
+    <Card id={`list-${list.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`} className="border-border/60 shadow-sm bg-card/30" data-testid={`card-custom-list-${list.id}`}>
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-6 group">
         <div>
           <CardTitle className="text-base font-bold text-foreground flex flex-col gap-1">
@@ -790,6 +791,36 @@ function SimpleListsManager() {
 }
 
 export default function Elenchi() {
+  const [location, setLocation] = useLocation();
+  const searchParams = new URLSearchParams(window.location.search);
+  const currentUrlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState("semplici");
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const tab = searchParams.get('tab');
+    if (tab && (tab === 'semplici' || tab === 'colorati')) {
+      setActiveTab(tab);
+    }
+    
+    // Gestione Deep Scroll
+    const focusId = searchParams.get('focus');
+    if (focusId) {
+      setTimeout(() => {
+        const el = document.getElementById(focusId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300); // Wait for DOM render inside active tab
+    }
+  }, [location]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Optional: sync back to URL if user clicks tab manually
+    setLocation(`/elenchi?tab=${value}`, { replace: true });
+  };
+
   return (
     <div className="p-6 md:p-8 space-y-8 mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -808,7 +839,7 @@ export default function Elenchi() {
         </div>
       </div>
 
-      <Tabs defaultValue="semplici" className="space-y-8">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
         <div className="w-full flex justify-center">
           <TabsList className="bg-muted/50 p-1 h-auto grid grid-cols-2 w-full max-w-md shadow-sm border border-border/50">
             <TabsTrigger value="semplici" className="py-2.5 px-4 rounded font-semibold text-sm">

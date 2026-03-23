@@ -2088,92 +2088,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // FreeTrials Routes
-  app.get("/api/free-trials", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getFreeTrials();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/free-trials", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createFreeTrial(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/free-trials/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateFreeTrial(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/free-trials/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteFreeTrial(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  // SingleLessons Routes
-  app.get("/api/single-lessons", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getSingleLessons();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/single-lessons", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createSingleLesson(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/single-lessons/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateSingleLesson(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/single-lessons/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteSingleLesson(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  // SundayActivities Routes
   app.get("/api/sunday-activities", isAuthenticated, async (req, res) => {
     try {
       const results = await storage.getSundayActivities();
@@ -3574,135 +3488,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==== EXTRA ENROLLMENTS ENDPOINTS ==== 
   // PaidTrial Enrollments
-  app.get("/api/paid-trial-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
-      if (memberId && !isNaN(memberId)) {
-        const enrollments = await storage.getPaidTrialEnrollmentsByMember(memberId);
-        res.json(enrollments);
-      } else {
-        const enrollments = await storage.getPaidTrialEnrollments();
-        res.json(enrollments);
-      }
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/paid-trial-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createPaidTrialEnrollment(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/paid-trial-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.updatePaidTrialEnrollment(parseInt(req.params.id), req.body);
-      res.json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/paid-trial-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      await storage.deletePaidTrialEnrollment(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // FreeTrial Enrollments
-  app.get("/api/free-trial-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
-      if (memberId && !isNaN(memberId)) {
-        const enrollments = await storage.getFreeTrialEnrollmentsByMember(memberId);
-        res.json(enrollments);
-      } else {
-        const enrollments = await storage.getFreeTrialEnrollments();
-        res.json(enrollments);
-      }
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/free-trial-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createFreeTrialEnrollment(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/free-trial-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.updateFreeTrialEnrollment(parseInt(req.params.id), req.body);
-      res.json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/free-trial-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      await storage.deleteFreeTrialEnrollment(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // SingleLesson Enrollments
-  app.get("/api/single-lesson-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
-      if (memberId && !isNaN(memberId)) {
-        const enrollments = await storage.getSingleLessonEnrollmentsByMember(memberId);
-        res.json(enrollments);
-      } else {
-        const enrollments = await storage.getSingleLessonEnrollments();
-        res.json(enrollments);
-      }
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/single-lesson-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createSingleLessonEnrollment(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/single-lesson-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.updateSingleLessonEnrollment(parseInt(req.params.id), req.body);
-      res.json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/single-lesson-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      await storage.deleteSingleLessonEnrollment(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // SundayActivity Enrollments
   app.get("/api/sunday-activity-enrollments", isAuthenticated, async (req, res) => {
     try {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
@@ -4098,16 +3883,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 paymentLinkField = "workshopEnrollmentId";
                 break;
               case "prove-pagamento":
-                enrollment = await storage.createPaidTrialEnrollment({ ...createPayload, paidTrialId: enrData.courseId });
-                paymentLinkField = "paidTrialEnrollmentId";
+                enrollment = await storage.createEnrollment({ ...createPayload, participationType: "prova_pagamento" });
+                paymentLinkField = "enrollmentId";
                 break;
               case "prove-gratuite":
-                enrollment = await storage.createFreeTrialEnrollment({ ...createPayload, freeTrialId: enrData.courseId });
-                paymentLinkField = "freeTrialEnrollmentId";
+                enrollment = await storage.createEnrollment({ ...createPayload, participationType: "prova_gratuita" });
+                paymentLinkField = "enrollmentId";
                 break;
               case "lezioni-singole":
-                enrollment = await storage.createSingleLessonEnrollment({ ...createPayload, singleLessonId: enrData.courseId });
-                paymentLinkField = "singleLessonEnrollmentId";
+                enrollment = await storage.createEnrollment({ ...createPayload, participationType: "lezione_singola" });
+                paymentLinkField = "enrollmentId";
                 break;
               case "domeniche-movimento":
                 enrollment = await storage.createSundayActivityEnrollment({ ...createPayload, sundayActivityId: enrData.courseId });
@@ -4174,9 +3959,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const hasValidRelation =
                 paymentData.enrollmentId ||
                 paymentData.workshopEnrollmentId ||
-                paymentData.paidTrialEnrollmentId ||
-                paymentData.freeTrialEnrollmentId ||
-                paymentData.singleLessonEnrollmentId ||
+                
+                
+                
                 paymentData.sundayActivityEnrollmentId ||
                 paymentData.trainingEnrollmentId ||
                 paymentData.individualLessonEnrollmentId ||
@@ -5265,49 +5050,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Paid Trials Routes
-  app.get("/api/paid-trials", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getPaidTrials();
-      res.json(results);
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to fetch paid trials" });
-    }
-  });
-
-  app.post("/api/paid-trials", isAuthenticated, async (req, res) => {
-    try {
-      const data = insertPaidTrialSchema.parse(req.body);
-      const trial = await storage.createPaidTrial(data);
-      res.status(201).json(trial);
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to create paid trial" });
-    }
-  });
-
-  app.patch("/api/paid-trials/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const trial = await storage.updatePaidTrial(id, req.body);
-      res.json(trial);
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to update paid trial" });
-    }
-  });
-
-  app.delete("/api/paid-trials/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deletePaidTrial(id);
-      res.sendStatus(204);
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to delete paid trial" });
-    }
-  });
-
   app.delete("/api/price-list-items/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);

@@ -11,9 +11,7 @@ const activityMenuItems = [
   { id: "panoramica", label: "Panoramica", icon: Activity, url: "/attivita" },
   { id: "corsi", label: "Corsi", icon: Calendar, url: "/attivita/corsi" },
   { id: "workshop", label: "Workshop", icon: Sparkles, url: "/attivita/workshops" },
-  { id: "prove-pagamento", label: "Prove a Pagamento", icon: CreditCard, url: "/attivita/prove-pagamento" },
-  { id: "prove-gratuite", label: "Prove Gratuite", icon: Gift, url: "/attivita/prove-gratuite" },
-  { id: "lezioni-singole", label: "Lezioni Singole", icon: BookOpen, url: "/attivita/lezioni-singole" },
+
   { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, url: "/attivita/lezioni-individuali" },
   { id: "domeniche-movimento", label: "Domenica in Movimento", icon: Sun, url: "/attivita/domeniche-movimento" },
   { id: "allenamenti", label: "Allenamenti", icon: Dumbbell, url: "/attivita/allenamenti" },

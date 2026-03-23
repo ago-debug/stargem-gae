@@ -112,11 +112,11 @@ export default function Courses() {
     queryKey: ["/api/courses"],
   });
 
-  const urlCourseId = urlParams.get('courseId');
+  const editId = urlParams.get('editId') || urlParams.get('courseId');
 
   useEffect(() => {
-    if (courses && urlCourseId) {
-      const course = courses.find(c => c.id === parseInt(urlCourseId));
+    if (courses && editId && !isFormOpen && !editingCourse) {
+      const course = courses.find(c => c.id === parseInt(editId));
       if (course) {
         setEditingCourse(course);
         setSelectedDayOfWeek(course.dayOfWeek || "");
@@ -126,9 +126,15 @@ export default function Courses() {
         setActiveTab("details");
         setStatusTags(parseStatusTags(course.statusTags));
         setIsFormOpen(true);
+        
+        // Clean up URL to avoid loops
+        urlParams.delete('editId');
+        urlParams.delete('courseId');
+        const newSearch = urlParams.toString();
+        setLocation(`/attivita/corsi${newSearch ? `?${newSearch}` : ''}`, { replace: true });
       }
     }
-  }, [courses, urlCourseId]);
+  }, [courses, editId, isFormOpen, editingCourse, setLocation]);
 
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({
     queryKey: ["/api/activity-statuses"],
