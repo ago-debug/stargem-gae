@@ -3915,7 +3915,8 @@ export class DatabaseStorage implements IStorage {
     bookingDateValue: Date | string,
     startTime: string,
     endTime: string,
-    currentBookingId?: number
+    currentBookingId?: number,
+    currentCourseId?: number
   ): Promise<{ type: 'booking' | 'course' | 'workshop' | 'operating_hours', name: string } | null> {
     const bookingDate = bookingDateValue instanceof Date ? bookingDateValue : new Date(bookingDateValue);
     if (isNaN(bookingDate.getTime())) {
@@ -4023,6 +4024,9 @@ export class DatabaseStorage implements IStorage {
 
     if (activeSeason) {
       courseConditions.push(eq(courses.seasonId, activeSeason.id));
+    }
+    if (currentCourseId) {
+      courseConditions.push(sql`${courses.id} != ${currentCourseId}`);
     }
 
     const potentialCourses = await db
