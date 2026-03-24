@@ -4017,76 +4017,7 @@ export default function MascheraInputGenerale() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* NUOVA ISCRIZIONE (Modalità Unificata) */}
-                  <div className="bg-muted/30 p-4 border rounded-lg space-y-4">
-                    <h4 className="text-sm font-semibold flex items-center gap-2 text-primary">
-                      <Plus className="w-4 h-4" /> Nuova Iscrizione
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                      <div className="md:col-span-6 space-y-1.5">
-                        <Label className="text-xs">Seleziona Corso</Label>
-                        <CourseSelector
-                          courses={courses || []}
-                          instructors={instructors || []}
-                          categories={categories || []}
-                          studios={studios || []}
-                          selectedCourseId={unifiedCourseId}
-                          onSelect={setUnifiedCourseId}
-                          excludeCourseIds={memberEnrollments?.map((e: any) => parseInt(e.courseId)) || []}
-                        />
-                      </div>
-                      <div className="md:col-span-3 space-y-1.5">
-                        <Label className="text-xs">Modalità</Label>
-                        <Select value={unifiedParticipationType} onValueChange={setUnifiedParticipationType}>
-                          <SelectTrigger className="h-9">
-                            <SelectValue placeholder="Modalità" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="STANDARD_COURSE">Iscrizione Standard</SelectItem>
-                            <SelectItem value="FREE_TRIAL">Prova Gratuita</SelectItem>
-                            <SelectItem value="PAID_TRIAL">Prova a Pagamento</SelectItem>
-                            <SelectItem value="SINGLE_LESSON">Lezione Singola</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="md:col-span-3 flex items-end">
-                        <Button 
-                          className="w-full h-9" 
-                          disabled={!unifiedCourseId || addEnrollmentMutation.isPending || (unifiedParticipationType !== 'STANDARD_COURSE' && !unifiedTargetDate)}
-                          onClick={() => {
-                             addEnrollmentMutation.mutate({
-                               memberId: selectedMemberId,
-                               courseId: parseInt(unifiedCourseId),
-                               participationType: unifiedParticipationType,
-                               targetDate: unifiedParticipationType !== "STANDARD_COURSE" ? (unifiedTargetDate || null) : null,
-                               active: true
-                             }, {
-                               onSuccess: () => {
-                                 setUnifiedCourseId("");
-                                 setUnifiedParticipationType("STANDARD_COURSE");
-                                 setUnifiedTargetDate("");
-                               }
-                             });
-                          }}
-                        >
-                          {addEnrollmentMutation.isPending ? "Salvataggio..." : "Aggiungi Partecipazione"}
-                        </Button>
-                      </div>
-                      {unifiedParticipationType !== "STANDARD_COURSE" && (
-                        <div className="md:col-span-6 md:col-start-1 space-y-1.5 mt-2">
-                          <Label className="text-xs">Data della Prova / Lezione (Obbligatoria)</Label>
-                          <Input 
-                            type="date" 
-                            className="h-9 w-1/2"
-                            value={unifiedTargetDate}
-                            onChange={(e) => setUnifiedTargetDate(e.target.value)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Active Enrollments List */}
+                  {/* Active Enrollments List (Read-Only) */}
                   {loadingEnrollments ? (
                     <div className="space-y-2">
                       <Skeleton className="h-12 w-full" />
@@ -4099,7 +4030,7 @@ export default function MascheraInputGenerale() {
                         const course = courses?.find((c: any) => c.id === e.courseId);
                         const hasDetails = Array.isArray(e.details) && e.details.length > 0;
                         return (
-                          <div key={e.id} className="grid grid-cols-[140px_180px_240px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
+                          <div key={e.id} className="grid grid-cols-[130px_160px_180px_160px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
 
                             {/* Nome Corso */}
                             <div className="font-bold text-sm truncate" title={course?.name}>
@@ -4112,12 +4043,27 @@ export default function MascheraInputGenerale() {
                             </div>
 
                             {/* Info Temporali */}
-                            <div className="text-xs text-muted-foreground flex items-center gap-2 truncate">
-                              <span>Iscritto il: {new Date(e.enrollmentDate).toLocaleDateString('it-IT')}</span>
+                            <div className="text-xs text-muted-foreground flex flex-col gap-0.5 truncate">
+                              <span>Iscritto: {new Date(e.enrollmentDate).toLocaleDateString('it-IT')}</span>
                               {course?.dayOfWeek && <span>• {course.dayOfWeek} {course.startTime}</span>}
                             </div>
+                            
+                            {/* Dettagli Partecipazione (Modalità) */}
+                            <div className="flex flex-col items-start gap-1 overflow-hidden">
+                              {e.participationType === 'FREE_TRIAL' && <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200 font-medium">Prova Gratuita</Badge>}
+                              {e.participationType === 'PAID_TRIAL' && <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 font-medium">Prova a Pagamento</Badge>}
+                              {e.participationType === 'SINGLE_LESSON' && <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200 font-medium">Lezione Singola</Badge>}
+                              {(!e.participationType || e.participationType === 'STANDARD_COURSE') && <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200 font-medium">Iscrizione Standard</Badge>}
+                              
+                              {e.targetDate && (
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium mt-0.5">
+                                  <Calendar className="w-2.5 h-2.5"/>
+                                  {new Date(e.targetDate).toLocaleDateString('it-IT')}
+                                </span>
+                              )}
+                            </div>
 
-                            {/* Dettagli Iscrizione (Solo Lettura) */}
+                            {/* Dettagli Opzionali (Note Extra) */}
                             <div className="flex items-center gap-1 overflow-hidden flex-1">
                               {hasDetails && e.details.map((detStr: string, idx: number) => {
                                 const color = enrollmentDetails?.find(d => d.name === detStr)?.color;
