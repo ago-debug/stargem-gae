@@ -123,3 +123,17 @@ Avere uno storico nero su bianco delle risposte del cliente è vitale per giusti
     *   *R (Utente):* Sarebbe infernale. Devono poterla aggiungere *direttamente lì* (dalla tendina), ma il sistema deve prima controllare la lista ufficiale, e salvarla nel DB centralizzato (Quick-Add).
 *   **D: Tipi Pagamento o Livelli CRM: Chi ha lo scettro su questi?**
     *   *R (Architettura Stabilita - AG-ELENCHI-001):* È stato attuato lo split a 2 livelli: I **System Vocabularies** (es. Note Pagamento, Metodologie incasso, Status attività) sono ancorati visceralmente e non permettono l'inserzione on-the-fly cross modale per non sfasare fatture. Le **Core Custom Lists** (es. Genere, Provenienza Marketing, CRM Tiers) invece supportano il *Quick-Add Universal Combobox*, consentendo agilità totale ma salvaguardando il vincolo database.
+
+---
+
+## Intervista 7: Abolizione Silos Prove e Modello Unificato
+**Data:** 23-24 Marzo 2026
+**Topic:** Razionalizzazione architettura "Partecipazioni" (STI Phase 1).
+
+*   **D: Perché Prove Gratuite, Prove Pagamento e Lezioni Singole hanno un DB separato dai Corsi Normali?**
+    *   *R (Analisi Sviluppatore):* È un errore di gioventù del gestionale. Trattarle da moduli autonomi ha triplicato i componenti UI e sfasato le statistiche iscritti/posti liberi.
+    *   *R (Decisione Management):* Sono solo variazioni temporanee! **Una prova è legata a un corso esistente**. La segreteria prenota una sedia di quel corso per quel giorno, fine. Non è logico che la prova generi una ricevuta per "Attività Fittizia A", ma deve generare un transito per il corso reale.
+*   **D: Ok. Come unifichiamo senza far esplodere i pagamenti in essere?**
+    *   *R (Decisione):* Spegniamo i silos vecchi 1 a 1 dal UI della Maschera Input per incanalare il traffico. Modifichiamo il master `enrollments` aggiungendo l'attributo `participationType` (es. FREE_TRIAL, PAID_TRIAL, SINGLE_LESSON). Il corso "Pilates Base" rimane lui, l'allievo è iscritto a lui, cambia solo che la UI legge "È una prova per il giorno 28/03".
+*   **D: L'architettura è stata già modificata fisicamente?**
+    *   *R:* Sì, in **Fase 1 (Prep Non Distruttiva)**, le due colonne passive SQL per far decantare l'ORM sono state scritte. Il sistema è in attesa refactoring UI prima di chiudere la canna del gas obsoleta dei `paid_trials`.

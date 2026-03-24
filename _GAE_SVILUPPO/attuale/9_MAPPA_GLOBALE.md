@@ -15,14 +15,14 @@ Questo documento fornisce una fotografia "da satellite" dell'intero ecosistema a
 | `courses` | Attività | Dati corsi standard | Silos | **Sì** -> `activities` |
 | `workshops` | Attività | Eventi spot / Stage (con orari) | Silos | **Sì** -> `activities` |
 | `domeniche_activities`| Attività | Eventi domenicali | Silos | **Sì** -> `activities` |
-| `single_lessons` | Attività | Lezioni singole prenotabili | Silos | **Sì** -> `activities` |
+| `single_lessons` | Attività | Lezioni singole prenotabili | Silos (UI Dismessa, DB Attivo) | **Sì** -> `activities` |
 | `trainings` | Attività | Allenamenti liberi / guidati | Silos | **Sì** -> `activities` |
 | `individual_lessons`| Attività | Personal training singoli | Silos | **Sì** -> `activities` |
 | `campus_activities` | Attività | Centri estivi / Campus | Silos | **Sì** -> `activities` |
 | `recitals` | Attività | Saggi fine anno | Silos | **Sì** -> `activities` |
 | `vacation_studies` | Attività | Vacanze studio | Silos | **Sì** -> `activities` |
-| `paid_trials` | Attività | Prove a pagamento | Silos | **Sì** -> `activities` |
-| `free_trials` | Attività | Prove gratuite (P/G) | Silos | **Sì** -> `activities` |
+| `paid_trials` | Attività | Prove a pagamento | Silos (UI Dismessa, DB Attivo) | **Sì** -> `activities` |
+| `free_trials` | Attività | Prove gratuite (P/G) | Silos (UI Dismessa, DB Attivo) | **Sì** -> `activities` |
 | `studios` / `booking_services` | Risorse/Serv. | Sale affittabili / Servizi generici (Massaggi ecc) | Silos Misto | **Sì** -> parzialmente in `activities` |
 | `enrollments` | Iscrizioni | Iscrizione a `courses` | Silos | **Sì** -> `global_enrollments` |
 | `workshop_enrollments`| Iscrizioni | Iscrizione a `workshops` | Silos | **Sì** -> `global_enrollments` |
@@ -49,7 +49,7 @@ Questo documento fornisce una fotografia "da satellite" dell'intero ecosistema a
 | **Calendario (Planning)** | `/calendar` | Hub Visivo Centralizzato | Core Vivo | `/api/events`, `/api/calendar/*` | Tutti i Silos Attività |
 | **Planning Aule** | `/planning` | Gestione aule (vecchio calendario o complementare) | Congelato / Da Unire | `/api/planning/*` | `studios`, Attività |
 | **Corsi** | `/courses` | Gestione Silos Corsi | Legacy Parziale | `/api/courses` | `courses` |
-| **[X] Categories** | `/*-categories` | Tutte le pagine gestione Categorie e Silos (Workshops, Prove, ecc) | Deprecabili (in futuro) | `/api/*` (es. `/api/workshops`) | Le 11 tabelle Silos |
+| **[X] Categories** | `/*-categories` | Tutte le pagine gestione Categorie e Silos (Workshops, Prove, ecc) | Parzialmente Dismesse (Trials Oscarate) | `/api/*` (es. `/api/workshops`) | Le 11 tabelle Silos |
 | **Listini** | `/listini` | Gestione quote e incroci prezzo | Core Vivo | `/api/price-lists`, `/api/course-quotes-grid` | `price_lists`, `items`, `course_quotes_grid` |
 | **Pagamenti/Cassa** | `/payments` | Registro entrate (storico) ed export | Core Sensibile | `/api/payments` | `payments` |
 | **Tessere/Tesseramenti** | `/memberships` | Elenco storico tessere fisiche emesse | Core Vivo | `/api/memberships` | `memberships`, `members` |

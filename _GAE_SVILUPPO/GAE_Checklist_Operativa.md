@@ -10,8 +10,24 @@
 
 ---
 
-## 1. Refactoring UI Attuale (Miglioramenti Immediati)
-Questi task servono a risolvere i "dolori" dell'applicazione odierna prima di tuffarsi pesantemente nella logica V2.
+## 1. Cleanup Consolidation (Livelli 1-3) & Audit Preliminari
+Questi task consolidano la stabilità prima della riscrittura profonda V2 (Partecipazioni).
+
+- [x] Cleanup Modale Corsi (Livello 1-3)
+  - Fatto: Unificata la source de campi dropdown (Genere, Categoria, Livelli, Stati). Inserito blocco anti-duplicato nei manager Custom Lists frontend. Riparato e documentato il mapping corretto di `livello` tecnico.
+  - Manca: Nulla su Modale Corsi. L'UI è stabile.
+
+- [x] Audit Maschera Input Generale
+  - Fatto: Mappati i colli di bottiglia e i punti letali (4300+ span, 12 mutation in parallelo, session storage Base64) del file massivo `maschera-input-generale.tsx`.
+  - Manca: Avvio dello spacchettamento V2 autorizzato dal cliente. Nessun codice è stato toccato.
+
+- [x] Audit Sistema Partecipazioni e Fase 1 (Infrastruttura)
+  - Fatto: Progettato modello funzionale per retrocedere Prove/Lezioni Singole a meri attributi della tabella `enrollments`. Eseguito schema push non-distruttivo (campi `participationType`, `targetDate`).
+  - Manca: Fase 2 (Migrazione UI Maschera Input per accogliere i nuovi campi e droppare UI silos) e Migrazione Dati Legacy.
+
+---
+
+## 2. Refactoring UI Attuale (Miglioramenti Immediati)
 
 - [x] Opzione A: Lazy Load Anagrafiche
   - File toccati: `members.tsx`, `anagrafica-home.tsx`

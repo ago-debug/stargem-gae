@@ -89,12 +89,12 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     labelUI: "Prove a Pagamento",
     order: 3,
     family: "didattica_gruppo",
-    isActive: true,
+    isActive: false,  // Disattivato per passaggio a modulo unificato
     isPlaceholder: false,
     routeUrl: "/attivita/prove-pagamento",
     categoryManagementUrl: "/categorie-prove-pagamento",
     apiEndpoint: "/api/categories",
-    visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
+    visibility: { sidebarMenu: false, hubAttivita: false, iscrittiPanel: false, categoriePanel: false, mascheraInput: false, listini: true, calendario: false },
     design: { icon: CreditCard, colorClass: "icon-gold-bg", description: "Lezioni di prova a pagamento" }
   },
   {
@@ -102,12 +102,12 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     labelUI: "Prove Gratuite",
     order: 4,
     family: "didattica_gruppo",
-    isActive: true,
+    isActive: false, // Disattivato per passaggio a modulo unificato
     isPlaceholder: false,
     routeUrl: "/attivita/prove-gratuite",
     categoryManagementUrl: "/categorie-prove-gratuite",
     apiEndpoint: "/api/categories",
-    visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
+    visibility: { sidebarMenu: false, hubAttivita: false, iscrittiPanel: false, categoriePanel: false, mascheraInput: false, listini: true, calendario: false },
     design: { icon: Gift, colorClass: "icon-gold-bg", description: "Lezioni di prova gratuite" }
   },
   {
@@ -115,12 +115,12 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     labelUI: "Lezioni Singole",
     order: 5,
     family: "didattica_gruppo",
-    isActive: true,
+    isActive: false, // Disattivato per passaggio a modulo unificato
     isPlaceholder: false,
     routeUrl: "/attivita/lezioni-singole",
     categoryManagementUrl: "/categorie-lezioni-singole",
     apiEndpoint: "/api/categories",
-    visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
+    visibility: { sidebarMenu: false, hubAttivita: false, iscrittiPanel: false, categoriePanel: false, mascheraInput: false, listini: true, calendario: false },
     design: { icon: BookOpen, colorClass: "icon-gold-bg", description: "Lezioni singole o drop-in" }
   },
   {

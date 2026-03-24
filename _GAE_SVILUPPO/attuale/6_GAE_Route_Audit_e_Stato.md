@@ -52,13 +52,13 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Cour
 | *Nessun UI* | `/workshops` | *Redirect* | legacy tollerato | Redirect pulito a `/attivita/workshops` |
 | Dettaglio Workshop | `/attivita/workshops` | `Workshops` | canonico | Vera parent route STI per workshops |
 | Categorie Eventi Esterni | `/categorie-eventi-esterni` | `BookingServiceCategories` | canonico | Nome UI corretto. Slug corretto ad `/eventi-esterni` per distacco da legacy `servizi`. |
-| Categorie Prove a Pagamento | `/categorie-prove-pagamento` | `PaidTrialsCategories` | canonico | Componente autonomo ma collegato ad `api/categories`. |
-| Categorie Prove Gratuite | `/categorie-prove-gratuite` | `FreeTrialsCategories` | canonico | Componente autonomo ma collegato ad `api/categories`. |
-| Categorie Lezioni Singole | `/categorie-lezioni-singole` | `SingleLessonsCategories` | canonico | Componente autonomo ma collegato ad `api/categories`. |
+| Categorie Prove a Pagamento | `/categorie-prove-pagamento` | `PaidTrialsCategories` | dismesso | Oscurate da UI (Fase 8) in attesa di decomissione db. |
+| Categorie Prove Gratuite | `/categorie-prove-gratuite` | `FreeTrialsCategories` | dismesso | Oscurate da UI (Fase 8) in attesa di decomissione db. |
+| Categorie Lezioni Singole | `/categorie-lezioni-singole` | `SingleLessonsCategories` | dismesso | Oscurate da UI (Fase 8) in attesa di decomissione db. |
 | Categorie Affitti | `/categorie-affitti` | `RentalsCategories` | canonico | Componente autonomo completamente staccato, basato su `api/rental-categories` e db table `rental_categories`. |
 | Categorie Merchandising | `/categorie-merchandising` | `MerchandisingCategories` | canonico | Componente e root API attivati su `/api/merchandising-categories`. Eliminato il placeholder. |
 | Schede Legacy (Varie) | `/scheda-corso`, ecc. | `SchedaCorso`, `SchedaWorkshop`, ecc. | legacy tollerato | Vecchie schede agganciate a params in attesa di redesign |
-| Viste Interne (Varie) | `/attivita/prove-pagamento`, ecc. | `PaidTrials`, `FreeTrials`, ecc. | legacy tollerato | Componenti isolati che andranno fusi in un'unica master view |
+| Viste Interne Trial/Lezioni | `/attivita/prove-pagamento`, ecc. | `PaidTrials`, `FreeTrials`, ecc. | dismesso | Navigation link rimossa. Gestite ora unicamente tramite Modulo Corsi Centrale (Fase 8). |
 | Eventi Esterni (Orfana) | `/booking-services` | `BookingServices` | candidato a eliminazione futura | Orfana storicizzata dismessa dalla root, ri-inglobata correttamente in `/attivita/servizi`. |
 
 ## 4. Risorse Umane e Team

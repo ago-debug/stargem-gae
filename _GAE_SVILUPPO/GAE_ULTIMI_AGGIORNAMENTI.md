@@ -5,12 +5,22 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 23-24 Marzo 2026 (Consolidamento Modali, Audit Maschera e Preparazione Partecipazioni V2)
+* **Cleanup Livello 1, 2, 3 (Consolidamento Modale Corsi):**
+  * Eseguito un ciclo di bonifica profonda per eliminare hardcoding e duplicazioni (`elenchi.tsx`, `calendar.tsx`, `planning.tsx`).
+  * Il blocco `CourseUnifiedModal` è ora un monoblocco stabile. Tutte le dropdown (Stati, Categorie, Liste Custom come Genere, Livello, Fascia d'età) leggono da *Single Source of Truth* reattive, riordinando nativamente i valori in ordine alfanumerico (IT locale).
+  * **Anti-Duplicazioni Totale:** Implementato un blocco ferreo in frontend nei form "Pennini" (Manager Categorie, Manager Stati, Liste Custom). Se l'utente digita una voce già esistente (case-insensitive), il sistema blocca il salvataggio prevenendo record doppi a monte nella maschera input.
+* **Correzione Binding Livello Modale Corsi:**
+  * Risolto in via definitiva l'equivoco semantico forzando l'aggancio del campo "Livello" nel modale corsi al suo dizionario tecnico reale `livello` (Es. Base, Intermedio), vietando letture incrociate verso `livello_crm` (Marketing).
+* **Audit Architetturale "Maschera Input Generale":**
+  * Eseguita una fotografia passiva (Audit) del monolite `maschera-input-generale.tsx` (4300+ righe). 
+  * Identificati i punti di estrazione futura (Componenti Foto, Allegati, Accounting) e i colli di bottiglia (useQuery massive). **Nessuna modifica è stata ancora eseguita al codice di runtime**.
+* **Audit Architetturale "Partecipazioni" e Fase 1 (Preparazione Non Distruttiva):**
+  * Congelato l'abuso dei "Silos-Prove" (Prove Gratuite, Prove a Pagamento, Lezioni Singole come cloni autonomi dei corsi).
+  * Stabilito il modello funzionale core: **Le prove sono modalità di iscrizione, non corsi separati**.
+  * **Esecuzione Fase 1:** Aggiunti in `shared/schema.ts` e nel DB remoto MySQL i campi estensivi `participationType` (Default: `STANDARD_COURSE`) e `targetDate` alla tabella core `enrollments`. Questa fase **non distruttiva** getta le basi dati senza alterare UI (`maschera-input-generale.tsx` intoccata), senza migrare il legacy e senza rompere i pagamenti attuali (nessuna tabelle dropped).
+
 ### 23 Marzo 2026 (Fix Nomenclatura Livelli Corsi vs Livelli CRM)
-* **Distinzione netta Custom Lists (Bugfix Semantica Modale e UI):**
-  * Corretta l'etichetta testuale fuorviante nel `CourseUnifiedModal.tsx` che riportava la dicitura "Livello CRM" al posto di "Livello".
-  * Il binding dei dati puntava già alla Custom List nativa `livello`, tuttavia l'etichetta creava forte incomprensione per l'operatore. Il fix ribadisce e cristallizza formalmente la seguente distinzione nei modali:
-    * `livello` = Livello tecnico del corso (Base, Intermedio, Avanzato...). Viene gestito dal relativo pennino sul Modale Corso.
-    * `livello_crm` = Livello interno di Marketing (Silver, Gold, Platinum, Diamond). Viene gestito dalle automazioni o forzato su `/maschera-input` nella singola scheda cliente.
 
 ### 23 Marzo 2026 (Redirect Parametrico & Stati Operativi Multipli - [AG-ELENCHI-002] & [AG-NAV-001])
 * **Nuovo Flusso Modifica Corsi (Redirect Parametrico):**

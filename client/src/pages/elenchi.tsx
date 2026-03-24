@@ -10,22 +10,7 @@ import { Trash2, GripVertical, ListChecks, Plus, Edit, ClipboardPaste, Settings,
 import { useToast } from "@/hooks/use-toast";
 import type { CustomList, CustomListItem } from "@shared/schema";
 
-const ACTIVITY_TYPES = [
-  { id: "courses", label: "Corsi" },
-  { id: "workshops", label: "Workshop" },
-  { id: "paid_trials", label: "Prove a pagamento" },
-  { id: "free_trials", label: "Prove gratuite" },
-  { id: "single_lessons", label: "Lezioni singole" },
-  { id: "individual_lessons", label: "Lezioni individuali" },
-  { id: "sunday_activities", label: "Domenica in movimento" },
-  { id: "trainings", label: "Allenamenti" },
-  { id: "rentals", label: "Affitti" },
-  { id: "campus", label: "Campus" },
-  { id: "recitals", label: "Saggi" },
-  { id: "vacation_studies", label: "Vacanze studio" },
-  { id: "external_events", label: "Eventi esterni" },
-  { id: "merchandising", label: "Merchandising" }
-];
+import { getActiveActivities } from "@/config/activities";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -416,7 +401,7 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
             </p>
             <div className="flex flex-wrap gap-1">
               {(typeof list.linkedActivities === 'string' ? JSON.parse(list.linkedActivities || '[]') : (list.linkedActivities || [])).map((act: string) => {
-                const label = ACTIVITY_TYPES.find(a => a.id === act)?.label || act;
+                const label = getActiveActivities().find(a => a.id === act)?.labelUI || act;
                 return <Badge key={act} variant="outline" className="text-[10px] px-2 py-0.5 bg-amber-50/50 border-amber-200 text-amber-900 shadow-sm">{label}</Badge>
               })}
             </div>
@@ -466,7 +451,7 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
                    <p className="text-xs text-muted-foreground mb-4">Seleziona in quali sottomoduli (attività) i valori di questo elenco devono essere disponibili per la selezione.</p>
                    
                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                     {ACTIVITY_TYPES.map(act => {
+                     {getActiveActivities().map(act => {
                        const isActive = editActivities.includes(act.id);
                        return (
                          <div 
@@ -479,7 +464,7 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
                            <div className={`w-4 h-4 rounded-sm border flex items-center justify-center flex-shrink-0 ${isActive ? 'bg-amber-500 border-amber-500' : 'bg-white border-input'}`}>
                              {isActive && <Check className="w-3 h-3 text-white" />}
                            </div>
-                           <span className="truncate">{act.label}</span>
+                           <span className="truncate" title={act.labelUI}>{act.labelUI}</span>
                          </div>
                        )
                      })}
@@ -711,67 +696,7 @@ function SimpleListsManager() {
         </div>
       </div>
 
-      <Card className="border-border/60 shadow-sm bg-muted/20">
-        <CardContent className="p-4 sm:p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-end">
-            <div className="w-full sm:flex-1 space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Nome Nuovo Elenco</label>
-              <Input
-                placeholder="es. Livelli Avanzati"
-                value={newListName}
-                onChange={(e) => setNewListName(e.target.value)}
-                className="h-10 border-border/50 shadow-sm"
-              />
-            </div>
-            <div className="w-full sm:flex-[1.5] space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Descrizione (Opzionale)</label>
-              <Input
-                placeholder="es. Usato nelle impostazioni corsi"
-                value={newListDescription}
-                onChange={(e) => setNewListDescription(e.target.value)}
-                className="h-10 border-border/50 shadow-sm"
-              />
-            </div>
-            <Button
-              className="w-full sm:w-auto h-10 px-8 gold-3d-button font-medium whitespace-nowrap"
-              onClick={() => {
-                if (newListName.trim()) {
-                  createListMutation.mutate({ 
-                    name: newListName.trim(), 
-                    description: newListDescription.trim() || undefined,
-                    linkedActivities: newListActivities
-                  });
-                }
-              }}
-              disabled={!newListName.trim() || createListMutation.isPending}
-            >
-              Crea Elenco Semplice
-            </Button>
-          </div>
-          
-          <div className="pt-2">
-            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">Assegnazione Rapida Attività Collegate</label>
-            <div className="flex flex-wrap gap-2">
-              {ACTIVITY_TYPES.map(act => {
-                const isActive = newListActivities.includes(act.id);
-                return (
-                  <Badge 
-                    key={act.id} 
-                    variant={isActive ? "default" : "outline"}
-                    className={`cursor-pointer px-3 py-1 font-medium text-[11px] select-none ${isActive ? 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200' : 'bg-white hover:bg-muted/50 border-border/50 text-muted-foreground'}`}
-                    onClick={() => {
-                      setNewListActivities(prev => isActive ? prev.filter(id => id !== act.id) : [...prev, act.id])
-                    }}
-                  >
-                     {isActive && <Check className="w-3 h-3 mr-1 inline-block" />}
-                     {act.label}
-                  </Badge>
-                )
-              })}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
 
       {lists && lists.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">

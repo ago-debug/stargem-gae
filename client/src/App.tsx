@@ -47,7 +47,6 @@ import ActivityCategories from "@/pages/activity-categories";
 import Elenchi from "@/pages/elenchi";
 import TodoList from "@/pages/todo-list";
 import Commenti from "@/pages/commenti";
-import NoteTeam from "@/pages/note-team";
 import SchedaCorso from "@/pages/scheda-corso";
 import SchedaWorkshop from "@/pages/scheda-workshop";
 import SchedaDomenica from "@/pages/scheda-domenica";
@@ -215,7 +214,6 @@ function Router() {
       <ProtectedRoute path="/elenchi" component={Elenchi} />
       <ProtectedRoute path="/todo-list" component={TodoList} />
       <ProtectedRoute path="/knowledge-base" component={StubKnowledgeBase} />
-      <ProtectedRoute path="/inserisci-nota" component={NoteTeam} />
       <ProtectedRoute path="/commenti" component={Commenti} />
       <Route component={NotFound} />
     </Switch>

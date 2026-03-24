@@ -12,6 +12,7 @@ import type { ActivityStatus } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { mapCourseToCalendarEvent, mapWorkshopToCalendarEvent, mapStudioBookingToCalendarEvent } from "@/lib/event-mappers";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -102,21 +103,7 @@ const TIME_SLOTS = Array.from({ length: 288 }, (_, i) => {
     return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
 });
 
-const CATEGORY_COLORS: Record<number, string> = {
-    // We'll dynamic assign background colors if not predefined
-};
-
-const COLORS = [
-    "bg-blue-100 border-blue-500 text-blue-900 shadow-md opacity-95 hover:opacity-100",
-    "bg-purple-100 border-purple-500 text-purple-900 shadow-md opacity-95 hover:opacity-100",
-    "bg-emerald-100 border-emerald-500 text-emerald-900 shadow-md opacity-95 hover:opacity-100",
-    "bg-rose-100 border-rose-500 text-rose-900 shadow-md opacity-95 hover:opacity-100",
-    "bg-amber-100 border-amber-500 text-amber-900 shadow-md opacity-95 hover:opacity-100",
-    "bg-indigo-100 border-indigo-500 text-indigo-900 shadow-md opacity-95 hover:opacity-100",
-    "bg-teal-100 border-teal-500 text-teal-900 shadow-md opacity-95 hover:opacity-100",
-    "bg-cyan-100 border-cyan-500 text-cyan-900 shadow-md opacity-95 hover:opacity-100",
-    "bg-fuchsia-100 border-fuchsia-500 text-fuchsia-900 shadow-md opacity-95 hover:opacity-100",
-];
+import { CATEGORY_COLORS_PALETTE as COLORS, OLD_CATEGORY_COLORS as CATEGORY_COLORS } from "@/lib/activity-colors";
 
 export interface CalendarEvent {
     id: string; // Hybrid ID (e.g. "course_1", "workshop_2", "booking_3")
@@ -653,103 +640,20 @@ export default function CalendarPage() {
     // --- UNIFIED EVENT MAPPER (Registro Centrale Source of Truth) ---
     const unifiedEvents = useMemo<CalendarEvent[]>(() => {
         const events: CalendarEvent[] = [];
-        const activities = getActiveActivities(); // Full registry
+        const activities = getActiveActivities();
 
-        // 1. Map Courses
-        filteredCourses.forEach(c => {
-            const registryConf = activities.find(a => a.id === 'courses');
-            const colorPropsValue = getCourseColor(c);
-            const cat = categories?.find(cat => cat.id === c.categoryId);
-            const ins1Obj = instructors?.find(i => i.id === c.instructorId);
-            events.push({
-                id: `course_${c.id}`,
-                sourceType: "course",
-                sourceId: c.id,
-                title: c.name || cat?.name || "CORSO",
-                description: c.description || undefined,
-                startTime: c.startTime || "",
-                endTime: c.endTime || "",
-                dayOfWeek: c.dayOfWeek || "",
-                startDate: safeIsoString(c.startDate),
-                endDate: safeIsoString(c.endDate),
-                instructorId: c.instructorId,
-                instructorName: ins1Obj ? `${ins1Obj.lastName} ${ins1Obj.firstName}` : undefined,
-                studioId: c.studioId,
-                categoryId: c.categoryId,
-                categoryName: cat?.name,
-                registryKey: "courses",
-                registryLabel: registryConf?.labelUI || "Corso",
-                active: c.active !== false,
-                colorProps: colorPropsValue,
-                rawPayload: c
-            });
-        });
+        events.push(
+            ...filteredCourses.map(c => mapCourseToCalendarEvent(c, categories, instructors, activities, getCourseColor(c)))
+        );
 
-        // 2. Map Workshops
-        filteredWorkshops.forEach(w => {
-            const registryConf = activities.find(a => a.id === 'workshops');
-            const colorPropsValue = getCourseColor(w);
-            const cat = categories?.find(cat => cat.id === w.categoryId);
-            const ins1Obj = instructors?.find(i => i.id === w.instructorId);
-            events.push({
-                id: `workshop_${w.id}`,
-                sourceType: "workshop",
-                sourceId: w.id,
-                title: w.name || cat?.name || "WORKSHOP",
-                description: w.description || undefined,
-                startTime: w.startTime || "",
-                endTime: w.endTime || "",
-                dayOfWeek: w.dayOfWeek || "",
-                startDate: safeIsoString(w.startDate),
-                endDate: safeIsoString(w.endDate),
-                instructorId: w.instructorId,
-                instructorName: ins1Obj ? `${ins1Obj.lastName} ${ins1Obj.firstName}` : undefined,
-                studioId: w.studioId,
-                categoryId: w.categoryId,
-                categoryName: cat?.name,
-                registryKey: "workshops",
-                registryLabel: registryConf?.labelUI || "Workshop",
-                active: w.active !== false,
-                colorProps: colorPropsValue,
-                rawPayload: w
-            });
-        });
+        events.push(
+            ...filteredWorkshops.map(w => mapWorkshopToCalendarEvent(w, categories, instructors, activities, getCourseColor(w)))
+        );
 
-        // 3. Map Studio Bookings (Approximation for Date -> Day)
         const relevantBookings = (Array.isArray(studioBookings) ? studioBookings : []).filter(b => b.status !== 'cancelled' && b.studioId && b.bookingDate);
-        relevantBookings.forEach(b => {
-             // For bookings to show on the weekly grid, let's derive dayOfWeek
-             const bDate = new Date(b.bookingDate);
-             const dayId = getDayId(bDate);
-             
-             // Check if it belongs to current week view (Optional optimization, but UI handles days placement)
-             
-             const registryConf = activities.find(a => a.id === 'studioBookings');
-             const colorPropsValue = getBookingColor(b);
-            
-             events.push({
-                 id: `booking_${b.id}`,
-                 sourceType: "studioBookings",
-                 sourceId: b.id,
-                 title: b.title || b.notes || "Affitto/Servizio",
-                 description: b.notes || undefined,
-                 startTime: stripSeconds(b.startTime) || "",
-                 endTime: stripSeconds(b.endTime) || "",
-                 dayOfWeek: dayId,
-                 startDate: safeIsoString(b.bookingDate),
-                 endDate: safeIsoString(b.bookingDate),
-                 instructorId: null,
-                 instructorName: "",
-                 studioId: b.studioId,
-                 categoryId: null,
-                 categoryName: "AFFITTO",
-                 registryKey: "studioBookings",
-                 registryLabel: registryConf?.labelUI || "Affitti/Service",
-                 active: true,
-                 colorProps: colorPropsValue,
-                 rawPayload: b
-             });
-        });
+        events.push(
+            ...relevantBookings.map(b => mapStudioBookingToCalendarEvent(b, activities, getBookingColor(b)))
+        );
 
         if (selectedEventType !== "all") {
              return events.filter(e => e.registryKey === selectedEventType);

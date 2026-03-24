@@ -3087,7 +3087,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/enrollments", isAuthenticated, checkPermission("/iscritti-corsi", "write"), async (req, res) => {
     try {
-      const validatedData = insertEnrollmentSchema.parse(req.body);
+      const dataToValidate = { ...req.body };
+      if (typeof dataToValidate.targetDate === 'string') {
+        dataToValidate.targetDate = new Date(dataToValidate.targetDate);
+      }
+      const validatedData = insertEnrollmentSchema.parse(dataToValidate);
       const enrollment = await storage.createEnrollment(validatedData);
 
       // Update course current enrollment count
@@ -3097,14 +3101,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentEnrollment: (course.currentEnrollment || 0) + 1,
         } as any);
 
-        if (req.query.skipPayment !== 'true') {
+        const isFreeTrial = validatedData.participationType === 'FREE_TRIAL';
+
+        if (req.query.skipPayment !== 'true' && !isFreeTrial) {
+          let paymentDesc = `Debito iscrizione corso: ${course.name}`;
+          if (validatedData.participationType === 'PAID_TRIAL') {
+            paymentDesc = `Debito Prova a Pagamento: ${course.name}`;
+          } else if (validatedData.participationType === 'SINGLE_LESSON') {
+            paymentDesc = `Debito Lezione Singola: ${course.name}`;
+          }
+
           // CREATE AUTOMATIC DEBT (Pending Payment)
           await storage.createPayment({
             memberId: enrollment.memberId,
             enrollmentId: enrollment.id,
-            amount: course.price || "0",
+            amount: course.price || "0", // Fallback to course price until custom rate is established
             type: "course",
-            description: `Debito iscrizione corso: ${course.name}`,
+            description: paymentDesc,
             status: "pending",
             dueDate: new Date(),
             paidDate: null,

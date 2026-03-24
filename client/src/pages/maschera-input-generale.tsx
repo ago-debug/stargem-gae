@@ -217,6 +217,11 @@ export default function MascheraInputGenerale() {
     }
   }, [allegati]);
 
+  // Unified Enrollment form states
+  const [unifiedCourseId, setUnifiedCourseId] = useState<string>("");
+  const [unifiedParticipationType, setUnifiedParticipationType] = useState<string>("STANDARD_COURSE");
+  const [unifiedTargetDate, setUnifiedTargetDate] = useState<string>("");
+
   const [photoFile, setPhotoFile] = useState<{ file: File | null; preview: string | null }>(() => {
     const saved = sessionStorage.getItem("mascheraInputPhoto");
     if (saved) {
@@ -1173,10 +1178,12 @@ export default function MascheraInputGenerale() {
 
   // Enrollment Mutations
   const addEnrollmentMutation = useMutation({
-    mutationFn: async (courseId: number) => {
+    mutationFn: async (data: { memberId?: string | number, courseId: number, participationType?: string, targetDate?: string | null, active?: boolean }) => {
       await apiRequest("POST", "/api/enrollments", {
         memberId: selectedMemberId,
-        courseId,
+        courseId: data.courseId,
+        participationType: data.participationType || "STANDARD_COURSE",
+        targetDate: data.targetDate || null,
         status: "active"
       });
     },
@@ -4010,6 +4017,75 @@ export default function MascheraInputGenerale() {
                 </div>
               ) : (
                 <div className="space-y-6">
+                  {/* NUOVA ISCRIZIONE (Modalità Unificata) */}
+                  <div className="bg-muted/30 p-4 border rounded-lg space-y-4">
+                    <h4 className="text-sm font-semibold flex items-center gap-2 text-primary">
+                      <Plus className="w-4 h-4" /> Nuova Iscrizione
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                      <div className="md:col-span-6 space-y-1.5">
+                        <Label className="text-xs">Seleziona Corso</Label>
+                        <CourseSelector
+                          courses={courses || []}
+                          instructors={instructors || []}
+                          categories={categories || []}
+                          studios={studios || []}
+                          selectedCourseId={unifiedCourseId}
+                          onSelect={setUnifiedCourseId}
+                          excludeCourseIds={memberEnrollments?.map((e: any) => parseInt(e.courseId)) || []}
+                        />
+                      </div>
+                      <div className="md:col-span-3 space-y-1.5">
+                        <Label className="text-xs">Modalità</Label>
+                        <Select value={unifiedParticipationType} onValueChange={setUnifiedParticipationType}>
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Modalità" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="STANDARD_COURSE">Iscrizione Standard</SelectItem>
+                            <SelectItem value="FREE_TRIAL">Prova Gratuita</SelectItem>
+                            <SelectItem value="PAID_TRIAL">Prova a Pagamento</SelectItem>
+                            <SelectItem value="SINGLE_LESSON">Lezione Singola</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="md:col-span-3 flex items-end">
+                        <Button 
+                          className="w-full h-9" 
+                          disabled={!unifiedCourseId || addEnrollmentMutation.isPending || (unifiedParticipationType !== 'STANDARD_COURSE' && !unifiedTargetDate)}
+                          onClick={() => {
+                             addEnrollmentMutation.mutate({
+                               memberId: selectedMemberId,
+                               courseId: parseInt(unifiedCourseId),
+                               participationType: unifiedParticipationType,
+                               targetDate: unifiedParticipationType !== "STANDARD_COURSE" ? (unifiedTargetDate || null) : null,
+                               active: true
+                             }, {
+                               onSuccess: () => {
+                                 setUnifiedCourseId("");
+                                 setUnifiedParticipationType("STANDARD_COURSE");
+                                 setUnifiedTargetDate("");
+                               }
+                             });
+                          }}
+                        >
+                          {addEnrollmentMutation.isPending ? "Salvataggio..." : "Aggiungi Partecipazione"}
+                        </Button>
+                      </div>
+                      {unifiedParticipationType !== "STANDARD_COURSE" && (
+                        <div className="md:col-span-6 md:col-start-1 space-y-1.5 mt-2">
+                          <Label className="text-xs">Data della Prova / Lezione (Obbligatoria)</Label>
+                          <Input 
+                            type="date" 
+                            className="h-9 w-1/2"
+                            value={unifiedTargetDate}
+                            onChange={(e) => setUnifiedTargetDate(e.target.value)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Active Enrollments List */}
                   {loadingEnrollments ? (
                     <div className="space-y-2">
@@ -4089,36 +4165,39 @@ export default function MascheraInputGenerale() {
             </div>
 
             {/* PROVE A PAGAMENTO */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <CreditCard className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/prove-pagamento" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-prove-pagamento">Prove a Pagamento</Link>
-                <KnowledgeInfo id="prove-a-pagamento" />
-                <SectionBadge count={memberPtEnrollments?.length || 0} />
+            <div className="opacity-75 grayscale-[20%]">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-muted/30 px-2 py-1 rounded flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground line-through decoration-muted-foreground/50">Prove a Pagamento</span>
+                </div>
+                <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
               </h3>
-              {renderGenericEnrollmentList(memberPtEnrollments, paidTrials, removePtEnrollmentMutation, "Nessuna prova a pagamento registrata.", "Prove a Pagamento Registrate", "le prove a pagamento", "paidTrialId")}
+              {renderGenericEnrollmentList(memberPtEnrollments, paidTrials, removePtEnrollmentMutation, "Nessuna prova a pagamento registrata.", "Storico Prove a Pagamento", "le prove a pagamento", "paidTrialId")}
             </div>
 
             {/* PROVE GRATUITE */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Gift className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/prove-gratuite" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-prove-gratuite">Prove Gratuite</Link>
-                <KnowledgeInfo id="prove-gratuite" />
-                <SectionBadge count={memberFtEnrollments?.length || 0} />
+            <div className="opacity-75 grayscale-[20%]">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-muted/30 px-2 py-1 rounded flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground line-through decoration-muted-foreground/50">Prove Gratuite</span>
+                </div>
+                <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
               </h3>
-              {renderGenericEnrollmentList(memberFtEnrollments, freeTrials, removeFtEnrollmentMutation, "Nessuna prova gratuita registrata.", "Prove Gratuite Registrate", "le prove gratuite", "freeTrialId")}
+              {renderGenericEnrollmentList(memberFtEnrollments, freeTrials, removeFtEnrollmentMutation, "Nessuna prova gratuita registrata.", "Storico Prove Gratuite", "le prove gratuite", "freeTrialId")}
             </div>
 
             {/* LEZIONI SINGOLE */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <BookOpen className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/lezioni-singole" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-lezioni-singole">Lezioni Singole</Link>
-                <KnowledgeInfo id="lezioni-singole" />
-                <SectionBadge count={memberSlEnrollments?.length || 0} />
+            <div className="opacity-75 grayscale-[20%]">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-muted/30 px-2 py-1 rounded flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground line-through decoration-muted-foreground/50">Lezioni Singole</span>
+                </div>
+                <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
               </h3>
-              {renderGenericEnrollmentList(memberSlEnrollments, singleLessons, removeSlEnrollmentMutation, "Nessuna lezione singola registrata.", "Lezioni Singole Registrate", "le lezioni singole", "singleLessonId")}
+              {renderGenericEnrollmentList(memberSlEnrollments, singleLessons, removeSlEnrollmentMutation, "Nessuna lezione singola registrata.", "Storico Lezioni Singole", "le lezioni singole", "singleLessonId")}
             </div>
 
             {/* WORKSHOP */}

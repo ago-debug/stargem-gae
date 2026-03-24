@@ -92,6 +92,9 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
 
   const createMutation = useMutation({
     mutationFn: async ({ name, color }: { name: string; color: string }) => {
+      if (statuses?.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
+        throw new Error("Questo stato esiste già.");
+      }
       const maxOrder = statuses?.reduce((max, s) => Math.max(max, s.sortOrder || 0), 0) || 0;
       await apiRequest("POST", "/api/activity-statuses", { name, color: color || null, sortOrder: maxOrder + 1, active: true });
     },
@@ -108,6 +111,9 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, name, color }: { id: number; name: string; color: string }) => {
+      if (statuses?.some((s) => s.id !== id && s.name.toLowerCase() === name.toLowerCase())) {
+        throw new Error("Questo stato esiste già.");
+      }
       await apiRequest("PATCH", `/api/activity-statuses/${id}`, { name, color: color || null });
     },
     onSuccess: () => {

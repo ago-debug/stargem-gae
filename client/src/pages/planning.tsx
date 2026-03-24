@@ -9,10 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getEventColorClass } from "@/lib/activity-colors";
+import { isItalianHoliday } from "@/lib/date-helpers";
+
+import { mapActivityToPlanningEvent, mapBookingServiceToPlanningEvent } from "@/lib/event-mappers";
 
 interface PlanningEvent {
     id: string;
-    type: 'course_aggregate' | 'workshop' | 'sunday' | 'campus' | 'recital' | 'vacation' | 'external';
+    type: string;
     title: string;
     startDate: Date;
     endDate?: Date;
@@ -78,100 +82,12 @@ export default function Planning() {
     const events = useMemo(() => {
         const evts: PlanningEvent[] = [];
 
-        // Add workshops
-        if (workshops) {
-            workshops.forEach(w => {
-                if (w.active !== false && w.startDate) {
-                    evts.push({
-                        id: `ws_${w.id}`,
-                        type: 'workshop',
-                        title: w.name,
-                        startDate: new Date(w.startDate),
-                        endDate: w.endDate ? new Date(w.endDate) : undefined,
-                        colorClass: "bg-indigo-100 text-indigo-800 border-indigo-300"
-                    });
-                }
-            });
-        }
-
-        // Add sunday activities
-        if (sundayActivities) {
-            sundayActivities.forEach(s => {
-                if (s.active !== false && s.startDate) {
-                    evts.push({
-                        id: `sun_${s.id}`,
-                        type: 'sunday',
-                        title: s.name || "Domenica in mov.",
-                        startDate: new Date(s.startDate),
-                        endDate: s.endDate ? new Date(s.endDate) : undefined,
-                        colorClass: "bg-amber-100 text-amber-800 border-amber-300"
-                    });
-                }
-            });
-        }
-
-        // Add campus
-        if (campusActivities) {
-            campusActivities.forEach(c => {
-                if (c.active !== false && c.startDate) {
-                    evts.push({
-                        id: `cam_${c.id}`,
-                        type: 'campus',
-                        title: c.name || "Campus",
-                        startDate: new Date(c.startDate),
-                        endDate: c.endDate ? new Date(c.endDate) : undefined,
-                        colorClass: "bg-teal-100 text-teal-800 border-teal-300"
-                    });
-                }
-            });
-        }
-
-        // Add recitals
-        if (recitals) {
-            recitals.forEach(r => {
-                if (r.active !== false && r.startDate) {
-                    evts.push({
-                        id: `rec_${r.id}`,
-                        type: 'recital',
-                        title: r.name || "Saggio",
-                        startDate: new Date(r.startDate),
-                        endDate: r.endDate ? new Date(r.endDate) : undefined,
-                        colorClass: "bg-rose-100 text-rose-800 border-rose-300"
-                    });
-                }
-            });
-        }
-
-        // Add vacations / closures (Festività prolungate)
-        if (vacationStudies) {
-            vacationStudies.forEach(v => {
-                if (v.active !== false && v.startDate) {
-                    evts.push({
-                        id: `vac_${v.id}`,
-                        type: 'vacation',
-                        title: v.name || "Chiusura/Vacanza",
-                        startDate: new Date(v.startDate),
-                        endDate: v.endDate ? new Date(v.endDate) : undefined,
-                        colorClass: "bg-orange-100 text-orange-800 border-orange-300 font-medium"
-                    });
-                }
-            });
-        }
-
-        // Add external events
-        if (bookingServices) {
-            bookingServices.forEach(e => {
-                if (e.active !== false && e.serviceDate) {
-                    evts.push({
-                        id: `ext_${e.id}`,
-                        type: 'external',
-                        title: e.name || "Evento Esterno",
-                        startDate: new Date(e.serviceDate),
-                        colorClass: "bg-slate-200 text-slate-800 border-slate-300"
-                    });
-                }
-            });
-        }
+        if (workshops) evts.push(...workshops.map(w => mapActivityToPlanningEvent(w, "ws", "Workshop", "workshop")).filter(Boolean) as PlanningEvent[]);
+        if (sundayActivities) evts.push(...sundayActivities.map(s => mapActivityToPlanningEvent(s, "sun", "Domenica in mov.", "domeniche-movimento")).filter(Boolean) as PlanningEvent[]);
+        if (campusActivities) evts.push(...campusActivities.map(c => mapActivityToPlanningEvent(c, "cam", "Campus", "campus")).filter(Boolean) as PlanningEvent[]);
+        if (recitals) evts.push(...recitals.map(r => mapActivityToPlanningEvent(r, "rec", "Saggio", "saggi")).filter(Boolean) as PlanningEvent[]);
+        if (vacationStudies) evts.push(...vacationStudies.map(v => mapActivityToPlanningEvent(v, "vac", "Chiusura/Vacanza", "vacanze-studio")).filter(Boolean) as PlanningEvent[]);
+        if (bookingServices) evts.push(...bookingServices.map(b => mapBookingServiceToPlanningEvent(b)).filter(Boolean) as PlanningEvent[]);
 
         return evts;
     }, [workshops, sundayActivities, campusActivities, recitals, vacationStudies, bookingServices]);
@@ -180,21 +96,7 @@ export default function Planning() {
     // 31 days rows, 12 months columns
     const daysArray = Array.from({ length: 31 }, (_, i) => i + 1);
 
-    const isItalianHoliday = (date: Date) => {
-        const d = date.getDate();
-        const m = date.getMonth();
-        if (m === 0 && d === 1) return "Capodanno";
-        if (m === 0 && d === 6) return "Epifania";
-        if (m === 3 && d === 25) return "Liberazione";
-        if (m === 4 && d === 1) return "Festa del Lavoro";
-        if (m === 5 && d === 2) return "Festa della Repubblica";
-        if (m === 7 && d === 15) return "Ferragosto";
-        if (m === 10 && d === 1) return "Tutti i Santi";
-        if (m === 11 && d === 8) return "Immacolata";
-        if (m === 11 && d === 25) return "Natale";
-        if (m === 11 && d === 26) return "Santo Stefano";
-        return null;
-    };
+
 
     const getEventsForDay = (day: number, realMonthIndex: number, cellYear: number) => {
         // Date checking to avoid non-existent days like Feb 30

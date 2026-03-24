@@ -16,12 +16,12 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 ---
 
 ## 2. Anagrafica / Maschera Input
-**Stato Attuale:** 🟢 CHIUSO
-**Sintesi:** La "Maschera Input" è stabilmente concepita come l'unica e formale Dashboard utente (la scheda partecipante autentica a 360°), consolidando ogni operazione di back-office.
-* **Cosa è già stato fatto:** Ricablati tutti i path per far atterrare l'utenza su `/maschera-input?memberId=X` partendo da griglie e elenchi (`members.tsx`). Tutte le appendici come iscritti, allegati, marketing e pagamenti giacciono ordinate in sezioni chiudibili/visibili full-width. **Completata la rimozione the fallback testuali (es: Livelli CRM e Canali di acquisizione), interamente sostituiti da `<Combobox>` alimentate nativamente dagli Elenchi server, dotate di funzione Quick-Add.**
-* **Cosa manca:** Rifiniture minori future per documentazione fiscale PDF.
-* **Rischi / Attenzioni:** Form React di dimensioni colossali che ingloba molte `mutations` concomitanti. Bisogna vigilare sui form state e sui re-render indesiderati al salvataggio.
-* **Prossimo Step Consigliato:** Nessuno strategico. L'UX è aderente alle aspettative. Non toccare.
+**Stato Attuale:** 🟢 CHIUSO (Area V1) / 🟡 AUDIT ESEGUITO (Per V2)
+**Sintesi:** La "Maschera Input" è stabilmente concepita come l'unica e formale Dashboard utente. 
+* **Cosa è già stato fatto:** Eseguito un profondo **Audit Tecnico** del file `maschera-input-generale.tsx` (4300 righe). Identificata la rotta di refactoring per spezzare in componenti asincroni Allegati, Contabilità, e UI "Prove/Lezioni". Sostituiti tutti i legacy fallback text con Combobox (`useCustomList`).
+* **Cosa manca:** Attuazione dello spacchettamento React in V2. Smantellamento visivo dei tabs "Prove Gratuite/Lezioni Singole" a favore di un unico Enrollment picker.
+* **Rischi / Attenzioni:** File colossale e letale se si altera l'ordine di chiamata dei vari hook `useQuery` o le rules. **Non toccato nel codice di runtime corrente**.
+* **Prossimo Step Consigliato:** Nessuno strategico immediato. Prima consolidare il core backend per l'appoggio dei pagamenti.
 
 ---
 
@@ -56,12 +56,12 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 ---
 
 ## 6. Attività / modali / silos
-**Stato Attuale:** 🟡 IN CORSO
-**Sintesi:** Area legata intimamente al Refactor delle dropdown (Comuni/Province risolti, Categorie implementate). Consiste nel disaccoppiare logiche incrociate o nomi vecchi.
-* **Cosa è già stato fatto:** Standardizzate Nomi/Etichette a UI abolendo il legacy "Corsivo". Definito che "Genere" risiede in combobox autocomplete. Categorie Custom Lists unificate. Divorse Affitti Studos da Eventi Esterni Booking in endpoints paralleli e puliti.
-* **Cosa manca:** Task in Tabella Master (Blocco 5) prettamente rivolti agli step di normalizzazione campi Livello (Base, Medio, Avanzato). 
-* **Rischi / Attenzioni:** L'ostentazione al refactor massiccio di Silos V1 per ricavare la Single Table Inheritance (STI) è severamente Bandita.
-* **Prossimo Step Consigliato:** Finalizzare Binding del sub-modale restanti dalla mappatura audit e colpire solo difetti chiari di naming per coerenza listini.
+**Stato Attuale:** 🟢 CHIUSO (Per la V1)
+**Sintesi:** Disaccoppiate le logiche incrociate nei modali base (es. Modale Corsi).
+* **Cosa è già stato fatto:** Chiuso il ciclo di Cleanup (Livello 1-3). Il Modale dei corsi è solido. Genere, Livelli, Fasce Età ed Elenchi sono mappati perfettamente alle `Custom Lists` con precaricamento dinamico, order sorting e prevenzione inserimento duplicati a frontend. Il binding per `livello` (vs livello crm) è cristallizzato.
+* **Cosa manca:** Nulla di stringente per la V1. I dati sono protetti da fallback omofoni.
+* **Rischi / Attenzioni:** Tassativo non avviare SQL Rewrite (Migrazione V2) d'iniziativa.
+* **Prossimo Step Consigliato:** Lasciare la UI in produzione per test Segreteria.
 
 ---
 
@@ -86,9 +86,12 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 ---
 
 ## 9. Architettura generale / stato progetto
-**Stato Attuale:** 🔵 CONGELATO (Al layer esistente V1)
+**Stato Attuale:** 🟢 AVANZATO (Al layer esistente V1) / 🟡 ESEGUITA FASE 1 e 2 PARTECIPAZIONI + PULIZIA UI LEGACY (Fase 8)
 **Sintesi:** La visione futura SOA/Single Table Inheritance e unificazione globale DB V2 (`activities`, `global_enrollments`).
-* **Cosa è già stato fatto:** Mockups relazionali redatti. V2 migrations proiettate su carta e modellate. Riadattamento di interfacce intermedie come Hub Calendario e Maschera Input per imitarne da vicino l'integrazione frontend V2, camuffando la persistenza V1 isolata backend.
-* **Cosa manca:** Fermati. Il Refactor distruttivo su 14 Silos distrugge l'orizzonte di Rilascio Prodotto (Time-To-Market short).
-* **Rischi / Attenzioni:** Creare entità chimera che tentano di scrivere via `fetch()` su API miste provocando buchi in database tra il core obsoleto ed il non finito.
-* **Prossimo Step Consigliato:** Supporto continuo ai vecchi silos con focus maniacale sulla UX dei cruscotti operatore e validazione della contabilità.
+* **Cosa è già stato fatto:** 
+  - Eseguita in modo chirurgico la **Fase 1 (Preparazione Non Distruttiva) delle Partecipazioni**, iniettando campi base in MYSQL (`participationType`, `targetDate`).
+  - Eseguita **Fase 2 (UI Corsi):** Inserito form unificato dentro la Maschera Input per le Prove/Lezioni Singole a discapito dei vecchi Tab.
+  - Eseguita **Fase 8 (Pulizia UI e Navigazione Legacy):** Sono state estirpate dal menu Attività, dalle Categorie e dalla vista Iscritti le vecchie entità (Prove a Pagamento, Prove Gratuite, Lezioni Singole) intervenendo da configurazione centrale; alleggerita la `/elenchi` dal box di interazione manuale e sistemata definitivamente la `404 Not Found`.
+* **Cosa manca:** Smobilizzo effettivo dei tavoli DB legacy (Cancellazione tabelle), adozione estesa dello strato API STI in produzione per la contabilità.
+* **Rischi / Attenzioni:** Non vi sono regressioni sui vecchi clienti (hanno i tab passati in sola lettura visiva nell'anagrafica, e route dead linkate alla 404 per evitare usi errati).
+* **Prossimo Step Consigliato:** Refactor contabile / Data-Pump migrazione vecchie partecipazioni se ritenuto necessario, o chiusura del cantiere Corsi.
