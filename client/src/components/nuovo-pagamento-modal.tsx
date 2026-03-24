@@ -324,13 +324,13 @@ export function NuovoPagamentoModal({
                         case 'corsi':
                         default:
                             if (row.participationType === 'FREE_TRIAL') {
-                                const payload = { ...basePayload, participationType: row.participationType, targetDate: row.targetDate, seasonId: row.periodId ? parseInt(row.periodId) : undefined, courseId: parsedId };
+                                const payload = { ...basePayload, participationType: row.participationType, targetDate: row.targetDate, courseId: parsedId };
                                 await apiRequest("POST", `/api/enrollments?skipPayment=true`, payload);
                             } else if (row.participationType === 'PAID_TRIAL' || row.participationType === 'SINGLE_LESSON') {
-                                const payload = { ...basePayload, participationType: row.participationType, targetDate: row.targetDate, seasonId: row.periodId ? parseInt(row.periodId) : undefined, courseId: parsedId };
+                                const payload = { ...basePayload, participationType: row.participationType, targetDate: row.targetDate, courseId: parsedId };
                                 await createEnrollmentAndPay("/api/enrollments", payload, "enrollmentId", row.participationType === 'SINGLE_LESSON' ? 'single_lesson' : 'paid_trial');
                             } else {
-                                const payload = { ...basePayload, participationType: "STANDARD_COURSE", seasonId: row.periodId ? parseInt(row.periodId) : undefined, courseId: parsedId };
+                                const payload = { ...basePayload, participationType: "STANDARD_COURSE", courseId: parsedId };
                                 await createEnrollmentAndPay("/api/enrollments", payload, "enrollmentId", "course");
                             }
                             break;

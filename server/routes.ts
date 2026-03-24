@@ -3091,6 +3091,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (typeof dataToValidate.targetDate === 'string') {
         dataToValidate.targetDate = new Date(dataToValidate.targetDate);
       }
+      
+      if (!dataToValidate.seasonId) {
+        const activeSeason = await storage.getActiveSeason();
+        if (activeSeason) {
+          dataToValidate.seasonId = activeSeason.id;
+        }
+      }
+
       const validatedData = insertEnrollmentSchema.parse(dataToValidate);
       const enrollment = await storage.createEnrollment(validatedData);
 
