@@ -1514,6 +1514,8 @@ export const enrollments = mysqlTable("enrollments", {
   id: int("id").primaryKey().autoincrement(),
   memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   courseId: int("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
+  participationType: varchar("participation_type", { length: 50 }).default("STANDARD_COURSE"), // 'STANDARD_COURSE', 'FREE_TRIAL', 'PAID_TRIAL', 'SINGLE_LESSON'
+  targetDate: date("target_date"), // Riferimento temporale specifico per lezioni singole e prove
   status: varchar("status", { length: 50 }).notNull().default("active"), // 'active', 'waitlist', 'completed', 'cancelled'
   enrollmentDate: timestamp("enrollment_date").defaultNow(),
   notes: text("notes"),

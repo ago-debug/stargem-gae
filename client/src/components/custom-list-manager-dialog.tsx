@@ -29,6 +29,9 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
 
   const createMutation = useMutation({
     mutationFn: async (value: string) => {
+      if (items?.some((i: any) => i.value.toLowerCase() === value.toLowerCase())) {
+        throw new Error("Questa voce esiste già nel dizionario.");
+      }
       if (!listId) throw new Error("Sorgente dizionario non accessibile (ListId)");
       const maxOrder = items?.reduce((max: number, s: any) => Math.max(max, s.sortOrder || 0), 0) || 0;
       await apiRequest("POST", `/api/custom-lists/${listId}/items`, { value, sortOrder: maxOrder + 1, active: true });
@@ -43,6 +46,9 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, value }: { id: number; value: string }) => {
+      if (items?.some((i: any) => i.id !== id && i.value.toLowerCase() === value.toLowerCase())) {
+        throw new Error("Questa voce esiste già nel dizionario.");
+      }
       if (!listId) throw new Error("Sorgente dizionario non accessibile");
       await apiRequest("PATCH", `/api/custom-lists/${listId}/items/${id}`, { value });
     },

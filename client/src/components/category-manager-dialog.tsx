@@ -24,6 +24,9 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
 
   const createMutation = useMutation({
     mutationFn: async (name: string) => {
+      if (items?.some((i: any) => i.name.toLowerCase() === name.toLowerCase())) {
+        throw new Error("Questa categoria esiste già.");
+      }
       const maxOrder = items?.reduce((max, s) => Math.max(max, s.sortOrder || 0), 0) || 0;
       await apiRequest("POST", `/api/categories`, { name, description: "", active: true, sortOrder: maxOrder + 1 });
     },
@@ -37,6 +40,9 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, name }: { id: number; name: string }) => {
+      if (items?.some((i: any) => i.id !== id && i.name.toLowerCase() === name.toLowerCase())) {
+        throw new Error("Questa categoria esiste già.");
+      }
       await apiRequest("PATCH", `/api/categories/${id}`, { name });
     },
     onSuccess: () => {

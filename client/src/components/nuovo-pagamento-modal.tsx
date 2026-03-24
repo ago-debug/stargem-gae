@@ -69,7 +69,7 @@ export function NuovoPagamentoModal({
     }, [selectedMemberId, selectedMember]);
 
     // === STATO CARRELLO (GRIGLIA) ===
-    const [cartRows, setCartRows] = useState<any[]>([{ id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
+    const [cartRows, setCartRows] = useState<any[]>([{ id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, participationType: "STANDARD_COURSE", targetDate: "", discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
     const [includeTessera, setIncludeTessera] = useState(false);
     const [includeProva, setIncludeProva] = useState(false);
 
@@ -279,25 +279,25 @@ export function NuovoPagamentoModal({
                     };
 
                     switch (row.activityType) {
-                        case 'workshops':
+                        case 'workshop':
                             await createEnrollmentAndPay("/api/workshop-enrollments", { ...basePayload, workshopId: parsedId }, "workshopEnrollmentId", "workshop");
                             break;
-                        case 'paid-trials':
+                        case 'prove-pagamento':
                             await createEnrollmentAndPay("/api/paid-trial-enrollments", { ...basePayload, paidTrialId: parsedId }, "paidTrialEnrollmentId", "paid_trial");
                             break;
-                        case 'free-trials':
+                        case 'prove-gratuite':
                             await createEnrollmentAndPay("/api/free-trial-enrollments", { ...basePayload, freeTrialId: parsedId }, "freeTrialEnrollmentId", "free_trial");
                             break;
-                        case 'single-lessons':
+                        case 'lezioni-singole':
                             await createEnrollmentAndPay("/api/single-lesson-enrollments", { ...basePayload, singleLessonId: parsedId }, "singleLessonEnrollmentId", "single_lesson");
                             break;
-                        case 'domeniche':
+                        case 'domeniche-movimento':
                             await createEnrollmentAndPay("/api/sunday-activity-enrollments", { ...basePayload, sundayActivityId: parsedId }, "sundayActivityEnrollmentId", "sunday_activity");
                             break;
                         case 'allenamenti':
                             await createEnrollmentAndPay("/api/training-enrollments", { ...basePayload, trainingId: parsedId }, "trainingEnrollmentId", "training");
                             break;
-                        case 'individual-lessons':
+                        case 'lezioni-individuali':
                             await createEnrollmentAndPay("/api/individual-lesson-enrollments", { ...basePayload, individualLessonId: parsedId }, "individualLessonEnrollmentId", "individual_lesson");
                             break;
                         case 'campus':
@@ -309,7 +309,7 @@ export function NuovoPagamentoModal({
                         case 'vacanze-studio':
                             await createEnrollmentAndPay("/api/vacation-study-enrollments", { ...basePayload, vacationStudyId: parsedId }, "vacationStudyEnrollmentId", "vacation_study");
                             break;
-                        case 'studioBookings':
+                        case 'affitti':
                             await createEnrollmentAndPay("/api/studio-bookings", { ...basePayload, studioId: parsedId, bookingDate: new Date().toISOString(), startTime: "12:00", endTime: "13:00", amount: row.basePrice.toString() }, "bookingId", "service_booking");
                             break;
                         case 'servizi':
@@ -321,9 +321,18 @@ export function NuovoPagamentoModal({
                                 await apiRequest("POST", "/api/payments", paymentPayload);
                             }
                             break;
-                        case 'courses':
+                        case 'corsi':
                         default:
-                            await createEnrollmentAndPay("/api/enrollments", { ...basePayload, courseId: parsedId }, "enrollmentId", "course");
+                            if (row.participationType === 'FREE_TRIAL') {
+                                const payload = { ...basePayload, participationType: row.participationType, targetDate: row.targetDate, seasonId: row.periodId ? parseInt(row.periodId) : undefined, courseId: parsedId };
+                                await apiRequest("POST", `/api/enrollments?skipPayment=true`, payload);
+                            } else if (row.participationType === 'PAID_TRIAL' || row.participationType === 'SINGLE_LESSON') {
+                                const payload = { ...basePayload, participationType: row.participationType, targetDate: row.targetDate, seasonId: row.periodId ? parseInt(row.periodId) : undefined, courseId: parsedId };
+                                await createEnrollmentAndPay("/api/enrollments", payload, "enrollmentId", row.participationType === 'SINGLE_LESSON' ? 'single_lesson' : 'paid_trial');
+                            } else {
+                                const payload = { ...basePayload, participationType: "STANDARD_COURSE", seasonId: row.periodId ? parseInt(row.periodId) : undefined, courseId: parsedId };
+                                await createEnrollmentAndPay("/api/enrollments", payload, "enrollmentId", "course");
+                            }
                             break;
                     }
                 }
@@ -399,7 +408,7 @@ export function NuovoPagamentoModal({
         },
         onSuccess: () => {
             toast({ title: "Checkout completato", description: "Iscrizioni e pagamento salvati con successo. ✅" });
-            setCartRows([{ id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
+            setCartRows([{ id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, participationType: "STANDARD_COURSE", targetDate: "", discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
             setIncludeTessera(false);
             setIncludeProva(false);
             setPaymentNotes("");
@@ -426,13 +435,15 @@ export function NuovoPagamentoModal({
                 skus: [debt.id],
                 periodId: "N/A",
                 basePrice: debt.remaining,
+                participationType: "STANDARD_COURSE",
+                targetDate: "",
                 discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: debt.remaining,
                 paymentNotes: [], enrollmentDetails: [],
                 isDebt: true,
                 debtDescription: debt.description
             }]);
         } else {
-            setCartRows([...cartRows, { id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
+            setCartRows([...cartRows, { id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, participationType: "STANDARD_COURSE", targetDate: "", discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
         }
     };
 
@@ -537,7 +548,7 @@ export function NuovoPagamentoModal({
                                                                     setSelectedMember(null);
                                                                     setMemberSearchQuery("");
                                                                     setMemberSearchOpen(false);
-                                                                    setCartRows([{ id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
+                                                                    setCartRows([{ id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, participationType: "STANDARD_COURSE", targetDate: "", discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
                                                                     setIncludeTessera(false);
                                                                     setIncludeProva(false);
                                                                     setPaymentMethod("contanti");
@@ -882,26 +893,35 @@ function CartTableRow({
             const entityId = parseInt(row.skus[0]);
             let entityType = "course";
             switch (row.activityType) {
-                case "courses": entityType = "course"; break;
-                case "workshops": entityType = "workshop"; break;
-                case "paid-trials": entityType = "paid_trial"; break;
-                case "free-trials": entityType = "free_trial"; break;
-                case "single-lessons": entityType = "single_lesson"; break;
-                case "domeniche": entityType = "sunday_activity"; break;
+                case "corsi": 
+                    if (row.participationType === 'SINGLE_LESSON') entityType = "single_lesson";
+                    else if (row.participationType === 'PAID_TRIAL') entityType = "paid_trial";
+                    else entityType = "course";
+                    break;
+                case "workshop": entityType = "workshop"; break;
+                case "prove-pagamento": entityType = "paid_trial"; break;
+                case "prove-gratuite": entityType = "free_trial"; break;
+                case "lezioni-singole": entityType = "single_lesson"; break;
+                case "domeniche-movimento": entityType = "sunday_activity"; break;
                 case "allenamenti": entityType = "training"; break;
-                case "individual-lessons": entityType = "individual_lesson"; break;
+                case "lezioni-individuali": entityType = "individual_lesson"; break;
                 case "campus": entityType = "campus_activity"; break;
                 case "saggi": entityType = "recital"; break;
                 case "vacanze-studio": entityType = "vacation_study"; break;
-                case "studioBookings": entityType = "booking_service"; break; // Sale mapping old system
+                case "affitti": entityType = "booking_service"; break; // Sale mapping old system
                 case "servizi": entityType = "booking_service"; break; // Eventi esterni
             }
 
             const item = listinoItems.find(i => i.entityType === entityType && i.entityId === entityId);
 
-            const currentCombo = `${row.periodId}-${row.activityType}-${entityId}`;
+            const currentCombo = `${row.periodId}-${row.activityType}-${entityId}-${row.participationType || 'STANDARD_COURSE'}`;
 
-            if (item && lastAutoPricedCombo !== currentCombo) {
+            if (row.activityType === "corsi" && row.participationType === 'FREE_TRIAL') {
+                 if (lastAutoPricedCombo !== currentCombo) {
+                     updateRow(row.id, 'basePrice', 0);
+                     setLastAutoPricedCombo(currentCombo);
+                 }
+            } else if (item && lastAutoPricedCombo !== currentCombo) {
                 let finalPrice = parseFloat((item.price as string) || "0");
                 if (item.quoteId && quotes.length) {
                     const q = quotes.find(qt => qt.id === item.quoteId);
@@ -911,25 +931,35 @@ function CartTableRow({
                     updateRow(row.id, 'basePrice', finalPrice);
                     setLastAutoPricedCombo(currentCombo);
                 }
+            } else if (!item && row.activityType === "corsi" && lastAutoPricedCombo !== currentCombo) {
+                // FALLBACK: If not found in price list, try fallback to master DB course price
+                const courseMaster = courses.find(c => c.id === entityId);
+                if (courseMaster && courseMaster.price !== null) {
+                     let finalPrice = parseFloat(courseMaster.price as string);
+                     if (!isNaN(finalPrice)) {
+                         updateRow(row.id, 'basePrice', finalPrice);
+                         setLastAutoPricedCombo(currentCombo);
+                     }
+                }
             }
         }
-    }, [row.skus, row.periodId, listinoItems, row.activityType, quotes.length, row.id, lastAutoPricedCombo]);
+    }, [row.skus, row.periodId, listinoItems, row.activityType, row.participationType, courses, quotes.length, row.id, lastAutoPricedCombo]);
 
     const currentCatalog = useMemo(() => {
         let catalog: any[] = [];
         switch (row.activityType) {
-            case "courses": catalog = courses || []; break;
-            case "workshops": catalog = workshops || []; break;
-            case "paid-trials": catalog = paidTrials || []; break;
-            case "free-trials": catalog = freeTrials || []; break;
-            case "single-lessons": catalog = singleLessons || []; break;
-            case "domeniche": catalog = sundayActivities || []; break;
+            case "corsi": catalog = courses || []; break;
+            case "workshop": catalog = workshops || []; break;
+            case "prove-pagamento": catalog = paidTrials || []; break;
+            case "prove-gratuite": catalog = freeTrials || []; break;
+            case "lezioni-singole": catalog = singleLessons || []; break;
+            case "domeniche-movimento": catalog = sundayActivities || []; break;
             case "allenamenti": catalog = trainings || []; break;
-            case "individual-lessons": catalog = individualLessons || []; break;
+            case "lezioni-individuali": catalog = individualLessons || []; break;
             case "campus": catalog = campusActivities || []; break;
             case "saggi": catalog = recitals || []; break;
             case "vacanze-studio": catalog = vacationStudies || []; break;
-            case "studioBookings": catalog = studios || []; break; // "Affitti" maps to the rooms catalog
+            case "affitti": catalog = studios || []; break; // "Affitti" maps to the rooms catalog
             case "servizi": catalog = bookingServices || []; break; // "Eventi Esterni" maps to specific external services
             case "merchandising": catalog = []; break; // Placeholder manuale 
             default: catalog = courses || []; break;
@@ -1062,6 +1092,41 @@ function CartTableRow({
                         />
                     </div>
                 </div>
+
+                {row.activityType === 'corsi' && (
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4 mb-4 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
+                        <div className="space-y-1">
+                            <Label className="text-xs text-blue-800 truncate font-bold">Modalità Partecipazione</Label>
+                            <Select value={row.participationType || "STANDARD_COURSE"} onValueChange={(val) => {
+                                updateRowBatch(row.id, { 
+                                    participationType: val,
+                                    basePrice: val === 'FREE_TRIAL' ? 0 : row.basePrice 
+                                });
+                            }}>
+                                <SelectTrigger className="h-9 bg-white border-blue-200">
+                                    <SelectValue placeholder="Standard" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="STANDARD_COURSE">Iscrizione Standard</SelectItem>
+                                    <SelectItem value="FREE_TRIAL">Prova Gratuita</SelectItem>
+                                    <SelectItem value="PAID_TRIAL">Prova a Pagamento</SelectItem>
+                                    <SelectItem value="SINGLE_LESSON">Lezione Singola</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {['FREE_TRIAL', 'PAID_TRIAL', 'SINGLE_LESSON'].includes(row.participationType) && (
+                            <div className="space-y-1">
+                                <Label className="text-xs text-blue-800 truncate font-bold">Data Lezione/Prova *</Label>
+                                <Input
+                                    type="date"
+                                    className="h-9 bg-white border-blue-200"
+                                    value={row.targetDate || ""}
+                                    onChange={(e) => updateRow(row.id, 'targetDate', e.target.value)}
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 xl:grid-cols-6 gap-4">
                     <div className="space-y-1">

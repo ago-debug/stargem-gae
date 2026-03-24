@@ -1,0 +1,1694 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+12:10:58 AM [express] serving on port 5001
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+12:13:57 AM [express] GET /api/user 401 in 1ms
+12:13:57 AM [express] POST /api/login 200 in 128ms :: {"id":"admin-id","username":"admin","password":…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:13:57 AM [express] GET /api/latest-activity 200 in 88ms :: {"id":782,"userId":"admin-id","action":…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:13:57 AM [express] GET /api/team-notes 304 in 265ms :: []
+12:13:57 AM [express] GET /api/team-comments 304 in 268ms :: [{"id":10,"authorId":"admin-id","authorN…
+12:13:57 AM [express] GET /api/todos 304 in 273ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+12:13:57 AM [express] GET /api/activities-summary 200 in 378ms :: {"workshop":{"total":6,"active":6},…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:07 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:14:07 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:14:10 AM [express] GET /api/user 401 in 1ms
+12:14:10 AM [express] POST /api/login 200 in 118ms :: {"id":"admin-id","username":"admin","password":…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:10 AM [express] GET /api/todos 304 in 81ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+12:14:10 AM [express] GET /api/team-comments 304 in 117ms :: [{"id":10,"authorId":"admin-id","authorN…
+12:14:10 AM [express] GET /api/latest-activity 200 in 119ms :: {"id":783,"userId":"admin-id","action"…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+12:14:10 AM [express] GET /api/team-notes 304 in 120ms :: []
+[AUTH DEBUG] Deserializing user admin-id
+12:14:10 AM [express] GET /api/activities-summary 200 in 147ms :: {"servizi":{"total":3,"active":3},"…
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:11 AM [express] GET /api/stats/alerts 304 in 365ms :: {"expiringMemberships":10,"expiredCertifi…
+12:14:11 AM [express] GET /api/stats/recent-activity 304 in 430ms :: [{"memberName":"ELISA ARRIVABENE…
+12:14:11 AM [express] GET /api/stats/dashboard 304 in 564ms :: {"totalMembers":9497,"activeMembership…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:17 AM [express] GET /api/team-comments 304 in 97ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:14:17 AM [express] GET /api/todos 304 in 92ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+12:14:20 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:20 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:27 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:14:27 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+12:14:31 AM [express] GET /api/todos 304 in 83ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:31 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:38 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:14:38 AM [express] GET /api/todos 304 in 92ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:41 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:14:41 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:48 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:14:48 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:51 AM [express] GET /api/todos 304 in 92ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:14:51 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:14:58 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:14:58 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:01 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:15:01 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:08 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:15:08 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:11 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:15:11 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:18 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:15:18 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:21 AM [express] GET /api/team-comments 304 in 86ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:15:21 AM [express] GET /api/todos 304 in 99ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:28 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:15:28 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:31 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:15:31 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:38 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:15:38 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:41 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:15:41 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:48 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:15:48 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:51 AM [express] GET /api/todos 304 in 83ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:15:51 AM [express] GET /api/team-comments 304 in 87ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:15:58 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:15:58 AM [express] GET /api/todos 304 in 93ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:01 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:16:01 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:08 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:16:08 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:11 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:16:11 AM [express] GET /api/team-comments 304 in 87ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:19 AM [express] GET /api/team-comments 304 in 101ms :: [{"id":10,"authorId":"admin-id","authorN…
+12:16:19 AM [express] GET /api/todos 304 in 101ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:22 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:16:22 AM [express] GET /api/team-comments 304 in 87ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:29 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:16:29 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:32 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:16:32 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:39 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:16:39 AM [express] GET /api/todos 304 in 92ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:42 AM [express] GET /api/team-comments 304 in 99ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:16:42 AM [express] GET /api/todos 304 in 101ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:49 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:16:49 AM [express] GET /api/team-comments 304 in 96ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:52 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:16:52 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:16:59 AM [express] GET /api/team-comments 304 in 96ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:16:59 AM [express] GET /api/todos 304 in 98ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:02 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:17:02 AM [express] GET /api/todos 304 in 96ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:09 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:17:09 AM [express] GET /api/team-comments 304 in 87ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:12 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:17:12 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:19 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:17:19 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:22 AM [express] GET /api/team-comments 304 in 87ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:17:22 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:29 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:17:29 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:32 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:17:32 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:39 AM [express] GET /api/todos 304 in 93ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:17:39 AM [express] GET /api/team-comments 304 in 94ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:42 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:17:42 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:49 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:17:49 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:52 AM [express] GET /api/team-comments 304 in 94ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:17:52 AM [express] GET /api/todos 304 in 97ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:17:59 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:17:59 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:03 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:18:03 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:10 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:18:10 AM [express] GET /api/team-comments 304 in 92ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:13 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:18:13 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:20 AM [express] GET /api/todos 304 in 93ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:18:20 AM [express] GET /api/team-comments 304 in 96ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:23 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:18:23 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:30 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:18:30 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:33 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:18:33 AM [express] GET /api/todos 304 in 92ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:40 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:18:40 AM [express] GET /api/team-comments 304 in 86ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:43 AM [express] GET /api/team-comments 304 in 97ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:18:43 AM [express] GET /api/todos 304 in 97ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:50 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:18:50 AM [express] GET /api/team-comments 304 in 86ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:18:53 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:18:53 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:00 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:19:00 AM [express] GET /api/todos 304 in 93ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:03 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:19:03 AM [express] GET /api/team-comments 304 in 93ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:10 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:19:10 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:13 AM [express] GET /api/team-comments 304 in 94ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:19:13 AM [express] GET /api/todos 304 in 97ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:20 AM [express] GET /api/team-comments 304 in 87ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:19:20 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:23 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:19:23 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:30 AM [express] GET /api/team-comments 304 in 86ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:19:30 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:33 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:19:33 AM [express] GET /api/team-comments 304 in 87ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:40 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:19:40 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:43 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:19:43 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:50 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:19:50 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:19:54 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:19:54 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:01 AM [express] GET /api/todos 304 in 96ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:20:01 AM [express] GET /api/team-comments 304 in 96ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:04 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:20:04 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:11 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:20:11 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:14 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:20:14 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:21 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:20:21 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:24 AM [express] GET /api/todos 304 in 83ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:20:24 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:31 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:20:31 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:34 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:20:34 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:41 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:20:41 AM [express] GET /api/team-comments 304 in 86ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:44 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:20:44 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:51 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:20:51 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:20:54 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:20:54 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:01 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:21:01 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:04 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:21:04 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:11 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:21:11 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:14 AM [express] GET /api/todos 304 in 96ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:21:14 AM [express] GET /api/team-comments 304 in 100ms :: [{"id":10,"authorId":"admin-id","authorN…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:21 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:21:21 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:24 AM [express] GET /api/team-comments 304 in 92ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:21:24 AM [express] GET /api/todos 304 in 95ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:31 AM [express] GET /api/team-comments 304 in 92ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:21:31 AM [express] GET /api/todos 304 in 96ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:34 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:21:34 AM [express] GET /api/team-comments 304 in 92ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:42 AM [express] GET /api/team-comments 304 in 93ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:21:42 AM [express] GET /api/todos 304 in 95ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:45 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:21:45 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:52 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:21:52 AM [express] GET /api/team-comments 304 in 92ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:21:55 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:21:55 AM [express] GET /api/todos 304 in 92ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:02 AM [express] GET /api/team-comments 304 in 87ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:22:02 AM [express] GET /api/todos 304 in 92ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:05 AM [express] GET /api/todos 304 in 92ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:22:05 AM [express] GET /api/team-comments 304 in 95ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:12 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:22:12 AM [express] GET /api/team-comments 304 in 95ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:15 AM [express] GET /api/team-comments 304 in 93ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:22:15 AM [express] GET /api/todos 304 in 95ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:22 AM [express] GET /api/team-comments 304 in 99ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:22:22 AM [express] GET /api/todos 304 in 101ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:25 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:22:25 AM [express] GET /api/todos 304 in 82ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:32 AM [express] GET /api/team-comments 304 in 95ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:22:32 AM [express] GET /api/todos 304 in 96ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:35 AM [express] GET /api/todos 304 in 88ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:22:35 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:42 AM [express] GET /api/todos 304 in 95ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:22:42 AM [express] GET /api/team-comments 304 in 96ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:45 AM [express] GET /api/team-comments 304 in 95ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:22:45 AM [express] GET /api/todos 304 in 97ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:52 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:22:52 AM [express] GET /api/todos 304 in 94ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:22:55 AM [express] GET /api/todos 304 in 95ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:22:55 AM [express] GET /api/team-comments 304 in 99ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:02 AM [express] GET /api/todos 304 in 97ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:23:02 AM [express] GET /api/team-comments 304 in 99ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:05 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:23:05 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:12 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:23:12 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:15 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:23:15 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:23 AM [express] GET /api/team-comments 304 in 108ms :: [{"id":10,"authorId":"admin-id","authorN…
+12:23:23 AM [express] GET /api/todos 304 in 110ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:26 AM [express] GET /api/todos 304 in 93ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:23:26 AM [express] GET /api/team-comments 304 in 96ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:33 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:23:33 AM [express] GET /api/team-comments 304 in 86ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:36 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:23:36 AM [express] GET /api/todos 304 in 93ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:43 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:23:43 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:46 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:23:46 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:53 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:23:53 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:23:56 AM [express] GET /api/team-comments 304 in 82ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:23:56 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:03 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:24:03 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:06 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:24:06 AM [express] GET /api/team-comments 304 in 86ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:13 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:24:13 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:16 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:24:16 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:23 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:24:23 AM [express] GET /api/todos 304 in 82ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:26 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:24:26 AM [express] GET /api/team-comments 304 in 87ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:33 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:24:33 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:36 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:24:36 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:43 AM [express] GET /api/todos 304 in 88ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:24:43 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:46 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:24:46 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:53 AM [express] GET /api/team-comments 304 in 107ms :: [{"id":10,"authorId":"admin-id","authorN…
+12:24:53 AM [express] GET /api/todos 304 in 109ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:24:56 AM [express] GET /api/todos 304 in 83ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:24:56 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:03 AM [express] GET /api/team-comments 304 in 93ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:25:03 AM [express] GET /api/todos 304 in 94ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:06 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:25:06 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:14 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:25:14 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:17 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:25:17 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:24 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:25:24 AM [express] GET /api/todos 304 in 88ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:27 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:25:27 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:34 AM [express] GET /api/todos 304 in 83ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:25:34 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:37 AM [express] GET /api/team-comments 304 in 92ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:25:37 AM [express] GET /api/todos 304 in 96ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:44 AM [express] GET /api/team-comments 304 in 93ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:25:44 AM [express] GET /api/todos 304 in 96ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:47 AM [express] GET /api/todos 304 in 88ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:25:47 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:54 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:25:54 AM [express] GET /api/team-comments 304 in 88ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:25:57 AM [express] GET /api/team-comments 304 in 95ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:25:57 AM [express] GET /api/todos 304 in 97ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:04 AM [express] GET /api/team-comments 304 in 83ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:04 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:07 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:07 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:14 AM [express] GET /api/team-comments 304 in 90ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:14 AM [express] GET /api/todos 304 in 89ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:17 AM [express] GET /api/todos 304 in 93ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:26:17 AM [express] GET /api/team-comments 304 in 96ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:24 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:26:24 AM [express] GET /api/team-comments 304 in 92ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:27 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:27 AM [express] GET /api/todos 304 in 90ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:34 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:34 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:37 AM [express] GET /api/team-comments 304 in 86ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:37 AM [express] GET /api/todos 304 in 87ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:44 AM [express] GET /api/team-comments 304 in 96ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:44 AM [express] GET /api/todos 304 in 95ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:47 AM [express] GET /api/team-comments 304 in 94ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:47 AM [express] GET /api/todos 304 in 95ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:54 AM [express] GET /api/team-comments 304 in 84ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:54 AM [express] GET /api/todos 304 in 84ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:26:58 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:26:58 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:27:05 AM [express] GET /api/team-comments 304 in 95ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:27:05 AM [express] GET /api/todos 304 in 95ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:27:08 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:27:08 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:27:15 AM [express] GET /api/team-comments 304 in 97ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:27:15 AM [express] GET /api/todos 304 in 98ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:27:18 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:27:18 AM [express] GET /api/todos 304 in 86ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:27:25 AM [express] GET /api/team-comments 304 in 89ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:27:25 AM [express] GET /api/todos 304 in 91ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:27:28 AM [express] GET /api/todos 304 in 96ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:27:28 AM [express] GET /api/team-comments 304 in 98ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:27:35 AM [express] GET /api/team-comments 304 in 85ms :: [{"id":10,"authorId":"admin-id","authorNa…
+12:27:35 AM [express] GET /api/todos 304 in 85ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+12:27:38 AM [express] GET /api/todos 304 in 83ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+12:27:38 AM [express] GET /api/team-comments 304 in 82ms :: [{"id":10,"authorId":"admin-id","authorNa…
