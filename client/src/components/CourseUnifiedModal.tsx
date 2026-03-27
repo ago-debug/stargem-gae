@@ -79,9 +79,10 @@ const getSafeDateStr = (dateVal: any) => {
 // ============================================
 
 interface EnrollmentsTabProps {
-  courseId: number;
+  activityId: number;
+  activityType: "course" | "workshop";
 }
-function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
+function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -90,19 +91,26 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
 
-  const { data: enrollments } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=corsi"] });
+  const enrollmentsQueryKey = activityType === "workshop" ? "/api/workshop-enrollments" : "/api/enrollments?type=corsi";
+  const parentQueryKey = activityType === "workshop" ? "/api/workshops" : "/api/courses";
+
+  const { data: enrollments } = useQuery<any[]>({ queryKey: [enrollmentsQueryKey] });
   const { data: searchResults } = useQuery<{ members: Member[] }>({
     queryKey: ["/api/search/members", memberSearchQuery],
     enabled: memberSearchQuery.length >= 3,
   });
 
   const createEnrollmentMutation = useMutation({
-    mutationFn: async (data: { memberId: number; courseId: number }) => {
-      await apiRequest("POST", "/api/enrollments", { memberId: data.memberId, courseId: data.courseId, status: 'active' });
+    mutationFn: async (data: { memberId: number; activityId: number }) => {
+      if (activityType === "workshop") {
+        await apiRequest("POST", "/api/workshop-enrollments", { memberId: data.memberId, workshopId: data.activityId, status: 'active', startDate: new Date().toISOString().split('T')[0] });
+      } else {
+        await apiRequest("POST", "/api/enrollments", { memberId: data.memberId, courseId: data.activityId, status: 'active' });
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: [enrollmentsQueryKey] });
+      queryClient.invalidateQueries({ queryKey: [parentQueryKey] });
       toast({ title: "Iscrizione aggiunta con successo" });
       setIsAddingEnrollment(false);
       setSelectedMemberId(null);
@@ -112,18 +120,19 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
 
   const deleteEnrollmentMutation = useMutation({
     mutationFn: async (enrollmentId: number) => {
-      await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`, undefined);
+      const endpoint = activityType === "workshop" ? `/api/workshop-enrollments/${enrollmentId}` : `/api/enrollments/${enrollmentId}`;
+      await apiRequest("DELETE", endpoint, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: [enrollmentsQueryKey] });
+      queryClient.invalidateQueries({ queryKey: [parentQueryKey] });
       toast({ title: "Iscrizione rimossa con successo" });
     },
     onError: (error: Error) => toast({ title: "Errore", description: error.message, variant: "destructive" }),
   });
 
   const courseEnrollments = enrollments
-    ?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status))
+    ?.filter(e => (activityType === "workshop" ? e.workshopId : e.courseId) === activityId && (e.status === 'active' || !e.status))
     .map(e => ({
       enrollmentId: e.id, memberId: e.memberId, firstName: e.memberFirstName || '', lastName: e.memberLastName || '', email: e.memberEmail || '',
     })) || [];
@@ -149,7 +158,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
                 {memberSearchQuery.length < 3 ? <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty> : !searchResults?.members?.length ? <CommandEmpty>Nessun membro trovato</CommandEmpty> : (
                   <CommandGroup>
                     {searchResults.members.filter(m => !courseEnrollments.some(e => e.memberId === m.id)).map(member => (
-                        <CommandItem key={member.id} value={member.id.toString()} onSelect={() => { setSelectedMemberId(member.id); createEnrollmentMutation.mutate({ memberId: member.id, courseId }); setMemberSearchQuery(""); }}>
+                        <CommandItem key={member.id} value={member.id.toString()} onSelect={() => { setSelectedMemberId(member.id); createEnrollmentMutation.mutate({ memberId: member.id, activityId }); setMemberSearchQuery(""); }}>
                           <div className="flex flex-col"><span className="font-medium">{member.lastName} {member.firstName}</span>{member.fiscalCode && <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>}</div>
                         </CommandItem>
                       ))}
@@ -160,7 +169,7 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
           </PopoverContent>
         </Popover>
       </div>
-      {courseEnrollments.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nessun membro iscritto a questo corso</p> : (
+      {courseEnrollments.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nessun membro iscritto a questa attività</p> : (
         <div className="border rounded-lg">
           <Table>
             <TableHeader>
@@ -196,9 +205,10 @@ function EnrollmentsTab({ courseId }: EnrollmentsTabProps) {
 }
 
 interface AttendancesTabProps {
-  courseId: number;
+  activityId: number;
+  activityType: "course" | "workshop";
 }
-function AttendancesTab({ courseId }: AttendancesTabProps) {
+function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -207,17 +217,24 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
 
-  const { data: attendances } = useQuery<Attendance[]>({ queryKey: ["/api/attendances"] });
+  const attendancesQueryKey = activityType === "workshop" ? "/api/workshop-attendances" : "/api/attendances";
+  const enrollmentsQueryKey = activityType === "workshop" ? "/api/workshop-enrollments" : "/api/enrollments?type=corsi";
+
+  const { data: attendances } = useQuery<Attendance[]>({ queryKey: [attendancesQueryKey] });
   const { data: membersData } = useQuery<{ members: Member[], total: number }>({ queryKey: ["/api/members"] });
   const members = membersData?.members || [];
-  const { data: enrollments } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=corsi"] });
+  const { data: enrollments } = useQuery<any[]>({ queryKey: [enrollmentsQueryKey] });
 
   const createAttendanceMutation = useMutation({
-    mutationFn: async (data: { memberId: number; courseId: number; attendanceDate: string }) => {
-      await apiRequest("POST", "/api/attendances", { memberId: data.memberId, courseId: data.courseId, attendanceDate: new Date(data.attendanceDate).toISOString(), type: 'manual' });
+    mutationFn: async (data: { memberId: number; activityId: number; attendanceDate: string }) => {
+      if (activityType === "workshop") {
+        await apiRequest("POST", "/api/workshop-attendances", { memberId: data.memberId, workshopId: data.activityId, attendanceDate: new Date(data.attendanceDate).toISOString(), type: 'manual' });
+      } else {
+        await apiRequest("POST", "/api/attendances", { memberId: data.memberId, courseId: data.activityId, attendanceDate: new Date(data.attendanceDate).toISOString(), type: 'manual' });
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/attendances"] });
+      queryClient.invalidateQueries({ queryKey: [attendancesQueryKey] });
       toast({ title: "Presenza registrata con successo" });
       setIsAddingAttendance(false);
       setSelectedMemberId(null);
@@ -228,21 +245,22 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
 
   const deleteAttendanceMutation = useMutation({
     mutationFn: async (attendanceId: number) => {
-      await apiRequest("DELETE", `/api/attendances/${attendanceId}`, undefined);
+      const endpoint = activityType === "workshop" ? `/api/workshop-attendances/${attendanceId}` : `/api/attendances/${attendanceId}`;
+      await apiRequest("DELETE", endpoint, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/attendances"] });
+      queryClient.invalidateQueries({ queryKey: [attendancesQueryKey] });
       toast({ title: "Successo", description: "Presenza eliminata" });
     },
     onError: (error: Error) => toast({ title: "Errore", description: error.message, variant: "destructive" }),
   });
 
-  const courseAttendances = attendances?.filter(a => a.courseId === courseId).map(a => {
+  const courseAttendances = attendances?.filter(a => (activityType === "workshop" ? (a as any).workshopId : a.courseId) === activityId).map(a => {
       const member = members?.find(m => m.id === a.memberId);
       return { ...a, memberName: member ? `${member.lastName} ${member.firstName}` : "Sconosciuto" };
     }).sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime()).slice(0, 50) || [];
 
-  const enrolledMembers = enrollments?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status)).map(e => members?.find(m => m.id === e.memberId)).filter((m): m is Member => m !== undefined) || [];
+  const enrolledMembers = enrollments?.filter(e => (activityType === "workshop" ? e.workshopId : e.courseId) === activityId && (e.status === 'active' || !e.status)).map(e => members?.find(m => m.id === e.memberId)).filter((m): m is Member => m !== undefined) || [];
 
   const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("attendanceDate");
   const getSortValue = (attendance: any, key: string) => {
@@ -275,12 +293,12 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddingAttendance(false)}>Annulla</Button>
-              <Button onClick={() => { if (!selectedMemberId) { toast({ title: "Errore", description: "Seleziona un membro", variant: "destructive" }); return; } createAttendanceMutation.mutate({ memberId: selectedMemberId, courseId, attendanceDate }); }} disabled={!selectedMemberId || createAttendanceMutation.isPending}>Registra</Button>
+              <Button onClick={() => { if (!selectedMemberId) { toast({ title: "Errore", description: "Seleziona un membro", variant: "destructive" }); return; } createAttendanceMutation.mutate({ memberId: selectedMemberId, activityId, attendanceDate }); }} disabled={!selectedMemberId || createAttendanceMutation.isPending}>Registra</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
-      {courseAttendances.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nessuna presenza registrata per questo corso</p> : (
+      {courseAttendances.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nessuna presenza registrata per questa attività</p> : (
         <div className="border rounded-lg">
           <Table>
             <TableHeader>
@@ -317,13 +335,14 @@ function AttendancesTab({ courseId }: AttendancesTabProps) {
 export interface CourseUnifiedModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  course: Course | null;
-  defaultValues?: Partial<InsertCourse>;
+  course: any | null;
+  defaultValues?: any;
   onSuccess?: () => void;
   onDelete?: (id: number) => void;
+  activityType?: "course" | "workshop";
 }
 
-export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, onSuccess, onDelete }: CourseUnifiedModalProps) {
+export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, onSuccess, onDelete, activityType = "course" }: CourseUnifiedModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -340,21 +359,24 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [isFasciaEtaModalOpen, setIsFasciaEtaModalOpen] = useState(false);
 
   // Dati da Liste e DB
-  const nomiCorsi = useCustomListValues("nomi_corsi");
+  const nameListType = activityType === "workshop" ? "genere" : "nomi_corsi";
+  const nomiCorsi = useCustomListValues(nameListType);
   const postiDisponibili = useCustomListValues("posti_disponibili");
   const livelli = useCustomListValues("livello");
   const fasceEta = useCustomListValues("fascia_eta");
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({ queryKey: ["/api/activity-statuses"] });
   const baseStati = ["ATTIVO", "IN PROGRAMMA", "COMPLETO", "ANNULLATO"];
   const finalStati = activityStatuses && activityStatuses.length > 0 ? [...activityStatuses].filter(s => s.active).sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})).map(s => s.name) : baseStati;
-  const { data: rawCategories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
+  
+  const categoryEndpoint = activityType === "workshop" ? "/api/workshop-categories" : "/api/categories";
+  const { data: rawCategories } = useQuery<Category[]>({ queryKey: [categoryEndpoint] });
   const categories = rawCategories ? [...rawCategories].sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})) : [];
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
 
   // State della Form
-  const [formData, setFormData] = useState<Partial<InsertCourse>>({});
+  const [formData, setFormData] = useState<any>({});
   
   // State Operativo (Multi) e Flags Promo
   const [opStates, setOpStates] = useState<string[]>(["ATTIVO"]);
@@ -383,8 +405,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     }
   }, [isOpen, course, defaultValues]);
 
-  const updateForm = (key: keyof InsertCourse, value: any) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+  const updateForm = (key: string, value: any) => {
+    setFormData((prev: any) => ({ ...prev, [key]: value }));
   };
 
   const handlePromoChange = (flag: string, isChecked: boolean) => {
@@ -395,14 +417,16 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     }
   };
 
+  const apiEndpoint = activityType === "workshop" ? "/api/workshops" : "/api/courses";
+
   const createMutation = useMutation({
-    mutationFn: async (data: InsertCourse) => {
+    mutationFn: async (data: any) => {
       try {
-        await apiRequest("POST", "/api/courses", data);
+        await apiRequest("POST", apiEndpoint, data);
       } catch (err: any) {
         if (err.status === 409) {
           if (confirm(err.message || "Conflitto rilevato. Forzare inserimento?")) {
-            await apiRequest("POST", "/api/courses", { ...data, force: true });
+            await apiRequest("POST", apiEndpoint, { ...data, force: true });
             return;
           }
           throw new Error("Operazione annullata");
@@ -411,9 +435,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
-      toast({ title: "Corso creato con successo" });
+      toast({ title: "Attività creata con successo" });
       onOpenChange(false);
       onSuccess?.();
     },
@@ -425,13 +449,13 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: InsertCourse }) => {
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
       try {
-        await apiRequest("PATCH", `/api/courses/${id}`, data);
+        await apiRequest("PATCH", `${apiEndpoint}/${id}`, data);
       } catch (err: any) {
         if (err.status === 409) {
-          if (confirm(err.message || "Conflitto rilevato. Forzare inserimento?")) {
-            await apiRequest("PATCH", `/api/courses/${id}`, { ...data, force: true });
+          if (confirm(err.message || "Conflitto rilevato. Forzare aggiornamento?")) {
+            await apiRequest("PATCH", `${apiEndpoint}/${id}`, { ...data, force: true });
             return;
           }
           throw new Error("Operazione annullata");
@@ -440,9 +464,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
-      toast({ title: "Corso aggiornato con successo" });
+      toast({ title: "Attività aggiornata con successo" });
       onOpenChange(false);
       onSuccess?.();
     },
@@ -460,7 +484,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     const mergedTags = [...opStates.map(s => `STATE:${s}`), ...promoFlags.map(p => `PROMO:${p}`)];
     const isActive = !opStates.includes("ANNULLATO");
 
-    const payload: InsertCourse = {
+    const payload: any = {
       sku: formData.sku || null,
       name: formData.name as string,
       description: formData.description || null,
@@ -500,9 +524,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-full">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Modifica Corso" : "Nuovo Corso"}</DialogTitle>
+          <DialogTitle>{isEdit ? (activityType === "workshop" ? "Modifica Workshop" : "Modifica Corso") : (activityType === "workshop" ? "Nuovo Workshop" : "Nuovo Corso")}</DialogTitle>
           <DialogDescription>
-            {isEdit ? "Gestisci informazioni, iscritti e presenze." : "Inserisci i dettagli del corso."}
+            {isEdit ? "Gestisci informazioni, iscritti e presenze." : "Inserisci i dettagli dell'attività."}
           </DialogDescription>
         </DialogHeader>
 
@@ -540,7 +564,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                  <Label className="font-semibold text-slate-800 shrink-0">Genere / Nome Corso *</Label>
+                  <Label className="font-semibold text-slate-800 shrink-0">{activityType === "workshop" ? "Nome Workshop *" : "Genere / Nome Corso *"}</Label>
                   <Button
                     type="button"
                     size="icon"
@@ -560,7 +584,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     value={formData.name || ""}
                     options={(nomiCorsi || []).map(val => ({ value: val, label: val }))}
                     onValueChange={(val) => updateForm("name", val)}
-                    placeholder="Cerca genere..."
+                    placeholder={activityType === "workshop" ? "Cerca o inserisci nome..." : "Cerca genere..."}
                     required
                   />
                 </div>
@@ -765,13 +789,13 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <DialogFooter className="sticky bottom-0 bg-background pt-4 border-t flex items-center justify-between w-full mt-6">
                 <div>
                   {isEdit && onDelete && canWrite && (
-                    <Button type="button" variant="destructive" size="sm" onClick={() => { if (confirm("Sei sicuro di voler eliminare totalmente il corso?")) { onDelete(course.id); onOpenChange(false); } }}>Elimina Corso</Button>
+                    <Button type="button" variant="destructive" size="sm" onClick={() => { if (confirm("Sei sicuro di voler eliminare totalmente questa attività?")) { onDelete(course.id); onOpenChange(false); } }}>Elimina Attività</Button>
                   )}
                 </div>
                 <div className="flex gap-2">
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annulla</Button>
                   <Button type="submit" disabled={updateMutation.isPending || createMutation.isPending} className="gold-3d-button text-black">
-                    {updateMutation.isPending || createMutation.isPending ? "Salvataggio..." : (isEdit ? "Salva Modifiche" : "Crea Corso")}
+                    {updateMutation.isPending || createMutation.isPending ? "Salvataggio..." : (isEdit ? "Salva Modifiche" : (activityType === "workshop" ? "Crea Workshop" : "Crea Corso"))}
                   </Button>
                 </div>
               </DialogFooter>
@@ -780,20 +804,20 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
           {isEdit && (
             <TabsContent value="enrollments">
-              <EnrollmentsTab courseId={course.id} />
+              <EnrollmentsTab activityId={course.id} activityType={activityType} />
             </TabsContent>
           )}
 
           {isEdit && (
             <TabsContent value="attendances">
-              <AttendancesTab courseId={course.id} />
+              <AttendancesTab activityId={course.id} activityType={activityType} />
             </TabsContent>
           )}
         </Tabs>
       </DialogContent>
     </Dialog>
-    <CustomListManagerDialog listType="nomi_corsi" title="Gestione Generi / Nomi Corsi" open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
-    <CategoryManagerDialog open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} />
+    <CustomListManagerDialog listType={nameListType} title={activityType === "workshop" ? "Gestione Nomi Workshop" : "Gestione Generi / Nomi Corsi"} open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
+    <CategoryManagerDialog open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} isWorkshop={activityType === "workshop"} />
     <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
     <CustomListManagerDialog listType="livello" title="Gestione Livelli" open={isLivelloModalOpen} onOpenChange={setIsLivelloModalOpen} />
     <CustomListManagerDialog listType="fascia_eta" title="Gestione Fasce d'Età" open={isFasciaEtaModalOpen} onOpenChange={setIsFasciaEtaModalOpen} />

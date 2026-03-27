@@ -10,16 +10,19 @@ import { useToast } from "@/hooks/use-toast";
 interface CategoryManagerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isWorkshop?: boolean;
 }
 
-export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDialogProps) {
+export function CategoryManagerDialog({ open, onOpenChange, isWorkshop = false }: CategoryManagerDialogProps) {
   const { toast } = useToast();
   const [newValue, setNewValue] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState("");
 
+  const apiEndpoint = isWorkshop ? "/api/workshop-categories" : "/api/categories";
+
   const { data: items } = useQuery<any[]>({
-    queryKey: ["/api/categories"],
+    queryKey: [apiEndpoint],
   });
 
   const createMutation = useMutation({
@@ -28,10 +31,10 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
         throw new Error("Questa categoria esiste già.");
       }
       const maxOrder = items?.reduce((max, s) => Math.max(max, s.sortOrder || 0), 0) || 0;
-      await apiRequest("POST", `/api/categories`, { name, description: "", active: true, sortOrder: maxOrder + 1 });
+      await apiRequest("POST", apiEndpoint, { name, description: "", active: true, sortOrder: maxOrder + 1 });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       setNewValue("");
       toast({ title: "Categoria creata con successo" });
     },
@@ -43,10 +46,10 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
       if (items?.some((i: any) => i.id !== id && i.name.toLowerCase() === name.toLowerCase())) {
         throw new Error("Questa categoria esiste già.");
       }
-      await apiRequest("PATCH", `/api/categories/${id}`, { name });
+      await apiRequest("PATCH", `${apiEndpoint}/${id}`, { name });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       setEditingId(null);
       setEditingValue("");
       toast({ title: "Categoria aggiornata con successo" });
@@ -56,10 +59,10 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/categories/${id}`, undefined);
+      await apiRequest("DELETE", `${apiEndpoint}/${id}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       toast({ title: "Categoria eliminata con successo" });
     },
     onError: (error: Error) => toast({ title: "Errore", description: error.message, variant: "destructive" }),

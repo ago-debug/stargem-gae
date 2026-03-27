@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Link, useSearch, useLocation } from "wouter";
@@ -12,22 +12,36 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCustomListValues } from "@/hooks/use-custom-list";
-import { Combobox } from "@/components/ui/combobox";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
+import { hasWritePermission } from "@/App";
+import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, Tag, ArrowLeft } from "lucide-react";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
+import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
-import { ArrowLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn, parseStatusTags } from "@/lib/utils";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import type { Workshop, InsertWorkshop, Category, Instructor, Studio, Member, Enrollment, Payment, Attendance, ActivityStatus, Quote } from "@shared/schema";
-import { buildEnrolledMembersData } from "@/lib/enrollments";
+import { useCustomListValues } from "@/hooks/use-custom-list";
+import { Combobox } from "@/components/ui/combobox";
+import type { Workshop, InsertWorkshop, Category, Instructor, Studio, WorkshopAttendance, Member, Quote, ActivityStatus } from "@shared/schema";
+
+export function formatStatusBadge(tag: string) {
+  if (!tag) return tag;
+  if (tag.startsWith("STATE:")) return tag.replace("STATE:", "");
+  if (tag.startsWith("PROMO:")) {
+    const p = tag.replace("PROMO:", "");
+    if (p === "GRATUITA") return "Prova gratuita";
+    if (p === "ONLINE") return "Iscrizione online";
+    if (p === "PROMO") return "Promo";
+    return p;
+  }
+  return tag;
+}
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -52,448 +66,30 @@ const RECURRENCE_TYPES = [
   { id: "custom", label: "Personalizzato" },
 ];
 
-interface WorkshopEnrollment {
-  id: number;
-  workshopId: number;
-  memberId: number;
-  startDate: string;
-  endDate?: string | null;
-  status: string;
-  memberFirstName?: string;
-  memberLastName?: string;
-  memberEmail?: string;
-  memberFiscalCode?: string;
-}
-
-interface WorkshopAttendance {
-  id: number;
-  workshopId: number;
-  memberId: number;
-  attendanceDate: string;
-  type: string;
-}
-
-interface EnrollmentsTabProps {
-  workshopId: number;
-}
-
-function EnrollmentsTab({ workshopId }: EnrollmentsTabProps) {
-  const { toast } = useToast();
-  const [, setLocation] = useLocation();
-  const [isAddingEnrollment, setIsAddingEnrollment] = useState(false);
-  const [memberSearchQuery, setMemberSearchQuery] = useState("");
-
-  const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
-    queryKey: ["/api/workshop-enrollments"],
-  });
-
-  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
-    queryKey: ["/api/members"],
-  });
-  const members = membersData?.members || [];
-
-  const { data: searchResults } = useQuery<{ members: Member[], total: number }>({
-    queryKey: ["/api/members", { search: memberSearchQuery }],
-    queryFn: async () => {
-      const res = await fetch(`/api/members?search=${encodeURIComponent(memberSearchQuery)}&pageSize=20`);
-      return res.json();
-    },
-    enabled: memberSearchQuery.length >= 3,
-  });
-
-  const createEnrollmentMutation = useMutation({
-    mutationFn: async (data: { memberId: number; workshopId: number }) => {
-      await apiRequest("POST", "/api/workshop-enrollments", {
-        memberId: data.memberId,
-        workshopId: data.workshopId,
-        startDate: new Date().toISOString().split('T')[0],
-        status: 'active',
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
-      toast({ title: "Iscrizione aggiunta con successo" });
-      setIsAddingEnrollment(false);
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
-    },
-  });
-
-  const deleteEnrollmentMutation = useMutation({
-    mutationFn: async (enrollmentId: number) => {
-      await apiRequest("DELETE", `/api/workshop-enrollments/${enrollmentId}`, undefined);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
-      toast({ title: "Iscrizione rimossa con successo" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
-    },
-  });
-
-  const enrichedWorkshopData = buildEnrolledMembersData({
-    activityId: workshopId,
-    isWorkshop: true,
-    enrollments: enrollments || [],
-    membersData: membersData || { members: [] }
-  });
-
-  const workshopEnrollments = enrichedWorkshopData.map((data: any) => ({
-    enrollmentId: data.enrollment.id,
-    memberId: data.member.id,
-    firstName: data.member.firstName || '',
-    lastName: data.member.lastName || '',
-    email: data.member.email || '',
-  }));
-
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
-
-  const getSortValue = (enrollment: any, key: string) => {
-    switch (key) {
-      case "firstName": return enrollment.firstName || "";
-      case "lastName": return enrollment.lastName || "";
-      case "email": return enrollment.email || "";
-      default: return null;
-    }
-  };
-
-  const sortedEnrollments = sortItems(workshopEnrollments, getSortValue);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">
-          Partecipanti Iscritti ({workshopEnrollments.length})
-        </h3>
-        <Popover open={isAddingEnrollment} onOpenChange={setIsAddingEnrollment}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" data-testid="button-add-workshop-enrollment">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Aggiungi Partecipante
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-0" align="end">
-            <Command shouldFilter={false}>
-              <CommandInput
-                placeholder="Cerca per cognome, nome o CF (min. 3 caratteri)..."
-                value={memberSearchQuery}
-                onValueChange={setMemberSearchQuery}
-              />
-              <CommandList>
-                {memberSearchQuery.length < 3 ? (
-                  <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty>
-                ) : !searchResults?.members?.length ? (
-                  <CommandEmpty>Nessun membro trovato</CommandEmpty>
-                ) : (
-                  <CommandGroup>
-                    {searchResults.members
-                      .filter((m: Member) => !workshopEnrollments.some((e: any) => e.memberId === m.id))
-                      .map((member: Member) => (
-                        <CommandItem
-                          key={member.id}
-                          value={member.id.toString()}
-                          onSelect={() => {
-                            createEnrollmentMutation.mutate({ memberId: member.id, workshopId });
-                            setMemberSearchQuery("");
-                          }}
-                          data-testid={`option-workshop-member-${member.id}`}
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-medium">{member.lastName} {member.firstName}</span>
-                            {member.fiscalCode && (
-                              <span className="text-xs text-muted-foreground">{member.fiscalCode}</span>
-                            )}
-                          </div>
-                        </CommandItem>
-                      ))}
-                  </CommandGroup>
-                )}
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      {workshopEnrollments.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">Nessun partecipante iscritto a questo workshop</p>
-      ) : (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
-                <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
-                <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
-                <TableHead className="text-right">Azioni</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedEnrollments.map((enrollment: any) => (
-                <TableRow key={enrollment.enrollmentId}>
-                  <TableCell className={cn("font-medium", isSortedColumn("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
-                  <TableCell className={cn(isSortedColumn("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
-                  <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setLocation(`${window.location.pathname}?editMemberId=${enrollment.memberId}`)}
-                        className="text-xs text-primary hover:underline"
-                        title="Modifica Rapida"
-                      >
-                        Modifica
-                      </button>
-                      <Link href={`/anagrafica_a_lista?search=${enrollment.lastName}`}>
-                        <Button variant="ghost" size="sm" data-testid={`button-view-workshop-member-${enrollment.memberId}`}>
-                          Profilo
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          if (confirm("Sei sicuro di voler rimuovere questa iscrizione?")) {
-                            deleteEnrollmentMutation.mutate(enrollment.enrollmentId);
-                          }
-                        }}
-                        data-testid={`button-remove-workshop-enrollment-${enrollment.enrollmentId}`}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface AttendancesTabProps {
-  workshopId: number;
-}
-
-function AttendancesTab({ workshopId }: AttendancesTabProps) {
-  const { toast } = useToast();
-  const [isAddingAttendance, setIsAddingAttendance] = useState(false);
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
-  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
-
-  const { data: attendances } = useQuery<WorkshopAttendance[]>({
-    queryKey: ["/api/workshop-attendances"],
-  });
-
-  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
-    queryKey: ["/api/members"],
-  });
-  const members = membersData?.members || [];
-
-  const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
-    queryKey: ["/api/workshop-enrollments"],
-  });
-
-  const createAttendanceMutation = useMutation({
-    mutationFn: async (data: { memberId: number; workshopId: number; attendanceDate: string }) => {
-      await apiRequest("POST", "/api/workshop-attendances", {
-        memberId: data.memberId,
-        workshopId: data.workshopId,
-        attendanceDate: new Date(data.attendanceDate).toISOString(),
-        type: 'manual',
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workshop-attendances"] });
-      toast({ title: "Presenza registrata con successo" });
-      setIsAddingAttendance(false);
-      setSelectedMemberId(null);
-      setAttendanceDate(new Date().toISOString().split('T')[0]);
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
-    },
-  });
-
-  const deleteAttendanceMutation = useMutation({
-    mutationFn: async (attendanceId: number) => {
-      await apiRequest("DELETE", `/api/workshop-attendances/${attendanceId}`, undefined);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workshop-attendances"] });
-      toast({ title: "Presenza eliminata con successo" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
-    },
-  });
-
-  const workshopAttendances = attendances
-    ?.filter(a => a.workshopId === workshopId)
-    .map(a => {
-      const member = members?.find(m => m.id === a.memberId);
-      return {
-        ...a,
-        memberName: member ? `${member.lastName} ${member.firstName}` : "Sconosciuto",
-      };
-    })
-    .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
-    .slice(0, 50) || [];
-
-  const enrolledMembers = enrollments
-    ?.filter(e => e.workshopId === workshopId && (e.status === 'active' || !e.status))
-    .map(e => members?.find(m => m.id === e.memberId))
-    .filter((m): m is Member => m !== undefined) || [];
-
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("attendanceDate");
-
-  const getSortValue = (attendance: any, key: string) => {
-    switch (key) {
-      case "member": return attendance.memberName || "";
-      case "attendanceDate": return attendance.attendanceDate || "";
-      case "type": return attendance.type || "";
-      default: return null;
-    }
-  };
-
-  const sortedAttendances = sortItems(workshopAttendances, getSortValue);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">
-          Presenze Registrate
-        </h3>
-        <Dialog open={isAddingAttendance} onOpenChange={setIsAddingAttendance}>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsAddingAttendance(true)}
-            data-testid="button-add-workshop-attendance"
-          >
-            <CalendarPlus className="w-4 h-4 mr-2" />
-            Registra Presenza
-          </Button>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Registra Presenza</DialogTitle>
-              <DialogDescription>Seleziona il partecipante e la data della presenza</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="member">Partecipante *</Label>
-                <Select value={selectedMemberId?.toString() || ""} onValueChange={(v) => setSelectedMemberId(parseInt(v))}>
-                  <SelectTrigger data-testid="select-workshop-attendance-member">
-                    <SelectValue placeholder="Seleziona partecipante" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {enrolledMembers.map(member => (
-                      <SelectItem key={member.id} value={member.id.toString()}>
-                        {member.lastName} {member.firstName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="attendanceDate">Data e Ora *</Label>
-                <Input
-                  id="attendanceDate"
-                  type="datetime-local"
-                  value={attendanceDate}
-                  onChange={(e) => setAttendanceDate(e.target.value)}
-                  data-testid="input-workshop-attendance-date"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddingAttendance(false)} data-testid="button-cancel-workshop-attendance">
-                Annulla
-              </Button>
-              <Button
-                onClick={() => {
-                  if (!selectedMemberId) {
-                    toast({ title: "Errore", description: "Seleziona un partecipante", variant: "destructive" });
-                    return;
-                  }
-                  createAttendanceMutation.mutate({
-                    memberId: selectedMemberId,
-                    workshopId,
-                    attendanceDate,
-                  });
-                }}
-                disabled={!selectedMemberId || createAttendanceMutation.isPending}
-                data-testid="button-submit-workshop-attendance"
-              >
-                Registra
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {workshopAttendances.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">Nessuna presenza registrata per questo workshop</p>
-      ) : (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Partecipante</SortableTableHead>
-                <SortableTableHead sortKey="attendanceDate" currentSort={sortConfig} onSort={handleSort}>Data e Ora</SortableTableHead>
-                <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
-                <TableHead className="text-right">Azioni</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedAttendances.map((attendance: any) => (
-                <TableRow key={attendance.id}>
-                  <TableCell className={cn("font-medium", isSortedColumn("member") && "sorted-column-cell")}>{attendance.memberName}</TableCell>
-                  <TableCell className={cn(isSortedColumn("attendanceDate") && "sorted-column-cell")}>
-                    {format(new Date(attendance.attendanceDate), "dd/MM/yyyy HH:mm", { locale: it })}
-                  </TableCell>
-                  <TableCell className={cn(isSortedColumn("type") && "sorted-column-cell")}>
-                    <Badge variant="outline">
-                      {attendance.type === 'manual' ? 'Manuale' :
-                        attendance.type === 'barcode' ? 'Badge' : 'Auto'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        if (confirm("Sei sicuro di voler eliminare questa presenza?")) {
-                          deleteAttendanceMutation.mutate(attendance.id);
-                        }
-                      }}
-                      data-testid={`button-delete-workshop-attendance-${attendance.id}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-    </div>
-  );
-}
+const normalizeDay = (day?: string | null) => {
+  if (!day) return "";
+  const d = day.toUpperCase().trim();
+  if (d.startsWith("LUN")) return "LUN";
+  if (d.startsWith("MAR")) return "MAR";
+  if (d.startsWith("MER")) return "MER";
+  if (d.startsWith("GIO")) return "GIO";
+  if (d.startsWith("VEN")) return "VEN";
+  if (d.startsWith("SAB")) return "SAB";
+  if (d.startsWith("DOM")) return "DOM";
+  return d;
+};
 
 export default function Workshops() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const canWrite = hasWritePermission(user, "/workshop");
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const initialSearch = urlParams.get('search') || "";
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [statusTags, setStatusTags] = useState<string[]>([]);
   const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
@@ -501,29 +97,51 @@ export default function Workshops() {
   const [selectedStartTime, setSelectedStartTime] = useState<string>("");
   const [selectedEndTime, setSelectedEndTime] = useState<string>("");
   const [selectedRecurrence, setSelectedRecurrence] = useState<string>("");
-  const [selectedStartDate, setSelectedStartDate] = useState<string>("");
-  const [selectedEndDate, setSelectedEndDate] = useState<string>("");
-  const [activeTab, setActiveTab] = useState("details");
-
   const [selectedQuoteId, setSelectedQuoteId] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("details");
   const [price, setPrice] = useState<string>("");
-
-  const formItems = useCustomListValues("genere");
 
   const { data: quotes } = useQuery<Quote[]>({
     queryKey: ["/api/quotes"],
   });
 
+  const nomiWorkshop = useCustomListValues("genere");
+  const postiDisponibili = useCustomListValues("posti_disponibili");
+
   const { data: workshops, isLoading } = useQuery<Workshop[]>({
     queryKey: ["/api/workshops"],
   });
+
+  const editId = urlParams.get('editId') || urlParams.get('workshopId');
+
+  useEffect(() => {
+    if (workshops && editId && !isFormOpen && !editingWorkshop) {
+      const workshop = workshops.find(c => c.id === parseInt(editId));
+      if (workshop) {
+        setEditingWorkshop(workshop);
+        setSelectedDayOfWeek(workshop.dayOfWeek || "");
+        setSelectedStartTime(workshop.startTime || "");
+        setSelectedEndTime(workshop.endTime || "");
+        setSelectedRecurrence(workshop.recurrenceType || "");
+        setActiveTab("details");
+        setStatusTags(parseStatusTags(workshop.statusTags));
+        setIsFormOpen(true);
+        
+        // Clean up URL to avoid loops
+        urlParams.delete('editId');
+        urlParams.delete('workshopId');
+        const newSearch = urlParams.toString();
+        setLocation(`/attivita/workshop${newSearch ? `?${newSearch}` : ''}`, { replace: true });
+      }
+    }
+  }, [workshops, editId, isFormOpen, editingWorkshop, setLocation]);
 
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({
     queryKey: ["/api/activity-statuses"],
   });
 
   const { data: categories } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
+    queryKey: ["/api/workshop-categories"],
   });
 
   const { data: instructors } = useQuery<Instructor[]>({
@@ -534,35 +152,34 @@ export default function Workshops() {
     queryKey: ["/api/studios"],
   });
 
-  const { data: enrollments } = useQuery<WorkshopEnrollment[]>({
+  interface EnrollmentWithMember {
+    id: number;
+    workshopId: number;
+    memberId: number;
+    status: string;
+    memberFirstName?: string | null;
+    memberLastName?: string | null;
+    memberEmail?: string | null;
+    memberFiscalCode?: string | null;
+  }
+
+  const { data: enrollments } = useQuery<EnrollmentWithMember[]>({
     queryKey: ["/api/workshop-enrollments"],
   });
 
-  const { data: membersData } = useQuery<{ members: Member[], total: number }>({
-    queryKey: ["/api/members"],
-  });
-  const members = membersData?.members || [];
+  interface AttendanceWithMember extends WorkshopAttendance {
+    memberFirstName?: string | null;
+    memberLastName?: string | null;
+    memberFiscalCode?: string | null;
+  }
 
-  const { data: attendances } = useQuery<WorkshopAttendance[]>({
+  const { data: attendances } = useQuery<AttendanceWithMember[]>({
     queryKey: ["/api/workshop-attendances"],
   });
 
-  const getWorkshopStats = (workshopId: number) => {
-    if (!enrollments) return { men: 0, women: 0, total: 0 };
-    const enrolls = enrollments.filter(e => e.workshopId === workshopId && (e.status === 'active' || !e.status));
-    const men = enrolls.filter(e => {
-      const g = (e as any).memberGender?.toUpperCase();
-      return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
-    }).length;
-    const women = enrolls.filter(e => {
-      const g = (e as any).memberGender?.toUpperCase();
-      return g === 'D' || g === 'F' || g === 'DONNA' || g === 'FEMMINA';
-    }).length;
-    return { men, women, total: enrolls.length };
-  };
-
   const getWorkshopEnrollmentCount = (workshopId: number): number => {
-    return getWorkshopStats(workshopId).total;
+    if (!enrollments) return 0;
+    return enrollments.filter(e => e.workshopId === workshopId && (e.status === 'active' || !e.status)).length;
   };
 
   const getWorkshopEnrollmentsList = (workshopId: number): Array<{ id: number; firstName: string; lastName: string }> => {
@@ -577,23 +194,33 @@ export default function Workshops() {
   };
 
   const getWorkshopAttendances = (workshopId: number) => {
-    if (!attendances || !members) return [];
+    if (!attendances) return [];
     return attendances
       .filter(a => a.workshopId === workshopId)
-      .map(a => {
-        const member = members.find(m => m.id === a.memberId);
-        return {
-          ...a,
-          memberName: member ? `${member.lastName} ${member.firstName}` : "Sconosciuto",
-        };
-      })
+      .map(a => ({
+        ...a,
+        memberName: (a.memberFirstName || a.memberLastName)
+          ? `${a.memberFirstName || ''} ${a.memberLastName || ''}`.trim()
+          : "Sconosciuto",
+      }))
       .sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime())
       .slice(0, 20);
   };
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertWorkshop) => {
-      await apiRequest("POST", "/api/workshops", data);
+      try {
+        await apiRequest("POST", "/api/workshops", data);
+      } catch (err: any) {
+        if (err.status === 409) {
+          if (confirm(err.message)) {
+            await apiRequest("POST", "/api/workshops", { ...data, force: true });
+            return;
+          }
+          throw new Error("Operazione annullata");
+        }
+        throw err;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
@@ -601,17 +228,28 @@ export default function Workshops() {
       setIsFormOpen(false);
       setEditingWorkshop(null);
       setStatusTags([]);
-      setSelectedQuoteId("");
-      setPrice("");
     },
     onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      if (error.message !== "Operazione annullata") {
+        toast({ title: "Errore", description: error.message, variant: "destructive" });
+      }
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: InsertWorkshop }) => {
-      await apiRequest("PATCH", `/api/workshops/${id}`, data);
+      try {
+        await apiRequest("PATCH", `/api/workshops/${id}`, data);
+      } catch (err: any) {
+        if (err.status === 409) {
+          if (confirm(err.message)) {
+            await apiRequest("PATCH", `/api/workshops/${id}`, { ...data, force: true });
+            return;
+          }
+          throw new Error("Operazione annullata");
+        }
+        throw err;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
@@ -619,11 +257,11 @@ export default function Workshops() {
       setIsFormOpen(false);
       setEditingWorkshop(null);
       setStatusTags([]);
-      setSelectedQuoteId("");
-      setPrice("");
     },
     onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      if (error.message !== "Operazione annullata") {
+        toast({ title: "Errore", description: error.message, variant: "destructive" });
+      }
     },
   });
 
@@ -640,7 +278,7 @@ export default function Workshops() {
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data: InsertWorkshop = {
@@ -651,63 +289,35 @@ export default function Workshops() {
       studioId: formData.get("studioId") ? parseInt(formData.get("studioId") as string) : null,
       instructorId: formData.get("instructorId") ? parseInt(formData.get("instructorId") as string) : null,
       secondaryInstructor1Id: formData.get("secondaryInstructor1Id") ? parseInt(formData.get("secondaryInstructor1Id") as string) : null,
-      price: price || null,
-      quoteId: selectedQuoteId ? parseInt(selectedQuoteId) : null,
+      price: formData.get("price") ? formData.get("price") as string : null,
       maxCapacity: formData.get("maxCapacity") ? parseInt(formData.get("maxCapacity") as string) : null,
       dayOfWeek: selectedDayOfWeek || null,
       startTime: selectedStartTime || null,
       endTime: selectedEndTime || null,
       recurrenceType: selectedRecurrence || null,
       schedule: formData.get("schedule") as string || null,
-      startDate: selectedStartDate as any || null,
-      endDate: selectedEndDate as any || null,
+      startDate: formData.get("startDate") ? new Date(formData.get("startDate") as string) : null,
+      endDate: formData.get("endDate") ? new Date(formData.get("endDate") as string) : null,
       statusTags, active: true,
+      quoteId: selectedQuoteId ? parseInt(selectedQuoteId) : null,
     };
 
-    const performSave = async (force = false) => {
-      try {
-        if (editingWorkshop) {
-          await apiRequest("PATCH", `/api/workshops/${editingWorkshop.id}${force ? '?force=true' : ''}`, data);
-        } else {
-          await apiRequest("POST", `/api/workshops${force ? '?force=true' : ''}`, data);
-        }
-        queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
-        toast({ title: editingWorkshop ? "Workshop aggiornato" : "Workshop creato" });
-        setIsFormOpen(false);
-        setEditingWorkshop(null);
-        setStatusTags([]);
-      } catch (err: any) {
-        if (err.message?.includes("Conflitto rilevato") || (err.status === 409)) {
-          const msg = typeof err === 'string' ? err : (err.message || "Conflitto rilevato");
-          if (confirm(msg + "\n\nVuoi forzare il salvataggio comunque?")) {
-            await performSave(true);
-          }
-        } else {
-          toast({ title: "Errore", description: err.message, variant: "destructive" });
-        }
-      }
-    };
-
-    await performSave();
+    if (editingWorkshop) {
+      updateMutation.mutate({ id: editingWorkshop.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
   };
 
   const openEditDialog = (workshop: Workshop) => {
     setEditingWorkshop(workshop);
-    setSelectedDayOfWeek(workshop.dayOfWeek || "");
+    setPrice(workshop.price?.toString() || "");
+    setSelectedQuoteId(workshop.quoteId?.toString() || "");
+    setSelectedDayOfWeek(normalizeDay(workshop.dayOfWeek));
     setSelectedStartTime(workshop.startTime || "");
     setSelectedEndTime(workshop.endTime || "");
     setSelectedRecurrence(workshop.recurrenceType || "");
-    setSelectedQuoteId(workshop.quoteId?.toString() || "");
-    setPrice(workshop.price || "");
-
-    // Format dates for input type="date"
-    const startD = workshop.startDate ? (workshop.startDate instanceof Date ? workshop.startDate.toISOString().split('T')[0] : new Date(workshop.startDate).toISOString().split('T')[0]) : "";
-    const endD = workshop.endDate ? (workshop.endDate instanceof Date ? workshop.endDate.toISOString().split('T')[0] : new Date(workshop.endDate).toISOString().split('T')[0]) : "";
-
-    setSelectedStartDate(startD);
-    setSelectedEndDate(endD);
     setStatusTags(parseStatusTags(workshop.statusTags));
-    setActiveTab("details");
     setIsFormOpen(true);
   };
 
@@ -715,32 +325,44 @@ export default function Workshops() {
     setIsFormOpen(false);
     setEditingWorkshop(null);
     setStatusTags([]);
+    setPrice("");
+    setSelectedQuoteId("");
     setSelectedDayOfWeek("");
     setSelectedStartTime("");
     setSelectedEndTime("");
     setSelectedRecurrence("");
-    setSelectedStartDate("");
-    setSelectedEndDate("");
-    setActiveTab("details");
   };
 
-  const handleDateChange = (val: string, type: 'start' | 'end') => {
-    if (type === 'start') {
-      setSelectedStartDate(val);
-      if (val) {
-        const date = new Date(val);
-        const dayIdx = date.getDay(); // 0 (Sun) to 6 (Sat)
-        const daysMap = ["DOM", "LUN", "MAR", "MER", "GIO", "VEN", "SAB"];
-        setSelectedDayOfWeek(daysMap[dayIdx]);
-      }
-    } else {
-      setSelectedEndDate(val);
+  const filteredWorkshops = workshops?.filter((workshop) => {
+    const query = searchQuery.toLowerCase().trim();
+
+    if (categoryFilter !== "all" && workshop.categoryId?.toString() !== categoryFilter) {
+      return false;
     }
-  };
 
-  const filteredWorkshops = workshops?.filter((workshop) =>
-    workshop.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+    if (!query) return true;
+
+    const category = categories?.find(c => c.id === (workshop as any).categoryId);
+    const instructor = instructors?.find(i => i.id === workshop.instructorId);
+    const secondaryInstructor1 = instructors?.find(i => i.id === workshop.secondaryInstructor1Id);
+    const studio = studios?.find(s => s.id === workshop.studioId);
+    const dayLabel = WEEKDAYS.find(d => d.id === workshop.dayOfWeek)?.label || "";
+
+    return (
+      workshop.name?.toLowerCase().includes(query) ||
+      workshop.sku?.toLowerCase().includes(query) ||
+      workshop.description?.toLowerCase().includes(query) ||
+      category?.name?.toLowerCase().includes(query) ||
+      instructor?.firstName?.toLowerCase().includes(query) ||
+      instructor?.lastName?.toLowerCase().includes(query) ||
+      secondaryInstructor1?.firstName?.toLowerCase().includes(query) ||
+      secondaryInstructor1?.lastName?.toLowerCase().includes(query) ||
+      studio?.name?.toLowerCase().includes(query) ||
+      dayLabel.toLowerCase().includes(query) ||
+      workshop.startTime?.includes(query) ||
+      workshop.endTime?.includes(query)
+    );
+  }) || [];
 
   const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<typeof filteredWorkshops[0]>("sku");
 
@@ -748,7 +370,7 @@ export default function Workshops() {
     switch (key) {
       case "sku": return workshop.sku;
       case "name": return workshop.name;
-      case "category": return categories?.find(c => c.id === workshop.categoryId)?.name;
+      case "category": return categories?.find(c => c.id === (workshop as any).categoryId)?.name;
       case "instructor": {
         const inst = instructors?.find(i => i.id === workshop.instructorId);
         return inst ? `${inst.lastName} ${inst.firstName}` : null;
@@ -767,15 +389,16 @@ export default function Workshops() {
   const exportToCSV = () => {
     if (!filteredWorkshops.length) return;
 
-    const headers = ["Nome", "Descrizione", "Categoria", "Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
+    const headers = ["SKU", "Nome", "Descrizione", "Categoria", "Insegnante", "Prezzo", "Max Partecipanti", "Giorno", "Orario Inizio", "Orario Fine", "Ricorrenza", "Data Inizio", "Data Fine", "Stato"];
 
     const rows = filteredWorkshops.map(workshop => {
-      const category = categories?.find(c => c.id === workshop.categoryId);
+      const category = categories?.find(c => c.id === (workshop as any).categoryId);
       const instructor = instructors?.find(i => i.id === workshop.instructorId);
       const dayLabel = WEEKDAYS.find(d => d.id === workshop.dayOfWeek)?.label || "";
       const recurrenceLabel = RECURRENCE_TYPES.find(r => r.id === workshop.recurrenceType)?.label || "";
 
       return [
+        workshop.sku || "",
         workshop.name,
         workshop.description || "",
         category?.name || "",
@@ -839,6 +462,7 @@ export default function Workshops() {
                   setIsFormOpen(true);
                 }}
                 data-testid="button-add-workshop"
+                disabled={!canWrite}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nuovo Workshop
@@ -852,17 +476,44 @@ export default function Workshops() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1 max-w-md">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="relative flex-1 min-w-[200px] max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Cerca workshop..."
+                  placeholder="Cerca in tutti i campi..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                   data-testid="input-search-workshops"
                 />
               </div>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-[180px]" data-testid="select-category-filter">
+                  <SelectValue placeholder="Filtra per categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tutte le categorie</SelectItem>
+                  {categories?.map((category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {(categoryFilter !== "all" || searchQuery) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setCategoryFilter("all");
+                    setSearchQuery("");
+                  }}
+                  data-testid="button-clear-filters"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Pulisci filtri
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -882,11 +533,11 @@ export default function Workshops() {
                 <TableHeader>
                   <TableRow>
                     <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
-                    <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Workshop</SortableTableHead>
+                    <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Corso</SortableTableHead>
                     <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
                     <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
                     <SortableTableHead sortKey="price" currentSort={sortConfig} onSort={handleSort}>Prezzo</SortableTableHead>
-                    <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Posti Max</SortableTableHead>
+                    <SortableTableHead sortKey="capacity" currentSort={sortConfig} onSort={handleSort}>Posti</SortableTableHead>
                     <SortableTableHead sortKey="enrollments" currentSort={sortConfig} onSort={handleSort}>Iscritti</SortableTableHead>
                     <SortableTableHead sortKey="period" currentSort={sortConfig} onSort={handleSort}>Periodo</SortableTableHead>
                     <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
@@ -908,9 +559,11 @@ export default function Workshops() {
                               onClick={() => {
                                 openEditDialog(workshop);
                                 setEditingWorkshop(workshop);
-                                // setSelectedDayOfWeek removed for brevity or reuse
+                                setSelectedDayOfWeek(workshop.dayOfWeek || "");
+                                setSelectedStartTime(workshop.startTime || "");
+                                setSelectedEndTime(workshop.endTime || "");
+                                setSelectedRecurrence(workshop.recurrenceType || "");
                                 setActiveTab("enrollments");
-                                setStatusTags(workshop.statusTags || []);
                                 setIsFormOpen(true);
                               }}
                               className="hover:text-primary hover:underline text-left text-sm"
@@ -921,7 +574,7 @@ export default function Workshops() {
                           </div>
                         </TableCell>
                         <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : ""}>
-                          {categories?.find(c => c.id === workshop.categoryId)?.name || "-"}
+                          {categories?.find(c => c.id === (workshop as any).categoryId)?.name || "-"}
                         </TableCell>
                         <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : ""}>
                           {instructors?.find(i => i.id === workshop.instructorId)
@@ -932,10 +585,27 @@ export default function Workshops() {
                           €{workshop.price || "0.00"}
                         </TableCell>
                         <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : ""}>
-                          {workshop.maxCapacity || "∞"}
+                          {enrollmentCount}/{workshop.maxCapacity || "∞"}
                         </TableCell>
-                        <TableCell className={cn("text-center", isSortedColumn("enrollments") && "sorted-column-cell")}>
-                          <Badge variant="secondary">{enrollmentCount}</Badge>
+                        <TableCell className={isSortedColumn("enrollments") ? "sorted-column-cell" : ""}>
+                          {enrollmentsList.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {enrollmentsList.slice(0, 2).map((member) => (
+                                <Link key={member.id} href={`/iscritti?search=${encodeURIComponent(`${member.lastName} ${member.firstName}`)}`}>
+                                  <Badge variant="outline" className="text-xs cursor-pointer hover-elevate">
+                                    {member.lastName} {member.firstName}
+                                  </Badge>
+                                </Link>
+                              ))}
+                              {enrollmentsList.length > 2 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{enrollmentsList.length - 2} altri
+                                </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Nessun iscritto</span>
+                          )}
                         </TableCell>
                         <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("period") && "sorted-column-cell")}>
                           {workshop.startDate && workshop.endDate
@@ -945,13 +615,13 @@ export default function Workshops() {
                         <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : ""}>
                           <div className="flex flex-col gap-1 items-start">
                             {parseStatusTags(workshop.statusTags).length > 0 ? (
-                              parseStatusTags(workshop.statusTags).map((tag) => (
-                                <StatusBadge
-                                  key={tag}
-                                  name={tag}
-                                  color={getStatusColor(tag, activityStatuses)}
-                                />
-                              ))
+                                parseStatusTags(workshop.statusTags).map((tag) => (
+                                  <StatusBadge
+                                    key={tag}
+                                    name={formatStatusBadge(tag)}
+                                    color={getStatusColor(formatStatusBadge(tag), activityStatuses)}
+                                  />
+                                ))
                             ) : (
                               <span className="text-xs italic text-muted-foreground">(Nessuno stato)</span>
                             )}
@@ -962,7 +632,7 @@ export default function Workshops() {
                             <Button
                               size="sm"
                               className="bg-[#2c3e50] text-[#e0e0e0] hover:bg-[#34495e]"
-                              onClick={() => setLocation(`/scheda-workshop?workshopId=${workshop.id}`)}
+                              onClick={() => setLocation(`/scheda-corso?workshopId=${workshop.id}`)}
                               data-testid={`button-scheda-${workshop.id}`}
                             >
                               Scheda
@@ -1000,563 +670,17 @@ export default function Workshops() {
           </CardContent>
         </Card>
 
-        <Dialog open={isFormOpen} onOpenChange={(open) => {
-          if (!open) closeDialog();
-        }}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingWorkshop ? "Modifica Workshop" : "Nuovo Workshop"}</DialogTitle>
-              <DialogDescription>
-                {editingWorkshop ? "Gestisci i dettagli del workshop, visualizza iscritti e presenze" : "Inserisci i dettagli del workshop"}
-              </DialogDescription>
-            </DialogHeader>
+        <CourseUnifiedModal 
+          activityType="workshop"
+          isOpen={isFormOpen || !!editingWorkshop} 
+          onOpenChange={(open) => { 
+            if (!open) closeDialog();
+          }} 
+          course={editingWorkshop || (isFormOpen ? {} as any : null)} 
+          onDelete={(id) => deleteMutation.mutate(id)}
+        />
 
-            {editingWorkshop ? (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="details" data-testid="tab-workshop-details">Dettagli</TabsTrigger>
-                  <TabsTrigger value="enrollments" data-testid="tab-workshop-enrollments">
-                    <Users className="w-4 h-4 mr-1" />
-                    Iscritti ({getWorkshopEnrollmentCount(editingWorkshop.id)})
-                  </TabsTrigger>
-                  <TabsTrigger value="attendances" data-testid="tab-workshop-attendances">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    Presenze ({getWorkshopAttendances(editingWorkshop.id).length})
-                  </TabsTrigger>
-                </TabsList>
 
-                <TabsContent value="details" className="space-y-4">
-                  <form onSubmit={handleSubmit} id="edit-workshop-form" className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Genere *</Label>
-                        <Combobox
-                          name="name"
-                          value={editingWorkshop.name}
-                          options={(formItems || []).map(val => ({ value: val, label: val }))}
-                          placeholder="Cerca genere..."
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="sku">SKU/Codice</Label>
-                        <Input
-                          id="sku"
-                          name="sku"
-                          placeholder="es: WS-2526-YOGA"
-                          defaultValue={editingWorkshop.sku || ""}
-                          data-testid="input-sku"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Stato</Label>
-                        <MultiSelectStatus selectedStatuses={statusTags} onChange={setStatusTags} />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Descrizione</Label>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        rows={3}
-                        defaultValue={editingWorkshop.description || ""}
-                        data-testid="input-description"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="categoryId">Categoria</Label>
-                        <Combobox
-                          name="categoryId"
-                          value={editingWorkshop.categoryId?.toString()}
-                          options={(categories || []).map(c => ({ value: c.id.toString(), label: c.name }))}
-                          placeholder="Cerca..."
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="studioId">Studio/Sala</Label>
-                        <Combobox
-                          name="studioId"
-                          value={editingWorkshop.studioId?.toString()}
-                          options={(studios || []).map(s => ({ value: s.id.toString(), label: s.name }))}
-                          placeholder="Cerca..."
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Insegnanti</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
-                          <Combobox
-                            name="instructorId"
-                            value={editingWorkshop.instructorId?.toString()}
-                            options={(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))}
-                            placeholder="Cerca..."
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
-                          <Combobox
-                            name="secondaryInstructor1Id"
-                            value={editingWorkshop.secondaryInstructor1Id?.toString()}
-                            options={(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))}
-                            placeholder="Cerca..."
-                          />
-                        </div>
-
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="price">Prezzo (€)</Label>
-                        <Input
-                          id="price"
-                          name="price"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={price}
-                          onChange={(e) => setPrice(e.target.value)}
-                          data-testid="input-price"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Quota Base</Label>
-                        <Select value={selectedQuoteId} onValueChange={(val) => {
-                          setSelectedQuoteId(val === "_none" ? "" : val);
-                          const quote = quotes?.find(q => q.id.toString() === val);
-                          if (quote) setPrice(Number(quote.amount).toFixed(2));
-                        }}>
-                          <SelectTrigger title="Seleziona Quota">
-                            <SelectValue placeholder="Seleziona Quota" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="_none">Nessuna Quota</SelectItem>
-                            {quotes?.map((q) => (
-                              <SelectItem key={q.id} value={q.id.toString()}>
-                                {q.name} (€{q.amount})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="maxCapacity">Posti Disponibili</Label>
-                        <Input
-                          id="maxCapacity"
-                          name="maxCapacity"
-                          type="number"
-                          min="1"
-                          defaultValue={editingWorkshop.maxCapacity || ""}
-                          data-testid="input-maxCapacity"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="startDate">Data Inizio</Label>
-                        <Input
-                          id="startDate"
-                          name="startDate"
-                          type="date"
-                          value={selectedStartDate}
-                          onChange={(e) => handleDateChange(e.target.value, 'start')}
-                          data-testid="input-startDate"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="endDate">Data Fine</Label>
-                        <Input
-                          id="endDate"
-                          name="endDate"
-                          type="date"
-                          value={selectedEndDate}
-                          onChange={(e) => handleDateChange(e.target.value, 'end')}
-                          data-testid="input-endDate"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="dayOfWeek">Giorno Settimana</Label>
-                        <Select value={selectedDayOfWeek} onValueChange={setSelectedDayOfWeek}>
-                          <SelectTrigger data-testid="select-dayOfWeek">
-                            <SelectValue placeholder="Seleziona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {WEEKDAYS.map((day) => (
-                              <SelectItem key={day.id} value={day.id}>
-                                {day.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="startTime">Ora Inizio</Label>
-                        <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
-                          <SelectTrigger data-testid="select-startTime">
-                            <SelectValue placeholder="--:--" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {TIME_SLOTS.map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {time}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="endTime">Ora Fine</Label>
-                        <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
-                          <SelectTrigger data-testid="select-endTime">
-                            <SelectValue placeholder="--:--" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {TIME_SLOTS.map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {time}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="recurrenceType">Ricorrenza</Label>
-                        <Select value={selectedRecurrence} onValueChange={setSelectedRecurrence}>
-                          <SelectTrigger data-testid="select-recurrenceType">
-                            <SelectValue placeholder="Seleziona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {RECURRENCE_TYPES.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="schedule">Note Orario (opzionale)</Label>
-                      <Textarea
-                        id="schedule"
-                        name="schedule"
-                        placeholder="Note aggiuntive sull'orario"
-                        rows={2}
-                        defaultValue={editingWorkshop.schedule || ""}
-                        data-testid="input-schedule"
-                      />
-                    </div>
-
-                    <DialogFooter>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={closeDialog}
-                        data-testid="button-cancel"
-                      >
-                        Annulla
-                      </Button>
-                      <Button
-                        type="submit"
-                        className="gold-3d-button"
-                        disabled={updateMutation.isPending}
-                        data-testid="button-submit-workshop"
-                      >
-                        Salva Modifiche
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </TabsContent>
-
-                <TabsContent value="enrollments" className="space-y-4">
-                  <EnrollmentsTab workshopId={editingWorkshop.id} />
-                </TabsContent>
-
-                <TabsContent value="attendances" className="space-y-4">
-                  <AttendancesTab workshopId={editingWorkshop.id} />
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Genere *</Label>
-                    <Combobox
-                      name="name"
-                      options={(formItems || []).map(val => ({ value: val, label: val }))}
-                      placeholder="Cerca genere..."
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="sku">SKU/Codice</Label>
-                    <Input
-                      id="sku"
-                      name="sku"
-                      placeholder="es: WS-2526-YOGA"
-                      data-testid="input-sku"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Stato</Label>
-                    <MultiSelectStatus selectedStatuses={statusTags} onChange={setStatusTags} />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Descrizione</Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    rows={3}
-                    data-testid="input-description"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="categoryId">Categoria</Label>
-                    <Combobox
-                      name="categoryId"
-                      options={(categories || []).map(c => ({ value: c.id.toString(), label: c.name }))}
-                      placeholder="Cerca..."
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="studioId">Studio/Sala</Label>
-                    <Combobox
-                      name="studioId"
-                      options={(studios || []).map(s => ({ value: s.id.toString(), label: s.name }))}
-                      placeholder="Cerca..."
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Insegnanti</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="instructorId" className="text-sm text-muted-foreground">Principale</Label>
-                      <Combobox
-                        name="instructorId"
-                        options={(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))}
-                        placeholder="Cerca..."
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="secondaryInstructor1Id" className="text-sm text-muted-foreground">Secondario 1</Label>
-                      <Combobox
-                        name="secondaryInstructor1Id"
-                        options={(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))}
-                        placeholder="Cerca..."
-                      />
-                    </div>
-
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Prezzo (€)</Label>
-                    <Input
-                      id="price"
-                      name="price"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      data-testid="input-price"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Quota Base</Label>
-                    <Select value={selectedQuoteId} onValueChange={(val) => {
-                      setSelectedQuoteId(val === "_none" ? "" : val);
-                      const quote = quotes?.find(q => q.id.toString() === val);
-                      if (quote) setPrice(Number(quote.amount).toFixed(2));
-                    }}>
-                      <SelectTrigger title="Seleziona Quota">
-                        <SelectValue placeholder="Seleziona Quota" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="_none">Nessuna Quota</SelectItem>
-                        {quotes?.map((q) => (
-                          <SelectItem key={q.id} value={q.id.toString()}>
-                            {q.name} (€{q.amount})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="maxCapacity">Posti Disponibili</Label>
-                    <Input
-                      id="maxCapacity"
-                      name="maxCapacity"
-                      type="number"
-                      min="1"
-                      data-testid="input-maxCapacity"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="startDate">Data Inizio</Label>
-                    <Input
-                      id="startDate"
-                      name="startDate"
-                      type="date"
-                      value={selectedStartDate}
-                      onChange={(e) => handleDateChange(e.target.value, 'start')}
-                      data-testid="input-startDate"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="endDate">Data Fine</Label>
-                    <Input
-                      id="endDate"
-                      name="endDate"
-                      type="date"
-                      value={selectedEndDate}
-                      onChange={(e) => handleDateChange(e.target.value, 'end')}
-                      data-testid="input-endDate"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="dayOfWeek">Giorno Settimana</Label>
-                    <Select value={selectedDayOfWeek} onValueChange={setSelectedDayOfWeek}>
-                      <SelectTrigger data-testid="select-dayOfWeek">
-                        <SelectValue placeholder="Seleziona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {WEEKDAYS.map((day) => (
-                          <SelectItem key={day.id} value={day.id}>
-                            {day.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="startTime">Ora Inizio</Label>
-                    <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
-                      <SelectTrigger data-testid="select-startTime">
-                        <SelectValue placeholder="--:--" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TIME_SLOTS.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="endTime">Ora Fine</Label>
-                    <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
-                      <SelectTrigger data-testid="select-endTime">
-                        <SelectValue placeholder="--:--" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TIME_SLOTS.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="recurrenceType">Ricorrenza</Label>
-                    <Select value={selectedRecurrence} onValueChange={setSelectedRecurrence}>
-                      <SelectTrigger data-testid="select-recurrenceType">
-                        <SelectValue placeholder="Seleziona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {RECURRENCE_TYPES.map((type) => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="schedule">Note Orario (opzionale)</Label>
-                  <Textarea
-                    id="schedule"
-                    name="schedule"
-                    placeholder="Note aggiuntive sull'orario"
-                    rows={2}
-                    data-testid="input-schedule"
-                  />
-                </div>
-
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={closeDialog}
-                    data-testid="button-cancel"
-                  >
-                    Annulla
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="gold-3d-button"
-                    disabled={createMutation.isPending}
-                    data-testid="button-submit-workshop"
-                  >
-                    Crea Workshop
-                  </Button>
-                </DialogFooter>
-              </form>
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
