@@ -24,7 +24,7 @@ async function main() {
   console.log("\n--- Verification: DESCRIBE courses ---");
   try {
     const rawSchema = await db.execute(sql`DESCRIBE courses`);
-    const relevantCols = (rawSchema[0] as any[]).filter(c => c.Field === 'level' || c.Field === 'age_group');
+    const relevantCols = (rawSchema[0] as unknown as any[]).filter(c => c.Field === 'level' || c.Field === 'age_group');
     console.log(relevantCols);
   } catch (err: any) {
     console.error("Describe failed:", err.message);

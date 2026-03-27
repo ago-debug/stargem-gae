@@ -5,6 +5,19 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 27 Marzo 2026 (Phase 20: Master Allineamento Modali - Workshop)
+* **Convergenza Architetturale Modale Workshop:**
+  * Sradicata la vecchia UI duplicata e frammentata di `workshops.tsx` (ridotta da ~1600 righe a ~700).
+  * Iniettato con successo il `CourseUnifiedModal` istanziandolo in modalità polimorfica (`activityType="workshop"`).
+  * Il modale Workshop ora eredita gratuitamente e in modo nativo tutte le feature master dei Corsi: Tabelline Iscritti/Presenze unificate, Pennini Edit rapidi, Lookup Anagrafici (Colori, Categorie) e salvataggi multi-livello.
+* **Fix Binding e Type Safety (TypeScript):**
+  * Sbloccate e iniettate le properties retrocompatibili del DTO in Drizzle `participationType` e `targetDate` nelle select query di `server/storage.ts` riferite alle iscrizioni (`workshop_enrollments`).
+  * Risolti molteplici cast TS in `run_migration.ts` portando i Type Error a Zero Assoluto.
+* **Collaudo E2E Automazione Browser:**
+  * L'Agent Browser ha validato l'efficacia del nuovo Modale Workshop creando slot di test, compilando le ComboBox per SKU e Categoria e navigando le interfacce annidate senza crash di Virtual DOM.
+
+---
+
 ### 24-25 Marzo 2026 (Fase 1-5 Architettura STI e Data-Aware Calendar)
 * **Shadow Database Creazione (Fase 2 STI):**
   * Create in esecuzione le nuove super-tabelle unificate `activities_unified` ed `enrollments_unified` nel database fisico di sviluppo.
@@ -20,7 +33,19 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
-### 25-27 Marzo 2026 (Phase 16-18: Sblocco Calendario e Refactor Strutturale)
+### 26-27 Marzo 2026 (Phase 19: Time-Space Elastico Calendario e Fine Bug Bloccanti)
+* **Algoritmo Geometrico a Doppia Passata (Phase 19):**
+  * Creato l'engine definitivo per il Layout Calendario dinamico, superando il vincolo delle righe ad altezza fissa che forzavano il clipping dei contenuti.
+  * Il componente `calendar.tsx` prima usa il `ResizeObserver` per "pesare" l'altezza testuale *richiesta* di tutte le schedine per formattare i wrap in altezza, popolando il dizionario in memoria `measuredHeights`.
+  * La stringa cumulativa `cumulativeTops` spalma l'Height reale DOM su tutti i minuti interessati per quel record, dislocando e deformando dolcemente lo "spazio" tempo a livello di griglia.
+* **Side-by-Side Completo e Validato:**
+  * Sradicata definitivamente l'illusione di *overlap* tra carte con stesso orario: tramite l'algoritmo geometrico aggregativo, ogni cluster di overlap assegna un `maxConcurrent` pari al reale numero di percorsi sovrapponibili paralleli. Nessuna sovrapposizione orizzontale o verticale esiste in assoluto, onorando strettamente la direttiva utente.
+* **Collaudo QA Visuale:**
+  * L'Agent Browser ha ispezionato con successo la deformazione della griglia senza clip su badge "U/D/D, Sku, Status", testando i filtri incrociati Giorno, Attività (Sale) e le aperture dei Modali Pennino (Total Body Modale).
+
+---
+
+### 25-26 Marzo 2026 (Phase 16-18: Sblocco Calendario e Refactor Strutturale)
 * **Canonical DTO e Sblocco UI (Phase 16-17):**
   * Superata l'impasse data-aware (`UI FREEZE`) trasferendo il potere di enrichment al backend (`server/services/unifiedBridge.ts`). Al posto di ID vuoti per istruttori e categorie, il bridge emette l'oggetto monolitico e pienamente risolto: `UnifiedCalendarEventDTO`.
   * La Single Source of Truth nel DB RAM permette a `client/src/pages/calendar.tsx` di ignorare logiche di lookup costose, garantendo color-coding e testi esatti out-of-the-box.

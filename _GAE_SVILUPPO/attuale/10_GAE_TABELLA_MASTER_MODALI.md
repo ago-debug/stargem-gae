@@ -1,4 +1,11 @@
 # TABELLA MASTER DEFINITIVA - CORE MODALI E ATTIVITÀ
+*(Rev. 27 Marzo 2026 - Master Allineamento Esecutivo Phase 20)*
+
+> **EXECUTIVE SUMMARY:** Sono state tracciate tre macro-chat di attività extra-Corsi per determinare la fattibilità e l'ordine di sviluppo del refactoring unificato (*Ref. Implementation Plan Phase 20*).
+> - **Chat 1 (Lez.Ind, Allenam, Affitti):** Lezioni e Allenamenti usano già Modale Condiviso STI. Affitti resta con Modale Custom per logiche Checkout e Anagrafica On-the-fly, ma esige standardizzazione Free-Text -> Combobox.
+> - **Chat 2 (Workshop, Campus, DomInMovimento):** Campus e Domeniche ok. Workshop in via immediata di unificazione a TheCourseUnifiedModal (Alta Priorità).
+> - **Chat 3 (Saggi, Vacanze, Eventi Ext):** Saggi e Vacanze ok. Eventi Esterni derubricato da UI Palinsesto a Tabella Setup Listino.
+> - **Planning:** Urgente innesto `strategic_events` database su modale attualmente vuoto.
 
 ## 1. MASCHERA INPUT GENERALE
 | Area | Pagina | Route canonica | Route legacy / alias | Modale | Campo UI | Label visibile | Tipo campo | Obbligatorio | Multi | Sorgente dati | Elenco / tabella sorgente | Binding | Endpoint lettura | Endpoint scrittura | Tabelle lette | Tabelle scritte | Impatta Calendario | Impatta Planning | Impatta Pagamenti | Impatta Tessere | Impatta Anagrafica | Dominio | Stato architetturale | Priorità | Rischio | Decisione operativa consigliata | Note |

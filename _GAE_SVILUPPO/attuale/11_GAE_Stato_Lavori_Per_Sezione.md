@@ -56,12 +56,12 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 ---
 
 ## 6. Attività / modali / silos
-**Stato Attuale:** 🟢 CHIUSO (Per la V1)
+**Stato Attuale:** 🟡 IN TRANSIZIONE V2 (Fase 20 Allineamento Avviata)
 **Sintesi:** Disaccoppiate le logiche incrociate nei modali base (es. Modale Corsi).
-* **Cosa è già stato fatto:** Chiuso il ciclo di Cleanup (Livello 1-3). Il Modale dei corsi è solido. Genere, Livelli, Fasce Età ed Elenchi sono mappati perfettamente alle `Custom Lists` con precaricamento dinamico, order sorting e prevenzione inserimento duplicati a frontend. Il binding per `livello` (vs livello crm) è cristallizzato.
-* **Cosa manca:** Nulla di stringente per la V1. I dati sono protetti da fallback omofoni.
-* **Rischi / Attenzioni:** Tassativo non avviare SQL Rewrite (Migrazione V2) d'iniziativa.
-* **Prossimo Step Consigliato:** Lasciare la UI in produzione per test Segreteria.
+* **Cosa è già stato fatto:** Chiuso il ciclo di Cleanup (Livello 1-3). Il Modale dei corsi è solido. Genere, Livelli, Fasce Età ed Elenchi sono mappati perfettamente alle `Custom Lists` con precaricamento dinamico, order sorting e prevenzione inserimento duplicati a frontend. Il binding per `livello` (vs livello crm) è cristallizzato. Eseguito in Fase 20 l'Audit architetturale per allineare gli altri 12 domini.
+* **Cosa manca:** Attuazione esecutiva della Phase 20 (Allineamento Modali Operativi): Unificazione del Modale Workshop a quello super-blindato dei Corsi, standardizzazione Affitti (free-text in combo), astrazione Eventi Esterni a Tabella Base Setup.
+* **Rischi / Attenzioni:** Tassativo non avviare SQL Rewrite globale (Migrazione V2 STI fisica) d'iniziativa prima di aver uniformato l'ingranaggio dei Forms in UI.
+* **Prossimo Step Consigliato:** Procedere allo switch e merge del Modale `WorkshopDialog` per incanalare Workshop nell'alveo condiviso e sicuro dei Corsi.
 
 ---
 

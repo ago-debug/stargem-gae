@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -199,6 +199,44 @@ export default function CalendarPage() {
         } catch(e) {}
         return new Date();
     }, []);
+
+    const getStartOfWeek = (d: Date) => {
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    };
+
+    // --- PHASE 19: Time-Space Elastico (Two-Pass Height Observer) ---
+    const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});
+    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+    useEffect(() => {
+        resizeObserverRef.current = new ResizeObserver((entries) => {
+            setMeasuredHeights(prev => {
+                let changed = false;
+                const next = { ...prev };
+                for (const entry of entries) {
+                    const id = entry.target.getAttribute('data-event-id');
+                    if (id) {
+                        const h = entry.target.getBoundingClientRect().height;
+                        if (Math.abs((next[id] || 0) - h) > 1) { // 1px threshold per tolleranza fluttuazioni
+                            next[id] = h;
+                            changed = true;
+                        }
+                    }
+                }
+                return changed ? next : prev;
+            });
+        });
+        return () => resizeObserverRef.current?.disconnect();
+    }, []);
+
+    const handleCardRef = useCallback((el: HTMLDivElement | null) => {
+        if (el && resizeObserverRef.current) {
+            resizeObserverRef.current.observe(el);
+        }
+    }, [measuredHeights]); // Dipendenza nominale
+    // ----------------------------------------------------------------
 
     const [viewDate, setViewDate] = useState(initialDate);
     const [selectedStudio, setSelectedStudio] = useState<string>("all");
@@ -794,6 +832,131 @@ export default function CalendarPage() {
         const iso = safeIsoString(dateVal);
         return iso ? iso.split('T')[0] : "";
     }
+
+    // --- PHASE 19: Time-Space Elastico (Two-Pass React Layout) ---
+    const TOTAL_MINUTES = 14 * 60; // Dalle 08:00 alle 22:00 = 840 mins
+
+    const calendarLayout = useMemo(() => {
+        // 1. Definisci le Colonne Visibili Base (Giorni o Sale)
+        const columns = selectedDay === 'all' 
+            ? WEEKDAYS.map(d => ({ type: 'day', id: d.id, label: d.label })) 
+            : (studios || []).map(s => ({ type: 'studio', id: s.id.toString(), label: s.name }));
+
+        const columnEvents: Record<string, any[]> = {};
+        const allVisibleEvents: any[] = [];
+
+        // 2. Collocazione e Clustering Indipendente
+        columns.forEach(col => {
+            const isDayCol = col.type === 'day';
+            const colId = col.id;
+            
+            // Assegna gli eventi filtrati alla colonna
+            const colFiltered = unifiedEvents.filter(evt => {
+                const matchStudio = isDayCol 
+                    ? (selectedStudio === "all" || evt.studioId?.toString() === selectedStudio)
+                    : evt.studioId?.toString() === colId;
+                
+                if (!matchStudio) return false;
+                
+                if (USE_STI_BRIDGE) {
+                    const targetDateStr = isDayCol ? weekDatesMap[colId] : weekDatesMap[selectedDay];
+                    return isEventOnDate(evt, targetDateStr);
+                }
+                const matchDay = isDayCol ? evt.dayOfWeek === colId : evt.dayOfWeek === selectedDay;
+                return matchDay;
+            });
+
+            const sorted = [...colFiltered].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+            const processedEvents: any[] = [];
+            let currentCluster: any[] = [];
+            let clusterEnd = 0;
+
+            const processCluster = (cluster: any[]) => {
+                if (cluster.length === 0) return;
+                const cols: typeof cluster[] = [];
+                cluster.forEach(cevt => {
+                    let placed = false;
+                    for (const c of cols) {
+                        if (cevt.startPx >= c[c.length - 1].endPx) {
+                            c.push(cevt);
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) cols.push([cevt]);
+                });
+                
+                const total = cols.length;
+                const widthNum = 100 / total;
+                cols.forEach((c, colIndex) => {
+                    const leftNum = colIndex * widthNum;
+                    c.forEach(cevt => {
+                        processedEvents.push({
+                            ...cevt,
+                            layoutLeft: leftNum,
+                            layoutWidth: widthNum,
+                            eventId: `evt-${cevt.id || cevt.uniqueEventId}-${cevt.sourceType}-${cevt.sourceId}`
+                        });
+                    });
+                });
+            };
+
+            sorted.forEach(evt => {
+                const startPx = timeToMinutes(evt.startTime);
+                // Minimo vitale per l'hit-box (evita card collassate)
+                const endPx = Math.max(timeToMinutes(evt.endTime) || startPx + (60 * PX_PER_MIN), startPx + (15 * PX_PER_MIN)); 
+                const durationPx = endPx - startPx;
+                const evtWithMetrics = { ...evt, startPx, endPx, durationPx };
+
+                if (startPx >= clusterEnd) {
+                    processCluster(currentCluster);
+                    currentCluster = [evtWithMetrics];
+                    clusterEnd = endPx;
+                } else {
+                    currentCluster.push(evtWithMetrics);
+                    if (endPx > clusterEnd) clusterEnd = endPx;
+                }
+            });
+            processCluster(currentCluster);
+
+            columnEvents[colId] = processedEvents;
+            allVisibleEvents.push(...processedEvents);
+        });
+
+        // 3. Spazio-Tempo Dilatato (Row Height Normalization)
+        // Array che rappresenta il "costo" in altezza di ogni minuto della giornata
+        const minHeights = new Float64Array(TOTAL_MINUTES).fill(PX_PER_MIN);
+
+        allVisibleEvents.forEach(evt => {
+            const startMin = Math.floor(evt.startPx / PX_PER_MIN);
+            const durationMin = Math.floor(evt.durationPx / PX_PER_MIN) || 1;
+            const endMin = Math.min(startMin + durationMin, TOTAL_MINUTES);
+
+            // Fetch in tempo reale dell'altezza generata dal DOM text, o fallback al Time naturale
+            const reqHeight = Math.max(measuredHeights[evt.eventId] || 0, evt.durationPx);
+            const reqPerMin = reqHeight / durationMin;
+
+            for (let m = startMin; m < endMin; m++) {
+                if (reqPerMin > minHeights[m]) {
+                    minHeights[m] = reqPerMin; // Aggrega la massima altezza richiesta in quello slot
+                }
+            }
+        });
+
+        // 4. Somma Cumulativa delle Y Absolute
+        let currentTop = 0;
+        const cumulativeTops = new Float64Array(TOTAL_MINUTES + 1);
+        for (let m = 0; m < TOTAL_MINUTES; m++) {
+            cumulativeTops[m] = currentTop;
+            currentTop += minHeights[m];
+        }
+        cumulativeTops[TOTAL_MINUTES] = currentTop;
+
+        return { columns, columnEvents, cumulativeTops };
+
+    }, [unifiedEvents, selectedDay, selectedStudio, measuredHeights, weekDatesMap]);
+    // ----------------------------------------------------------------
 
     const resetFilters = () => {
         setSelectedStudio("all");
@@ -1415,24 +1578,30 @@ export default function CalendarPage() {
                             </div>
                         </div>
 
-                        {/* Calendar Body */}
+                        {/* Calendar Body (PHASE 19 - Elastic Time Space) */}
                         <div className="relative grid bg-white"
                             style={{
                                 gridTemplateColumns: selectedDay === 'all'
                                     ? `80px repeat(7, minmax(120px, 1fr))`
                                     : `80px repeat(${studios?.length || 1}, minmax(140px, 1fr))`,
-                                height: `${HOURS.length * ROW_HEIGHT}px`
+                                height: `${calendarLayout.cumulativeTops[TOTAL_MINUTES]}px`
                             }}>
                             {/* Hour Labels */}
-                            <div className="border-r bg-[#f8f9fa] relative z-30 sticky left-0 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
-                                {HOURS.map(hour => (
-                                    <div key={hour}
-                                        className="border-b border-[#eee] flex flex-col items-center justify-start pt-2 text-[11px] font-bold text-[#666] bg-[#f8f9fa]"
-                                        style={{ height: `${ROW_HEIGHT}px` }}>
-                                        <span>{hour.toString().padStart(2, "0")}.00</span>
-                                        <span className="opacity-50 font-normal text-[9px] mt-1">{hour.toString().padStart(2, "0")}.30</span>
-                                    </div>
-                                ))}
+                            <div className="border-r bg-[#f8f9fa] relative z-30 sticky left-0 shadow-[2px_0_5px_rgba(0,0,0,0.05)] h-full">
+                                {HOURS.map((hour, idx) => {
+                                    const minOffset = idx * 60;
+                                    const nextMinOffset = (idx + 1) * 60;
+                                    const topPx = calendarLayout.cumulativeTops[minOffset];
+                                    const heightPx = calendarLayout.cumulativeTops[nextMinOffset] - topPx;
+                                    return (
+                                        <div key={hour}
+                                            className="border-b border-[#eee] flex flex-col items-center justify-start pt-2 text-[11px] font-bold text-[#666] bg-[#f8f9fa] absolute w-full left-0 right-0 overflow-hidden"
+                                            style={{ top: `${topPx}px`, height: `${heightPx}px` }}>
+                                            <span>{hour.toString().padStart(2, "0")}.00</span>
+                                            {heightPx > 60 && <span className="opacity-50 font-normal text-[9px] mt-1">{hour.toString().padStart(2, "0")}.30</span>}
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             {/* Grid Lines Overlay */}
@@ -1440,423 +1609,132 @@ export default function CalendarPage() {
                                 style={{
                                     gridTemplateColumns: selectedDay === 'all'
                                         ? `repeat(7, minmax(120px, 1fr))`
-                                        : `repeat(${studios?.length || 1}, minmax(140px, 1fr))`,
-                                    gridTemplateRows: `repeat(${HOURS.length}, ${ROW_HEIGHT}px)`
+                                        : `repeat(${studios?.length || 1}, minmax(140px, 1fr))`
                                 }}>
-                                {HOURS.map((hour, rowIdx) => (
-                                    (selectedDay === 'all' ? WEEKDAYS.map(d => d.id) : (studios || [])).map((col, colIdx) => {
-                                        const studioId = typeof col === 'string' ? null : col.id;
-                                        const dayId = typeof col === 'string' ? col : selectedDay;
-
-                                        return (
-                                            <div
-                                                key={`${rowIdx}-${colIdx}`}
-                                                className="border-b border-r last:border-r-0 border-[#eee] hover:bg-slate-50 cursor-crosshair transition-colors"
-                                                onClick={() => {
-                                                    setSelectionContext({ dayId, studioId, hour });
-                                                }}
-                                            ></div>
-                                        );
-                                    })
+                                {calendarLayout.columns.map((col, colIdx) => (
+                                    <div key={col.id} className="relative h-full border-r last:border-r-0 border-[#eee]">
+                                        {HOURS.map((hour, idx) => {
+                                            const minOffset = idx * 60;
+                                            const nextMinOffset = (idx + 1) * 60;
+                                            const topPx = calendarLayout.cumulativeTops[minOffset];
+                                            const heightPx = calendarLayout.cumulativeTops[nextMinOffset] - topPx;
+                                            return (
+                                                <div key={hour}
+                                                    className="absolute left-0 right-0 border-b border-[#eee] hover:bg-slate-50 cursor-crosshair transition-colors"
+                                                    style={{ top: `${topPx}px`, height: `${heightPx}px` }}
+                                                    onClick={() => setSelectionContext({ 
+                                                        dayId: col.type === 'day' ? col.id : selectedDay, 
+                                                        studioId: col.type === 'studio' ? parseInt(col.id, 10) : null, 
+                                                        hour 
+                                                    })}
+                                                />
+                                            );
+                                        })}
+                                    </div>
                                 ))}
                             </div>
 
-                            {/* Content Columns */}
-                                                       {selectedDay === "all" ? (
-                                WEEKDAYS.map(day => {
-                                    // 1. Filtraggio eventi del giorno specifico nella settimana corrente
-                                    const dayEvents = unifiedEvents.filter(evt => {
-                                        const matchStudio = selectedStudio === "all" || evt.studioId?.toString() === selectedStudio;
-                                        if (!matchStudio) return false;
-                                        if (USE_STI_BRIDGE) {
-                                            const targetDateStr = weekDatesMap[day.id];
-                                            return isEventOnDate(evt, targetDateStr);
-                                        }
-                                        return evt.dayOfWeek === day.id;
-                                    });
-                                    
-                                    // 2. Ordinamento per startTime (necessario per l'algoritmo di overlap)
-                                    const sortedEvents = [...dayEvents].sort((a, b) => {
-                                        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
-                                    });
+                            {/* Content Columns (Events) */}
+                            {calendarLayout.columns.map(col => {
+                                const layoutEvents = calendarLayout.columnEvents[col.id];
+                                return (
+                                    <div key={col.id} className="relative pointer-events-none min-w-[120px] isolate h-full">
+                                        {layoutEvents.map(evt => {
+                                            const { layoutLeft, layoutWidth, durationPx, startPx } = evt;
+                                            
+                                            // Real calculation with Space-Time distortion mapping
+                                            const startMin = Math.floor(startPx / PX_PER_MIN);
+                                            const durationMin = Math.floor(durationPx / PX_PER_MIN) || 1;
+                                            const endMin = Math.min(startMin + durationMin, TOTAL_MINUTES);
+                                            
+                                            const realTop = calendarLayout.cumulativeTops[startMin];
+                                            const realHeight = calendarLayout.cumulativeTops[endMin] - realTop;
 
-                                    // 3. Cluster Overlap Algorithm (Isola i gruppi di collisione per non schiacciare le intere giornate)
-                                    const processedEvents: any[] = [];
-                                    let currentCluster: any[] = [];
-                                    let clusterEnd = 0;
+                                            const handleEdit = (e: React.MouseEvent) => {
+                                                e.stopPropagation();
+                                                if (evt.sourceType === "course" || evt.sourceType === "courses") handleEditCourse(evt.rawPayload);
+                                                if (evt.sourceType === "workshop" || evt.sourceType === "workshops") handleEditWorkshop(evt.rawPayload);
+                                                if (evt.sourceType === "studioBookings" || evt.sourceType === "rentals") handleEditBooking(evt.rawPayload);
+                                            };
 
-                                    sortedEvents.forEach(evt => {
-                                        const startPx = timeToMinutes(evt.startTime);
-                                        const endPx = timeToMinutes(evt.endTime) || startPx + (60 * PX_PER_MIN);
-                                        const durationPx = endPx - startPx;
-                                        const evtWithMetrics = { ...evt, startPx, endPx, durationPx };
+                                            const handleCardClick = () => {
+                                                 if (evt.registryKey === "courses") setLocation(`/scheda-corso?courseId=${evt.sourceId}`);
+                                                 if (evt.registryKey === "workshops") setLocation(`/scheda-workshop?workshopId=${evt.sourceId}`);
+                                                 if (evt.registryKey === "lezione_individuale") setLocation(`/scheda-lezione-individuale?activityId=${evt.sourceId}`);
+                                                 if (evt.registryKey === "domenica" || evt.registryKey === "sunday_activities") setLocation(`/scheda-domenica?activityId=${evt.sourceId}`);
+                                                 if (evt.registryKey === "allenamento") setLocation(`/scheda-allenamento?activityId=${evt.sourceId}`);
+                                                 if (evt.registryKey === "campus") setLocation(`/scheda-campus?activityId=${evt.sourceId}`);
+                                                 if (evt.registryKey === "studioBookings" || evt.registryKey === "rentals") setLocation(`/prenotazioni-sale?edit=${evt.sourceId}`);
+                                            };
 
-                                        if (startPx >= clusterEnd) {
-                                            // Process old cluster
-                                            if (currentCluster.length > 0) {
-                                                const columns: typeof currentCluster[] = [];
-                                                currentCluster.forEach(cevt => {
-                                                    let placed = false;
-                                                    for (const col of columns) {
-                                                        if (cevt.startPx >= col[col.length - 1].endPx) {
-                                                            col.push(cevt);
-                                                            placed = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                    if (!placed) columns.push([cevt]);
-                                                });
-                                                
-                                                columns.forEach((col, colIndex) => {
-                                                    const total = columns.length;
-                                                    const widthNum = 100 / total;
-                                                    const leftNum = colIndex * widthNum;
-                                                    
-                                                    col.forEach(cevt => {
-                                                        processedEvents.push({
-                                                            ...cevt,
-                                                            layoutLeft: leftNum,
-                                                            layoutWidth: widthNum
-                                                        });
-                                                    });
-                                                });
+                                            const stats = (evt.sourceType === "course" || evt.sourceType === "courses") ? getCourseStats(evt.sourceId) :
+                                                          ((evt.sourceType === "workshop" || evt.sourceType === "workshops") ? getWorkshopStats(evt.sourceId) : null);
+                                            
+                                            const maxCap = evt.rawPayload?.maxCapacity;
+                                            const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
+
+                                            const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
+                                            const parsedTags = parseStatusTags(evt.rawPayload?.statusTags);
+                                            let statusLabels: string[] = [];
+                                            if (parsedTags && parsedTags.length > 0) {
+                                                statusLabels = parsedTags
+                                                    .filter((t: string) => t.startsWith("STATE:"))
+                                                    .map((t: string) => t.replace("STATE:", ""));
                                             }
-                                            currentCluster = [evtWithMetrics];
-                                            clusterEnd = endPx;
-                                        } else {
-                                            currentCluster.push(evtWithMetrics);
-                                            if (endPx > clusterEnd) clusterEnd = endPx;
-                                        }
-                                    });
-
-                                    // Process last cluster
-                                    if (currentCluster.length > 0) {
-                                        const columns: typeof currentCluster[] = [];
-                                        currentCluster.forEach(cevt => {
-                                            let placed = false;
-                                            for (const col of columns) {
-                                                if (cevt.startPx >= col[col.length - 1].endPx) {
-                                                    col.push(cevt);
-                                                    placed = true;
-                                                    break;
-                                                }
+                                            if (statusLabels.length === 0) {
+                                                statusLabels = [evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO"];
                                             }
-                                            if (!placed) columns.push([cevt]);
-                                        });
-                                        
-                                        columns.forEach((col, colIndex) => {
-                                            const colWidth = 100 / columns.length;
-                                            col.forEach(cevt => {
-                                                processedEvents.push({
-                                                    ...cevt,
-                                                    layoutLeft: colIndex * colWidth,
-                                                    layoutWidth: colWidth
-                                                });
-                                            });
-                                        });
-                                    }
+                                            const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
+                                            const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
+                                            const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
 
-                                    const layoutEvents = processedEvents;
-
-                                    return (
-                                        <div key={day.id} className="relative pointer-events-none min-w-[120px] isolate">
-                                            {layoutEvents.map(evt => {
-                                                const { layoutLeft, layoutWidth, durationPx, startPx } = evt;
-                                                // Event type handlers map (preserved legacy form-modals compatibility without backend impact)
-                                                const handleEdit = (e: React.MouseEvent) => {
-                                                    e.stopPropagation();
-                                                    if (evt.sourceType === "course" || evt.sourceType === "courses") handleEditCourse(evt.rawPayload);
-                                                    if (evt.sourceType === "workshop" || evt.sourceType === "workshops") handleEditWorkshop(evt.rawPayload);
-                                                    if (evt.sourceType === "studioBookings" || evt.sourceType === "rentals") handleEditBooking(evt.rawPayload);
-                                                };
-
-                                                const handleCardClick = () => {
-                                                    if (evt.registryKey === "courses") setLocation(`/scheda-corso?courseId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "workshops") setLocation(`/scheda-workshop?workshopId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "lezione_individuale") setLocation(`/scheda-lezione-individuale?activityId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "domenica" || evt.registryKey === "sunday_activities") setLocation(`/scheda-domenica?activityId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "allenamento") setLocation(`/scheda-allenamento?activityId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "campus") setLocation(`/scheda-campus?activityId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "studioBookings" || evt.registryKey === "rentals") setLocation(`/prenotazioni-sale?edit=${evt.sourceId}`);
-                                                };
-
-                                                const stats = (evt.sourceType === "course" || evt.sourceType === "courses") ? getCourseStats(evt.sourceId) :
-                                                             ((evt.sourceType === "workshop" || evt.sourceType === "workshops") ? getWorkshopStats(evt.sourceId) : null);
-                                                
-                                                const maxCap = evt.rawPayload?.maxCapacity;
-                                                const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
-
-                                                const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
-                                                const parsedTags = parseStatusTags(evt.rawPayload?.statusTags);
-                                                let statusLabels: string[] = [];
-                                                if (parsedTags && parsedTags.length > 0) {
-                                                    statusLabels = parsedTags
-                                                        .filter((t: string) => t.startsWith("STATE:"))
-                                                        .map((t: string) => t.replace("STATE:", ""));
-                                                }
-                                                if (statusLabels.length === 0) {
-                                                    statusLabels = [evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO"];
-                                                }
-                                                const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
-                                                const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
-                                                const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
-
-                                                return (
+                                            return (
+                                                <div
+                                                    key={evt.eventId}
+                                                    onClick={handleCardClick}
+                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 overflow-hidden`}
+                                                    style={{
+                                                        top: `${realTop + 2}px`,
+                                                        height: `${realHeight - 4}px`,  // Fixed height frame
+                                                        left: `calc(${layoutLeft}% + 2px)`,
+                                                        width: `calc(${layoutWidth}% - 4px)`
+                                                    }}
+                                                >
                                                     <div
-                                                        key={`week-${evt.id || evt.uniqueEventId}-${evt.sourceType}-${evt.sourceId}`}
-                                                        onClick={handleCardClick}
-                                                        className={`absolute left-0.5 right-0.5 p-1.5 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 flex flex-col justify-start items-start text-left min-h-[80px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${evt.colorProps.className || ''}`}
+                                                        ref={handleCardRef} 
+                                                        data-event-id={evt.eventId}
+                                                        className={`w-full min-h-full h-max p-1.5 rounded-md border-l-[6px] shadow-sm flex flex-col justify-start items-start text-left bg-white ${evt.colorProps.className || ''}`}
                                                         style={{
-                                                            top: `${startPx + 3}px`,
-                                                            minHeight: `${durationPx - 6}px`,
-                                                            overflow: "hidden",
-                                                            left: `calc(${layoutLeft}% + 4px)`,
-                                                            width: `calc(${layoutWidth}% - 8px)`,
                                                             fontSize: "10px",
                                                             backgroundColor: evt.colorProps.backgroundColor,
                                                             borderLeftColor: evt.colorProps.borderLeftColor,
                                                             color: "#0f172a"
                                                         }}
                                                     >
-                                                        <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 z-30">
-                                                            <div className={`bg-white/60 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`} title={evt.categoryName || "CAT"}>
-                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2 h-2" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2 h-2" /> : <MapPin className="w-2 h-2" />}
-                                                                {evt.categoryName || (evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO")}
-                                                            </div>
-                                                            <div className={`bg-white/80 px-1 py-0.5 rounded text-[7px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5 ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`}>
-                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2 h-2" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2 h-2" /> : <MapPin className="w-2 h-2" />}
-                                                                {evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO"}
-                                                            </div>
-                                                        </div>
-                                                        <div className="font-bold text-[9px] mb-0.5 opacity-90">{evt.startTime} - {evt.endTime}</div>
-                                                        <div className="font-extrabold text-[11px] leading-tight line-clamp-2 w-full uppercase break-words">{evt.title}</div>
-                                                        {ins1 && <div className="font-semibold text-[9px] truncate w-full opacity-90 mt-0.5">{ins1}</div>}
-                                                        {ins2 && <div className="font-semibold text-[9px] truncate w-full opacity-90">{ins2}</div>}
-                                                        
-                                                        <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-1 shrink-0">
-                                                            {stats && (
-                                                                <div className="flex justify-between text-[7px] font-bold w-full bg-white/50 px-1 py-0.5 rounded border border-black/5">
-                                                                    <span className="text-blue-700">U:{stats.men}</span>
-                                                                    <span className="text-pink-700">D:{stats.women}</span>
-                                                                    {availability !== null && (
-                                                                        <span className={availability <= 2 ? "text-red-700 font-extrabold" : "text-emerald-700 ml-auto"}>Disp:{availability}</span>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                            
-                                                            <div className="flex w-full items-center justify-between mt-0.5 gap-1">
-                                                                <div className="flex flex-wrap gap-1" title={statusLabels.join(", ")}>
-                                                                    {statusLabels.map(s => {
-                                                                        const color = getStatusColor(s, activityStatuses);
-                                                                        return (
-                                                                            <div key={s} className="text-[7px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: `${color}15`, color, border: `0.5px solid ${color}40` } : { color: s === "ATTIVO" ? "#15803d" : "#b91c1c" }}>
-                                                                                {s}
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                                <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm shrink-0 border border-black/5" title="Modifica rapida">
-                                                                    <Edit2 className="w-2 h-2" />
-                                                                </button>
-                                                            </div>
-                                                            
-                                                            {codeLabel && (
-                                                                <div className="text-[7px] font-mono opacity-90 font-semibold tracking-wider bg-white/70 px-1.5 py-0.5 rounded shadow-sm w-full text-left truncate leading-none border border-black/5 mt-0.5">
-                                                                    {codeLabel}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        
-                                                        {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
-                                                            <span className="text-[8px] font-bold absolute top-1 right-1 bg-white/90 px-1.5 py-0.5 rounded shadow-sm text-slate-800 border-black/5 border z-40">
-                                                                €{Number(evt.rawPayload.amount).toFixed(2)}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )
-                                })
-                            ) : (
-                                studios?.map(studio => {
-                                    // 1. Filtraggio eventi in sala per il giorno prescelto
-                                    const studioEvents = unifiedEvents.filter(evt => {
-                                        if (evt.studioId !== studio.id) return false;
-                                        if (USE_STI_BRIDGE) {
-                                            const targetDateStr = weekDatesMap[selectedDay];
-                                            return isEventOnDate(evt, targetDateStr);
-                                        }
-                                        return evt.dayOfWeek === selectedDay;
-                                    });
-                                    
-                                    // 2. Ordinamento per startTime
-                                    const sortedEvents = [...studioEvents].sort((a, b) => {
-                                        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
-                                    });
-
-                                    // 3. Bucket Columns Builder con Cluster Isolation
-                                    const processedEvents: any[] = [];
-                                    let currentCluster: any[] = [];
-                                    let clusterEnd = 0;
-
-                                    sortedEvents.forEach(evt => {
-                                        const startPx = timeToMinutes(evt.startTime);
-                                        const endPx = timeToMinutes(evt.endTime) || startPx + (60 * PX_PER_MIN);
-                                        const durationPx = endPx - startPx;
-                                        const evtWithMetrics = { ...evt, startPx, endPx, durationPx };
-
-                                        if (startPx >= clusterEnd) {
-                                            // Process old cluster
-                                            if (currentCluster.length > 0) {
-                                                const columns: typeof currentCluster[] = [];
-                                                currentCluster.forEach(cevt => {
-                                                    let placed = false;
-                                                    for (const col of columns) {
-                                                        if (cevt.startPx >= col[col.length - 1].endPx) {
-                                                            col.push(cevt);
-                                                            placed = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                    if (!placed) columns.push([cevt]);
-                                                });
-                                                
-                                                columns.forEach((col, colIndex) => {
-                                                    const total = columns.length;
-                                                    const widthNum = 100 / total;
-                                                    const leftNum = colIndex * widthNum;
-                                                    
-                                                    col.forEach(cevt => {
-                                                        processedEvents.push({
-                                                            ...cevt,
-                                                            layoutLeft: leftNum,
-                                                            layoutWidth: widthNum
-                                                        });
-                                                    });
-                                                });
-                                            }
-                                            currentCluster = [evtWithMetrics];
-                                            clusterEnd = endPx;
-                                        } else {
-                                            currentCluster.push(evtWithMetrics);
-                                            if (endPx > clusterEnd) clusterEnd = endPx;
-                                        }
-                                    });
-
-                                    // Process last cluster
-                                    if (currentCluster.length > 0) {
-                                        const columns: typeof currentCluster[] = [];
-                                        currentCluster.forEach(cevt => {
-                                            let placed = false;
-                                            for (const col of columns) {
-                                                if (cevt.startPx >= col[col.length - 1].endPx) {
-                                                    col.push(cevt);
-                                                    placed = true;
-                                                    break;
-                                                }
-                                            }
-                                            if (!placed) columns.push([cevt]);
-                                        });
-                                        
-                                        columns.forEach((col, colIndex) => {
-                                            const colWidth = 100 / columns.length;
-                                            col.forEach(cevt => {
-                                                processedEvents.push({
-                                                    ...cevt,
-                                                    layoutLeft: colIndex * colWidth,
-                                                    layoutWidth: colWidth
-                                                });
-                                            });
-                                        });
-                                    }
-
-                                    const layoutEvents = processedEvents;
-
-                                    return (
-                                        <div key={studio.id} className="relative pointer-events-none min-w-[140px] isolate">
-                                            {layoutEvents.map(evt => {
-                                                const { layoutLeft, layoutWidth, durationPx, startPx } = evt;
-
-                                                const handleEdit = (e: React.MouseEvent) => {
-                                                    e.stopPropagation();
-                                                    if (evt.sourceType === "course" || evt.sourceType === "courses") handleEditCourse(evt.rawPayload);
-                                                    if (evt.sourceType === "workshop" || evt.sourceType === "workshops") handleEditWorkshop(evt.rawPayload);
-                                                    if (evt.sourceType === "studioBookings" || evt.sourceType === "rentals") handleEditBooking(evt.rawPayload);
-                                                };
-
-                                                const handleCardClick = () => {
-                                                    if (evt.registryKey === "courses") setLocation(`/scheda-corso?courseId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "workshops") setLocation(`/scheda-workshop?workshopId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "lezione_individuale") setLocation(`/scheda-lezione-individuale?activityId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "domenica" || evt.registryKey === "sunday_activities") setLocation(`/scheda-domenica?activityId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "allenamento") setLocation(`/scheda-allenamento?activityId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "campus") setLocation(`/scheda-campus?activityId=${evt.sourceId}`);
-                                                    if (evt.registryKey === "studioBookings" || evt.registryKey === "rentals") setLocation(`/prenotazioni-sale?edit=${evt.sourceId}`);
-                                                };
-
-                                                const stats = (evt.sourceType === "course" || evt.sourceType === "courses") ? getCourseStats(evt.sourceId) :
-                                                             ((evt.sourceType === "workshop" || evt.sourceType === "workshops") ? getWorkshopStats(evt.sourceId) : null);
-                                                
-                                                const maxCap = evt.rawPayload?.maxCapacity;
-                                                const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
-
-                                                const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
-                                                const parsedTags = parseStatusTags(evt.rawPayload?.statusTags);
-                                                let statusLabels: string[] = [];
-                                                if (parsedTags && parsedTags.length > 0) {
-                                                    statusLabels = parsedTags
-                                                        .filter((t: string) => t.startsWith("STATE:"))
-                                                        .map((t: string) => t.replace("STATE:", ""));
-                                                }
-                                                if (statusLabels.length === 0) {
-                                                    statusLabels = [evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO"];
-                                                }
-                                                const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
-                                                const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
-                                                const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
-
-                                                return (
-                                                    <div
-                                                        key={`studio-${evt.id || evt.uniqueEventId}-${evt.sourceType}-${evt.sourceId}`}
-                                                        onClick={handleCardClick}
-                                                        className={`absolute left-1.5 right-1.5 p-2 rounded-md border-l-[6px] shadow-sm pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 flex flex-col justify-start items-start text-left min-h-[85px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${evt.colorProps.className || ''}`}
-                                                        style={{
-                                                            top: `${startPx + 3}px`,
-                                                            minHeight: `${durationPx - 6}px`,
-                                                            overflow: "hidden",
-                                                            left: `calc(${layoutLeft}% + 4px)`,
-                                                            width: `calc(${layoutWidth}% - 8px)`,
-                                                            fontSize: "10px",
-                                                            backgroundColor: evt.colorProps.backgroundColor,
-                                                            borderLeftColor: evt.colorProps.borderLeftColor,
-                                                            color: "#0f172a"
-                                                        }}
-                                                    >
-                                                        <div className="absolute top-1 right-1 flex flex-col items-end gap-0.5 z-30">
+                                                        <div className="absolute top-2 right-2 flex flex-col items-end gap-0.5 z-30">
                                                             <div className={`bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`} title={evt.categoryName || "CAT"}>
-                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2 h-2" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2 h-2" /> : <MapPin className="w-2 h-2" />}
+                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" /> : <MapPin className="w-2.5 h-2.5" />}
                                                                 {evt.categoryName || (evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO")}
                                                             </div>
                                                             <div className={`bg-white/80 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5 ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`}>
-                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2 h-2" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2 h-2" /> : <MapPin className="w-2 h-2" />}
+                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" /> : <MapPin className="w-2.5 h-2.5" />}
                                                                 {evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO"}
                                                             </div>
                                                         </div>
-                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full">{evt.startTime} - {evt.endTime}</div>
-                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase break-words">{evt.title}</div>
+                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-[calc(100%-40px)]">{evt.startTime} - {evt.endTime}</div>
+                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase break-words pr-[45px]">{evt.title}</div>
                                                         {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5">{ins1}</div>}
                                                         {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90">{ins2}</div>}
                                                         
-                                                        <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-1 shrink-0 z-10 bg-inherit w-full">
+                                                        <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-1 shrink-0 z-10 w-full relative">
                                                             {evt.registryKey === "studioBookings" && (
-                                                                <div className="bg-black/5 px-2 py-0.5 rounded-full text-[8px] font-bold text-black/60 mb-1 w-fit">
+                                                                <div className="bg-black/5 px-2 py-0.5 rounded-full text-[9px] font-bold text-black/60 mb-1 w-fit">
                                                                     {evt.startTime}-{evt.endTime}
                                                                 </div>
                                                             )}
                                                             
                                                             {stats && (
-                                                                <div className="flex justify-between text-[8px] font-bold w-full bg-white/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
+                                                                <div className="flex justify-between text-[9px] font-bold w-full bg-white/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
                                                                     <span className="text-blue-700">U:{stats.men}</span>
                                                                     <span className="text-pink-700">D:{stats.women}</span>
                                                                     {availability !== null && (
@@ -1865,7 +1743,7 @@ export default function CalendarPage() {
                                                                 </div>
                                                             )}
                                                             
-                                                            <div className="flex w-full items-center justify-between mt-0.5 gap-1">
+                                                            <div className="flex w-full items-center justify-between mt-1 gap-1">
                                                                 <div className="flex flex-wrap gap-1" title={statusLabels.join(", ")}>
                                                                     {statusLabels.map(s => {
                                                                         const color = getStatusColor(s, activityStatuses);
@@ -1882,29 +1760,29 @@ export default function CalendarPage() {
                                                             </div>
                                                             
                                                             {codeLabel && (
-                                                                <div className="text-[8px] font-mono opacity-90 font-semibold tracking-wider bg-white/70 px-1.5 py-0.5 rounded shadow-sm w-full text-left truncate leading-none border border-black/5 mt-0.5 mb-0.5">
+                                                                <div className="text-[9px] font-mono opacity-90 font-semibold tracking-wider bg-white/70 px-1.5 py-0.5 rounded shadow-sm w-full text-left truncate leading-none border border-black/5 mt-1 mb-0.5">
                                                                     {codeLabel}
                                                                 </div>
                                                             )}
                                                         </div>
                                                         
                                                         {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
-                                                            <span className="text-[10px] font-bold absolute top-1 right-8 bg-white/90 px-1.5 py-0.5 rounded shadow-sm text-slate-800 border-black/5 border z-40">
+                                                            <span className="text-[10px] font-bold absolute top-1 right-[75px] bg-white/90 px-1.5 py-0.5 rounded shadow-sm text-slate-800 border-black/5 border z-40">
                                                                 €{Number(evt.rawPayload.amount).toFixed(2)}
                                                             </span>
                                                         )}
                                                         {evt.registryKey === "studioBookings" && evt.rawPayload?.paid && (
-                                                            <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5 text-white shadow-sm z-40">
+                                                            <div className="absolute top-1 right-[60px] bg-green-500 rounded-full p-0.5 text-white shadow-sm z-40">
                                                                 <Check className="w-3 h-3" />
                                                             </div>
                                                         )}
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
-                                    );
-                                })
-                            )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         {/* Bottom Sticky Day Selector - Outside scroll container for best visibility */}

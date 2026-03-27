@@ -111,7 +111,28 @@ I due componenti universali che sostituiranno le decine di form sparsi.
 
 ---
 
-## 3. Implementazione Schema Drizzle V2 (Motore Dati ed API) - *SOSPENSIONE TEMPORANEA*
+## 3. Allineamento Modali Operativi Attività (Fase 20)
+I seguenti task derivano dall'audit architetturale volto ad allineare i 12 silos operativi verso l'architettura unificata `CourseUnifiedModal` o `ActivityManagementPage`.
+
+- [ ] Allineamento Modale "Workshop" (Alta Priorità)
+  - File toccati: `client/src/pages/workshops.tsx`, UI components.
+  - Obiettivo: Sostituire il custom `WorkshopDialog` con un modulo dipendente da `CourseUnifiedModal` in modo da ereditare pennini e lookup.
+
+- [ ] Generazione Entità "Planning Strategico" (Media Priorità)
+  - File toccati: `shared/schema.ts`, `server/routes.ts`, `planning.tsx`
+  - Obiettivo: Abbandonare il Mockup UI ed instaurare il salvataggio eventi Macro (`strategic_events`), Chiusure, Ferie.
+
+- [ ] Blindatura Modale "Affitti" (Media Priorità)
+  - File toccati: `client/src/pages/studio-bookings.tsx`
+  - Obiettivo: Trasformare l'input libero in Select basata su `custom_lists`, isolando i comportamenti di Cassa dal modale base.
+
+- [ ] Astrazione Modal "Eventi Esterni" (Bassa Priorità)
+  - File toccati: `client/src/pages/booking-services.tsx`
+  - Obiettivo: Estrarre questo componente dall'orchestrazione attività e renderlo paritetico a una pagina Setup di sistema asettica.
+
+---
+
+## 4. Implementazione Schema Drizzle V2 (Motore Dati ed API) - *SOSPENSIONE TEMPORANEA*
 > [!WARNING]
 > **AGGIORNAMENTO OBIETTIVO STI (Single Table Inheritance):** La Fase 1 (Design Esecutivo) è completata e approvata in `15_GAE_STI_Bridge_Plan_Executive.md`. Siamo autorizzati a procedere con la Fase 2 (Creazione Tabelle in Shadow Mode), senza ancora toccare il database in produzione né alterare la UI/Runtime.
 
