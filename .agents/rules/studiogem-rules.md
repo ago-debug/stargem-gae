@@ -10,7 +10,7 @@ Regole di progetto:
 2. Non toccare pagamenti e tessere (core sensibile).
 3. Rispetta struttura a silos esistente.
 4. Non eliminare mai UI o logiche esistenti senza richiesta esplicita.
-5. Aggiorna i file in `_GAE_SVILUPPO` solo se realmente impattati.
+5. Aggiorna sempre i file in `_GAE_SVILUPPO`.
 6. La Maschera Input è il centro del sistema.
 7. Il CRM è tecnicamente pronto ma non validato senza dati reali.
 8. Clarissa è fase futura (non sviluppare ora).

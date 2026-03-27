@@ -15,6 +15,7 @@ import {
 } from "./google-calendar";
 import { log } from "./vite";
 import { db } from "./db";
+import { getUnifiedActivitiesPreview, getUnifiedActivityById, getUnifiedEnrollmentsPreview } from "./services/unifiedBridge";
 import { eq, desc, and, isNull, isNotNull } from "drizzle-orm";
 import {
   insertMemberSchema,
@@ -6710,6 +6711,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching activities summary:", error);
       res.status(500).json({ error: "Failed to fetch activities summary" });
+    }
+  });
+
+  // ==========================================
+  // STI: PHASE 3 BRIDGE API READ-ONLY
+  // ==========================================
+  app.get("/api/activities-unified-preview", isAuthenticated, async (req, res) => {
+    try {
+      const data = await getUnifiedActivitiesPreview(req);
+      res.json(data);
+    } catch (error) {
+      console.error("Bridge Error (Activities):", error);
+      res.status(500).json({ error: "Failed to fetch unified activities preview" });
+    }
+  });
+
+  app.get("/api/activities-unified-preview/:type/:id", isAuthenticated, async (req, res) => {
+    try {
+      const data = await getUnifiedActivityById(req);
+      if (!data) return res.status(404).json({ error: "Activity not found" });
+      res.json(data);
+    } catch (error) {
+      console.error("Bridge Error (Single Activity):", error);
+      res.status(500).json({ error: "Failed to fetch unified activity by id" });
+    }
+  });
+
+  app.get("/api/enrollments-unified-preview", isAuthenticated, async (req, res) => {
+    try {
+      const data = await getUnifiedEnrollmentsPreview(req);
+      res.json(data);
+    } catch (error) {
+      console.error("Bridge Error (Enrollments):", error);
+      res.status(500).json({ error: "Failed to fetch unified enrollments preview" });
     }
   });
 
