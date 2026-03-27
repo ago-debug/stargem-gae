@@ -43,6 +43,13 @@
       "when": 1773337887351,
       "tag": "0005_rare_talkback",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1774377377673,
+      "tag": "0006_curvy_princess_powerful",
+      "breakpoints": true
     }
   ]
 }

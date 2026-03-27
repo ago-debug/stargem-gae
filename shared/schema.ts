@@ -2771,3 +2771,101 @@ export const insertCrmCampaignSchema = createInsertSchema(crmCampaigns).omit({
 export type InsertCrmCampaign = z.infer<typeof insertCrmCampaignSchema>;
 export type CrmCampaign = typeof crmCampaigns.$inferSelect;
 
+// ============================================================================
+// SINGLE TABLE INHERITANCE (STI) - UNIFIED ACTIVITIES
+// ============================================================================
+
+export const activitiesUnified = mysqlTable("activities_unified", {
+  id: int("id").primaryKey().autoincrement(),
+  legacySourceType: varchar("legacy_source_type", { length: 50 }),
+  legacySourceId: int("legacy_source_id"),
+  activityFamily: varchar("activity_family", { length: 50 }),
+  activityType: varchar("activity_type", { length: 50 }),
+  title: varchar("title", { length: 255 }).notNull(),
+  subtitle: varchar("subtitle", { length: 255 }),
+  description: text("description"),
+  seasonId: int("season_id"),
+  startDatetime: timestamp("start_datetime"),
+  endDatetime: timestamp("end_datetime"),
+  recurrenceType: varchar("recurrence_type", { length: 50 }),
+  instructorId: int("instructor_id"),
+  studioId: int("studio_id"),
+  maxParticipants: int("max_participants"),
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }),
+  status: varchar("status", { length: 50 }).default("active"),
+  visibility: varchar("visibility", { length: 50 }).default("public"),
+  extraConfigJson: json("extra_config_json"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertActivitiesUnifiedSchema = createInsertSchema(activitiesUnified).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertActivitiesUnified = z.infer<typeof insertActivitiesUnifiedSchema>;
+export type ActivitiesUnified = typeof activitiesUnified.$inferSelect;
+
+export const enrollmentsUnified = mysqlTable("enrollments_unified", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull(),
+  activityUnifiedId: int("activity_unified_id"),
+  participationType: varchar("participation_type", { length: 50 }).notNull(), // 'STANDARD_COURSE', 'FREE_TRIAL', 'PAID_TRIAL', 'SINGLE_LESSON'
+  targetDate: timestamp("target_date"),
+  paymentStatus: varchar("payment_status", { length: 50 }),
+  notes: text("notes"),
+  seasonId: int("season_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const insertEnrollmentsUnifiedSchema = createInsertSchema(enrollmentsUnified).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEnrollmentsUnified = z.infer<typeof insertEnrollmentsUnifiedSchema>;
+export type EnrollmentsUnified = typeof enrollmentsUnified.$inferSelect;
+
+// ============================================================================
+// CANONICAL CALENDAR DTO (Fase 15/16)
+// ============================================================================
+export interface UnifiedCalendarEventDTO {
+    id: string; // Es. "course_12_2026-03-25"
+    activityFamily: 'course' | 'workshop' | 'rental' | 'campus' | 'sunday' | 'recital' | 'trial';
+    activityType: string;
+    
+    // Titoli e UI
+    title: string;
+    sku: string | null;           // [RECUPERATO] Es. "CRS-19"
+    statusLabels: string[];       // [RECUPERATO] Es. ["waiting_list"]
+    isActive: boolean;            
+    
+    // Dati Categoria Pieni
+    categoryId: number | null;    
+    categoryName: string;         
+    categoryTag: string;          // Es. "CRS", "WKS"
+    colorProps: {
+        backgroundColor?: string;
+        borderLeftColor?: string;
+        color?: string;
+        className?: string;       // Fallback Tailwind
+    };
+    
+    // Dati Insegnanti
+    instructorIds: number[];
+    instructorNames: string[];    // Array (permette futuri docenti doppi)
+    
+    // Logistica
+    studioId: number | null;
+    studioName: string;
+    
+    // Date Assolute Locali
+    startDatetime: string;        // ISO format garantito non null
+    endDatetime: string;          // ISO format
+    
+    // Engine UI Form
+    uiRenderingType: string;      // Es. "STANDARD_COURSE_FORM" per istruire la Modale onclick
+    rawPayload: any;              // Legacy info di supporto per la transizione
+}
