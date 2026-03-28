@@ -182,9 +182,15 @@ import {
   activities,
   type Activity,
   type InsertActivity,
+  ActivitiesUnified,
+  InsertActivitiesUnified,
+  activitiesUnified,
   globalEnrollments,
   type GlobalEnrollment,
   type InsertGlobalEnrollment,
+  type StrategicEvent,
+  type InsertStrategicEvent,
+  strategicEvents,
   merchandisingCategories,
   type MerchandisingCategory,
   type InsertMerchandisingCategory,
@@ -700,6 +706,13 @@ export interface IStorage {
   createGlobalEnrollment(data: InsertGlobalEnrollment): Promise<GlobalEnrollment>;
   updateGlobalEnrollment(id: number, data: Partial<InsertGlobalEnrollment>): Promise<GlobalEnrollment | undefined>;
   deleteGlobalEnrollment(id: number): Promise<void>;
+
+  // Strategic Events (Planning)
+  getStrategicEvents(): Promise<StrategicEvent[]>;
+  getStrategicEvent(id: number): Promise<StrategicEvent | undefined>;
+  createStrategicEvent(event: InsertStrategicEvent): Promise<StrategicEvent>;
+  updateStrategicEvent(id: number, event: Partial<InsertStrategicEvent>): Promise<StrategicEvent | undefined>;
+  deleteStrategicEvent(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4364,6 +4377,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteGlobalEnrollment(id: number): Promise<void> {
     await db.delete(globalEnrollments).where(eq(globalEnrollments.id, id));
+  }
+
+  // ==== Strategic Events (Planning) ====
+  async getStrategicEvents(): Promise<StrategicEvent[]> {
+    return await db.select().from(strategicEvents).orderBy(desc(strategicEvents.startDate));
+  }
+
+  async getStrategicEvent(id: number): Promise<StrategicEvent | undefined> {
+    const [event] = await db.select().from(strategicEvents).where(eq(strategicEvents.id, id));
+    return event;
+  }
+
+  async createStrategicEvent(eventData: InsertStrategicEvent): Promise<StrategicEvent> {
+    const [result] = await db.insert(strategicEvents).values(eventData as any);
+    const insertId = (result as any).insertId || (result as any).id;
+    const [event] = await db.select().from(strategicEvents).where(eq(strategicEvents.id, insertId));
+    if (!event) throw new Error("Strategic Event not found after creation");
+    return event;
+  }
+
+  async updateStrategicEvent(id: number, eventData: Partial<InsertStrategicEvent>): Promise<StrategicEvent | undefined> {
+    await db.update(strategicEvents).set({ ...eventData, updatedAt: new Date() } as any).where(eq(strategicEvents.id, id));
+    const [event] = await db.select().from(strategicEvents).where(eq(strategicEvents.id, id));
+    return event;
+  }
+
+  async deleteStrategicEvent(id: number): Promise<void> {
+    await db.delete(strategicEvents).where(eq(strategicEvents.id, id));
   }
 }
 

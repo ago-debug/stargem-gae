@@ -1016,6 +1016,8 @@ export const trainings = mysqlTable("trainings", {
   endDate: date("end_date"),
   statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
+  difficultyLevel: varchar("difficulty_level", { length: 100 }),
+  equipment: varchar("equipment", { length: 255 }),
   quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1080,6 +1082,8 @@ export const individualLessons = mysqlTable("individual_lessons", {
   endDate: date("end_date"),
   statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
+  memberId: int("member_id").references(() => members.id, { onDelete: "set null" }),
+  targetPurpose: text("target_purpose"),
   quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1097,6 +1101,10 @@ export const individualLessonsRelations = relations(individualLessons, ({ one })
   quote: one(quotes, {
     fields: [individualLessons.quoteId],
     references: [quotes.id],
+  }),
+  member: one(members, {
+    fields: [individualLessons.memberId],
+    references: [members.id],
   }),
   instructor: one(members, {
     fields: [individualLessons.instructorId],
@@ -2869,3 +2877,48 @@ export interface UnifiedCalendarEventDTO {
     uiRenderingType: string;      // Es. "STANDARD_COURSE_FORM" per istruire la Modale onclick
     rawPayload: any;              // Legacy info di supporto per la transizione
 }
+
+// ============================================================================
+// STRATEGIC EVENTS (Fase 24 / Planning Reale)
+// ============================================================================
+export const strategicEvents = mysqlTable("strategic_events", {
+  id: int("id").primaryKey().autoincrement(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  eventType: varchar("event_type", { length: 100 }).notNull(), // chiusura, ferie, sospensione, evento_macro, nota
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date"),
+  allDay: boolean("all_day").default(true),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  status: varchar("status", { length: 50 }).default("active"),
+  affectsCalendar: boolean("affects_calendar").default(true),
+  affectsPlanning: boolean("affects_planning").default(true),
+  affectsPayments: boolean("affects_payments").default(false),
+  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  color: varchar("color", { length: 50 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const strategicEventsRelations = relations(strategicEvents, ({ one }) => ({
+  season: one(seasons, {
+    fields: [strategicEvents.seasonId],
+    references: [seasons.id],
+  }),
+  studio: one(studios, {
+    fields: [strategicEvents.studioId],
+    references: [studios.id],
+  }),
+}));
+
+export const insertStrategicEventSchema = createInsertSchema(strategicEvents, {
+  startDate: z.string().or(z.date()).transform((val) => (typeof val === "string" ? new Date(val) : val)),
+  endDate: z.string().or(z.date()).transform((val) => (typeof val === "string" ? new Date(val) : val)).or(z.null()).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertStrategicEvent = z.infer<typeof insertStrategicEventSchema>;
+export type StrategicEvent = typeof strategicEvents.$inferSelect;

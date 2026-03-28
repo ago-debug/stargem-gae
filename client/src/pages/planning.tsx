@@ -1,5 +1,4 @@
-import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo, Fragment } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Calendar as CalendarIcon, Filter, Plus } from "lucide-react";
 import { format, getYear, getMonth, getDate, getDaysInMonth, isSameDay } from "date-fns";
@@ -9,6 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { getEventColorClass } from "@/lib/activity-colors";
 import { isItalianHoliday } from "@/lib/date-helpers";
 
@@ -40,6 +45,18 @@ const MONTHS_ORDERED = [
     { label: "Agosto", monthIndex: 7 }
 ];
 
+const getStrategicColor = (type: string) => {
+    switch(type) {
+        case 'chiusura': return 'bg-red-100 border-red-300 text-red-800';
+        case 'ferie': return 'bg-purple-100 border-purple-300 text-purple-800';
+        case 'apertura_eccezionale': return 'bg-emerald-100 border-emerald-300 text-emerald-800';
+        case 'evento_macro': return 'bg-blue-100 border-blue-300 text-blue-800';
+        case 'nota': return 'bg-yellow-100 border-yellow-300 text-yellow-800';
+        default: return 'bg-slate-100 border-slate-300 text-slate-800';
+    }
+};
+
+// Innesco HMR per Vite (Bypass cache Subagent)
 export default function Planning() {
     const today = new Date();
     // Se siamo prima di settembre, la stagione parte dall'anno scorso
@@ -50,6 +67,14 @@ export default function Planning() {
     // For mensile/settimanale navigation
     const [currentDateParam, setCurrentDateParam] = useState<Date>(today);
     const currentMonthIndex = today.getMonth();
+    
+    const { toast } = useToast();
+    const [strategicTitle, setStrategicTitle] = useState("");
+    const [strategicDesc, setStrategicDesc] = useState("");
+    const [strategicType, setStrategicType] = useState("chiusura");
+    const [strategicStart, setStrategicStart] = useState("");
+    const [strategicEnd, setStrategicEnd] = useState("");
+    const [strategicAllDay, setStrategicAllDay] = useState(true);
 
     // --- FETCH DATA ---
     const { data: courses, isLoading: coursesLoading } = useQuery<any[]>({ queryKey: ["/api/courses"] });
@@ -59,9 +84,45 @@ export default function Planning() {
     const { data: recitals, isLoading: recitalsLoading } = useQuery<any[]>({ queryKey: ["/api/recitals"] });
     const { data: vacationStudies, isLoading: vacationsLoading } = useQuery<any[]>({ queryKey: ["/api/vacation-studies"] });
     const { data: bookingServices, isLoading: servicesLoading } = useQuery<any[]>({ queryKey: ["/api/booking-services"] });
+    const { data: strategicEventsData, isLoading: strategicLoading } = useQuery<any[]>({ queryKey: ["/api/strategic-events"] });
 
-    const isLoading = coursesLoading || workshopsLoading || sundayLoading || 
+    const isLoading = coursesLoading || workshopsLoading || sundayLoading || strategicLoading ||
                       campusLoading || recitalsLoading || vacationsLoading || servicesLoading;
+
+    // --- MUTATIONS ---
+    const createStrategicMutation = useMutation({
+        mutationFn: async (data: any) => {
+            const res = await apiRequest("POST", "/api/strategic-events", data);
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/strategic-events"] });
+            setStrategicModalOpen(false);
+            toast({ title: "Evento creato", description: "L'evento strategico è stato salvato con successo." });
+            setStrategicTitle("");
+            setStrategicDesc("");
+            setStrategicStart("");
+            setStrategicEnd("");
+        },
+        onError: (err) => {
+            toast({ title: "Errore", description: "Impossibile salvare l'evento.", variant: "destructive" });
+        }
+    });
+
+    const handleSaveStrategicEvent = () => {
+        if (!strategicTitle || !strategicStart) {
+            toast({ title: "Campi obbligatori", description: "Inserisci titolo e data inizio.", variant: "destructive" });
+            return;
+        }
+        createStrategicMutation.mutate({
+            title: strategicTitle,
+            description: strategicDesc,
+            eventType: strategicType,
+            startDate: strategicStart,
+            endDate: strategicEnd || null,
+            allDay: strategicAllDay,
+        });
+    };
 
     // --- AGGREGATE COURSES ---
     // mapping courses to dayOfWeek (1=Lun, 7=Dom)
@@ -89,8 +150,19 @@ export default function Planning() {
         if (vacationStudies) evts.push(...vacationStudies.map(v => mapActivityToPlanningEvent(v, "vac", "Chiusura/Vacanza", "vacanze-studio")).filter(Boolean) as PlanningEvent[]);
         if (bookingServices) evts.push(...bookingServices.map(b => mapBookingServiceToPlanningEvent(b)).filter(Boolean) as PlanningEvent[]);
 
+        if (strategicEventsData) {
+            evts.push(...strategicEventsData.map(se => ({
+                id: `strat_${se.id}`,
+                type: se.eventType,
+                title: se.title,
+                startDate: new Date(se.startDate),
+                endDate: se.endDate ? new Date(se.endDate) : undefined,
+                colorClass: getStrategicColor(se.eventType)
+            })));
+        }
+
         return evts;
-    }, [workshops, sundayActivities, campusActivities, recitals, vacationStudies, bookingServices]);
+    }, [workshops, sundayActivities, campusActivities, recitals, vacationStudies, bookingServices, strategicEventsData]);
 
     // --- GRID GENERATION ---
     // 31 days rows, 12 months columns
@@ -167,7 +239,7 @@ export default function Planning() {
                     </Link>
                 );
             } else {
-                cellEvents.push(<React.Fragment key={e.id}>{elementBlock}</React.Fragment>);
+                cellEvents.push(<Fragment key={e.id}>{elementBlock}</Fragment>);
             }
         });
 
@@ -461,7 +533,7 @@ export default function Planning() {
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
                             <Label>Tipologia Evento</Label>
-                            <Select defaultValue="chiusura">
+                            <Select value={strategicType} onValueChange={setStrategicType}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Seleziona tipologia..." />
                                 </SelectTrigger>
@@ -474,10 +546,38 @@ export default function Planning() {
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div className="space-y-2">
+                            <Label>Titolo</Label>
+                            <Input value={strategicTitle} onChange={e => setStrategicTitle(e.target.value)} placeholder="Es. Ferie Estive" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Data Inizio</Label>
+                                <Input type="date" value={strategicStart} onChange={e => setStrategicStart(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Data Fine (Opzionale)</Label>
+                                <Input type="date" value={strategicEnd} onChange={e => setStrategicEnd(e.target.value)} />
+                            </div>
+                        </div>
+                        <div className="space-y-2 text-sm flex items-center justify-between border rounded p-3">
+                            <div>
+                                <p className="font-semibold">Tutto il giorno</p>
+                                <p className="text-slate-500 text-xs text-muted-foreground">L'evento copre per intero le date indicate</p>
+                            </div>
+                            <Switch checked={strategicAllDay} onCheckedChange={setStrategicAllDay} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Note / Descrizione</Label>
+                            <Textarea value={strategicDesc} onChange={e => setStrategicDesc(e.target.value)} placeholder="Dettagli operativi..." />
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setStrategicModalOpen(false)}>Annulla</Button>
-                        <Button onClick={() => setStrategicModalOpen(false)}>Salva Evento (Mock)</Button>
+                        <Button onClick={handleSaveStrategicEvent} disabled={createStrategicMutation.isPending}>
+                            {createStrategicMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Salva Evento
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

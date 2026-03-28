@@ -9,8 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Sparkles } from "lucide-react";
-import { ActivityNavMenu } from "@/components/activity-nav-menu";
+import { Plus, Edit, Trash2, Sparkles, ArrowLeft } from "lucide-react";
 import type { BookingService, InsertBookingService, BookingServiceCategory } from "@shared/schema";
 
 export default function BookingServices() {
@@ -98,14 +97,17 @@ export default function BookingServices() {
 
     return (
         <div className="p-6 md:p-8 space-y-6 mx-auto">
-            <div className="mb-6">
-                <ActivityNavMenu />
+            <div className="flex items-center gap-3 mb-6">
+                 <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0">
+                    <ArrowLeft className="w-4 h-4 text-white" />
+                 </Button>
+                 <div>
+                    <h1 className="text-3xl font-semibold text-foreground mb-1">Setup Listino Servizi / Eventi Esterni</h1>
+                    <p className="text-muted-foreground text-sm">Configura l'anagrafica dei servizi extra per alimentare il modale Affitti/Prenotazioni</p>
+                 </div>
             </div>
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div>
-                    <h1 className="text-3xl font-semibold text-foreground mb-2">Eventi Esterni</h1>
-                    <p className="text-muted-foreground">Configura e gestisci gli eventi extra e non a listino</p>
-                </div>
+            
+            <div className="flex items-center justify-end gap-4 flex-wrap">
                 <Button
                     onClick={() => {
                         setEditingService(null);

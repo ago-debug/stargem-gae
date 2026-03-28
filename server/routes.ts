@@ -70,7 +70,8 @@ import {
   globalEnrollments,
   insertGlobalEnrollmentSchema,
   insertMerchandisingCategorySchema,
-  insertRentalCategorySchema
+  insertRentalCategorySchema,
+  insertStrategicEventSchema
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -6745,6 +6746,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Bridge Error (Enrollments):", error);
       res.status(500).json({ error: "Failed to fetch unified enrollments preview" });
+    }
+  });
+
+  // ==========================================
+  // STRATEGIC EVENTS (PLANNING STAGIONALE)
+  // ==========================================
+  app.get("/api/strategic-events", isAuthenticated, async (req, res) => {
+    try {
+      const events = await storage.getStrategicEvents();
+      res.json(events);
+    } catch (err) {
+      console.error("Error fetching strategic events:", err);
+      res.status(500).json({ message: "Failed to fetch strategic events" });
+    }
+  });
+
+  app.post("/api/strategic-events", isAuthenticated, async (req, res) => {
+    try {
+      const result = insertStrategicEventSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid event data", errors: result.error.errors });
+      }
+      const newEvent = await storage.createStrategicEvent(result.data);
+      res.status(201).json(newEvent);
+    } catch (err: any) {
+      console.error("Error creating strategic event:", err);
+      res.status(500).json({ message: "Failed to create strategic event", error: err.message, stack: err.stack });
+    }
+  });
+
+  app.patch("/api/strategic-events/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid ID" });
+      
+      const result = insertStrategicEventSchema.partial().safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid event data", errors: result.error.errors });
+      }
+
+      const updated = await storage.updateStrategicEvent(id, result.data);
+      if (!updated) return res.status(404).json({ message: "Strategic event not found" });
+      
+      res.json(updated);
+    } catch (err) {
+      console.error("Error updating strategic event:", err);
+      res.status(500).json({ message: "Failed to update strategic event" });
+    }
+  });
+
+  app.delete("/api/strategic-events/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid ID" });
+      
+      await storage.deleteStrategicEvent(id);
+      res.json({ message: "Strategic event deleted successfully" });
+    } catch (err) {
+      console.error("Error deleting strategic event:", err);
+      res.status(500).json({ message: "Failed to delete strategic event" });
     }
   });
 

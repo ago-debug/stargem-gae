@@ -19,7 +19,7 @@ import { Plus, Search, Edit, Trash2, Download, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
-import type { Instructor, Studio, ActivityStatus, Quote } from "@shared/schema";
+import type { Instructor, Studio, ActivityStatus, Quote, Member } from "@shared/schema";
 import { Combobox } from "@/components/ui/combobox";
 import { useCustomListValues } from "@/hooks/use-custom-list";
 
@@ -81,6 +81,7 @@ interface ActivityManagementPageProps {
   itemLabelPlural: string;
   baseRoute: string; // The route prefix for the detail page
   testIdPrefix: string;
+  activityType?: "individual_lesson" | "training" | "other"; // Identificatore per il Modale Operativo Condiviso
 }
 
 export default function ActivityManagementPage({
@@ -92,6 +93,7 @@ export default function ActivityManagementPage({
   itemLabelPlural,
   baseRoute,
   testIdPrefix,
+  activityType = "other",
 }: ActivityManagementPageProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -119,6 +121,16 @@ export default function ActivityManagementPage({
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string>("");
   const [price, setPrice] = useState<string>("");
+
+  const [selectedMemberId, setSelectedMemberId] = useState<string>("");
+  const [targetPurpose, setTargetPurpose] = useState<string>("");
+  const [difficultyLevel, setDifficultyLevel] = useState<string>("");
+  const [equipment, setEquipment] = useState<string>("");
+
+  const { data: membersResponse } = useQuery<{ members: Member[] }>({
+    queryKey: ["/api/members?pageSize=5000"],
+  });
+  const membersList = membersResponse?.members || [];
 
   const { data: quotes } = useQuery<Quote[]>({
     queryKey: ["/api/quotes"],
@@ -214,6 +226,14 @@ export default function ActivityManagementPage({
       active: true,
     };
 
+    if (activityType === "individual_lesson") {
+      data.memberId = selectedMemberId ? parseInt(selectedMemberId) : null;
+      data.targetPurpose = targetPurpose || null;
+    } else if (activityType === "training") {
+      data.difficultyLevel = difficultyLevel || null;
+      data.equipment = equipment || null;
+    }
+
     if (editingItem) {
       updateMutation.mutate({ id: editingItem.id, data });
     } else {
@@ -230,6 +250,10 @@ export default function ActivityManagementPage({
     setSelectedStatuses(parseStatusTags(item.statusTags));
     setSelectedQuoteId(item.quoteId?.toString() || "");
     setPrice(item.price || "");
+    setSelectedMemberId((item as any).memberId?.toString() || "");
+    setTargetPurpose((item as any).targetPurpose || "");
+    setDifficultyLevel((item as any).difficultyLevel || "");
+    setEquipment((item as any).equipment || "");
     setIsFormOpen(true);
   };
 
@@ -243,6 +267,10 @@ export default function ActivityManagementPage({
     setSelectedStatuses([]);
     setSelectedQuoteId("");
     setPrice("");
+    setSelectedMemberId("");
+    setTargetPurpose("");
+    setDifficultyLevel("");
+    setEquipment("");
   };
 
   const filteredItems = items?.filter((item) =>
@@ -557,6 +585,68 @@ export default function ActivityManagementPage({
           data-testid={`input-${testIdPrefix}-schedule`}
         />
       </div>
+
+      {/* BLOCCCHI CONDIZIONALI MODALE OPERATIVO CONDIVISO (FASE 21/23) */}
+      {activityType === "individual_lesson" && (
+        <div className="p-4 mt-6 border border-amber-500/30 bg-amber-500/5 rounded-md space-y-4">
+          <h4 className="text-sm font-semibold text-amber-900 border-b border-amber-500/20 pb-2">Dettagli Specifici Lezione Privata</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Allievo / Partecipante Principale</Label>
+              <Select value={selectedMemberId} onValueChange={setSelectedMemberId}>
+                <SelectTrigger className="bg-white/50">
+                  <SelectValue placeholder="Seleziona allievo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {membersList.map((member) => (
+                    <SelectItem key={member.id} value={member.id.toString()}>
+                      {member.lastName} {member.firstName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Obiettivo Specifico Sessione</Label>
+              <Input 
+                placeholder="Es. Rieducazione spalla, Potenziamento..." 
+                className="bg-white/50" 
+                value={targetPurpose}
+                onChange={(e) => setTargetPurpose(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activityType === "training" && (
+        <div className="p-4 mt-6 border border-blue-500/30 bg-blue-500/5 rounded-md space-y-4">
+          <h4 className="text-sm font-semibold text-blue-900 border-b border-blue-500/20 pb-2">Parametri Allenamento Autonomo</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Livello Consigliato / Intensità</Label>
+              <Select value={difficultyLevel} onValueChange={setDifficultyLevel}>
+                <SelectTrigger className="bg-white/50"><SelectValue placeholder="Seleziona livello..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="base">Programma Base</SelectItem>
+                  <SelectItem value="intermedio">Programma Intermedio</SelectItem>
+                  <SelectItem value="avanzato">Programma Avanzato</SelectItem>
+                  <SelectItem value="recupero">Recupero Attivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Gruppo / Attrezzi Prenotati</Label>
+              <Input 
+                placeholder="Es. Macchinari Cardio, Circuito 1..." 
+                className="bg-white/50" 
+                value={equipment}
+                onChange={(e) => setEquipment(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <DialogFooter>
         <Button
