@@ -663,7 +663,7 @@ export default function StudioBookings() {
                                         <div className="flex flex-col items-start overflow-hidden">
                                             {bookingForm.serviceId
                                                 ? <span className="font-medium">{bookingServices?.find(s => s.id === bookingForm.serviceId)?.name}</span>
-                                                : <span className="text-muted-foreground">{bookingForm.title || "Seleziona o scrivi servizio..."}</span>
+                                                : <span className="text-muted-foreground">Seleziona servizio...</span>
                                             }
                                         </div>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -672,25 +672,11 @@ export default function StudioBookings() {
                                 <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                                     <Command>
                                         <CommandInput
-                                            placeholder="Cerca o scrivi nuovo servizio..."
+                                            placeholder="Cerca servizio..."
                                         />
                                         <CommandList>
                                             <CommandEmpty className="p-2 space-y-2">
-                                                <p className="text-xs text-muted-foreground px-2">Nessun servizio trovato.</p>
-                                                <Button
-                                                    variant="secondary"
-                                                    size="sm"
-                                                    className="w-full justify-start gap-2 h-10"
-                                                    onClick={() => {
-                                                        const typedValue = (document.querySelector('[cmdk-input]') as HTMLInputElement)?.value;
-                                                        if (typedValue) {
-                                                            setBookingForm((prev: any) => ({ ...prev, serviceId: undefined, title: typedValue }));
-                                                            setServiceSearchOpen(false);
-                                                        }
-                                                    }}
-                                                >
-                                                    <Plus className="w-4 h-4" /> Usa come testo libero: "{(document.querySelector('[cmdk-input]') as HTMLInputElement)?.value}"
-                                                </Button>
+                                                <p className="text-xs text-muted-foreground px-2">Nessun servizio trovato. Clicca su "Nuovo Servizio" in alto a destra per crearne uno.</p>
                                             </CommandEmpty>
                                             <CommandGroup heading="Servizi Esistenti">
                                                 {bookingServices?.map(s => (

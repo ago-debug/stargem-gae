@@ -18,9 +18,7 @@ const activityMenuItems = [
   { id: "affitti", label: "Affitti", icon: Building2, url: "/prenotazioni-sale" },
   { id: "campus", label: "Campus", icon: Users, url: "/attivita/campus" },
   { id: "saggi", label: "Saggi", icon: Award, url: "/attivita/saggi" },
-  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, url: "/attivita/vacanze-studio" },
-  { id: "eventi-esterni", label: "Eventi Esterni", icon: Globe, url: "/attivita/servizi" },
-  { id: "merchandising", label: "Merchandising", icon: ShoppingBag, url: "/gestione-attivita-stub" },
+  { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, url: "/attivita/vacanze-studio" }
 ];
 
 export function ActivityNavMenu() {

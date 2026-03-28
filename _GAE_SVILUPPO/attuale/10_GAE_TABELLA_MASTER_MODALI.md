@@ -2,8 +2,8 @@
 *(Rev. 27 Marzo 2026 - Master Allineamento Esecutivo Phase 20)*
 
 > **EXECUTIVE SUMMARY:** Sono state tracciate tre macro-chat di attività extra-Corsi per determinare la fattibilità e l'ordine di sviluppo del refactoring unificato (*Ref. Implementation Plan Phase 20*).
-> - **Chat 1 (Lez.Ind, Allenam, Affitti):** Lezioni e Allenamenti usano già Modale Condiviso STI. Affitti resta con Modale Custom per logiche Checkout e Anagrafica On-the-fly, ma esige standardizzazione Free-Text -> Combobox.
-> - **Chat 2 (Workshop, Campus, DomInMovimento):** Campus e Domeniche ok. Workshop in via immediata di unificazione a TheCourseUnifiedModal (Alta Priorità).
+> - **Chat 4 (Lez.Ind, Allenam, Affitti) - AUDIT ESEGUITO:** Separazione netta dei domini. 'Affitti' resta isolato con Modale Booking Dedicato (rischio checkout). 'Lezioni Individuali' e 'Allenamenti' confluiranno in un unico "Modale Operativo Condiviso" preservando i campi specifici, senza fonderli semanticamente (Lezione = Prestazione privata; Allenamento = Pratica autonoma didattica).
+> - **Chat 2 (Workshop, Campus, DomInMovimento):** Campus e Domeniche ok. Workshop già unificato in Phase 20 a `CourseUnifiedModal`.
 > - **Chat 3 (Saggi, Vacanze, Eventi Ext):** Saggi e Vacanze ok. Eventi Esterni derubricato da UI Palinsesto a Tabella Setup Listino.
 > - **Planning:** Urgente innesto `strategic_events` database su modale attualmente vuoto.
 
@@ -68,8 +68,11 @@
 | Attività | Corsi/Workshop | `/corsi`, `/workshop` | - | `CourseDialog`, `WorkshopDialog` | Temporali | Date, Orari, Giorni | Date, Select | Sì | No | Costanti TimeSlots | - | Corretto | - | `/api/courses`, `/api/workshops` | - | `courses`, `workshops` | Sì | No | No | No | No | Attività | Stabile | Media | Basso | Usare Timestamp unici futuri | Orari come string `HH:mm` |
 
 
-## 7. MODALE UNIFICATO ATTIVITÀ (9 Silos Condivisi)
-*Le seguenti aree utilizzano tutte un file riutilizzabile: `ActivityManagementPage` (`components/activity-management-page.tsx`). Questo semplifica notevolmente l'unificazione futura. Riguarda: Prove Gratuite, Prove a Pagamento, Lezioni Singole, Lezioni Indiv., Domenica in Mov., Allenamenti, Campus, Vacanze Studio, Saggi.*
+## 7. MODALE OPERATIVO CONDIVISO (Lezioni Individuali, Allenamenti e altre 7 Attività)
+*Le seguenti aree utilizzano tutte un file riutilizzabile: `ActivityManagementPage` (`components/activity-management-page.tsx`). Questo semplifica notevolmente l'unificazione futura.*
+* **Campi Core Condivisi:** Nome, Categoria, Stato, Istruttore, Sala, Data, Ora Inizio/Fine, Partecipanti, Quota, Note.
+* **Campi Lezione Ind.:** Partecipante principale (Obbligatorio), Pacchetto associato, Obiettivo/Sessione.
+* **Campi Allenamento:** Gruppo/Partecipanti, Istruttore (Facoltativo/Obbligatorio).
 
 | Area | Pagina | Route canonica | Route legacy / alias | Modale | Campo UI | Label visibile | Tipo campo | Obbligatorio | Multi | Sorgente dati | Elenco / tabella sorgente | Binding | Endpoint lettura | Endpoint scrittura | Tabelle lette | Tabelle scritte | Impatta Calendario | Impatta Planning | Impatta Pagamenti | Impatta Tessere | Impatta Anagrafica | Dominio | Stato architetturale | Priorità | Rischio | Decisione operativa consigliata | Note |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -81,8 +84,10 @@
 | Misti | (9 Silos) | Variabili | - | `Dialog Form (Unified)`| Temporali | Date, Orari, Giorni | Date, Select | No/Sì | No | Costanti TimeSlots | - | Corretto | - | Vari endpoints | - | 9 Tabelle DB | Sì | No | No | No | No | Attività | Stabile | Media | Basso | Da convertire in Timestamp real | Gestione stringhe `HH:mm` |
 
 
-## 8. AFFITTI (Studio Bookings)
-*Gestione indipendente. Modale `StudioBookings` in `studio-bookings.tsx` focalizzato sugli spazi anziché sui corsi.*
+## 8. AFFITTI (Booking / Rental Modal Dedicato)
+*Gestione indipendente e blindata. Modale `StudioBookings` in `studio-bookings.tsx` focalizzato sugli spazi nudi anziché sui corsi. È un dominio di Booking, NON didattico.*
+* **Campi Obbligatori:** Servizio, Prenotante, Sala, Data, Ora Inizio/Fine, Importo, Stato Pagamento Immediato (Sì/No).
+* **Campi Accessori:** Metodo Pagamento, Note, Contatto, Categoria Affitto.
 
 | Area | Pagina | Route canonica | Route legacy / alias | Modale | Campo UI | Label visibile | Tipo campo | Obbligatorio | Multi | Sorgente dati | Elenco / tabella sorgente | Binding | Endpoint lettura | Endpoint scrittura | Tabelle lette | Tabelle scritte | Impatta Calendario | Impatta Planning | Impatta Pagamenti | Impatta Tessere | Impatta Anagrafica | Dominio | Stato architetturale | Priorità | Rischio | Decisione operativa consigliata | Note |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |

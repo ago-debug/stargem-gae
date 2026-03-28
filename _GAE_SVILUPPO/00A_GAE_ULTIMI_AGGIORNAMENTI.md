@@ -5,6 +5,13 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 27 Marzo 2026 (Phase 25: Allineamento e Audit Finale 13 Attività)
+* **Certificazione Stato Attività:** Eseguito ed emesso il verdetto tecnico finale sullo status dei 13 silos di attività:
+  * **Pienamente Operativi (7):** Corsi, Workshop, Lezioni Individuali, Allenamenti, Affitti, Domeniche, Campus, Saggi, Vacanze. Ciascuno è coperto dalle factory universali `CourseUnifiedModal` e `ActivityOperationalModal`.
+  * **Architettura Partecipazioni V2 (3):** Prove Gratuite, Prove a Pagamento, Lezioni Singole. Questi moduli "legacy" sono sfociati in via definitiva come logiche ibride nella tabella base `enrollments`. Nessun endpoint di recupero o salvataggio risulta orfano o troncato nella rotta *Maschera Input / Nuove Iscrizioni*. Il loop architetturale salva correttamente custom types ed extra-dates senza null values.
+  * **Moduli Setup (1):** Eventi Esterni. Architetturalmente isolato dalla didattica a Settings tecnico.
+* **Allineamento Documentale:** Convalidata l'assenza totale di Mockup di sistema. Chiuso il giro di boa tecnico aggiornando i Documenti di Progetto (`00B_GAE`, `11_GAE` e `task.md`) per dichiarare tecnicamente "Fossilizzata e Stabile" l'intera Area UI Attività e Modali.
+
 ### 27 Marzo 2026 (Phase 20: Master Allineamento Modali - Workshop)
 * **Convergenza Architetturale Modale Workshop:**
   * Sradicata la vecchia UI duplicata e frammentata di `workshops.tsx` (ridotta da ~1600 righe a ~700).

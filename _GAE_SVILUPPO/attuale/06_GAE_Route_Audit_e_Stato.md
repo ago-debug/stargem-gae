@@ -38,7 +38,7 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Cour
 | Calendario Attività | `/calendario-attivita` | `CalendarPage` | canonico | Area per inserimento orario (Single-Entry Modal limitata a 10 attività day-by-day e Box a 5-righe). Aggiunte indicazioni di instradamento inverso (Vai alla Scheda) nei form modifica. Implementato Collision-Layout e Frontend Time-Conflict Blocker. |
 | Planning | `/planning` | `Planning` | canonico | Mappa Strategica Multi-Stagione (Set-Ago). Evidenzia Oggi e Mese Corrente. Implementa il modale Bozza (Chiude/Ferie/Extra) e routing Corsi verso il calendario. |
 | Studios / Sale | `/studios` | `Studios` | canonico | Gestione risorse fisiche |
-| Affitti | `/prenotazioni-sale` | `StudioBookings` | da riallineare | **Attività ufficiale** (Nome UI definitivo). URL e componente legacy tecnico ("sale") da pulire. |
+| Affitti | `/prenotazioni-sale` | `StudioBookings` | da riallineare | **Attività ufficiale** (Nome UI definitivo). Dominio Booking Separato (non mischiabile con le attività didattiche). URL e componente legacy tecnico ("sale") da riallineare al nuovo DTO. |
 | Affitto Studio Medico | `/affitto-studio` | `StubAffittoStudio` (Wrapper) | placeholder | Sotto-caso / Modulo specifico futuro collegato ad "Affitti". |
 | Eventi Esterni | `/attivita/servizi` | `BookingServices` | canonico | **Attività ufficiale**. Nome UI ormai consolidato; `/servizi` e `BookingServices` sono solo gli slug/componenti tecnici storici. Le vecchie chiamate "Servizi Extra" / "Prenotabili" non esistono più. |
 | Merchandising | `/attivita/merchandising` | `StubMerchandising` (Wrapper) | placeholder | **Attività ufficiale** 100%. Momentaneamente su Stub/Placeholder ma gode degli stessi asset delle altre attività. |
@@ -52,6 +52,8 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Cour
 | *Nessun UI* | `/workshops` | *Redirect* | legacy tollerato | Redirect pulito a `/attivita/workshops` |
 | Dettaglio Workshop | `/attivita/workshops` | `Workshops` | canonico | Vera parent route STI per workshops |
 | Categorie Eventi Esterni | `/categorie-eventi-esterni` | `BookingServiceCategories` | canonico | Nome UI corretto. Slug corretto ad `/eventi-esterni` per distacco da legacy `servizi`. |
+| Dettaglio Lezioni Individuali | `/attivita/lezioni-individuali` | *Modale Condiviso* | canonico | Route canonica per silo operativo privato. Condividerà l'Activity Operational Modal. |
+| Dettaglio Allenamenti | `/attivita/allenamenti` | *Modale Condiviso* | canonico | Route canonica per silo operativo autonomo. Condividerà l'Activity Operational Modal. |
 | Categorie Prove a Pagamento | `/categorie-prove-pagamento` | `PaidTrialsCategories` | dismesso | Oscurate da UI (Fase 8) in attesa di decomissione db. |
 | Categorie Prove Gratuite | `/categorie-prove-gratuite` | `FreeTrialsCategories` | dismesso | Oscurate da UI (Fase 8) in attesa di decomissione db. |
 | Categorie Lezioni Singole | `/categorie-lezioni-singole` | `SingleLessonsCategories` | dismesso | Oscurate da UI (Fase 8) in attesa di decomissione db. |
