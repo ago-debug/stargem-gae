@@ -49,7 +49,7 @@
 ## 5. PLANNING (STRATEGICO)
 | Area | Pagina | Route canonica | Route legacy / alias | Modale | Campo UI | Label visibile | Tipo campo | Obbligatorio | Multi | Sorgente dati | Elenco / tabella sorgente | Binding | Endpoint lettura | Endpoint scrittura | Tabelle lette | Tabelle scritte | Impatta Calendario | Impatta Planning | Impatta Pagamenti | Impatta Tessere | Impatta Anagrafica | Dominio | Stato architetturale | Priorità | Rischio | Decisione operativa consigliata | Note |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Direzione | Planning | `/planning` | - | `StrategicEventModal` | Tipologia | Tipologia Evento | Select | Sì | No | Costante Statica | - | Mancante | - | - | - | - | No | Sì | No | No | No | Meta | MOCKUP / Draft | Urgente | Basso | Creare Tabella `strategic_events` DB | Al momento apre una Form vuota finta. |
+| Direzione | Planning | `/planning` | - | `StrategicEventModal` | Tipologia | Tipologia Evento | Select | Sì | No | API `strategic_events` | `strategic_events` | Corretto | `/api/strategic-events` | `/api/strategic-events` | `strategic_events` | `strategic_events` | No | Sì | No | No | No | Meta | STABILE | Alta | Basso | - | Dati collegati a DB e attivi in backend |
 
 ---
 
@@ -197,7 +197,7 @@ L'analisi del Blocco 3 ha evidenziato che la maggior parte dei selettori relazio
 | Anagrafica | `/maschera-input` | Form | Comune/Prov. | Comune Residenza | MultiSelect | Anagrafica | Hardcoded Mock | Errato (Mock) | Specifico | No | No | No | No | No | No | Sì (API) | No | Da rifare | Media | Basso | Sostituire con SDK ISTAT o DB statico Comuni IT | Ora array dummy vuoto/free text pre-config |
 | Iscrizioni | `/maschera-input` | Form | Iscrizione | Iscrivi Corsi | MultiSelect | Attività | Fetch Multip. | Ambiguo | Specifico | No | No | No | No | No | No | Sì (STI) | Sì (`_global_enro.`) | Da rifare | Massima | Alto | Refactoring STI verso payload unico `/api/activities` | Blocca la fluidità, spara n-fetch ai Silos |
 | Cassa | Globale | `NuovoPagamento` | Dettaglio | Dettagli Iscr. (Mock) | MultiSelect | Trasversale | Hardcoded Mock | Errato (Mock) | Condiviso | No | Sì | Sì | No | No | No | Sì | No | Da rifare | Alta | Medio | Generare `custom_lists` ("Mese", "Trimestre"...) e associarla | Dati "Mensilità", "Annuale" non bindati a backend reale |
-| Planning | `/planning` | `StrategicEvent` | Tipologia | Tipologia Evento | Select | Extra | Hardcoded UI | Mancante | Specifico | No | Sì | Sì | No | Sì | No | Sì | Sì | Da rifare | Media | Basso | Creare entità `strategic_events` e linkare il DB | Il componente attualmente genera un proxy vuoto |
+| Planning | `/planning` | `StrategicEvent` | Tipologia | Tipologia Evento | Select | Extra | API Reale | Corretto | Specifico | No | No | No | No | No | No | Sì | Sì | OK | Bassa | Basso | - | Modulo strategico E2E Funzionante |
 | Tessere | Multiple | Tessere/Input | Ente | Tessera Ente | Input | Associaz. | Libero/Hardc. | Sporco | Condiviso | No | Sì | Sì | No | No | No | Sì | No | Da normalizzare | Bassa | Basso | Sostituire Input con `Select` guidato da `custom_lists` | Spesso si digita free text `Libertas`, genera mis-match |
 
 <br/>
@@ -217,7 +217,7 @@ L'analisi del Blocco 3 ha evidenziato che la maggior parte dei selettori relazio
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
 | MED-1 | Genere | Attività | `/*` | Unified/Course | Attività | Recente Refac | UI completata, ma vecchi corsi orfani | `custom_lists` | Consolidamento | Sì | Sì | Sì | Sì | No | No | Massima | Medio | Refactoring Elenchi completato | Nessuno (se base stabile) | Eseguire binding dei vecchi corsi ai nuovi ID lista (Data Pump) | 1 | Rivedere flussi storici |
 | MED-2 | Categoria Attività | Attività | `/*` | Unified/Course | Attività | Stabile | Categorie non filtrate per Dominio | `categories` | Filtrate per contesto | No | No | No | No | Sì | No | Media | Medio | `categories` DB | `/api/categories`, Modali UI | Aggiungere parametro tipo dominio al fetch categorie | 2 | Standard FK |
-| MED-3 | Tipologia Evento Planning| Planning | `/planning` | StrategicEvent | Extra | Manca Base Dati | Modale produce dati fantasma | UI Enum Dummies | DB Entità | No | No | No | No | Sì | Sì (Temp) | Media | Basso | Creazione tabella | `schema.ts`, `planning.tsx` | Creare `strategic_events` o lasciare hardcoded se poco usato | 3 | Valutare effort/beneficio |
+| MED-3 | Tipologia Evento Planning| Planning | `/planning` | StrategicEvent | Extra | Stabile | DB Funzionante | `strategic_events` | DB Entità | No | No | No | No | Sì | No | Bassa | Basso | Nessuna | - | Creazione completata (Phase 24) | Eseguito | Componente UI e Backend perfettamente allineati |
 
 ## 3. INTERVENTI AD ALTO RISCHIO DA CONGELARE (STOP & GO - Non toccare)
 | ID | Campo / elenco | Area | Pagina | Modale | Dominio attività | Stato architetturale | Problema attuale | Sorgente attuale | Modello target | Usa `custom_lists` | Usa `items` | Usa `linked_act` | Serve binding completo | Tabella relaz. | Hardcoded per ora | Priorità | Rischio | Dipendenze | File da toccare | Decisione operativa | Ordine esecuz. | Note |

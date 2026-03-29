@@ -122,7 +122,7 @@ I seguenti task derivano dall'audit architetturale volto ad allineare i 12 silos
 - [x] Generazione Entità "Planning Strategico" (Media Priorità)
   - File toccati: `shared/schema.ts`, `server/routes.ts`, `planning.tsx`
   - Obiettivo: Abbandonare il Mockup UI ed instaurare il salvataggio eventi Macro (`strategic_events`), Chiusure, Ferie.
-  - Esito: Schema generato, REST funzionante e salvataggi verificati su DB.
+  - Esito: Operativo E2E e testato nativamente su DB in read/write/delete.
 
 - [x] Blindatura Modale "Affitti" (Media Priorità)
   - File toccati: `client/src/pages/studio-bookings.tsx`

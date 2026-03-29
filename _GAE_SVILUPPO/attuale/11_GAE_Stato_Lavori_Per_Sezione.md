@@ -56,17 +56,18 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 ---
 
 ## 6. Attività / modali / silos
-**Stato Attuale:** 🟢 CHIUSO E ALLINEATO AL 100% (Audit Fase 25 Completato)
-**Sintesi:** Il nucleo operativo delle 13 Attività è stato interamente mappato, revisionato e collaudato.
+**Stato Attuale:** 🟢 13 su 13 CENSITE E OPERATIVE
+**Sintesi:** Il nucleo operativo delle 13 Attività è stato interamente mappato e revisionato, offrendo livelli diversi di maturità architetturale.
 * **Cosa è già stato fatto:** 
   - **Corsi, Workshop**: Gestiti nativamente dal `CourseUnifiedModal` con Iscritti/Presenze in tempo reale.
   - **Lezioni Individuali, Allenamenti, Campus, Domeniche, Saggi, Vacanze**: Fully-managed dal polimorfico `ActivityOperationalModal` / `activity-management-page.tsx`.
   - **Affitti**: Isolati tramite modulo blindato e Listino dedicato.
   - **Prove Gratuite, Prove a Pagamento, Lezioni Singole**: I 3 vecchi silos frammentati sono stati definitivamente smantellati come tabelle indipendenti. Sono ora processati dalla *Maschera Input / Modulo Iscrizioni* globale che scrive un record `enrollments` specializzato valorizzando `participationType` e `targetDate`. Niente dati orfani o form finti, 100% integrità backend.
   - **Eventi Esterni**: Rimosso dalla griglia operativa, relegato a Setup tecnico configurativo.
-* **Cosa manca:** Nulla. Mappatura endpoint REST, UI React e persistenza MySQL sono in perfetto sincrono tra di loro. The Truth is Code.
+  - **Planning Strategico**: Modulo connesso a DB (`strategic_events`), validato End-to-End con CRUD reale e render visuale sul calendario annuale. Nessun bug bloccante emerso nel collaudo E2E eseguito su Planning e smoke test Attività.
+* **Cosa manca:** Nessun modulo bloccato nell’area Attività, ma restano collaudi e rifiniture sui casi edge (es. scaling della UI, concurrency, validazioni secondarie). La base REST, UI React e MySQL è sincronizzata costantemente sull'obiettivo primario.
 * **Rischi / Attenzioni:** Tassativo non ricreare mai tabelle isolate per le "prove" fisiche di un'attività. Appoggiarsi costantemente alla factory universale `enrollments` con il suo Type.
-* **Prossimo Step Consigliato:** Nessun intervento ulteriore. Considerare il blocco "Gestione Attività / UI" tecnicamente chiuso e garantito.
+* **Prossimo Step Consigliato:** Promuovere il modulo ai test QA di integrazione estesi, spostando lo sviluppo puro sulla Maschera Input / Carrello Pagamenti.
 
 ---
 

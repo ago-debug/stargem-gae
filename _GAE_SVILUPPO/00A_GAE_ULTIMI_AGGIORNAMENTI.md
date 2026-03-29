@@ -10,7 +10,13 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
   * **Pienamente Operativi (7):** Corsi, Workshop, Lezioni Individuali, Allenamenti, Affitti, Domeniche, Campus, Saggi, Vacanze. Ciascuno è coperto dalle factory universali `CourseUnifiedModal` e `ActivityOperationalModal`.
   * **Architettura Partecipazioni V2 (3):** Prove Gratuite, Prove a Pagamento, Lezioni Singole. Questi moduli "legacy" sono sfociati in via definitiva come logiche ibride nella tabella base `enrollments`. Nessun endpoint di recupero o salvataggio risulta orfano o troncato nella rotta *Maschera Input / Nuove Iscrizioni*. Il loop architetturale salva correttamente custom types ed extra-dates senza null values.
   * **Moduli Setup (1):** Eventi Esterni. Architetturalmente isolato dalla didattica a Settings tecnico.
-* **Allineamento Documentale:** Convalidata l'assenza totale di Mockup di sistema. Chiuso il giro di boa tecnico aggiornando i Documenti di Progetto (`00B_GAE`, `11_GAE` e `task.md`) per dichiarare tecnicamente "Fossilizzata e Stabile" l'intera Area UI Attività e Modali.
+* **Allineamento Documentale:** Convalidata l'assenza totale di Mockup di base. I Documenti di Progetto (`00B_GAE`, `11_GAE` e `task.md`) sono stati aggiornati per documentare la convergenza dell'Area UI Attività e i prossimi test architetturali.
+
+### 28 Marzo 2026 (Fix E2E Planning e Restituzione Validazione)
+* **Testing E2E Modulo Planning:**
+  * Eseguito il restart pulito del dev server per forzare in memoria il Router `POST /api/strategic-events` rimasto latente causa avvio senza watchmode (tsx).
+  * Validazione visiva del Salvataggio, Modifica e Cancellazione record in tabella `strategic_events`.
+  * Smoke test eseguito sui Moduli Attività: l'apertura e il salvataggio del Planning extra-didattico non invalida la SPA di Calendar, Corsi, e prenotazioni.
 
 ### 27 Marzo 2026 (Phase 20: Master Allineamento Modali - Workshop)
 * **Convergenza Architetturale Modale Workshop:**
