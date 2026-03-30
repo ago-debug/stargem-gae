@@ -523,5 +523,6 @@ Questa fase certifica il passaggio dell'app di produzione dal server condiviso "
 - [x] Fix integrazione `BASE_URL` su `.env` VPS (Login Auth Google)
 - [x] Fix Nginx Exception Path ACME Challenge (per bypass Node)
 - [x] Estrazione primo Backup Architettonico post-migrazione (28K righe, 7.1MB)
+- [x] **PUSH FINALE:** Snapshot stato attuale su repository `main` (`[AG-26.25]`)
 - [ ] SSL Let's Encrypt (in attesa DNS)
 - [ ] Migrazione DNS completa su Plesk IONOS

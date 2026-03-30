@@ -11,6 +11,7 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
   * **Server Specifics:** IP `82.165.35.145` — Ubuntu 24.04 — Node.js 25.8.2.
   * **Erogazione:** Build produzione completata. L'app Node viene servita internamente sulla porta `5001` e mantenuta viva tramite PM2.
   * **Configurazione Nginx:** Il web server Nginx è stato configurato come reverse proxy su 5001. Aggiunto modulo specifico Exception Path per `/ /.well-known/acme-challenge/` garantendo l'emissione del certificato Let's Encrypt, bypassando Node.js.
+* **Chiusura della Fase:** È stato eseguito un Push finale Architetturale al repository `main` (`[AG-26.25] Phase 26: Tunnel SSH, fix nginx acme-challenge...`), congelando la migrazione con tutte le chiavi sensibili (`.env`, `backups/`, `tunnel-db.sh`) rigidamente tracciate e tenute distanti da GitHub via `.gitignore`. Le fondamenta VPS sono pronte.
 * **Sicurezza e Networking (Tunnel SSH):**
   * La porta 3306 del VPS è saggiamente blindata al traffico esterno. Il dev server locale (Mac) si collega ora al DB in produzione tramite un tunnel SSH configurato sullo script `scripts/tunnel-db.sh`, che mappa `127.0.0.1:3307` direttamente al MariaDB remoto.
   * Autenticazione Mac → VPS configurata via chiave SSH (password-less).
