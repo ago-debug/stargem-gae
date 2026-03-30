@@ -12,3 +12,5 @@ debug_output.txt
 debug.command
 debug.sh
 scripts/tunnel-db.sh
+
+backups/

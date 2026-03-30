@@ -9,22 +9,13 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Infrastruttura e Server:** Migrazione completa del progetto verso un nuovo VPS indipendente.
   * **Database:** `sg_gae` duplicato e rinominato `stargem_v2` allocato nativamente sul nuovo VPS IONOS.
   * **Server Specifics:** IP `82.165.35.145` — Ubuntu 24.04 — Node.js 25.8.2.
-  * **Erogazione:** Build produzione completata. L'app Node viene servita internamente sulla porta `5001` e mantenuta viva tramite PM2. Nginx è configurato come reverse proxy.
+  * **Erogazione:** Build produzione completata. L'app Node viene servita internamente sulla porta `5001` e mantenuta viva tramite PM2.
+  * **Configurazione Nginx:** Il web server Nginx è stato configurato come reverse proxy su 5001. Aggiunto modulo specifico Exception Path per `/ /.well-known/acme-challenge/` garantendo l'emissione del certificato Let's Encrypt, bypassando Node.js.
 * **Sicurezza e Networking (Tunnel SSH):**
   * La porta 3306 del VPS è saggiamente blindata al traffico esterno. Il dev server locale (Mac) si collega ora al DB in produzione tramite un tunnel SSH configurato sullo script `scripts/tunnel-db.sh`, che mappa `127.0.0.1:3307` direttamente al MariaDB remoto.
   * Autenticazione Mac → VPS configurata via chiave SSH (password-less).
   * Il file `.env` locale e quello del VPS sono allineati ai nuovi parametri e protetti tramite `.gitignore`.
-* **Risoluzione DNS:** Record A aggiornato dal vecchio Plesk verso l'IP `82.165.35.145`. Propagazione attualmente in corso. (Il certificato SSL Let's Encrypt rimane in attesa di sblocco propagazione).
-
-### 30 Marzo 2026 (Phase 26: Migrazione VPS IONOS)
-* **Infrastruttura e Server:** Migrazione completa del progetto verso un nuovo VPS indipendente.
-  * **Database:** `sg_gae` duplicato e rinominato `stargem_v2` allocato nativamente sul nuovo VPS IONOS.
-  * **Server Specifics:** IP `82.165.35.145` — Ubuntu 24.04 — Node.js 25.8.2.
-  * **Erogazione:** Build produzione completata. L'app Node viene servita internamente sulla porta `5001` e mantenuta viva tramite PM2. Nginx è configurato come reverse proxy.
-* **Sicurezza e Networking (Tunnel SSH):**
-  * La porta 3306 del VPS è saggiamente blindata al traffico esterno. Il dev server locale (Mac) si collega ora al DB in produzione tramite un tunnel SSH configurato sullo script `scripts/tunnel-db.sh`, che mappa `127.0.0.1:3307` direttamente al MariaDB remoto.
-  * Autenticazione Mac → VPS configurata via chiave SSH (password-less).
-  * Il file `.env` locale e quello del VPS sono allineati ai nuovi parametri e protetti tramite `.gitignore`.
+  * **Variabili d'ambiente (Fix):** Aggiunta la stringa vitale `BASE_URL=https://stargem.studio-gem.it` in produzione, evitando di far crashare il mapping delle URI Auth/Google su domini legacy obsoleti.
 * **Risoluzione DNS:** Record A aggiornato dal vecchio Plesk verso l'IP `82.165.35.145`. Propagazione attualmente in corso. (Il certificato SSL Let's Encrypt rimane in attesa di sblocco propagazione).
 
 ### 27 Marzo 2026 (Phase 25: Allineamento e Audit Finale 13 Attività)

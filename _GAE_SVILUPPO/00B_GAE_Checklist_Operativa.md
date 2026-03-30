@@ -519,21 +519,9 @@ Questa fase certifica il passaggio dell'app di produzione dal server condiviso "
 - [x] Tunnel SSH locale → `stargem_v2`
 - [x] Chiave SSH senza password
 - [x] DNS record A aggiornato (propagazione in corso)
+- [x] Fix resolv Node.js IPv4 `127.0.0.1` (.env produzione)
+- [x] Fix integrazione `BASE_URL` su `.env` VPS (Login Auth Google)
+- [x] Fix Nginx Exception Path ACME Challenge (per bypass Node)
+- [x] Estrazione primo Backup Architettonico post-migrazione (28K righe, 7.1MB)
 - [ ] SSL Let's Encrypt (in attesa DNS)
-- [ ] Test finale HTTPS completo
-- [ ] Migrazione DNS completa su Plesk IONOS
----
-
-## Fase 26 - Migrazione Infrasruttura Server (VPS IONOS)
-Questa fase certifica il passaggio dell'app di produzione dal server condiviso "Legacy" al nuovo VPS dedicato, risolvendo vincoli prestazionali e gettando le basi per i Webhooks CRM in arrivo.
-
-- [x] Deploy codice su VPS IONOS
-- [x] Import DB `stargem_v2` da dump `sg_gae`
-- [x] PM2 configurato e online
-- [x] Nginx reverse proxy configurato
-- [x] Tunnel SSH locale → `stargem_v2`
-- [x] Chiave SSH senza password
-- [x] DNS record A aggiornato (propagazione in corso)
-- [ ] SSL Let's Encrypt (in attesa DNS)
-- [ ] Test finale HTTPS completo
 - [ ] Migrazione DNS completa su Plesk IONOS

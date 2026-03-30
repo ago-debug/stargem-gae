@@ -27,6 +27,10 @@ Cambiato il "Record A" sul vecchio Plesk per dirottare il traffico pubblico sul 
 L'audit `nslookup stargem.studio-gem.it 8.8.8.8` ha evidenziato in serata un corposo ritardo di propagazione mondiale (visti i DNS cached TTL fino a 19 ore da provider legacy).
 * **Policy decisa:** Trattenuto e procrastinato lo "Step SSL" Let's Encrypt per evitare blocchi AuthZ causa mismatch di risoluzione da parte dell'Authority.
 
+### 4. Estrazione Baseline Backup (Fase di Sicurezza)
+Una volta appurato che l'architettura `stargem_v2` è integra e funzionante al 100%, è stato estratto in tempo reale un dump formale dell'intero DB di produzione (peso: `7.1 MB`, oltre `28.800` record/istruzioni) tramite comando remote `mysqldump` in SSH. 
+Questo snapshot locale risiede volutamente all'interno della directory sicura `./backups` (tracciata in `.gitignore` contro fughe di dati sul cloud Github). Costituirà l'ancora di salvezza ufficiale pre-avvio dell'inserimento massivo clienti di StudioGem.
+
 ## Schema dell'Ambiente Odierno Definitivo
 * **VPS Host:** `82.165.35.145`
 * **Node Environment:** 25.8.2 (`pm2` process name: `stargem` in ascolto su porta tcp: `5001`)

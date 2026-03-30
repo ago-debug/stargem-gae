@@ -13,7 +13,8 @@ Il blocco principale dei lavori odierni ha riguardato il consolidamento dei modu
 - **Process Manager:** L'applicazione Node/Express è gestita da `pm2` (nome app: `stargem`) esposta internamente sulla porta `5001`.
 - **Web Server:** Nginx agisce come reverse proxy configurato su `/etc/nginx/plesk.conf.d/vhosts/stargem.studio-gem.it.conf`.
 - **Deploy Workflow:** Git Push → Aggiornamento su Plesk → `npm run build` → `pm2 reload stargem`.
-- **Comandi Emergenza:** Per leggere gli errori dal VPS via SSH, eseguire `pm2 logs stargem --lines 20 --nostream`.
+- **Comandi Emergenza VPS:** Per leggere gli errori dal VPS via SSH, eseguire `pm2 logs stargem --lines 20 --nostream`.
+- **Politica Backup Locale:** Qualsiasi snapshot del DB `stargem_v2` deve essere generato tramite l'estrazione remota via SSH (`mysqldump`) e salvato unicamente nel path `/backups` locale, regolarmente tracciato in `.gitignore`. (Ultimo Baseline: Phase 26, 7.1MB).
 
 ### A. Attività
 - Il registro centrale delle attività (`ACTIVITY_REGISTRY`) è stato impostato come "Single Source of Truth".
