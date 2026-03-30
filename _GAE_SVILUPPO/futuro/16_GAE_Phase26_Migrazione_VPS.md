@@ -16,14 +16,9 @@ Si è deciso di migrare tutto il layer di produzione su un server Ubuntu 24.04 d
 ### 2. Sblocco del Local Development (Problema ECONNREFUSED)
 Dopo l'allestimento di `stargem_v2` sul nuovo IP, il dev server di Vite/NodeJS locale sul Mac andava in crash tentando di connettersi a `82.165.35.145:3306`.
 * **Causa:** Nativi blocchi Firewall in ingresso. Il server MariaDB sul VPS accettava solo connessioni da `localhost`.
-* **La Soluzione (Tunnel SSH):** 
-Invece di bucare il firewall esponendo il core dei pagamenti a script kid/botnet mondiali, abbiamo implementato un **"Ponte SSH" (Port Forwarding)**.
-Tramite lo script creato in `scripts/tunnel-db.sh`:
-```bash
-ssh -N -L 3307:127.0.0.1:3306 root@82.165.35.145
-```
-Si è agganciata una pipe silenziosa e sicura tra il Mac ed il VPS. 
-Il file `.env` locale è stato riconfigurato su `mysql://gaetano_admin...127.0.0.1:3307/stargem_v2`.
+* **La Soluzione (Tunnel SSH Auto-Reconnect):** 
+Invece di bucare il firewall esponendo il core dei pagamenti a script kid/botnet mondiali, abbiamo implementato un **"Ponte SSH" (Port Forwarding)** persistente.
+Tramite lo script creato in `scripts/tunnel-db.sh` usando un ciclo infinito (while-true) unito ai pragrametri `-o ServerAliveInterval=60`, la pipe garantisce una reconnessione automatica locale al database remoto se la route decade o viene silenziata per inattività.
 
 * **Esito:** Connessione trasparente in 5 millisecondi e nessuna istruzione SQL dovuta transitare via internet in chiaro.
 
