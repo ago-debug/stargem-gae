@@ -40,7 +40,16 @@ Ogni sviluppatore che contribuisce a CourseManager deve aderire a questi princip
 4. **Coerenza Evolutiva (Pragmatismo):** Nei nuovi task la prima domanda è: *"Cosa serve davvero per lavorare presto?"*. Le decisioni devono risolvere il blocco odierno, unificare i data-source sparsi (es. Tessere vs members), lasciando però intatti e inalterati i settori funzionanti non essenziali. Progetta per il futuro, ma implementa solo ciò che serve ora.
 5. **Modello Persone Fluido:** Non esistono tabelle isolate per "Collaboratori", "Studenti" o "Affittuari". In CourseManager un `member` o uno `user` può essere simultaneamente Tesserato, Insegnante, Staff, Esterno, tramite etichette di ruolo dinamiche.
 
-## B. Contesto Operativo Reale (Stato Dati)
+## B. Contesto Operativo Reale (Stato Dati e Infrastruttura)
+
+### Infrastruttura Cloud (Phase 26)
+Il progetto è operativo su un ecosistema indipendente e scalabile che bypassa server legacy condivisi.
+*   **Server Produzione:** VPS IONOS (`82.165.35.145`) con Ubuntu 24.04.
+*   **Database Produzione:** L'applicazione legge/scrive sul DB locale `stargem_v2` (MariaDB 11.4).
+*   **Sviluppo Locale (Regola d'Oro):** Dato che la porta 3306 sul VPS è chiusa per sicurezza, lo sviluppo locale del codice dal Mac non comunica direttamente all'IP esterno. **Deve rigorosamente essere avviato il Tunnel SSH** (`bash scripts/tunnel-db.sh`) prima di `npm run dev`. In questo modo, il local host inganna NodeJS facendogli credere che il DB sia su `127.0.0.1:3307`. Questa operazione garantisce privacy totale sui dati e zero esposizione ad attacchi bruteforce remoti su MariaDB.
+*   **Deploy Workflow:** La logica procede da Git su GitHub → Fetch/Pull dal pannello Plesk → Operatività Node build → Riavvio del demone tramite PM2.
+
+### Dinamiche dei Dati
 *   **Gestione Non in Produzione Estesa:** Il gestionale sta venendo costruito ad-hoc su database vivi. I dati anagrafici attualmente immessi sono **record ibridi** importati a scopo di stress-test. Possono risultare storpiati o orfani.
 *   **Integrazione Attesa:** La bonifica formale del DB di produzione avverrà prelevando gli storici reali da fonti decentralizzate (fogli G-Sheet, export PDF, Athena Portal, TeamSystem).
 *   **Ecosistema Allargato:** Nei quarter futuri il CMS `studio-gem.it` (WooCommerce/WordPress) verrà integrato al db, rendendo i listini comunicanti.

@@ -7,6 +7,14 @@ Il blocco principale dei lavori odierni ha riguardato il consolidamento dei modu
 
 ## Stato attuale per macro-area
 
+### Infrastruttura Server e Configurazione (Agg. Phase 26)
+- **VPS/Hosting:** Server IONOS indipendente, indirizzo IP `82.165.35.145`.
+- **Database Produzione:** `stargem_v2` girante su MariaDB `localhost:3306` (del VPS).
+- **Process Manager:** L'applicazione Node/Express è gestita da `pm2` (nome app: `stargem`) esposta internamente sulla porta `5001`.
+- **Web Server:** Nginx agisce come reverse proxy configurato su `/etc/nginx/plesk.conf.d/vhosts/stargem.studio-gem.it.conf`.
+- **Deploy Workflow:** Git Push → Aggiornamento su Plesk → `npm run build` → `pm2 reload stargem`.
+- **Comandi Emergenza:** Per leggere gli errori dal VPS via SSH, eseguire `pm2 logs stargem --lines 20 --nostream`.
+
 ### A. Attività
 - Il registro centrale delle attività (`ACTIVITY_REGISTRY`) è stato impostato come "Single Source of Truth".
 - Le 14 attività ufficiali di dominio sono state definite e tipizzate.

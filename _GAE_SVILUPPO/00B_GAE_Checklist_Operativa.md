@@ -506,3 +506,19 @@ Questa fase è strettamente NON DISTRUTTIVA. Nessuna tabella legacy è stata div
   - Risolto il collo di bottiglia `mapUnifiedToCalendarEvents`. Ora eroga entità arricchite (`UnifiedCalendarEventDTO`). Congelamento revocato e visual layer ripristinato ed attivo.
 - [x] **Hard Fix Strutturale Calendario (Fase 16-18)**:
   - Risolti i 5 bug formali d'intersezione sostituendo il Cascade con un array iterativo in Side-by-Side (`Left/Width 100%`). Risolto il bug di Midnight che forzava offset verticali negativi spaccando la griglia. Status wrap approvati. UX pencil bindings multi-entità ricollegati solidamente al single source record corretto.
+
+---
+
+## Fase 26 - Migrazione Infrasruttura Server (VPS IONOS)
+Questa fase certifica il passaggio dell'app di produzione dal server condiviso "Legacy" al nuovo VPS dedicato, risolvendo vincoli prestazionali e gettando le basi per i Webhooks CRM in arrivo.
+
+- [x] Deploy codice su VPS IONOS
+- [x] Import DB `stargem_v2` da dump `sg_gae`
+- [x] PM2 configurato e online
+- [x] Nginx reverse proxy configurato
+- [x] Tunnel SSH locale → `stargem_v2`
+- [x] Chiave SSH senza password
+- [x] DNS record A aggiornato (propagazione in corso)
+- [ ] SSL Let's Encrypt (in attesa DNS)
+- [ ] Test finale HTTPS completo
+- [ ] Migrazione DNS completa su Plesk IONOS
