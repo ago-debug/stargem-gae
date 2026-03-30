@@ -17,7 +17,8 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
   * Autenticazione Mac → VPS configurata via chiave SSH (password-less).
   * Il file `.env` locale e quello del VPS sono allineati ai nuovi parametri e protetti tramite `.gitignore`.
   * **Variabili d'ambiente (Fix):** Aggiunta la stringa vitale `BASE_URL=https://stargem.studio-gem.it` in produzione, evitando di far crashare il mapping delle URI Auth/Google su domini legacy obsoleti.
-* **Risoluzione DNS:** Record A aggiornato dal vecchio Plesk verso l'IP `82.165.35.145`. Propagazione attualmente in corso. (Il certificato SSL Let's Encrypt rimane in attesa di sblocco propagazione).
+* **Risoluzione DNS e Cut-Over:** Rilevato blocco lato NameServer autoritativi su SiteGround. Finché il record A non rifletterà il nuovo IP 82.x mondiale, Let's Encrypt rimane in standby bloccato.
+  * **Freeze Applicativo:** L'App Server Node.js sul legacy 185 è stato ibernato dal pannello di Plesk (redirezione locale `login.php`) riducendo a zero il rischio di "Split-Brain" dei database da parte dei visitatori pubblici in transito incrociato sui vecchi DNS.
 
 ### 27 Marzo 2026 (Phase 25: Allineamento e Audit Finale 13 Attività)
 * **Certificazione Stato Attività:** Eseguito ed emesso il verdetto tecnico finale sullo status dei 13 silos di attività:

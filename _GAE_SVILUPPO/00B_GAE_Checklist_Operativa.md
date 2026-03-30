@@ -524,5 +524,6 @@ Questa fase certifica il passaggio dell'app di produzione dal server condiviso "
 - [x] Fix Nginx Exception Path ACME Challenge (per bypass Node)
 - [x] Estrazione primo Backup Architettonico post-migrazione (28K righe, 7.1MB)
 - [x] **PUSH FINALE:** Snapshot stato attuale su repository `main` (`[AG-26.25]`)
-- [ ] SSL Let's Encrypt (in attesa DNS)
-- [ ] Migrazione DNS completa su Plesk IONOS
+- [x] **AUDIT CUT-OVER & FREEZE 185:** Identificato scollamento DNS (SiteGround). App legacy 185 spenta per blocco split-brain e freeze preventivo.
+- [ ] SSL Let's Encrypt (in attesa propagazione SiteGround `->` IONOS)
+- [ ] Migrazione zona DNS completa su IONOS (Pianificata Fase 2)
