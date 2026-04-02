@@ -409,7 +409,7 @@ export default function CalendarPage() {
         if (prevSeasonId.current === null && selectedSeasonId === "active") {
             const now = new Date();
             if (now.getMonth() >= 1) { // February is index 1
-                const activeSeason = seasons.find(s => s.status === "active") || seasons[0];
+                const activeSeason = seasons.find(s => s.active) || seasons[0];
                 const activeIdx = seasons.findIndex(s => s.id === activeSeason.id);
                 if (activeIdx !== -1 && activeIdx + 1 < seasons.length) {
                     setSelectedSeasonId(seasons[activeIdx + 1].id.toString());
@@ -426,7 +426,7 @@ export default function CalendarPage() {
                                 name: nextName,
                                 startDate: `${activeYear + 1}-09-01T00:00:00.000Z`,
                                 endDate: `${activeYear + 2}-08-31T23:59:59.000Z`,
-                                status: 'planned'
+                                active: false
                             })
                         }).then(() => {
                             queryClient.invalidateQueries({ queryKey: ["/api/seasons"] }).then(() => {
@@ -445,7 +445,7 @@ export default function CalendarPage() {
                     setViewDate(new Date(selectedSeason.startDate));
                 }
             } else {
-                const activeSeason = seasons.find(s => s.status === "active") || seasons[0];
+                const activeSeason = seasons.find(s => s.active) || seasons[0];
                 if (activeSeason && activeSeason.startDate) {
                     const now = new Date();
                     const start = new Date(activeSeason.startDate);
@@ -1479,9 +1479,9 @@ export default function CalendarPage() {
                                 <SelectValue placeholder="Stagione" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="active" className="font-semibold">Attiva ({formatSeasonName(seasons?.find((s: any) => s.status === 'active')?.name || '...')})</SelectItem>
+                                <SelectItem value="active" className="font-semibold">Attiva ({formatSeasonName(seasons?.find((s: any) => s.active)?.name || '...')})</SelectItem>
                                 {seasons?.map((s: any) => (
-                                    <SelectItem key={s.id} value={s.id.toString()}>{formatSeasonName(s.name)} {s.status === 'active' ? '(Attiva)' : ''}</SelectItem>
+                                    <SelectItem key={s.id} value={s.id.toString()}>{formatSeasonName(s.name)} {s.active ? '(Attiva)' : ''}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>

@@ -34,7 +34,7 @@ export default function StrategicProgrammingTable() {
 
     const activeSeasonObj = useMemo(() => {
         if (!seasons || seasons.length === 0) return null;
-        return seasons.find((s) => s.status === 'active') || seasons[0];
+        return seasons.find((s) => s.active) || seasons[0];
     }, [seasons]);
     
     const targetSeason = useMemo(() => {
