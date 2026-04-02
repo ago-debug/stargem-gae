@@ -441,31 +441,56 @@ export default function CalendarPage() {
                 }
             }
         }
+        // Imperative setup happens in handleSeasonChange now
+        prevSeasonId.current = selectedSeasonId;
+    }, [selectedSeasonId, seasons]);
 
-        if (prevSeasonId.current !== null && prevSeasonId.current !== selectedSeasonId) {
-            if (selectedSeasonId !== "active") {
-                const selectedSeason = seasons.find(s => s.id.toString() === selectedSeasonId);
-                if (selectedSeason && selectedSeason.startDate) {
-                    setViewDate(new Date(selectedSeason.startDate));
-                }
-            } else {
-                const activeSeason = seasons.find(s => s.active) || seasons[0];
-                if (activeSeason && activeSeason.startDate) {
-                    const now = new Date();
-                    const start = new Date(activeSeason.startDate);
-                    const end = activeSeason.endDate ? new Date(activeSeason.endDate) : new Date();
-                    if (now < start || now > end) {
-                        setViewDate(start); 
-                    } else {
-                        setViewDate(now);
-                    }
-                } else {
-                    setViewDate(new Date());
+    useEffect(() => {
+        // Seamlessly switch selected season when scrolling viewDate crosses boundaries
+        if (!seasons || !seasons.length) return;
+        const activeSeason = seasons.find((s: any) => s.active) || seasons[0];
+        const resolvedId = selectedSeasonId === "active" ? activeSeason?.id?.toString() : selectedSeasonId;
+        const currentSeason = seasons.find((s: any) => s.id.toString() === resolvedId);
+        
+        if (currentSeason) {
+            const vDate = new Date(viewDate);
+            const sDate = new Date(currentSeason.startDate);
+            const eDate = new Date(currentSeason.endDate);
+            
+            // Allow slight buffer before forcing a switch to prevent flip-flopping near boundaries if not needed
+            if (vDate < sDate || vDate > eDate) {
+                const matchingSeason = seasons.find((s: any) => vDate >= new Date(s.startDate) && vDate <= new Date(s.endDate));
+                if (matchingSeason && matchingSeason.id !== currentSeason.id) {
+                    const isMatchingActive = matchingSeason.id === activeSeason.id;
+                    const newId = isMatchingActive ? "active" : matchingSeason.id.toString();
+                    setSelectedSeasonId(newId);
+                    prevSeasonId.current = newId;
                 }
             }
         }
-        prevSeasonId.current = selectedSeasonId;
-    }, [selectedSeasonId, seasons]);
+    }, [viewDate, seasons, selectedSeasonId]);
+
+    const handleSeasonChange = (newVal: string) => {
+        setSelectedSeasonId(newVal);
+        const activeSeason = seasons?.find(s => s.active) || seasons?.[0];
+        const resolvedId = newVal === "active" ? activeSeason?.id.toString() : newVal;
+        const selectedSeason = seasons?.find(s => s.id.toString() === resolvedId);
+        
+        if (selectedSeason && selectedSeason.startDate) {
+            if (newVal === "active") {
+                const now = new Date();
+                const start = new Date(selectedSeason.startDate);
+                const end = selectedSeason.endDate ? new Date(selectedSeason.endDate) : new Date();
+                if (now < start || now > end) {
+                    setViewDate(start); 
+                } else {
+                    setViewDate(now);
+                }
+            } else {
+                setViewDate(new Date(selectedSeason.startDate));
+            }
+        }
+    };
 
     const { data: workshopAttendances } = useQuery<any[]>({
         queryKey: ["/api/workshop-attendances"],
@@ -1477,7 +1502,7 @@ export default function CalendarPage() {
 
                     <div className="space-y-1.5 text-left">
                         <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Stagione</Label>
-                        <Select value={selectedSeasonId} onValueChange={setSelectedSeasonId}>
+                        <Select value={selectedSeasonId} onValueChange={handleSeasonChange}>
                             <SelectTrigger className="w-[180px] bg-slate-50 border-slate-300">
                                 <CalendarIcon className="w-4 h-4 mr-2 text-slate-500" />
                                 <SelectValue placeholder="Stagione" />
