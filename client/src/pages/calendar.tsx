@@ -414,6 +414,26 @@ export default function CalendarPage() {
                 if (activeIdx !== -1 && activeIdx + 1 < seasons.length) {
                     setSelectedSeasonId(seasons[activeIdx + 1].id.toString());
                     return; // Skip normal navigation logic on auto jump
+                } else if (activeIdx !== -1 && activeIdx + 1 >= seasons.length) {
+                    // Auto-generate next season
+                    const activeYear = parseInt(activeSeason.name.substring(0, 4));
+                    if (!isNaN(activeYear)) {
+                        const nextName = `${activeYear + 1}/${activeYear + 2}`;
+                        fetch('/api/seasons', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: nextName,
+                                startDate: `${activeYear + 1}-09-01T00:00:00.000Z`,
+                                endDate: `${activeYear + 2}-08-31T23:59:59.000Z`,
+                                status: 'planned'
+                            })
+                        }).then(() => {
+                            queryClient.invalidateQueries({ queryKey: ["/api/seasons"] }).then(() => {
+                                // Will re-trigger and auto jump on next render
+                            });
+                        });
+                    }
                 }
             }
         }
@@ -1459,7 +1479,7 @@ export default function CalendarPage() {
                                 <SelectValue placeholder="Stagione" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="active" className="font-semibold">Stagione Attiva</SelectItem>
+                                <SelectItem value="active" className="font-semibold">Attiva ({formatSeasonName(seasons?.find((s: any) => s.status === 'active')?.name || '...')})</SelectItem>
                                 {seasons?.map((s: any) => (
                                     <SelectItem key={s.id} value={s.id.toString()}>{formatSeasonName(s.name)} {s.status === 'active' ? '(Attiva)' : ''}</SelectItem>
                                 ))}
@@ -1688,7 +1708,7 @@ export default function CalendarPage() {
                                                 <div className={`p-3 pb-1 flex flex-col items-center w-full ${isToday ? 'border-b-[3px] border-yellow-400 text-yellow-900' : ''}`}>
                                                     <span>{day.label} {format(dayDate, "d")}</span>
                                                     <span className="text-[10px] font-normal text-muted-foreground">{format(dayDate, "MMMM", { locale: it })}</span>
-                                                    {isToday && <span className="absolute top-1.5 right-1.5 text-[7px] bg-yellow-400 text-yellow-900 px-[3px] py-[1px] rounded-sm font-black hidden md:block uppercase tracking-wider">Oggi</span>}
+                                                    {isToday && <span className="absolute top-1.5 right-1.5 text-[7.5px] bg-yellow-400 text-yellow-900 px-[4px] py-[2px] rounded-sm font-black uppercase tracking-wider shadow-sm border border-yellow-500/30">Oggi</span>}
                                                 </div>
                                                 
                                                 {/* Banner Eventi Strategici (Chiusure/Ferie/Macro) */}
@@ -1839,7 +1859,7 @@ export default function CalendarPage() {
                                                     className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 overflow-hidden ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''}`}
                                                     style={{
                                                         top: `${realTop + 2}px`,
-                                                        height: `${realHeight - 4}px`,  // Fixed height frame
+                                                        minHeight: `${realHeight - 4}px`,  // Elastic minimum height
                                                         left: `calc(${layoutLeft}% + 2px)`,
                                                         width: `calc(${layoutWidth}% - 4px)`,
                                                         minWidth: "70px"
@@ -1848,7 +1868,7 @@ export default function CalendarPage() {
                                                     <div
                                                         ref={handleCardRef} 
                                                         data-event-id={evt.eventId}
-                                                        className={`w-full h-full p-1.5 rounded-md border-l-[6px] shadow-sm flex flex-col justify-start items-start text-left bg-white overflow-hidden ${evt.colorProps.className || ''}`}
+                                                        className={`w-full min-h-full h-auto p-1.5 rounded-md border-l-[6px] shadow-sm flex flex-col justify-start items-start text-left bg-white overflow-hidden ${evt.colorProps.className || ''}`}
                                                         style={{
                                                             fontSize: "10px",
                                                             backgroundColor: evt.colorProps.backgroundColor,
@@ -1905,7 +1925,7 @@ export default function CalendarPage() {
                                                             </div>
                                                             
                                                             {codeLabel && (
-                                                                <div className="text-[9px] font-mono opacity-90 font-semibold tracking-wider bg-white/70 px-1.5 py-0.5 rounded shadow-sm w-full text-left truncate leading-none border border-black/5 mt-1 mb-0.5">
+                                                                <div className="bg-slate-100 text-[8px] font-bold px-1.5 py-0.5 rounded text-slate-600 break-all leading-tight w-full">
                                                                     {codeLabel}
                                                                 </div>
                                                             )}

@@ -2,13 +2,14 @@
 
 **[SPRINT CHIUSO CON SUCCESSO E CONSEGNATO]**: Fase 27 completata. Le logiche di Calendario/Multi-Stagione sono pienamente varate. L'endpoint di duplicazione controllata (no enrollments) lavora dinamicamente via UI (Checkbox batch). La **Programmazione Date Strategiche** (chiusure/ferie) è integrata, attingendo la logica dei template storici, risultando prioritaria e visibile sia nel Planning stagionale sia nel Calendario operativo.
 
-**🚨 [AG-043/AG-045 FEEDBACK E ALLINEAMENTO VISIVO - FIX PRIORITARI MARTEDÌ]**:  
-A seguito del collaudo UI post-sprint, sono decretati con massima priorità i seguenti requirement di correzione visiva:
-- **Labeling Default Season**: L'applicativo deve riportare visivamente l'etichetta esatta "25-26", che rimarrà sempre attiva, visibile e flaggata di default al caricamento.
-- **Auto-Switch Label "26-27"**: La stagione successiva deve caricare in UI l'etichetta "26-27" che subentrerà in automatico a febbraio di ogni anno ciclico.
-- **Indicatore "OGGI" Dinamico**: Il riquadro evidenziatore del giorno corrente in UI deve variare colore (applicando un giallo di highlight *solo* sul giorno effettivo in corso). Inoltre, la parola stringa "OGGI" deve scomparire e nascondersi interamente quando la vista utente scorre verso giorni passati o futuri.
-- **Navigazione Combinata (Scroll/Select)**: La UX del Calendario disporrà obbligatoriamente di un meccanismo ibrido che offra scorrimento elastico tra settimane assieme a una selezione mirata su un giorno specifico.
-- **Zero Overlap Card**: Per *qualsiasi attività* (corsi, camp, sale), le box/card in griglia non devono **mai** subire glitch di overlap né sovrapposizioni o restringimenti insensati.
+**🚨 [AG-043 -> AG-049 FEEDBACK E ALLINEAMENTO VISIVO - FIX PRIORITARI MARTEDÌ]**:  
+A seguito del collaudo UI post-sprint, sono decretati con massima priorità i seguenti requirement di correzione e calibrazione visiva del layout:
+- **Labeling Default Season**: L'applicativo deve riportare in UI la dicitura stringente "25-26" flaggata e attiva di default al root.
+- **Auto-Switch Label "26-27"**: La stagione successiva appare in UI con dicitura "26-27", innescata automaticamente a febbraio.
+- **UI Card Height & Dinamismo Righe Orarie**: Le card devono vantare un'altezza elastica/variabile atta a visualizzare *integralmente e senza elisioni* tutto il payload assegnato (Status, U/D/D, Codice SKU e nomi testuali estesi). L'architettura grid del calendario forzerà un _resize dinamico_ delle righe orarie (adattandosi alla UI in espansione delle proprie celle figlie e bypassando la limitazione statica CSS). Troncamenti testuali categoricamente non autorizzati.
+- **Zero-Overlap Assoluto**: Qualunque sia la natura dell'evento in overlay temporale (sala o modulo), le cards non si impileranno mai visibilmente una sull'altra né collideranno.
+- **Indicatore "OGGI" Dinamico**: Riquadro condizionale giallo (match date real-time). La stringa "OGGI" sparisce nello scroll laterale off-day.
+- **Navigazione Combinata (Scroll/Select)**: Lo sliding del planning deve assecondarsi in swipe libero interfacciato al day-click mirato sull'header.
 - **Pedanteria Tabella Master**: La sezione programmazione (Date Strategiche) deve replicare fedelmente e in toto il foglio Excel, confermando l'asse verticale delle settimane numerate, l'asse orizzontale Lun-Dom, il bilancio dei totali lezioni, la colonna di note libere, e il codice colore visivo. Le righe placeholder di esempio non spariranno mai durante la digitazione.
 
 ~~**[BUG CRITICO RILEVATO]**: Quando si chiude il modale di inserimento o modifica, le schede spariscono visivamente dal calendario e serve un refresh manuale della pagina per ripristinare il rendering.~~  
