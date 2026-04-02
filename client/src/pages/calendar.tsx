@@ -1725,7 +1725,14 @@ export default function CalendarPage() {
                                 <Calendar
                                     mode="single"
                                     selected={viewDate}
-                                    onSelect={(d: Date | undefined) => d && setViewDate(d)}
+                                    onSelect={(d: Date | undefined) => {
+                                        if (d) {
+                                            setViewDate(d);
+                                            const idx = d.getDay();
+                                            const daysStr = ["DOM", "LUN", "MAR", "MER", "GIO", "VEN", "SAB"];
+                                            setSelectedDay(daysStr[idx]);
+                                        }
+                                    }}
                                     defaultMonth={viewDate}
                                     initialFocus
                                     locale={it}
