@@ -2679,16 +2679,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       let coursesList;
-      if (seasonId) {
-        coursesList = await storage.getCoursesBySeason(seasonId);
-      } else {
         const activeSeason = await storage.getActiveSeason();
-        if (activeSeason) {
-          coursesList = await storage.getCoursesBySeason(activeSeason.id);
+        const targetSeasonId = seasonId || activeSeason?.id;
+
+        if (targetSeasonId) {
+          const allCourses = await storage.getCourses(); // Fetch all to include legacy NULLs
+          coursesList = allCourses.filter(c => {
+            const effSeasonId = c.seasonId || activeSeason?.id;
+            return effSeasonId === targetSeasonId;
+          });
         } else {
           coursesList = await storage.getCourses();
         }
-      }
       res.json(coursesList);
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
@@ -6754,7 +6756,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==========================================
   app.get("/api/strategic-events", isAuthenticated, async (req, res) => {
     try {
-      const events = await storage.getStrategicEvents();
+      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
+      let events;
+      const allEvents = await storage.getStrategicEvents();
+      
+      if (req.query.seasonId === "all") {
+        events = allEvents;
+      } else {
+        const activeSeason = await storage.getActiveSeason();
+        const targetSeasonId = seasonId || activeSeason?.id;
+        
+        events = allEvents.filter(e => {
+            const effSeasonId = e.seasonId || activeSeason?.id;
+            return effSeasonId === targetSeasonId;
+        });
+      }
       res.json(events);
     } catch (err) {
       console.error("Error fetching strategic events:", err);
