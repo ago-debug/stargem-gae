@@ -155,7 +155,10 @@ export function setupAuth(app: Express) {
                     console.error("[AUTH] Failed to log logout activity:", err);
                 }
             }
-            res.sendStatus(200);
+            req.session.destroy((err2) => {
+                res.clearCookie("connect.sid");
+                res.sendStatus(200);
+            });
         });
     });
 
