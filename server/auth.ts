@@ -125,12 +125,16 @@ export function setupAuth(app: Express) {
 
     app.post("/api/login", passport.authenticate("local"), async (req, res) => {
         if (req.user) {
-            await storage.logActivity({
-                userId: (req.user as any).id,
-                action: "LOGIN",
-                ipAddress: req.ip || null,
-                details: { username: (req.user as any).username }
-            });
+            try {
+                await storage.logActivity({
+                    userId: (req.user as any).id,
+                    action: "LOGIN",
+                    ipAddress: req.ip || null,
+                    details: { username: (req.user as any).username }
+                });
+            } catch (err) {
+                console.error("[AUTH] Failed to log login activity:", err);
+            }
         }
         res.status(200).json(req.user);
     });
@@ -140,12 +144,16 @@ export function setupAuth(app: Express) {
         req.logout(async (err) => {
             if (err) return next(err);
             if (user) {
-                await storage.logActivity({
-                    userId: user.id,
-                    action: "LOGOUT",
-                    ipAddress: req.ip || null,
-                    details: { username: user.username }
-                });
+                try {
+                    await storage.logActivity({
+                        userId: user.id,
+                        action: "LOGOUT",
+                        ipAddress: req.ip || null,
+                        details: { username: user.username }
+                    });
+                } catch (err) {
+                    console.error("[AUTH] Failed to log logout activity:", err);
+                }
             }
             res.sendStatus(200);
         });
@@ -178,12 +186,16 @@ export function setupAuth(app: Express) {
 
             req.login(user, async (err) => {
                 if (err) return res.status(500).send("Errore durante il login automatico");
-                await storage.logActivity({
-                    userId: user.id,
-                    action: "REGISTER",
-                    ipAddress: req.ip || null,
-                    details: { username: user.username }
-                });
+                try {
+                    await storage.logActivity({
+                        userId: user.id,
+                        action: "REGISTER",
+                        ipAddress: req.ip || null,
+                        details: { username: user.username }
+                    });
+                } catch (err) {
+                    console.error("[AUTH] Failed to log registration activity:", err);
+                }
                 res.status(201).json(user);
             });
         } catch (error: any) {
