@@ -27,14 +27,6 @@ export default function AuthPage() {
         },
     });
 
-    useEffect(() => {
-        // Forza l'invio del form al primo caricamento utile se abbiamo i default values
-        setTimeout(() => {
-            if (!user) {
-                form.handleSubmit(onSubmit)();
-            }
-        }, 100);
-    }, []);
 
     if (user) {
         // Redirect is handled by the creating component (Router)
