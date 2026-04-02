@@ -345,85 +345,68 @@ export default function Planning() {
     };
 
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="p-6 space-y-4">
+            {/* INTESTAZIONE E CONTROLLI AMBIENTE */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Planning Strategico</h1>
-                    <p className="text-muted-foreground">
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 border-l-4 border-primary pl-4 rounded-sm">Planning Strategico</h1>
+                    <p className="text-sm text-slate-500 mt-2 pl-5">
                         Mappa Plurimensile e Multi-Stagione. I corsi sono mostrati in forma sintetica.
                     </p>
                 </div>
-                <div className="flex items-center gap-4 border rounded-md p-1 bg-muted/30">
-                    <Button 
-                        variant={viewMode === 'annuale' ? 'default' : 'ghost'} 
-                        size="sm"
-                        onClick={() => setViewMode('annuale')}
-                    >
-                        Annuale
-                    </Button>
-                    <Button 
-                        variant={viewMode === 'mensile' ? 'default' : 'ghost'} 
-                        size="sm"
-                        onClick={() => setViewMode('mensile')}
-                    >
-                        Mensile
-                    </Button>
-                    <Button 
-                        variant={viewMode === 'settimanale' ? 'default' : 'ghost'} 
-                        size="sm"
-                        onClick={() => setViewMode('settimanale')}
-                    >
-                        Settimanale
-                    </Button>
-                </div>
-                <div className="flex items-center gap-4">
-                    <button 
-                        onClick={prevTimeSpan}
-                        className="rounded bg-muted px-3 py-1 hover:bg-muted/80 text-sm font-medium"
-                    >
-                        &larr; Prec.
-                    </button>
-                    <span className="text-xl font-bold px-4 tracking-wide text-primary">
-                        {viewMode === 'annuale' ? `Stagione ${startYear.toString().slice(-2)}-${(startYear + 1).toString().slice(-2)}` : 
-                         viewMode === 'mensile' ? format(currentDateParam, "MMMM yyyy", { locale: it }).toUpperCase() : 
-                         `Settimana del ${format(currentDateParam, "d MMM yyyy", { locale: it })}`}
-                    </span>
-                    <button 
-                        onClick={nextTimeSpan}
-                        className="rounded bg-muted px-3 py-1 hover:bg-muted/80 text-sm font-medium mr-4"
-                    >
-                        Succ. &rarr;
-                    </button>
-                    <Button onClick={() => setStrategicModalOpen(true)} className="gap-2">
-                        <Plus className="h-4 w-4" /> Nuovo Evento Strategico
-                    </Button>
+                
+                <div className="flex items-center gap-3">
+                    {/* View Mode Toggle */}
+                    <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+                        <Button variant={viewMode === 'annuale' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('annuale')} className="rounded-md">Annuale</Button>
+                        <Button variant={viewMode === 'mensile' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('mensile')} className="rounded-md">Mensile</Button>
+                        <Button variant={viewMode === 'settimanale' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('settimanale')} className="rounded-md">Settimanale</Button>
+                    </div>
                 </div>
             </div>
 
-            <Card className="w-full overflow-hidden">
-                <CardHeader className="bg-muted/30 pb-4">
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                            <CalendarIcon className="h-5 w-5" />
-                            Vista {viewMode === 'annuale' ? 'Annuale' : viewMode === 'mensile' ? 'Mensile' : 'Settimanale'}
-                        </CardTitle>
-                        <div className="flex items-center gap-4 text-sm font-medium">
-                            <div className="text-primary bg-primary/10 px-3 py-1 rounded-md hidden md:block border border-primary/20 cursor-pointer hover:bg-primary/20 transition-colors"
+            <Card className="w-full overflow-hidden shadow-xl border-none">
+                <CardHeader className="bg-slate-50 border-b pb-4 pt-4">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                        
+                        <div className="flex items-center gap-2">
+                            <CalendarIcon className="h-5 w-5 text-primary" />
+                            <CardTitle className="text-xl">Vista {viewMode === 'annuale' ? 'Annuale' : viewMode === 'mensile' ? 'Mensile' : 'Settimanale'}</CardTitle>
+                        </div>
+                        
+                        {/* Navigatore Temporale Centrale */}
+                        <div className="flex items-center bg-white rounded-md border shadow-sm p-1">
+                            <Button variant="ghost" size="sm" onClick={prevTimeSpan} className="text-slate-500 hover:text-slate-900">&larr; Prec.</Button>
+                            <div className="px-6 text-base font-bold text-slate-800 min-w-[200px] text-center uppercase tracking-wide">
+                                {viewMode === 'annuale' ? `Stagione ${startYear.toString().slice(-2)}-${(startYear + 1).toString().slice(-2)}` : 
+                                 viewMode === 'mensile' ? format(currentDateParam, "MMMM yyyy", { locale: it }) : 
+                                 `Settimana ${format(currentDateParam, "d MMM yyyy", { locale: it })}`}
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={nextTimeSpan} className="text-slate-500 hover:text-slate-900">Succ. &rarr;</Button>
+                        </div>
+
+                        {/* Azioni Destra */}
+                        <div className="flex items-center gap-3">
+                            <div className="text-xs font-semibold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors"
                                  onClick={() => {
-                                     // Helper: go to today
                                      setViewMode('annuale');
                                      setStartYear(today.getMonth() < 8 ? today.getFullYear() - 1 : today.getFullYear());
                                      setCurrentDateParam(today);
-                                 }}>
-                                Giorno attuale: {format(today, "EEEE d MMMM", { locale: it })}
+                                 }}
+                                 title="Torna ad oggi">
+                                Oggi: {format(today, "d MMM", { locale: it })}
                             </div>
                             {viewMode === 'annuale' && (
-                                <div className="flex items-center gap-2 text-muted-foreground border-l pl-4">
-                                    <Filter className="h-4 w-4" />
-                                    <span>Da Settembre {startYear} ad Agosto {startYear + 1}</span>
+                                <div className="hidden xl:flex items-center gap-2 text-muted-foreground border-l pl-4 text-xs">
+                                    <Filter className="h-3 w-3" />
+                                    <span>Set {startYear} - Ago {startYear + 1}</span>
                                 </div>
                             )}
+                            <Button onClick={() => setStrategicModalOpen(true)} size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-white shadow-sm ml-2">
+                                <Plus className="h-4 w-4" /> Nuovo Evento
+                            </Button>
                         </div>
+
                     </div>
                 </CardHeader>
                 <CardContent className="p-0 overflow-auto">
@@ -441,8 +424,9 @@ export default function Planning() {
                                     const highlightStyle = isCurrentMonth ? "border-b-4 border-b-yellow-400 bg-yellow-100/50" : "";
                                     
                                     return (
-                                        <div key={monthObj.label} className={`border-r px-2 py-3 text-center font-bold text-sm tracking-wide ${themeStyle} ${highlightStyle}`}>
-                                            {monthObj.label} {monthObj.monthIndex < 8 ? startYear + 1 : startYear}
+                                        <div key={monthObj.label} className={`border-r px-2 py-2 flex flex-col items-center justify-center tracking-wide leading-tight ${themeStyle} ${highlightStyle}`}>
+                                            <span className="font-bold text-[13px] uppercase">{monthObj.label}</span>
+                                            <span className="text-[11px] font-semibold opacity-75">{monthObj.monthIndex < 8 ? startYear + 1 : startYear}</span>
                                         </div>
                                     );
                                 })}
