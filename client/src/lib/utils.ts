@@ -30,13 +30,13 @@ export function getSeasonLabel(s: any, seasonsArray?: any[]): string {
   const shortName = formatSeasonName(s.name).replace(/Stagione\s*/i, "").trim();
   
   if (s.active) {
-    return `Stagione Attuale ${shortName}`;
+    return `${shortName} (Stagione Attuale)`;
   }
   
   if (seasonsArray && seasonsArray.length > 0) {
     const activeSeason = seasonsArray.find(x => x.active) || seasonsArray[0];
     if (activeSeason && new Date(s.startDate) > new Date(activeSeason.startDate)) {
-      return `Stagione Successiva ${shortName}`;
+      return `${shortName} (Stagione Successiva)`;
     }
   }
   
