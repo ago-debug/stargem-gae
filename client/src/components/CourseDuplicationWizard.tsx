@@ -50,6 +50,17 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
     return seasons.filter(s => s.id.toString() !== effectiveSourceSeasonId);
   }, [seasons, effectiveSourceSeasonId]);
 
+  React.useEffect(() => {
+      // Auto-select next season ("26-27") by default
+      if (targetSeasons.length > 0 && !targetSeasonId) {
+          // find the first season ID greater than source, or fallback to the first available target
+          const nextSeason = targetSeasons.find(s => Number(s.id) > Number(effectiveSourceSeasonId)) || targetSeasons[0];
+          if (nextSeason) {
+              setTargetSeasonId(nextSeason.id.toString());
+          }
+      }
+  }, [targetSeasons, targetSeasonId, effectiveSourceSeasonId]);
+
   const toggleCourse = (courseId: number) => {
     const next = new Set(selectedCourseIds);
     if (next.has(courseId)) next.delete(courseId);
@@ -180,7 +191,13 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                         <TableRow>
                             <TableHead className="w-12 text-center">
                                 <Checkbox 
-                                   checked={selectedCourseIds.size > 0 && selectedCourseIds.size === sourceCourses.length} 
+                                   checked={
+                                       selectedCourseIds.size === 0 
+                                       ? false 
+                                       : selectedCourseIds.size === sourceCourses.length 
+                                            ? true 
+                                            : "indeterminate"
+                                   } 
                                    onCheckedChange={toggleAll}
                                 />
                             </TableHead>
