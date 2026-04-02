@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, addDays, startOfWeek, endOfWeek, isBefore, isAfter, isSameDay, getDay } from "date-fns";
 import { it } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { formatSeasonName } from "@/lib/utils";
+import { getSeasonLabel } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +42,34 @@ export default function StrategicProgrammingTable() {
         if (selectedSeasonId === "active") return activeSeasonObj;
         return seasons.find(s => s.id.toString() === selectedSeasonId);
     }, [seasons, selectedSeasonId, activeSeasonObj]);
+
+    useEffect(() => {
+        if (!seasons?.length) return;
+        const now = new Date();
+        if (now.getMonth() >= 1) { // February or later
+            const activeSeason = seasons.find(s => s.active) || seasons[0];
+            const activeIdx = seasons.findIndex(s => s.id === activeSeason.id);
+            if (activeIdx === 0) {
+                // Auto-generate next season
+                const activeYear = parseInt(activeSeason.name.substring(0, 4));
+                if (!isNaN(activeYear)) {
+                    const nextName = `${activeYear + 1}/${activeYear + 2}`;
+                    fetch('/api/seasons', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: nextName,
+                            startDate: `${activeYear + 1}-09-01T00:00:00.000Z`,
+                            endDate: `${activeYear + 2}-08-31T23:59:59.000Z`,
+                            active: false
+                        })
+                    }).then(() => {
+                        queryClient.invalidateQueries({ queryKey: ["/api/seasons"] });
+                    });
+                }
+            }
+        }
+    }, [seasons, queryClient]);
 
     // Mutation
     const saveEventMutation = useMutation({
@@ -133,9 +161,9 @@ export default function StrategicProgrammingTable() {
                                 <SelectValue placeholder="Seleziona stagione" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="active" className="font-bold">Attiva ({formatSeasonName(activeSeasonObj?.name)})</SelectItem>
-                                {seasons?.map(s => (
-                                    <SelectItem key={s.id} value={s.id.toString()}>{formatSeasonName(s.name)}</SelectItem>
+                                <SelectItem value="active" className="font-bold">{getSeasonLabel(activeSeasonObj, seasons)}</SelectItem>
+                                {seasons?.map((s) => (
+                                    <SelectItem key={s.id} value={s.id.toString()}>{getSeasonLabel(s, seasons)}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -146,7 +174,7 @@ export default function StrategicProgrammingTable() {
             <Card className="flex-1 overflow-hidden flex flex-col shadow-xl">
                 <CardHeader className="bg-slate-100/50 border-b pb-4">
                     <CardTitle className="text-lg flex items-center justify-between">
-                        Foglio Operativo: Stagione {formatSeasonName(targetSeason?.name)}
+                        Foglio Operativo: {getSeasonLabel(targetSeason, seasons)}
                         <Button size="sm" onClick={() => openCellModal(new Date())}>
                             <Plus className="w-4 h-4 mr-2" /> Aggiungi Evento
                         </Button>

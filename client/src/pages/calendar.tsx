@@ -77,7 +77,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Separator } from "@/components/ui/separator";
 import { validateFiscalCode, parseFiscalCode, getPlaceName } from "@/lib/fiscalCodeUtils";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { cn, parseStatusTags, formatSeasonName } from "@/lib/utils";
+import { cn, parseStatusTags, getSeasonLabel } from "@/lib/utils";
 
 const WEEKDAYS = [
     { id: "LUN", label: "Lunedì", short: "Lun" },
@@ -411,11 +411,13 @@ export default function CalendarPage() {
             if (now.getMonth() >= 1) { // February is index 1
                 const activeSeason = seasons.find(s => s.active) || seasons[0];
                 const activeIdx = seasons.findIndex(s => s.id === activeSeason.id);
-                if (activeIdx !== -1 && activeIdx + 1 < seasons.length) {
-                    setSelectedSeasonId(seasons[activeIdx + 1].id.toString());
+                
+                // activeIdx - 1 is the next season because order is DESC (newest first)
+                if (activeIdx > 0) {
+                    setSelectedSeasonId(seasons[activeIdx - 1].id.toString());
                     return; // Skip normal navigation logic on auto jump
-                } else if (activeIdx !== -1 && activeIdx + 1 >= seasons.length) {
-                    // Auto-generate next season
+                } else if (activeIdx === 0) {
+                    // Auto-generate next season if we are at the newest season and we need the next one
                     const activeYear = parseInt(activeSeason.name.substring(0, 4));
                     if (!isNaN(activeYear)) {
                         const nextName = `${activeYear + 1}/${activeYear + 2}`;
@@ -1479,9 +1481,9 @@ export default function CalendarPage() {
                                 <SelectValue placeholder="Stagione" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="active" className="font-semibold">Attiva ({formatSeasonName(seasons?.find((s: any) => s.active)?.name || '...')})</SelectItem>
+                                <SelectItem value="active" className="font-semibold">{getSeasonLabel(seasons?.find((s: any) => s.active), seasons)}</SelectItem>
                                 {seasons?.map((s: any) => (
-                                    <SelectItem key={s.id} value={s.id.toString()}>{formatSeasonName(s.name)} {s.active ? '(Attiva)' : ''}</SelectItem>
+                                    <SelectItem key={s.id} value={s.id.toString()}>{getSeasonLabel(s, seasons)}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
