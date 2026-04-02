@@ -66,7 +66,11 @@ export function setupAuth(app: Express) {
 
     // Auto-login only in local development (bypass authentication locally per requirements)
     app.use((req, res, next) => {
-        if (process.env.NODE_ENV !== "production" && !req.isAuthenticated()) {
+        // Secure check: verify we are ACTUALLY on localhost, so production VPS doesn't accidentally bypass auth
+        // if NODE_ENV is misconfigured in Plesk.
+        const isLocalHost = req.hostname === "localhost" || req.hostname === "127.0.0.1";
+        
+        if (isLocalHost && !req.isAuthenticated()) {
             storage.getUserByUsername("admin").then(admin => {
                 if (admin) {
                     req.login(admin, (err) => next());
