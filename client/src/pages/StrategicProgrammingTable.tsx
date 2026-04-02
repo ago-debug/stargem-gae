@@ -51,7 +51,9 @@ export default function StrategicProgrammingTable() {
             const activeIdx = seasons.findIndex(s => s.id === activeSeason.id);
             if (activeIdx === 0) {
                 // Auto-generate next season
-                const activeYear = parseInt(activeSeason.name.substring(0, 4));
+                const yearMatch = activeSeason.name.match(/20(\d{2})\/20(\d{2})/);
+                const activeYear = yearMatch ? 2000 + parseInt(yearMatch[1]) : NaN;
+                
                 if (!isNaN(activeYear)) {
                     const nextName = `${activeYear + 1}/${activeYear + 2}`;
                     fetch('/api/seasons', {
@@ -161,10 +163,14 @@ export default function StrategicProgrammingTable() {
                                 <SelectValue placeholder="Seleziona stagione" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="active" className="font-bold">{getSeasonLabel(activeSeasonObj, seasons)}</SelectItem>
-                                {seasons?.map((s) => (
-                                    <SelectItem key={s.id} value={s.id.toString()}>{getSeasonLabel(s, seasons)}</SelectItem>
-                                ))}
+                                {seasons?.map((s: any, idx: number) => {
+                                    const isActiveFallback = s.active || (!seasons.find((x) => x.active) && idx === 0);
+                                    return (
+                                        <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-bold" : ""}>
+                                            {getSeasonLabel(s, seasons)}
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>
