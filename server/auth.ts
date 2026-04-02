@@ -64,6 +64,21 @@ export function setupAuth(app: Express) {
     app.use(passport.initialize());
     app.use(passport.session());
 
+    // Auto-login only in local development (bypass authentication locally per requirements)
+    app.use((req, res, next) => {
+        if (process.env.NODE_ENV !== "production" && !req.isAuthenticated()) {
+            storage.getUserByUsername("admin").then(admin => {
+                if (admin) {
+                    req.login(admin, (err) => next());
+                } else {
+                    next();
+                }
+            }).catch(() => next());
+        } else {
+            next();
+        }
+    });
+
     passport.use(
         new LocalStrategy(async (username, password, done) => {
             try {
