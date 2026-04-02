@@ -26,7 +26,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   const queryClient = useQueryClient();
 
   const { data: seasons } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
-  const activeSeasonFallbackId = seasons?.find(s => s.status === "active")?.id?.toString() || "";
+  const activeSeasonFallbackId = seasons?.find(s => s.active)?.id?.toString() || "";
   const effectiveSourceSeasonId = currentSeasonId === "active" ? activeSeasonFallbackId : currentSeasonId;
 
   const { data: courses, isLoading: loadingCourses } = useQuery<Course[]>({ 
