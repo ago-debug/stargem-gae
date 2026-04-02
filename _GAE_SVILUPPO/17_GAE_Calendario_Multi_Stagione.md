@@ -2,12 +2,14 @@
 
 **[SPRINT CHIUSO CON SUCCESSO E CONSEGNATO]**: Fase 27 completata. Le logiche di Calendario/Multi-Stagione sono pienamente varate. L'endpoint di duplicazione controllata (no enrollments) lavora dinamicamente via UI (Checkbox batch). La **Programmazione Date Strategiche** (chiusure/ferie) è integrata, attingendo la logica dei template storici, risultando prioritaria e visibile sia nel Planning stagionale sia nel Calendario operativo.
 
-**🚨 [AG-043 FEEDBACK TEST UTENTE - FIX PRIORITARI MARTEDÌ]**:  
-A seguito del test utente post-sprint sono emersi i seguenti requirement bloccanti (Hotfix temporali):
-- **Default Season 25-26**: L'applicativo al caricamento deve *sempre* avere la stagione "25-26" attiva, visibile e flaggata di default.
-- **Auto-Switch Season**: La stagione successiva ("26-27") deve subentrare e popolarsi in tendina automaticamente (trigger a Febbraio di ogni anno per le stagioni venture).
-- **Master Table Date Strategiche**: Durante la programmazione delle date, le righe di base o di esempio della griglia in UI *non* devono sparire al primo input dell'utente.
-- **Overlap Card Rigoroso**: Le card di **tutte** le attività in calendario (non limitate ai corsi) non devono assolutamente subire overlap e sovrapposizione visiva, né restringersi in larghezza senza motivo spaziale verificato.
+**🚨 [AG-043/AG-045 FEEDBACK E ALLINEAMENTO VISIVO - FIX PRIORITARI MARTEDÌ]**:  
+A seguito del collaudo UI post-sprint, sono decretati con massima priorità i seguenti requirement di correzione visiva:
+- **Labeling Default Season**: L'applicativo deve riportare visivamente l'etichetta esatta "25-26", che rimarrà sempre attiva, visibile e flaggata di default al caricamento.
+- **Auto-Switch Label "26-27"**: La stagione successiva deve caricare in UI l'etichetta "26-27" che subentrerà in automatico a febbraio di ogni anno ciclico.
+- **Indicatore "OGGI" Dinamico**: Il riquadro evidenziatore del giorno corrente in UI deve variare colore (applicando un giallo di highlight *solo* sul giorno effettivo in corso). Inoltre, la parola stringa "OGGI" deve scomparire e nascondersi interamente quando la vista utente scorre verso giorni passati o futuri.
+- **Navigazione Combinata (Scroll/Select)**: La UX del Calendario disporrà obbligatoriamente di un meccanismo ibrido che offra scorrimento elastico tra settimane assieme a una selezione mirata su un giorno specifico.
+- **Zero Overlap Card**: Per *qualsiasi attività* (corsi, camp, sale), le box/card in griglia non devono **mai** subire glitch di overlap né sovrapposizioni o restringimenti insensati.
+- **Pedanteria Tabella Master**: La sezione programmazione (Date Strategiche) deve replicare fedelmente e in toto il foglio Excel, confermando l'asse verticale delle settimane numerate, l'asse orizzontale Lun-Dom, il bilancio dei totali lezioni, la colonna di note libere, e il codice colore visivo. Le righe placeholder di esempio non spariranno mai durante la digitazione.
 
 ~~**[BUG CRITICO RILEVATO]**: Quando si chiude il modale di inserimento o modifica, le schede spariscono visivamente dal calendario e serve un refresh manuale della pagina per ripristinare il rendering.~~  
 **[AG-027 CHIUSURA BUG]**: Bug "Sparizione Schede Modale" risolto con successo in UI e state. Il reset forzato della resourceType a `"all"` unito all'esecuzione di `queryClient.invalidateQueries` all'interno dell'`onClose` del modale assicura un re-fetch totale e la persistenza completa della griglia.

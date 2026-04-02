@@ -545,10 +545,12 @@ Questa fase sblocca la gestione del calendario su più archi temporali, gestendo
 - [x] Detection Conflitti Risorse: Tracking e alert di collisione tecnica (stessa Sala/Ora) pienamente funzionante a livello UI.
 - [x] Programmazione Date Strategiche (Integrazione base completata): Implementata evidenziazione automatica nativa in Planning e Calendario.
 
-**🚨 QA HOTFIXES (PRIORITÀ MARTEDÌ - POST USER TEST)**
-- [ ] **FIX DEFAULT SEASON:** Rendere la stagione "25-26" chiaramente visibile, flaggata e sempre attiva di default al caricamento dell'applicativo.
-- [ ] **FIX AUTO-SWITCH NEXT SEASON:** La stagione successiva "26-27" deve poter subentrare e flaggarsi. Regola d'oro: ogni anno a febbraio il sistema fa apparire automaticamente la stagione del prossimo anno in tendina.
-- [ ] **FIX OVERLAP CARD UI:** Correggere l'engine visivo che causa una sovrapposizione anomala o un restringimento irrazionale delle card in griglia (applicabile a tutte le tipologie di attività, non solo ai corsi).
+**🚨 QA HOTFIXES (ALLINEAMENTI VISIVI E PRIORITÀ MARTEDÌ)**
+- [ ] **LABEL SEASON ESATTA:** La stagione di default al caricamento deve riportare tassativamente la stringa visibile "25-26" (flaggata attivamente).
+- [ ] **AUTO-SWITCH LABEL:** La stringa "26-27" (stagione successiva) deve auto-promuoversi ed esporsi in automatico a febbraio di ogni ciclo.
+- [ ] **UI BOTTONE OGGI:** Garantire il cambio colore (es: colore giallo di sfondo) solo quando ci si trova sul giorno corrente. Importante: la scritta testuale "OGGI" *deve sparire* non appena l'operatore scrolla via passando a giornate passate o future.
+- [ ] **SELEZIONE IBRIDA SCROLL/GIORNO:** Implementare interazione UI combinata consentendo simultaneamente lo scrolling/slittamento libero delle settimane e il trigger diretto di selezione cliccando su un giorno in header.
+- [ ] **ZERO OVERLAP CARD UI:** Bugfix estetico rigoroso del motore metrico: le card di *tutte* le tipologie (corsi, rent, extra) non devono MAI sormontarsi, nascondersi a parziale overlap o subire restringimenti ingiustificati.
 
 **📅 TASK ARCHITETTURA EXCEL / TABELLA DATE (FASE NUOVA)**
 - [ ] Creazione tabella master "Programmazione Date Strategiche" come replica esatta del foglio Excel: asse verticale con settimane numerate, asse orizzontale Lun-Dom con date, color coding attività/chiusure, totali e spazio note settimanali. Inserimento rapido e sync UI completo.

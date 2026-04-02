@@ -77,7 +77,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Separator } from "@/components/ui/separator";
 import { validateFiscalCode, parseFiscalCode, getPlaceName } from "@/lib/fiscalCodeUtils";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { cn, parseStatusTags } from "@/lib/utils";
+import { cn, parseStatusTags, formatSeasonName } from "@/lib/utils";
 
 const WEEKDAYS = [
     { id: "LUN", label: "Lunedì", short: "Lun" },
@@ -405,6 +405,19 @@ export default function CalendarPage() {
     useEffect(() => {
         if (!seasons?.length) return;
         
+        // Auto-advance season if we are in February or later
+        if (prevSeasonId.current === null && selectedSeasonId === "active") {
+            const now = new Date();
+            if (now.getMonth() >= 1) { // February is index 1
+                const activeSeason = seasons.find(s => s.status === "active") || seasons[0];
+                const activeIdx = seasons.findIndex(s => s.id === activeSeason.id);
+                if (activeIdx !== -1 && activeIdx + 1 < seasons.length) {
+                    setSelectedSeasonId(seasons[activeIdx + 1].id.toString());
+                    return; // Skip normal navigation logic on auto jump
+                }
+            }
+        }
+
         if (prevSeasonId.current !== null && prevSeasonId.current !== selectedSeasonId) {
             if (selectedSeasonId !== "active") {
                 const selectedSeason = seasons.find(s => s.id.toString() === selectedSeasonId);
@@ -918,7 +931,8 @@ export default function CalendarPage() {
                 
                 if (USE_STI_BRIDGE) {
                     const targetDateStr = isDayCol ? weekDatesMap[colId] : weekDatesMap[selectedDay];
-                    return isEventOnDate(evt, targetDateStr);
+                    const targetDayId = isDayCol ? colId : selectedDay;
+                    return isEventOnDate(evt, targetDateStr) && (!evt.dayOfWeek || evt.dayOfWeek === targetDayId);
                 }
                 const matchDay = isDayCol ? evt.dayOfWeek === colId : evt.dayOfWeek === selectedDay;
                 return matchDay;
@@ -1394,6 +1408,11 @@ export default function CalendarPage() {
         );
     }
 
+    const isTodayInView = useMemo(() => {
+        const today = new Date();
+        return WEEKDAYS.some((_, idx) => isSameDay(addDays(currentWeekStart, idx), today));
+    }, [currentWeekStart]);
+
     return (
         <div className="p-6 space-y-6 relative">
             <div className="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-sm px-6 py-4 -mx-6 -mt-6 border-b flex flex-col md:flex-row md:items-center justify-between gap-4 border-slate-200 shadow-sm">
@@ -1404,9 +1423,11 @@ export default function CalendarPage() {
                     <div>
                         <div className="flex flex-col md:flex-row md:items-center gap-4">
                             <h1 className="text-3xl font-bold">Calendario Attività</h1>
-                            <div className="hidden md:inline-flex items-center px-3 py-1 bg-yellow-100/80 border border-yellow-300 text-yellow-800 text-sm font-bold rounded-md shadow-sm">
-                                Oggi: {format(new Date(), "EEEE d MMMM", { locale: it })}
-                            </div>
+                            {isTodayInView && (
+                                <div className="hidden md:inline-flex items-center px-3 py-1 bg-yellow-100/80 border border-yellow-300 text-yellow-800 text-sm font-bold rounded-md shadow-sm">
+                                    Oggi: {format(new Date(), "EEEE d MMMM", { locale: it })}
+                                </div>
+                            )}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                             <Button variant="outline" size="icon" className="h-7 w-7" onClick={prevWeek}>
@@ -1438,7 +1459,7 @@ export default function CalendarPage() {
                             <SelectContent>
                                 <SelectItem value="active" className="font-semibold">Stagione Attiva</SelectItem>
                                 {seasons?.map((s: any) => (
-                                    <SelectItem key={s.id} value={s.id.toString()}>{s.name} {s.status === 'active' ? '(Attiva)' : ''}</SelectItem>
+                                    <SelectItem key={s.id} value={s.id.toString()}>{formatSeasonName(s.name)} {s.status === 'active' ? '(Attiva)' : ''}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -1656,12 +1677,16 @@ export default function CalendarPage() {
                                             return dayDate >= sDate && dayDate <= eDate;
                                         });
 
+                                        const isToday = isSameDay(dayDate, new Date());
+                                        const rowBg = isToday ? "bg-yellow-50/50" : "bg-white";
+
                                         return (
-                                            <div key={day.id} className="text-center border-r last:border-r-0 font-bold text-[12px] uppercase tracking-tight text-[#333] bg-white min-w-[120px] flex flex-col items-center justify-start relative">
+                                            <div key={day.id} className={`text-center border-r last:border-r-0 font-bold text-[12px] uppercase tracking-tight text-[#333] ${rowBg} min-w-[120px] flex flex-col items-center justify-start relative`}>
                                                 {/* Testata Data Base */}
-                                                <div className="p-3 pb-1 flex flex-col items-center w-full">
+                                                <div className={`p-3 pb-1 flex flex-col items-center w-full ${isToday ? 'border-b-[3px] border-yellow-400 text-yellow-900' : ''}`}>
                                                     <span>{day.label} {format(dayDate, "d")}</span>
                                                     <span className="text-[10px] font-normal text-muted-foreground">{format(dayDate, "MMMM", { locale: it })}</span>
+                                                    {isToday && <span className="absolute top-1.5 right-1.5 text-[7px] bg-yellow-400 text-yellow-900 px-[3px] py-[1px] rounded-sm font-black hidden md:block uppercase tracking-wider">Oggi</span>}
                                                 </div>
                                                 
                                                 {/* Banner Eventi Strategici (Chiusure/Ferie/Macro) */}
@@ -1814,7 +1839,8 @@ export default function CalendarPage() {
                                                         top: `${realTop + 2}px`,
                                                         height: `${realHeight - 4}px`,  // Fixed height frame
                                                         left: `calc(${layoutLeft}% + 2px)`,
-                                                        width: `calc(${layoutWidth}% - 4px)`
+                                                        width: `calc(${layoutWidth}% - 4px)`,
+                                                        minWidth: "70px"
                                                     }}
                                                 >
                                                     <div
