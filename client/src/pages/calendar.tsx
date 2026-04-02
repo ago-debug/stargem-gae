@@ -417,8 +417,10 @@ export default function CalendarPage() {
                     setSelectedSeasonId(seasons[activeIdx - 1].id.toString());
                     return; // Skip normal navigation logic on auto jump
                 } else if (activeIdx === 0) {
-                    // Auto-generate next season if we are at the newest season and we need the next one
-                    const activeYear = parseInt(activeSeason.name.substring(0, 4));
+                    // Auto-generate next season
+                    const yearMatch = activeSeason.name.match(/20(\d{2})\/20(\d{2})/);
+                    const activeYear = yearMatch ? 2000 + parseInt(yearMatch[1]) : NaN;
+                    
                     if (!isNaN(activeYear)) {
                         const nextName = `${activeYear + 1}/${activeYear + 2}`;
                         fetch('/api/seasons', {
@@ -1481,10 +1483,14 @@ export default function CalendarPage() {
                                 <SelectValue placeholder="Stagione" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="active" className="font-semibold">{getSeasonLabel(seasons?.find((s: any) => s.active), seasons)}</SelectItem>
-                                {seasons?.map((s: any) => (
-                                    <SelectItem key={s.id} value={s.id.toString()}>{getSeasonLabel(s, seasons)}</SelectItem>
-                                ))}
+                                {seasons?.map((s: any, idx: number) => {
+                                    const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
+                                    return (
+                                        <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
+                                            {getSeasonLabel(s, seasons)}
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>
