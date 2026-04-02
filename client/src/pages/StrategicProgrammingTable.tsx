@@ -31,9 +31,13 @@ export default function StrategicProgrammingTable() {
     const [modalStartDate, setModalStartDate] = useState("");
     const [modalEndDate, setModalEndDate] = useState("");
 
-    const activeSeasonObj = useMemo(() => seasons?.find((s) => s.status === 'active'), [seasons]);
+    const activeSeasonObj = useMemo(() => {
+        if (!seasons || seasons.length === 0) return null;
+        return seasons.find((s) => s.status === 'active') || seasons[0];
+    }, [seasons]);
+    
     const targetSeason = useMemo(() => {
-        if (!seasons) return null;
+        if (!seasons || seasons.length === 0) return null;
         if (selectedSeasonId === "active") return activeSeasonObj;
         return seasons.find(s => s.id.toString() === selectedSeasonId);
     }, [seasons, selectedSeasonId, activeSeasonObj]);

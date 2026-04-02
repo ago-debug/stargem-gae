@@ -545,5 +545,11 @@ Questa fase sblocca la gestione del calendario su più archi temporali, gestendo
 - [x] Detection Conflitti Risorse: Tracking e alert di collisione tecnica (stessa Sala/Ora) pienamente funzionante a livello UI.
 - [x] Programmazione Date Strategiche (Integrazione base completata): Implementata evidenziazione automatica nativa in Planning e Calendario.
 
+**🚨 QA HOTFIXES (PRIORITÀ MARTEDÌ - POST USER TEST)**
+- [ ] **FIX DEFAULT SEASON:** Rendere la stagione "25-26" chiaramente visibile, flaggata e sempre attiva di default al caricamento dell'applicativo.
+- [ ] **FIX AUTO-SWITCH NEXT SEASON:** La stagione successiva "26-27" deve poter subentrare e flaggarsi. Regola d'oro: ogni anno a febbraio il sistema fa apparire automaticamente la stagione del prossimo anno in tendina.
+- [ ] **FIX OVERLAP CARD UI:** Correggere l'engine visivo che causa una sovrapposizione anomala o un restringimento irrazionale delle card in griglia (applicabile a tutte le tipologie di attività, non solo ai corsi).
+
 **📅 TASK ARCHITETTURA EXCEL / TABELLA DATE (FASE NUOVA)**
 - [ ] Creazione tabella master "Programmazione Date Strategiche" come replica esatta del foglio Excel: asse verticale con settimane numerate, asse orizzontale Lun-Dom con date, color coding attività/chiusure, totali e spazio note settimanali. Inserimento rapido e sync UI completo.
+- [ ] **FIX RIGHE MASTER TABLE:** Evitare che le righe o l'impalcatura di base/esempio spariscano inspiegabilmente quando l'operatore inizia a registrare o programmare le prime date.

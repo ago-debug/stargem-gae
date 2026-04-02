@@ -1,6 +1,14 @@
 # Specifica Funzionale: Calendario Multi-Stagione, Duplicazione Corsi e Gestione Conflitti (Fase 27)
 
 **[SPRINT CHIUSO CON SUCCESSO E CONSEGNATO]**: Fase 27 completata. Le logiche di Calendario/Multi-Stagione sono pienamente varate. L'endpoint di duplicazione controllata (no enrollments) lavora dinamicamente via UI (Checkbox batch). La **Programmazione Date Strategiche** (chiusure/ferie) è integrata, attingendo la logica dei template storici, risultando prioritaria e visibile sia nel Planning stagionale sia nel Calendario operativo.
+
+**🚨 [AG-043 FEEDBACK TEST UTENTE - FIX PRIORITARI MARTEDÌ]**:  
+A seguito del test utente post-sprint sono emersi i seguenti requirement bloccanti (Hotfix temporali):
+- **Default Season 25-26**: L'applicativo al caricamento deve *sempre* avere la stagione "25-26" attiva, visibile e flaggata di default.
+- **Auto-Switch Season**: La stagione successiva ("26-27") deve subentrare e popolarsi in tendina automaticamente (trigger a Febbraio di ogni anno per le stagioni venture).
+- **Master Table Date Strategiche**: Durante la programmazione delle date, le righe di base o di esempio della griglia in UI *non* devono sparire al primo input dell'utente.
+- **Overlap Card Rigoroso**: Le card di **tutte** le attività in calendario (non limitate ai corsi) non devono assolutamente subire overlap e sovrapposizione visiva, né restringersi in larghezza senza motivo spaziale verificato.
+
 ~~**[BUG CRITICO RILEVATO]**: Quando si chiude il modale di inserimento o modifica, le schede spariscono visivamente dal calendario e serve un refresh manuale della pagina per ripristinare il rendering.~~  
 **[AG-027 CHIUSURA BUG]**: Bug "Sparizione Schede Modale" risolto con successo in UI e state. Il reset forzato della resourceType a `"all"` unito all'esecuzione di `queryClient.invalidateQueries` all'interno dell'`onClose` del modale assicura un re-fetch totale e la persistenza completa della griglia.
 

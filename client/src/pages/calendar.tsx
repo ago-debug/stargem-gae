@@ -412,7 +412,7 @@ export default function CalendarPage() {
                     setViewDate(new Date(selectedSeason.startDate));
                 }
             } else {
-                const activeSeason = seasons.find(s => s.status === "active");
+                const activeSeason = seasons.find(s => s.status === "active") || seasons[0];
                 if (activeSeason && activeSeason.startDate) {
                     const now = new Date();
                     const start = new Date(activeSeason.startDate);
@@ -1820,7 +1820,7 @@ export default function CalendarPage() {
                                                     <div
                                                         ref={handleCardRef} 
                                                         data-event-id={evt.eventId}
-                                                        className={`w-full min-h-full h-max p-1.5 rounded-md border-l-[6px] shadow-sm flex flex-col justify-start items-start text-left bg-white ${evt.colorProps.className || ''}`}
+                                                        className={`w-full h-full p-1.5 rounded-md border-l-[6px] shadow-sm flex flex-col justify-start items-start text-left bg-white overflow-hidden ${evt.colorProps.className || ''}`}
                                                         style={{
                                                             fontSize: "10px",
                                                             backgroundColor: evt.colorProps.backgroundColor,
@@ -1937,8 +1937,10 @@ export default function CalendarPage() {
                 if (!open) {
                   setEditingCourse(null); 
                   setEditForm({});
+                  setSelectedEventType("all");
+                  queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
                 }
-              }} 
+              }}
               course={editForm?.id ? (editForm as any) : null} 
               defaultValues={!editForm?.id ? editForm : undefined}
               onDelete={(id) => {
