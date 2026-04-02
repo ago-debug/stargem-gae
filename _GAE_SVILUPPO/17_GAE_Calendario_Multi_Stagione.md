@@ -69,3 +69,18 @@ A seguito del collaudo UI post-sprint, sono decretati con massima priorità i se
   1. **Creazione Pre-Stagione (Trigger di Febbraio):** A partire da febbraio di ogni anno, il sistema genera in automatico la `Stagione Successiva` (es. a Febbraio 2026 crea e imposta nel DB la "26-27" come inattiva/programmata ma selezionabile). Questo permette in anticipo la pianificazione strategica (ferie, chiusure, pianificazione corsi).
   2. **Promozione (Scatto del 1° Agosto):** Alla scoccare del 1° agosto di ogni anno solare, la `Stagione Successiva` deve prendere il sopravvento. Diventa ufficialmente la `Stagione Attuale` tramite l'aggiornamento automatico del flag booleano nel DB (`active = true` per la nuova, `false` per la precedente).
   3. **Rigenerazione Continua (1° Agosto):** Contestualmente alla promozione della stagione, il sistema alloca la _nuova_ `Stagione Successiva` per l'anno seguente, permettendo al framework di ruotare perennemente (Lifecycle Loop).
+
+## 7. Storicità Immutabile dei Corsi (Non-Deletion Policy)
+- **Obiettivo:** Preservare la memoria storica. I corsi passati non devono MAI essere svuotati o massivamente eliminati dal database alla chiusura della stagione.
+- **Logica Architetturale:** 
+  - La piattaforma archivia ogni entità corso indissolubilmente legata al proprio `seasonId`.
+  - La sovrascrittura o soppressione massiva a fine anno è **severamente vietata** via codice.
+  - La funzione di "Duplicazione Stagione" effettua esclusivamente una _clonazione_ dei metadati verso la nuova stagione, associandoli al nuovo `seasonId` e azzerando le partecipazioni (iscritti). L'originale resta intoccabile.
+  - Sarà concessa solo l'eliminazione singola manuale di una scheda corso (se inserita per errore), ma il defaticamento annuale avviene lasciando sedimentare i dati come archivio storico in sola consultazione.
+
+## 8. Navigazione Temporale Sincronizzata (Scorrimento Infinito)
+- **Obiettivo:** Garantire un'esperienza utente fluida che replichi il comportamento del Planning all'interno del Calendario Operativo.
+- **Logica Architetturale:**
+  - Il sistema monitora in tempo reale la `viewDate` (data attualmente visualizzata) quando l'utente utilizza le frecce di scorrimento settimanale (`<` e `>`).
+  - Non appena la vista temporale sconfina oltre le date di inizio/fine della stagione selezionata nel Dropdown, il calendario esegue un _auto-switch_ della risorsa `seasonId`, agganciando la stagione coerente a quella data.
+  - L'UI aggiornerà dinamicamente il nome nel selettore assegnando etichette specifiche come `(Stagione Precedente)` o `(Stagione Successiva)` a ridosso dell'anno, pre-caricando i relativi dati storicizzati del backend.
