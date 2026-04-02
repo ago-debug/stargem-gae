@@ -2385,7 +2385,20 @@ export const insertUserActivityLogSchema = createInsertSchema(userActivityLogs).
 export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
 export type UserActivityLog = typeof userActivityLogs.$inferSelect;
 
-// Seasons
+/* 
+ * ============================================================================
+ * SEASONS (STAGIONI) - LIFECYCLE BUSINESS RULES (PROMEMORIA PER IL TEAM)
+ * ============================================================================
+ * Il sistema prevede un ciclo vitale rigido per la rotazione delle stagioni:
+ * 1. FEBBRAIO: Da febbraio di ogni anno, il frontend autogenera la `Stagione Successiva` (es. 2026/2027) 
+ *    con `active = false`. Questo sblocca la Programmazione Date e il Planning a lunghissimo termine.
+ * 2. 1° AGOSTO: Avviene la promozione. La `Stagione Successiva` viene promossa a `Stagione Attuale` 
+ *    (`active = true`), mentre la precedente viene disattivata.
+ * 3. ROLL-OVER: Subito dopo lo switch del 1° agosto, viene creata immediatamente la nuova `Stagione Successiva`
+ *    per l'anno sportivo seguente.
+ * Assicurarsi di NON spezzare questa logica (Frontend: calendar.tsx, Api, e Jobs di rollover futuri).
+ * ============================================================================
+ */
 export const seasons = mysqlTable("seasons", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
