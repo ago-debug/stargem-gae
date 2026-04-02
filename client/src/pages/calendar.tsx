@@ -1393,6 +1393,11 @@ export default function CalendarPage() {
 
 
 
+    const isTodayInView = useMemo(() => {
+        const today = new Date();
+        return WEEKDAYS.some((_, idx) => isSameDay(addDays(currentWeekStart, idx), today));
+    }, [currentWeekStart]);
+
     if (isLoading) {
         return (
             <div className="p-6 space-y-6">
@@ -1408,10 +1413,7 @@ export default function CalendarPage() {
         );
     }
 
-    const isTodayInView = useMemo(() => {
-        const today = new Date();
-        return WEEKDAYS.some((_, idx) => isSameDay(addDays(currentWeekStart, idx), today));
-    }, [currentWeekStart]);
+
 
     return (
         <div className="p-6 space-y-6 relative">
