@@ -52,7 +52,7 @@ import {
     Sparkles,
     Edit2,
 } from "lucide-react";
-import { format, startOfWeek, addDays, isSameDay, parse, startOfDay, addMinutes, isWithinInterval } from "date-fns";
+import { format, startOfWeek, addDays, isSameDay, parse, startOfDay, addMinutes, isWithinInterval, isAfter, isBefore } from "date-fns";
 import { it } from "date-fns/locale";
 import type {
     Course, Instructor,
@@ -1474,11 +1474,34 @@ export default function CalendarPage() {
                     <div>
                         <div className="flex flex-col md:flex-row md:items-center gap-4">
                             <h1 className="text-3xl font-bold">Calendario Attività</h1>
-                            {isTodayInView && (
-                                <div className="hidden md:inline-flex items-center px-3 py-1 bg-yellow-100/80 border border-yellow-300 text-yellow-800 text-sm font-bold rounded-md shadow-sm">
-                                    Oggi: {format(new Date(), "EEEE d MMMM", { locale: it })}
-                                </div>
-                            )}
+                            {selectedDay === "all" ? (
+                                isTodayInView && (
+                                    <div className="hidden md:inline-flex items-center px-3 py-1 bg-yellow-100/80 border border-yellow-300 text-yellow-800 text-sm font-bold rounded-md shadow-sm">
+                                        Oggi: {format(new Date(), "EEEE d MMMM", { locale: it })}
+                                    </div>
+                                )
+                            ) : (() => {
+                                const dayIdx = WEEKDAYS.findIndex(d => d.id === selectedDay);
+                                const refDate = addDays(currentWeekStart, dayIdx);
+                                const today = new Date();
+                                const isCurrentDay = isSameDay(refDate, today);
+                                const isFutureDay = isAfter(startOfDay(refDate), startOfDay(today));
+                                
+                                let boxClass = "hidden md:inline-flex items-center px-3 py-1 text-sm font-bold rounded-md shadow-sm border";
+                                if (isCurrentDay) {
+                                    boxClass += " bg-yellow-100/80 border-yellow-300 text-yellow-800";
+                                } else if (isFutureDay) {
+                                    boxClass += " bg-blue-100/80 border-blue-300 text-blue-800";
+                                } else {
+                                    boxClass += " bg-slate-100/80 border-slate-300 text-slate-600";
+                                }
+
+                                return (
+                                    <div className={boxClass}>
+                                        {isCurrentDay ? "Oggi: " : ""}{format(refDate, "EEEE d MMMM", { locale: it })}
+                                    </div>
+                                );
+                            })()}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                             <Button variant="outline" size="icon" className="h-7 w-7" onClick={prevWeek}>
@@ -1490,7 +1513,7 @@ export default function CalendarPage() {
                             <Button variant="outline" size="icon" className="h-7 w-7" onClick={nextWeek}>
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={resetToToday}>
+                            <Button variant="outline" size="sm" className="h-7 px-3 text-xs bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 shadow-sm" onClick={resetToToday}>
                                 Oggi
                             </Button>
                         </div>
@@ -1932,11 +1955,11 @@ export default function CalendarPage() {
                                                             )}
                                                             
                                                             {stats && (
-                                                                <div className="flex justify-between text-[9px] font-bold w-full bg-white/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
-                                                                    <span className="text-blue-700">U:{stats.men}</span>
-                                                                    <span className="text-pink-700">D:{stats.women}</span>
+                                                                <div className="flex flex-wrap items-center gap-1.5 text-[9px] font-bold w-full bg-white/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
+                                                                    <span className="text-blue-700 whitespace-nowrap">U:{stats.men}</span>
+                                                                    <span className="text-pink-700 whitespace-nowrap">D:{stats.women}</span>
                                                                     {availability !== null && (
-                                                                        <span className={availability <= 2 ? "text-red-700 font-extrabold" : "text-emerald-700 ml-auto"}>Disp:{availability}</span>
+                                                                        <span className={cn("ml-auto whitespace-nowrap", availability <= 2 ? "text-red-700 font-extrabold" : "text-emerald-700")}>Disp:{availability}</span>
                                                                     )}
                                                                 </div>
                                                             )}
