@@ -22,8 +22,8 @@ export default function AuthPage() {
     const form = useForm<LoginData>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
-            username: "admin",
-            password: "Palermo_1",
+            username: import.meta.env.PROD ? "" : "admin",
+            password: import.meta.env.PROD ? "" : "Palermo_1",
         },
     });
 
