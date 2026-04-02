@@ -11,7 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Course, Instructor, Studio } from "@shared/schema";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
+import { formatSeasonName } from "@/lib/utils";
 interface CourseDuplicationWizardProps {
   currentSeasonId: string;
 }
@@ -175,7 +175,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                         </SelectTrigger>
                         <SelectContent>
                             {targetSeasons.map((s: any) => (
-                                <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                                <SelectItem key={s.id} value={s.id.toString()}>{formatSeasonName(s.name)}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>

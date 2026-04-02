@@ -5,6 +5,7 @@ import { it } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatSeasonName } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -132,9 +133,9 @@ export default function StrategicProgrammingTable() {
                                 <SelectValue placeholder="Seleziona stagione" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="active" className="font-bold">Attiva ({activeSeasonObj?.name})</SelectItem>
+                                <SelectItem value="active" className="font-bold">Attiva ({formatSeasonName(activeSeasonObj?.name)})</SelectItem>
                                 {seasons?.map(s => (
-                                    <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                                    <SelectItem key={s.id} value={s.id.toString()}>{formatSeasonName(s.name)}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -145,7 +146,7 @@ export default function StrategicProgrammingTable() {
             <Card className="flex-1 overflow-hidden flex flex-col shadow-xl">
                 <CardHeader className="bg-slate-100/50 border-b pb-4">
                     <CardTitle className="text-lg flex items-center justify-between">
-                        Foglio Operativo: Stagione {targetSeason?.name}
+                        Foglio Operativo: Stagione {formatSeasonName(targetSeason?.name)}
                         <Button size="sm" onClick={() => openCellModal(new Date())}>
                             <Plus className="w-4 h-4 mr-2" /> Aggiungi Evento
                         </Button>

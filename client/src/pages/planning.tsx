@@ -384,7 +384,7 @@ export default function Planning() {
                         &larr; Prec.
                     </button>
                     <span className="text-xl font-bold px-4 tracking-wide text-primary">
-                        {viewMode === 'annuale' ? `Stagione ${startYear} - ${startYear + 1}` : 
+                        {viewMode === 'annuale' ? `Stagione ${startYear.toString().slice(-2)}-${(startYear + 1).toString().slice(-2)}` : 
                          viewMode === 'mensile' ? format(currentDateParam, "MMMM yyyy", { locale: it }).toUpperCase() : 
                          `Settimana del ${format(currentDateParam, "d MMM yyyy", { locale: it })}`}
                     </span>

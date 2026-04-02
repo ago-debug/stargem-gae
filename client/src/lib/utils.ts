@@ -18,3 +18,9 @@ export function parseStatusTags(tags: any): string[] {
   }
   return [];
 }
+
+export function formatSeasonName(name?: string): string {
+  if (!name) return "";
+  // Transforms "Stagione 2025/2026" into "Stagione 25-26" or "2025/2026" into "25-26"
+  return name.replace(/20(\d{2})\/20(\d{2})/, "$1-$2");
+}
