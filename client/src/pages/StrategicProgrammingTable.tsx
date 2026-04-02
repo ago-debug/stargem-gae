@@ -110,7 +110,7 @@ export default function StrategicProgrammingTable() {
     const gridRows = useMemo(() => {
         if (!targetSeason) return [];
         const start = targetSeason.startDate ? new Date(targetSeason.startDate) : new Date(new Date().getFullYear(), 8, 1);
-        const end = targetSeason.endDate ? new Date(targetSeason.endDate) : new Date(new Date().getFullYear() + 1, 7, 31);
+        const end = addDays(start, 364);
         
         let currentWeekStart = startOfWeek(start, { weekStartsOn: 1 });
         const rows = [];
@@ -260,6 +260,47 @@ export default function StrategicProgrammingTable() {
                                 );
                             })}
                         </tbody>
+                        <tfoot className="sticky bottom-0 bg-slate-100 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-10">
+                            <tr>
+                                <td colSpan={2} className="border p-2 font-bold text-slate-700 text-right">Totale Lezioni (Adulti)</td>
+                                {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((d, index) => {
+                                    const totalWeeks = gridRows.length;
+                                    let excluded = 0;
+                                    gridRows.forEach(row => {
+                                        const day = row.days[index];
+                                        const evts = getEventsForDay(day);
+                                        const isClosed = evts.some(e => {
+                                            const type = e.eventType;
+                                            const title = (e.title || "").toUpperCase();
+                                            return type === 'chiusura' || type === 'ferie' || title.includes('CHIUSO') || title.includes('NO CORSI') || title.includes('PROVA');
+                                        });
+                                        if (isClosed) excluded++;
+                                    });
+                                    return <td key={d} className="border p-2 text-center font-bold text-slate-900 bg-white">{totalWeeks - excluded}</td>;
+                                })}
+                                <td className="border p-2 bg-slate-100"></td>
+                            </tr>
+                            <tr>
+                                <td colSpan={2} className="border p-2 font-bold text-slate-700 text-right">Totale Lezioni (Bambini)</td>
+                                {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((d, index) => {
+                                    const totalWeeks = gridRows.length;
+                                    let excluded = 0;
+                                    gridRows.forEach(row => {
+                                        const day = row.days[index];
+                                        const evts = getEventsForDay(day);
+                                        const isAdultExcluded = evts.some(e => {
+                                            const type = e.eventType;
+                                            const title = (e.title || "").toUpperCase();
+                                            return type === 'chiusura' || type === 'ferie' || title.includes('CHIUSO') || title.includes('NO CORSI') || title.includes('PROVA');
+                                        });
+                                        const isKidsExcluded = evts.some(e => (e.title || "").toUpperCase().includes('NO BAMBINI'));
+                                        if (isAdultExcluded || isKidsExcluded) excluded++;
+                                    });
+                                    return <td key={`kids-${d}`} className="border p-2 text-center font-bold text-slate-900 bg-teal-50">{totalWeeks - excluded}</td>;
+                                })}
+                                <td className="border p-2 bg-slate-100"></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </Card>
