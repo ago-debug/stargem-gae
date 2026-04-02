@@ -52,6 +52,7 @@ import {
     Sparkles,
     Edit2,
 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { format, startOfWeek, addDays, isSameDay, parse, startOfDay, addMinutes, isWithinInterval, isAfter, isBefore } from "date-fns";
 import { it } from "date-fns/locale";
 import type {
@@ -292,19 +293,12 @@ export default function CalendarPage() {
     const nextWeek = () => setViewDate(prev => addDays(prev, 7));
     const prevWeek = () => setViewDate(prev => addDays(prev, -7));
     const resetToToday = () => {
-        if (selectedSeasonId && selectedSeasonId !== "active" && seasons) {
-            const season = seasons.find(s => s.id.toString() === selectedSeasonId);
-            if (season && season.startDate) {
-                const now = new Date();
-                const start = new Date(season.startDate);
-                const end = season.endDate ? new Date(season.endDate) : new Date(now.getTime() + 31536000000);
-                if (now < start || now > end) {
-                    setViewDate(start); 
-                    return;
-                }
-            }
-        }
-        setViewDate(new Date());
+        const today = new Date();
+        setViewDate(today);
+        setSelectedDay((() => {
+            const dayIdx = today.getDay();
+            return WEEKDAYS[dayIdx === 0 ? 6 : dayIdx - 1]?.id || "LUN";
+        })());
     };
 
     // Get Lists for standard Comboboxes
@@ -1520,11 +1514,10 @@ export default function CalendarPage() {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-end gap-4">
+                <div className="flex flex-wrap items-center gap-4">
                     <CourseDuplicationWizard currentSeasonId={selectedSeasonId} />
 
-                    <div className="space-y-1.5 text-left">
-                        <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Stagione</Label>
+                    <div className="text-left">
                         <Select value={selectedSeasonId} onValueChange={handleSeasonChange}>
                             <SelectTrigger className="w-[180px] bg-slate-50 border-slate-300">
                                 <CalendarIcon className="w-4 h-4 mr-2 text-slate-500" />
@@ -1543,8 +1536,22 @@ export default function CalendarPage() {
                         </Select>
                     </div>
 
-                    <div className="space-y-1.5 text-left">
-                        <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Studio</Label>
+                    <div className="text-left">
+                        <Select value={selectedDay} onValueChange={setSelectedDay}>
+                            <SelectTrigger className="w-[150px]">
+                                <CalendarIcon className="w-4 h-4 mr-2" />
+                                <SelectValue placeholder="Giorno" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tutta la Sett.</SelectItem>
+                                {WEEKDAYS.map(d => (
+                                    <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="text-left">
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className="w-[180px] justify-between font-normal">
@@ -1587,8 +1594,7 @@ export default function CalendarPage() {
                         </Popover>
                     </div>
 
-                    <div className="space-y-1.5 text-left">
-                        <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Insegnante</Label>
+                    <div className="text-left">
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className="w-[180px] justify-between font-normal">
@@ -1634,8 +1640,7 @@ export default function CalendarPage() {
                         </Popover>
                     </div>
 
-                    <div className="space-y-1.5 text-left">
-                        <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Tipo Attività</Label>
+                    <div className="text-left">
                         <Select value={selectedEventType} onValueChange={setSelectedEventType}>
                             <SelectTrigger className="w-[160px] h-10 border-slate-300">
                                 <SelectValue placeholder="Tutte le Attività" />
@@ -1649,8 +1654,7 @@ export default function CalendarPage() {
                         </Select>
                     </div>
 
-                    <div className="space-y-1.5 text-left">
-                        <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Categoria</Label>
+                    <div className="text-left">
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className="w-[180px] justify-between font-normal">
@@ -1693,24 +1697,7 @@ export default function CalendarPage() {
                         </Popover>
                     </div>
 
-                    <div className="space-y-1.5 text-left">
-                        <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Giorno</Label>
-                        <Select value={selectedDay} onValueChange={setSelectedDay}>
-                            <SelectTrigger className="w-[180px]">
-                                <CalendarIcon className="w-4 h-4 mr-2" />
-                                <SelectValue placeholder="Giorno" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Tutta la Settimana</SelectItem>
-                                {WEEKDAYS.map(d => (
-                                    <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-1.5 text-left flex-1 min-w-[200px]">
-                        <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Cerca (Nome/Insegnante/Note)</Label>
+                    <div className="text-left flex-1 min-w-[200px]">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -1722,11 +1709,30 @@ export default function CalendarPage() {
                         </div>
                     </div>
 
-                    {(selectedStudio !== "all" || selectedInstructor !== "all" || selectedCategory !== "all" || selectedDay !== "all" || searchQuery !== "") && (
-                        <Button variant="ghost" size="icon" onClick={resetFilters} title="Resetta filtri" className="mb-[2px]">
-                            <RefreshCw className="w-4 h-4" />
-                        </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {(selectedStudio !== "all" || selectedInstructor !== "all" || selectedCategory !== "all" || selectedDay !== "all" || searchQuery !== "") && (
+                            <Button variant="ghost" size="icon" onClick={resetFilters} title="Resetta filtri">
+                                <RefreshCw className="w-4 h-4" />
+                            </Button>
+                        )}
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0 bg-slate-900 border-slate-900 text-slate-100 hover:bg-slate-800 hover:text-white" title="Calendario Mensile">
+                                    <CalendarIcon className="w-5 h-5" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="end">
+                                <Calendar
+                                    mode="single"
+                                    selected={viewDate}
+                                    onSelect={(d: Date | undefined) => d && setViewDate(d)}
+                                    defaultMonth={viewDate}
+                                    initialFocus
+                                    locale={it}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
                 </div>
             </div>
 
