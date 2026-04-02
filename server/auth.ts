@@ -66,11 +66,10 @@ export function setupAuth(app: Express) {
 
     // Auto-login only in local development (bypass authentication locally per requirements)
     app.use((req, res, next) => {
-        // Secure check: verify we are ACTUALLY on localhost, so production VPS doesn't accidentally bypass auth
-        // if NODE_ENV is misconfigured in Plesk.
-        const isLocalHost = req.hostname === "localhost" || req.hostname === "127.0.0.1";
-        
-        if (isLocalHost && !req.isAuthenticated()) {
+        // Secure check: verify process.env.LOCAL_BYPASS_AUTH is specifically strictly true.
+        // This variable is ONLY injected by "npm run dev" locally.
+        // Plesk/Passenger will never have this, resolving the proxy forward mismatch securely!
+        if (process.env.LOCAL_BYPASS_AUTH === "true" && !req.isAuthenticated()) {
             storage.getUserByUsername("admin").then(admin => {
                 if (admin) {
                     req.login(admin, (err) => next());
