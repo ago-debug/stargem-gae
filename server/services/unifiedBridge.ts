@@ -215,6 +215,14 @@ function expandCourseRecurrence(
 export async function getUnifiedActivitiesPreview(req: Request) {
   const activeSeason = await storage.getActiveSeason();
   const defaultSeasonId = activeSeason?.id || null;
+  
+  let querySeasonId: number | null = defaultSeasonId;
+  if (req.query.seasonId === 'all') {
+    querySeasonId = null;
+  } else if (req.query.seasonId) {
+    const parsed = parseInt(req.query.seasonId as string);
+    if (!isNaN(parsed)) querySeasonId = parsed;
+  }
 
   // Mass RAM DB Extractions
   const [
@@ -249,11 +257,16 @@ export async function getUnifiedActivitiesPreview(req: Request) {
 
   // Mappa Corsi (con modulo di Expansion Recurrence)
   for (const c of dbCourses) {
+    const effSeasonId = c.seasonId || defaultSeasonId;
+    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
     unified.push(...expandCourseRecurrence(c, defaultSeasonId, { dbMembers, dbCats, dbStudios }));
   }
 
   // Mappa Workshop
   for (const w of dbWorkshops) {
+    const effSeasonId = w.seasonId || defaultSeasonId;
+    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
+
     const { ids: insIds, names: insNames } = resolveInstructor(w.instructorId, dbMembers);
     const catInfo = resolveCategory(w.categoryId, dbWsCats, "WKS");
     const studioInfo = resolveStudio(w.studioId, dbStudios);
@@ -287,6 +300,9 @@ export async function getUnifiedActivitiesPreview(req: Request) {
 
   // Mappa Affitti (Rentals)
   for (const r of dbRentals) {
+    const effSeasonId = r.seasonId || defaultSeasonId;
+    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
+
     const { ids: insIds, names: insNames } = resolveInstructor(r.instructorId, dbMembers);
     const studioInfo = resolveStudio(r.studioId, dbStudios);
     const colors = buildColorProps(null, null, "rental");
@@ -329,6 +345,9 @@ export async function getUnifiedActivitiesPreview(req: Request) {
 
   // Mappa Campus
   for (const c of dbCampus) {
+    const effSeasonId = (c as any).seasonId || defaultSeasonId;
+    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
+
     const { ids: insIds, names: insNames } = resolveInstructor(c.instructorId, dbMembers);
     const studioInfo = resolveStudio(c.studioId, dbStudios);
     const colors = buildColorProps(null, c.id, "campus");
@@ -361,6 +380,9 @@ export async function getUnifiedActivitiesPreview(req: Request) {
 
   // Mappa Domeniche (Sunday)
   for (const s of dbSunday) {
+    const effSeasonId = (s as any).seasonId || defaultSeasonId;
+    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
+
     const { ids: insIds, names: insNames } = resolveInstructor(s.instructorId, dbMembers);
     const catInfo = resolveCategory((s as any).categoryId, dbSunCats, "SUN");
     const studioInfo = resolveStudio(s.studioId, dbStudios);
@@ -394,6 +416,9 @@ export async function getUnifiedActivitiesPreview(req: Request) {
 
   // Mappa Saggi (Recitals)
   for (const r of dbRecitals) {
+    const effSeasonId = (r as any).seasonId || defaultSeasonId;
+    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
+
     const { ids: insIds, names: insNames } = resolveInstructor(r.instructorId, dbMembers);
     const studioInfo = resolveStudio(r.studioId, dbStudios);
     const colors = buildColorProps(null, r.id, "recital");

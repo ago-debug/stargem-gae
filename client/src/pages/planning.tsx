@@ -84,7 +84,8 @@ export default function Planning() {
     const { data: recitals, isLoading: recitalsLoading } = useQuery<any[]>({ queryKey: ["/api/recitals"] });
     const { data: vacationStudies, isLoading: vacationsLoading } = useQuery<any[]>({ queryKey: ["/api/vacation-studies"] });
     const { data: bookingServices, isLoading: servicesLoading } = useQuery<any[]>({ queryKey: ["/api/booking-services"] });
-    const { data: strategicEventsData, isLoading: strategicLoading } = useQuery<any[]>({ queryKey: ["/api/strategic-events"] });
+    const { data: strategicEventsData, isLoading: strategicLoading } = useQuery<any[]>({ queryKey: ["/api/strategic-events?seasonId=all"] });
+    const { data: seasons, isLoading: seasonsLoading } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
 
     const isLoading = coursesLoading || workshopsLoading || sundayLoading || strategicLoading ||
                       campusLoading || recitalsLoading || vacationsLoading || servicesLoading;
@@ -121,6 +122,7 @@ export default function Planning() {
             startDate: strategicStart,
             endDate: strategicEnd || null,
             allDay: strategicAllDay,
+            seasonId: seasons?.find(s => s.active)?.id || null
         });
     };
 

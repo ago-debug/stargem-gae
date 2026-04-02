@@ -512,18 +512,38 @@ Questa fase è strettamente NON DISTRUTTIVA. Nessuna tabella legacy è stata div
 ## Fase 26 - Migrazione Infrasruttura Server (VPS IONOS)
 Questa fase certifica il passaggio dell'app di produzione dal server condiviso "Legacy" al nuovo VPS dedicato, risolvendo vincoli prestazionali e gettando le basi per i Webhooks CRM in arrivo.
 
-- [x] Deploy codice su VPS IONOS
+- [x] Deploy codice su VPS IONOS (Workflow GitHub -> Plesk Git Ext)
 - [x] Import DB `stargem_v2` da dump `sg_gae`
-- [x] PM2 configurato e online
-- [x] Nginx reverse proxy configurato
-- [x] Tunnel SSH locale → `stargem_v2`
+- [x] **Plesk Node.js Extension** (Phusion Passenger) configurato e online, rimpiazzando il vecchio setup PM2
+- [x] Nginx / Apache fix (Rinominato index.html default Plesk, sbloccata l'esecuzione dist/index.js e bug Porta 80 curato)
+- [x] Tunnel SSH locale → `stargem_v2` (Script persistente)
 - [x] Chiave SSH senza password
-- [x] DNS record A aggiornato (propagazione in corso)
+- [x] DNS record A aggiornato (propagazione conclusa su IONOS)
 - [x] Fix resolv Node.js IPv4 `127.0.0.1` (.env produzione)
 - [x] Fix integrazione `BASE_URL` su `.env` VPS (Login Auth Google)
-- [x] Fix Nginx Exception Path ACME Challenge (per bypass Node)
 - [x] Estrazione primo Backup Architettonico post-migrazione (28K righe, 7.1MB)
 - [x] **PUSH FINALE:** Snapshot stato attuale su repository `main` (`[AG-26.25]`)
-- [x] **AUDIT CUT-OVER & FREEZE 185:** Identificato scollamento DNS (SiteGround). App legacy 185 spenta per blocco split-brain e freeze preventivo.
-- [ ] SSL Let's Encrypt (in attesa propagazione SiteGround `->` IONOS)
-- [ ] Migrazione zona DNS completa su IONOS (Pianificata Fase 2)
+- [x] **AUDIT CUT-OVER & FREEZE 185:** Dismissione totale infrastruttura su vecchio server abilitata in via finale.
+- [x] SSL Let's Encrypt (Risolto impasse bind porta Nginx 80. Certificato HTTPS attivamente emesso a lungo termine)
+- [x] Migrazione zona DNS (Assicurato mapping `www.stargem` in IONOS Panel via CNAME/A Record)
+
+---
+
+## Fase 27 - Calendario Multi-Stagione & Engine Modifiche (In Cantiere)
+Questa fase sblocca la gestione del calendario su più archi temporali, gestendo nativamente sovrapposizioni e porting automatico dei record.
+
+- [x] **Inizializzazione Architetturale Fase 27:** Documentazione e vincoli temporali (Stagione default 25-26 visibile e flaggata, Futura 26-27) cristallizzati in `17_GAE_Calendario_Multi_Stagione.md`.
+- [x] Allineamento Regole di Copia (post AG-017/AG-018): Ribadita UI e Checkbox funzionante in batch.
+- [x] Ripristino Architettura (UI FREEZE ATTIVO confermato): Messa in sicurezza del DOM per evitare manipulation.
+
+**🚨 DEADLINE: CONSEGNA DI MARTEDÌ (E FIX URGENTI)**
+- [x] **[BUG CRITICO RISOLTO] FIX Disparizione Schede: Implementato auto-refresh modale tramite reset forzato a "all" e `invalidateQueries` per ripristinare il calendario.**
+- [x] Sviluppo Endpoint Duplicatore: `POST /api/activities/duplicate-season` esplorato e integrato rispettando i vincoli di copia ristretti (no enrollments).
+- [x] Sviluppo UI Porting/Clonazione: Tabella/Lista corsi correnti validata. Checkbox a multi-selezione funzionante con macro-pulsante "Duplica selezionati" operativo.
+- [x] Switch "Season" in Header: Toggle 25-26 / 26-27 completato con filtro dinamico del payload nel componente Calendario base.
+- [x] Layout Sliding: Refactoring della view settimanale completato, resa fluida.
+- [x] Detection Conflitti Risorse: Tracking e alert di collisione tecnica (stessa Sala/Ora) pienamente funzionante a livello UI.
+- [x] Programmazione Date Strategiche (Integrazione base completata): Implementata evidenziazione automatica nativa in Planning e Calendario.
+
+**📅 TASK ARCHITETTURA EXCEL / TABELLA DATE (FASE NUOVA)**
+- [ ] Creazione tabella master "Programmazione Date Strategiche" come replica esatta del foglio Excel: asse verticale con settimane numerate, asse orizzontale Lun-Dom con date, color coding attività/chiusure, totali e spazio note settimanali. Inserimento rapido e sync UI completo.

@@ -155,6 +155,11 @@ const teachingItems = [
     icon: CalendarRange,
   },
   {
+    title: "Programmazione Date",
+    url: "/programmazione-date",
+    icon: Calendar,
+  },
+  {
     title: "Studios/Sale",
     url: "/studios",
     icon: Building2,

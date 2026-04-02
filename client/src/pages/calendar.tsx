@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
+import { CourseDuplicationWizard } from "@/components/CourseDuplicationWizard";
 import { useCustomListValues } from "@/hooks/use-custom-list";
 import { Combobox } from "@/components/ui/combobox";
 import { getStatusColor } from "@/components/multi-select-status";
@@ -248,6 +249,7 @@ export default function CalendarPage() {
     });
     const [searchQuery, setSearchQuery] = useState("");
     const [conflictInfo, setConflictInfo] = useState<{ message: string, data: any, isUpdate: boolean } | null>(null);
+    const [conflictEventId, setConflictEventId] = useState<string | null>(null);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
     const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
     const [editingBooking, setEditingBooking] = useState<any | null>(null);
@@ -289,7 +291,21 @@ export default function CalendarPage() {
 
     const nextWeek = () => setViewDate(prev => addDays(prev, 7));
     const prevWeek = () => setViewDate(prev => addDays(prev, -7));
-    const resetToToday = () => setViewDate(new Date());
+    const resetToToday = () => {
+        if (selectedSeasonId && selectedSeasonId !== "active" && seasons) {
+            const season = seasons.find(s => s.id.toString() === selectedSeasonId);
+            if (season && season.startDate) {
+                const now = new Date();
+                const start = new Date(season.startDate);
+                const end = season.endDate ? new Date(season.endDate) : new Date(now.getTime() + 31536000000);
+                if (now < start || now > end) {
+                    setViewDate(start); 
+                    return;
+                }
+            }
+        }
+        setViewDate(new Date());
+    };
 
     // Get Lists for standard Comboboxes
     const formItems = useCustomListValues("genere");
@@ -367,10 +383,52 @@ export default function CalendarPage() {
         queryKey: ["/api/activity-statuses"],
     });
 
+    const { data: seasons } = useQuery<any[]>({
+        queryKey: ["/api/seasons"],
+    });
+
+    const [selectedSeasonId, setSelectedSeasonId] = useState<string>("active");
+
+    const unifiedQueryKey = selectedSeasonId === "active" ? "/api/activities-unified-preview" : `/api/activities-unified-preview?seasonId=${selectedSeasonId}`;
     const { data: unifiedBridgeActivities } = useQuery<any[]>({
-        queryKey: ["/api/activities-unified-preview"],
+        queryKey: [unifiedQueryKey],
         enabled: USE_STI_BRIDGE,
     });
+
+    const strategicQueryKey = selectedSeasonId === "active" ? "/api/strategic-events" : `/api/strategic-events?seasonId=${selectedSeasonId}`;
+    const { data: strategicEventsData, isLoading: strategicLoading } = useQuery<any[]>({
+        queryKey: [strategicQueryKey]
+    });
+
+    const prevSeasonId = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (!seasons?.length) return;
+        
+        if (prevSeasonId.current !== null && prevSeasonId.current !== selectedSeasonId) {
+            if (selectedSeasonId !== "active") {
+                const selectedSeason = seasons.find(s => s.id.toString() === selectedSeasonId);
+                if (selectedSeason && selectedSeason.startDate) {
+                    setViewDate(new Date(selectedSeason.startDate));
+                }
+            } else {
+                const activeSeason = seasons.find(s => s.status === "active");
+                if (activeSeason && activeSeason.startDate) {
+                    const now = new Date();
+                    const start = new Date(activeSeason.startDate);
+                    const end = activeSeason.endDate ? new Date(activeSeason.endDate) : new Date();
+                    if (now < start || now > end) {
+                        setViewDate(start); 
+                    } else {
+                        setViewDate(now);
+                    }
+                } else {
+                    setViewDate(new Date());
+                }
+            }
+        }
+        prevSeasonId.current = selectedSeasonId;
+    }, [selectedSeasonId, seasons]);
 
     const { data: workshopAttendances } = useQuery<any[]>({
         queryKey: ["/api/workshop-attendances"],
@@ -616,7 +674,7 @@ export default function CalendarPage() {
         }
     });
 
-    const isLoading = coursesLoading || studiosLoading || instructorsLoading || categoriesLoading;
+    const isLoading = coursesLoading || studiosLoading || instructorsLoading || categoriesLoading || strategicLoading;
 
     const getCourseStats = (courseId: number) => {
         const courseEnrollments = enrollments?.filter(e => e.activityDetailId === courseId && (e.status === 'active' || !e.status)) || [];
@@ -971,6 +1029,7 @@ export default function CalendarPage() {
             return await apiRequest("PATCH", `/api/courses/${id}`, data);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
             queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
             toast({ title: "Corso aggiornato", description: "Le modifiche sono state salvate correttamente." });
             setEditingCourse(null);
@@ -985,6 +1044,7 @@ export default function CalendarPage() {
             return await apiRequest("DELETE", `/api/courses/${id}`);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
             queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
             toast({ title: "Corso eliminato", description: "Il corso è stato rimosso correttamente." });
             setEditingCourse(null);
@@ -1067,11 +1127,13 @@ export default function CalendarPage() {
 
         const conflict = checkConflict();
         if (conflict) {
+             setConflictEventId(conflict.conflictedEvt.id);
              toast({ 
                  title: "Conflitto d'Orario Rilevato", 
                  description: `La Sala selezionata è già occupata da "${conflict.conflictedEvt.title}" (dalle ${conflict.conflictedEvt.startTime} alle ${conflict.conflictedEvt.endTime}). Scegli un altro orario o un'altra sala.`, 
                  variant: "destructive" 
              });
+             setTimeout(() => setConflictEventId(null), 8000);
              return;
         }
 
@@ -1110,6 +1172,7 @@ export default function CalendarPage() {
             return await apiRequest("POST", "/api/workshops", data);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
             queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
             toast({ title: "Workshop creato", description: "Il nuovo workshop è stato aggiunto con successo." });
             setUnifiedFormOpen(false);
@@ -1125,6 +1188,7 @@ export default function CalendarPage() {
             return await apiRequest("PATCH", `/api/workshops/${id}`, data);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
             queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
             toast({ title: "Workshop aggiornato", description: "Le modifiche scritte con successo." });
             setUnifiedFormOpen(false);
@@ -1139,6 +1203,7 @@ export default function CalendarPage() {
             return await apiRequest("POST", "/api/courses", data);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
             queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
             toast({ title: "Corso creato", description: "Il nuovo corso è stato aggiunto con successo." });
             setEditingCourse(null);
@@ -1153,6 +1218,7 @@ export default function CalendarPage() {
             return await apiRequest("POST", "/api/studio-bookings", data);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
             queryClient.invalidateQueries({ queryKey: ["/api/studio-bookings"] });
             toast({ title: "Prenotazione creata", description: "La prenotazione è stata salvata correttamente." });
             setEditingBooking(null);
@@ -1172,6 +1238,7 @@ export default function CalendarPage() {
             return await apiRequest("PATCH", `/api/studio-bookings/${id}`, data);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
             queryClient.invalidateQueries({ queryKey: ["/api/studio-bookings"] });
             toast({ title: "Prenotazione aggiornata", description: "Le modifiche sono state salvate correttamente." });
             setEditingBooking(null);
@@ -1191,6 +1258,7 @@ export default function CalendarPage() {
             return await apiRequest("DELETE", `/api/studio-bookings/${id}`);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
             queryClient.invalidateQueries({ queryKey: ["/api/studio-bookings"] });
             toast({ title: "Prenotazione eliminata", description: "La prenotazione è stata rimossa correttamente." });
             setEditingBooking(null);
@@ -1282,11 +1350,13 @@ export default function CalendarPage() {
 
         const conflict = checkBookingConflict();
         if (conflict) {
+             setConflictEventId(conflict.conflictedEvt.id);
              toast({ 
                  title: "Conflitto d'Orario Rilevato", 
                  description: `La Sala selezionata è già occupata da "${conflict.conflictedEvt.title}" (dalle ${conflict.conflictedEvt.startTime} alle ${conflict.conflictedEvt.endTime}). Scegli un altro orario o un'altra sala.`, 
                  variant: "destructive" 
              });
+             setTimeout(() => setConflictEventId(null), 8000);
              return;
         }
 
@@ -1325,8 +1395,8 @@ export default function CalendarPage() {
     }
 
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-6 space-y-6 relative">
+            <div className="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-sm px-6 py-4 -mx-6 -mt-6 border-b flex flex-col md:flex-row md:items-center justify-between gap-4 border-slate-200 shadow-sm">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">
                         <CalendarIcon className="w-8 h-8 text-primary" />
@@ -1356,6 +1426,24 @@ export default function CalendarPage() {
                 </div>
 
                 <div className="flex flex-wrap items-end gap-4">
+                    <CourseDuplicationWizard currentSeasonId={selectedSeasonId} />
+
+                    <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Stagione</Label>
+                        <Select value={selectedSeasonId} onValueChange={setSelectedSeasonId}>
+                            <SelectTrigger className="w-[180px] bg-slate-50 border-slate-300">
+                                <CalendarIcon className="w-4 h-4 mr-2 text-slate-500" />
+                                <SelectValue placeholder="Stagione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="active" className="font-semibold">Stagione Attiva</SelectItem>
+                                {seasons?.map((s: any) => (
+                                    <SelectItem key={s.id} value={s.id.toString()}>{s.name} {s.status === 'active' ? '(Attiva)' : ''}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                     <div className="space-y-1.5 text-left">
                         <Label className="text-xs font-semibold text-muted-foreground uppercase ml-1">Studio</Label>
                         <Popover>
@@ -1560,10 +1648,39 @@ export default function CalendarPage() {
                                 {selectedDay === 'all' ? (
                                     WEEKDAYS.map((day, idx) => {
                                         const dayDate = addDays(currentWeekStart, idx);
+                                        const overlappingEvents = strategicEventsData?.filter(e => {
+                                            const sDate = new Date(e.startDate);
+                                            sDate.setHours(0,0,0,0);
+                                            const eDate = e.endDate ? new Date(e.endDate) : new Date(e.startDate);
+                                            eDate.setHours(23,59,59,999);
+                                            return dayDate >= sDate && dayDate <= eDate;
+                                        });
+
                                         return (
-                                            <div key={day.id} className="p-3 text-center border-r last:border-r-0 font-bold text-[12px] uppercase tracking-tight text-[#333] bg-white min-w-[120px] flex flex-col items-center">
-                                                <span>{day.label} {format(dayDate, "d")}</span>
-                                                <span className="text-[10px] font-normal text-muted-foreground">{format(dayDate, "MMMM", { locale: it })}</span>
+                                            <div key={day.id} className="text-center border-r last:border-r-0 font-bold text-[12px] uppercase tracking-tight text-[#333] bg-white min-w-[120px] flex flex-col items-center justify-start relative">
+                                                {/* Testata Data Base */}
+                                                <div className="p-3 pb-1 flex flex-col items-center w-full">
+                                                    <span>{day.label} {format(dayDate, "d")}</span>
+                                                    <span className="text-[10px] font-normal text-muted-foreground">{format(dayDate, "MMMM", { locale: it })}</span>
+                                                </div>
+                                                
+                                                {/* Banner Eventi Strategici (Chiusure/Ferie/Macro) */}
+                                                <div className="w-full flex-grow flex flex-col gap-[1px] px-[2px] pb-[4px]">
+                                                {overlappingEvents && overlappingEvents.map(evt => {
+                                                    let bgColor = 'bg-slate-200 text-slate-800';
+                                                    if (evt.eventType === 'chiusura') bgColor = 'bg-red-500 text-white';
+                                                    if (evt.eventType === 'ferie') bgColor = 'bg-purple-500 text-white';
+                                                    if (evt.eventType === 'apertura_eccezionale') bgColor = 'bg-emerald-500 text-white';
+                                                    if (evt.eventType === 'evento_macro') bgColor = 'bg-blue-500 text-white';
+                                                    if (evt.eventType === 'nota') bgColor = 'bg-yellow-100 border border-yellow-400 text-yellow-900';
+                                                    
+                                                    return (
+                                                        <div key={evt.id} className={`w-full text-[9px] py-[2px] px-1 font-bold truncate rounded-[3px] leading-tight ${bgColor}`} title={evt.title}>
+                                                            {evt.title}
+                                                        </div>
+                                                    );
+                                                })}
+                                                </div>
                                             </div>
                                         );
                                     })
@@ -1692,7 +1809,7 @@ export default function CalendarPage() {
                                                 <div
                                                     key={evt.eventId}
                                                     onClick={handleCardClick}
-                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 overflow-hidden`}
+                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 overflow-hidden ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''}`}
                                                     style={{
                                                         top: `${realTop + 2}px`,
                                                         height: `${realHeight - 4}px`,  // Fixed height frame
@@ -2358,7 +2475,7 @@ export default function CalendarPage() {
             <Dialog open={!!selectionContext} onOpenChange={(open) => {
                 if (!open) {
                     setSelectionContext(null);
-                    setSelectedEventType("");
+                    setSelectedEventType("all");
                 }
             }}>
                 <DialogContent className="max-w-md">
@@ -2428,7 +2545,7 @@ export default function CalendarPage() {
                                     
                                     setUnifiedFormOpen(true);
                                     setSelectionContext(null);
-                                    setSelectedEventType("");
+                                    setSelectedEventType("all");
                                 }
                             }}
                         >

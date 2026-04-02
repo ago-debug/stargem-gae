@@ -56,6 +56,7 @@ import SchedaCampus from "@/pages/scheda-campus";
 import SchedaSaggio from "@/pages/scheda-saggio";
 import SchedaVacanzaStudio from "@/pages/scheda-vacanza-studio";
 import Planning from "@/pages/planning";
+import StrategicProgrammingTable from "@/pages/StrategicProgrammingTable";
 
 import SundayActivities from "@/pages/sunday-activities";
 import Trainings from "@/pages/trainings";
@@ -153,6 +154,7 @@ function Router() {
       </Route>
       <ProtectedRoute path="/calendario-attivita" component={CalendarPage} />
       <ProtectedRoute path="/planning" component={Planning} />
+      <ProtectedRoute path="/programmazione-date" component={StrategicProgrammingTable} />
       <ProtectedRoute path="/attivita-a-lista" component={StubAttivitaLista} />
       <ProtectedRoute path="/staff" component={Instructors} />
       <ProtectedRoute path="/studios" component={Studios} />
