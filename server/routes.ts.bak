@@ -2798,7 +2798,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             endTime,
             undefined, // no booking ID
             id,        // current course ID
-            (validatedData.seasonId ?? existingCourse.seasonId) || undefined
+            validatedData.seasonId !== undefined ? validatedData.seasonId : (existingCourse.seasonId || undefined)
           );
           if (conflict) {
             const conflictTypeLabel =

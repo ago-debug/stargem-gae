@@ -3730,7 +3730,7 @@ export class DatabaseStorage implements IStorage {
 
     const isOverlapping = (itemStart: string, itemEnd: string) => {
       const s = toMinutes(itemStart);
-      const e = toMinutes(itemEnd);
+      const e = toMinutes(itemEnd) || (s + 60);
       return s < endMin && e > startMin;
     };
 

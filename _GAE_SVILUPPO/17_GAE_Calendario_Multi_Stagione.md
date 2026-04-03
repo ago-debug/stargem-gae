@@ -34,11 +34,12 @@ Tutti i requirements di layout UI post-sprint sono stati bonificati:
   - **NON** verranno copiati gli iscritti. Lo stack partirà da zero, limitando il bleed.
   - L'interfaccia UI esporrà una lista con **checkbox a multi-selezione funzionante**, controllata da un macro-pulsante **"Duplica selezionati"**, per eseguire in un solo colpo il porting massivo dei corsi verso l'anno sportivo imminente.
 
-## 3. Layout Dinamico "Sliding" Settimanale
+## 3. Layout Dinamico "Sliding" Settimanale ed Elasticità Oraria
 - **Obiettivo:** Creare un'infrastruttura visiva fluida e reattiva alla componente temporale continua.
 - **Logica Architetturale:**
   - Sostituire la griglia rigida mensile/giornaliera pura con un carosello temporale (sliding).
   - Integrazione con l'algoritmo già sviluppato nell'Engine STI (che sfrutta `ResizeObserver` per l'altezza dinamica): le ore scorreranno fluidamente sull'asse orizzontale o verticale calcolate tramite `Temporal` o date-fns.
+  - **Dinamismo Orario Globale:** L'array di fasce orarie visualizzate dal calendario non è più costituito da 17 slot hardcoded, ma scala ritagliandosi elasticamente sui limiti fisici (Apertura e Chiusura) stabiliti nel database in `system_configs` dal Pannello di Amministrazione. Le dimensioni e spaziature in pixel (`PX_PER_MIN`) si auto-adeguano, assicurando che l'UX reagisca di conseguenza.
 
 ## 4. Supporto Visivo ai Conflitti: Sale e Affitti
 - **Obiettivo:** Avvisare immediatamente la segreteria in caso di collisione di risorse fisiche (stessa sala, stessa ora).

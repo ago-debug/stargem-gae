@@ -17,7 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
 import { Calendar, Users, MapPin, X, UserPlus, CalendarPlus, Trash2, Edit2, Edit } from "lucide-react";
-import { cn, parseStatusTags } from "@/lib/utils";
+import { cn, parseStatusTags, getSeasonLabel } from "@/lib/utils";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { useAuth } from "@/hooks/use-auth";
@@ -661,7 +661,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                      </SelectTrigger>
                      <SelectContent>
                         {seasons?.map((s: any) => (
-                           <SelectItem key={s.id} value={s.id.toString()}>{s.name || s.name}</SelectItem>
+                           <SelectItem key={s.id} value={s.id.toString()}>{getSeasonLabel(s, seasons)}</SelectItem>
                         ))}
                      </SelectContent>
                   </Select>

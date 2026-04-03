@@ -1058,7 +1058,7 @@ export default function CalendarPage() {
                 for (let j = i + 1; j < sortedWithMetrics.length; j++) {
                     const a = sortedWithMetrics[i];
                     const b = sortedWithMetrics[j];
-                    if (a.startPx < b.endPx - 1 && a.endPx > b.startPx + 1 && String(a.studioId) === String(b.studioId)) {
+                    if (a.startPx < b.evtWithMetrics.endPx - 1 && a.evtWithMetrics.endPx > b.startPx + 1 && String(a.studioId) === String(b.studioId)) {
                         a.hasTimeOverlap = true;
                         b.hasTimeOverlap = true;
                     }

@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Copy } from "lucide-react";
+import { Copy, Save } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -184,6 +184,72 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
     }
   };
 
+  const handleSingleDuplicate = async (id: number) => {
+    if (!targetSeasonId) {
+        toast({ title: "Errore", description: "Seleziona la stagione di destinazione.", variant: "destructive" });
+        return;
+    }
+    const overrides = courseOverrides[id] || {};
+    const originalCourse = sourceCourses.find(c => c.id === id);
+
+    if (!overrides.startDate || !overrides.endDate) {
+        toast({ title: "Dati Mancanti", description: `Inserisci Data Inizio e Data Fine per il corso: ${originalCourse?.name}`, variant: "destructive" });
+        return;
+    }
+
+    const duplicateCheck = targetCourses.find(tc => 
+        tc.name === (overrides.name ?? originalCourse?.name) &&
+        tc.dayOfWeek === originalCourse?.dayOfWeek &&
+        tc.startTime === originalCourse?.startTime &&
+        tc.studioId === (overrides.studioId !== undefined ? overrides.studioId : originalCourse?.studioId)
+    );
+    if (duplicateCheck) {
+        toast({ title: "Attenzione: Corso già presente", description: `Il corso ${duplicateCheck.name} (${duplicateCheck.dayOfWeek} ${duplicateCheck.startTime}) esiste già nella stagione target.`, variant: "destructive" });
+        return;
+    }
+
+    if (!originalCourse) return;
+
+    const newCourse = {
+        name: overrides.name ?? originalCourse.name,
+        categoryId: originalCourse.categoryId,
+        instructorId: overrides.instructorId !== undefined ? overrides.instructorId : originalCourse.instructorId,
+        dayOfWeek: overrides.dayOfWeek ?? originalCourse.dayOfWeek,
+        startTime: overrides.startTime ?? originalCourse.startTime,
+        endTime: overrides.endTime ?? originalCourse.endTime,
+        studioId: overrides.studioId !== undefined ? overrides.studioId : originalCourse.studioId,
+        seasonId: parseInt(targetSeasonId),
+        startDate: overrides.startDate,
+        endDate: overrides.endDate,
+        currentEnrollment: 0, 
+        statusTags: [], 
+        googleEventId: null, 
+        quoteId: null, 
+        sku: null, 
+        price: "0",
+        active: true,
+        maxCapacity: originalCourse.maxCapacity
+    };
+
+    try {
+        await createMutation.mutateAsync(newCourse);
+        queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
+        toast({ title: "Operazione completata", description: `Corso duplicato con successo.` });
+        
+        // Remove from selection so it's not re-duplicated by accident
+        const next = new Set(selectedCourseIds);
+        next.delete(id);
+        setSelectedCourseIds(next);
+        
+        // Update local targetCourses so immediate second clicks are caught
+        setTargetCourses(prev => [...prev, newCourse as any]);
+
+    } catch (error: any) {
+        toast({ title: "Errore di duplicazione", description: error.message, variant: "destructive" });
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -216,7 +282,9 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                     </Select>
                 </div>
                 <div className="flex-1 flex flex-col items-end">
-                    {/* Placeholder for header spacing improvement */}
+                    <Button onClick={handleDuplicate} className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[140px]" disabled={createMutation.isPending || selectedCourseIds.size === 0}>
+                        {createMutation.isPending ? "Elaborazione..." : `Duplica Selezione (${selectedCourseIds.size})`}
+                    </Button>
                 </div>
                 <div className="flex-1 flex items-center mt-6 text-xs text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200">
                     <strong>Sicurezza:</strong> I corsi selezionati verranno clonati vergini (no pagamenti/iscritti). La logica oraria originale verrà mantenuta, con nuove date inizio/fine limitate alla stagione considerata.
@@ -243,6 +311,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                             <TableHead>Date / Stagione *</TableHead>
                             <TableHead>Nuovo Nome <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
                             <TableHead>Sala/Ins. <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
+                            <TableHead className="w-12 text-center"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -328,6 +397,18 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                                                 </SelectContent>
                                             </Select>
                                         </div>
+                                    </TableCell>
+                                    <TableCell className="text-center align-middle">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon"
+                                            className="h-8 w-8 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-800"
+                                            onClick={() => handleSingleDuplicate(course.id)}
+                                            title="Duplica solo questo corso"
+                                            disabled={createMutation.isPending}
+                                        >
+                                            <Save className="h-4 w-4" />
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             );
