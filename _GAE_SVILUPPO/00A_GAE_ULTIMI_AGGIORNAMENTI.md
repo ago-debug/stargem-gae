@@ -6,6 +6,7 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 ---
 
 ### 03 Aprile 2026 (Phase 28: Code Freeze Strategico e Perfezionamento Qualitativo)
+* **Gestione Orari Globali del Centro:** Cambiata l'architettura dei limiti di blocco operativo. Per evitare rigidità legate alle singole Sale (Studios), i validatori di backend (`checkStudioConflict`) ora consultano la configurazione globale `center_operating_hours` da tabella `system_configs`. Il Calendario UI si espande e si stringe elasticamente basandosi su questi orari salvati dall'Admin.
 * **Totali Lezioni GSheet-compliant:** Finalizzata l'integrazione della logica di calcolo nel `StrategicProgrammingTable.tsx`. Costruito l'engine che sottrae massivamente le giornate taggate come `chisura`, `ferie`, `no corsi` in base al parsing testo (`include()`) replicando la logica originale del Google Sheet.
 * **Forzatura 52 Settimane:** Modificata la genesi temporale della grid `Planning Strategico`. Passando a un calcolo assoluto di 365 giorni dal kick-off di stagione, si assicura una copertura visiva perfetta fino a fine agosto indepdendentemente dalle end-date ereditate.
 * **Fix UI Header Planning (`planning.tsx`):** Unificato l'header sparso della pagina Planning, raggruppando `Annuale/Mensile/Settimanale` in un selettore solido ed enfatizzando coerentemente il blocco navigazione ("Oggi" e "Nuovo Evento").
