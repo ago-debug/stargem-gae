@@ -293,9 +293,9 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
       </DialogTrigger>
       <DialogContent className="max-w-[1400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between gap-6 pe-4 border-b pb-4">
-          <div className="w-[180px] shrink-0">
-            <DialogTitle className="text-base text-left">Duplicazione Massiva Corsi</DialogTitle>
-            <DialogDescription className="text-[10px] leading-tight mt-1 text-left">
+          <div className="w-[300px] sm:w-[380px] shrink-0">
+            <DialogTitle className="text-lg text-left">Duplicazione Massiva Corsi</DialogTitle>
+            <DialogDescription className="text-xs leading-tight mt-1 text-left">
               Copia i corsi della stagione attualmente selezionata verso una nuova stagione.
             </DialogDescription>
           </div>
