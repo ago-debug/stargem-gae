@@ -1,19 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Calendar, AlertCircle, TrendingUp } from "lucide-react";
+import { Users, Calendar, AlertCircle, TrendingUp, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation, Link } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 const logoStarGem = "/logo_stargem.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
 
   interface RevenueMember {
     name: string;
     amount: number;
     count: number;
+    userId?: string;
   }
 
   interface DashboardStats {
@@ -133,17 +137,52 @@ export default function Dashboard() {
                 </div>
                 
                 {stats?.revenueByMember && stats.revenueByMember.length > 0 && (
-                  <div className="space-y-2 mt-4 pt-4 border-t border-emerald-100">
-                    <p className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider mb-2">Incasso per Operatore</p>
-                    {stats.revenueByMember.map((rm, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-sm p-1.5 rounded bg-white border border-emerald-50">
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-slate-700">{rm.name}</span>
-                          <span className="text-[10px] text-muted-foreground">{rm.count} operazioni</span>
-                        </div>
-                        <span className="font-bold text-emerald-600">€{rm.amount.toFixed(2)}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-4 mt-4 pt-4 border-t border-emerald-100">
+                    
+                    {/* Incasso Personale dell'operatore connesso */}
+                    {(() => {
+                      const myIndex = stats.revenueByMember.findIndex(rm => rm.userId === user?.id);
+                      const myRevenue = myIndex >= 0 ? stats.revenueByMember[myIndex] : null;
+                      const otherRevenues = stats.revenueByMember.filter(rm => rm.userId !== user?.id);
+                      
+                      return (
+                        <>
+                          <div className="space-y-2">
+                            <p className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">Il tuo Incasso Mensile</p>
+                            <div className="flex items-center justify-between text-sm p-2 rounded bg-emerald-100/50 border border-emerald-200">
+                              <div className="flex flex-col">
+                                <span className="font-semibold text-emerald-900">{myRevenue ? myRevenue.name : "Tu"}</span>
+                                <span className="text-[10px] text-emerald-700">{myRevenue ? myRevenue.count : 0} operazioni</span>
+                              </div>
+                              <span className="font-bold text-emerald-700">€{myRevenue ? myRevenue.amount.toFixed(2) : "0.00"}</span>
+                            </div>
+                          </div>
+
+                          {/* Tendina per gli altri membri del team */}
+                          {otherRevenues.length > 0 && (
+                            <Collapsible className="w-full">
+                              <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="sm" className="w-full flex justify-between items-center text-xs text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 h-8 px-2 -mx-2">
+                                  <span>Visualizza incasso altri operatori</span>
+                                  <ChevronDown className="h-4 w-4" />
+                                </Button>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="space-y-2 mt-2">
+                                {otherRevenues.map((rm, idx) => (
+                                  <div key={idx} className="flex items-center justify-between text-sm p-1.5 rounded bg-white border border-emerald-50">
+                                    <div className="flex flex-col">
+                                      <span className="font-semibold text-slate-700">{rm.name}</span>
+                                      <span className="text-[10px] text-muted-foreground">{rm.count} operazioni</span>
+                                    </div>
+                                    <span className="font-bold text-emerald-600">€{rm.amount.toFixed(2)}</span>
+                                  </div>
+                                ))}
+                              </CollapsibleContent>
+                            </Collapsible>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </CardContent>
