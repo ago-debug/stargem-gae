@@ -4180,14 +4180,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Group revenue by operatore (staff member)
       const users = await storage.getUsers();
-      const revenueMap = new Map<string, { amount: number, count: number, name: string }>();
+      const revenueMap = new Map<string, { amount: number, count: number, name: string, userId: string }>();
       
       currentMonthPayments.forEach(p => {
         if (!p.createdById) return;
         const user = users.find(u => u.id === p.createdById);
         if (!user) return;
         
-        const existing = revenueMap.get(user.id) || { amount: 0, count: 0, name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username };
+        const existing = revenueMap.get(user.id) || { amount: 0, count: 0, name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username, userId: user.id };
         existing.amount += parseFloat(p.amount);
         existing.count += 1;
         revenueMap.set(user.id, existing);
