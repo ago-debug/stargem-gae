@@ -74952,3 +74952,1547 @@ Filters received in /api/members: {
 [AUTH DEBUG] UserRoleByName result:  true
 [AUTH DEBUG] Deserialization done for admin-id
 2:54:05 AM [express] GET /api/todos 304 in 50ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:14 AM [express] GET /api/todos 304 in 79ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:54:14 AM [express] GET /api/team-comments 304 in 92ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:54:15 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:15 AM [express] GET /api/todos 304 in 51ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:24 AM [express] GET /api/todos 304 in 78ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:54:24 AM [express] GET /api/team-comments 304 in 77ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:54:25 AM [express] GET /api/team-comments 304 in 49ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:25 AM [express] GET /api/todos 304 in 49ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:34 AM [express] GET /api/todos 304 in 78ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:54:34 AM [express] GET /api/team-comments 304 in 79ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:54:35 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:35 AM [express] GET /api/todos 304 in 49ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:44 AM [express] GET /api/todos 304 in 79ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:54:44 AM [express] GET /api/team-comments 304 in 80ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:54:45 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:45 AM [express] GET /api/todos 304 in 51ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:54 AM [express] GET /api/todos 304 in 78ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:54:54 AM [express] GET /api/team-comments 304 in 79ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:54:55 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:54:55 AM [express] GET /api/todos 304 in 49ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:04 AM [express] GET /api/todos 304 in 78ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:55:04 AM [express] GET /api/team-comments 304 in 80ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:55:05 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:05 AM [express] GET /api/todos 304 in 50ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:14 AM [express] GET /api/todos 304 in 79ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:55:14 AM [express] GET /api/team-comments 304 in 79ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:55:15 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:15 AM [express] GET /api/todos 304 in 50ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:24 AM [express] GET /api/todos 304 in 79ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:55:24 AM [express] GET /api/team-comments 304 in 79ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:55:25 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:25 AM [express] GET /api/todos 304 in 51ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:29 AM [express] GET /api/user 304 in 34ms :: {"id":"admin-id","username":"admin","password":"08…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:29 AM [express] GET /api/latest-activity 200 in 50ms :: {"id":1030,"userId":"admin-id","action"…
+[AUTH DEBUG] Deserializing user admin-id
+2:55:29 AM [express] GET /api/activities-summary 200 in 83ms :: {"prove-gratuite":{"total":3,"active…
+2:55:29 AM [express] GET /api/todos 304 in 82ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+2:55:29 AM [express] GET /api/team-comments 304 in 159ms :: [{"id":10,"authorId":"admin-id","authorN…
+2:55:29 AM [express] GET /api/team-notes 304 in 159ms :: []
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:29 AM [express] GET /api/stats/alerts 304 in 268ms :: {"expiringMemberships":21,"expiredCertifi…
+2:55:29 AM [express] GET /api/stats/dashboard 304 in 389ms :: {"totalMembers":9497,"activeMembership…
+2:55:29 AM [express] GET /api/stats/recent-activity 304 in 322ms :: [{"memberName":"SANTO MANTICE","…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+2:55:35 AM [express] GET /api/team-comments 304 in 63ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:35 AM [express] GET /api/todos 304 in 51ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:36 AM [express] GET /api/user 304 in 34ms :: {"id":"admin-id","username":"admin","password":"08…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+2:55:36 AM [express] GET /api/activities-summary 200 in 82ms :: {"lezioni-singole":{"total":1,"activ…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:36 AM [express] GET /api/latest-activity 304 in 134ms :: {"id":1030,"userId":"admin-id","action…
+2:55:36 AM [express] GET /api/team-notes 304 in 133ms :: []
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+2:55:36 AM [express] GET /api/todos 304 in 119ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] User admin-id found, fetching roles
+2:55:36 AM [express] GET /api/stats/alerts 304 in 171ms :: {"expiringMemberships":21,"expiredCertifi…
+2:55:36 AM [express] GET /api/team-comments 304 in 91ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:36 AM [express] GET /api/stats/recent-activity 304 in 345ms :: [{"memberName":"SANTO MANTICE","…
+2:55:36 AM [express] GET /api/stats/dashboard 304 in 329ms :: {"totalMembers":9497,"activeMembership…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:55:45 AM [express] GET /api/team-comments 304 in 51ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:45 AM [express] GET /api/todos 304 in 63ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:46 AM [express] GET /api/todos 304 in 77ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:55:46 AM [express] GET /api/team-comments 304 in 76ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:55:55 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:55 AM [express] GET /api/todos 304 in 49ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:55:56 AM [express] GET /api/todos 304 in 78ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:55:56 AM [express] GET /api/team-comments 304 in 80ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:56:05 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:05 AM [express] GET /api/todos 304 in 51ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:06 AM [express] GET /api/todos 304 in 78ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:56:06 AM [express] GET /api/team-comments 304 in 79ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:56:15 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:15 AM [express] GET /api/todos 304 in 51ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:16 AM [express] GET /api/todos 304 in 78ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:56:16 AM [express] GET /api/team-comments 304 in 82ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:56:25 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:25 AM [express] GET /api/todos 304 in 51ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:26 AM [express] GET /api/todos 304 in 78ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:56:26 AM [express] GET /api/team-comments 304 in 78ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:56:35 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:35 AM [express] GET /api/todos 304 in 49ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:36 AM [express] GET /api/todos 304 in 77ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:56:36 AM [express] GET /api/team-comments 304 in 78ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:56:45 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:45 AM [express] GET /api/todos 304 in 51ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:46 AM [express] GET /api/todos 304 in 77ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:56:46 AM [express] GET /api/team-comments 304 in 79ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:56:55 AM [express] GET /api/team-comments 304 in 50ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:55 AM [express] GET /api/todos 304 in 50ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:56:56 AM [express] GET /api/todos 304 in 79ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:56:56 AM [express] GET /api/team-comments 304 in 80ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+2:57:05 AM [express] GET /api/team-comments 304 in 51ms :: [{"id":10,"authorId":"admin-id","authorNa…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:57:06 AM [express] GET /api/todos 304 in 51ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+2:57:07 AM [express] GET /api/todos 304 in 79ms :: [{"id":1,"text":"Implementare verifica SMS/WhatsA…
+2:57:07 AM [express] GET /api/team-comments 304 in 80ms :: [{"id":10,"authorId":"admin-id","authorNa…
