@@ -172,16 +172,13 @@ function expandCourseRecurrence(
   const expanded: UnifiedCalendarEventDTO[] = [];
   const now = new Date();
   
-  let windowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
-  let windowEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 60);
+  // Utilizziamo le date reali del corso; se mancano, forniamo un fallback
+  let windowStart = course.startDate ? new Date(course.startDate) : new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
+  let windowEnd = course.endDate ? new Date(course.endDate) : new Date(now.getFullYear(), now.getMonth(), now.getDate() + 60);
 
-  if (course.startDate) {
-    const courseStart = new Date(course.startDate);
-    if (courseStart > windowStart) windowStart = courseStart;
-  }
-  if (course.endDate) {
-    const courseEnd = new Date(course.endDate);
-    if (courseEnd < windowEnd) windowEnd = courseEnd;
+  // Paracadute di sicurezza: se la finestra è più ampia di 18 mesi (previene infinite loops per refusi di date)
+  if (windowEnd.getTime() - windowStart.getTime() > 1.5 * 365 * 24 * 3600 * 1000) {
+      windowEnd = new Date(windowStart.getTime() + 1.5 * 365 * 24 * 3600 * 1000);
   }
 
   const [startH, startM] = (course.startTime || "00:00").split(":").map(Number);
