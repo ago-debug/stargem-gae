@@ -24,11 +24,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn, parseStatusTags } from "@/lib/utils";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useCustomListValues } from "@/hooks/use-custom-list";
 import { Combobox } from "@/components/ui/combobox";
-import type { Course, InsertCourse, Category, Instructor, Studio, Attendance, Member, Quote, ActivityStatus } from "@shared/schema";
+import type { Course, InsertCourse, Season, Category, Instructor, Studio, Attendance, Member, Quote, ActivityStatus } from "@shared/schema";
 
 export function formatStatusBadge(tag: string) {
   if (!tag) return tag;
@@ -89,6 +90,10 @@ export default function Courses() {
   const initialSearch = urlParams.get('search') || "";
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string>("active");
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [showBulkDuplicateDialog, setShowBulkDuplicateDialog] = useState(false);
+  const [targetSeasonId, setTargetSeasonId] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [statusTags, setStatusTags] = useState<string[]>([]);
@@ -109,7 +114,7 @@ export default function Courses() {
   const postiDisponibili = useCustomListValues("posti_disponibili");
 
   const { data: courses, isLoading } = useQuery<Course[]>({
-    queryKey: ["/api/courses"],
+    queryKey: [`/api/courses?seasonId=${selectedSeasonId}`],
   });
 
   const editId = urlParams.get('editId') || urlParams.get('courseId');
@@ -135,6 +140,10 @@ export default function Courses() {
       }
     }
   }, [courses, editId, isFormOpen, editingCourse, setLocation]);
+
+  const { data: seasons } = useQuery<Season[]>({
+    queryKey: ["/api/seasons"],
+  });
 
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({
     queryKey: ["/api/activity-statuses"],
@@ -223,7 +232,7 @@ export default function Courses() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
       toast({ title: "Corso creato con successo" });
       setIsFormOpen(false);
       setEditingCourse(null);
@@ -386,6 +395,59 @@ export default function Courses() {
 
   const sortedCourses = sortItems(filteredCourses, getSortValue);
 
+    const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(filteredCourses.map(c => c.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectRow = (id: number, checked: boolean) => {
+    const newSelected = new Set(selectedIds);
+    if (checked) newSelected.add(id);
+    else newSelected.delete(id);
+    setSelectedIds(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Sei sicuro di voler eliminare i ${selectedIds.size} corsi selezionati?`)) return;
+    try {
+      await Promise.all(Array.from(selectedIds).map(id => apiRequest("DELETE", `/api/courses/${id}`)));
+      toast({ title: "Eliminazione completata" });
+      setSelectedIds(new Set());
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?seasonId=${selectedSeasonId}`] });
+    } catch (e) {
+      toast({ title: "Errore durante l'eliminazione", variant: "destructive" });
+    }
+  };
+
+  const handleBulkDuplicate = async () => {
+    if (!targetSeasonId) {
+      toast({ title: "Seleziona una stagione", variant: "destructive" });
+      return;
+    }
+    try {
+      const selectedCourses = filteredCourses.filter(c => selectedIds.has(c.id));
+      await Promise.all(selectedCourses.map(course => {
+        const insertData = { ...course };
+        delete (insertData as any).id;
+        delete (insertData as any).createdAt;
+        delete (insertData as any).updatedAt;
+        (insertData as any).seasonId = parseInt(targetSeasonId);
+        (insertData as any).sku = null;
+        (insertData as any).price = "0.00"; 
+        return apiRequest("POST", "/api/courses", insertData);
+      }));
+      toast({ title: "Duplicazione massiva completata" });
+      setShowBulkDuplicateDialog(false);
+      setSelectedIds(new Set());
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?seasonId=${targetSeasonId}`] });
+    } catch (e) {
+      toast({ title: "Errore duplicazione", variant: "destructive" });
+    }
+  };
+
   const exportToCSV = () => {
     if (!filteredCourses.length) return;
 
@@ -487,6 +549,21 @@ export default function Courses() {
                   data-testid="input-search-courses"
                 />
               </div>
+              
+              <Select value={selectedSeasonId} onValueChange={setSelectedSeasonId}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Seleziona stagione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tutte le stagioni</SelectItem>
+                  <SelectItem value="active">Stagione Attiva</SelectItem>
+                  {seasons?.map((season) => (
+                    <SelectItem key={season.id} value={season.id.toString()}>
+                      {season.name} {season.active ? "(Attiva)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-[180px]" data-testid="select-category-filter">
                   <SelectValue placeholder="Filtra per categoria" />
@@ -532,6 +609,7 @@ export default function Courses() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[40px]"><Checkbox checked={filteredCourses.length > 0 && selectedIds.size === filteredCourses.length} onCheckedChange={(checked) => handleSelectAll(checked as boolean)} /></TableHead>
                     <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
                     <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Corso</SortableTableHead>
                     <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
@@ -550,6 +628,7 @@ export default function Courses() {
                     const enrollmentsList = getCourseEnrollmentsList(course.id);
                     return (
                       <TableRow key={course.id} data-testid={`course-row-${course.id}`}>
+                        <TableCell><Checkbox checked={selectedIds.has(course.id)} onCheckedChange={(checked) => handleSelectRow(course.id, checked as boolean)} /></TableCell>
                         <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("sku") && "sorted-column-cell")}>
                           {course.sku || "-"}
                         </TableCell>
@@ -670,6 +749,51 @@ export default function Courses() {
           </CardContent>
         </Card>
 
+        
+        {/* Bulk Dialog */}
+        <Dialog open={showBulkDuplicateDialog} onOpenChange={setShowBulkDuplicateDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Duplica {selectedIds.size} Corsi</DialogTitle>
+              <DialogDescription>
+                Seleziona la stagione di destinazione. I corsi clonati avranno il prezzo azzerato e il codice vuoto, preservando nome, staff e pianificazione.
+              </DialogDescription>
+            </DialogHeader>
+            <Select value={targetSeasonId} onValueChange={setTargetSeasonId}>
+              <SelectTrigger>
+                 <SelectValue placeholder="Seleziona la stagione di destinazione" />
+              </SelectTrigger>
+              <SelectContent>
+                 {seasons?.map(s => (
+                    <SelectItem key={s.id} value={s.id.toString()}>{s.name} {s.active ? '(Attiva)' : ''}</SelectItem>
+                 ))}
+              </SelectContent>
+            </Select>
+            <DialogFooter>
+               <Button onClick={handleBulkDuplicate} disabled={!targetSeasonId}>Conferma Duplicazione</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Selected Toolbar */}
+        {selectedIds.size > 0 && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white border border-slate-200 shadow-xl rounded-full px-6 py-3 flex items-center gap-6 animate-in slide-in-from-bottom-10">
+            <span className="text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
+              {selectedIds.size} {selectedIds.size === 1 ? 'corso selezionato' : 'corsi selezionati'}
+            </span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={handleBulkDelete}>
+                <Trash2 className="w-4 h-4 mr-2" /> Elimina
+              </Button>
+              <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setShowBulkDuplicateDialog(true)}>
+                <CalendarPlus className="w-4 h-4 mr-2" /> Duplica
+              </Button>
+            </div>
+            <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100" onClick={() => setSelectedIds(new Set())}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
         <CourseUnifiedModal 
           isOpen={isFormOpen || !!editingCourse} 
           onOpenChange={(open) => { 
