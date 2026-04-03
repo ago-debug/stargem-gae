@@ -94,3 +94,13 @@ Tutti i requirements di layout UI post-sprint sono stati bonificati:
   2. **Sezione "Scadenze Operative":** Disintegrazione totale dell'attuale componente "Attività Recente". Il vuoto lasciato sarà ricolmato da un nuovo pannello di allerta scadenze e compiti operativi in esaurimento, permettendo al team di agire sulle criticità quotidiane.
   3. **Gerarchia Strutturale:** Il design dovrà dare priorità spaziale e visiva a questi due nuovi blocchi, schiacciando in secondo piano eventuali KPI secondari. L'operatore all'accesso (boot) deve poter analizzare istantaneamente le revenue ed evadere le scadenze rossastre.
   4. **Costrutto Cromatico/Stile:** Massimizzare l'uso degli Alert Badge (es. Rosso lucido per ritardi fatali o scadenze odierne, Giallo per task in pending). Il blocco incassi prediligerà invece spaziature clean e neutrali senza saturare l'UI.
+
+---
+
+## 10. Modale Nuovo Pagamento – Filtro Attività/Corso
+- **Obiettivo:** Sanitizzare il flusso di inserimento nel Checkout (sezione "Dettaglio Quote e Servizi") impedendo la contaminazione visiva e logica tra categorie disciplinari incompatibili.
+- **Specifiche di Modifica Modale:**
+  1. **Filtro per Attività (Parent-Targeting):** Il blocco d'acquisizione opererà tramite gerarchia stretta. La prima select (Attività madre - es: Danza) piloterà nativamente le opzioni del select secondario.
+  2. **Logica di Dipendenza (Child-Lock):** Il field "Genere/Corso" deve rimanere disabilitato (disabled) finché l'operatore non innesca un'Attività madre valida. Solo dopo tale evento il selettore si abiliterà mostrando *solamente* le discipline afferenti all'id-padre.
+  3. **Pulizia Etichette (Sanitizzazione UI):** La UI della tendina "genere/corso" assicurerà la rimozione totale di artefatti visivi, label tecniche rotte o chiavi di sistema non tradotte o non pertinenti ai plain-text.
+  4. **Validazione Integrale:** Il vincolo impedisce il submit di quote per associazioni miste fittizie (es. Attività "Sala Musicale" con Genere "Hip-Hop Junior"). Il middleware o la UI React bloccherà l'azione salvaguardando il ledger.

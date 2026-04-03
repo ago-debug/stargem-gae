@@ -559,3 +559,6 @@ Questa fase sblocca la gestione del calendario su più archi temporali, gestendo
 
 **🖥️ DASHBOARD SEGRETERIA OPERATIVA (IN CANTIERE)**
 - [ ] Rifacimento Dashboard Segreteria Operativa (Entrate Mese + Sezione Scadenze Operative): Implementazione di un nuovo blocco "Entrate Mese" con dettaglio analitico ripartito per ogni membro del team, accompagnato dalla sostituzione del vecchio pannello "Attività Recente" a favore di una nuova "Sezione Scadenze Operative" incentrata su alert e task imminenti per le receptionist.
+
+**💳 MODULO PAGAMENTI E RICEVUTE (IN CANTIERE)**
+- [ ] Modale Nuovo Pagamento – Filtro Generi/Corsi per Attività selezionata: Ottimizzazione del form "Dettaglio Quote e Servizi". Implementazione logica di validazione e filtraggio a cascata (es. isolare i soli generi congrui all'Attività madre e ripulire le label sporche).

@@ -15,6 +15,7 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
   * **Alert Operativi Didattici:** Sostituzione delle liste inutili con alert predittivi per Corsi in Avvicinamento (< 14 giorni) e Workshop in Scadenza (< 14 giorni). Modificata API `/api/stats/alerts`.
   * **Gestione Incassi Profilata (Tendina):** La card degli incassi è divisa in "Incasso Globale (Mese)" e "Incasso per Operatore" (breakdown via `users` e `createdById`). All'accesso l'operatore vede nativamente il SUO incasso in un layer prioritario, nascondendo gli incassi degli altri colleghi all'interno di una moderna chiusura a tendina `Collapsible` di ShadCN.
   * **Ripristino Log Attività:** Reinserito il blocco `Attività Recente` sul bottom-page del layout (minimizzando lo spazio ma senza perdere l'informazione storica).
+* **[AG-052] Modifica Modale Nuovo Pagamento – Filtro corretto per attività:** Aggiunto in coda il requisito per sbloccare e validare la dipendenza modale all'interno del Checkout. La selezione dell'Attività madre piloterà conseguentemente le "options" fornite dalla tendina "Genere/Corso", epurando la lista da inquinamenti non semantici.
 
 ### 02 Aprile 2026 (Phase 27: Kickoff Calendario Multi-Stagione & Duplicazione)
 * **Status Architetturale (UI FREEZE):** Il modulo Calendario si trova nel mezzo del "Bridge STI". L'interfaccia utente (UI) è stata cautelativamente ri-messa in stato di **FREEZE** per non destabilizzare le API legacy durante lo sviluppo delle nuove query per le stagioni multiple.

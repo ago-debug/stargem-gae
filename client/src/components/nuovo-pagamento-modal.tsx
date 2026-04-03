@@ -947,25 +947,45 @@ function CartTableRow({
 
     const currentCatalog = useMemo(() => {
         let catalog: any[] = [];
+        let entityType = "course";
+
         switch (row.activityType) {
-            case "corsi": catalog = courses || []; break;
-            case "workshop": catalog = workshops || []; break;
-            case "prove-pagamento": catalog = paidTrials || []; break;
-            case "prove-gratuite": catalog = freeTrials || []; break;
-            case "lezioni-singole": catalog = singleLessons || []; break;
-            case "domeniche-movimento": catalog = sundayActivities || []; break;
-            case "allenamenti": catalog = trainings || []; break;
-            case "lezioni-individuali": catalog = individualLessons || []; break;
-            case "campus": catalog = campusActivities || []; break;
-            case "saggi": catalog = recitals || []; break;
-            case "vacanze-studio": catalog = vacationStudies || []; break;
-            case "affitti": catalog = studios || []; break; // "Affitti" maps to the rooms catalog
-            case "servizi": catalog = bookingServices || []; break; // "Eventi Esterni" maps to specific external services
+            case "corsi": 
+                catalog = courses || []; 
+                if (row.participationType === 'SINGLE_LESSON') entityType = "single_lesson";
+                else if (row.participationType === 'PAID_TRIAL') entityType = "paid_trial";
+                else entityType = "course";
+                break;
+            case "workshop": catalog = workshops || []; entityType = "workshop"; break;
+            case "prove-pagamento": catalog = paidTrials || []; entityType = "paid_trial"; break;
+            case "prove-gratuite": catalog = freeTrials || []; entityType = "free_trial"; break;
+            case "lezioni-singole": catalog = singleLessons || []; entityType = "single_lesson"; break;
+            case "domeniche-movimento": catalog = sundayActivities || []; entityType = "sunday_activity"; break;
+            case "allenamenti": catalog = trainings || []; entityType = "training"; break;
+            case "lezioni-individuali": catalog = individualLessons || []; entityType = "individual_lesson"; break;
+            case "campus": catalog = campusActivities || []; entityType = "campus_activity"; break;
+            case "saggi": catalog = recitals || []; entityType = "recital"; break;
+            case "vacanze-studio": catalog = vacationStudies || []; entityType = "vacation_study"; break;
+            case "affitti": catalog = studios || []; entityType = "booking_service"; break; // "Affitti" maps to the rooms catalog
+            case "servizi": catalog = bookingServices || []; entityType = "booking_service"; break; // "Eventi Esterni" maps to specific external services
             case "merchandising": catalog = []; break; // Placeholder manuale 
             default: catalog = courses || []; break;
         }
+
+        // Filtro Logica di Dipendenza: Applica incrocio stretto con Listino Selezionato
+        if (listinoItems && listinoItems.length > 0 && row.periodId) {
+            const validIdsForThisType = listinoItems
+                .filter(li => li.entityType === entityType)
+                .map(li => li.entityId);
+            
+            catalog = catalog.filter(c => validIdsForThisType.includes(c.id));
+        }
+
+        // Filtro Sicurezza: Nascondi esplicitamente voci inattive o di "test"
+        catalog = catalog.filter(c => c.active !== false && !(c.name || c.title || "").toLowerCase().includes("test"));
+
         return catalog;
-    }, [row.activityType, courses, workshops, paidTrials, freeTrials, singleLessons, sundayActivities, trainings, individualLessons, campusActivities, recitals, vacationStudies, studios, bookingServices]);
+    }, [row.activityType, row.periodId, row.participationType, listinoItems, courses, workshops, paidTrials, freeTrials, singleLessons, sundayActivities, trainings, individualLessons, campusActivities, recitals, vacationStudies, studios, bookingServices]);
 
     if (row.isDebt) {
         return (
@@ -1064,7 +1084,9 @@ function CartTableRow({
                             </SelectTrigger>
                             <SelectContent>
                                 {currentCatalog?.map(c => (
-                                    <SelectItem key={c.id} value={c.id.toString()}>{c.name} {c.sku ? `(${c.sku})` : ''}</SelectItem>
+                                    <SelectItem key={c.id} value={c.id.toString()}>
+                                        <span className="font-semibold text-slate-800">{c.name || c.title}</span>
+                                    </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
