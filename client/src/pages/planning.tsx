@@ -289,7 +289,16 @@ export default function Planning() {
                     const cellEvents = getEventsForDay(d, month, year);
                     const isToday = isSameDay(new Date(year, month, d), today);
                     return (
-                        <div key={d} className={`bg-white min-h-[120px] p-2 hover:bg-slate-50 ${isToday ? 'bg-yellow-50/50' : ''}`}>
+                        <div 
+                            key={d} 
+                            className={`bg-white min-h-[120px] p-2 hover:bg-slate-50 cursor-pointer transition-colors ${isToday ? 'bg-yellow-50/50' : ''}`}
+                            onClick={() => {
+                                const dateStr = format(new Date(year, month, d), "yyyy-MM-dd");
+                                setStrategicStart(dateStr);
+                                setStrategicEnd(dateStr);
+                                setStrategicModalOpen(true);
+                            }}
+                        >
                             <div className={`text-right font-bold text-sm mb-2 ${isToday ? 'text-yellow-600 underline text-base' : 'text-slate-700'}`}>{d}</div>
                             <div className="flex flex-col gap-1">
                                 {cellEvents}
@@ -457,7 +466,15 @@ export default function Planning() {
                                         return (
                                             <div 
                                                 key={`${day}-${monthColIndex}`} 
-                                                className={`relative min-h-[50px] border-r p-1 text-xs ${
+                                                onClick={() => {
+                                                    if (isValidDay && cellDate) {
+                                                        const dateStr = format(cellDate, "yyyy-MM-dd");
+                                                        setStrategicStart(dateStr);
+                                                        setStrategicEnd(dateStr);
+                                                        setStrategicModalOpen(true);
+                                                    }
+                                                }}
+                                                className={`relative min-h-[50px] border-r p-1 text-xs ${isValidDay ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
                                                     !isValidDay ? 'bg-slate-200' : 
                                                     (isToday ? 'bg-yellow-200 border-2 border-yellow-500 z-10 shadow-md scale-[1.02] transition-transform' : 
                                                     (holidayName || isSunday ? 'bg-red-50/50' : 

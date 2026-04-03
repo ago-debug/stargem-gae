@@ -258,7 +258,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
           <span className="hidden sm:inline">Duplica Corsi</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[1400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Duplicazione Massiva Corsi</DialogTitle>
           <DialogDescription>
@@ -310,7 +310,8 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                             <TableHead>Corso Originale</TableHead>
                             <TableHead>Date / Stagione *</TableHead>
                             <TableHead>Nuovo Nome <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
-                            <TableHead>Sala/Ins. <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
+                            <TableHead>Sala <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
+                            <TableHead>Insegnante <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
                             <TableHead className="w-12 text-center"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -365,38 +366,38 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex flex-col gap-1">
-                                            <Select 
-                                                disabled={!isSelected}
-                                                value={courseOverrides[course.id]?.studioId?.toString() || course.studioId?.toString() || "none"}
-                                                onValueChange={(val) => updateOverride(course.id, "studioId", val === "none" ? null : parseInt(val))}
-                                            >
-                                                <SelectTrigger className="h-7 text-xs bg-white">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="none">Nessuna</SelectItem>
-                                                    {studios?.map(s => (
-                                                        <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <Select 
-                                                disabled={!isSelected}
-                                                value={courseOverrides[course.id]?.instructorId?.toString() || course.instructorId?.toString() || "none"}
-                                                onValueChange={(val) => updateOverride(course.id, "instructorId", val === "none" ? null : parseInt(val))}
-                                            >
-                                                <SelectTrigger className="h-7 text-xs bg-white">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="none">Nessuno</SelectItem>
-                                                    {instructors?.map(i => (
-                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
+                                        <Select 
+                                            disabled={!isSelected}
+                                            value={courseOverrides[course.id]?.studioId?.toString() || course.studioId?.toString() || "none"}
+                                            onValueChange={(val) => updateOverride(course.id, "studioId", val === "none" ? null : parseInt(val))}
+                                        >
+                                            <SelectTrigger className="h-8 text-xs bg-white">
+                                                <SelectValue placeholder="Seleziona Sala..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="none" className="text-muted-foreground italic">Nessuna sala</SelectItem>
+                                                {studios?.map(s => (
+                                                    <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Select 
+                                            disabled={!isSelected}
+                                            value={courseOverrides[course.id]?.instructorId?.toString() || course.instructorId?.toString() || "none"}
+                                            onValueChange={(val) => updateOverride(course.id, "instructorId", val === "none" ? null : parseInt(val))}
+                                        >
+                                            <SelectTrigger className="h-8 text-xs bg-white">
+                                                <SelectValue placeholder="Seleziona Insegnante..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="none" className="text-muted-foreground italic">Nessun insegnante</SelectItem>
+                                                {instructors?.map(i => (
+                                                    <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </TableCell>
                                     <TableCell className="text-center align-middle">
                                         <Button 
