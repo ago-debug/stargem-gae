@@ -292,18 +292,18 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[1400px] max-h-[90vh] overflow-y-auto">
-                <DialogHeader className="flex flex-row items-start justify-between pe-8">
-          <div>
-            <DialogTitle>Duplicazione Massiva Corsi</DialogTitle>
-            <DialogDescription>
+        <DialogHeader className="flex flex-row items-center justify-between gap-6 pe-4 border-b pb-4">
+          <div className="w-[180px] shrink-0">
+            <DialogTitle className="text-base text-left">Duplicazione Massiva Corsi</DialogTitle>
+            <DialogDescription className="text-[10px] leading-tight mt-1 text-left">
               Copia i corsi della stagione attualmente selezionata verso una nuova stagione.
             </DialogDescription>
           </div>
-          <div className="flex flex-col items-end gap-2 mt-0">
-            <div className="flex items-center text-xs text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200 max-w-lg text-right">
-              <strong>Sicurezza:</strong> I corsi selezionati verranno clonati vergini (no pagamenti/iscritti). La logica oraria originale verrà mantenuta, con nuove date inizio/fine limitate alla stagione considerata.
+          <div className="flex items-center justify-end gap-4 flex-1">
+            <div className="text-[10px] sm:text-xs text-yellow-700 bg-yellow-50 px-3 py-2 rounded-md border border-yellow-200 max-w-[600px] text-left leading-snug">
+              <strong className="mr-1">Sicurezza:</strong> I corsi selezionati verranno clonati vergini (no pagamenti/iscritti). La logica oraria originale verrà mantenuta, con nuove date inizio/fine limitate alla stagione considerata.
             </div>
-            <Button onClick={handleDuplicate} className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[200px]" disabled={createMutation.isPending || selectedCourseIds.size === 0}>
+            <Button onClick={handleDuplicate} className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[180px] whitespace-nowrap h-11" disabled={createMutation.isPending || selectedCourseIds.size === 0}>
                 {createMutation.isPending ? "Elaborazione..." : `Duplica Selezione (${selectedCourseIds.size})`}
             </Button>
           </div>
