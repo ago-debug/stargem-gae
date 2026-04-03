@@ -1,4 +1,4 @@
-import { useState, useMemo, Fragment } from 'react';
+import { useState, useMemo, Fragment, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Calendar as CalendarIcon, Filter, Plus } from "lucide-react";
 import { format, getYear, getMonth, getDate, getDaysInMonth, isSameDay } from "date-fns";
@@ -150,18 +150,32 @@ export default function Planning() {
     };
 
     // --- AGGREGATE COURSES ---
-    // mapping courses to dayOfWeek (1=Lun, 7=Dom)
-    const activeCoursesByDay = useMemo(() => {
-        const counts: Record<number, number> = {};
-        if (courses) {
-            courses.forEach(c => {
-                if (c.active !== false && c.dayOfWeek) {
-                    const mappedDay = mapDayOfWeek(c.dayOfWeek);
-                    counts[mappedDay] = (counts[mappedDay] || 0) + 1;
+    // --- AGGREGATE COURSES BY DATE ---
+    const getCoursesCountForDate = useCallback((cellDate: Date, cellDayOfWeek: number) => {
+        let count = 0;
+        if (!courses) return 0;
+        courses.forEach((c: any) => {
+            if (c.active !== false && c.dayOfWeek) {
+                const mappedDay = mapDayOfWeek(c.dayOfWeek);
+                if (mappedDay === cellDayOfWeek) {
+                    let isValid = true;
+                    if (c.startDate) {
+                        const sDate = new Date(c.startDate);
+                        sDate.setHours(0, 0, 0, 0);
+                        if (cellDate < sDate) isValid = false;
+                    }
+                    if (c.endDate) {
+                        const eDate = new Date(c.endDate);
+                        eDate.setHours(23, 59, 59, 999);
+                        if (cellDate > eDate) isValid = false;
+                    }
+                    if (isValid) {
+                        count++;
+                    }
                 }
-            });
-        }
-        return counts;
+            }
+        });
+        return count;
     }, [courses]);
 
     // --- UNIFY EVENTS ---
@@ -215,8 +229,8 @@ export default function Planning() {
             );
         }
 
-        // 1. Assign aggregated courses (repeated weekly)
-        const coursesCount = activeCoursesByDay[cellDayOfWeek];
+        // 1. Assign aggregated courses (repeated weekly within boundaries)
+        const coursesCount = getCoursesCountForDate(cellDate, cellDayOfWeek);
         if (coursesCount > 0 && !holidayName) { // Optionally don't show courses on National Holidays
             // Passiamo la data esatta come parametro GET query per far aprire il Calendario nel giorno giusto
             const dateStr = format(cellDate, "yyyy-MM-dd");

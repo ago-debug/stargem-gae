@@ -251,7 +251,7 @@ export default function CalendarPage() {
     const [selectedInstructor, setSelectedInstructor] = useState<string>("all");
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [selectedDay, setSelectedDay] = useState<string>(() => {
-        const dayIdx = new Date().getDay();
+        const dayIdx = initialDate.getDay();
         return WEEKDAYS[dayIdx === 0 ? 6 : dayIdx - 1].id;
     });
     const [searchQuery, setSearchQuery] = useState("");
