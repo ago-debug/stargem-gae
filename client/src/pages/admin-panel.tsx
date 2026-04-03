@@ -50,7 +50,10 @@ export default function AdminPanel() {
 
     useEffect(() => {
         if (centerHoursConfig) {
-            setCenterHours(centerHoursConfig as any);
+            const config = centerHoursConfig as any;
+            if (config.start && config.end && Array.isArray(config.days)) {
+                setCenterHours(config);
+            }
         }
     }, [centerHoursConfig]);
 
