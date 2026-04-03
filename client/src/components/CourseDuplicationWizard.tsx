@@ -116,13 +116,15 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
     // Validazione pre-invio
     for (const id of Array.from(selectedCourseIds)) {
         const overrides = courseOverrides[id] || {};
-        if (!overrides.startDate || !overrides.endDate) {
-           const originalCourse = sourceCourses.find(c => c.id === id);
+        const originalCourse = sourceCourses.find(c => c.id === id);
+        
+        const effectiveStartDate = overrides.startDate || (originalCourse?.startDate ? new Date(originalCourse.startDate).toISOString().split('T')[0] : null);
+        const effectiveEndDate = overrides.endDate || (originalCourse?.endDate ? new Date(originalCourse.endDate).toISOString().split('T')[0] : null);
+
+        if (!effectiveStartDate || !effectiveEndDate) {
            toast({ title: "Dati Mancanti", description: `Inserisci Data Inizio e Data Fine per il corso: ${originalCourse?.name}`, variant: "destructive" });
            return;
         }
-
-        const originalCourse = sourceCourses.find(c => c.id === id);
         const duplicateCheck = targetCourses.find(tc => 
             tc.name === (overrides.name ?? originalCourse?.name) &&
             tc.dayOfWeek === originalCourse?.dayOfWeek &&
@@ -151,8 +153,8 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                 endTime: overrides.endTime ?? originalCourse.endTime, // Orario Fine
                 studioId: overrides.studioId !== undefined ? overrides.studioId : originalCourse.studioId, // Studio
                 seasonId: parseInt(targetSeasonId), // Nuova Stagione
-                startDate: overrides.startDate, // Data Inizio Obbligatoria (verificata)
-                endDate: overrides.endDate, // Data Fine Obbligatoria (verificata)
+                startDate: overrides.startDate || (originalCourse.startDate ? new Date(originalCourse.startDate).toISOString().split('T')[0] : undefined), // Data Inizio Obbligatoria (verificata)
+                endDate: overrides.endDate || (originalCourse.endDate ? new Date(originalCourse.endDate).toISOString().split('T')[0] : undefined), // Data Fine Obbligatoria (verificata)
 
                 // CAMPI PROIBITI O RE-INIZIALIZZATI VUOTI
                 currentEnrollment: 0, 
@@ -192,7 +194,10 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
     const overrides = courseOverrides[id] || {};
     const originalCourse = sourceCourses.find(c => c.id === id);
 
-    if (!overrides.startDate || !overrides.endDate) {
+    const effectiveStartDate = overrides.startDate || (originalCourse?.startDate ? new Date(originalCourse.startDate).toISOString().split('T')[0] : null);
+    const effectiveEndDate = overrides.endDate || (originalCourse?.endDate ? new Date(originalCourse.endDate).toISOString().split('T')[0] : null);
+
+    if (!effectiveStartDate || !effectiveEndDate) {
         toast({ title: "Dati Mancanti", description: `Inserisci Data Inizio e Data Fine per il corso: ${originalCourse?.name}`, variant: "destructive" });
         return;
     }
@@ -219,8 +224,8 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
         endTime: overrides.endTime ?? originalCourse.endTime,
         studioId: overrides.studioId !== undefined ? overrides.studioId : originalCourse.studioId,
         seasonId: parseInt(targetSeasonId),
-        startDate: overrides.startDate,
-        endDate: overrides.endDate,
+        startDate: effectiveStartDate,
+        endDate: effectiveEndDate,
         currentEnrollment: 0, 
         statusTags: [], 
         googleEventId: null, 
@@ -343,15 +348,15 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                                             <Input
                                                 type="date"
                                                 disabled={!isSelected}
-                                                className={`h-8 text-xs ${isSelected && !courseOverrides[course.id]?.startDate ? "border-red-400 bg-red-50" : ""}`}
-                                                value={courseOverrides[course.id]?.startDate || ""}
+                                                className={`h-8 text-xs ${isSelected && !(courseOverrides[course.id]?.startDate || course.startDate) ? "border-red-400 bg-red-50" : ""}`}
+                                                value={courseOverrides[course.id]?.startDate || (course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : "")}
                                                 onChange={(e) => updateOverride(course.id, "startDate", e.target.value)}
                                             />
                                             <Input
                                                 type="date"
                                                 disabled={!isSelected}
-                                                className={`h-8 text-xs ${isSelected && !courseOverrides[course.id]?.endDate ? "border-red-400 bg-red-50" : ""}`}
-                                                value={courseOverrides[course.id]?.endDate || ""}
+                                                className={`h-8 text-xs ${isSelected && !(courseOverrides[course.id]?.endDate || course.endDate) ? "border-red-400 bg-red-50" : ""}`}
+                                                value={courseOverrides[course.id]?.endDate || (course.endDate ? new Date(course.endDate).toISOString().split('T')[0] : "")}
                                                 onChange={(e) => updateOverride(course.id, "endDate", e.target.value)}
                                             />
                                         </div>
