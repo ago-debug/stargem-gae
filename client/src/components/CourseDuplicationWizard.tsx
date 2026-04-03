@@ -21,6 +21,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   const [targetSeasonId, setTargetSeasonId] = useState<string>("");
   const [selectedCourseIds, setSelectedCourseIds] = useState<Set<number>>(new Set());
   const [courseOverrides, setCourseOverrides] = useState<Record<number, any>>({});
+  const [targetCourses, setTargetCourses] = useState<Course[]>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -60,6 +61,16 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
           }
       }
   }, [targetSeasons, targetSeasonId, effectiveSourceSeasonId]);
+
+  // Fetch target season courses per anti-duplicazione
+  React.useEffect(() => {
+    if (targetSeasonId) {
+        fetch(`/api/courses?seasonId=${targetSeasonId}`)
+            .then(r => r.json())
+            .then(data => setTargetCourses(data))
+            .catch(() => setTargetCourses([]));
+    }
+  }, [targetSeasonId]);
 
   const toggleCourse = (courseId: number) => {
     const next = new Set(selectedCourseIds);
@@ -102,6 +113,28 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
        return;
     }
 
+    // Validazione pre-invio
+    for (const id of Array.from(selectedCourseIds)) {
+        const overrides = courseOverrides[id] || {};
+        if (!overrides.startDate || !overrides.endDate) {
+           const originalCourse = sourceCourses.find(c => c.id === id);
+           toast({ title: "Dati Mancanti", description: `Inserisci Data Inizio e Data Fine per il corso: ${originalCourse?.name}`, variant: "destructive" });
+           return;
+        }
+
+        const originalCourse = sourceCourses.find(c => c.id === id);
+        const duplicateCheck = targetCourses.find(tc => 
+            tc.name === (overrides.name ?? originalCourse?.name) &&
+            tc.dayOfWeek === originalCourse?.dayOfWeek &&
+            tc.startTime === originalCourse?.startTime &&
+            tc.studioId === (overrides.studioId !== undefined ? overrides.studioId : originalCourse?.studioId)
+        );
+        if (duplicateCheck) {
+            toast({ title: "Attenzione: Corso già presente", description: `Stai duplicando lo stesso corso per errore. Il corso ${duplicateCheck.name} (${duplicateCheck.dayOfWeek} ${duplicateCheck.startTime}) esiste già nella stagione target.`, variant: "destructive" });
+            return;
+        }
+    }
+
     try {
         const promises = Array.from(selectedCourseIds).map(id => {
             const originalCourse = sourceCourses.find(c => c.id === id);
@@ -118,6 +151,8 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                 endTime: overrides.endTime ?? originalCourse.endTime, // Orario Fine
                 studioId: overrides.studioId !== undefined ? overrides.studioId : originalCourse.studioId, // Studio
                 seasonId: parseInt(targetSeasonId), // Nuova Stagione
+                startDate: overrides.startDate, // Data Inizio Obbligatoria (verificata)
+                endDate: overrides.endDate, // Data Fine Obbligatoria (verificata)
 
                 // CAMPI PROIBITI O RE-INIZIALIZZATI VUOTI
                 currentEnrollment: 0, 
@@ -180,8 +215,11 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="flex items-center mt-6 text-sm text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200">
-                    <strong>Nota Sicurezza:</strong> I corsi selezionati verranno clonati interamente vergini. Tutte le anagrafiche, iscritti (enrollments) e transazioni collegate NON verranno in alcun modo trasferite per ragioni di coerenza contabile.
+                <div className="flex-1 flex flex-col items-end">
+                    {/* Placeholder for header spacing improvement */}
+                </div>
+                <div className="flex-1 flex items-center mt-6 text-xs text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200">
+                    <strong>Sicurezza:</strong> I corsi selezionati verranno clonati vergini (no pagamenti/iscritti). La logica oraria originale verrà mantenuta, con nuove date inizio/fine limitate alla stagione considerata.
                 </div>
             </div>
 
@@ -202,9 +240,9 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                                 />
                             </TableHead>
                             <TableHead>Corso Originale</TableHead>
-                            <TableHead>Nuovo Nome <span className="text-xs text-muted-foreground font-normal">(opzionale)</span></TableHead>
-                            <TableHead>Nuovo Insegnante</TableHead>
-                            <TableHead>Nuova Sala</TableHead>
+                            <TableHead>Date / Stagione *</TableHead>
+                            <TableHead>Nuovo Nome <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
+                            <TableHead>Sala/Ins. <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -231,6 +269,24 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                                         </div>
                                     </TableCell>
                                     <TableCell>
+                                        <div className="flex gap-2 mb-1">
+                                            <Input
+                                                type="date"
+                                                disabled={!isSelected}
+                                                className={`h-8 text-xs ${isSelected && !courseOverrides[course.id]?.startDate ? "border-red-400 bg-red-50" : ""}`}
+                                                value={courseOverrides[course.id]?.startDate || ""}
+                                                onChange={(e) => updateOverride(course.id, "startDate", e.target.value)}
+                                            />
+                                            <Input
+                                                type="date"
+                                                disabled={!isSelected}
+                                                className={`h-8 text-xs ${isSelected && !courseOverrides[course.id]?.endDate ? "border-red-400 bg-red-50" : ""}`}
+                                                value={courseOverrides[course.id]?.endDate || ""}
+                                                onChange={(e) => updateOverride(course.id, "endDate", e.target.value)}
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
                                         <Input 
                                            disabled={!isSelected}
                                            placeholder={course.name}
@@ -240,38 +296,38 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        <Select 
-                                            disabled={!isSelected}
-                                            value={courseOverrides[course.id]?.instructorId?.toString() || course.instructorId?.toString() || "none"}
-                                            onValueChange={(val) => updateOverride(course.id, "instructorId", val === "none" ? null : parseInt(val))}
-                                        >
-                                            <SelectTrigger className="h-8 text-sm bg-white">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none">Nessuno</SelectItem>
-                                                {instructors?.map(i => (
-                                                    <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Select 
-                                            disabled={!isSelected}
-                                            value={courseOverrides[course.id]?.studioId?.toString() || course.studioId?.toString() || "none"}
-                                            onValueChange={(val) => updateOverride(course.id, "studioId", val === "none" ? null : parseInt(val))}
-                                        >
-                                            <SelectTrigger className="h-8 text-sm bg-white">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none">Nessuna</SelectItem>
-                                                {studios?.map(s => (
-                                                    <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <div className="flex flex-col gap-1">
+                                            <Select 
+                                                disabled={!isSelected}
+                                                value={courseOverrides[course.id]?.studioId?.toString() || course.studioId?.toString() || "none"}
+                                                onValueChange={(val) => updateOverride(course.id, "studioId", val === "none" ? null : parseInt(val))}
+                                            >
+                                                <SelectTrigger className="h-7 text-xs bg-white">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">Nessuna</SelectItem>
+                                                    {studios?.map(s => (
+                                                        <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <Select 
+                                                disabled={!isSelected}
+                                                value={courseOverrides[course.id]?.instructorId?.toString() || course.instructorId?.toString() || "none"}
+                                                onValueChange={(val) => updateOverride(course.id, "instructorId", val === "none" ? null : parseInt(val))}
+                                            >
+                                                <SelectTrigger className="h-7 text-xs bg-white">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">Nessuno</SelectItem>
+                                                    {instructors?.map(i => (
+                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             );
@@ -280,10 +336,10 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                 </Table>
             </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="bg-slate-50 border-t p-4 rounded-b-lg">
           <Button variant="outline" onClick={() => setIsOpen(false)}>Annulla</Button>
-          <Button onClick={handleDuplicate} disabled={selectedCourseIds.size === 0 || createMutation.isPending} className="gold-3d-button text-black font-semibold">
-              {createMutation.isPending ? "Duplicazione in corso..." : `Duplica ${selectedCourseIds.size} selezionati`}
+          <Button onClick={handleDuplicate} className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[140px]" disabled={createMutation.isPending}>
+            {createMutation.isPending ? "Elaborazione..." : "Duplica Selezione"}
           </Button>
         </DialogFooter>
       </DialogContent>

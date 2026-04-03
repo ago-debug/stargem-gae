@@ -545,13 +545,17 @@ Questa fase sblocca la gestione del calendario su più archi temporali, gestendo
 - [x] Detection Conflitti Risorse: Tracking e alert di collisione tecnica (stessa Sala/Ora) pienamente funzionante a livello UI.
 - [x] Programmazione Date Strategiche (Integrazione base completata): Implementata evidenziazione automatica nativa in Planning e Calendario.
 
-**🚨 QA HOTFIXES (ALLINEAMENTI VISIVI E PRIORITÀ MARTEDÌ)**
+**🚨 QA HOTFIXES (FIX URGENTI E PRIORITÀ MARTEDÌ)**
 - [ ] **LABEL SEASON ESATTA:** La stagione di default al caricamento deve riportare tassativamente la stringa visibile "25-26" (flaggata attivamente).
 - [ ] **AUTO-SWITCH LABEL:** La stringa "26-27" (stagione successiva) deve auto-promuoversi ed esporsi in automatico a febbraio di ogni ciclo.
 - [ ] **UI BOTTONE OGGI:** Garantire il cambio colore (es: colore giallo di sfondo) solo quando ci si trova sul giorno corrente. Importante: la scritta testuale "OGGI" *deve sparire* non appena l'operatore scrolla via passando a giornate passate o future.
 - [ ] **SELEZIONE IBRIDA SCROLL/GIORNO:** Implementare interazione UI combinata consentendo simultaneamente lo scrolling/slittamento libero delle settimane e il trigger diretto di selezione cliccando su un giorno in header.
 - [ ] **FULL-TEXT CARD & AUTO-RESIZE RIGHE:** Garantire che le card abbiano sempre altezza sufficiente per mostrare tutto il payload testuale previsto (es. U/D/D, SKU, Stato e Nomi estesi). L'engine grid deve forzare dinamicamente l'adattamento in altezza dell'intera riga per assecondare il box, disinnescando i troncamenti CSS.
 - [ ] **ZERO OVERLAP CARD UI:** Bugfix estetico rigoroso del motore metrico: le card di *tutte* le tipologie (corsi, rent, extra) non devono MAI sormontarsi, nascondersi a parziale overlap o subire restringimenti ingiustificati.
+- [ ] **DUPLICAZIONE CORSI CORRETTA:** Check dati integrali: i corsi duplicati devono ereditare e riportare fedelmente le date di inizio/fine esatte e gli orari corretti.
+- [ ] **FILTRI CALENDARIO ALLINEATI:** Implementare i filtri bloccanti in UI logica attiva (Filtro per "Corsi", e Filtro per categoria "Fitness").
+- [ ] **STUDI MODIFICABILI (23, 24, 25):** Rendere le locazioni/studi modificabili apertamente e in toto in tutte le casistiche.
+- [ ] **FIX MASCHERA INPUT (ERRORI DI DEFAULT):** Neutralizzare il bug per cui la maschera input genera falsi positivi / errori visivi rossi di default all'apertura cruda (pre-interazione).
 
 **📅 TASK ARCHITETTURA EXCEL / TABELLA DATE (FASE NUOVA)**
 - [ ] Creazione tabella master "Programmazione Date Strategiche" come replica esatta del foglio Excel: asse verticale con settimane numerate, asse orizzontale Lun-Dom con date, color coding attività/chiusure, totali e spazio note settimanali. Inserimento rapido e sync UI completo.

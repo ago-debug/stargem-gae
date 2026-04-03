@@ -97,7 +97,7 @@ const RECURRENCE_TYPES = [
     { id: "custom", label: "Personalizzato" },
 ];
 
-const HOURS = Array.from({ length: 15 }, (_, i) => i + 8); // 8:00 to 22:00
+const HOURS = Array.from({ length: 16 }, (_, i) => i + 7); // 7:00 to 22:00
 
 const TIME_SLOTS = Array.from({ length: 288 }, (_, i) => {
     const hour = Math.floor(i / 12);
@@ -906,7 +906,12 @@ export default function CalendarPage() {
         );
 
         if (selectedEventType !== "all") {
-             return events.filter(e => e.registryKey === selectedEventType);
+             return events.filter(e => {
+                 if (selectedEventType === "corsi" && (e.registryKey === "course" || e.registryKey === "courses" || e.registryKey === "corsi" || e.sourceType === "course")) return true;
+                 if (selectedEventType === "workshop" && (e.registryKey === "workshop" || e.registryKey === "workshops" || e.sourceType === "workshop")) return true;
+                 if (selectedEventType === "affitto" && (e.registryKey === "rentals" || e.registryKey === "studioBookings" || e.sourceType === "studioBookings" || e.sourceType === "rentals")) return true;
+                 return e.registryKey === selectedEventType || e.sourceType === selectedEventType;
+             });
         }
 
         return events;
@@ -923,7 +928,7 @@ export default function CalendarPage() {
         let hours = parseInt(parts[0], 10) || 0;
         if (hours === 0) hours = 24; // Handle 00:00 as Midnight relatively to Day start 08:00
         const minutes = parseInt(parts[1], 10) || 0;
-        return ((hours * 60 + minutes) - (8 * 60)) * PX_PER_MIN;
+        return ((hours * 60 + minutes) - (7 * 60)) * PX_PER_MIN;
     }
 
     // Hoisted function per prevenire ReferenceError (TDZ) negli useMemo richiamati prima della dichiarazione originale
@@ -948,7 +953,7 @@ export default function CalendarPage() {
     }
 
     // --- PHASE 19: Time-Space Elastico (Two-Pass React Layout) ---
-    const TOTAL_MINUTES = 14 * 60; // Dalle 08:00 alle 22:00 = 840 mins
+    const TOTAL_MINUTES = 15 * 60; // Dalle 07:00 alle 22:00 = 900 mins
 
     const calendarLayout = useMemo(() => {
         // 1. Definisci le Colonne Visibili Base (Giorni o Sale)

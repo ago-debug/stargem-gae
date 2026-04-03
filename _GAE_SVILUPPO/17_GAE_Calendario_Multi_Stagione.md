@@ -30,7 +30,7 @@ Tutti i requirements di layout UI post-sprint sono stati bonificati:
 - **Logica Architetturale e Limitazioni Copia:**
   - Endpoint dedicato: `POST /api/activities/duplicate-season`.
   - La duplicazione creerà **nuovi record** nel DB ma con una policy di copia molto stringente.
-  - Verranno copiati ESCLUSIVAMENTE questi 5 metadati: **Genere (Nome Corso), Insegnante, Giorno, Orario, Studio**.
+  - Verranno copiati ESCLUSIVAMENTE questi 5 metadati: **Genere (Nome Corso), Insegnante, Giorno, Orario, Studio**. *Attenzione operativa (AG-053):* È imperativo che l'engine garantisca la trascrizione **corretta** degli Orari e ricalcoli senza divergenze i campi **Data Inizio / Data Fine**, agganciandoli temporalmente all'alveo della Nuova Stagione creata.
   - **NON** verranno copiati gli iscritti. Lo stack partirà da zero, limitando il bleed.
   - L'interfaccia UI esporrà una lista con **checkbox a multi-selezione funzionante**, controllata da un macro-pulsante **"Duplica selezionati"**, per eseguire in un solo colpo il porting massivo dei corsi verso l'anno sportivo imminente.
 
@@ -104,3 +104,12 @@ Tutti i requirements di layout UI post-sprint sono stati bonificati:
   2. **Logica di Dipendenza (Child-Lock):** Il field "Genere/Corso" deve rimanere disabilitato (disabled) finché l'operatore non innesca un'Attività madre valida. Solo dopo tale evento il selettore si abiliterà mostrando *solamente* le discipline afferenti all'id-padre.
   3. **Pulizia Etichette (Sanitizzazione UI):** La UI della tendina "genere/corso" assicurerà la rimozione totale di artefatti visivi, label tecniche rotte o chiavi di sistema non tradotte o non pertinenti ai plain-text.
   4. **Validazione Integrale:** Il vincolo impedisce il submit di quote per associazioni miste fittizie (es. Attività "Sala Musicale" con Genere "Hip-Hop Junior"). Il middleware o la UI React bloccherà l'azione salvaguardando il ledger.
+
+---
+
+## 11. Stabilizzazione Calendario e Bugfix Emergenziali (Pre Go-Live)
+Al fine di sbloccare l'operatività di base, sono stati consolidati e protetti in quest'area i seguenti interventi di bonifica UI:
+
+- **11.1 Armonizzazione Filtri Calendario:** Ripristinare il cablaggio funzionale dei filtri a monte calendario. Categorico l'allineamento dei toggle/checkbox (nello specifico, filtro primario "Corsi" e categoria selettiva "Fitness") affinché manipolino reattivamente la griglia dati proiettando il result set conforme.
+- **11.2 Edit Form Studi Logici:** Disattivare l'eventuale costrutto statico che blindava le locazioni denominate `Studi 23-24-25`. Tali sale dovranno rendersi inequivocabilmente *modificabili* dall'operatore.
+- **11.3 Sanitizzazione Maschera Input:** Il trigger di init che lancia irrazionalmente "errori di default rossi" alla mera apertura del modale deve essere intercettato e neutralizzato. La validation map (Zod o React Hook Form) scatterà esclusivamente a validazione sfidata (onSubmit o onChange post-interazione) e mai al boot visivo neutro.
