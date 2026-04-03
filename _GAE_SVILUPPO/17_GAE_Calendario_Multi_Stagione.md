@@ -84,3 +84,13 @@ Tutti i requirements di layout UI post-sprint sono stati bonificati:
   - Il sistema monitora in tempo reale la `viewDate` (data attualmente visualizzata) quando l'utente utilizza le frecce di scorrimento settimanale (`<` e `>`).
   - Non appena la vista temporale sconfina oltre le date di inizio/fine della stagione selezionata nel Dropdown, il calendario esegue un _auto-switch_ della risorsa `seasonId`, agganciando la stagione coerente a quella data.
   - L'UI aggiornerà dinamicamente il nome nel selettore assegnando etichette specifiche come `(Stagione Precedente)` o `(Stagione Successiva)` a ridosso dell'anno, pre-caricando i relativi dati storicizzati del backend.
+
+---
+
+## 9. Dashboard Segreteria Operativa – Nuova Struttura
+- **Obiettivo:** Elevare la pragmatica operativa della landing page predefinita interfacciata alla segreteria (Dashboard), estirpando widget passivi in favore di tool reattivi e di contabilità personale.
+- **Specifiche Architetturali:**
+  1. **Modulo "Entrate Mese":** Inserire highlight contabile per il tracciamento degli incassi, potenziato con la suddivisione esplicita per singolo operatore/membro della segreteria. Un report in tempo reale del venduto personale.
+  2. **Sezione "Scadenze Operative":** Disintegrazione totale dell'attuale componente "Attività Recente". Il vuoto lasciato sarà ricolmato da un nuovo pannello di allerta scadenze e compiti operativi in esaurimento, permettendo al team di agire sulle criticità quotidiane.
+  3. **Gerarchia Strutturale:** Il design dovrà dare priorità spaziale e visiva a questi due nuovi blocchi, schiacciando in secondo piano eventuali KPI secondari. L'operatore all'accesso (boot) deve poter analizzare istantaneamente le revenue ed evadere le scadenze rossastre.
+  4. **Costrutto Cromatico/Stile:** Massimizzare l'uso degli Alert Badge (es. Rosso lucido per ritardi fatali o scadenze odierne, Giallo per task in pending). Il blocco incassi prediligerà invece spaziature clean e neutrali senza saturare l'UI.

@@ -556,3 +556,6 @@ Questa fase sblocca la gestione del calendario su più archi temporali, gestendo
 **📅 TASK ARCHITETTURA EXCEL / TABELLA DATE (FASE NUOVA)**
 - [ ] Creazione tabella master "Programmazione Date Strategiche" come replica esatta del foglio Excel: asse verticale con settimane numerate, asse orizzontale Lun-Dom con date, color coding attività/chiusure, totali e spazio note settimanali. Inserimento rapido e sync UI completo.
 - [ ] **FIX RIGHE MASTER TABLE:** Evitare che le righe o l'impalcatura di base/esempio spariscano inspiegabilmente quando l'operatore inizia a registrare o programmare le prime date.
+
+**🖥️ DASHBOARD SEGRETERIA OPERATIVA (IN CANTIERE)**
+- [ ] Rifacimento Dashboard Segreteria Operativa (Entrate Mese + Sezione Scadenze Operative): Implementazione di un nuovo blocco "Entrate Mese" con dettaglio analitico ripartito per ogni membro del team, accompagnato dalla sostituzione del vecchio pannello "Attività Recente" a favore di una nuova "Sezione Scadenze Operative" incentrata su alert e task imminenti per le receptionist.

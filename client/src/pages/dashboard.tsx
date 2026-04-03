@@ -10,6 +10,12 @@ const logoStarGem = "/logo_stargem.png";
 export default function Dashboard() {
   const [, setLocation] = useLocation();
 
+  interface RevenueMember {
+    name: string;
+    amount: number;
+    count: number;
+  }
+
   interface DashboardStats {
     totalMembers: number;
     activeMemberships: number;
@@ -18,12 +24,15 @@ export default function Dashboard() {
     expiringThisWeek: number;
     monthlyRevenue: number;
     pendingPayments: number;
+    revenueByMember?: RevenueMember[];
   }
 
   interface AlertStats {
     expiringMemberships: number;
     expiredCertificates: number;
     overduePayments: number;
+    expiringCourses?: number;
+    expiringWorkshops?: number;
   }
 
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
@@ -40,14 +49,13 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 md:p-8 space-y-8 mx-auto">
-      {/* Removed Logo */}
       <div>
-        <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard Segreteria</h1>
         <p className="text-muted-foreground">Panoramica del sistema di gestione corsi</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
         {statsLoading ? (
           <>
             {[...Array(4)].map((_, i) => (
@@ -109,18 +117,35 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Entrate Mese</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <Card className="border-emerald-200 bg-emerald-50/20 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                <TrendingUp className="h-24 w-24" />
+              </div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-emerald-100 bg-emerald-50/50">
+                <CardTitle className="text-sm font-bold text-emerald-800">Incasso Globale (Mese)</CardTitle>
+                <TrendingUp className="h-4 w-4 text-emerald-600" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  €{stats?.monthlyRevenue != null ? stats.monthlyRevenue.toFixed(2) : '0.00'}
+              <CardContent className="pt-4">
+                <div className="flex items-end gap-2 mb-4">
+                  <div className="text-3xl font-extrabold text-emerald-700">
+                    €{stats?.monthlyRevenue != null ? stats.monthlyRevenue.toFixed(2) : '0.00'}
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.pendingPayments || 0} pagamenti in attesa
-                </p>
+                
+                {stats?.revenueByMember && stats.revenueByMember.length > 0 && (
+                  <div className="space-y-2 mt-4 pt-4 border-t border-emerald-100">
+                    <p className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider mb-2">Incasso per Operatore</p>
+                    {stats.revenueByMember.map((rm, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-sm p-1.5 rounded bg-white border border-emerald-50">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-slate-700">{rm.name}</span>
+                          <span className="text-[10px] text-muted-foreground">{rm.count} operazioni</span>
+                        </div>
+                        <span className="font-bold text-emerald-600">€{rm.amount.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </>
@@ -208,7 +233,71 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Recent Activity */}
+      {/* Alert Operativi Didattici (Sostituisce Attività Recente) */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4 text-slate-800">Alert Operativi Didattici</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {alertsLoading ? (
+            <>
+              {[...Array(2)].map((_, i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <Skeleton className="h-5 w-32 mb-2" />
+                    <Skeleton className="h-4 w-48" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-6 w-16" />
+                  </CardContent>
+                </Card>
+              ))}
+            </>
+          ) : (
+            <>
+              <Card className={(alerts?.expiringCourses ?? 0) > 0 ? "border-amber-200 bg-amber-50/30" : ""}>
+                <CardHeader>
+                  <CardTitle className="text-lg">Corsi in Avvicinamento Fine</CardTitle>
+                  <CardDescription>Terminano entro 14 giorni</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-slate-700">{alerts?.expiringCourses ?? 0}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLocation('/corsi')}
+                      className={(alerts?.expiringCourses ?? 0) > 0 ? "text-amber-700 border-amber-300 hover:bg-amber-100" : ""}
+                    >
+                      Pianifica Rinnovi
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className={(alerts?.expiringWorkshops ?? 0) > 0 ? "border-amber-200 bg-amber-50/30" : ""}>
+                <CardHeader>
+                  <CardTitle className="text-lg">Workshop Imminenti / in Scadenza</CardTitle>
+                  <CardDescription>Eventi attivi nei prossimi 14 giorni</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-slate-700">{alerts?.expiringWorkshops ?? 0}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLocation('/workshop')}
+                      className={(alerts?.expiringWorkshops ?? 0) > 0 ? "text-amber-700 border-amber-300 hover:bg-amber-100" : ""}
+                    >
+                      Verifica Partecipanti
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Recent Activity (Ripristinata) */}
       <Card>
         <CardHeader>
           <CardTitle>Attività Recente</CardTitle>

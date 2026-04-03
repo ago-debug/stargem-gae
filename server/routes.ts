@@ -4167,15 +4167,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const currentMonth = today.getMonth();
       const currentYear = today.getFullYear();
-      const monthlyRevenue = payments
-        .filter(p => {
-          if (!p.createdAt) return false;
-          const createdDate = new Date(p.createdAt);
-          return p.status === "paid" &&
-            createdDate.getMonth() === currentMonth &&
-            createdDate.getFullYear() === currentYear;
-        })
-        .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+      
+      const currentMonthPayments = payments.filter(p => {
+        if (!p.createdAt) return false;
+        const createdDate = new Date(p.createdAt);
+        return p.status === "paid" &&
+          createdDate.getMonth() === currentMonth &&
+          createdDate.getFullYear() === currentYear;
+      });
+
+      const monthlyRevenue = currentMonthPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
+      // Group revenue by operatore (staff member)
+      const users = await storage.getUsers();
+      const revenueMap = new Map<string, { amount: number, count: number, name: string }>();
+      
+      currentMonthPayments.forEach(p => {
+        if (!p.createdById) return;
+        const user = users.find(u => u.id === p.createdById);
+        if (!user) return;
+        
+        const existing = revenueMap.get(user.id) || { amount: 0, count: 0, name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username };
+        existing.amount += parseFloat(p.amount);
+        existing.count += 1;
+        revenueMap.set(user.id, existing);
+      });
+
+      const revenueByMember = Array.from(revenueMap.values()).sort((a, b) => b.amount - a.amount);
 
       const pendingPayments = payments.filter(p => p.status === "pending").length;
       const enrollments = await storage.getEnrollments();
@@ -4187,6 +4205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalEnrollments: enrollments.length,
         expiringThisWeek,
         monthlyRevenue,
+        revenueByMember,
         pendingPayments,
       });
     } catch (error) {
@@ -4200,8 +4219,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const memberships = await storage.getMemberships();
       const certificates = await storage.getMedicalCertificates();
       const payments = await storage.getPayments();
+      const courses = await storage.getCourses();
+      const workshops = await storage.getWorkshops ? await storage.getWorkshops() : [];
+
       const today = new Date();
       const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const nextTwoWeeks = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
+
+      const expiringCourses = courses.filter(c => {
+        if (!c.active || !c.endDate) return false;
+        const eDate = new Date(c.endDate);
+        return eDate >= today && eDate <= nextTwoWeeks;
+      });
+
+      const expiringWorkshops = workshops.filter(w => {
+        if (!w.endDate) return false;
+        const eDate = new Date(w.endDate);
+        return eDate >= today && eDate <= nextTwoWeeks;
+      });
 
       res.json({
         expiringMemberships: memberships.filter(m => {
@@ -4213,6 +4248,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return expiry < today;
         }).length,
         overduePayments: payments.filter(p => p.status === "overdue").length,
+        expiringCourses: expiringCourses.length,
+        expiringWorkshops: expiringWorkshops.length,
       });
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
