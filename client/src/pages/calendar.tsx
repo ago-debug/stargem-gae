@@ -279,10 +279,11 @@ export default function CalendarPage() {
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
     const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
     const [editingBooking, setEditingBooking] = useState<any | null>(null);
-    const [selectionContext, setSelectionContext] = useState<{ dayId: string, studioId: number | null, hour: number } | null>(null);
+    const [selectionContext, setSelectionContext] = useState<{ dayId: string, studioId: number | null, hour: number, date?: Date } | null>(null);
     const [unifiedFormOpen, setUnifiedFormOpen] = useState(false);
     const [unifiedFormType, setUnifiedFormType] = useState<"course" | "workshop" | "booking">("course");
     const [selectedEventType, setSelectedEventType] = useState<string>("all");
+    const [newEventSelectionType, setNewEventSelectionType] = useState<string>("");
     const [instructorSearchOpen, setInstructorSearchOpen] = useState(false);
     const [showFreeSlots, setShowFreeSlots] = useState(false);
     const { toast } = useToast();
@@ -1045,10 +1046,29 @@ export default function CalendarPage() {
                 });
             };
 
-            const sortedWithMetrics = sorted.map(evt => {
+            const sortedWithMetrics = sorted.map((evt, idx) => {
                 const startPx = timeToMinutes(evt.startTime);
+                let endPxRaw = timeToMinutes(evt.endTime);
+                
+                // Intelligent fallback se manca orario di fine esatto o è fallace
+                if (!endPxRaw || endPxRaw <= startPx) {
+                    endPxRaw = startPx + (60 * PX_PER_MIN);
+                    // Lookahead: trova il prossimo evento in questa sala e taglia il default per non sforare over-time
+                    const nextEvt = sorted.find((n, nIdx) => 
+                        nIdx > idx && 
+                        String(n.studioId) === String(evt.studioId) && 
+                        timeToMinutes(n.startTime) > startPx
+                    );
+                    if (nextEvt) {
+                        const nextStartPx = timeToMinutes(nextEvt.startTime);
+                        if (endPxRaw > nextStartPx && nextStartPx > startPx) {
+                            endPxRaw = nextStartPx;
+                        }
+                    }
+                }
+                
                 // Minimo vitale per l'hit-box (evita card collassate)
-                const endPx = Math.max(timeToMinutes(evt.endTime) || startPx + (60 * PX_PER_MIN), startPx + (15 * PX_PER_MIN)); 
+                const endPx = Math.max(endPxRaw, startPx + (15 * PX_PER_MIN)); 
                 const durationPx = endPx - startPx;
                 return { ...evt, startPx, endPx, durationPx, hasTimeOverlap: false };
             });
@@ -1066,7 +1086,7 @@ export default function CalendarPage() {
             }
 
             sortedWithMetrics.forEach(evtWithMetrics => {
-                if (evtWithMetrics.startPx >= clusterEnd) {
+                if (evtWithMetrics.startPx >= clusterEnd - 1) { // 1px threshold for safe bounds
                     processCluster(currentCluster);
                     currentCluster = [evtWithMetrics];
                     clusterEnd = evtWithMetrics.endPx;
@@ -1159,9 +1179,16 @@ export default function CalendarPage() {
         setEditForm(course);
     };
 
-    const handleCreateCourse = (dayId: string, studioId: number, hour: number) => {
+    const handleCreateCourse = (dayId: string, studioId: number, hour: number, selectionDate?: Date) => {
+        let endHour = hour;
+        let endMin = 30;
+        if (endHour >= 24) endHour = 23;
+        
         const timeStr = `${hour.toString().padStart(2, "0")}:00`;
-        const endTimeStr = `${(hour + 1).toString().padStart(2, "0")}:00`;
+        const endTimeStr = `${endHour.toString().padStart(2, "0")}:${endMin.toString().padStart(2, "0")}`;
+
+        const actualActiveSeasonId = seasons?.find(s => s.active)?.id || seasons?.[0]?.id;
+        const resolvedSeasonId = selectedSeasonId === "active" ? actualActiveSeasonId : (selectedSeasonId ? parseInt(selectedSeasonId, 10) : undefined);
 
         const newCourse: Partial<Course> = {
             name: "",
@@ -1171,7 +1198,10 @@ export default function CalendarPage() {
             endTime: endTimeStr,
             active: true,
             currentEnrollment: 0,
-            maxCapacity: 20
+            maxCapacity: 20,
+            seasonId: resolvedSeasonId,
+            startDate: selectionDate || null,
+            endDate: selectionDate || null
         };
 
         setEditingCourse(newCourse as Course);
@@ -1897,11 +1927,17 @@ export default function CalendarPage() {
                                                 <div key={hour}
                                                     className="absolute left-0 right-0 border-b border-[#eee] hover:bg-slate-50 cursor-crosshair transition-colors"
                                                     style={{ top: `${topPx}px`, height: `${heightPx}px` }}
-                                                    onClick={() => setSelectionContext({ 
-                                                        dayId: col.type === 'day' ? col.id : selectedDay, 
-                                                        studioId: col.type === 'studio' ? parseInt(col.id, 10) : null, 
-                                                        hour 
-                                                    })}
+                                                    onClick={() => {
+                                                        const dayId = col.type === 'day' ? col.id : selectedDay;
+                                                        const dateStr = weekDatesMap[dayId];
+                                                        const date = dateStr ? new Date(dateStr) : undefined;
+                                                        setSelectionContext({ 
+                                                            dayId,
+                                                            date,
+                                                            studioId: col.type === 'studio' ? parseInt(col.id, 10) : null, 
+                                                            hour 
+                                                        });
+                                                    }}
                                                 />
                                             );
                                         })}
@@ -1967,7 +2003,7 @@ export default function CalendarPage() {
                                                 <div
                                                     key={evt.eventId}
                                                     onClick={handleCardClick}
-                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 overflow-hidden ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''}`}
+                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 overflow-hidden ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 ring-2 ring-red-500 animate-pulse z-[90]' : ''}`}
                                                     style={{
                                                         top: `${realTop + 2}px`,
                                                         minHeight: `${realHeight - 4}px`,  // Elastic minimum height
@@ -2636,7 +2672,7 @@ export default function CalendarPage() {
             <Dialog open={!!selectionContext} onOpenChange={(open) => {
                 if (!open) {
                     setSelectionContext(null);
-                    setSelectedEventType("all");
+                    setNewEventSelectionType("");
                 }
             }}>
                 <DialogContent className="max-w-md">
@@ -2650,7 +2686,7 @@ export default function CalendarPage() {
                     <div className="py-6 space-y-4">
                         <div className="space-y-2">
                             <Label>Tipologia Evento Operativo</Label>
-                            <Select value={selectedEventType} onValueChange={setSelectedEventType}>
+                            <Select value={newEventSelectionType} onValueChange={setNewEventSelectionType}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Seleziona dal dominio..." />
                                 </SelectTrigger>
@@ -2668,17 +2704,26 @@ export default function CalendarPage() {
                         
                         <Button 
                             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" 
-                            disabled={!selectedEventType}
+                            disabled={!newEventSelectionType}
                             onClick={() => {
-                                if (selectionContext && selectedEventType) {
+                                if (selectionContext && newEventSelectionType) {
                                     const sId = selectionContext.studioId || (studios?.[0]?.id || 1);
                                     const timeStr = `${selectionContext.hour.toString().padStart(2, "0")}:00`;
-                                    const endTimeStr = `${(selectionContext.hour + 1).toString().padStart(2, "0")}:00`;
+                                    
+                                    // Start with 30 min duration for default inserts
+                                    let endHour = selectionContext.hour;
+                                    let endMin = 30;
+                                    if (endHour >= 24) endHour = 23;
+                                    const endTimeStr = `${endHour.toString().padStart(2, "0")}:${endMin.toString().padStart(2, "0")}`;
 
-                                    if (selectedEventType === "course") {
-                                        handleCreateCourse(selectionContext.dayId, sId, selectionContext.hour);
+                                    const actualActiveSeasonId = seasons?.find(s => s.active)?.id || seasons?.[0]?.id;
+                                    const resolvedSeasonId = selectedSeasonId === "active" ? actualActiveSeasonId : (selectedSeasonId ? parseInt(selectedSeasonId, 10) : undefined);
+
+                                    if (newEventSelectionType === "course") {
+                                        handleCreateCourse(selectionContext.dayId, sId, selectionContext.hour, selectionContext.date);
                                         setUnifiedFormType("course");
-                                    } else if (selectedEventType === "workshop" || selectedEventType === "domenica" || selectedEventType === "campus") {
+                                    } else if (newEventSelectionType === "workshop" || newEventSelectionType === "domenica" || newEventSelectionType === "campus") {
+                                        const dateStr = selectionContext.date ? selectionContext.date : null;
                                         setEditingWorkshop({
                                             name: "",
                                             dayOfWeek: selectionContext.dayId,
@@ -2686,7 +2731,10 @@ export default function CalendarPage() {
                                             startTime: timeStr,
                                             endTime: endTimeStr,
                                             active: true,
-                                            maxCapacity: 20
+                                            maxCapacity: 20,
+                                            seasonId: resolvedSeasonId,
+                                            startDate: dateStr,
+                                            endDate: dateStr
                                         } as any);
                                         setEditForm({
                                             name: "",
@@ -2695,18 +2743,35 @@ export default function CalendarPage() {
                                             startTime: timeStr,
                                             endTime: endTimeStr,
                                             active: true,
-                                            maxCapacity: 20
+                                            maxCapacity: 20,
+                                            seasonId: resolvedSeasonId,
+                                            startDate: dateStr,
+                                            endDate: dateStr
                                         });
                                         // TODO: Pass actual chosen type so the form can default the category
                                         setUnifiedFormType("workshop");
                                     } else {
-                                        handleCreateBooking(selectionContext.dayId, sId, selectionContext.hour);
+                                        const dateStr = selectionContext.date ? selectionContext.date : null;
+                                        
+                                        const newBooking = {
+                                            title: "",
+                                            studioId: sId,
+                                            dayOfWeek: selectionContext.dayId,
+                                            startTime: timeStr,
+                                            endTime: endTimeStr,
+                                            status: "pending",
+                                            seasonId: resolvedSeasonId,
+                                            startDate: dateStr,
+                                            endDate: dateStr
+                                        };
+                                        setEditingBooking(newBooking as any);
+                                        setEditForm(newBooking);
                                         setUnifiedFormType("booking");
                                     }
                                     
                                     setUnifiedFormOpen(true);
                                     setSelectionContext(null);
-                                    setSelectedEventType("all");
+                                    setNewEventSelectionType("");
                                 }
                             }}
                         >
