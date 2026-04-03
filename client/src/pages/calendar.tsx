@@ -1749,7 +1749,7 @@ export default function CalendarPage() {
 
             <Card className="border-none shadow-xl bg-card overflow-hidden">
                 <CardContent ref={scrollContainerRef} className="p-0 overflow-auto max-h-[calc(100vh-220px)] relative scroll-smooth">
-                    <div className="min-w-full flex flex-col relative">
+                    <div className="min-w-full w-fit flex flex-col relative">
                         {/* Header: Ore | (Days or Studios) */}
                         <div className="sticky top-0 z-40 bg-white shadow-sm">
                             <div className={`grid border-b bg-[#f8f9fa]`}
