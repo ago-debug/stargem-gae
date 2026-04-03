@@ -212,8 +212,9 @@ export default function CalendarPage() {
     const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
-    useEffect(() => {
-        resizeObserverRef.current = new ResizeObserver((entries) => {
+    // Inizializzazione sincrona (impedisce accavallamenti durante il delay dell'useEffect)
+    if (typeof window !== 'undefined' && !resizeObserverRef.current) {
+        resizeObserverRef.current = new window.ResizeObserver((entries) => {
             setMeasuredHeights(prev => {
                 let changed = false;
                 const next = { ...prev };
@@ -230,7 +231,12 @@ export default function CalendarPage() {
                 return changed ? next : prev;
             });
         });
-        return () => resizeObserverRef.current?.disconnect();
+    }
+
+    useEffect(() => {
+        return () => {
+            if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
+        }
     }, []);
 
     const handleCardRef = useCallback((el: HTMLDivElement | null) => {
@@ -1039,20 +1045,34 @@ export default function CalendarPage() {
                 });
             };
 
-            sorted.forEach(evt => {
+            const sortedWithMetrics = sorted.map(evt => {
                 const startPx = timeToMinutes(evt.startTime);
                 // Minimo vitale per l'hit-box (evita card collassate)
                 const endPx = Math.max(timeToMinutes(evt.endTime) || startPx + (60 * PX_PER_MIN), startPx + (15 * PX_PER_MIN)); 
                 const durationPx = endPx - startPx;
-                const evtWithMetrics = { ...evt, startPx, endPx, durationPx };
+                return { ...evt, startPx, endPx, durationPx, hasTimeOverlap: false };
+            });
 
-                if (startPx >= clusterEnd) {
+            // Mark strict overlaps in the same column
+            for (let i = 0; i < sortedWithMetrics.length; i++) {
+                for (let j = i + 1; j < sortedWithMetrics.length; j++) {
+                    const a = sortedWithMetrics[i];
+                    const b = sortedWithMetrics[j];
+                    if (a.startPx < b.endPx - 1 && a.endPx > b.startPx + 1 && String(a.studioId) === String(b.studioId)) {
+                        a.hasTimeOverlap = true;
+                        b.hasTimeOverlap = true;
+                    }
+                }
+            }
+
+            sortedWithMetrics.forEach(evtWithMetrics => {
+                if (evtWithMetrics.startPx >= clusterEnd) {
                     processCluster(currentCluster);
                     currentCluster = [evtWithMetrics];
-                    clusterEnd = endPx;
+                    clusterEnd = evtWithMetrics.endPx;
                 } else {
                     currentCluster.push(evtWithMetrics);
-                    if (endPx > clusterEnd) clusterEnd = endPx;
+                    if (evtWithMetrics.endPx > clusterEnd) clusterEnd = evtWithMetrics.endPx;
                 }
             });
             processCluster(currentCluster);
