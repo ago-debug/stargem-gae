@@ -546,7 +546,7 @@ export interface IStorage {
   markAllNotificationsRead(userId: string): Promise<void>;
 
   // Conflict detection
-  checkStudioConflict(studioId: number, bookingDate: Date | string, startTime: string, endTime: string, currentBookingId?: number): Promise<{ type: 'booking' | 'course' | 'workshop' | 'operating_hours', name: string } | null>;
+  checkStudioConflict(studioId: number, bookingDate: Date | string, startTime: string, endTime: string, currentBookingId?: number, currentCourseId?: number, targetSeasonId?: number): Promise<{ type: 'booking' | 'course' | 'workshop' | 'operating_hours', name: string } | null>;
 
   // System Config operations
   getSystemConfig(keyName: string): Promise<SystemConfig | undefined>;
@@ -3680,7 +3680,8 @@ export class DatabaseStorage implements IStorage {
     startTime: string,
     endTime: string,
     currentBookingId?: number,
-    currentCourseId?: number
+    currentCourseId?: number,
+    targetSeasonId?: number
   ): Promise<{ type: 'booking' | 'course' | 'workshop' | 'operating_hours', name: string } | null> {
     const bookingDate = bookingDateValue instanceof Date ? bookingDateValue : new Date(bookingDateValue);
     if (isNaN(bookingDate.getTime())) {
@@ -3780,14 +3781,15 @@ export class DatabaseStorage implements IStorage {
     // 2. Check Courses (Recurring)
     // IMPORTANT: Filter by Active Season to avoid conflicts with old courses
     const activeSeason = await this.getActiveSeason();
+    const effectiveSeasonId = targetSeasonId || activeSeason?.id;
     const courseConditions = [
       eq(courses.studioId, studioId),
       eq(courses.active, true),
       sql`UPPER(${courses.dayOfWeek}) LIKE ${dayOfWeek + '%'} `
     ];
 
-    if (activeSeason) {
-      courseConditions.push(eq(courses.seasonId, activeSeason.id));
+    if (effectiveSeasonId) {
+      courseConditions.push(eq(courses.seasonId, effectiveSeasonId));
     }
     if (currentCourseId) {
       courseConditions.push(sql`${courses.id} != ${currentCourseId}`);

@@ -2708,7 +2708,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           validatedData.studioId!,
           validatedData.startDate!,
           validatedData.startTime!,
-          validatedData.endTime!
+          validatedData.endTime!,
+          undefined,
+          undefined,
+          validatedData.seasonId || undefined
         );
         if (conflict) {
           const conflictTypeLabel =
@@ -2764,7 +2767,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startTime,
             endTime,
             undefined, // no booking ID
-            id // current course ID
+            id,        // current course ID
+            validatedData.seasonId !== undefined ? validatedData.seasonId : (existingCourse.seasonId || undefined)
           );
           if (conflict) {
             const conflictTypeLabel =
@@ -2849,7 +2853,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           validatedData.studioId,
           validatedData.startDate,
           validatedData.startTime,
-          validatedData.endTime
+          validatedData.endTime,
+          undefined,
+          undefined,
+          validatedData.seasonId || undefined
         );
         if (conflict) {
           const conflictTypeLabel =
@@ -2889,7 +2896,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           updatedData.studioId,
           updatedData.startDate,
           updatedData.startTime,
-          updatedData.endTime
+          updatedData.endTime,
+          undefined,
+          undefined,
+          updatedData.seasonId || undefined
         );
 
         if (conflict) {
@@ -5987,7 +5997,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           result.data.studioId,
           result.data.bookingDate,
           result.data.startTime,
-          result.data.endTime
+          result.data.endTime,
+          undefined,
+          undefined,
+          (result.data as any).seasonId || undefined
         );
         if (conflict) {
           const message = conflict.type === 'operating_hours'
@@ -6064,7 +6077,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           bookingData.bookingDate,
           bookingData.startTime,
           bookingData.endTime,
-          id
+          id,
+          undefined,
+          (bookingData as any).seasonId || undefined
         );
         if (conflict) {
           const message = conflict.type === 'operating_hours'
