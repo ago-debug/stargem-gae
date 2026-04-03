@@ -229,7 +229,7 @@ export default function Planning() {
             else if (e.type === 'external') linkTo = `/attivita/servizi?id=${pureId}`; // Eventi Esterni usano la grid filtrata se non c'è una scheda 1:1
 
             const elementBlock = (
-                <div className={`mb-1 truncate rounded border px-1 py-0.5 text-xs shadow-sm cursor-pointer hover:brightness-95 transition-all ${e.colorClass}`} title={e.title}>
+                <div className={`mb-1 break-words whitespace-normal leading-tight rounded border px-1.5 py-1 text-[10px] sm:text-xs font-medium shadow-sm cursor-pointer hover:brightness-95 transition-all ${e.colorClass}`} title={e.title}>
                     {e.title}
                 </div>
             );
@@ -291,7 +291,7 @@ export default function Planning() {
                     return (
                         <div key={d} className={`bg-white min-h-[120px] p-2 hover:bg-slate-50 ${isToday ? 'bg-yellow-50/50' : ''}`}>
                             <div className={`text-right font-bold text-sm mb-2 ${isToday ? 'text-yellow-600 underline text-base' : 'text-slate-700'}`}>{d}</div>
-                            <div className="flex flex-col gap-1 overflow-y-auto max-h-[80px] custom-scrollbar">
+                            <div className="flex flex-col gap-1">
                                 {cellEvents}
                             </div>
                         </div>
