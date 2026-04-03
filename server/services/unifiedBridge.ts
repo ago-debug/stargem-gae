@@ -1,6 +1,12 @@
 import { db } from "../db";
 import { type Request } from "express";
 import { storage } from "../storage";
+
+function toLocalISOString(d: Date): string {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+}
+
 import {
   courses,
   workshops,
@@ -134,8 +140,8 @@ function expandCourseRecurrence(
     instructorNames: insNames,
     studioId: studioInfo.id,
     studioName: studioInfo.name,
-    startDatetime: evtStart.toISOString(),
-    endDatetime: evtEnd.toISOString(),
+    startDatetime: toLocalISOString(evtStart),
+    endDatetime: toLocalISOString(evtEnd),
     uiRenderingType: "STANDARD_COURSE",
     rawPayload: { ...course, legacy_source_type: "courses" }
   });
@@ -291,8 +297,8 @@ export async function getUnifiedActivitiesPreview(req: Request) {
       instructorNames: insNames,
       studioId: studioInfo.id,
       studioName: studioInfo.name,
-      startDatetime: fallbackStart.toISOString(),
-      endDatetime: fallbackEnd.toISOString(),
+      startDatetime: toLocalISOString(fallbackStart),
+      endDatetime: toLocalISOString(fallbackEnd),
       uiRenderingType: "STANDARD_WORKSHOP",
       rawPayload: { ...w, legacy_source_type: "workshops" }
     });
@@ -307,7 +313,7 @@ export async function getUnifiedActivitiesPreview(req: Request) {
     const studioInfo = resolveStudio(r.studioId, dbStudios);
     const colors = buildColorProps(null, null, "rental");
     
-    const bDateStr = r.bookingDate instanceof Date ? r.bookingDate.toISOString().split('T')[0] : (r.bookingDate as any)?.split?.('T')[0] || null;
+    const bDateStr = r.bookingDate instanceof Date ? toLocalISOString(r.bookingDate).split('T')[0] : (r.bookingDate as any)?.split?.('T')[0] || null;
     let fallStart = new Date();
     if (bDateStr && r.startTime) {
        const parsedStart = new Date(`${bDateStr}T${r.startTime}`);
@@ -336,8 +342,8 @@ export async function getUnifiedActivitiesPreview(req: Request) {
       instructorNames: insNames,
       studioId: studioInfo.id,
       studioName: studioInfo.name,
-      startDatetime: fallStart.toISOString(),
-      endDatetime: fallEnd.toISOString(),
+      startDatetime: toLocalISOString(fallStart),
+      endDatetime: toLocalISOString(fallEnd),
       uiRenderingType: "RENTAL_SLOT",
       rawPayload: { ...r, legacy_source_type: "rentals" }
     });
@@ -371,8 +377,8 @@ export async function getUnifiedActivitiesPreview(req: Request) {
       instructorNames: insNames,
       studioId: studioInfo.id,
       studioName: studioInfo.name,
-      startDatetime: fallbackStart.toISOString(),
-      endDatetime: fallbackEnd.toISOString(),
+      startDatetime: toLocalISOString(fallbackStart),
+      endDatetime: toLocalISOString(fallbackEnd),
       uiRenderingType: "CAMPUS_EVENT",
       rawPayload: { ...c, legacy_source_type: "campus" }
     });
@@ -407,8 +413,8 @@ export async function getUnifiedActivitiesPreview(req: Request) {
       instructorNames: insNames,
       studioId: studioInfo.id,
       studioName: studioInfo.name,
-      startDatetime: fallbackStart.toISOString(),
-      endDatetime: fallbackEnd.toISOString(),
+      startDatetime: toLocalISOString(fallbackStart),
+      endDatetime: toLocalISOString(fallbackEnd),
       uiRenderingType: "SUNDAY_EVENT",
       rawPayload: { ...s, legacy_source_type: "sunday_activities" }
     });
@@ -442,8 +448,8 @@ export async function getUnifiedActivitiesPreview(req: Request) {
       instructorNames: insNames,
       studioId: studioInfo.id,
       studioName: studioInfo.name,
-      startDatetime: fallbackStart.toISOString(),
-      endDatetime: fallbackEnd.toISOString(),
+      startDatetime: toLocalISOString(fallbackStart),
+      endDatetime: toLocalISOString(fallbackEnd),
       uiRenderingType: "RECITAL_EVENT",
       rawPayload: { ...r, legacy_source_type: "recitals" }
     });
