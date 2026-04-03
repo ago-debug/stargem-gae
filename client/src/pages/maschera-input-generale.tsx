@@ -496,7 +496,8 @@ export default function MascheraInputGenerale() {
     const isDirty = dirtyFields[fieldName];
 
     // Priority 1: Red for fields that *will* be auto-populated
-    if (isAutoPopulated && !formData.codiceFiscale && !value && !isSaved) {
+    const isNewMask = !selectedMemberId && !formData.nome && !formData.cognome;
+    if (isAutoPopulated && !formData.codiceFiscale && !value && !isSaved && !isNewMask) {
       return 'bg-destructive/50 border-destructive400 transition-colors text-destructive900';
     }
 
@@ -696,7 +697,7 @@ export default function MascheraInputGenerale() {
   };
 
   const renderMancaDato = (val: string | undefined | null) => {
-    if (selectedMemberId && (!val || String(val).trim() === "")) {
+    if (selectedMemberId && actionFromUrl !== "new" && (!val || String(val).trim() === "")) {
       return (
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-bold text-red-500 select-none pointer-events-none z-10">
           <AlertTriangle className="w-3 h-3 fill-red-500 text-white" /> Manca Dato

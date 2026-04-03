@@ -374,6 +374,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
+  const { data: seasons } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
 
   // State della Form
   const [formData, setFormData] = useState<any>({});
@@ -506,12 +507,73 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       statusTags: mergedTags,
       active: isActive,
       quoteId: formData.quoteId || null,
+      seasonId: formData.seasonId ? parseInt(formData.seasonId.toString()) : undefined,
     };
 
     if (isEdit && course?.id) {
       updateMutation.mutate({ id: course.id, data: payload });
     } else {
       createMutation.mutate(payload);
+    }
+  };
+
+  const handleDuplicateFromModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.seasonId) {
+        toast({ title: "Errore", description: "Seleziona una stagione", variant: "destructive" });
+        return;
+    }
+    
+    try {
+        const res = await fetch(`${apiEndpoint}?seasonId=${formData.seasonId}`);
+        const existing = await res.json();
+        
+        const safeDayOfWeek = normalizeDay(formData.dayOfWeek);
+        const safeStartTime = stripSeconds(formData.startTime);
+
+        const duplicateCheck = existing.find((tc: any) => 
+            tc.name === formData.name &&
+            tc.dayOfWeek === safeDayOfWeek &&
+            tc.startTime === safeStartTime &&
+            tc.studioId === formData.studioId
+        );
+
+        if (duplicateCheck) {
+            toast({ title: "Attenzione: Corso già presente", description: `Stai duplicando lo stesso corso per errore. Il corso ${duplicateCheck.name} in data ${duplicateCheck.dayOfWeek} ${duplicateCheck.startTime} esiste già nella stagione target.`, variant: "destructive" });
+            return;
+        }
+
+        const mergedTags = [...opStates.map(s => `STATE:${s}`), ...promoFlags.map(p => `PROMO:${p}`)];
+        const isActive = !opStates.includes("ANNULLATO");
+        
+        const payload: any = {
+          sku: formData.sku || null,
+          name: formData.name as string,
+          description: formData.description || null,
+          categoryId: formData.categoryId || null,
+          studioId: formData.studioId || null,
+          instructorId: formData.instructorId || null,
+          secondaryInstructor1Id: formData.secondaryInstructor1Id || null,
+          price: formData.price?.toString() || null,
+          maxCapacity: formData.maxCapacity ? parseInt(formData.maxCapacity as any) : null,
+          dayOfWeek: safeDayOfWeek || null,
+          startTime: safeStartTime || null,
+          endTime: stripSeconds(formData.endTime) || null,
+          recurrenceType: formData.recurrenceType || null,
+          schedule: formData.schedule || null,
+          startDate: formData.startDate ? new Date(formData.startDate) : null,
+          endDate: formData.endDate ? new Date(formData.endDate) : null,
+          level: formData.level || null,
+          ageGroup: formData.ageGroup || null,
+          statusTags: mergedTags,
+          active: isActive,
+          quoteId: formData.quoteId || null,
+          seasonId: parseInt(formData.seasonId.toString()),
+        };
+
+        createMutation.mutate(payload);
+    } catch (err: any) {
+        toast({ title: "Errore durante la duplicazione", description: err.message, variant: "destructive" });
     }
   };
 
@@ -589,12 +651,28 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="sku">SKU / Codice</Label>
-                  <Input id="sku" value={formData.sku || ""} onChange={(e) => updateForm("sku", e.target.value)} placeholder="es: 2526-CORSO-1" />
+                  <Label className="font-semibold text-slate-800">Stagione</Label>
+                  <Select 
+                     value={formData.seasonId?.toString() || "none"}
+                     onValueChange={val => updateForm("seasonId", val === "none" ? null : parseInt(val))}
+                  >
+                     <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Seleziona la stagione..." />
+                     </SelectTrigger>
+                     <SelectContent>
+                        {seasons?.map((s: any) => (
+                           <SelectItem key={s.id} value={s.id.toString()}>{s.name || s.name}</SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sku">SKU / Codice</Label>
+                  <Input id="sku" value={formData.sku || ""} onChange={(e) => updateForm("sku", e.target.value)} placeholder="es: 2526-CORSO-1" />
+                </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                   <Label className="font-semibold text-slate-800 shrink-0">Categoria</Label>
@@ -786,16 +864,21 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <Textarea id="schedule" value={formData.schedule || ""} onChange={e => updateForm("schedule", e.target.value)} rows={1} />
               </div>
 
-              <DialogFooter className="sticky bottom-0 bg-background pt-4 border-t flex items-center justify-between w-full mt-6">
-                <div>
+              <DialogFooter className="sticky bottom-0 bg-background pt-4 border-t flex flex-col sm:flex-row items-center justify-between w-full mt-6 gap-2">
+                <div className="w-full sm:w-auto">
                   {isEdit && onDelete && canWrite && (
-                    <Button type="button" variant="destructive" size="sm" onClick={() => { if (confirm("Sei sicuro di voler eliminare totalmente questa attività?")) { onDelete(course.id); onOpenChange(false); } }}>Elimina Attività</Button>
+                    <Button type="button" variant="destructive" size="sm" onClick={() => { if (confirm("Sei sicuro di voler eliminare totalmente questa attività?")) { onDelete(course.id); onOpenChange(false); } }}>Elimina</Button>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annulla</Button>
+                  {isEdit && (
+                    <Button type="button" variant="secondary" onClick={handleDuplicateFromModal} disabled={updateMutation.isPending || createMutation.isPending} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200">
+                      {createMutation.isPending ? "Duplicazione..." : "Crea Copia (Duplica)"}
+                    </Button>
+                  )}
                   <Button type="submit" disabled={updateMutation.isPending || createMutation.isPending} className="gold-3d-button text-black">
-                    {updateMutation.isPending || createMutation.isPending ? "Salvataggio..." : (isEdit ? "Salva Modifiche" : (activityType === "workshop" ? "Crea Workshop" : "Crea Corso"))}
+                    {updateMutation.isPending ? "Salvataggio..." : (isEdit ? "Salva (Sovrascrivi / Slitta)" : (activityType === "workshop" ? "Crea Workshop" : "Crea Corso"))}
                   </Button>
                 </div>
               </DialogFooter>
