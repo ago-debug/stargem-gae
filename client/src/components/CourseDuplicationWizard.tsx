@@ -22,6 +22,9 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   const [selectedCourseIds, setSelectedCourseIds] = useState<Set<number>>(new Set());
   const [courseOverrides, setCourseOverrides] = useState<Record<number, any>>({});
   const [targetCourses, setTargetCourses] = useState<Course[]>([]);
+  const [searchFilter, setSearchFilter] = useState("");
+  const [globalStartDate, setGlobalStartDate] = useState("");
+  const [globalEndDate, setGlobalEndDate] = useState("");
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -45,6 +48,17 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
       return cSeasonId === effectiveSourceSeasonId;
     });
   }, [courses, effectiveSourceSeasonId, activeSeasonFallbackId]);
+
+  const filteredSourceCourses = useMemo(() => {
+    if (!searchFilter.trim()) return sourceCourses;
+    const lowerFilter = searchFilter.toLowerCase().trim();
+    return sourceCourses.filter(c => {
+        const matchName = c.name?.toLowerCase().includes(lowerFilter);
+        const matchDay = c.dayOfWeek?.toLowerCase().includes(lowerFilter);
+        const matchInstructor = (instructors?.find(i => i.id === c.instructorId)?.lastName || "").toLowerCase().includes(lowerFilter);
+        return matchName || matchDay || matchInstructor;
+    });
+  }, [sourceCourses, searchFilter, instructors]);
 
   const targetSeasons = useMemo(() => {
     if (!seasons) return [];
@@ -80,11 +94,25 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   };
 
   const toggleAll = () => {
-    if (selectedCourseIds.size === sourceCourses.length) {
+    if (selectedCourseIds.size === filteredSourceCourses.length && filteredSourceCourses.length > 0) {
       setSelectedCourseIds(new Set());
     } else {
-      setSelectedCourseIds(new Set(sourceCourses.map(c => c.id)));
+      setSelectedCourseIds(new Set(filteredSourceCourses.map(c => c.id)));
     }
+  };
+
+  const handleApplyGlobalDates = () => {
+    if (!globalStartDate && !globalEndDate) return;
+    setCourseOverrides(prev => {
+        const next = { ...prev };
+        filteredSourceCourses.forEach(c => {
+            if (!next[c.id]) next[c.id] = {};
+            if (globalStartDate) next[c.id].startDate = globalStartDate;
+            if (globalEndDate) next[c.id].endDate = globalEndDate;
+        });
+        return next;
+    });
+    toast({ title: "Date applicate", description: `Le date sono state copiate su ${filteredSourceCourses.length} corsi visibili.` });
   };
 
   const updateOverride = (courseId: number, field: string, value: any) => {
@@ -264,15 +292,25 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[1400px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Duplicazione Massiva Corsi</DialogTitle>
-          <DialogDescription>
-            Copia i corsi della stagione attualmente selezionata verso una nuova stagione.
-          </DialogDescription>
+                <DialogHeader className="flex flex-row items-start justify-between pe-8">
+          <div>
+            <DialogTitle>Duplicazione Massiva Corsi</DialogTitle>
+            <DialogDescription>
+              Copia i corsi della stagione attualmente selezionata verso una nuova stagione.
+            </DialogDescription>
+          </div>
+          <div className="flex flex-col items-end gap-2 mt-0">
+            <div className="flex items-center text-xs text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200 max-w-lg text-right">
+              <strong>Sicurezza:</strong> I corsi selezionati verranno clonati vergini (no pagamenti/iscritti). La logica oraria originale verrà mantenuta, con nuove date inizio/fine limitate alla stagione considerata.
+            </div>
+            <Button onClick={handleDuplicate} className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[200px]" disabled={createMutation.isPending || selectedCourseIds.size === 0}>
+                {createMutation.isPending ? "Elaborazione..." : `Duplica Selezione (${selectedCourseIds.size})`}
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-            <div className="flex items-center gap-4 border p-4 rounded-lg bg-slate-50">
+            <div className="flex items-center gap-4 border p-4 rounded-lg bg-slate-50 flex-wrap">
                 <div className="space-y-1.5 w-[250px]">
                     <Label className="font-semibold text-slate-800">Stagione Destinazione</Label>
                     <Select value={targetSeasonId} onValueChange={setTargetSeasonId}>
@@ -286,14 +324,23 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="flex-1 flex flex-col items-end">
-                    <Button onClick={handleDuplicate} className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[140px]" disabled={createMutation.isPending || selectedCourseIds.size === 0}>
-                        {createMutation.isPending ? "Elaborazione..." : `Duplica Selezione (${selectedCourseIds.size})`}
-                    </Button>
+                <div className="space-y-1.5 flex-1 min-w-[150px]">
+                    <Label className="font-semibold text-slate-800">Cerca (Es: LUN)</Label>
+                    <Input placeholder="Filtra corsi..." value={searchFilter} onChange={e => setSearchFilter(e.target.value)} className="bg-white" />
                 </div>
-                <div className="flex-1 flex items-center mt-6 text-xs text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200">
-                    <strong>Sicurezza:</strong> I corsi selezionati verranno clonati vergini (no pagamenti/iscritti). La logica oraria originale verrà mantenuta, con nuove date inizio/fine limitate alla stagione considerata.
+                <div className="space-y-1.5 min-w-[130px]">
+                     <Label className="font-semibold text-slate-800">Data Inizio globale</Label>
+                     <Input type="date" value={globalStartDate} onChange={e => setGlobalStartDate(e.target.value)} className="bg-white" />
                 </div>
+                <div className="space-y-1.5 min-w-[130px]">
+                     <Label className="font-semibold text-slate-800">Data Fine globale</Label>
+                     <Input type="date" value={globalEndDate} onChange={e => setGlobalEndDate(e.target.value)} className="bg-white" />
+                </div>
+                <div className="space-y-1.5 self-end">
+                     <Button type="button" variant="secondary" onClick={handleApplyGlobalDates}>Applica a tutti</Button>
+                </div>
+
+
             </div>
 
             <div className="border rounded-lg bg-white overflow-hidden">
@@ -305,7 +352,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                                    checked={
                                        selectedCourseIds.size === 0 
                                        ? false 
-                                       : selectedCourseIds.size === sourceCourses.length 
+                                       : selectedCourseIds.size === filteredSourceCourses.length && filteredSourceCourses.length > 0 
                                             ? true 
                                             : "indeterminate"
                                    } 
@@ -321,13 +368,13 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {sourceCourses.length === 0 ? (
+                        {filteredSourceCourses.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                                     Nessun corso presente nella stagione corrente.
                                 </TableCell>
                             </TableRow>
-                        ) : sourceCourses.map(course => {
+                        ) : filteredSourceCourses.map(course => {
                             const isSelected = selectedCourseIds.has(course.id);
                             return (
                                 <TableRow key={course.id} className={isSelected ? 'bg-indigo-50/30' : ''}>
@@ -423,12 +470,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                 </Table>
             </div>
         </div>
-        <DialogFooter className="bg-slate-50 border-t p-4 rounded-b-lg">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>Annulla</Button>
-          <Button onClick={handleDuplicate} className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[140px]" disabled={createMutation.isPending}>
-            {createMutation.isPending ? "Elaborazione..." : "Duplica Selezione"}
-          </Button>
-        </DialogFooter>
+        
       </DialogContent>
     </Dialog>
   );
