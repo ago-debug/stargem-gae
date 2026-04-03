@@ -97,7 +97,7 @@ const RECURRENCE_TYPES = [
     { id: "custom", label: "Personalizzato" },
 ];
 
-const HOURS = Array.from({ length: 16 }, (_, i) => i + 7); // 7:00 to 22:00
+const HOURS = Array.from({ length: 17 }, (_, i) => i + 7); // 7:00 to 23:00
 
 const TIME_SLOTS = Array.from({ length: 288 }, (_, i) => {
     const hour = Math.floor(i / 12);
@@ -952,8 +952,7 @@ export default function CalendarPage() {
         return iso ? iso.split('T')[0] : "";
     }
 
-    // --- PHASE 19: Time-Space Elastico (Two-Pass React Layout) ---
-    const TOTAL_MINUTES = 15 * 60; // Dalle 07:00 alle 22:00 = 900 mins
+    const TOTAL_MINUTES = HOURS.length * 60; // Calculate max grid height dynamically based on HOURS
 
     const calendarLayout = useMemo(() => {
         // 1. Definisci le Colonne Visibili Base (Giorni o Sale)
