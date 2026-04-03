@@ -76,16 +76,39 @@ export default function Planning() {
     const [strategicEnd, setStrategicEnd] = useState("");
     const [strategicAllDay, setStrategicAllDay] = useState(true);
 
+    const { data: seasons, isLoading: seasonsLoading } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
+
+    // Determina la stagione correntemente visualizzata
+    const targetSeasonId = useMemo(() => {
+        if (!seasons) return 'all';
+        
+        if (viewMode === 'annuale') {
+            const nextYear = startYear + 1;
+            const matched = seasons.find(s => s.name.includes(`${startYear}`) && s.name.includes(`${nextYear}`));
+            if (matched) return matched.id;
+            const fallback = seasons.find(s => s.name.includes(`${startYear}`));
+            if (fallback) return fallback.id;
+        } else {
+            const matched = seasons.find(s => {
+                if (!s.startDate || !s.endDate) return false;
+                const d1 = new Date(s.startDate);
+                const d2 = new Date(s.endDate);
+                return currentDateParam >= d1 && currentDateParam <= d2;
+            });
+            if (matched) return matched.id;
+        }
+        return seasons.find(s => s.active)?.id || 'all';
+    }, [seasons, viewMode, startYear, currentDateParam]);
+
     // --- FETCH DATA ---
-    const { data: courses, isLoading: coursesLoading } = useQuery<any[]>({ queryKey: ["/api/courses"] });
-    const { data: workshops, isLoading: workshopsLoading } = useQuery<any[]>({ queryKey: ["/api/workshops"] });
-    const { data: sundayActivities, isLoading: sundayLoading } = useQuery<any[]>({ queryKey: ["/api/sunday-activities"] });
-    const { data: campusActivities, isLoading: campusLoading } = useQuery<any[]>({ queryKey: ["/api/campus"] });
-    const { data: recitals, isLoading: recitalsLoading } = useQuery<any[]>({ queryKey: ["/api/recitals"] });
-    const { data: vacationStudies, isLoading: vacationsLoading } = useQuery<any[]>({ queryKey: ["/api/vacation-studies"] });
+    const { data: courses, isLoading: coursesLoading } = useQuery<any[]>({ queryKey: [`/api/courses?seasonId=${targetSeasonId}`] });
+    const { data: workshops, isLoading: workshopsLoading } = useQuery<any[]>({ queryKey: [`/api/workshops?seasonId=${targetSeasonId}`] });
+    const { data: sundayActivities, isLoading: sundayLoading } = useQuery<any[]>({ queryKey: [`/api/sunday-activities?seasonId=${targetSeasonId}`] });
+    const { data: campusActivities, isLoading: campusLoading } = useQuery<any[]>({ queryKey: [`/api/campus?seasonId=${targetSeasonId}`] });
+    const { data: recitals, isLoading: recitalsLoading } = useQuery<any[]>({ queryKey: [`/api/recitals?seasonId=${targetSeasonId}`] });
+    const { data: vacationStudies, isLoading: vacationsLoading } = useQuery<any[]>({ queryKey: [`/api/vacation-studies?seasonId=${targetSeasonId}`] });
     const { data: bookingServices, isLoading: servicesLoading } = useQuery<any[]>({ queryKey: ["/api/booking-services"] });
     const { data: strategicEventsData, isLoading: strategicLoading } = useQuery<any[]>({ queryKey: ["/api/strategic-events?seasonId=all"] });
-    const { data: seasons, isLoading: seasonsLoading } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
 
     const isLoading = coursesLoading || workshopsLoading || sundayLoading || strategicLoading ||
                       campusLoading || recitalsLoading || vacationsLoading || servicesLoading;
