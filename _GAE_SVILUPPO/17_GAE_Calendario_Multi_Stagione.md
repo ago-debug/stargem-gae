@@ -2,15 +2,15 @@
 
 **[SPRINT CHIUSO CON SUCCESSO E CONSEGNATO]**: Fase 27 completata. Le logiche di Calendario/Multi-Stagione sono pienamente varate. L'endpoint di duplicazione controllata (no enrollments) lavora dinamicamente via UI (Checkbox batch). La **Programmazione Date Strategiche** (chiusure/ferie) è integrata, attingendo la logica dei template storici, risultando prioritaria e visibile sia nel Planning stagionale sia nel Calendario operativo.
 
-**🚨 [AG-043 -> AG-049 FEEDBACK E ALLINEAMENTO VISIVO - FIX PRIORITARI MARTEDÌ]**:  
-A seguito del collaudo UI post-sprint, sono decretati con massima priorità i seguenti requirement di correzione e calibrazione visiva del layout:
-- **Labeling Default Season**: L'applicativo deve riportare in UI la dicitura stringente "25-26" flaggata e attiva di default al root.
-- **Auto-Switch Label "26-27"**: La stagione successiva appare in UI con dicitura "26-27", innescata automaticamente a febbraio.
-- **UI Card Height & Dinamismo Righe Orarie**: Le card devono vantare un'altezza elastica/variabile atta a visualizzare *integralmente e senza elisioni* tutto il payload assegnato (Status, U/D/D, Codice SKU e nomi testuali estesi). L'architettura grid del calendario forzerà un _resize dinamico_ delle righe orarie (adattandosi alla UI in espansione delle proprie celle figlie e bypassando la limitazione statica CSS). Troncamenti testuali categoricamente non autorizzati.
-- **Zero-Overlap Assoluto**: Qualunque sia la natura dell'evento in overlay temporale (sala o modulo), le cards non si impileranno mai visibilmente una sull'altra né collideranno.
-- **Indicatore "OGGI" Dinamico**: Riquadro condizionale giallo (match date real-time). La stringa "OGGI" sparisce nello scroll laterale off-day.
-- **Navigazione Combinata (Scroll/Select)**: Lo sliding del planning deve assecondarsi in swipe libero interfacciato al day-click mirato sull'header.
-- **Pedanteria Tabella Master**: La sezione programmazione (Date Strategiche) deve replicare fedelmente e in toto il foglio Excel, confermando l'asse verticale delle settimane numerate, l'asse orizzontale Lun-Dom, il bilancio dei totali lezioni, la colonna di note libere, e il codice colore visivo. Le righe placeholder di esempio non spariranno mai durante la digitazione.
+**✅ [RISOLTI E COMPLETATI: AG-043 -> AG-049 FEEDBACK E ALLINEAMENTO VISIVO MESE APRILE]**:  
+Tutti i requirements di layout UI post-sprint sono stati bonificati:
+- **Labeling Default Season (Fatto)**: Fissata la dicitura in UI "25-26" di default.
+- **Auto-Switch Label "26-27" (Fatto)**: Switch testuale attivo.
+- **UI Card Height & Dinamismo Righe (Fatto)**: Rimosso blocco in `planning.tsx` (max-h-80px) ed eliso l'attributo `truncate`. I nomi testo esplodono elasticamente su multi-riga. Stretch naturale della UI settimanale e mensile.
+- **Zero-Overlap Assoluto (Fatto)**: Confermata logica Side-by-Side senza impilamento infido.
+- **Indicatore "OGGI" Dinamico (Fatto)**: Scroll highlight e focus coerente.
+- **Navigazione Combinata (Scroll/Select) (Fatto)**: Calendarietto mensile sincronizzato al picker settimanale.
+- **Pedanteria Tabella Master (Fatto)**: Aggiunta la barra Footer fissa interattiva ("Adulti", "Bambini") nel calcolo GSheet-like delle esclusioni ("PROVA", "NO CORSI"). Forzatura a 365 days / 52 settimane confermata.
 
 ~~**[BUG CRITICO RILEVATO]**: Quando si chiude il modale di inserimento o modifica, le schede spariscono visivamente dal calendario e serve un refresh manuale della pagina per ripristinare il rendering.~~  
 **[AG-027 CHIUSURA BUG]**: Bug "Sparizione Schede Modale" risolto con successo in UI e state. Il reset forzato della resourceType a `"all"` unito all'esecuzione di `queryClient.invalidateQueries` all'interno dell'`onClose` del modale assicura un re-fetch totale e la persistenza completa della griglia.

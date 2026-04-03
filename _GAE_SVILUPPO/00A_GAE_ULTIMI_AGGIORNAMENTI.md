@@ -5,6 +5,12 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 03 Aprile 2026 (Phase 28: Code Freeze Strategico e Perfezionamento Qualitativo)
+* **Totali Lezioni GSheet-compliant:** Finalizzata l'integrazione della logica di calcolo nel `StrategicProgrammingTable.tsx`. Costruito l'engine che sottrae massivamente le giornate taggate come `chisura`, `ferie`, `no corsi` in base al parsing testo (`include()`) replicando la logica originale del Google Sheet.
+* **Forzatura 52 Settimane:** Modificata la genesi temporale della grid `Planning Strategico`. Passando a un calcolo assoluto di 365 giorni dal kick-off di stagione, si assicura una copertura visiva perfetta fino a fine agosto indepdendentemente dalle end-date ereditate.
+* **Fix UI Header Planning (`planning.tsx`):** Unificato l'header sparso della pagina Planning, raggruppando `Annuale/Mensile/Settimanale` in un selettore solido ed enfatizzando coerentemente il blocco navigazione ("Oggi" e "Nuovo Evento").
+* **Sblocco Altezza Celle e Layout Titoli Calendario:** Rimosso il difetto grafico del "Testo Troncato e Schiacciato" sulla griglia mensile. Attivato lo stretch flessibile delle righe senza limite `max-h` e sostituita la regex `truncate` nei titoli pill con `break-words`.
+* **Sync Filtra-Giorno in Calendario:** Il mini-ShadCN Datepicker del modulo calendario sincronizza ora fluidamente la macro-vista day sul click (Es. l'utente seleziona 15 Aprile da tendina = Il sistema si focalizza su "Mercoledì" in automatico). Allineamento perfetto dell'UX.
 ### 02 Aprile 2026 (Phase 27: Kickoff Calendario Multi-Stagione & Duplicazione)
 * **Status Architetturale (UI FREEZE):** Il modulo Calendario si trova nel mezzo del "Bridge STI". L'interfaccia utente (UI) è stata cautelativamente ri-messa in stato di **FREEZE** per non destabilizzare le API legacy durante lo sviluppo delle nuove query per le stagioni multiple.
 * **Progettazione Calendario Multi-Stagione:** Pianificato l'avanzamento radicale della logica temporale. Il sistema lavora su base Duale (Stagione Corrente 25-26 e Stagione Prossima 26-27), isolandone gli iscritti al 100%.
