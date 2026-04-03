@@ -2707,10 +2707,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Courses Routes ====
   app.get("/api/courses", isAuthenticated, checkPermission("/corsi", "read"), async (req, res) => {
     try {
-      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
+      const seasonId = req.query.seasonId && req.query.seasonId !== "all" ? parseInt(req.query.seasonId as string) : null;
       let coursesList;
         const activeSeason = await storage.getActiveSeason();
-        const targetSeasonId = seasonId || activeSeason?.id;
+        const targetSeasonId = req.query.seasonId === "all" ? null : (seasonId || activeSeason?.id);
 
         if (targetSeasonId) {
           const allCourses = await storage.getCourses(); // Fetch all to include legacy NULLs
@@ -2854,16 +2854,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Workshops Routes ====
   app.get("/api/workshops", isAuthenticated, checkPermission("/workshops", "read"), async (req, res) => {
     try {
-      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       let workshopsList;
-      if (seasonId) {
-        workshopsList = await storage.getWorkshopsBySeason(seasonId);
+      if (req.query.seasonId === "all") {
+        workshopsList = await storage.getWorkshops();
       } else {
-        const activeSeason = await storage.getActiveSeason();
-        if (activeSeason) {
-          workshopsList = await storage.getWorkshopsBySeason(activeSeason.id);
+        const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
+        if (seasonId) {
+          workshopsList = await storage.getWorkshopsBySeason(seasonId);
         } else {
-          workshopsList = await storage.getWorkshops();
+          const activeSeason = await storage.getActiveSeason();
+          if (activeSeason) {
+            workshopsList = await storage.getWorkshopsBySeason(activeSeason.id);
+          } else {
+            workshopsList = await storage.getWorkshops();
+          }
         }
       }
       res.json(workshopsList);

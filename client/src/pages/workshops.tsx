@@ -21,14 +21,15 @@ import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn, parseStatusTags } from "@/lib/utils";
+import { cn, parseStatusTags, getSeasonLabel } from "@/lib/utils";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useCustomListValues } from "@/hooks/use-custom-list";
 import { Combobox } from "@/components/ui/combobox";
-import type { Workshop, InsertWorkshop, Category, Instructor, Studio, WorkshopAttendance, Member, Quote, ActivityStatus } from "@shared/schema";
+import type { Workshop, InsertWorkshop, Season, Category, Instructor, Studio, WorkshopAttendance, Member, Quote, ActivityStatus } from "@shared/schema";
 
 export function formatStatusBadge(tag: string) {
   if (!tag) return tag;
@@ -89,6 +90,10 @@ export default function Workshops() {
   const initialSearch = urlParams.get('search') || "";
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string>("active");
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [showBulkDuplicateDialog, setShowBulkDuplicateDialog] = useState(false);
+  const [targetSeasonId, setTargetSeasonId] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [statusTags, setStatusTags] = useState<string[]>([]);
@@ -109,7 +114,7 @@ export default function Workshops() {
   const postiDisponibili = useCustomListValues("posti_disponibili");
 
   const { data: workshops, isLoading } = useQuery<Workshop[]>({
-    queryKey: ["/api/workshops"],
+    queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`],
   });
 
   const editId = urlParams.get('editId') || urlParams.get('workshopId');
@@ -136,6 +141,7 @@ export default function Workshops() {
     }
   }, [workshops, editId, isFormOpen, editingWorkshop, setLocation]);
 
+  const { data: seasons } = useQuery<Season[]>({ queryKey: ["/api/seasons"] });
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({
     queryKey: ["/api/activity-statuses"],
   });
@@ -223,7 +229,7 @@ export default function Workshops() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
       toast({ title: "Workshop creato con successo" });
       setIsFormOpen(false);
       setEditingWorkshop(null);
@@ -252,7 +258,7 @@ export default function Workshops() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
       toast({ title: "Workshop aggiornato con successo" });
       setIsFormOpen(false);
       setEditingWorkshop(null);
@@ -270,7 +276,7 @@ export default function Workshops() {
       await apiRequest("DELETE", `/api/workshops/${id}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
       toast({ title: "Workshop eliminato con successo" });
     },
     onError: (error: Error) => {
@@ -386,6 +392,56 @@ export default function Workshops() {
 
   const sortedWorkshops = sortItems(filteredWorkshops, getSortValue);
 
+    const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(filteredWorkshops.map(c => c.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectRow = (id: number, checked: boolean) => {
+    const newSelected = new Set(selectedIds);
+    if (checked) newSelected.add(id);
+    else newSelected.delete(id);
+    setSelectedIds(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Sei sicuro di voler eliminare i ${selectedIds.size} elementi selezionati?`)) return;
+    try {
+      await Promise.all(Array.from(selectedIds).map(id => apiRequest("DELETE", `/api/workshops/${id}`)));
+      import("@/hooks/use-toast").then(({ toast }) => toast({ title: "Eliminazione completata" }));
+      setSelectedIds(new Set());
+      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`] });
+    } catch (e) {
+      import("@/hooks/use-toast").then(({ toast }) => toast({ title: "Errore durante l'eliminazione", variant: "destructive" }));
+    }
+  };
+
+  const handleBulkDuplicate = async () => {
+    if (!targetSeasonId) return;
+    try {
+      const selectedItems = filteredWorkshops.filter(c => selectedIds.has(c.id));
+      await Promise.all(selectedItems.map(item => {
+        const insertData = { ...item };
+        delete (insertData as any).id;
+        delete (insertData as any).createdAt;
+        delete (insertData as any).updatedAt;
+        (insertData as any).seasonId = parseInt(targetSeasonId);
+        (insertData as any).sku = null;
+        (insertData as any).price = "0.00"; 
+        return apiRequest("POST", "/api/workshops", insertData);
+      }));
+      import("@/hooks/use-toast").then(({ toast }) => toast({ title: "Duplicazione massiva completata" }));
+      setShowBulkDuplicateDialog(false);
+      setSelectedIds(new Set());
+      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${targetSeasonId}`] });
+    } catch (e) {
+      import("@/hooks/use-toast").then(({ toast }) => toast({ title: "Errore duplicazione", variant: "destructive" }));
+    }
+  };
+
   const exportToCSV = () => {
     if (!filteredWorkshops.length) return;
 
@@ -487,6 +543,23 @@ export default function Workshops() {
                   data-testid="input-search-workshops"
                 />
               </div>
+              
+              <Select value={selectedSeasonId} onValueChange={setSelectedSeasonId}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Seleziona stagione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tutte le stagioni</SelectItem>
+                  {seasons?.map((s: any, idx: number) => {
+                      const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
+                      return (
+                          <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
+                              {getSeasonLabel(s, seasons)}
+                          </SelectItem>
+                      );
+                  })}
+                </SelectContent>
+              </Select>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-[180px]" data-testid="select-category-filter">
                   <SelectValue placeholder="Filtra per categoria" />
@@ -532,6 +605,7 @@ export default function Workshops() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[40px]"><Checkbox checked={filteredWorkshops.length > 0 && selectedIds.size === filteredWorkshops.length} onCheckedChange={(checked) => handleSelectAll(checked as boolean)} /></TableHead>
                     <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
                     <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Corso</SortableTableHead>
                     <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
@@ -550,6 +624,7 @@ export default function Workshops() {
                     const enrollmentsList = getWorkshopEnrollmentsList(workshop.id);
                     return (
                       <TableRow key={workshop.id} data-testid={`workshop-row-${workshop.id}`}>
+                        <TableCell><Checkbox checked={selectedIds.has(workshop.id)} onCheckedChange={(checked) => handleSelectRow(workshop.id, checked as boolean)} /></TableCell>
                         <TableCell className={cn("text-xs text-muted-foreground", isSortedColumn("sku") && "sorted-column-cell")}>
                           {workshop.sku || "-"}
                         </TableCell>
@@ -670,6 +745,56 @@ export default function Workshops() {
           </CardContent>
         </Card>
 
+        
+        {/* Bulk Dialog */}
+        <Dialog open={showBulkDuplicateDialog} onOpenChange={setShowBulkDuplicateDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Duplica {selectedIds.size} elementi</DialogTitle>
+              <DialogDescription>
+                Seleziona la stagione di destinazione. I cloni avranno il prezzo azzerato e il codice vuoto, preservando nome, staff e pianificazione.
+              </DialogDescription>
+            </DialogHeader>
+            <Select value={targetSeasonId} onValueChange={setTargetSeasonId}>
+              <SelectTrigger>
+                 <SelectValue placeholder="Seleziona la stagione di destinazione" />
+              </SelectTrigger>
+              <SelectContent>
+                  {seasons?.map((s: any, idx: number) => {
+                      const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
+                      return (
+                          <SelectItem key={s.id} value={s.id.toString()}>
+                              {getSeasonLabel(s, seasons)}
+                          </SelectItem>
+                      );
+                  })}
+              </SelectContent>
+            </Select>
+            <DialogFooter>
+               <Button onClick={handleBulkDuplicate} disabled={!targetSeasonId}>Conferma Duplicazione</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Selected Toolbar */}
+        {selectedIds.size > 0 && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white border border-slate-200 shadow-xl rounded-full px-6 py-3 flex items-center gap-6 animate-in slide-in-from-bottom-10">
+            <span className="text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
+              {selectedIds.size} {selectedIds.size === 1 ? 'elemento selezionato' : 'elementi selezionati'}
+            </span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={handleBulkDelete}>
+                Elimina
+              </Button>
+              <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setShowBulkDuplicateDialog(true)}>
+                Duplica
+              </Button>
+            </div>
+            <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100" onClick={() => setSelectedIds(new Set())}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
         <CourseUnifiedModal 
           activityType="workshop"
           isOpen={isFormOpen || !!editingWorkshop} 

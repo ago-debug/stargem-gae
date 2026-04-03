@@ -21,7 +21,7 @@ import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn, parseStatusTags } from "@/lib/utils";
+import { cn, parseStatusTags, getSeasonLabel } from "@/lib/utils";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -556,12 +556,14 @@ export default function Courses() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tutte le stagioni</SelectItem>
-                  <SelectItem value="active">Stagione Attiva</SelectItem>
-                  {seasons?.map((season) => (
-                    <SelectItem key={season.id} value={season.id.toString()}>
-                      {season.name} {season.active ? "(Attiva)" : ""}
-                    </SelectItem>
-                  ))}
+                  {seasons?.map((s: any, idx: number) => {
+                      const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
+                      return (
+                          <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
+                              {getSeasonLabel(s, seasons)}
+                          </SelectItem>
+                      );
+                  })}
                 </SelectContent>
               </Select>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
