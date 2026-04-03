@@ -3701,42 +3701,30 @@ export class DatabaseStorage implements IStorage {
     const endMin = toMinutes(endTime);
 
     // 0. Check Operating Hours/Days and Studio Availability
+    const configRow = await this.getSystemConfig("center_operating_hours");
+    let globalHours = { start: "07:30", end: "23:00", days: ['LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB', 'DOM'] };
+    if (configRow && configRow.value) {
+      try { globalHours = JSON.parse(configRow.value); } catch { }
+    }
+
     const studio = await this.getStudio(studioId);
-    if (studio) {
-      if (!studio.active) {
-        return { type: 'operating_hours', name: "Studio non disponibile (disattivato)" };
-      }
+    if (studio && !studio.active) {
+      return { type: 'operating_hours', name: "Studio non disponibile (disattivato)" };
+    }
 
-      const daysAbbr = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
-      const dayOfWeek = daysAbbr[bookingDate.getDay()];
+    const daysAbbr = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
+    const dayOfWeekStr = daysAbbr[bookingDate.getDay()];
 
-      // Parse operating days
-      let opDays: string[] = [];
-      if (typeof studio.operatingDays === 'string') {
-        try { opDays = JSON.parse(studio.operatingDays); } catch { opDays = []; }
-      } else if (Array.isArray(studio.operatingDays)) {
-        opDays = studio.operatingDays as string[];
-      }
+    if (globalHours.days && globalHours.days.length > 0 && !globalHours.days.includes(dayOfWeekStr)) {
+      return { type: 'operating_hours', name: `Centro chiuso il ${dayOfWeekStr}` };
+    }
 
-      if (opDays.length > 0 && !opDays.includes(dayOfWeek)) {
-        return { type: 'operating_hours', name: `Studio chiuso il ${dayOfWeek}` };
-      }
+    if (globalHours.start && globalHours.end) {
+      const opStart = toMinutes(globalHours.start);
+      const opEnd = toMinutes(globalHours.end);
 
-      // Parse operating hours
-      let opHours: { start: string, end: string } | null = null;
-      if (typeof studio.operatingHours === 'string') {
-        try { opHours = JSON.parse(studio.operatingHours); } catch { opHours = null; }
-      } else if (studio.operatingHours && typeof studio.operatingHours === 'object') {
-        opHours = studio.operatingHours as any;
-      }
-
-      if (opHours?.start && opHours?.end) {
-        const opStart = toMinutes(opHours.start);
-        const opEnd = toMinutes(opHours.end);
-
-        if (startMin < opStart || endMin > opEnd) {
-          return { type: 'operating_hours', name: `Fuori orario apertura (${opHours.start} - ${opHours.end})` };
-        }
+      if (startMin < opStart || endMin > opEnd) {
+        return { type: 'operating_hours', name: `Fuori orario centro (${globalHours.start} - ${globalHours.end})` };
       }
     }
 

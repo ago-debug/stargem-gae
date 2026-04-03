@@ -97,7 +97,7 @@ const RECURRENCE_TYPES = [
     { id: "custom", label: "Personalizzato" },
 ];
 
-const HOURS = Array.from({ length: 17 }, (_, i) => i + 7); // 7:00 to 23:00
+// Dynamic HOURS resolution inside component
 
 const TIME_SLOTS = Array.from({ length: 288 }, (_, i) => {
     const hour = Math.floor(i / 12);
@@ -249,6 +249,25 @@ export default function CalendarPage() {
         return WEEKDAYS[dayIdx === 0 ? 6 : dayIdx - 1].id;
     });
     const [searchQuery, setSearchQuery] = useState("");
+    
+    // --- Configurazione Dinamica Orari Centro ---
+    const { data: centerHoursConfig } = useQuery<{ start: string, end: string, days: string[] }>({ queryKey: ["/api/config/center-hours"] });
+    const { parsedHours: HOURS, globalStartHour, globalEndHour, globalStartStr, globalEndStr } = useMemo(() => {
+        let s = 7;
+        let e = 23;
+        let startStr = "07:00";
+        let endStr = "23:00";
+        if (centerHoursConfig?.start && centerHoursConfig?.end) {
+            s = parseInt(centerHoursConfig.start.split(":")[0]);
+            e = parseInt(centerHoursConfig.end.split(":")[0]);
+            startStr = centerHoursConfig.start;
+            endStr = centerHoursConfig.end;
+        }
+        const hoursList = Array.from({ length: e - s + 1 }, (_, i) => i + s);
+        return { globalStartHour: s, globalEndHour: e, parsedHours: hoursList, globalStartStr: startStr, globalEndStr: endStr };
+    }, [centerHoursConfig]);
+    // ------------------------------------------
+    
     const [conflictInfo, setConflictInfo] = useState<{ message: string, data: any, isUpdate: boolean } | null>(null);
     const [conflictEventId, setConflictEventId] = useState<string | null>(null);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -605,7 +624,7 @@ export default function CalendarPage() {
 
         const slots: { start: string, end: string }[] = [];
         let currentStart: any = null;
-        const relevantSlots = TIME_SLOTS.filter(t => t >= "07:00" && t <= "22:00");
+        const relevantSlots = TIME_SLOTS.filter(t => t >= globalStartStr && t <= globalEndStr);
 
         // First find continuous free segments
         const segments: { start: string, end: string }[] = [];
@@ -622,7 +641,7 @@ export default function CalendarPage() {
         });
 
         if (currentStart !== null) {
-            segments.push({ start: currentStart, end: "22:00" });
+            segments.push({ start: currentStart, end: globalEndStr });
         }
 
         // Now divide each segment into 1-hour chunks
@@ -920,16 +939,16 @@ export default function CalendarPage() {
     const ROW_HEIGHT = 120; // Increased from 60
     const PX_PER_MIN = ROW_HEIGHT / 60;
 
-    // Helper to parse time string (HH:mm) to minutes from 08:00
-    function timeToMinutes(timeStr?: string) {
+    // Helper to parse time string (HH:mm) to minutes from globalStartHour
+    const timeToMinutes = useCallback((timeStr?: string) => {
         if (!timeStr || typeof timeStr !== 'string') return 0;
         const parts = timeStr.split(":");
         if (parts.length < 2) return 0;
         let hours = parseInt(parts[0], 10) || 0;
-        if (hours === 0) hours = 24; // Handle 00:00 as Midnight relatively to Day start 08:00
+        if (hours === 0 && globalStartHour > 0) hours = 24; // Handle 00:00 as Midnight
         const minutes = parseInt(parts[1], 10) || 0;
-        return ((hours * 60 + minutes) - (7 * 60)) * PX_PER_MIN;
-    }
+        return ((hours * 60 + minutes) - (globalStartHour * 60)) * PX_PER_MIN;
+    }, [globalStartHour]);
 
     // Hoisted function per prevenire ReferenceError (TDZ) negli useMemo richiamati prima della dichiarazione originale
     function stripSeconds(timeStr?: string | null) {
@@ -968,7 +987,6 @@ export default function CalendarPage() {
             const isDayCol = col.type === 'day';
             const colId = col.id;
             
-            // Assegna gli eventi filtrati alla colonna
             const colFiltered = unifiedEvents.filter(evt => {
                 const matchStudio = isDayCol 
                     ? (selectedStudio === "all" || evt.studioId?.toString() === selectedStudio)
@@ -1074,7 +1092,7 @@ export default function CalendarPage() {
 
         return { columns, columnEvents, cumulativeTops };
 
-    }, [unifiedEvents, selectedDay, selectedStudio, measuredHeights, weekDatesMap]);
+    }, [unifiedEvents, selectedDay, selectedStudio, measuredHeights, weekDatesMap, timeToMinutes]);
     // ----------------------------------------------------------------
 
     const resetFilters = () => {

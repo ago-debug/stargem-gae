@@ -1,12 +1,29 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Database, AlertTriangle, CheckCircle2, XCircle, Loader2, ShieldCheck, Terminal, Wallet, Plus, ExternalLink, Link2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Database, AlertTriangle, CheckCircle2, XCircle, Loader2, ShieldCheck, Terminal, Wallet, Plus, ExternalLink, Link2, Clock, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const WEEKDAYS = [
+  { id: "LUN", label: "Lunedì" },
+  { id: "MAR", label: "Martedì" },
+  { id: "MER", label: "Mercoledì" },
+  { id: "GIO", label: "Giovedì" },
+  { id: "VEN", label: "Venerdì" },
+  { id: "SAB", label: "Sabato" },
+  { id: "DOM", label: "Domenica" },
+];
+
+const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
+  const hour = Math.floor(i / 2).toString().padStart(2, "0");
+  const min = (i % 2) === 0 ? "00" : "30";
+  return `${hour}:${min}`;
+});
 
 export default function AdminPanel() {
     const { toast } = useToast();
@@ -20,6 +37,35 @@ export default function AdminPanel() {
         success?: boolean;
         message?: string;
     } | null>(null);
+
+    const [centerHours, setCenterHours] = useState<{ start: string, end: string, days: string[] }>({
+        start: "07:30",
+        end: "23:00",
+        days: ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"]
+    });
+
+    const { data: centerHoursConfig, isLoading: isLoadingHours } = useQuery({
+        queryKey: ["/api/config/center-hours"],
+    });
+
+    useEffect(() => {
+        if (centerHoursConfig) {
+            setCenterHours(centerHoursConfig as any);
+        }
+    }, [centerHoursConfig]);
+
+    const saveCenterHoursMutation = useMutation({
+        mutationFn: async (data: typeof centerHours) => {
+            return await apiRequest("POST", "/api/config/center-hours", data);
+        },
+        onSuccess: () => {
+            toast({ title: "Orari globali del centro aggiornati" });
+            queryClient.invalidateQueries({ queryKey: ["/api/config/center-hours"] });
+        },
+        onError: (err: any) => {
+            toast({ title: "Errore salvataggio orari", description: err.message, variant: "destructive" });
+        }
+    });
 
     const seedMethodsMutation = useMutation({
         mutationFn: async () => {
@@ -218,6 +264,88 @@ export default function AdminPanel() {
                                 {seedMethodsStatus.message && (
                                     <p className="text-sm text-muted-foreground">{seedMethodsStatus.message}</p>
                                 )}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card className="border-primary/20 shadow-sm border-2">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-primary" />
+                            Orari Globali del Centro
+                        </CardTitle>
+                        <CardDescription>
+                            Imposta gli orari assoluti di apertura e chiusura. Questi sovrascriveranno i limiti delle singole sale e determineranno la griglia del Calendario e del Planning.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {isLoadingHours ? (
+                            <div className="flex justify-center p-4"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Orario Apertura</label>
+                                        <Select
+                                            value={centerHours.start}
+                                            onValueChange={(val) => setCenterHours({ ...centerHours, start: val })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {TIME_SLOTS.map(t => <SelectItem key={`start-${t}`} value={t}>{t}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Orario Chiusura</label>
+                                        <Select
+                                            value={centerHours.end}
+                                            onValueChange={(val) => setCenterHours({ ...centerHours, end: val })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {TIME_SLOTS.map(t => <SelectItem key={`end-${t}`} value={t}>{t}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Giorni di Apertura Generale</label>
+                                    <div className="flex flex-wrap gap-3 p-3 bg-muted/30 rounded-md border">
+                                        {WEEKDAYS.map(day => (
+                                            <div key={day.id} className="flex items-center space-x-2">
+                                                <Checkbox
+                                                    id={`global-day-${day.id}`}
+                                                    checked={centerHours.days.includes(day.id)}
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setCenterHours({ ...centerHours, days: [...centerHours.days, day.id] });
+                                                        } else {
+                                                            setCenterHours({ ...centerHours, days: centerHours.days.filter(d => d !== day.id) });
+                                                        }
+                                                    }}
+                                                />
+                                                <label htmlFor={`global-day-${day.id}`} className="text-sm leading-none font-medium cursor-pointer">
+                                                    {day.label}
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex justify-end pt-2">
+                                    <Button
+                                        onClick={() => saveCenterHoursMutation.mutate(centerHours)}
+                                        disabled={saveCenterHoursMutation.isPending}
+                                    >
+                                        {saveCenterHoursMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                                        Salva Impostazioni
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </CardContent>

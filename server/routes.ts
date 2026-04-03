@@ -786,6 +786,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==========================================
+  // CONFIGURAZIONE GLOBALE DEL CENTRO
+  // ==========================================
+  app.get("/api/config/center-hours", isAuthenticated, async (req, res) => {
+    try {
+      const config = await storage.getSystemConfig("center_operating_hours");
+      if (config && config.value) {
+        return res.json(JSON.parse(config.value));
+      }
+      // Valori di default fallback se non esiste 
+      return res.json({ start: "07:30", end: "23:00", days: ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"] });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/config/center-hours", isAuthenticated, async (req, res) => {
+    try {
+      const { start, end, days } = req.body;
+      if (!start || !end || !Array.isArray(days)) {
+        return res.status(400).json({ message: "Parametri incompleti" });
+      }
+      const valStr = JSON.stringify({ start, end, days });
+      await storage.updateSystemConfig("center_operating_hours", valStr);
+      res.json({ success: true, message: "Orari globali aggiornati con successo", config: { start, end, days } });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // User Management Routes
 
   app.get("/api/users", isAuthenticated, isAdmin, async (req, res) => {
