@@ -561,8 +561,13 @@ export default function UtentiPermessi() {
                         </TableCell>
                         <TableCell className={cn(iscRole("description") && "sorted-column-cell")}>{r.description || "-"}</TableCell>
                         <TableCell className={cn(iscRole("permissions") && "sorted-column-cell")}>
-                          <span className="text-xs text-muted-foreground">
-                            {Object.keys(r.permissions as any).length} menu configurati
+                          <span className="text-xs font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded-md">
+                            {(() => {
+                              const p = typeof r.permissions === 'string' ? JSON.parse(r.permissions as string) : (r.permissions || {});
+                              if (p["*"] === "write" || p["*"] === "read") return "Accesso Totale (100%)";
+                              const active = Object.keys(p).filter(k => p[k] === "read" || p[k] === "write").length;
+                              return `${active} settori abilitati`;
+                            })()}
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
