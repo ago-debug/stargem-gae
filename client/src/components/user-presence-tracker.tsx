@@ -6,25 +6,15 @@ export function UserPresenceTracker() {
   const { user } = useAuth();
 
   useEffect(() => {
-    // Solo invia l'heartbeat se l'utente è loggato
     if (!user) return;
 
     let lastActivityTime = Date.now();
 
-    const updateActivity = () => {
-      lastActivityTime = Date.now();
-    };
-
-    window.addEventListener("mousemove", updateActivity);
-    window.addEventListener("keydown", updateActivity);
-    window.addEventListener("click", updateActivity);
-
     const pingHeartbeat = async () => {
-      // Se l'utente non ha interagito per più di 4 minuti, fermiamo l'invio dell'heartbeat per farlo cadere in "In Pausa/Stop"
-      if (Date.now() - lastActivityTime > 4 * 60 * 1000) {
+      // Se l'utente non interagisce da 2 minuti (120 secondi), non inviamo l'heartbeat
+      if (Date.now() - lastActivityTime > 2 * 60 * 1000) {
         return;
       }
-
       try {
         await apiRequest("POST", "/api/users/presence/heartbeat");
       } catch (error) {
@@ -32,13 +22,28 @@ export function UserPresenceTracker() {
       }
     };
 
-    // Ping immediato al caricamento
+    const updateActivity = () => {
+      const now = Date.now();
+      // Se ci stiamo risvegliando da una pausa profonda (> 2 minuti), forziamo un ping immediato al server
+      if (now - lastActivityTime > 2 * 60 * 1000) {
+        lastActivityTime = now;
+        pingHeartbeat();
+      } else {
+        lastActivityTime = now;
+      }
+    };
+
+    window.addEventListener("mousemove", updateActivity, { passive: true });
+    window.addEventListener("keydown", updateActivity, { passive: true });
+    window.addEventListener("click", updateActivity, { passive: true });
+    window.addEventListener("scroll", updateActivity, { passive: true });
+
+    // Ping immediato iniziale
     pingHeartbeat();
 
-    // Ping ogni minuto (60000 ms)
+    // Loop heartbeat ogni 60 secondi
     const intervalId = setInterval(pingHeartbeat, 60000);
 
-    // Se l'utente chiude il browser o naviga fuori in modo violento usiamo sendBeacon
     const handleUnload = () => {
       navigator.sendBeacon("/api/users/presence/offline");
     };
@@ -51,10 +56,11 @@ export function UserPresenceTracker() {
       window.removeEventListener("mousemove", updateActivity);
       window.removeEventListener("keydown", updateActivity);
       window.removeEventListener("click", updateActivity);
+      window.removeEventListener("scroll", updateActivity);
       window.removeEventListener("beforeunload", handleUnload);
       window.removeEventListener("pagehide", handleUnload);
     };
   }, [user]);
 
-  return null; // Componente "silenzioso", non renderizza nulla
+  return null;
 }

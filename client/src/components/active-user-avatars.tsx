@@ -1,17 +1,14 @@
 import { useActiveUsers } from "@/hooks/use-active-users";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
 } from "@/components/ui/tooltip";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Users, Clock } from "lucide-react";
+import { KnowledgeInfo } from "@/components/knowledge-info";
 
 export function ActiveUserAvatars() {
   const { data: users = [] } = useActiveUsers();
@@ -22,6 +19,10 @@ export function ActiveUserAvatars() {
     if (!u.lastSeenAt || !u.currentSessionStart) return false;
     const diff = new Date().getTime() - new Date(u.lastSeenAt).getTime();
     return diff <= 20 * 60 * 1000;
+  }).sort((a, b) => {
+    if (a.id === currentUser?.id) return -1;
+    if (b.id === currentUser?.id) return 1;
+    return 0;
   });
 
   if (activeUsers.length === 0) return null;
@@ -35,7 +36,7 @@ export function ActiveUserAvatars() {
       {visibleUsers.map((u) => {
         const isMe = u.id === currentUser?.id;
         const diffMins = (new Date().getTime() - new Date(u.lastSeenAt!).getTime()) / 60000;
-        const isAway = diffMins > 5;
+        const isAway = diffMins > 2;
         const initials = `${u.firstName?.[0] || ""}${u.lastName?.[0] || ""}` || (u.username?.[0] || "?").toUpperCase();
         
         return (
@@ -67,16 +68,28 @@ export function ActiveUserAvatars() {
             </button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-64 p-2">
-            <h4 className="text-xs font-semibold mb-2 flex items-center gap-2 text-slate-500 uppercase tracking-wider">
-              <Users className="w-3 h-3" /> 
-              Tutti gli utenti live ({activeUsers.length})
-            </h4>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-xs font-semibold flex items-center gap-2 text-slate-500 uppercase tracking-wider">
+                <Users className="w-3 h-3" /> 
+                Tutti gli utenti live ({activeUsers.length})
+              </h4>
+              <KnowledgeInfo id="tempo-di-lavoro" />
+            </div>
             <div className="space-y-1">
               {activeUsers.map(u => {
                 const isMe = u.id === currentUser?.id;
                 const diffMins = (new Date().getTime() - new Date(u.lastSeenAt!).getTime()) / 60000;
-                const isAway = diffMins > 5;
-              	const initials = `${u.firstName?.[0] || ""}${u.lastName?.[0] || ""}` || (u.username?.[0] || "?").toUpperCase();
+                const isAway = diffMins > 2; // aggiornato a 2 minuti
+                const initials = `${u.firstName?.[0] || ""}${u.lastName?.[0] || ""}` || (u.username?.[0] || "?").toUpperCase();
+                
+                // Calcoliamo quanti minuti EFFETTIVI ha lavorato (netto pause)
+                let workingMins = 0;
+                if (u.currentSessionStart) {
+                  let endT = u.lastSeenAt ? new Date(u.lastSeenAt).getTime() : Date.now();
+                  endT = !isAway ? Date.now() : endT;
+                  workingMins = Math.round((endT - new Date(u.currentSessionStart).getTime()) / 60000);
+                }
+
                 return (
                   <div key={u.id} className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-md">
                     <div className="relative w-6 h-6 rounded-full flex items-center justify-center bg-emerald-100 text-[9px] font-bold text-emerald-800 shrink-0 overflow-hidden">
@@ -94,7 +107,7 @@ export function ActiveUserAvatars() {
                       {u.currentSessionStart && (
                         <span className="text-[10px] text-slate-400 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          Entrato alle {new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                          {workingMins} min netti lavorati 
                         </span>
                       )}
                     </div>

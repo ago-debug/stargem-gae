@@ -31,6 +31,17 @@ L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per
 - **`user_roles`**: Ruoli generici e permessi scritti in JSON per gli utenti.
 - **`sessions`**: Archiviazione dei dati di sessione (login attivi).
 
+#### ⏱️ Logica del "Tempo di Lavoro" e Presenza (Heartbeat)
+Il calcolo di quanto un operatore resta "connesso" (Tempo di Lavoro) NON viene affidato al client (browser timer), ma è un algoritmo Server-Side "Anti-Fragile" residente in `routes.ts`:
+1. **La Scintilla di Partenza:** Il tempo di lavoro nasce all'assegnazione persistente di `currentSessionStart` in tabella `users`.
+2. **Il Radar a impulsi (Heartbeat):** Il client esegue check `/api/users/presence/heartbeat` continui. Questo rinnova costantemente l'impronta in backend (`lastSeenAt`) ma mantiene sigillato il `currentSessionStart`.
+3. **Fattore "Tolleranza Urti":** A fronte di refresh completi del browser (F5), chiusura improvvisa o blackout WiFi, il proxy `/api/users/presence/offline` decreta lo status visivo "Offline", ma **non cancella la sessione master**. Il server estrae i minuti raggiunti transitoriamente salvandoli in `lastSessionDuration`.
+4. **Morte Causale o Riconnessione (Tempo Netto e Pause):**
+   * **Pausa Istantanea:** Se il mouse/tastiera è inattivo per 2 minuti, l'interfaccia entra in stato di Pausa (Giallo) silenziando il radar. Al rientro, il segnale "Sono Tornato" è istantaneo al primo movimento.
+   * **Tempo Netto (L'esclusione della Pausa):** Se la pausa supera i 3 minuti, un algoritmo SQL retroattivo **sposta in avanti l'orario di `currentSessionStart`** di un lasso di tempo esatto pari alla pausa stessa. In questo modo l'interfaccia, pur riattivandosi, **scarta la pausa** dal totale calcolato mostrandoti esclusivamente il Tempo Netto lavorato!
+   * **Se l'operatore scompare definitivamente:** Trascorsi i 20 Minuti dal `lastSeenAt`, il server decreta morta la vecchia sessione. Il tempo totale sarà identico all'ultimo secondo netto registrato.
+5. **Chiusura volontaria:** Chiudere a mano l'interfaccia via "Logout" sdogana `/api/logout`, azzera il `currentSessionStart = null` e storicizza istantaneamente in `user_activity_logs` la label nativa *"Logout (Tempo di lavoro: Xh Ym)"*.
+
 ### 2. Configurazione Generale & Utility
 - **`system_configs`**: Impostazioni globali chiave-valore del gestionale.
 - **`custom_lists` / `custom_list_items`**: Liste semplici definite dall'utente (es. "Nomi Corsi", "Posti Disponibili").

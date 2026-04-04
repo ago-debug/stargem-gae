@@ -592,13 +592,16 @@ export function AppSidebar() {
                 </Dialog>
               </div>
               <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
-                {usersInfo.map((u: any) => {
+                {[...usersInfo].sort((a, b) => {
+                  if (a.id === user?.id) return -1;
+                  if (b.id === user?.id) return 1;
+                  return 0;
+                }).map((u: any) => {
                   const now = new Date().getTime();
-                  const lastSeen = u.lastSeenAt ? new Date(u.lastSeenAt).getTime() : 0;
-                  const diffMins = (now - lastSeen) / 1000 / 60;
+                  const diffMins = u.lastSeenAt ? Math.round((now - new Date(u.lastSeenAt).getTime()) / 60000) : 0;
                   
-                  const isOnline = !!u.currentSessionStart && diffMins <= 5;
-                  const isAway = !!u.currentSessionStart && diffMins > 5 && diffMins <= 20;
+                  const isOnline = !!u.currentSessionStart && diffMins <= 2;
+                  const isAway = !!u.currentSessionStart && diffMins > 2 && diffMins <= 20;
                   const isMe = user?.id === u.id;
                   
                   return (

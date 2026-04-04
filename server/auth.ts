@@ -2,14 +2,14 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
+import MySQLStoreFactory from "express-mysql-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as DbUser } from "@shared/schema";
-import { db } from "./db";
+import { pool, db } from "./db";
 import { users } from "@shared/schema";
 import { eq, sql } from "drizzle-orm";
-import createMemoryStore from "memorystore";
 
 declare global {
     namespace Express {
@@ -20,7 +20,7 @@ declare global {
 }
 
 const scryptAsync = promisify(scrypt);
-const MemoryStore = createMemoryStore(session);
+const MySQLStore = MySQLStoreFactory(session as any);
 
 export async function hashPassword(password: string) {
     const salt = randomBytes(16).toString("hex");
@@ -48,13 +48,21 @@ export function isAuthenticated(req: Request, res: Response, next: NextFunction)
 }
 
 export function setupAuth(app: Express) {
+    const sessionStore = new MySQLStore({
+        clearExpired: true,
+        checkExpirationInterval: 900000,
+        expiration: 86400000,
+        createDatabaseTable: true,
+        schema: {
+            tableName: 'express_sessions'
+        }
+    }, pool as any);
+
     const sessionSettings: session.SessionOptions = {
         secret: process.env.SESSION_SECRET || "default_local_secret",
         resave: false,
         saveUninitialized: false,
-        store: new MemoryStore({
-            checkPeriod: 86400000,
-        }),
+        store: sessionStore,
         cookie: {
             httpOnly: true,
             secure: false, // Changed to false to allow testing on http://localhost:5001
@@ -94,9 +102,32 @@ export function setupAuth(app: Express) {
                 const user = await storage.getUserByUsername(username);
                 if (!user || !(await comparePasswords(password, user.password))) {
                     return done(null, false);
-                } else {
-                    return done(null, user);
                 }
+
+                // Attach permissions immediately upon login (same logic as deserializeUser)
+                let role = await storage.getUserRoleByName(user.role);
+                if (!role) {
+                    const allRoles = await storage.getUserRoles();
+                    role = allRoles.find(r => r.name.toLowerCase() === user.role.toLowerCase());
+                }
+
+                let permissions = role?.permissions || {};
+                if (typeof permissions === 'string') {
+                    try {
+                        permissions = JSON.parse(permissions);
+                    } catch (e) {
+                        permissions = {};
+                    }
+                }
+
+                const roleNameLower = user.role.toLowerCase();
+                if (roleNameLower === 'admin' || roleNameLower === 'admministratore totale' || roleNameLower === 'super admin' || roleNameLower === 'master' || (permissions as any)["*"] === "write") {
+                    permissions = { "*": "write", ...((permissions as any) || {}) };
+                }
+
+                (user as any).permissions = permissions;
+
+                return done(null, user);
             } catch (err) {
                 return done(err);
             }
@@ -131,7 +162,7 @@ export function setupAuth(app: Express) {
 
                 // Safety: if user is admin string or role has wildcard, ensure they have full access
                 const roleNameLower = user.role.toLowerCase();
-                if (roleNameLower === 'admin' || roleNameLower === 'admministratore totale' || (permissions as any)["*"] === "write") {
+                if (roleNameLower === 'admin' || roleNameLower === 'admministratore totale' || roleNameLower === 'super admin' || roleNameLower === 'master' || (permissions as any)["*"] === "write") {
                     permissions = { "*": "write", ...((permissions as any) || {}) };
                 }
 
