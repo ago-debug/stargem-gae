@@ -558,12 +558,27 @@ export function AppSidebar() {
           
           return (
             <div className="mt-4 pt-4 border-t border-sidebar-border">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
-                Connessioni Live
-                <span className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0.5 rounded-full">
-                  {usersInfo.filter((u: any) => u.currentSessionStart && u.lastSeenAt && (new Date().getTime() - new Date(u.lastSeenAt).getTime() <= 20 * 60 * 1000)).length}
-                </span>
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                  Connessioni Live
+                  <span className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0.5 rounded-full">
+                    {usersInfo.filter((u: any) => u.currentSessionStart && u.lastSeenAt && (new Date().getTime() - new Date(u.lastSeenAt).getTime() <= 20 * 60 * 1000)).length}
+                  </span>
+                </p>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-5 px-1.5 text-[9px] hover:bg-slate-200 text-slate-500">
+                      <Activity className="w-3 h-3 mr-1" /> Attività
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-[90vw] md:max-w-4xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Log Attività di Sistema</DialogTitle>
+                    </DialogHeader>
+                    <SharedActivityLog hideTitle />
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
                 {usersInfo.map((u: any) => {
                   const now = new Date().getTime();
