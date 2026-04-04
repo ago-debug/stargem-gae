@@ -6,6 +6,9 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as DbUser } from "@shared/schema";
+import { db } from "./db";
+import { users } from "@shared/schema";
+import { eq, sql } from "drizzle-orm";
 import createMemoryStore from "memorystore";
 
 declare global {
@@ -145,6 +148,12 @@ export function setupAuth(app: Express) {
             if (err) return next(err);
             if (user) {
                 try {
+                    // Rimuovi tempestivamente lo stato online
+                    await db.update(users).set({
+                        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 MINUTE)`,
+                        currentSessionStart: null
+                    }).where(eq(users.id, user.id));
+
                     await storage.logActivity({
                         userId: user.id,
                         action: "LOGOUT",
@@ -152,7 +161,7 @@ export function setupAuth(app: Express) {
                         details: { username: user.username }
                     });
                 } catch (err) {
-                    console.error("[AUTH] Failed to log logout activity:", err);
+                    console.error("[AUTH] Failed to log logout activity or mark offline:", err);
                 }
             }
             req.session.destroy((err2) => {
@@ -163,8 +172,19 @@ export function setupAuth(app: Express) {
     });
 
     app.get("/api/logout", (req, res, next) => {
-        req.logout((err) => {
+        const user = req.user as any;
+        req.logout(async (err) => {
             if (err) return next(err);
+            if (user) {
+                try {
+                    await db.update(users).set({
+                        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 MINUTE)`,
+                        currentSessionStart: null
+                    }).where(eq(users.id, user.id));
+                } catch (e) {
+                    console.error("[AUTH] Failed to mark offline", e);
+                }
+            }
             res.redirect("/");
         });
     });
