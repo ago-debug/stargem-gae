@@ -29,7 +29,8 @@ L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per
 ### 1. Autenticazione & Utenti (Authentication & Users)
 - **`users`**: La tabella base degli account per lo staff e gli operatori.
 - **`user_roles`**: Ruoli generici e permessi scritti in JSON per gli utenti.
-- **`sessions`**: Archiviazione dei dati di sessione (login attivi).
+- **`sessions`**: Tabella Drizzle originale per jwt o vecchie gestioni sessione.
+- **`express_sessions`**: Nuova tabella persistente generata da `express-mysql-session` per il mantenimento in vita dei login oltre il riavvio del processo Node.js.
 
 #### ⏱️ Logica del "Tempo di Lavoro" e Presenza (Heartbeat)
 Il calcolo di quanto un operatore resta "connesso" (Tempo di Lavoro) NON viene affidato al client (browser timer), ma è un algoritmo Server-Side "Anti-Fragile" residente in `routes.ts`:
