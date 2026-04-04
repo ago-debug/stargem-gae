@@ -81,23 +81,23 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 
 ---
 
-## 8. Documentazione GAE
-**Stato Attuale:** 🟡 IN CORSO (Perennemente vivo)
-**Sintesi:** Repositorio ufficiale delle regole aziendali, task eseguiti e linee guida architetturali. Navigatore e salvagente dell'orchestrazione AI / Sviluppatori.
-* **Cosa è già stato fatto:** Approvato processo Stop & Go. Impostate mappe mentali (Route, Database, Tassonomie e Architettura) solidissime per orientarsi tra la legna. Aggiornamento manuale quotidiano su check-ins.
-* **Cosa manca:** Seguirne costantemente, religiosamente i dettami negli Step successivi. 
-* **Rischi / Attenzioni:** Rompere il patto Documentale significherebbe corrompere l'affidamento delle prossime sessioni di sviluppo scatenando entropia code-base.
+## 8. Documentazione GAE e Sicurezza (Ruoli/Permessi)
+**Stato Attuale:** 🟢 COMPLETATO E ATTIVO
+**Sintesi:** Repositorio ufficiale delle regole aziendali, task eseguiti e linee guida architetturali. Il sistema di controllo accessi e ruoli (Security by Design) è sigillato.
+* **Cosa è già stato fatto:** Impostato processo Stop & Go. Costruite le mappe mentali. **Implementata la neonata `Knowledge Base` (Matrix dei 5 Ruoli)** integrata nativamente nella UI in base alla quale le autorizzazioni della Sidebar (30 sezioni esatte) vengono oscurate in tempo reale.
+* **Cosa manca:** Seguirne costantemente i dettami negli Step successivi. 
+* **Rischi / Attenzioni:** Alterare l'assetto documentale o i Ruoli appena configurati significherebbe generare nuove falle di sicurezza.
 * **Prossimo Step Consigliato:** Persistere nell'obbligo report pre e post modifica del software.
 
 ---
 
-## 9. Architettura generale / stato progetto
-**Stato Attuale:** 🟡 TRANSIZIONE STI (Shadow Mode / Bridge)
-**Sintesi:** La visione futura SOA/Single Table Inheritance sta progressivamente fagocitando le 11 tabelle frammentate. Il database è ancora fisicamente identico e protetto.
+## 9. Architettura generale / stato progetto (Database STI)
+**Stato Attuale:** 🟡 TRANSIZIONE STI (Shadow Mode Terminata, Pronti al Data Pump)
+**Sintesi:** Tutte le preparazioni Frontend (Modali operativi unificati, Calendario multi-stagione, Sicurezza a 30 settori) sono ultimate. Il progetto è ora interamente proteso al refactoring del backend (STI Data Pump), che collasserà le 11 tabelle frammentate nel Dynamic Engine.
 * **Cosa è già stato fatto:** 
   - **Fase 2 (Shadow Tables):** Create `activities_unified` ed `enrollments_unified`.
-  - **Fase 3 (Read-Only Bridge):** Costruita la prima factory API (`unifiedBridge.ts`) che fonde e unifica in memoria i records derivanti dai Silos prima di darli in pasto al frontend. Nessun dual write inserito.
-  - **Fase 4 (Calendar Switch):** Switchato la view interattiva frontale al layer Bridge senza alterare il form di aggiunta legacy.
-* **Cosa manca:** Testing massivo e Iniezione Anagrafiche per far superare la Fase 5 e approdare felicemente al cut-over del Modale Pagamenti (Cassa Unificata).
-* **Rischi / Attenzioni:** Il bridge read-only bypassa i join storici frontend-centrici. Attenzione alle label perse.
-* **Prossimo Step Consigliato:** Refinire il Bridge Backend e programmare il Data-Pump asincrono per l'allineamento.
+  - **Fase 3 (Read-Only Bridge):** Fuso in memoria i records dal backend per permettere al Calendario (switchato in Fase 4) di lavorare agevolmente.
+  - **Preparazione Interfacce:** La Maschera Input, il Calendario, la Knowledge base e i Ruoli sono testati e idonei.
+* **Cosa manca:** Creazione e propagazione dello script "Data-Pump" vero e proprio (Modellazione Drizzle e Travaso massivo dei dati storici).
+* **Rischi / Attenzioni:** Essere disallineati durante il travaso potrebbe costare caro alla continuità dei dati live.
+* **Prossimo Step Consigliato:** Eseguire immediatamente la _Fase 1_ del Piano STI (vedi File 13 `Piano_Migrazione_DB.md`): Ristrutturazione di `schema.ts`.

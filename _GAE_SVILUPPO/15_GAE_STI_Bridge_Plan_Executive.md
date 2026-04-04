@@ -84,6 +84,6 @@ Gli endpoint preesistenti (`GET /api/courses`, `POST /api/workshops`) rimarranno
 - **Fase 2 (Completata)**: Creazione tabelle shadow `activities_unified` ed `enrollments_unified` in database (Strictly permissivo, no FK hard, no CASCADE).
 - **Fase 3 (Completata)**: Bridge API in lettura (`unifiedBridge.ts`) testato su `GET /api/activities-unified-preview`.
 - **Fase 4 (Completata)**: Calendar Read Switch. Il Calendario frontend è collegato al layer Bridge.
-- **Fase 5 (Completata con UI Freeze)**: Trasformazione Data-Aware con *Recurrence Engine* settimanale funzionante sui Corsi (-30/+60 gg). **[UI FREEZE]**: La UI visiva è congelata in attesa di iniettare/risolvere le anagrafiche mancanti nel Bridge (nomi categorie, istruttori, color mapping) andate perdute nel bypass del legacy mapper.
-- **Fase 6 (Inizianda)**: Risoluzione campi relazionali per alimentare la scheda Calendario e validazione.
-- **Fase 7 (Futura)**: Data pump reale, redirect delle operazioni CRUD write (POST/PATCH), dismissione silos nativi.
+- **Fase 5 (Completata con UI Freeze REVOCATO)**: Trasformazione Data-Aware con *Recurrence Engine* settimanale funzionante sui Corsi (-30/+60 gg).
+- **Fase 6 (Completata)**: Risoluzione campi relazionali per alimentare la scheda Calendario e validazione visiva (tutte le anagrafiche sono agganciate). Il calendario è multi-stagione e operativo.
+- **Fase 7 (Inizianda / PROSSIMO STEP)**: Modifica allo Schema (`schema.ts`) per formalizzare la STI, generazione Drizzle Migration. Data pump reale, redirect delle operazioni CRUD write (POST/PATCH), dismissione silos nativi.

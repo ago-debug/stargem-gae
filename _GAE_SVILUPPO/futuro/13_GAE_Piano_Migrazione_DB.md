@@ -83,7 +83,8 @@ erDiagram
 La transizione da un modello all'altro non è un'operazione banale, è un trapianto di cuore a sistema avviato. Il seguente programma di lavoro è stato delineato per minimizzare i rischi di corruzione dati o downtime. 
 **Regola d'oro:** Tutto il lavoro deve svolgersi in un branch isolato (es. `feature/sti-architecture-revamp`).
 
-### Fase 1: Modellazione Database e Preparazione ORM (Tempo stimato: 1 Giorno / 8 Ore)
+### Fase 1: Modellazione Database e Preparazione ORM (In Esecuzione)
+**[STATUS: SPRINT ATTIVO DA ESEGUIRE ORA]**
 - [ ] Creazione del nuovo schema Drizzle ORM (`shared/schema.ts`) introducendo le 3 macro tabelle padri: `activities`, `categories`, `activity_details`.
 - [ ] Creazione della nuova tabella convergente `enrollments` (Gestione iscritti universale universale).
 - [ ] Refactoring tabella `payments`: snellimento drastico tramite rimozione delle 12 foreign key a croce e configurazione dell'unica foreign key verso la neo-tabella `enrollments`.

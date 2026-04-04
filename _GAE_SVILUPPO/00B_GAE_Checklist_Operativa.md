@@ -11,14 +11,11 @@
 ---
 
 
-## 8. Presenza Utenti in Tempo Reale & Gestione Profilo Operatore (Phase 28)
-- [x] Sviluppo Heartbeat & Endpoints API (`/api/users/presence/heartbeat`, `/api/users/presence/active`, `/api/users/profile`)
-- [x] Componente `UserPresenceTracker` + Global Mount in `App.tsx`
-- [x] Aggiornamento Schema DB (`lastSeenAt`, `currentSessionStart`, `phone`, `profileImageUrl` esteso) e Push
-- [x] UI/UX Lista Presenze Sidebar (Verde Live, Grigio Disconnessi > 15m) + Orari primo ingresso sessione
-- [x] UI/UX Avatars Header Multipli (max 3 visualizzati + popover eccedenze)
-- [x] Dialogo Aggiornamento Profilo (Base64 avatar limitato 2MB & Phone nr.) cablato nel click sulla Sidebar.
-
+## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
+- [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.
+- [x] Trasformazione rotta `/knowledge-base` e stesura dell'Articolo #1: "Matrix Interattiva dei Ruoli e Permessi".
+- [x] Risolto bug rendering JSON Permissions e pulizia tabella ruoli (rimozione doppioni, isolati solo 5 ruoli ufficiali).
+- [x] Parser Semantico Interattivo in `activity-translator.ts` per Audit Log in lingua italiana, integrato nella tab Sicurezza.
 
 ## 1. Cleanup Consolidation (Livelli 1-3) & Audit Preliminari
 Questi task consolidano la stabilità prima della riscrittura profonda V2 (Partecipazioni).
@@ -161,9 +158,9 @@ I seguenti task derivano dall'Audit Esecutivo su "Lezioni Individuali", "Allenam
 
 ---
 
-## 4. Implementazione Schema Drizzle V2 (Motore Dati ed API) - *SOSPENSIONE TEMPORANEA*
-> [!WARNING]
-> **AGGIORNAMENTO OBIETTIVO STI (Single Table Inheritance):** La Fase 1 (Design Esecutivo) è completata e approvata in `15_GAE_STI_Bridge_Plan_Executive.md`. Siamo autorizzati a procedere con la Fase 2 (Creazione Tabelle in Shadow Mode), senza ancora toccare il database in produzione né alterare la UI/Runtime.
+## 4. Implementazione Schema Drizzle V2 (Motore Dati ed API) - *FASE 3: REFACTORING DATABASE (STI) - IN CORSO*
+> [!IMPORTANT]
+> **AGGIORNAMENTO OBIETTIVO STI (Single Table Inheritance):** La preparazione Frontend/Sicurezza/UI è totalmente ultimata. Iniziamo formalmente la **Fase 3: Refactoring Database (STI)**. La sequenza operativa (Fase 1..5) deve essere rispettata tassativamente, manipolando `schema.ts`.
 
 - [x] Modellazione Iniziale Database
   - File toccati: `schema.ts`
