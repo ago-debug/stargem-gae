@@ -583,7 +583,7 @@ export function AppSidebar() {
                            <PowerOff className="w-2.5 h-2.5 shrink-0 text-slate-400" />
                         )}
                         <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : isAway ? "text-slate-500" : "text-slate-400 opacity-80"}`}>
-                          {isMe ? "Tu" : (u.firstName ? `${u.firstName} ${u.lastName}` : u.username)}
+                          {isMe ? "Tu" : (u.firstName || u.username)}
                         </span>
                       </div>
                       
@@ -629,13 +629,11 @@ export function AppSidebar() {
             <p className="flex justify-between">
               <span>Da chi:</span>
               <span className="font-medium truncate max-w-[100px] text-right">
-                {latestActivity.user?.firstName || latestActivity.user?.lastName
-                  ? `${latestActivity.user.firstName || ""} ${latestActivity.user.lastName || ""}`.trim()
-                  : latestActivity.user?.username || "Sistema"}
+                {latestActivity.user?.firstName || latestActivity.user?.username || "Sistema"}
               </span>
             </p>
             <p className="flex justify-between">
-              <span>Versione:</span>
+              <span>Azione:</span>
               <span className="font-medium truncate max-w-[100px] text-right" title={`${latestActivity.action} ${latestActivity.entityType} #${latestActivity.entityId}`}>
                 {latestActivity.action} {latestActivity.entityType}
               </span>

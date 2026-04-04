@@ -120,7 +120,7 @@ export default function UtentiPermessi() {
   const { sortConfig: scLog, handleSort: hsLog, sortItems: siLog, isSortedColumn: iscLog } = useSortableTable<any>("createdAt", "desc");
   const getSortValueLog = (log: any, key: string) => {
     switch (key) {
-      case "createdAt": return log.createdAt;
+      case "createdAt": return new Date(log.createdAt).getTime();
       case "username": return log.user?.username || "";
       case "action": return log.action || "";
       case "entityType": return log.entityType || "";
@@ -624,7 +624,11 @@ export default function UtentiPermessi() {
                           {log.entityType || "-"}
                         </TableCell>
                         <TableCell className={cn("text-xs max-w-md truncate", iscLog("details") && "sorted-column-cell")}>
-                          {log.details ? JSON.stringify(log.details) : "-"}
+                          {log.action === "LOGOUT" && log.details?.durationMins !== undefined
+                            ? `Sessione conclusa (durata: ${log.details.durationMins > 60 ? Math.floor(log.details.durationMins / 60) + 'h ' + (log.details.durationMins % 60) + 'm' : log.details.durationMins + 'm'})`
+                            : log.action === "LOGIN"
+                              ? `Ingresso nel sistema`
+                              : log.details ? JSON.stringify(log.details) : "-"}
                         </TableCell>
                       </TableRow>
                     ))}
