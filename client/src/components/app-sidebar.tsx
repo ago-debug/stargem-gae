@@ -63,6 +63,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SharedActivityLog } from "@/components/shared-activity-log";
 import { getActiveActivities } from "@/config/activities";
 import { Button } from "@/components/ui/button";
@@ -568,14 +569,25 @@ export function AppSidebar() {
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm" className="h-[18px] px-1.5 text-[9px] bg-white hover:bg-slate-50 border-slate-300 text-slate-600 font-medium tracking-tight shadow-sm">
-                      <Activity className="w-2.5 h-2.5 mr-1 text-primary" /> Log
+                      <Activity className="w-2.5 h-2.5 mr-1 text-primary" /> Processi
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-[90vw] md:max-w-4xl max-h-[85vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Log Attività di Sistema</DialogTitle>
+                    <DialogHeader className="mb-4">
+                      <DialogTitle>Registro Interventi e Accessi</DialogTitle>
                     </DialogHeader>
-                    <SharedActivityLog hideTitle />
+                    <Tabs defaultValue="access">
+                       <TabsList className="grid w-full grid-cols-2">
+                           <TabsTrigger value="access">Accessi</TabsTrigger>
+                           <TabsTrigger value="activities">Processi Svolti</TabsTrigger>
+                       </TabsList>
+                       <TabsContent value="access" className="mt-4 border rounded-md">
+                           <SharedActivityLog hideTitle type="access" />
+                       </TabsContent>
+                       <TabsContent value="activities" className="mt-4 border rounded-md">
+                           <SharedActivityLog hideTitle type="activities" />
+                       </TabsContent>
+                    </Tabs>
                   </DialogContent>
                 </Dialog>
               </div>

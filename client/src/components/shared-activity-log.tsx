@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
-import { translateActivity } from "@/lib/activity-translator";
+import { translateActivity, translateEntity } from "@/lib/activity-translator";
 
 export function SharedActivityLog({ hideTitle = false, type = "all" }: { hideTitle?: boolean, type?: "all" | "access" | "activities" }) {
   const { data: activityLogs, isLoading: logsLoading } = useQuery<any[]>({
@@ -56,13 +56,13 @@ export function SharedActivityLog({ hideTitle = false, type = "all" }: { hideTit
           <TableBody>
             {siLog(filteredLogs, getSortValueLog).map((log: any) => (
               <TableRow key={log.id}>
-                <TableCell className={cn("text-xs whitespace-nowrap", iscLog("createdAt") && "sorted-column-cell")}>
+                <TableCell className={cn("text-xs whitespace-nowrap align-top pt-3", iscLog("createdAt") && "sorted-column-cell")}>
                   {format(new Date(log.createdAt), "dd/MM/yyyy HH:mm:ss", { locale: it })}
                 </TableCell>
-                <TableCell className={cn("font-medium text-xs", iscLog("username") && "sorted-column-cell")}>
+                <TableCell className={cn("font-medium text-xs align-top pt-3", iscLog("username") && "sorted-column-cell")}>
                   {log.user.username}
                 </TableCell>
-                <TableCell className={cn(iscLog("action") && "sorted-column-cell")}>
+                <TableCell className={cn("align-top pt-3", iscLog("action") && "sorted-column-cell")}>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${log.action === 'CREATE' ? 'bg-green-100 text-green-700' :
                     log.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' :
                       log.action === 'DELETE' ? 'bg-red-100 text-red-700' :
@@ -73,10 +73,10 @@ export function SharedActivityLog({ hideTitle = false, type = "all" }: { hideTit
                     {log.action}
                   </span>
                 </TableCell>
-                <TableCell className={cn("text-xs uppercase", iscLog("entityType") && "sorted-column-cell")}>
-                  {log.entityType || "-"}
+                <TableCell className={cn("text-xs uppercase font-medium align-top pt-3", iscLog("entityType") && "sorted-column-cell")}>
+                  {translateEntity(log.entityType)}
                 </TableCell>
-                <TableCell className={cn("text-xs max-w-[300px]", iscLog("details") && "sorted-column-cell")}>
+                <TableCell className={cn("text-xs max-w-xl whitespace-normal break-words py-3 leading-relaxed", iscLog("details") && "sorted-column-cell")}>
                    {translateActivity(log.action, log.entityType, log.details)}
                 </TableCell>
               </TableRow>
