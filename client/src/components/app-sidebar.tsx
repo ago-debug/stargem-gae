@@ -582,11 +582,11 @@ export function AppSidebar() {
                         ) : (
                            <PowerOff className="w-2.5 h-2.5 shrink-0 text-slate-400" />
                         )}
-                        <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : isAway ? "text-slate-500" : "text-slate-400 opacity-60"}`}>
+                        <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : isAway ? "text-slate-500" : "text-slate-400 opacity-80"}`}>
                           {isMe ? "Tu" : (u.firstName ? `${u.firstName} ${u.lastName}` : u.username)}
                         </span>
                       </div>
-                      <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : isAway ? "text-slate-400/80" : "text-slate-300 opacity-50"}`}>
+                      <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : isAway ? "text-slate-400" : "text-slate-400"}`}>
                         {u.currentSessionStart 
                           ? new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
                           : u.lastSeenAt ? `Uscito ${format(new Date(u.lastSeenAt), "dd/MM HH:mm")}` : ''}
