@@ -38,11 +38,21 @@ export function UserPresenceTracker() {
     // Ping ogni minuto (60000 ms)
     const intervalId = setInterval(pingHeartbeat, 60000);
 
+    // Se l'utente chiude il browser o naviga fuori in modo violento usiamo sendBeacon
+    const handleUnload = () => {
+      navigator.sendBeacon("/api/users/presence/offline");
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    window.addEventListener("pagehide", handleUnload);
+
     return () => {
       clearInterval(intervalId);
       window.removeEventListener("mousemove", updateActivity);
       window.removeEventListener("keydown", updateActivity);
       window.removeEventListener("click", updateActivity);
+      window.removeEventListener("beforeunload", handleUnload);
+      window.removeEventListener("pagehide", handleUnload);
     };
   }, [user]);
 

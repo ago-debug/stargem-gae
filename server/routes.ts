@@ -933,6 +933,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User explicitly offline (e.g. browser closed or navigated away)
+  app.post("/api/users/presence/offline", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { db } = await import("./db");
+      const { users } = await import("../shared/schema");
+      const { sql, eq } = await import("drizzle-orm");
+
+      await db.update(users).set({
+        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)`
+      }).where(eq(users.id, userId));
+
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Active Users list (Returns all users so frontend can render offline ones as grey)
   app.get("/api/users/presence/active", isAuthenticated, async (req, res) => {
     try {
