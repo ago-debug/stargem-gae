@@ -38,3 +38,4 @@ Seeding skipped: Database might not be ready yet.
 3:30:09 PM [vite] hmr invalidate /src/App.tsx?v=LvAKh7ojXz9MzV81Q3TFR Could not Fast Refresh ("hasPermission" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
 3:30:09 PM [vite] page reload src/App.tsx
 3:30:10 PM [express] GET /api/user 401 in 1ms
+3:39:18 PM [vite] hmr update /src/components/app-sidebar.tsx, /src/index.css?v=LvAKh7ojXz9MzV81Q3TFR
