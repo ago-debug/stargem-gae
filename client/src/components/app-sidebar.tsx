@@ -62,6 +62,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SharedActivityLog } from "@/components/shared-activity-log";
 import { getActiveActivities } from "@/config/activities";
 import { Button } from "@/components/ui/button";
 import { StarGemCopilot } from "@/components/star-gem-copilot";
@@ -634,8 +636,8 @@ export function AppSidebar() {
             </p>
             <p className="flex justify-between">
               <span>Azione:</span>
-              <span className="font-medium truncate max-w-[100px] text-right" title={`${latestActivity.action} ${latestActivity.entityType} #${latestActivity.entityId}`}>
-                {latestActivity.action} {latestActivity.entityType}
+              <span className="font-medium truncate max-w-[100px] text-right" title={"Versione di sistema aggiornata"}>
+                v2.2.27
               </span>
             </p>
           </div>

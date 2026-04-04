@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { UserProfileDialog } from "@/components/user-profile-dialog";
+import { SharedActivityLog } from "@/components/shared-activity-log";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -447,7 +448,7 @@ export default function UtentiPermessi() {
                         <TableCell className={cn(iscUser("role") && "sorted-column-cell")}>
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                             }`}>
-                            {u.role}
+                            {u.role === 'admin' ? 'super admin' : u.role}
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
@@ -533,7 +534,9 @@ export default function UtentiPermessi() {
                   <TableBody>
                     {siRole(roles || [], getSortValueRole).map((r: UserRole) => (
                       <TableRow key={r.id}>
-                        <TableCell className={cn("font-bold", iscRole("name") && "sorted-column-cell")}>{r.name}</TableCell>
+                        <TableCell className={cn("font-bold", iscRole("name") && "sorted-column-cell")}>
+                          {r.name === 'admin' ? 'super admin' : r.name}
+                        </TableCell>
                         <TableCell className={cn(iscRole("description") && "sorted-column-cell")}>{r.description || "-"}</TableCell>
                         <TableCell className={cn(iscRole("permissions") && "sorted-column-cell")}>
                           <span className="text-xs text-muted-foreground">
@@ -586,55 +589,7 @@ export default function UtentiPermessi() {
 
           <Card>
             <CardContent className="pt-6">
-              {logsLoading ? (
-                <div className="flex justify-center p-8">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <SortableTableHead sortKey="createdAt" currentSort={scLog} onSort={hsLog}>Data/Ora</SortableTableHead>
-                      <SortableTableHead sortKey="username" currentSort={scLog} onSort={hsLog}>Utente</SortableTableHead>
-                      <SortableTableHead sortKey="action" currentSort={scLog} onSort={hsLog}>Operazione</SortableTableHead>
-                      <SortableTableHead sortKey="entityType" currentSort={scLog} onSort={hsLog}>Entità</SortableTableHead>
-                      <SortableTableHead sortKey="details" currentSort={scLog} onSort={hsLog}>Dettagli</SortableTableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {siLog(activityLogs || [], getSortValueLog).map((log: any) => (
-                      <TableRow key={log.id}>
-                        <TableCell className={cn("text-xs whitespace-nowrap", iscLog("createdAt") && "sorted-column-cell")}>
-                          {format(new Date(log.createdAt), "dd/MM/yyyy HH:mm:ss", { locale: it })}
-                        </TableCell>
-                        <TableCell className={cn("font-medium text-xs", iscLog("username") && "sorted-column-cell")}>
-                          {log.user.username}
-                        </TableCell>
-                        <TableCell className={cn(iscLog("action") && "sorted-column-cell")}>
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${log.action === 'CREATE' ? 'bg-green-100 text-green-700' :
-                            log.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' :
-                              log.action === 'DELETE' ? 'bg-red-100 text-red-700' :
-                                log.action === 'LOGIN' ? 'bg-purple-100 text-purple-700' :
-                                  'bg-gray-100 text-gray-700'
-                            }`}>
-                            {log.action}
-                          </span>
-                        </TableCell>
-                        <TableCell className={cn("text-xs uppercase", iscLog("entityType") && "sorted-column-cell")}>
-                          {log.entityType || "-"}
-                        </TableCell>
-                        <TableCell className={cn("text-xs max-w-md truncate", iscLog("details") && "sorted-column-cell")}>
-                          {log.action === "LOGOUT" && log.details?.durationMins !== undefined
-                            ? `Sessione conclusa (durata: ${log.details.durationMins > 60 ? Math.floor(log.details.durationMins / 60) + 'h ' + (log.details.durationMins % 60) + 'm' : log.details.durationMins + 'm'})`
-                            : log.action === "LOGIN"
-                              ? `Ingresso nel sistema`
-                              : log.details ? JSON.stringify(log.details) : "-"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+              <SharedActivityLog hideTitle />
             </CardContent>
           </Card>
         </TabsContent>
