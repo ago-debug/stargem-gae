@@ -6,11 +6,15 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 ---
 
 
-### 04 Aprile 2026 (Phase 28: Live User Presence & Gestione Profilo Operatore)
+### 04 Aprile 2026 (Phase 28.5: Security by Design, "Knowledge Base" e Matrix dei Ruoli)
+* **Sincronizzazione Reale Permessi (30 Settori):** Divelto dal componente storico `utenti-permessi.tsx` il tracciamento dei vecchi 23 sottomenù obsoleti. Costruita la mappatura matematica di 30 viste operative definitive affinché i permessi scelti combacino 1:1 con i reali URL presenti sulla Sidebar (es. Attività, Calendario, Affitti, Processi, Admin Root).
+* **Introduzione del Modulo "Knowledge Base":** Trasformata in rotta attiva la voce `/knowledge-base` precedentemente dormiente in sidebar. Implementata al suo interno una UI ufficiale per l'intera squadra, di cui il primo "Articolo Base" è una Matrix Interattiva dei Ruoli ("Chi Vede Cosa"). Lo specchietto (creato come artifact `report_accessi_e_ruoli.md`) garantisce che il Super Admin e lo Staff sappiano esplicitamente quali poteri offre ogni qualifica (Super Admin VS Segreteria VS Insegnante).
+* **Activity & Audit UI Translator (Tracciabilità Linguistica):** Distrutto l'output JSON bruto e inserito un Parser Semantico Interattivo in `activity-translator.ts`. I vecchi indici `{firstName: xyz}` sono testualmente convertiti da Inglese a Italiano, affiancati dal focus ("Corso", "Accessi"). Adesso la colonna `"Dettagli Info"` del log restituisce stringhe discorsive (es. `Aggiornato Corso. Valori Inseriti: Nome(Gaetano)`). Tab unificati in Dialog unica per snellimento UX.
 * **Live Presence Tracker:** Aggiunta una funzionalità di heartbeat silente al backend. Gli utenti collegati mandano un ping ogni minuto.
 * **Componente Avatars:** Sulla dashboard in alto a fianco alle notifiche integrato un raggruppatore di Avatars (limite 3 visi prima del trucco "popover" col resto dei loggati live) che mostra graficamente i dev/admin connessi.
 * **Sezione Sidebar (Loggati):** In fondo alla Sidebar sotto al Modulo Profilo, l'elenco stringato in realtime del gruppo di lavoro mostra la loro presenza (Verde per live, Grigio off con orario dell'ultimo Heartbeat) filtrando chi supera i 15m.
 * **Modale Profilazione Upload Immagine:** Attivato al click sul Profilo utente in Sidebar il modulo d'inserimento foto in Base64 `longtext` rigorosamente clampata a 2MB max, con possibilità rapida di associare i propri recapiti telefonici (integrando `phone` nel db) al proprio set utente in tempo reale, ricaricando lo stack React Query dell'ecosistema per immediato riscontro visivo altrui.
+
 
 ### 03 Aprile 2026 (Phase 28: Code Freeze Strategico e Perfezionamento Qualitativo)
 * **Gestione Orari Globali del Centro:** Cambiata l'architettura dei limiti di blocco operativo. Per evitare rigidità legate alle singole Sale (Studios), i validatori di backend (`checkStudioConflict`) ora consultano la configurazione globale `center_operating_hours` da tabella `system_configs`. Il Calendario UI si espande e si stringe elasticamente basandosi su questi orari salvati dall'Admin.

@@ -57,6 +57,7 @@ import SchedaSaggio from "@/pages/scheda-saggio";
 import SchedaVacanzaStudio from "@/pages/scheda-vacanza-studio";
 import Planning from "@/pages/planning";
 import StrategicProgrammingTable from "@/pages/StrategicProgrammingTable";
+import KnowledgeBase from "@/pages/knowledge-base";
 
 import SundayActivities from "@/pages/sunday-activities";
 import Trainings from "@/pages/trainings";
@@ -138,7 +139,6 @@ const StubAttivitaLista = () => <GestioneAttivitaStub title="Attività a Lista" 
 const StubAffittoStudio = () => <GestioneAttivitaStub title="Affitto Studio Medico" description="Modulo di gestione affitto studi medici in arrivo." />;
 const StubCopilot = () => <GestioneAttivitaStub title="StarGem Copilot" description="Pannello di controllo dell'assistente AI in costruzione." />;
 const StubPromoSconti = () => <GestioneAttivitaStub title="Promo e Sconti" description="Motore di gestione regole promozionali in sviluppo." />;
-const StubKnowledgeBase = () => <GestioneAttivitaStub title="Knowledge Base" description="Base di conoscenza interna in fase di redazione." />;
 const StubMerchandising = () => <GestioneAttivitaStub title="Merchandising" description="Modulo di gestione e vendita merchandising in arrivo." />;
 const StubCategorieMerchandising = () => <GestioneAttivitaStub title="Categorie Merchandising" description="Gestione categorie per articoli di merchandising in sviluppo." />;
 
@@ -221,7 +221,7 @@ function Router() {
       <ProtectedRoute path="/listini-base/:activityType" component={PriceLists} />
       <ProtectedRoute path="/elenchi" component={Elenchi} />
       <ProtectedRoute path="/todo-list" component={TodoList} />
-      <ProtectedRoute path="/knowledge-base" component={StubKnowledgeBase} />
+      <ProtectedRoute path="/knowledge-base" component={KnowledgeBase} />
       <ProtectedRoute path="/commenti" component={Commenti} />
       <Route component={NotFound} />
     </Switch>

@@ -32,8 +32,17 @@ export function translateEntity(entityType: string): string {
   return entityMap[entityType.toLowerCase()] || entityType.charAt(0).toUpperCase() + entityType.slice(1).toLowerCase();
 }
 
-export function translateActivity(action: string, entityType: string, details: any): string {
+export function translateActivity(action: string, entityType: string, rawDetails: any): string {
   const entityName = translateEntity(entityType);
+  
+  let details = rawDetails;
+  if (typeof details === 'string') {
+    try {
+      details = JSON.parse(details);
+    } catch(e) {
+      // Keep it as a string if it fails to parse
+    }
+  }
 
   if (action === "LOGIN") return "Login (Accesso al sistema)";
   if (action === "LOGOUT") {
@@ -49,7 +58,7 @@ export function translateActivity(action: string, entityType: string, details: a
 
   if (action === "CREATE") {
     let summary = "";
-    if (details) {
+    if (details && typeof details === 'object') {
       if (details.firstName || details.lastName) summary = ` (${details.firstName || ""} ${details.lastName || ""})`.trim();
       else if (details.name) summary = ` ("${details.name}")`;
       else if (details.title) summary = ` ("${details.title}")`;
@@ -59,7 +68,7 @@ export function translateActivity(action: string, entityType: string, details: a
   }
 
   if (action === "UPDATE") {
-    if (!details || Object.keys(details).length === 0) {
+    if (!details || typeof details !== 'object' || Object.keys(details).length === 0) {
       return `✏️ Aggiornato ${entityName}`;
     }
     
@@ -72,7 +81,7 @@ export function translateActivity(action: string, entityType: string, details: a
         return `${humanKey} (${valStr})`;
       });
 
-    return `✏️ Aggiornato ${entityName}. Valori inseriti: ${updatedKeys.length > 0 ? updatedKeys.join(", ") : "dati vari"}`;
+    return `✏️ Aggiornato ${entityName}. Valori inseriti: \n${updatedKeys.length > 0 ? updatedKeys.join(", ") : "dati vari"}`;
   }
 
   return `${action} su ${entityName}`;
