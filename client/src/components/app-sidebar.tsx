@@ -12,6 +12,8 @@ import {
   Upload,
   LogOut,
   Circle,
+  PauseCircle,
+  PowerOff,
   Building2,
   Wallet,
   Settings,
@@ -556,28 +558,40 @@ export function AppSidebar() {
               <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
                 Connessioni Live
                 <span className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0.5 rounded-full">
-                  {usersInfo.filter((u: any) => u.lastSeenAt && (new Date().getTime() - new Date(u.lastSeenAt).getTime() <= 15 * 60 * 1000)).length}
+                  {usersInfo.filter((u: any) => u.lastSeenAt && (new Date().getTime() - new Date(u.lastSeenAt).getTime() <= 20 * 60 * 1000)).length}
                 </span>
               </p>
               <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
                 {usersInfo.map((u: any) => {
-                  const isOnline = u.lastSeenAt && (new Date().getTime() - new Date(u.lastSeenAt).getTime() <= 15 * 60 * 1000);
+                  const now = new Date().getTime();
+                  const lastSeen = u.lastSeenAt ? new Date(u.lastSeenAt).getTime() : 0;
+                  const diffMins = (now - lastSeen) / 1000 / 60;
+                  
+                  const isOnline = diffMins <= 5;
+                  const isAway = diffMins > 5 && diffMins <= 20;
                   const isMe = user?.id === u.id;
                   
                   return (
                     <div key={u.id} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <Circle className={`w-2 h-2 fill-current shrink-0 ${isOnline ? "text-green-500" : "text-slate-300"}`} />
-                        <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : "text-slate-400"}`}>
+                      <div className="flex items-center gap-1.5 min-w-0" title={isOnline ? 'Online' : isAway ? 'In Stop / Pausa' : 'Offline'}>
+                        {isOnline ? (
+                           <Circle className="w-2.5 h-2.5 fill-current shrink-0 text-green-500" />
+                        ) : isAway ? (
+                           <PauseCircle className="w-[11px] h-[11px] fill-current shrink-0 text-amber-500" />
+                        ) : (
+                           <PowerOff className="w-2.5 h-2.5 shrink-0 text-slate-400" />
+                        )}
+                        <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : isAway ? "text-slate-500" : "text-slate-400 opacity-60"}`}>
                           {isMe ? "Tu" : (u.firstName ? `${u.firstName} ${u.lastName}` : u.username)}
                         </span>
                       </div>
                       {u.currentSessionStart && (
-                        <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : "text-slate-300"}`}>
+                        <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : isAway ? "text-slate-400/80" : "text-slate-300 opacity-50"}`}>
                           {new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       )}
                     </div>
+
                   );
                 })}
               </div>
