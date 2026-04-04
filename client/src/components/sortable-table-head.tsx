@@ -56,10 +56,10 @@ export function SortableTableHead({
   );
 }
 
-export function useSortableTable<T>(defaultKey = "") {
+export function useSortableTable<T>(defaultKey = "", defaultDirection: SortDirection = "asc") {
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: defaultKey,
-    direction: defaultKey ? "asc" : null,
+    direction: defaultKey ? defaultDirection : null,
   });
 
   const handleSort = (key: string) => {

@@ -7,6 +7,7 @@ export type PresenceUser = {
   lastName: string | null;
   profileImageUrl: string | null;
   currentSessionStart: string | null;
+  lastSessionDuration: number | null;
   lastSeenAt: string | null;
 };
 

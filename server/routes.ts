@@ -490,6 +490,16 @@ async function seedParticipantCategories() {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  const { db } = await import("./db");
+  const { sql } = await import("drizzle-orm");
+
+  // Prevent missing column crash on early access by running a soft migration
+  try {
+    await db.execute(sql`ALTER TABLE users ADD COLUMN last_session_duration INT DEFAULT 0`);
+  } catch (e) {
+    // Column already exists
+  }
+
   // Seed database
   await seedParticipantCategories();
 
@@ -957,8 +967,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { users } = await import("../shared/schema");
       const { sql, eq } = await import("drizzle-orm");
 
+      const currentUserState = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      const start = currentUserState[0]?.currentSessionStart;
+      const durationMins = start ? Math.round((Date.now() - new Date(start).getTime()) / 60000) : 0;
+
       await db.update(users).set({
-        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)`
+        lastSeenAt: sql`CURRENT_TIMESTAMP`,
+        currentSessionStart: null,
+        lastSessionDuration: durationMins
       }).where(eq(users.id, userId));
 
       res.json({ success: true });

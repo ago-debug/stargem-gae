@@ -586,11 +586,31 @@ export function AppSidebar() {
                           {isMe ? "Tu" : (u.firstName ? `${u.firstName} ${u.lastName}` : u.username)}
                         </span>
                       </div>
-                      <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : isAway ? "text-slate-400" : "text-slate-400"}`}>
-                        {u.currentSessionStart 
-                          ? new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
-                          : u.lastSeenAt ? `Uscito ${format(new Date(u.lastSeenAt), "dd/MM HH:mm")}` : ''}
-                      </span>
+                      
+                      {(() => {
+                        let text = "";
+                        if (u.currentSessionStart) {
+                          const startT = new Date(u.currentSessionStart).getTime();
+                          const sessionMins = Math.round((now - startT) / 60000);
+                          const durStr = sessionMins > 60 ? `${Math.floor(sessionMins / 60)}h ${sessionMins % 60}m` : `${sessionMins}m`;
+                          const timeStr = new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                          text = `${timeStr} (da ${durStr})`;
+                        } else if (u.lastSeenAt) {
+                          const dateStr = format(new Date(u.lastSeenAt), "dd/MM HH:mm");
+                          let durStr = "";
+                          if (u.lastSessionDuration !== null && u.lastSessionDuration !== undefined) {
+                            const d = u.lastSessionDuration;
+                            durStr = d > 60 ? ` (per ${Math.floor(d / 60)}h ${d % 60}m)` : (d > 0 ? ` (per ${d}m)` : "");
+                          }
+                          text = `Uscito ${dateStr}${durStr}`;
+                        }
+
+                        return (
+                          <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : isAway ? "text-slate-400" : "text-slate-400"}`}>
+                            {text}
+                          </span>
+                        );
+                      })()}
                     </div>
 
                   );

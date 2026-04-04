@@ -144,14 +144,19 @@ export function setupAuth(app: Express) {
 
     app.post("/api/logout", (req, res, next) => {
         const user = req.user as any;
-        req.logout(async (err) => {
+        req.logout(async (err: any) => {
             if (err) return next(err);
             if (user) {
                 try {
+                    const currentUserState = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
+                    const start = currentUserState[0]?.currentSessionStart;
+                    const durationMins = start ? Math.round((Date.now() - new Date(start).getTime()) / 60000) : 0;
+
                     // Rimuovi tempestivamente lo stato online
                     await db.update(users).set({
-                        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)`,
-                        currentSessionStart: null
+                        lastSeenAt: sql`CURRENT_TIMESTAMP`,
+                        currentSessionStart: null,
+                        lastSessionDuration: durationMins
                     }).where(eq(users.id, user.id));
 
                     await storage.logActivity({
@@ -173,13 +178,18 @@ export function setupAuth(app: Express) {
 
     app.get("/api/logout", (req, res, next) => {
         const user = req.user as any;
-        req.logout(async (err) => {
+        req.logout(async (err: any) => {
             if (err) return next(err);
             if (user) {
                 try {
+                    const currentUserState = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
+                    const start = currentUserState[0]?.currentSessionStart;
+                    const durationMins = start ? Math.round((Date.now() - new Date(start).getTime()) / 60000) : 0;
+
                     await db.update(users).set({
-                        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)`,
-                        currentSessionStart: null
+                        lastSeenAt: sql`CURRENT_TIMESTAMP`,
+                        currentSessionStart: null,
+                        lastSessionDuration: durationMins
                     }).where(eq(users.id, user.id));
                 } catch (e) {
                     console.error("[AUTH] Failed to mark offline", e);
