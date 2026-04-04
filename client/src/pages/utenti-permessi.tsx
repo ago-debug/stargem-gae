@@ -37,31 +37,48 @@ import {
 import type { User, UserRole } from "@shared/schema";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-
 const MENU_PATHS = [
-  { path: "/maschera-input", title: "Maschera Input" },
-  { path: "/dashboard", title: "Dashboard Statistiche" },
-  { path: "/anagrafica_a_lista", title: "Anagrafica a Lista" },
-  { path: "/membro", title: "Dettaglio Membro" },
-  { path: "/corsi", title: "Corsi" },
-  { path: "/calendario", title: "Calendario Attività" },
-  { path: "/workshops", title: "Workshops" },
-  { path: "/iscritti-corsi", title: "Iscritti per Corso" },
-  { path: "/insegnanti", title: "Insegnanti" },
-  { path: "/studios", title: "Studios/Sale" },
-  { path: "/tessere-certificati", title: "Tessere & Certificati" },
-  { path: "/generazione-tessere", title: "Generazione Tessere" },
-  { path: "/pagamenti", title: "Pagamenti" },
-  { path: "/accessi", title: "Controllo Accessi" },
-  { path: "/report", title: "Report & Statistiche" },
-  { path: "/prenotazioni-sale", title: "Affitti" },
-  { path: "/categorie-corsi", title: "Categorie Corsi" },
-  { path: "/elenchi", title: "Metodi di Pagamento" },
-  { path: "/booking-services", title: "Eventi Esterni" },
-  { path: "/admin", title: "Pannello Admin" },
-  { path: "/importa", title: "Importazione Dati" },
-  { path: "/utenti-permessi", title: "Utenti e Permessi" },
-  { path: "/reset-stagione", title: "Reset Stagione" },
+  // SEGRETERIA OPERATIVA
+  { path: "/dashboard", title: "1. Dashboard Statistiche" },
+  { path: "/maschera-input", title: "2. Maschera Input" },
+  { path: "/anagrafica-generale", title: "3. Anagrafica Generale" },
+  { path: "/tessere-certificati", title: "4. Tessere & Certificati" },
+  { path: "/generazione-tessere", title: "5. Generazione Tessere" },
+  { path: "/accessi", title: "6. Controllo Accessi" },
+  
+  // AMMINISTRAZIONE E CASSA
+  { path: "/pagamenti", title: "7. Lista Pagamenti" },
+  { path: "/scheda-contabile", title: "8. Scheda Contabile" },
+  { path: "/report", title: "9. Report & Statistiche" },
+
+  // ATTIVITA E DIDATTICA
+  { path: "/attivita", title: "10. Attività (Corsi, Workshop...)" },
+  { path: "/iscritti_per_attivita", title: "11. Iscritti per Attività" },
+  { path: "/categorie-attivita", title: "12. Categorie Attività" },
+  { path: "/calendario-attivita", title: "13. Calendario Attività" },
+  { path: "/planning", title: "14. Planning" },
+  { path: "/programmazione-date", title: "15. Programmazione Date" },
+  { path: "/studios", title: "16. Studios / Sale" },
+  { path: "/affitto-studio", title: "17. Affitto Studio Medico" },
+
+  // RISORSE UMANE E TEAM
+  { path: "/staff", title: "18. Staff e Insegnanti" },
+  { path: "/inserisci-nota", title: "19. Inserisci Nota" },
+  { path: "/commenti", title: "20. Commenti Team" },
+  { path: "/todo-list", title: "21. ToDo List" },
+  { path: "/knowledge-base", title: "22. Knowledge Base" },
+
+  // CONFIGURAZIONI CORE
+  { path: "/listini", title: "23. Listini e Quote" },
+  { path: "/promo-sconti", title: "24. Promo / Sconti" },
+
+  // AMMINISTRATORE
+  { path: "/admin", title: "25. Pannello Admin Global" },
+  { path: "/elenchi", title: "26. Elenchi Custom" },
+  { path: "/importa", title: "27. Importazione Dati" },
+  { path: "/utenti-permessi", title: "28. Utenti e Permessi" },
+  { path: "/audit-logs", title: "29. Storico Log ed Eliminazioni" },
+  { path: "/reset-stagione", title: "30. Reset Stagione" },
 ];
 
 export default function UtentiPermessi() {
