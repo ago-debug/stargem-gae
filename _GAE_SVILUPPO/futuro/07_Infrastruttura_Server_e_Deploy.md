@@ -1,3 +1,7 @@
+
+
+<!-- --- INIZIO SORGENTE: futuro/16_GAE_Phase26_Migrazione_VPS.md --- -->
+
 # Phase 26: Migrazione Infrastruttura Server VPS IONOS
 **Data Operazioni:** 30 Marzo 2026
 
@@ -43,3 +47,7 @@ Quando il DNS sarà 100% stabile:
 1. Chiudere l'account/database vecchio per prevenire split-brain.
 2. Certificare Let's Encrypt al perimetro HTTPS.
 3. Testare le performance di read/write simultanee dal dev locale appoggiato in SSH, tenendo conto di eventuali ping spike.
+
+
+<!-- --- FINE SORGENTE: futuro/16_GAE_Phase26_Migrazione_VPS.md --- -->
+

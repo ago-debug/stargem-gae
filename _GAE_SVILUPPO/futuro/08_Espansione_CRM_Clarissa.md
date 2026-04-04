@@ -1,3 +1,7 @@
+
+
+<!-- --- INIZIO SORGENTE: futuro/14_GAE_Strategic_Plan_Clarissa_CRM.md --- -->
+
 # PROPOSTA TECNICO-STRATEGICA: INTEGRAZIONE STUDIO GEM ↔ CLARISSA CRM
 
 > [!NOTE]
@@ -105,3 +109,7 @@ A questo punto Clarissa reagisce passivamente tramite le sue Automazioni native:
 
 ---
 *Documento Strategico approvato e mappato per le prossime Roadmap di implementazione in `_GAE_SVILUPPO`.*
+
+
+<!-- --- FINE SORGENTE: futuro/14_GAE_Strategic_Plan_Clarissa_CRM.md --- -->
+

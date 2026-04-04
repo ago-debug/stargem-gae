@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { hasWritePermission } from "@/App";
 import {
   UserCog,
   Plus,
@@ -39,7 +40,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 const MENU_PATHS = [
   // SEGRETERIA OPERATIVA
-  { path: "/dashboard", title: "1. Dashboard Statistiche" },
+  { path: "/", title: "1. Dashboard Statistiche" },
   { path: "/maschera-input", title: "2. Maschera Input" },
   { path: "/anagrafica-generale", title: "3. Anagrafica Generale" },
   { path: "/tessere-certificati", title: "4. Tessere & Certificati" },
@@ -378,7 +379,7 @@ export default function UtentiPermessi() {
     setIsRoleDialogOpen(true);
   };
 
-  if (currentUser?.role !== 'admin') {
+  if (!hasWritePermission(currentUser, "/utenti-permessi")) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <Shield className="w-16 h-16 text-destructive opacity-50" />
@@ -468,9 +469,9 @@ export default function UtentiPermessi() {
                         <TableCell className={cn(iscUser("phone") && "sorted-column-cell")}>{u.phone || "-"}</TableCell>
                         <TableCell className={cn(iscUser("email") && "sorted-column-cell")}>{u.email || "-"}</TableCell>
                         <TableCell className={cn(iscUser("role") && "sorted-column-cell")}>
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                          <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${u.role === 'admin' ? 'bg-amber-100 text-amber-700 border border-amber-300' : 'bg-blue-100 text-blue-700'
                             }`}>
-                            {u.role === 'admin' ? 'super admin' : u.role}
+                            {u.role === 'admin' ? 'MASTER' : u.role}
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
@@ -556,10 +557,10 @@ export default function UtentiPermessi() {
                   <TableBody>
                     {siRole(roles || [], getSortValueRole).map((r: UserRole) => (
                       <TableRow key={r.id}>
-                        <TableCell className={cn("font-bold", iscRole("name") && "sorted-column-cell")}>
-                          {r.name === 'admin' ? 'super admin' : r.name}
+                        <TableCell className={cn("font-bold text-sm", iscRole("name") && "sorted-column-cell", r.name === 'admin' && "text-amber-600")}>
+                          {r.name === 'admin' ? 'MASTER (System)' : r.name}
                         </TableCell>
-                        <TableCell className={cn(iscRole("description") && "sorted-column-cell")}>{r.description || "-"}</TableCell>
+                        <TableCell className={cn("text-sm", iscRole("description") && "sorted-column-cell")}>{r.description || "-"}</TableCell>
                         <TableCell className={cn(iscRole("permissions") && "sorted-column-cell")}>
                           <span className="text-xs font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded-md">
                             {(() => {
@@ -575,7 +576,8 @@ export default function UtentiPermessi() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              title="Modifica Ruolo"
+                              title={r.name === 'admin' ? "Permessi Master non modificabili" : "Modifica Ruolo"}
+                              disabled={r.name === 'admin'}
                               onClick={() => openRoleDialog(r)}
                             >
                               <Edit className="w-4 h-4" />

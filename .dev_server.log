@@ -10053,3 +10053,2601 @@ A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cau
 [AUTH DEBUG] Deserialization done for admin-id
 5:59:25 PM [express] GET /api/team-comments 304 in 295ms :: [{"id":10,"authorId":"admin-id","authorN…
 5:59:25 PM [express] GET /api/users/presence/active 200 in 292ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+5:59:35 PM [express] GET /api/todos 304 in 268ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+5:59:35 PM [express] GET /api/team-comments 304 in 242ms :: [{"id":10,"authorId":"admin-id","authorN…
+5:59:36 PM [express] GET /api/users/presence/active 304 in 238ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+5:59:46 PM [express] GET /api/todos 304 in 276ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+5:59:46 PM [express] GET /api/team-comments 304 in 303ms :: [{"id":10,"authorId":"admin-id","authorN…
+5:59:46 PM [express] GET /api/users/presence/active 304 in 299ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+5:59:56 PM [express] GET /api/todos 304 in 299ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+5:59:56 PM [express] GET /api/team-comments 304 in 272ms :: [{"id":10,"authorId":"admin-id","authorN…
+5:59:56 PM [express] GET /api/users/presence/active 304 in 269ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+5:59:57 PM [express] POST /api/users/presence/heartbeat 200 in 201ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:06 PM [express] GET /api/todos 304 in 275ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:06 PM [express] GET /api/team-comments 304 in 302ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:00:06 PM [express] GET /api/users/presence/active 200 in 298ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:17 PM [express] GET /api/todos 304 in 272ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:00:17 PM [express] GET /api/team-comments 304 in 241ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:00:17 PM [express] GET /api/users/presence/active 304 in 237ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:27 PM [express] GET /api/todos 304 in 272ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:27 PM [express] GET /api/team-comments 304 in 304ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:00:27 PM [express] GET /api/users/presence/active 200 in 299ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:37 PM [express] GET /api/todos 304 in 300ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:00:37 PM [express] GET /api/team-comments 304 in 255ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:00:37 PM [express] GET /api/users/presence/active 304 in 245ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:47 PM [express] GET /api/todos 304 in 266ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:47 PM [express] GET /api/team-comments 304 in 314ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:00:48 PM [express] GET /api/users/presence/active 304 in 311ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+6:00:54 PM [express] POST /api/users/presence/offline 200 in 369ms :: {"success":true}
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+6:00:54 PM [express] POST /api/users/presence/offline 200 in 196ms :: {"success":true}
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:57 PM [express] GET /api/user 200 in 159ms :: {"id":"admin-id","username":"admin","password":"0…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:57 PM [express] GET /api/activities-summary 200 in 153ms :: {"servizi":{"total":3,"active":3},"…
+6:00:57 PM [express] GET /api/latest-activity 200 in 158ms :: {"id":1151,"userId":"admin-id","action…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+6:00:57 PM [express] GET /api/users/presence/active 200 in 167ms :: [{"id":"admin-id","username":"ad…
+6:00:57 PM [express] GET /api/team-notes 304 in 170ms :: [{"id":23,"authorId":"admin-id","authorName…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+6:00:57 PM [express] GET /api/todos 304 in 179ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:57 PM [express] POST /api/users/presence/heartbeat 200 in 245ms :: {"success":true}
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:57 PM [express] GET /api/team-comments 304 in 116ms :: [{"id":10,"authorId":"admin-id","authorN…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:00:57 PM [express] GET /api/roles 200 in 142ms :: [{"id":6,"name":"Back-Office","description":"Seg…
+6:00:57 PM [express] GET /api/activity-logs 200 in 156ms :: [{"id":1152,"userId":"admin-id","action"…
+6:00:57 PM [express] GET /api/users 200 in 183ms :: [{"id":"admin-id","username":"admin","email":nul…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:01:07 PM [express] GET /api/todos 304 in 298ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:01:07 PM [express] GET /api/team-comments 304 in 210ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:01:07 PM [express] GET /api/users/presence/active 200 in 314ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:01:17 PM [express] GET /api/todos 304 in 271ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:01:17 PM [express] GET /api/team-comments 304 in 320ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:01:17 PM [express] GET /api/users/presence/active 304 in 352ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:01:28 PM [express] GET /api/todos 304 in 284ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:01:28 PM [express] GET /api/team-comments 304 in 288ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:01:28 PM [express] GET /api/users/presence/active 304 in 284ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:01:38 PM [express] GET /api/todos 304 in 269ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:01:38 PM [express] GET /api/users/presence/active 304 in 212ms :: [{"id":"admin-id","username":"ad…
+6:01:38 PM [express] GET /api/team-comments 304 in 256ms :: [{"id":10,"authorId":"admin-id","authorN…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:01:48 PM [express] GET /api/todos 304 in 302ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:01:48 PM [express] GET /api/users/presence/active 304 in 300ms :: [{"id":"admin-id","username":"ad…
+6:01:48 PM [express] GET /api/team-comments 304 in 301ms :: [{"id":10,"authorId":"admin-id","authorN…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:01:57 PM [express] POST /api/users/presence/heartbeat 200 in 278ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:01:58 PM [express] GET /api/todos 304 in 289ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:01:58 PM [express] GET /api/team-comments 304 in 273ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:01:59 PM [express] GET /api/users/presence/active 200 in 309ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:02:09 PM [express] GET /api/todos 304 in 273ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:02:09 PM [express] GET /api/team-comments 304 in 302ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:02:09 PM [express] GET /api/users/presence/active 304 in 296ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:02:19 PM [express] GET /api/todos 304 in 282ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:02:19 PM [express] GET /api/team-comments 304 in 257ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:02:19 PM [express] GET /api/users/presence/active 304 in 252ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:02:29 PM [express] GET /api/todos 304 in 295ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:02:29 PM [express] GET /api/team-comments 304 in 322ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:02:29 PM [express] GET /api/users/presence/active 304 in 331ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:02:40 PM [express] GET /api/todos 304 in 270ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:02:40 PM [express] GET /api/team-comments 304 in 244ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:02:40 PM [express] GET /api/users/presence/active 304 in 231ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:02:50 PM [express] GET /api/todos 304 in 298ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:02:50 PM [express] GET /api/team-comments 304 in 283ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:02:50 PM [express] GET /api/users/presence/active 304 in 273ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:02:57 PM [express] POST /api/users/presence/heartbeat 200 in 287ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:00 PM [express] GET /api/todos 304 in 267ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:03:00 PM [express] GET /api/team-comments 304 in 288ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:03:00 PM [express] GET /api/users/presence/active 200 in 291ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:10 PM [express] GET /api/todos 304 in 271ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:11 PM [express] GET /api/team-comments 304 in 298ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:03:11 PM [express] GET /api/users/presence/active 304 in 291ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:21 PM [express] GET /api/todos 304 in 280ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:03:21 PM [express] GET /api/team-comments 304 in 253ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:03:21 PM [express] GET /api/users/presence/active 304 in 249ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:31 PM [express] GET /api/todos 304 in 274ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:31 PM [express] GET /api/team-comments 304 in 300ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:03:31 PM [express] GET /api/users/presence/active 304 in 297ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:41 PM [express] GET /api/todos 304 in 273ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:03:41 PM [express] GET /api/team-comments 304 in 249ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:03:41 PM [express] GET /api/users/presence/active 304 in 243ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:52 PM [express] GET /api/todos 304 in 275ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:52 PM [express] GET /api/team-comments 304 in 304ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:03:52 PM [express] GET /api/users/presence/active 304 in 301ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:03:57 PM [express] POST /api/users/presence/heartbeat 200 in 304ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:04:02 PM [express] GET /api/todos 304 in 272ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:04:02 PM [express] GET /api/team-comments 304 in 241ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:04:02 PM [express] GET /api/users/presence/active 200 in 239ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:04:12 PM [express] GET /api/todos 304 in 274ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:04:12 PM [express] GET /api/team-comments 304 in 305ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:04:12 PM [express] GET /api/users/presence/active 304 in 294ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:04:22 PM [express] GET /api/team-comments 304 in 215ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:04:22 PM [express] GET /api/todos 304 in 291ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:04:22 PM [express] GET /api/users/presence/active 304 in 238ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:04:33 PM [express] GET /api/team-comments 304 in 275ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:04:33 PM [express] GET /api/todos 304 in 273ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:04:33 PM [express] GET /api/users/presence/active 304 in 267ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:04:43 PM [express] GET /api/team-comments 304 in 263ms :: [{"id":10,"authorId":"admin-id","authorN…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:04:43 PM [express] GET /api/todos 304 in 293ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:04:43 PM [express] GET /api/users/presence/active 304 in 293ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:04:53 PM [express] GET /api/team-comments 304 in 267ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:04:53 PM [express] GET /api/todos 304 in 239ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:04:53 PM [express] GET /api/users/presence/active 304 in 232ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:04:57 PM [express] POST /api/users/presence/heartbeat 200 in 292ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:05:03 PM [express] GET /api/team-comments 304 in 274ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:05:04 PM [express] GET /api/todos 304 in 276ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:05:04 PM [express] GET /api/users/presence/active 200 in 277ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:05:14 PM [express] GET /api/team-comments 304 in 269ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:05:14 PM [express] GET /api/todos 304 in 269ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:05:14 PM [express] GET /api/users/presence/active 304 in 263ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:05:24 PM [express] GET /api/team-comments 304 in 274ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:05:24 PM [express] GET /api/todos 304 in 280ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:05:24 PM [express] GET /api/users/presence/active 304 in 274ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+6:05:34 PM [express] PATCH /api/users/1db5007f-054e-4f0d-b47d-df95e6829d01 200 in 266ms :: {"id":"1d…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+6:05:34 PM [express] GET /api/team-comments 304 in 148ms :: [{"id":10,"authorId":"admin-id","authorN…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:05:34 PM [express] GET /api/todos 304 in 150ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:05:34 PM [express] GET /api/users 200 in 169ms :: [{"id":"admin-id","username":"admin","email":nul…
+6:05:34 PM [express] GET /api/users/presence/active 304 in 160ms :: [{"id":"admin-id","username":"ad…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:05:57 PM [express] POST /api/users/presence/heartbeat 200 in 269ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:06:53 PM [express] GET /api/team-comments 304 in 304ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:06:53 PM [express] GET /api/todos 304 in 307ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:06:53 PM [express] GET /api/users/presence/active 200 in 343ms :: [{"id":"1db5007f-054e-4f0d-b47d-…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:06:57 PM [express] POST /api/users/presence/heartbeat 200 in 276ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:07:03 PM [express] GET /api/team-comments 304 in 290ms :: [{"id":10,"authorId":"admin-id","authorN…
+6:07:03 PM [express] GET /api/todos 304 in 293ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:07:03 PM [express] GET /api/users/presence/active 200 in 287ms :: [{"id":"1db5007f-054e-4f0d-b47d-…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:07:13 PM [express] GET /api/team-comments 304 in 270ms :: [{"id":10,"authorId":"admin-id","authorN…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:07:13 PM [express] GET /api/todos 304 in 313ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:07:14 PM [express] GET /api/users/presence/active 304 in 307ms :: [{"id":"1db5007f-054e-4f0d-b47d-…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:07:20 PM [express] PATCH /api/users/1db5007f-054e-4f0d-b47d-df95e6829d01 200 in 278ms :: {"id":"1d…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:07:20 PM [express] GET /api/users 200 in 193ms :: [{"id":"admin-id","username":"admin","email":nul…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:07:24 PM [express] GET /api/team-comments 304 in 272ms :: [{"id":10,"authorId":"admin-id","authorN…
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:07:24 PM [express] GET /api/todos 304 in 274ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+6:07:24 PM [express] GET /api/users/presence/active 304 in 274ms :: [{"id":"1db5007f-054e-4f0d-b47d-…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:07:57 PM [express] POST /api/users/presence/heartbeat 200 in 277ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:09:20 PM [express] POST /api/users/presence/heartbeat 200 in 275ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:10:20 PM [express] POST /api/users/presence/heartbeat 200 in 289ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  false
+[AUTH DEBUG] Fetched all roles, count:  5
+[AUTH DEBUG] Deserialization done for admin-id
+6:11:20 PM [express] POST /api/users/presence/heartbeat 200 in 278ms :: {"success":true}
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: Connection lost: The server closed the connection.
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'PROTOCOL_CONNECTION_LOST',
+    errno: undefined,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: Connection lost: The server closed the connection.
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'PROTOCOL_CONNECTION_LOST',
+    errno: undefined,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:17:53 PM [express] PATCH /api/users/1db5007f-054e-4f0d-b47d-df95e6829d01 500 in 21284ms :: {"messa…
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: Connection lost: The server closed the connection.
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'PROTOCOL_CONNECTION_LOST',
+    errno: undefined,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: Connection lost: The server closed the connection.
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'PROTOCOL_CONNECTION_LOST',
+    errno: undefined,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: Connection lost: The server closed the connection.
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'PROTOCOL_CONNECTION_LOST',
+    errno: undefined,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: Connection lost: The server closed the connection.
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'PROTOCOL_CONNECTION_LOST',
+    errno: undefined,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: Connection lost: The server closed the connection.
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'PROTOCOL_CONNECTION_LOST',
+    errno: undefined,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: Connection lost: The server closed the connection.
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'PROTOCOL_CONNECTION_LOST',
+    errno: undefined,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:17:53 PM [express] GET /api/todos 500 in 33262ms :: {"message":"Failed query: select `id`, `userna…
+6:17:53 PM [express] GET /api/users/presence/active 500 in 33261ms :: {"message":"Failed query: sele…
+6:17:53 PM [express] GET /api/team-comments 500 in 33264ms :: {"message":"Failed query: select `id`,…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:17:57 PM [express] POST /api/users/presence/heartbeat 500 in 2ms :: {"message":"Failed query: sele…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:03 PM [express] GET /api/todos 500 in 3ms :: {"message":"Failed query: select `id`, `username`,…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+[AUTH DEBUG] Deserializing user admin-id
+6:18:03 PM [express] GET /api/users/presence/active 500 in 1ms :: {"message":"Failed query: select `…
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at runNextTicks (node:internal/process/task_queues:68:3)
+      at process.processImmediate (node:internal/timers:472:9) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at runNextTicks (node:internal/process/task_queues:68:3)
+      at process.processImmediate (node:internal/timers:472:9) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:03 PM [express] GET /api/team-comments 500 in 1ms :: {"message":"Failed query: select `id`, `us…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:05 PM [express] PATCH /api/users/1db5007f-054e-4f0d-b47d-df95e6829d01 500 in 1ms :: {"message":…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at runNextTicks (node:internal/process/task_queues:68:3)
+      at process.processImmediate (node:internal/timers:472:9) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at runNextTicks (node:internal/process/task_queues:68:3)
+      at process.processImmediate (node:internal/timers:472:9) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:13 PM [express] GET /api/todos 500 in 4ms :: {"message":"Failed query: select `id`, `username`,…
+6:18:13 PM [express] GET /api/users/presence/active 500 in 3ms :: {"message":"Failed query: select `…
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:13 PM [express] GET /api/team-comments 500 in 4ms :: {"message":"Failed query: select `id`, `us…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:23 PM [express] GET /api/todos 500 in 2ms :: {"message":"Failed query: select `id`, `username`,…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:23 PM [express] GET /api/users/presence/active 500 in 2ms :: {"message":"Failed query: select `…
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:23 PM [express] GET /api/team-comments 500 in 1ms :: {"message":"Failed query: select `id`, `us…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:27 PM [express] PATCH /api/users/1db5007f-054e-4f0d-b47d-df95e6829d01 500 in 1ms :: {"message":…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:31 PM [express] POST /api/users/presence/offline 500 in 1ms :: {"message":"Failed query: select…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+6:18:31 PM [express] POST /api/users/presence/offline 500 in 2ms :: {"message":"Failed query: select…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserialization error for admin-id: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?
+params: admin-id
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUser (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:721:20)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:91:26) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`id` = ?',
+  params: [ 'admin-id' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}

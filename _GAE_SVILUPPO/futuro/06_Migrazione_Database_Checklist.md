@@ -1,3 +1,7 @@
+
+
+<!-- --- INIZIO SORGENTE: futuro/13_GAE_Piano_Migrazione_DB.md --- -->
+
 # Piano Lavoro e Analisi Architetturale: Transizione Database CourseManager
 
 > [!CAUTION] 
@@ -116,3 +120,7 @@ La transizione da un modello all'altro non è un'operazione banale, è un trapia
 
 **Totale Tempo Stimato (Team Senior Developer): ~7 Giornate Lavorative (56 ore ometto l'overhead).**
 *Informativa:* Durante l'avanzamento fino alla _Fase 2 compresa_, si esige il congelamento totale di feature che interessano il branch "main" da parte degli altri membri, onde evitare colossali conflitti di riscrittura GIT (merge conflicts) e derive sui dati di test.
+
+
+<!-- --- FINE SORGENTE: futuro/13_GAE_Piano_Migrazione_DB.md --- -->
+
