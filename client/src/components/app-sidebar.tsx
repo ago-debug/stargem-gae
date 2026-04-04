@@ -11,6 +11,7 @@ import {
   BarChart3,
   Upload,
   LogOut,
+  Circle,
   Building2,
   Wallet,
   Settings,
@@ -248,6 +249,8 @@ const adminItems = [
 ];
 
 import { hasPermission } from "@/App";
+import { UserProfileDialog } from "@/components/user-profile-dialog";
+import { useActiveUsers } from "@/hooks/use-active-users";
 
 export function AppSidebar() {
   const [location] = useLocation();
@@ -502,27 +505,33 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border">
+            <SidebarFooter className="p-4 border-t border-sidebar-border">
         {user && (
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center flex-shrink-0 border border-sidebar-border">
-                <span className="text-xs font-bold text-primary">
-                  {user.firstName ? user.firstName[0] : (user.username ? user.username[0].toUpperCase() : "?")}
-                  {user.lastName ? user.lastName[0] : ""}
-                </span>
+            <UserProfileDialog>
+              <div className="flex items-center gap-2 min-w-0 cursor-pointer hover:bg-slate-100 p-1.5 rounded-md transition-colors flex-1">
+                <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center flex-shrink-0 border border-sidebar-border overflow-hidden">
+                  {user.profileImageUrl ? (
+                    <img src={user.profileImageUrl} alt="avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs font-bold text-primary">
+                      {user.firstName ? user.firstName[0] : (user.username ? user.username[0].toUpperCase() : "?")}
+                      {user.lastName ? user.lastName[0] : ""}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-sidebar-foreground truncate group-hover:text-primary">
+                    {user.firstName || user.lastName
+                      ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+                      : user.username}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium">
+                    {user.role}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-sidebar-foreground truncate">
-                  {user.firstName || user.lastName
-                    ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
-                    : user.username}
-                </p>
-                <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium">
-                  {user.role}
-                </p>
-              </div>
-            </div>
+            </UserProfileDialog>
             <Button
               variant="ghost"
               size="icon"
@@ -530,11 +539,52 @@ export function AppSidebar() {
               disabled={logoutMutation.isPending}
               data-testid="button-logout"
               className="flex-shrink-0"
+              title="Esci"
             >
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
         )}
+        
+        {/* ACTIVE USERS ACCORDION/LIST */}
+        {(() => {
+          const { data: usersInfo = [] } = useActiveUsers();
+          if (usersInfo.length === 0) return null;
+          
+          return (
+            <div className="mt-4 pt-4 border-t border-sidebar-border">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
+                Connessioni Live
+                <span className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0.5 rounded-full">
+                  {usersInfo.filter((u: any) => u.lastSeenAt && (new Date().getTime() - new Date(u.lastSeenAt).getTime() <= 15 * 60 * 1000)).length}
+                </span>
+              </p>
+              <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
+                {usersInfo.map((u: any) => {
+                  const isOnline = u.lastSeenAt && (new Date().getTime() - new Date(u.lastSeenAt).getTime() <= 15 * 60 * 1000);
+                  const isMe = user?.id === u.id;
+                  
+                  return (
+                    <div key={u.id} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Circle className={`w-2 h-2 fill-current shrink-0 ${isOnline ? "text-green-500" : "text-slate-300"}`} />
+                        <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : "text-slate-400"}`}>
+                          {isMe ? "Tu" : (u.firstName ? `${u.firstName} ${u.lastName}` : u.username)}
+                        </span>
+                      </div>
+                      {u.currentSessionStart && (
+                        <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : "text-slate-300"}`}>
+                          {new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {latestActivity && (
           <div className="mt-4 pt-4 border-t border-sidebar-border text-[10px] text-muted-foreground/80 leading-tight space-y-1 select-none">
             <p className="flex justify-between">

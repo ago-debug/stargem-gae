@@ -41,7 +41,7 @@ export function isAuthenticated(req: Request, res: Response, next: NextFunction)
     if (req.isAuthenticated()) {
         return next();
     }
-    res.status(401).send("Not logged in");
+    res.status(401).send("Non autenticato");
 }
 
 export function setupAuth(app: Express) {
@@ -210,7 +210,7 @@ export function setupAuth(app: Express) {
         if (req.isAuthenticated()) {
             res.json(req.user);
         } else {
-            res.status(401).send("Not logged in");
+            res.status(401).send("Non autenticato");
         }
     });
 

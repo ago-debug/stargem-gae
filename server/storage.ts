@@ -744,7 +744,7 @@ export class DatabaseStorage implements IStorage {
 
     if (!userData.username) throw new Error("Username is required for upsert");
     const [user] = await db.select().from(users).where(eq(users.username, userData.username));
-    if (!user) throw new Error("User not found after upsert");
+    if (!user) throw new Error("Utente non trovato dopo l'upsert");
     return user;
   }
 
@@ -755,7 +755,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id));
 
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("Utente non trovato");
     return user;
   }
 

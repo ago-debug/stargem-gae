@@ -50,6 +50,13 @@
       "when": 1774377377673,
       "tag": "0006_curvy_princess_powerful",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1775298856209,
+      "tag": "0007_bitter_zeigeist",
+      "breakpoints": true
     }
   ]
 }

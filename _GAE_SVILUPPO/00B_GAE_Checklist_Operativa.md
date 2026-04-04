@@ -10,6 +10,16 @@
 
 ---
 
+
+## 8. Presenza Utenti in Tempo Reale & Gestione Profilo Operatore (Phase 28)
+- [x] Sviluppo Heartbeat & Endpoints API (`/api/users/presence/heartbeat`, `/api/users/presence/active`, `/api/users/profile`)
+- [x] Componente `UserPresenceTracker` + Global Mount in `App.tsx`
+- [x] Aggiornamento Schema DB (`lastSeenAt`, `currentSessionStart`, `phone`, `profileImageUrl` esteso) e Push
+- [x] UI/UX Lista Presenze Sidebar (Verde Live, Grigio Disconnessi > 15m) + Orari primo ingresso sessione
+- [x] UI/UX Avatars Header Multipli (max 3 visualizzati + popover eccedenze)
+- [x] Dialogo Aggiornamento Profilo (Base64 avatar limitato 2MB & Phone nr.) cablato nel click sulla Sidebar.
+
+
 ## 1. Cleanup Consolidation (Livelli 1-3) & Audit Preliminari
 Questi task consolidano la stabilità prima della riscrittura profonda V2 (Partecipazioni).
 
