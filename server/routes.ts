@@ -689,7 +689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/google/callback", async (req, res) => {
     const code = req.query.code as string;
-    if (!code) return res.status(400).send("Code missing");
+    if (!code) return res.status(400).send("Codice mancante");
 
     try {
       const oauth2Client = getGoogleOAuth2Client();
@@ -835,14 +835,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/users", isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const { username, password, firstName, lastName, email, role } = req.body;
+      const { username, password, firstName, lastName, email, role, phone, profileImageUrl } = req.body;
       if (!username || !password) {
-        return res.status(400).send("Username and password are required");
+        return res.status(400).send("Username e password obbligatori");
       }
 
       const existing = await storage.getUserByUsername(username);
       if (existing) {
-        return res.status(400).send("Username already exists");
+        return res.status(400).send("Username già esistente");
       }
 
       const { hashPassword } = await import("./auth");
@@ -854,6 +854,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName,
         lastName,
         email,
+        phone,
+        profileImageUrl,
         role: role || 'operator'
       } as any);
 
@@ -865,14 +867,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Profile
+  app.patch("/api/users/profile", isAuthenticated, async (req, res) => {
+    try {
+      const { phone, profileImageUrl } = req.body;
+      const userId = (req.user as any).id;
+      
+      const payload: any = {};
+      if (phone !== undefined) payload.phone = phone;
+      if (profileImageUrl !== undefined) payload.profileImageUrl = profileImageUrl;
+      
+      await storage.updateUser(userId, payload);
+      const updatedUser = await storage.getUser(userId);
+      const { password: _, ...safeUser } = updatedUser as any;
+      
+      res.json(safeUser);
+    } catch (error: any) {
+      console.error("[API Error] /api/users/profile", error);
+      res.status(500).send(error.message);
+    }
+  });
+
   app.patch("/api/users/:id", isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const { firstName, lastName, email, role } = req.body;
+      const { firstName, lastName, email, role, phone, profileImageUrl } = req.body;
       const updatedUser = await storage.updateUser(req.params.id, {
         firstName,
         lastName,
         email,
-        role
+        role,
+        phone,
+        profileImageUrl
       } as any);
 
       const { password: _, ...safeUser } = updatedUser;
@@ -883,11 +908,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Presence Heartbeat
+  app.post("/api/users/presence/heartbeat", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { db } = await import("./db");
+      const { users } = await import("../shared/schema");
+      const { sql, eq } = await import("drizzle-orm");
+
+      await db.update(users).set({
+        lastSeenAt: sql`CURRENT_TIMESTAMP`,
+        currentSessionStart: sql`
+          CASE 
+            WHEN current_session_start IS NULL THEN CURRENT_TIMESTAMP
+            WHEN TIMESTAMPDIFF(MINUTE, last_seen_at, CURRENT_TIMESTAMP) > 15 THEN CURRENT_TIMESTAMP
+            ELSE current_session_start
+          END
+        `
+      }).where(eq(users.id, userId));
+
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Active Users list (Returns all users so frontend can render offline ones as grey)
+  app.get("/api/users/presence/active", isAuthenticated, async (req, res) => {
+    try {
+      const { db } = await import("./db");
+      const { users } = await import("../shared/schema");
+      const { desc } = await import("drizzle-orm");
+
+      const allUsers = await db.select({
+        id: users.id,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        currentSessionStart: users.currentSessionStart,
+        lastSeenAt: users.lastSeenAt,
+      })
+      .from(users)
+      .orderBy(desc(users.lastSeenAt));
+      
+      res.json(allUsers);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.post("/api/users/:id/password", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { password } = req.body;
       if (!password) {
-        return res.status(400).send("Password is required");
+        return res.status(400).send("Password obbligatoria");
       }
 
       const { hashPassword } = await import("./auth");
@@ -905,7 +980,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Don't allow deleting yourself
       if ((req.user as any).id === req.params.id) {
-        return res.status(400).send("You cannot delete your own account");
+        return res.status(400).send("Non puoi eliminare il tuo stesso account");
       }
 
       await storage.deleteUser(req.params.id);
@@ -931,12 +1006,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { name, description, permissions } = req.body;
       if (!name || !permissions) {
-        return res.status(400).send("Name and permissions are required");
+        return res.status(400).send("Nome e permessi sono obbligatori");
       }
 
       const existing = await storage.getUserRoleByName(name);
       if (existing) {
-        return res.status(400).send("Role name already exists");
+        return res.status(400).send("Il nome del ruolo esiste già");
       }
 
       const newRole = await storage.createUserRole({
@@ -970,7 +1045,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const role = await storage.getUserRole(id);
       if (role?.name === 'admin') {
-        return res.status(400).send("Cannot delete admin role");
+        return res.status(400).send("Impossibile eliminare il ruolo di admin");
       }
       await storage.deleteUserRole(id);
       await logUserActivity(req, "DELETE", "roles", id.toString(), { name: role?.name });
@@ -1155,7 +1230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const member = await storage.getMember(id);
       if (!member) {
-        return res.status(404).json({ message: "Member not found" });
+        return res.status(404).json({ message: "Membro non trovato" });
       }
       res.json(member);
     } catch (error) {
@@ -4425,7 +4500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             skipped += result.skipped;
           } catch (err: any) {
             console.error("Bulk import failed:", err);
-            throw new Error("Bulk import failed: " + err.message);
+            throw new Error("Importazione massiva fallita: " + err.message);
           }
         }
       } else {

@@ -79,6 +79,8 @@ import { NotificationCenter } from "@/components/notification-center";
 import { TodoNotification } from "@/components/todo-notification";
 import { PageNotesIndicator } from "@/components/page-notes-indicator";
 import { PageNotesOverlay } from "@/components/page-notes-overlay";
+import { ActiveUserAvatars } from "@/components/active-user-avatars";
+import { UserPresenceTracker } from "@/components/user-presence-tracker";
 const logoStarGem = "/logo_stargem.png";
 
 export function hasPermission(user: SelectUser | null, path: string) {
@@ -251,7 +253,8 @@ function AppContent() {
         <div className="flex flex-col flex-1 overflow-hidden">
           <header className="flex items-center justify-between h-10 px-4 border-b border-border bg-background flex-shrink-0">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
-            <div className="flex items-center gap-12 h-full">
+            <div className="flex items-center gap-6 h-full">
+              <ActiveUserAvatars />
               <div className="flex items-center gap-4">
                 <PageNotesIndicator />
                 <TodoNotification />
@@ -260,6 +263,7 @@ function AppContent() {
             </div>
           </header>
           <main className="flex-1 overflow-auto bg-background relative">
+            <UserPresenceTracker />
             <PageNotesOverlay />
             <Router />
           </main>

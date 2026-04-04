@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { UserProfileDialog } from "@/components/user-profile-dialog";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -27,7 +28,9 @@ import {
   ShieldCheck,
   Edit,
   History,
-  Search
+  Search,
+  Camera,
+  Upload
 } from "lucide-react";
 import type { User, UserRole } from "@shared/schema";
 import { format } from "date-fns";
@@ -68,6 +71,10 @@ export default function UtentiPermessi() {
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<Partial<User> | null>(null);
+  const [newUserImageBase64, setNewUserImageBase64] = useState<string | null>(null);
+  const [uploadingNewUserImage, setUploadingNewUserImage] = useState(false);
+  const [editUserImageBase64, setEditUserImageBase64] = useState<string | null>(null);
+  const [uploadingEditUserImage, setUploadingEditUserImage] = useState(false);
 
   // State for Roles
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
@@ -93,6 +100,7 @@ export default function UtentiPermessi() {
     switch (key) {
       case "username": return u.username;
       case "fullName": return `${u.firstName || ""} ${u.lastName || ""}`;
+      case "phone": return u.phone || "";
       case "email": return u.email || "";
       case "role": return u.role || "";
       default: return null;
@@ -235,13 +243,65 @@ export default function UtentiPermessi() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
+    if (newUserImageBase64) {
+      data.profileImageUrl = newUserImageBase64;
+    }
     createUserMutation.mutate(data);
+  };
+
+  const handleNewUserFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ variant: "destructive", title: "File troppo grande", description: "L'immagine deve pesare al massimo 2 MB." });
+      return;
+    }
+
+    setUploadingNewUserImage(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setNewUserImageBase64(event.target?.result as string);
+      setUploadingNewUserImage(false);
+    };
+    reader.onerror = () => {
+      setUploadingNewUserImage(false);
+      toast({ variant: "destructive", title: "Errore di caricamento", description: "Impossibile leggere il file." });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleEditUserFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ variant: "destructive", title: "File troppo grande", description: "L'immagine deve pesare al massimo 2 MB." });
+      return;
+    }
+
+    setUploadingEditUserImage(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setEditUserImageBase64(event.target?.result as string);
+      setUploadingEditUserImage(false);
+    };
+    reader.onerror = () => {
+      setUploadingEditUserImage(false);
+      toast({ variant: "destructive", title: "Errore di caricamento", description: "Impossibile leggere il file." });
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleUpdateUser = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
+    
+    if (editUserImageBase64 !== null && editUserImageBase64 !== selectedUser?.profileImageUrl) {
+      data.profileImageUrl = editUserImageBase64;
+    }
+
     if (selectedUser?.id) {
       updateUserMutation.mutate({ id: selectedUser.id, data });
     }
@@ -360,6 +420,7 @@ export default function UtentiPermessi() {
                     <TableRow>
                       <SortableTableHead sortKey="username" currentSort={scUser} onSort={hsUser}>Utente</SortableTableHead>
                       <SortableTableHead sortKey="fullName" currentSort={scUser} onSort={hsUser}>Nome Completo</SortableTableHead>
+                      <SortableTableHead sortKey="phone" currentSort={scUser} onSort={hsUser}>Cellulare</SortableTableHead>
                       <SortableTableHead sortKey="email" currentSort={scUser} onSort={hsUser}>Email</SortableTableHead>
                       <SortableTableHead sortKey="role" currentSort={scUser} onSort={hsUser}>Ruolo</SortableTableHead>
                       <TableHead className="text-right">Azioni</TableHead>
@@ -369,14 +430,19 @@ export default function UtentiPermessi() {
                     {siUser(users || [], getSortValueUser).map((u: User) => (
                       <TableRow key={u.id}>
                         <TableCell className={cn("font-medium flex items-center gap-2", iscUser("username") && "sorted-column-cell")}>
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <UserIcon className="w-4 h-4 text-primary" />
+                          <div className="w-8 h-8 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center border border-slate-200">
+                            {u.profileImageUrl ? (
+                              <img src={u.profileImageUrl} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                              <UserIcon className="w-4 h-4 text-primary" />
+                            )}
                           </div>
                           {u.username}
                         </TableCell>
                         <TableCell className={cn(iscUser("fullName") && "sorted-column-cell")}>
                           {u.firstName || u.lastName ? `${u.firstName || ""} ${u.lastName || ""}` : "-"}
                         </TableCell>
+                        <TableCell className={cn(iscUser("phone") && "sorted-column-cell")}>{u.phone || "-"}</TableCell>
                         <TableCell className={cn(iscUser("email") && "sorted-column-cell")}>{u.email || "-"}</TableCell>
                         <TableCell className={cn(iscUser("role") && "sorted-column-cell")}>
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
@@ -392,11 +458,17 @@ export default function UtentiPermessi() {
                               title="Modifica Utente"
                               onClick={() => {
                                 setSelectedUser(u);
+                                setEditUserImageBase64(u.profileImageUrl || null);
                                 setIsEditUserDialogOpen(true);
                               }}
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
+                            <UserProfileDialog targetUser={u}>
+                              <Button variant="ghost" size="icon" title="Modifica Foto / Telefono">
+                                <Camera className="w-4 h-4" />
+                              </Button>
+                            </UserProfileDialog>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -565,13 +637,39 @@ export default function UtentiPermessi() {
       </Tabs>
 
       {/* User Dialogs */}
-      <Dialog open={isNewUserDialogOpen} onOpenChange={setIsNewUserDialogOpen}>
+      <Dialog open={isNewUserDialogOpen} onOpenChange={(val) => {
+        setIsNewUserDialogOpen(val);
+        if (!val) setNewUserImageBase64(null);
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Aggiungi Nuovo Utente</DialogTitle>
             <DialogDescription>Crea un nuovo account operatore.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateUser} className="space-y-4">
+            <div className="flex flex-col items-center gap-4 py-2">
+              <div className="relative group cursor-pointer w-20 h-20 rounded-full overflow-hidden border-2 border-slate-200">
+                {newUserImageBase64 ? (
+                  <img src={newUserImageBase64} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                    <Camera className="w-6 h-6" />
+                  </div>
+                )}
+                <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  {uploadingNewUserImage ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 text-white mb-1" />
+                      <span className="text-[9px] text-white font-medium">Carica</span>
+                    </>
+                  )}
+                  <input type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleNewUserFileChange} disabled={uploadingNewUserImage} />
+                </label>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="username">Username *</Label>
@@ -592,9 +690,15 @@ export default function UtentiPermessi() {
                 <Input id="lastName" name="lastName" />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Cellulare</Label>
+                <Input id="phone" name="phone" placeholder="es. +39 333..." />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Ruolo</Label>
@@ -617,13 +721,39 @@ export default function UtentiPermessi() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
+      <Dialog open={isEditUserDialogOpen} onOpenChange={(val) => {
+        setIsEditUserDialogOpen(val);
+        if (!val) setEditUserImageBase64(null);
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Modifica Utente</DialogTitle>
             <DialogDescription>Aggiorna le informazioni di profilo dell'utente.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleUpdateUser} className="space-y-4">
+            <div className="flex flex-col items-center gap-4 py-2">
+              <div className="relative group cursor-pointer w-20 h-20 rounded-full overflow-hidden border-2 border-slate-200">
+                {editUserImageBase64 ? (
+                  <img src={editUserImageBase64} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                    <UserIcon className="w-6 h-6" />
+                  </div>
+                )}
+                <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  {uploadingEditUserImage ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 text-white mb-1" />
+                      <span className="text-[9px] text-white font-medium">Cambia</span>
+                    </>
+                  )}
+                  <input type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleEditUserFileChange} disabled={uploadingEditUserImage} />
+                </label>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-firstName">Nome</Label>
@@ -634,9 +764,15 @@ export default function UtentiPermessi() {
                 <Input id="edit-lastName" name="lastName" defaultValue={selectedUser?.lastName || ""} />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-email">Email</Label>
-              <Input id="edit-email" name="email" type="email" defaultValue={selectedUser?.email || ""} />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input id="edit-email" name="email" type="email" defaultValue={selectedUser?.email || ""} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-phone">Cellulare</Label>
+                <Input id="edit-phone" name="phone" defaultValue={selectedUser?.phone || ""} placeholder="es. +39 333..." />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-role">Ruolo</Label>
