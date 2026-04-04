@@ -67,7 +67,26 @@ export function setupAuth(app: Express) {
     app.use(passport.initialize());
     app.use(passport.session());
 
-
+    // --- AUTO-LOGIN MIDDLEWARE FOR LOCAL DEVELOPMENT ---
+    app.use(async (req, res, next) => {
+        // Se siamo in locale e l'utente non ha la sessione
+        if (process.env.NODE_ENV !== "production" && !req.isAuthenticated()) {
+            try {
+                const adminUser = await storage.getUserByUsername("admin");
+                if (adminUser) {
+                    req.login(adminUser, (err) => {
+                        if (err) console.error("[AUTH DEBUG] Auto-login error:", err);
+                        return next();
+                    });
+                    return; // Importante per non chiamare next() due volte
+                }
+            } catch (e) {
+                console.error("[AUTH DEBUG] Auto-login failed:", e);
+            }
+        }
+        next();
+    });
+    // ---------------------------------------------------
 
     passport.use(
         new LocalStrategy(async (username, password, done) => {
@@ -163,7 +182,7 @@ export function setupAuth(app: Express) {
                         userId: user.id,
                         action: "LOGOUT",
                         ipAddress: req.ip || null,
-                        details: { username: user.username }
+                        details: { username: user.username, durationMins }
                     });
                 } catch (err) {
                     console.error("[AUTH] Failed to log logout activity or mark offline:", err);
@@ -191,6 +210,13 @@ export function setupAuth(app: Express) {
                         currentSessionStart: null,
                         lastSessionDuration: durationMins
                     }).where(eq(users.id, user.id));
+
+                    await storage.logActivity({
+                        userId: user.id,
+                        action: "LOGOUT",
+                        ipAddress: req.ip || null,
+                        details: { username: user.username, durationMins }
+                    });
                 } catch (e) {
                     console.error("[AUTH] Failed to mark offline", e);
                 }

@@ -975,7 +975,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { sql, eq } = await import("drizzle-orm");
 
       const currentUserState = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-      const isNewSession = !currentUserState[0]?.currentSessionStart;
+      const lastSeen = currentUserState[0]?.lastSeenAt;
+      const isNewSession = !currentUserState[0]?.currentSessionStart || (lastSeen && (Date.now() - new Date(lastSeen).getTime()) > 20 * 60000);
 
       await db.update(users).set({
         lastSeenAt: sql`CURRENT_TIMESTAMP`,
@@ -1019,9 +1020,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const start = currentUserState[0]?.currentSessionStart;
       const durationMins = start ? Math.round((Date.now() - new Date(start).getTime()) / 60000) : 0;
 
+      // Al refresh o chiusura tab inviamo i minuti finali, ma NON distruggiamo 
+      // brutalmente la sessione (currentSessionStart). Manteniamo la memoria intatta: 
+      // il sistema backend deciderà di azzerarla solo se passano oltre 20 min dal lastSeenAt.
       await db.update(users).set({
         lastSeenAt: sql`CURRENT_TIMESTAMP`,
-        currentSessionStart: null,
         lastSessionDuration: durationMins
       }).where(eq(users.id, userId));
 
@@ -1046,6 +1049,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: users.profileImageUrl,
         currentSessionStart: users.currentSessionStart,
         lastSeenAt: users.lastSeenAt,
+        lastSessionDuration: users.lastSessionDuration,
       })
       .from(users)
       .orderBy(desc(users.lastSeenAt));

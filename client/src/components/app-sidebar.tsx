@@ -617,21 +617,32 @@ export function AppSidebar() {
                       </div>
                       
                       {(() => {
+                        const isOffline = !isOnline && !isAway;
                         let text = "";
-                        if (u.currentSessionStart) {
+                        
+                        if (isOffline) {
+                          const dateStr = u.lastSeenAt ? format(new Date(u.lastSeenAt), "dd/MM HH:mm") : "";
+                          let workedMins = 0;
+                          
+                          if (u.lastSessionDuration != null && u.lastSessionDuration > 0) {
+                            workedMins = u.lastSessionDuration;
+                          } else if (u.currentSessionStart && u.lastSeenAt) {
+                            const startT = new Date(u.currentSessionStart).getTime();
+                            const endT = new Date(u.lastSeenAt).getTime();
+                            if (endT > startT) workedMins = Math.round((endT - startT) / 60000);
+                          }
+                          
+                          let durStr = "";
+                          if (workedMins > 0) {
+                            durStr = workedMins > 60 ? ` (lavoro: ${Math.floor(workedMins / 60)}h ${workedMins % 60}m)` : ` (lavoro: ${workedMins}m)`;
+                          }
+                          text = `Uscito ${dateStr}${durStr}`;
+                        } else if (u.currentSessionStart) {
                           const startT = new Date(u.currentSessionStart).getTime();
                           const sessionMins = Math.round((now - startT) / 60000);
                           const durStr = sessionMins > 60 ? `${Math.floor(sessionMins / 60)}h ${sessionMins % 60}m` : `${sessionMins}m`;
                           const timeStr = new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-                          text = `${timeStr} (da ${durStr})`;
-                        } else if (u.lastSeenAt) {
-                          const dateStr = format(new Date(u.lastSeenAt), "dd/MM HH:mm");
-                          let durStr = "";
-                          if (u.lastSessionDuration !== null && u.lastSessionDuration !== undefined) {
-                            const d = u.lastSessionDuration;
-                            durStr = d > 60 ? ` (per ${Math.floor(d / 60)}h ${d % 60}m)` : (d > 0 ? ` (per ${d}m)` : "");
-                          }
-                          text = `Uscito ${dateStr}${durStr}`;
+                          text = `${timeStr} (lavoro: ${durStr})`;
                         }
 
                         return (
