@@ -43,6 +43,7 @@ export const users = mysqlTable("users", {
   profileImageUrl: longtext("profile_image_url"),
   lastSeenAt: timestamp("last_seen_at"),
   currentSessionStart: timestamp("current_session_start"),
+  lastSessionDuration: int("last_session_duration").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });

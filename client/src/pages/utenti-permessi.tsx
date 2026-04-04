@@ -117,7 +117,7 @@ export default function UtentiPermessi() {
     }
   };
 
-  const { sortConfig: scLog, handleSort: hsLog, sortItems: siLog, isSortedColumn: iscLog } = useSortableTable<any>("createdAt");
+  const { sortConfig: scLog, handleSort: hsLog, sortItems: siLog, isSortedColumn: iscLog } = useSortableTable<any>("createdAt", "desc");
   const getSortValueLog = (log: any, key: string) => {
     switch (key) {
       case "createdAt": return log.createdAt;
