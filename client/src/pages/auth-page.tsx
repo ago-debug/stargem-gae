@@ -51,7 +51,7 @@ export default function AuthPage() {
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <FormField
                                 control={form.control}
                                 name="username"
@@ -59,7 +59,7 @@ export default function AuthPage() {
                                     <FormItem>
                                         <FormLabel>Username</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="admin" autoComplete="off" data-1p-ignore {...field} />
+                                            <Input autoComplete="username" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -72,7 +72,7 @@ export default function AuthPage() {
                                     <FormItem>
                                         <FormLabel>Password</FormLabel>
                                         <FormControl>
-                                            <Input type="password" placeholder="••••••••" autoComplete="new-password" data-1p-ignore {...field} />
+                                            <Input type="password" autoComplete="current-password" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

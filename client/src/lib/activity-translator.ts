@@ -49,7 +49,7 @@ export function translateActivity(action: string, entityType: string, rawDetails
     if (details?.durationMins !== undefined) {
       const ore = Math.floor(details.durationMins / 60);
       const min = details.durationMins % 60;
-      return `Logout (Sessione durata: ${ore > 0 ? `${ore}h ` : ""}${min}m)`;
+      return `Logout (Tempo di lavoro: ${ore > 0 ? `${ore}h ` : ""}${min}m)`;
     }
     return "Logout dal sistema";
   }

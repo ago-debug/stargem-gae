@@ -564,7 +564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const action = req.method === 'POST' ? 'CREATE' : req.method === 'DELETE' ? 'DELETE' : 'UPDATE';
           const segments = req.path.split('/').filter(Boolean);
           const entityType = segments[0] || 'system';
-          const entityId = segments[1] ? parseInt(segments[1], 10) : undefined;
+          const entityIdStr = segments[1] || undefined;
           
           let details = undefined;
           if (req.method !== 'DELETE' && req.body && Object.keys(req.body).length > 0) {
@@ -579,7 +579,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId: req.user.id,
             action,
             entityType,
-            entityId: !isNaN(entityId as any) ? entityId : undefined,
+            entityId: entityIdStr,
             details
           }).catch(e => console.error("Interceptor log error:", e));
         } catch (err) {
@@ -983,7 +983,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currentSessionStart: sql`
           CASE 
             WHEN current_session_start IS NULL THEN CURRENT_TIMESTAMP
-            WHEN TIMESTAMPDIFF(MINUTE, last_seen_at, CURRENT_TIMESTAMP) > 20 THEN CURRENT_TIMESTAMP
+            WHEN last_seen_at IS NULL THEN CURRENT_TIMESTAMP
+            WHEN TIMESTAMPDIFF(SECOND, last_seen_at, CURRENT_TIMESTAMP) > 1200 THEN CURRENT_TIMESTAMP
+            WHEN TIMESTAMPDIFF(SECOND, last_seen_at, CURRENT_TIMESTAMP) > 180 THEN DATE_ADD(current_session_start, INTERVAL TIMESTAMPDIFF(SECOND, last_seen_at, CURRENT_TIMESTAMP) SECOND)
+            WHEN current_session_start > CURRENT_TIMESTAMP THEN CURRENT_TIMESTAMP
             ELSE current_session_start
           END
         `
