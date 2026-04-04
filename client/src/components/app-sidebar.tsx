@@ -533,7 +533,7 @@ export function AppSidebar() {
                       : user.username}
                   </p>
                   <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium">
-                    {user.role}
+                    {user.role === 'admin' ? 'MASTER' : user.role}
                   </p>
                 </div>
               </div>
