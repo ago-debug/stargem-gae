@@ -567,8 +567,8 @@ export function AppSidebar() {
                 </p>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-6 px-2 text-[10px] bg-white hover:bg-slate-50 border-slate-300 text-slate-700 font-medium whitespace-nowrap shadow-sm">
-                      <Activity className="w-3 h-3 mr-1 text-primary" /> Log Attività
+                    <Button variant="outline" size="sm" className="h-[18px] px-1.5 text-[9px] bg-white hover:bg-slate-50 border-slate-300 text-slate-600 font-medium tracking-tight shadow-sm">
+                      <Activity className="w-2.5 h-2.5 mr-1 text-primary" /> Log
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-[90vw] md:max-w-4xl max-h-[85vh] overflow-y-auto">

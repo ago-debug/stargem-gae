@@ -31,7 +31,8 @@ import {
   History,
   Search,
   Camera,
-  Upload
+  Upload,
+  Activity
 } from "lucide-react";
 import type { User, UserRole } from "@shared/schema";
 import { format } from "date-fns";
@@ -385,7 +386,7 @@ export default function UtentiPermessi() {
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-xl">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="users">
             <UserIcon className="w-4 h-4 mr-2" />
             Utenti
@@ -396,7 +397,11 @@ export default function UtentiPermessi() {
           </TabsTrigger>
           <TabsTrigger value="logs">
             <History className="w-4 h-4 mr-2" />
-            Log Attività
+            Log Accessi
+          </TabsTrigger>
+          <TabsTrigger value="events">
+            <Activity className="w-4 h-4 mr-2" />
+            Attività Svolte
           </TabsTrigger>
         </TabsList>
 
@@ -580,7 +585,7 @@ export default function UtentiPermessi() {
 
         <TabsContent value="logs">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Log Attività di Sistema</h2>
+            <h2 className="text-xl font-semibold">Log Accessi Sistema</h2>
             <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/activity-logs"] })}>
               <Search className="w-4 h-4 mr-2" />
               Aggiorna
@@ -589,7 +594,23 @@ export default function UtentiPermessi() {
 
           <Card>
             <CardContent className="pt-6">
-              <SharedActivityLog hideTitle />
+              <SharedActivityLog hideTitle type="access" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="events">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Attività Svolte e Variazioni</h2>
+            <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/activity-logs"] })}>
+              <Search className="w-4 h-4 mr-2" />
+              Aggiorna
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="pt-6">
+              <SharedActivityLog hideTitle type="activities" />
             </CardContent>
           </Card>
         </TabsContent>

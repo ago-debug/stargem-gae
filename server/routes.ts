@@ -543,6 +543,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   };
 
+  
+  // ==== Global Activity Interceptor ====
+  app.use("/api", (req, res, next) => {
+    // We only care about modifications (POST, PATCH, PUT, DELETE)
+    if (['GET', 'OPTIONS', 'HEAD'].includes(req.method)) {
+      return next();
+    }
+    
+    // Ignore pure login/logout because auth.ts already handles them
+    if (req.path === '/login' || req.path === '/logout' || req.path.includes('/presence')) {
+      return next();
+    }
+
+    // Capture the original send to intercept the response
+    const originalSend = res.send;
+    res.send = function (body) {
+      if (res.statusCode >= 200 && res.statusCode < 300 && req.user) {
+        try {
+          const action = req.method === 'POST' ? 'CREATE' : req.method === 'DELETE' ? 'DELETE' : 'UPDATE';
+          const segments = req.path.split('/').filter(Boolean);
+          const entityType = segments[0] || 'system';
+          const entityId = segments[1] ? parseInt(segments[1], 10) : undefined;
+          
+          let details = undefined;
+          if (req.method !== 'DELETE' && req.body && Object.keys(req.body).length > 0) {
+             // Redact sensitive stuff if needed, but for now we just dump req.body
+             const safeBody = { ...req.body };
+             delete safeBody.password;
+             details = safeBody;
+          }
+          
+          // Fire and forget
+          storage.logActivity({
+            userId: req.user.id,
+            action,
+            entityType,
+            entityId: !isNaN(entityId as any) ? entityId : undefined,
+            details
+          }).catch(e => console.error("Interceptor log error:", e));
+        } catch (err) {
+          console.error("Error in activity interceptor:", err);
+        }
+      }
+      return originalSend.call(this, body);
+    };
+    next();
+  });
+
   // ==== Google Calendar Helpers ====
   const getGlobalCalendarId = () => process.env.GOOGLE_CALENDAR_ID || 'primary';
   const TIMEZONE = 'Europe/Rome';

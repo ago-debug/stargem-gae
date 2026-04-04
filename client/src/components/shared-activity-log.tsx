@@ -5,8 +5,9 @@ import { Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
+import { translateActivity } from "@/lib/activity-translator";
 
-export function SharedActivityLog({ hideTitle = false }: { hideTitle?: boolean }) {
+export function SharedActivityLog({ hideTitle = false, type = "all" }: { hideTitle?: boolean, type?: "all" | "access" | "activities" }) {
   const { data: activityLogs, isLoading: logsLoading } = useQuery<any[]>({
     queryKey: ["/api/activity-logs"],
     refetchInterval: 30000,
@@ -32,6 +33,12 @@ export function SharedActivityLog({ hideTitle = false }: { hideTitle?: boolean }
     );
   }
 
+  const filteredLogs = (activityLogs || []).filter(log => {
+    if (type === "access") return log.action === "LOGIN" || log.action === "LOGOUT";
+    if (type === "activities") return log.action !== "LOGIN" && log.action !== "LOGOUT";
+    return true;
+  });
+
   return (
     <div className="space-y-4">
       {!hideTitle && <h3 className="text-lg font-medium">Cronologia Operazioni e Accessi</h3>}
@@ -47,7 +54,7 @@ export function SharedActivityLog({ hideTitle = false }: { hideTitle?: boolean }
             </TableRow>
           </TableHeader>
           <TableBody>
-            {siLog(activityLogs || [], getSortValueLog).map((log: any) => (
+            {siLog(filteredLogs, getSortValueLog).map((log: any) => (
               <TableRow key={log.id}>
                 <TableCell className={cn("text-xs whitespace-nowrap", iscLog("createdAt") && "sorted-column-cell")}>
                   {format(new Date(log.createdAt), "dd/MM/yyyy HH:mm:ss", { locale: it })}
@@ -60,7 +67,7 @@ export function SharedActivityLog({ hideTitle = false }: { hideTitle?: boolean }
                     log.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' :
                       log.action === 'DELETE' ? 'bg-red-100 text-red-700' :
                         log.action === 'LOGIN' ? 'bg-emerald-100 text-emerald-700' :
-                          log.action === 'LOGOUT' ? 'bg-orange-100 text-orange-700' :
+                          log.action === 'LOGOUT' ? 'bg-amber-100 text-amber-700' :
                             'bg-gray-100 text-gray-700'
                     }`}>
                     {log.action}
@@ -69,12 +76,8 @@ export function SharedActivityLog({ hideTitle = false }: { hideTitle?: boolean }
                 <TableCell className={cn("text-xs uppercase", iscLog("entityType") && "sorted-column-cell")}>
                   {log.entityType || "-"}
                 </TableCell>
-                <TableCell className={cn("text-xs max-w-md truncate", iscLog("details") && "sorted-column-cell")}>
-                  {log.action === "LOGOUT" && log.details?.durationMins !== undefined
-                    ? `Sessione conclusa (durata: ${log.details.durationMins > 60 ? Math.floor(log.details.durationMins / 60) + 'h ' + (log.details.durationMins % 60) + 'm' : log.details.durationMins + 'm'})`
-                    : log.action === "LOGIN"
-                      ? `Ingresso nel sistema`
-                      : log.details ? JSON.stringify(log.details) : "-"}
+                <TableCell className={cn("text-xs max-w-[300px]", iscLog("details") && "sorted-column-cell")}>
+                   {translateActivity(log.action, log.entityType, log.details)}
                 </TableCell>
               </TableRow>
             ))}
