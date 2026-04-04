@@ -41,6 +41,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
+import { format } from "date-fns";
 import {
   Sidebar,
   SidebarContent,
@@ -558,7 +559,7 @@ export function AppSidebar() {
               <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
                 Connessioni Live
                 <span className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0.5 rounded-full">
-                  {usersInfo.filter((u: any) => u.lastSeenAt && (new Date().getTime() - new Date(u.lastSeenAt).getTime() <= 20 * 60 * 1000)).length}
+                  {usersInfo.filter((u: any) => u.currentSessionStart && u.lastSeenAt && (new Date().getTime() - new Date(u.lastSeenAt).getTime() <= 20 * 60 * 1000)).length}
                 </span>
               </p>
               <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
@@ -567,8 +568,8 @@ export function AppSidebar() {
                   const lastSeen = u.lastSeenAt ? new Date(u.lastSeenAt).getTime() : 0;
                   const diffMins = (now - lastSeen) / 1000 / 60;
                   
-                  const isOnline = diffMins <= 5;
-                  const isAway = diffMins > 5 && diffMins <= 20;
+                  const isOnline = !!u.currentSessionStart && diffMins <= 5;
+                  const isAway = !!u.currentSessionStart && diffMins > 5 && diffMins <= 20;
                   const isMe = user?.id === u.id;
                   
                   return (
@@ -585,11 +586,11 @@ export function AppSidebar() {
                           {isMe ? "Tu" : (u.firstName ? `${u.firstName} ${u.lastName}` : u.username)}
                         </span>
                       </div>
-                      {u.currentSessionStart && (
-                        <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : isAway ? "text-slate-400/80" : "text-slate-300 opacity-50"}`}>
-                          {new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      )}
+                      <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : isAway ? "text-slate-400/80" : "text-slate-300 opacity-50"}`}>
+                        {u.currentSessionStart 
+                          ? new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+                          : u.lastSeenAt ? `Uscito ${format(new Date(u.lastSeenAt), "dd/MM HH:mm")}` : ''}
+                      </span>
                     </div>
 
                   );

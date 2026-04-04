@@ -85,7 +85,9 @@ const logoStarGem = "/logo_stargem.png";
 
 export function hasPermission(user: SelectUser | null, path: string) {
   if (!user) return false;
-  if (user.role === 'admin') return true;
+  const roleNameLower = user.role?.toLowerCase() || '';
+  if (roleNameLower === 'admin' || roleNameLower === 'admministratore totale') return true;
+  
   const perms = (user as any).permissions || {};
   if (perms["*"] === "write" || perms["*"] === "read") return true;
 
@@ -104,7 +106,9 @@ export function hasPermission(user: SelectUser | null, path: string) {
 
 export function hasWritePermission(user: SelectUser | null, path: string) {
   if (!user) return false;
-  if (user.role === 'admin') return true;
+  const roleNameLower = user.role?.toLowerCase() || '';
+  if (roleNameLower === 'admin' || roleNameLower === 'admministratore totale') return true;
+  
   const perms = (user as any).permissions || {};
   if (perms["*"] === "write") return true;
 
