@@ -401,7 +401,7 @@ export default function UtentiPermessi() {
           </TabsTrigger>
           <TabsTrigger value="events">
             <Activity className="w-4 h-4 mr-2" />
-            Attività Svolte
+            Processi Svolti
           </TabsTrigger>
         </TabsList>
 
@@ -601,7 +601,7 @@ export default function UtentiPermessi() {
 
         <TabsContent value="events">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Attività Svolte e Variazioni</h2>
+            <h2 className="text-xl font-semibold">Processi Svolti</h2>
             <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/activity-logs"] })}>
               <Search className="w-4 h-4 mr-2" />
               Aggiorna
