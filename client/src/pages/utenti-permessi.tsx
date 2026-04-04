@@ -398,7 +398,7 @@ export default function UtentiPermessi() {
           <UserCog className="w-8 h-8 text-primary" />
           <div>
             <h1 className="text-3xl font-semibold text-foreground">Utenti e Permessi</h1>
-            <p className="text-muted-foreground">Gestisci gli accessi, i ruoli e monitora le attività</p>
+            <p className="text-muted-foreground">Gestisci gli accessi, i ruoli e monitora i processi</p>
           </div>
         </div>
       </div>
