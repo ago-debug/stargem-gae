@@ -731,7 +731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activity Logs Route
-  app.get("/api/activity-logs", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/activity-logs", isAuthenticated, async (req, res) => {
     try {
       const logs = await storage.getUserActivityLogs(200);
       res.json(logs);
