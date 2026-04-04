@@ -150,7 +150,7 @@ export function setupAuth(app: Express) {
                 try {
                     // Rimuovi tempestivamente lo stato online
                     await db.update(users).set({
-                        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 MINUTE)`,
+                        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)`,
                         currentSessionStart: null
                     }).where(eq(users.id, user.id));
 
@@ -178,7 +178,7 @@ export function setupAuth(app: Express) {
             if (user) {
                 try {
                     await db.update(users).set({
-                        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 20 MINUTE)`,
+                        lastSeenAt: sql`DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)`,
                         currentSessionStart: null
                     }).where(eq(users.id, user.id));
                 } catch (e) {

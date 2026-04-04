@@ -2,11 +2,33 @@
 > rest-express@1.0.0 dev
 > NODE_ENV=development tsx server/index.ts
 
-3:04:10 PM [express] serving on port 5001
+Failed to seed participant categories: DrizzleQueryError: Failed query: select `id`, `name`, `description`, `parent_id`, `color`, `created_at`, `updated_at` from `cli_cats` order by `cli_cats`.`name`
+params: 
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getClientCategories (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:1801:12)
+    at async seedParticipantCategories (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/routes.ts:476:26)
+    at async registerRoutes (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/routes.ts:494:3)
+    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/index.ts:76:18) {
+  query: 'select `id`, `name`, `description`, `parent_id`, `color`, `created_at`, `updated_at` from `cli_cats` order by `cli_cats`.`name`',
+  params: [],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+3:15:38 PM [express] serving on port 5001
 
 A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
-3:04:12 PM [express] GET /api/user 401 in 1ms
-3:08:26 PM [vite] hmr update /src/components/user-presence-tracker.tsx, /src/index.css?v=rff90vlz1ADWwidFYwOVY
-3:08:48 PM [vite] hmr update /src/components/app-sidebar.tsx, /src/index.css?v=rff90vlz1ADWwidFYwOVY
-3:09:07 PM [vite] hmr update /src/components/app-sidebar.tsx, /src/index.css?v=rff90vlz1ADWwidFYwOVY
-3:09:33 PM [vite] hmr update /src/components/active-user-avatars.tsx, /src/index.css?v=rff90vlz1ADWwidFYwOVY
+3:15:40 PM [express] GET /api/user 401 in 1ms
+Seeding skipped: Database might not be ready yet.
