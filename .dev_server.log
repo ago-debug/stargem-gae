@@ -28,5 +28,83 @@ params:
     sqlMessage: undefined
   }
 }
-4:02:33 PM [express] serving on port 5001
+4:42:26 PM [express] serving on port 5001
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+4:42:28 PM [express] GET /api/user 401 in 2ms
 Seeding skipped: Database might not be ready yet.
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?
+params: admin
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUserByUsername (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:726:20)
+    at async Strategy._verify (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:75:30) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?',
+  params: [ 'admin' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+4:42:31 PM [express] POST /api/login 500 in 1ms :: {"message":"Failed query: select `id`, `username`…
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?
+params: admin
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUserByUsername (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:726:20)
+    at async Strategy._verify (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:75:30) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?',
+  params: [ 'admin' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+4:42:38 PM [express] POST /api/login 500 in 1ms :: {"message":"Failed query: select `id`, `username`…
+GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?
+params: admin
+    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
+    at async DatabaseStorage.getUserByUsername (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:726:20)
+    at async Strategy._verify (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:75:30) {
+  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?',
+  params: [ 'admin' ],
+  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
+      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
+      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
+      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
+      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
+      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+    code: 'ECONNREFUSED',
+    errno: -61,
+    sql: undefined,
+    sqlState: undefined,
+    sqlMessage: undefined
+  }
+}
+4:42:48 PM [express] POST /api/login 500 in 4ms :: {"message":"Failed query: select `id`, `username`…
