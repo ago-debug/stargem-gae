@@ -916,16 +916,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { users } = await import("../shared/schema");
       const { sql, eq } = await import("drizzle-orm");
 
+      const currentUserState = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      const isNewSession = !currentUserState[0]?.currentSessionStart;
+
       await db.update(users).set({
         lastSeenAt: sql`CURRENT_TIMESTAMP`,
         currentSessionStart: sql`
           CASE 
             WHEN current_session_start IS NULL THEN CURRENT_TIMESTAMP
-            WHEN TIMESTAMPDIFF(MINUTE, last_seen_at, CURRENT_TIMESTAMP) > 15 THEN CURRENT_TIMESTAMP
+            WHEN TIMESTAMPDIFF(MINUTE, last_seen_at, CURRENT_TIMESTAMP) > 20 THEN CURRENT_TIMESTAMP
             ELSE current_session_start
           END
         `
       }).where(eq(users.id, userId));
+
+      if (isNewSession && currentUserState[0]) {
+        try {
+          await storage.logActivity({
+            userId,
+            action: "LOGIN",
+            ipAddress: req.ip || null,
+            details: { username: currentUserState[0].username, note: "Session resumed" }
+          });
+        } catch (e) {
+          console.error("Failed to log implicit login", e);
+        }
+      }
 
       res.json({ success: true });
     } catch (error: any) {
