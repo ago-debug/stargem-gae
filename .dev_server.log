@@ -2,109 +2,64 @@
 > rest-express@1.0.0 dev
 > NODE_ENV=development tsx server/index.ts
 
-Failed to seed participant categories: DrizzleQueryError: Failed query: select `id`, `name`, `description`, `parent_id`, `color`, `created_at`, `updated_at` from `cli_cats` order by `cli_cats`.`name`
-params: 
-    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
-    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getClientCategories (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:1801:12)
-    at async seedParticipantCategories (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/routes.ts:476:26)
-    at async registerRoutes (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/routes.ts:504:3)
-    at async <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/index.ts:76:18) {
-  query: 'select `id`, `name`, `description`, `parent_id`, `color`, `created_at`, `updated_at` from `cli_cats` order by `cli_cats`.`name`',
-  params: [],
-  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
-      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
-      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
-      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
-      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
-      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
-      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
-      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
-    code: 'ECONNREFUSED',
-    errno: -61,
-    sql: undefined,
-    sqlState: undefined,
-    sqlMessage: undefined
-  }
-}
-4:42:26 PM [express] serving on port 5001
+5:02:29 PM [express] serving on port 5001
+5:02:29 PM [express] POST /api/users/presence/offline 401 in 1ms
+5:02:29 PM [express] POST /api/users/presence/offline 401 in 0ms
 
 A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
-4:42:28 PM [express] GET /api/user 401 in 2ms
-Seeding skipped: Database might not be ready yet.
-GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?
-params: admin
-    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
-    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUserByUsername (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:726:20)
-    at async Strategy._verify (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:75:30) {
-  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?',
-  params: [ 'admin' ],
-  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
-      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
-      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
-      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
-      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
-      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
-      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
-      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
-    code: 'ECONNREFUSED',
-    errno: -61,
-    sql: undefined,
-    sqlState: undefined,
-    sqlMessage: undefined
-  }
-}
-4:42:31 PM [express] POST /api/login 500 in 1ms :: {"message":"Failed query: select `id`, `username`…
-GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?
-params: admin
-    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
-    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUserByUsername (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:726:20)
-    at async Strategy._verify (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:75:30) {
-  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?',
-  params: [ 'admin' ],
-  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
-      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
-      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
-      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
-      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
-      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
-      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
-      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
-    code: 'ECONNREFUSED',
-    errno: -61,
-    sql: undefined,
-    sqlState: undefined,
-    sqlMessage: undefined
-  }
-}
-4:42:38 PM [express] POST /api/login 500 in 1ms :: {"message":"Failed query: select `id`, `username`…
-GLOBAL ERROR HANDLER CAUGHT: DrizzleQueryError: Failed query: select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?
-params: admin
-    at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:79:11)
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
-    at async MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:18)
-    at async DatabaseStorage.getUserByUsername (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/storage.ts:726:20)
-    at async Strategy._verify (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/server/auth.ts:75:30) {
-  query: 'select `id`, `username`, `password`, `email`, `phone`, `first_name`, `last_name`, `role`, `profile_image_url`, `last_seen_at`, `current_session_start`, `last_session_duration`, `created_at`, `updated_at` from `users` where `users`.`username` = ?',
-  params: [ 'admin' ],
-  cause: Error: connect ECONNREFUSED 127.0.0.1:3307
-      at PromisePool.query (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/mysql2/lib/promise/pool.js:36:22)
-      at <anonymous> (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:133:24)
-      at MySql2PreparedQuery.queryWithCache (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/session.ts:77:18)
-      at MySql2PreparedQuery.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql2/session.ts:132:29)
-      at MySqlSelectBase.execute (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
-      at MySqlSelectBase.then (/Users/gaetano1/SVILUPPO/CourseManager_Source_Export/node_modules/src/query-promise.ts:31:15)
-      at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
-    code: 'ECONNREFUSED',
-    errno: -61,
-    sql: undefined,
-    sqlState: undefined,
-    sqlMessage: undefined
-  }
-}
-4:42:48 PM [express] POST /api/login 500 in 4ms :: {"message":"Failed query: select `id`, `username`…
+5:02:31 PM [express] GET /api/user 401 in 0ms
+5:02:39 PM [express] POST /api/login 200 in 219ms :: {"id":"admin-id","username":"admin","password":…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+5:02:39 PM [express] POST /api/users/presence/heartbeat 200 in 192ms :: {"success":true}
+5:02:39 PM [express] GET /api/team-notes 304 in 191ms :: [{"id":23,"authorId":"admin-id","authorName…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] Deserializing user admin-id
+5:02:39 PM [express] GET /api/latest-activity 200 in 199ms :: {"id":1141,"userId":"admin-id","action…
+[AUTH DEBUG] Deserializing user admin-id
+5:02:39 PM [express] GET /api/todos 304 in 247ms :: [{"id":1,"text":"Implementare verifica SMS/Whats…
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] User admin-id found, fetching roles
+5:02:39 PM [express] GET /api/users/presence/active 200 in 285ms :: [{"id":"admin-id","username":"ad…
+5:02:39 PM [express] GET /api/activities-summary 200 in 288ms :: {"corsi":{"total":399,"active":399}…
+[AUTH DEBUG] User admin-id found, fetching roles
+[AUTH DEBUG] Deserializing user admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
+[AUTH DEBUG] User admin-id found, fetching roles
+5:02:39 PM [express] GET /api/roles 304 in 143ms :: [{"id":3,"name":"admin","description":"Admin","p…
+5:02:39 PM [express] GET /api/team-comments 304 in 151ms :: [{"id":10,"authorId":"admin-id","authorN…
+5:02:39 PM [express] GET /api/users 200 in 162ms :: [{"id":"admin-id","username":"admin","email":nul…
+5:02:39 PM [express] GET /api/activity-logs 200 in 117ms :: [{"id":1141,"userId":"admin-id","action"…
+[AUTH DEBUG] UserRoleByName result:  true
+[AUTH DEBUG] Deserialization done for admin-id
