@@ -608,7 +608,10 @@ export function AppSidebar() {
                     <div key={u.id} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 min-w-0" title={isOnline ? 'Online' : isAway ? 'In Stop / Pausa' : 'Offline'}>
                         {isOnline ? (
-                           <Circle className="w-2.5 h-2.5 fill-current shrink-0 text-green-500" />
+                           <div className="relative flex h-[10px] w-[10px] shrink-0 justify-center items-center">
+                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                           </div>
                         ) : isAway ? (
                            <PauseCircle className="w-[11px] h-[11px] fill-current shrink-0 text-amber-500" />
                         ) : (
