@@ -1913,13 +1913,21 @@ export default function MascheraInputGenerale() {
       <datalist id="province-list">{["AG","AL","AN","AO","AP","AQ","AR","AT","AV","BA","BG","BI","BL","BN","BO","BR","BS","BT","BZ","CA","CB","CE","CH","CL","CN","CO","CR","CS","CT","CZ","EN","FC","FE","FG","FI","FM","FR","GE","GO","GR","IM","IS","KR","LC","LE","LI","LO","LT","LU","MB","MC","ME","MI","MN","MO","MS","MT","NA","NO","NU","OR","PA","PC","PD","PE","PG","PI","PN","PO","PR","PT","PU","PV","PZ","RA","RC","RE","RG","RI","RM","RN","RO","SA","SI","SO","SP","SR","SS","SU","SV","TA","TE","TN","TO","TP","TR","TS","TV","UD","VA","VB","VC","VE","VI","VR","VT","VV"].map(p => <option key={p} value={p} />)}</datalist>
       <datalist id="comuni-list">{["Roma", "Milano", "Napoli", "Torino", "Palermo", "Genova", "Bologna", "Firenze", "Bari", "Catania", "Venezia", "Verona", "Messina", "Padova", "Trieste", "Brescia", "Terni", "Taranto", "Prato", "Parma", "Modena", "Reggio Calabria", "Reggio Emilia", "Perugia", "Ravenna", "Livorno", "Cagliari", "Foggia", "Rimini", "Salerno", "Ferrara", "Sassari", "Latina", "Giugliano in Campania", "Monza", "Siracusa", "Pescara", "Bergamo", "Forlì", "Trento", "Vicenza", "Bolzano", "Novara", "Piacenza", "Ancona", "Andria", "Arezzo", "Udine", "Cesena", "Lecce"].map(c => <option key={c} value={c} />)}</datalist>
       {/* Header fisso con navigazione */}
-      <div className="border-b bg-muted/30 sticky top-0 z-10">
-        <div className="p-4 space-y-4">
+      <div className="border-b bg-gradient-to-r from-slate-50 via-white to-slate-50 sticky top-0 z-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden">
+        {/* Premium Decorators */}
+        <div className="absolute top-[-20%] right-[-5%] w-[150px] h-[150px] rounded-full bg-primary/5 blur-[40px] pointer-events-none" />
+        
+        <div className="p-5 space-y-4 relative z-10">
           {/* Riga titolo e pulsanti azioni */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold">Maschera Input</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex bg-gradient-to-br from-primary/10 to-primary/5 p-2.5 rounded-xl border border-primary/10 shadow-inner">
+                <Users className="w-6 h-6 text-primary drop-shadow-sm" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Maschera Input Generale</h1>
+                <p className="text-xs sm:text-sm text-slate-500 font-medium">Motore di registrazione e ricerca iscritti</p>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-gsheets" onClick={handleGSheets}>
