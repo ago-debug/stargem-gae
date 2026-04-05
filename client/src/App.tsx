@@ -58,6 +58,7 @@ import SchedaVacanzaStudio from "@/pages/scheda-vacanza-studio";
 import Planning from "@/pages/planning";
 import StrategicProgrammingTable from "@/pages/StrategicProgrammingTable";
 import KnowledgeBase from "@/pages/knowledge-base";
+import GestioneNote from "@/pages/gestione-note";
 
 import SundayActivities from "@/pages/sunday-activities";
 import Trainings from "@/pages/trainings";
@@ -151,6 +152,7 @@ function Router() {
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/maschera-input" component={MascheraInputGenerale} />
       <ProtectedRoute path="/anagrafica-generale" component={Members} />
+      <ProtectedRoute path="/inserisci-nota" component={GestioneNote} />
       <Route path="/corsi">
         <Redirect to="/attivita/corsi" />
       </Route>
