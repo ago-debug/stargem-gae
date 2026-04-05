@@ -2003,7 +2003,7 @@ export default function CalendarPage() {
                                                 <div
                                                     key={evt.eventId}
                                                     onClick={handleCardClick}
-                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 overflow-hidden ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 ring-2 ring-red-500 animate-pulse z-[90]' : ''}`}
+                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-xl z-20 hover:z-50 overflow-hidden ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 ring-2 ring-red-500 animate-pulse z-[90]' : ''}`}
                                                     style={{
                                                         top: `${realTop + 2}px`,
                                                         minHeight: `${Math.max(realHeight - 4, 55)}px`,  // Elastic minimum height for short events
