@@ -2006,7 +2006,7 @@ export default function CalendarPage() {
                                                     className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] z-20 hover:z-50 overflow-hidden ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 ring-2 ring-red-500 animate-pulse z-[90]' : ''}`}
                                                     style={{
                                                         top: `${realTop + 2}px`,
-                                                        minHeight: `${realHeight - 4}px`,  // Elastic minimum height
+                                                        minHeight: `${Math.max(realHeight - 4, 55)}px`,  // Elastic minimum height for short events
                                                         left: `calc(${layoutLeft}% + 2px)`,
                                                         width: `calc(${layoutWidth}% - 4px)`,
                                                         minWidth: "70px"
@@ -2034,7 +2034,7 @@ export default function CalendarPage() {
                                                             </div>
                                                         </div>
                                                         <div className="font-bold text-[10px] mb-0.5 opacity-90 w-[calc(100%-40px)]">{evt.startTime} - {evt.endTime}</div>
-                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase break-words pr-[45px]">{evt.title}</div>
+                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[30px] break-normal overflow-hidden">{evt.title}</div>
                                                         {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5">{ins1}</div>}
                                                         {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90">{ins2}</div>}
                                                         
