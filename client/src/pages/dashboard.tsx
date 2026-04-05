@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Calendar, AlertCircle, TrendingUp, ChevronDown } from "lucide-react";
+import { Users, Calendar, AlertCircle, TrendingUp, ChevronDown, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -356,8 +356,12 @@ export default function Dashboard() {
               ))}
             </div>
           ) : !recentActivity || recentActivity.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Nessuna attività recente</p>
+            <div className="text-center py-10 px-4 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl animate-in fade-in zoom-in-95 mt-4">
+              <div className="bg-primary/5 w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-3 ring-1 ring-primary/10">
+                <Activity className="w-6 h-6 text-primary/60" />
+              </div>
+              <p className="text-lg font-bold text-slate-800">Nessuna attività da mostrare</p>
+              <p className="text-sm text-slate-500">Iscrizioni e pagamenti recenti appariranno qui automaticamente.</p>
             </div>
           ) : (
             <div className="space-y-1">
