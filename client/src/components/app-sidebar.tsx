@@ -186,7 +186,7 @@ const secretariatItems = [
     icon: Briefcase,
   },
   {
-    title: "Inserisci Nota",
+    title: "Gestione Note",
     url: "/inserisci-nota",
     icon: StickyNote,
   },
