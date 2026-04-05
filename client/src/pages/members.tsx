@@ -807,12 +807,18 @@ export default function Members() {
 
   return (
     <div className="p-6 md:p-8 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">Anagrafica Generale</h1>
-          <p className="text-muted-foreground">Gestisci clienti, istruttori e staff</p>
+      <div className="flex items-center justify-between gap-4 flex-wrap bg-gradient-to-r from-slate-50 to-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden mb-6">
+        <div className="absolute top-0 right-[-5%] -mt-8 w-40 h-40 rounded-full bg-primary/5 blur-[40px] pointer-events-none" />
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="hidden sm:flex bg-gradient-to-br from-primary/10 to-primary/5 p-3 rounded-xl border border-primary/10 shadow-inner">
+            <Users className="w-8 h-8 text-primary drop-shadow-sm" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-1">Anagrafica Generale</h1>
+            <p className="text-sm font-medium text-slate-500">Gestisci clienti, istruttori e staff con ricerca avanzata e filtri multidimensionali</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap relative z-10">
           <Button
             variant="outline"
             onClick={() => setLocation("/importa")}
@@ -1059,10 +1065,12 @@ export default function Members() {
               ))}
             </div>
           ) : members.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">Nessun iscritto trovato</p>
-              <p className="text-sm">Nessun risultato combacia con la tua ricerca attuale.</p>
+            <div className="text-center py-16 px-4 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl animate-in fade-in zoom-in-95 duration-500 m-4 flex flex-col items-center justify-center">
+              <div className="bg-primary/5 p-4 rounded-full mb-4 ring-1 ring-primary/10 shadow-sm">
+                <Users className="w-10 h-10 text-primary/60" />
+              </div>
+              <p className="text-xl font-bold tracking-tight text-slate-800 mb-1">Nessun iscritto trovato</p>
+              <p className="text-sm text-slate-500 max-w-[280px]">Nessun risultato combacia con la tua ricerca attuale. Modifica i filtri o crea una nuova anagrafica.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
