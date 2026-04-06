@@ -2,6 +2,11 @@ import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { TeoCopilot } from "@/components/teo-copilot";
+import { useCopilot } from "@/hooks/use-copilot";
+import { Button } from "@/components/ui/button";
+import { Sparkles, Bot } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -140,7 +145,7 @@ function ProtectedRoute({ path, component: Component }: { path: string, componen
 const StubPlanning = () => <GestioneAttivitaStub title="Planning" description="La sezione Planning è in fase di realizzazione o manutenzione." />;
 const StubAttivitaLista = () => <GestioneAttivitaStub title="Attività a Lista" description="Visualizzazione alternativa delle attività in fase di sviluppo." />;
 const StubAffittoStudio = () => <GestioneAttivitaStub title="Affitto Studio Medico" description="Modulo di gestione affitto studi medici in arrivo." />;
-const StubCopilot = () => <GestioneAttivitaStub title="StarGem Copilot" description="Pannello di controllo dell'assistente AI in costruzione." />;
+const StubCopilot = () => <GestioneAttivitaStub title="TeoCopilot" description="Pannello di controllo dell'assistente AI in costruzione." />;
 const StubPromoSconti = () => <GestioneAttivitaStub title="Promo e Sconti" description="Motore di gestione regole promozionali in sviluppo." />;
 const StubMerchandising = () => <GestioneAttivitaStub title="Merchandising" description="Modulo di gestione e vendita merchandising in arrivo." />;
 const StubCategorieMerchandising = () => <GestioneAttivitaStub title="Categorie Merchandising" description="Gestione categorie per articoli di merchandising in sviluppo." />;
@@ -262,11 +267,21 @@ function AppContent() {
       <div className="flex h-screen w-full">
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
-          <header className="flex items-center justify-between h-10 px-4 border-b border-border bg-background flex-shrink-0">
+          <header className="flex items-center justify-between h-10 px-4 border-b border-border bg-background flex-shrink-0 z-20">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <div className="flex items-center gap-6 h-full">
               <ActiveUserAvatars />
               <div className="flex items-center gap-4">
+                <div 
+                   title="Apri TeoCopilot (Ctrl+Space)" 
+                   onClick={() => useCopilot.getState().openCopilot()} 
+                   className="relative cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
+                >
+                   <Avatar className="h-9 w-9 border-2 border-primary/20 shadow-sm">
+                      <AvatarImage src="/assets/teo-head-new.png" alt="Teo Copilot" className="object-cover bg-white" />
+                      <AvatarFallback className="bg-primary text-white"><Bot className="w-4 h-4" /></AvatarFallback>
+                   </Avatar>
+                </div>
                 <PageNotesIndicator />
                 <TodoNotification />
                 <NotificationCenter />
@@ -279,6 +294,7 @@ function AppContent() {
             <Router />
           </main>
         </div>
+        <TeoCopilot />
       </div>
     </SidebarProvider>
   );
