@@ -164,8 +164,8 @@ export default function AuthPage() {
                 </CardContent>
                 </div>
 
-                {/* COLONNA DESTRA: TEO COPILOT */}
-                <div className="hidden lg:flex flex-1 w-full h-full relative items-center justify-center border-l border-slate-200/60 bg-white/50 min-h-[400px] rounded-r-xl">
+                {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
+                <div className="flex flex-1 w-full h-full relative items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200/60 bg-gradient-to-b lg:bg-gradient-to-r from-white/10 to-white/50 min-h-[320px] lg:min-h-[400px] rounded-b-xl lg:rounded-b-none lg:rounded-r-xl">
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group" onClick={handleVideoClick}>
                         <video 
                             key={teoVideo} /* Forza il reload del video quando cambia il src per browser più vecchi */
