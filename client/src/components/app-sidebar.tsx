@@ -511,54 +511,16 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-            <SidebarFooter className="p-4 border-t border-sidebar-border">
-        {user && (
-          <div className="flex items-center justify-between gap-2">
-            <UserProfileDialog>
-              <div className="flex items-center gap-2 min-w-0 cursor-pointer hover:bg-slate-100 p-1.5 rounded-md transition-colors flex-1">
-                <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center flex-shrink-0 border border-sidebar-border overflow-hidden">
-                  {user.profileImageUrl ? (
-                    <img src={user.profileImageUrl} alt="avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-xs font-bold text-primary">
-                      {user.firstName ? user.firstName[0] : (user.username ? user.username[0].toUpperCase() : "?")}
-                      {user.lastName ? user.lastName[0] : ""}
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-sidebar-foreground truncate group-hover:text-primary">
-                    {user.firstName || user.lastName
-                      ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
-                      : user.username}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium">
-                    {user.role === 'admin' ? 'MASTER' : user.role}
-                  </p>
-                </div>
-              </div>
-            </UserProfileDialog>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending}
-              data-testid="button-logout"
-              className="flex-shrink-0"
-              title="Esci"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
-        
+      <SidebarFooter className="p-4 pt-0 border-t border-sidebar-border">
+
+
         {/* ACTIVE USERS ACCORDION/LIST */}
         {(() => {
           const { data: usersInfo = [] } = useActiveUsers();
           if (usersInfo.length === 0) return null;
           
           return (
-            <div className="mt-4 pt-4 border-t border-sidebar-border">
+            <div className="mt-2 pb-2">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-primary flex items-center gap-2">
                   Connessioni Live
@@ -666,24 +628,60 @@ export function AppSidebar() {
           );
         })()}
 
-        {latestActivity && (
-          <div className="mt-4 pt-4 border-t border-sidebar-border text-[10px] text-muted-foreground/80 leading-tight space-y-1 select-none">
-            <p className="flex justify-between">
-              <span>Aggiornato:</span>
-              <span className="font-medium">{new Date(latestActivity.createdAt).toLocaleString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-            </p>
-            <p className="flex justify-between">
-              <span>Da chi:</span>
-              <span className="font-medium truncate max-w-[100px] text-right">
-                {latestActivity.user?.firstName || latestActivity.user?.username || "Sistema"}
-              </span>
-            </p>
-            <p className="flex justify-between">
-              <span>Azione:</span>
-              <span className="font-medium truncate max-w-[100px] text-right" title={"Versione di sistema aggiornata"}>
-                v2.2.27
-              </span>
-            </p>
+        {user && (
+          <div className="mt-2 bg-slate-50 border border-sidebar-border rounded-lg shadow-sm overflow-hidden flex-shrink-0">
+            {latestActivity && (
+              <div className="px-3 pt-2 pb-1.5 text-[9px] text-muted-foreground/80 leading-tight space-y-1 select-none bg-white/50 border-b border-sidebar-border/50">
+                <p className="flex justify-between items-center text-[8.5px]">
+                  <span className="opacity-80">Aggiornato:</span>
+                  <span className="font-medium text-slate-600">{new Date(latestActivity.createdAt).toLocaleString("it-IT", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
+                </p>
+                <p className="flex justify-between items-center text-[8.5px]">
+                  <span className="opacity-80">Da/Azione:</span>
+                  <span className="font-medium text-slate-600 truncate max-w-[100px] text-right" title={`Di: ${latestActivity.user?.username} / Sys: v2.2.27`}>
+                    {latestActivity.user?.firstName || latestActivity.user?.username || "Sys"} (v2.2.27)
+                  </span>
+                </p>
+              </div>
+            )}
+
+            <div className="px-2 py-1.5 flex items-center justify-between gap-2">
+              <UserProfileDialog>
+                <div className="flex items-center gap-2 min-w-0 cursor-pointer hover:bg-slate-200/50 p-1 rounded-md transition-colors flex-1">
+                  <div className="w-6 h-6 rounded-full bg-sidebar-accent flex items-center justify-center flex-shrink-0 border border-slate-300 shadow-sm overflow-hidden">
+                    {user.profileImageUrl ? (
+                      <img src={user.profileImageUrl} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-[10px] font-bold text-primary">
+                        {user.firstName ? user.firstName[0] : (user.username ? user.username[0].toUpperCase() : "?")}
+                        {user.lastName ? user.lastName[0] : ""}
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-sidebar-foreground truncate group-hover:text-primary leading-tight">
+                      {user.firstName || user.lastName
+                        ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+                        : user.username}
+                    </p>
+                    <p className="text-[8px] text-muted-foreground truncate uppercase tracking-widest font-bold">
+                      {user.role === 'admin' ? 'MASTER' : user.role}
+                    </p>
+                  </div>
+                </div>
+              </UserProfileDialog>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                data-testid="button-logout"
+                className="flex-shrink-0 h-7 w-7 rounded-md hover:bg-red-100 hover:text-red-700 bg-white border border-slate-200 shadow-sm"
+                title="Scollegati"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
         )}
       </SidebarFooter>

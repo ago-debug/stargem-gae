@@ -15,6 +15,7 @@ import {
 } from "./google-calendar";
 import { log } from "./vite";
 import { db } from "./db";
+import { sendSMS, sendEmail } from "./notifications";
 import { getUnifiedActivitiesPreview, getUnifiedActivityById, getUnifiedEnrollmentsPreview } from "./services/unifiedBridge";
 import { eq, desc, and, isNull, isNotNull } from "drizzle-orm";
 import {
@@ -2942,6 +2943,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const course = await storage.createCourse(validatedData);
+
+      // Integrazioni Prenotazioni (Auto-Enroll & Notify)
+      const notifyMessage = `Conferma prenotazione: ${course.name} - Inizio: ${course.startDate || req.body.startDate || ''} alle ${course.startTime || ''}`;
+      if (req.body.member1Id) {
+        const m1 = await storage.getMember(req.body.member1Id);
+        if (m1) {
+           await storage.createEnrollment({ courseId: course.id, memberId: m1.id, status: 'active', startDate: course.startDate || new Date() } as any);
+           if (req.body.notifySms && m1.phone) await sendSMS({ to: m1.phone, message: notifyMessage });
+           if (req.body.notifyEmail && m1.email) await sendEmail({ to: m1.email, subject: "Conferma Prenotazione", message: notifyMessage });
+        }
+      }
+      if (req.body.member2Id) {
+        const m2 = await storage.getMember(req.body.member2Id);
+        if (m2) {
+           await storage.createEnrollment({ courseId: course.id, memberId: m2.id, status: 'active', startDate: course.startDate || new Date() } as any);
+           if (req.body.notifySms && m2.phone) await sendSMS({ to: m2.phone, message: notifyMessage });
+           if (req.body.notifyEmail && m2.email) await sendEmail({ to: m2.email, subject: "Conferma Prenotazione", message: notifyMessage });
+        }
+      }
 
       // Sync to Google Calendar (async)
       try {

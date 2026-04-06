@@ -1531,269 +1531,177 @@ export default function CalendarPage() {
 
 
     return (
-        <div className="p-6 space-y-6 relative">
-            <div className="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-sm px-6 py-4 -mx-6 -mt-6 border-b flex flex-col md:flex-row md:items-center justify-between gap-4 border-slate-200 shadow-sm">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                        <CalendarIcon className="w-8 h-8 text-primary" />
-                    </div>
-                    <div>
-                        <div className="flex flex-col md:flex-row md:items-center gap-4">
-                            <h1 className="text-3xl font-bold">Calendario Attività</h1>
-                            {selectedDay === "all" ? (
-                                isTodayInView && (
-                                    <div className="hidden md:inline-flex items-center px-3 py-1 bg-yellow-100/80 border border-yellow-300 text-yellow-800 text-sm font-bold rounded-md shadow-sm">
-                                        Oggi: {format(new Date(), "EEEE d MMMM", { locale: it })}
-                                    </div>
-                                )
-                            ) : (() => {
-                                const dayIdx = WEEKDAYS.findIndex(d => d.id === selectedDay);
-                                const refDate = addDays(currentWeekStart, dayIdx);
-                                const today = new Date();
-                                const isCurrentDay = isSameDay(refDate, today);
-                                const isFutureDay = isAfter(startOfDay(refDate), startOfDay(today));
-                                
-                                let boxClass = "hidden md:inline-flex items-center px-3 py-1 text-sm font-bold rounded-md shadow-sm border";
-                                if (isCurrentDay) {
-                                    boxClass += " bg-yellow-100/80 border-yellow-300 text-yellow-800";
-                                } else if (isFutureDay) {
-                                    boxClass += " bg-blue-100/80 border-blue-300 text-blue-800";
-                                } else {
-                                    boxClass += " bg-slate-100/80 border-slate-300 text-slate-600";
-                                }
-
-                                return (
-                                    <div className={boxClass}>
-                                        {isCurrentDay ? "Oggi: " : ""}{format(refDate, "EEEE d MMMM", { locale: it })}
-                                    </div>
-                                );
-                            })()}
+        <div className="p-6 pb-0 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2rem)] overflow-hidden">
+            <div className="flex flex-col gap-4 mb-4 shrink-0 overflow-hidden">
+                {/* --- RIGA 1: Titolo e Macro Selectors --- */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+                    <div className="flex items-center gap-3 shrink-0">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                            <CalendarIcon className="w-8 h-8 text-primary" />
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={prevWeek}>
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <span className="text-sm font-semibold min-w-40 text-center">
-                                {format(currentWeekStart, "dd MMM", { locale: it })} - {format(currentWeekEnd, "dd MMM yyyy", { locale: it })}
-                            </span>
-                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={nextWeek}>
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-7 px-3 text-xs bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 shadow-sm" onClick={resetToToday}>
-                                Oggi
-                            </Button>
+                        <h1 className="text-3xl font-bold truncate">Calendario Attività</h1>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-nowrap w-full md:w-auto md:justify-end pb-1 md:pb-0">
+                        <div className="shrink-0">
+                            <Select value={selectedSeasonId} onValueChange={handleSeasonChange}>
+                                <SelectTrigger className="w-[180px] bg-transparent border-slate-300">
+                                    <CalendarIcon className="w-4 h-4 mr-2 text-slate-500" />
+                                    <SelectValue placeholder="Stagione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {seasons?.map((s: any, idx: number) => {
+                                        const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
+                                        return (
+                                            <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
+                                                {getSeasonLabel(s, seasons)}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        
+                        <div className="shrink-0">
+                            <Select value={selectedDay} onValueChange={setSelectedDay}>
+                                <SelectTrigger className="w-[150px] bg-transparent border-slate-300">
+                                    <CalendarIcon className="w-4 h-4 mr-2" />
+                                    <SelectValue placeholder="Giorno" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tutta la Sett.</SelectItem>
+                                    {WEEKDAYS.map(d => (
+                                        <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        
+                        <div className="shrink-0">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="w-[180px] justify-between font-normal bg-transparent border-slate-300">
+                                        <div className="flex items-center truncate">
+                                            <MapPin className="w-4 h-4 mr-2 shrink-0" />
+                                            <span className="truncate">
+                                                {selectedStudio === "all" ? "Tutti gli Studio" : sortedStudios.find(s => s.id.toString() === selectedStudio)?.name || "Studio"}
+                                            </span>
+                                        </div>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[180px] p-0" align="start">
+                                    <Command>
+                                        <CommandInput placeholder="Cerca studio..." />
+                                        <CommandList>
+                                            <CommandEmpty>Nessun risultato.</CommandEmpty>
+                                            <CommandGroup>
+                                                <CommandItem onSelect={() => setSelectedStudio("all")} className="flex items-center justify-between">
+                                                    Tutti gli Studio
+                                                    {selectedStudio === "all" && <Check className="w-4 h-4" />}
+                                                </CommandItem>
+                                                {sortedStudios.map(s => (
+                                                    <CommandItem key={s.id} onSelect={() => setSelectedStudio(s.id.toString())} className="flex items-center justify-between">
+                                                        <span className="truncate">{s.name}</span>
+                                                        {selectedStudio === s.id.toString() && <Check className="w-4 h-4" />}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+
+                        <div className="shrink-0">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="w-[180px] justify-between font-normal bg-transparent border-slate-300">
+                                        <div className="flex items-center truncate">
+                                            <User className="w-4 h-4 mr-2 shrink-0" />
+                                            <span className="truncate">
+                                                {selectedInstructor === "all" ? "Tutti gli Insegnanti" : (() => {
+                                                    const i = sortedInstructors.find(i => i.id.toString() === selectedInstructor);
+                                                    return i ? `${i.lastName} ${i.firstName}` : "Insegnante";
+                                                })()}
+                                            </span>
+                                        </div>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[180px] p-0" align="start">
+                                    <Command>
+                                        <CommandInput placeholder="Cerca insegnante..." />
+                                        <CommandList>
+                                            <CommandEmpty>Nessun risultato.</CommandEmpty>
+                                            <CommandGroup>
+                                                <CommandItem onSelect={() => setSelectedInstructor("all")} className="flex items-center justify-between">
+                                                    Tutti gli Insegnanti
+                                                    {selectedInstructor === "all" && <Check className="w-4 h-4" />}
+                                                </CommandItem>
+                                                {sortedInstructors.map(i => (
+                                                    <CommandItem key={i.id} onSelect={() => setSelectedInstructor(i.id.toString())} className="flex items-center justify-between">
+                                                        <span className="truncate">{i.lastName} {i.firstName}</span>
+                                                        {selectedInstructor === i.id.toString() && <Check className="w-4 h-4" />}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+
+                        <div className="shrink-0">
+                            <Select value={selectedEventType} onValueChange={setSelectedEventType}>
+                                <SelectTrigger className="w-[160px] h-10 border-slate-300">
+                                    <SelectValue placeholder="Tutte le Attività" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tutte le Attività</SelectItem>
+                                    {getActiveActivities().filter(a => ['corsi', 'workshop', 'lezioni-individuali', 'domeniche-movimento', 'allenamenti', 'affitti', 'campus'].includes(a.id)).map(act => (
+                                        <SelectItem key={act.id} value={act.id}>{act.labelUI}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4">
-                    <CourseDuplicationWizard currentSeasonId={selectedSeasonId} />
+                {/* --- RIGA 2: Timeline Navigation e Micro Filtri/Ricerca --- */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    
+                    <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-nowrap shrink-0">
+                        {selectedDay === "all" ? (
+                            isTodayInView && (
+                                <div className="hidden md:inline-flex items-center px-3 h-10 bg-yellow-100/80 border border-yellow-300 text-yellow-800 text-sm font-bold rounded-md shadow-sm shrink-0 whitespace-nowrap">
+                                    Oggi: {format(new Date(), "EEEE d MMMM", { locale: it })}
+                                </div>
+                            )
+                        ) : (() => {
+                            const dayIdx = WEEKDAYS.findIndex(d => d.id === selectedDay);
+                            const refDate = addDays(currentWeekStart, dayIdx);
+                            const today = new Date();
+                            const isCurrentDay = isSameDay(refDate, today);
+                            const isFutureDay = isAfter(startOfDay(refDate), startOfDay(today));
+                            let boxClass = "hidden md:inline-flex items-center px-3 h-10 text-sm font-bold rounded-md shadow-sm border shrink-0 whitespace-nowrap";
+                            if (isCurrentDay) boxClass += " bg-yellow-100/80 border-yellow-300 text-yellow-800";
+                            else if (isFutureDay) boxClass += " bg-blue-100/80 border-blue-300 text-blue-800";
+                            else boxClass += " bg-slate-100/80 border-slate-300 text-slate-600";
+                            return (
+                                <div className={boxClass}>
+                                    {isCurrentDay ? "Oggi: " : ""}{format(refDate, "EEEE d MMMM", { locale: it })}
+                                </div>
+                            );
+                        })()}
 
-                    <div className="text-left">
-                        <Select value={selectedSeasonId} onValueChange={handleSeasonChange}>
-                            <SelectTrigger className="w-[180px] bg-slate-50 border-slate-300">
-                                <CalendarIcon className="w-4 h-4 mr-2 text-slate-500" />
-                                <SelectValue placeholder="Stagione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {seasons?.map((s: any, idx: number) => {
-                                    const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
-                                    return (
-                                        <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
-                                            {getSeasonLabel(s, seasons)}
-                                        </SelectItem>
-                                    );
-                                })}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="text-left">
-                        <Select value={selectedDay} onValueChange={setSelectedDay}>
-                            <SelectTrigger className="w-[150px]">
-                                <CalendarIcon className="w-4 h-4 mr-2" />
-                                <SelectValue placeholder="Giorno" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Tutta la Sett.</SelectItem>
-                                {WEEKDAYS.map(d => (
-                                    <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="text-left">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-[180px] justify-between font-normal">
-                                    <div className="flex items-center truncate">
-                                        <MapPin className="w-4 h-4 mr-2 shrink-0" />
-                                        <span className="truncate">
-                                            {selectedStudio === "all" ? "Tutti gli Studio" : sortedStudios.find(s => s.id.toString() === selectedStudio)?.name || "Studio"}
-                                        </span>
-                                    </div>
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[180px] p-0" align="start">
-                                <Command>
-                                    <CommandInput placeholder="Cerca studio..." />
-                                    <CommandList>
-                                        <CommandEmpty>Nessun risultato.</CommandEmpty>
-                                        <CommandGroup>
-                                            <CommandItem
-                                                onSelect={() => setSelectedStudio("all")}
-                                                className="flex items-center justify-between"
-                                            >
-                                                Tutti gli Studio
-                                                {selectedStudio === "all" && <Check className="w-4 h-4" />}
-                                            </CommandItem>
-                                            {sortedStudios.map(s => (
-                                                <CommandItem
-                                                    key={s.id}
-                                                    onSelect={() => setSelectedStudio(s.id.toString())}
-                                                    className="flex items-center justify-between"
-                                                >
-                                                    <span className="truncate">{s.name}</span>
-                                                    {selectedStudio === s.id.toString() && <Check className="w-4 h-4" />}
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-
-                    <div className="text-left">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-[180px] justify-between font-normal">
-                                    <div className="flex items-center truncate">
-                                        <User className="w-4 h-4 mr-2 shrink-0" />
-                                        <span className="truncate">
-                                            {selectedInstructor === "all" ? "Tutti gli Insegnanti" : (() => {
-                                                const i = sortedInstructors.find(i => i.id.toString() === selectedInstructor);
-                                                return i ? `${i.lastName} ${i.firstName}` : "Insegnante";
-                                            })()}
-                                        </span>
-                                    </div>
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[180px] p-0" align="start">
-                                <Command>
-                                    <CommandInput placeholder="Cerca insegnante..." />
-                                    <CommandList>
-                                        <CommandEmpty>Nessun risultato.</CommandEmpty>
-                                        <CommandGroup>
-                                            <CommandItem
-                                                onSelect={() => setSelectedInstructor("all")}
-                                                className="flex items-center justify-between"
-                                            >
-                                                Tutti gli Insegnanti
-                                                {selectedInstructor === "all" && <Check className="w-4 h-4" />}
-                                            </CommandItem>
-                                            {sortedInstructors.map(i => (
-                                                <CommandItem
-                                                    key={i.id}
-                                                    onSelect={() => setSelectedInstructor(i.id.toString())}
-                                                    className="flex items-center justify-between"
-                                                >
-                                                    <span className="truncate">{i.lastName} {i.firstName}</span>
-                                                    {selectedInstructor === i.id.toString() && <Check className="w-4 h-4" />}
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-
-                    <div className="text-left">
-                        <Select value={selectedEventType} onValueChange={setSelectedEventType}>
-                            <SelectTrigger className="w-[160px] h-10 border-slate-300">
-                                <SelectValue placeholder="Tutte le Attività" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Tutte le Attività</SelectItem>
-                                {getActiveActivities().filter(a => ['corsi', 'workshop', 'lezioni-individuali', 'domeniche-movimento', 'allenamenti', 'affitti', 'campus'].includes(a.id)).map(act => (
-                                    <SelectItem key={act.id} value={act.id}>{act.labelUI}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="text-left">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-[180px] justify-between font-normal">
-                                    <div className="flex items-center truncate">
-                                        <Filter className="w-4 h-4 mr-2 shrink-0" />
-                                        <span className="truncate">
-                                            {selectedCategory === "all" ? "Tutte le Categorie" : sortedCategories.find(c => c.id.toString() === selectedCategory)?.name || "Categoria"}
-                                        </span>
-                                    </div>
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[180px] p-0" align="start">
-                                <Command>
-                                    <CommandInput placeholder="Cerca categoria..." />
-                                    <CommandList>
-                                        <CommandEmpty>Nessun risultato.</CommandEmpty>
-                                        <CommandGroup>
-                                            <CommandItem
-                                                onSelect={() => setSelectedCategory("all")}
-                                                className="flex items-center justify-between"
-                                            >
-                                                Tutte le Categorie
-                                                {selectedCategory === "all" && <Check className="w-4 h-4" />}
-                                            </CommandItem>
-                                            {sortedCategories.map(c => (
-                                                <CommandItem
-                                                    key={c.id}
-                                                    onSelect={() => setSelectedCategory(c.id.toString())}
-                                                    className="flex items-center justify-between"
-                                                >
-                                                    <span className="truncate">{c.name}</span>
-                                                    {selectedCategory === c.id.toString() && <Check className="w-4 h-4" />}
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-
-                    <div className="text-left flex-1 min-w-[200px]">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Cerca..."
-                                value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
-                                className="pl-9 h-10"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        {(selectedStudio !== "all" || selectedInstructor !== "all" || selectedCategory !== "all" || selectedDay !== "all" || searchQuery !== "") && (
-                            <Button variant="ghost" size="icon" onClick={resetFilters} title="Resetta filtri">
-                                <RefreshCw className="w-4 h-4" />
-                            </Button>
-                        )}
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" size="icon" className="h-10 w-10 shrink-0 bg-slate-900 border-slate-900 text-slate-100 hover:bg-slate-800 hover:text-white" title="Calendario Mensile">
                                     <CalendarIcon className="w-5 h-5" />
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
+                            <PopoverContent className="w-auto p-0" align="start">
                                 <Calendar
                                     mode="single"
                                     selected={viewDate}
@@ -1811,13 +1719,89 @@ export default function CalendarPage() {
                                 />
                             </PopoverContent>
                         </Popover>
+
+                        <div className="flex items-center bg-white border border-slate-300 rounded-md shadow-sm h-10 shrink-0">
+                            <Button variant="ghost" size="icon" className="h-full w-9 shrink-0" onClick={prevWeek}>
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <span className="text-sm font-semibold min-w-[170px] text-center px-2">
+                                {format(currentWeekStart, "dd MMM", { locale: it })} - {format(currentWeekEnd, "dd MMM yyyy", { locale: it })}
+                            </span>
+                            <Button variant="ghost" size="icon" className="h-full w-9 shrink-0" onClick={nextWeek}>
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+
+                        <Button variant="outline" size="sm" className="h-10 px-4 font-semibold shrink-0 bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 shadow-sm" onClick={resetToToday}>
+                            Oggi
+                        </Button>
+                    </div>
+
+                    <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-nowrap w-full md:w-auto md:justify-end pb-1 md:pb-0">
+                        <div className="shrink-0">
+                            <CourseDuplicationWizard currentSeasonId={selectedSeasonId} />
+                        </div>
+
+                        <div className="shrink-0">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="w-[180px] h-10 justify-between font-normal bg-transparent border-slate-300">
+                                        <div className="flex items-center truncate">
+                                            <Filter className="w-4 h-4 mr-2 shrink-0" />
+                                            <span className="truncate">
+                                                {selectedCategory === "all" ? "Tutte le Categorie" : sortedCategories.find(c => c.id.toString() === selectedCategory)?.name || "Categoria"}
+                                            </span>
+                                        </div>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[180px] p-0" align="end">
+                                    <Command>
+                                        <CommandInput placeholder="Cerca categoria..." />
+                                        <CommandList>
+                                            <CommandEmpty>Nessun risultato.</CommandEmpty>
+                                            <CommandGroup>
+                                                <CommandItem onSelect={() => setSelectedCategory("all")} className="flex items-center justify-between">
+                                                    Tutte le Categorie
+                                                    {selectedCategory === "all" && <Check className="w-4 h-4" />}
+                                                </CommandItem>
+                                                {sortedCategories.map(c => (
+                                                    <CommandItem key={c.id} onSelect={() => setSelectedCategory(c.id.toString())} className="flex items-center justify-between">
+                                                        <span className="truncate">{c.name}</span>
+                                                        {selectedCategory === c.id.toString() && <Check className="w-4 h-4" />}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+
+                        <div className="w-[200px] shrink-0">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Cerca..."
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                    className="pl-9 h-10 bg-transparent border-slate-300"
+                                />
+                            </div>
+                        </div>
+
+                        {(selectedStudio !== "all" || selectedInstructor !== "all" || selectedCategory !== "all" || selectedDay !== "all" || searchQuery !== "") && (
+                            <Button variant="ghost" size="icon" onClick={resetFilters} title="Resetta filtri" className="shrink-0 h-10 w-10 bg-slate-100 hover:bg-slate-200">
+                                <RefreshCw className="w-4 h-4 text-slate-600" />
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>
 
-            <Card className="border-none shadow-xl bg-card overflow-hidden">
-                <CardContent ref={scrollContainerRef} className="p-0 overflow-auto max-h-[calc(100vh-220px)] relative scroll-smooth">
-                    <div className="min-w-full w-fit flex flex-col relative">
+            <Card className="border-none shadow-xl bg-card overflow-hidden flex-1 flex flex-col min-h-0">
+                <CardContent ref={scrollContainerRef} className="p-0 overflow-auto flex-1 relative scroll-smooth border-t">
+                    <div className="min-w-full w-fit flex flex-col relative min-h-full">
                         {/* Header: Ore | (Days or Studios) */}
                         <div className="sticky top-0 z-40 bg-white shadow-sm">
                             <div className={`grid border-b bg-[#f8f9fa]`}
@@ -1900,10 +1884,10 @@ export default function CalendarPage() {
                                     const heightPx = calendarLayout.cumulativeTops[nextMinOffset] - topPx;
                                     return (
                                         <div key={hour}
-                                            className="border-b border-[#eee] flex flex-col items-center justify-start pt-2 text-[11px] font-bold text-[#666] bg-[#f8f9fa] absolute w-full left-0 right-0 overflow-hidden"
+                                            className="border-b border-[#eee] flex flex-col items-center justify-start text-[11px] font-bold text-[#666] bg-[#f8f9fa] absolute w-full left-0 right-0 overflow-hidden"
                                             style={{ top: `${topPx}px`, height: `${heightPx}px` }}>
-                                            <span>{hour.toString().padStart(2, "0")}.00</span>
-                                            {heightPx > 60 && <span className="opacity-50 font-normal text-[9px] mt-1">{hour.toString().padStart(2, "0")}.30</span>}
+                                            <span className="pt-2">{hour.toString().padStart(2, "0")}.00</span>
+                                            {heightPx > 60 && <span className="absolute top-1/2 -translate-y-1/2 opacity-50 font-normal text-[9px]">{hour.toString().padStart(2, "0")}.30</span>}
                                         </div>
                                     );
                                 })}
@@ -2097,33 +2081,34 @@ export default function CalendarPage() {
                             })}
                         </div>
 
-                        {/* Bottom Sticky Day Selector - Outside scroll container for best visibility */}
-                        <div className="bg-[#f8f9fa] border-t p-2 flex items-center justify-center gap-1 z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] sticky bottom-0">
-                            <Button
-                                variant={selectedDay === "all" ? "default" : "ghost"}
-                                size="sm"
-                                className="h-10 text-xs font-bold uppercase rounded-none px-4"
-                                onClick={() => setSelectedDay("all")}
-                            >
-                                <Users className="w-4 h-4 mr-2" />
-                                Settimana
-                            </Button>
-                            <div className="h-6 w-[1px] bg-slate-300 mx-2" />
-                            {WEEKDAYS.map(day => (
-                                <Button
-                                    key={day.id}
-                                    variant={selectedDay === day.id ? "default" : "ghost"}
-                                    size="sm"
-                                    className={`h-10 text-xs font-bold uppercase rounded-none px-4 ${selectedDay === day.id ? 'bg-primary text-white' : 'hover:bg-primary/10 text-[#555]'}`}
-                                    onClick={() => setSelectedDay(day.id)}
-                                >
-                                    {day.label}
-                                </Button>
-                            ))}
-                        </div>
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Bottom Sticky Day Selector - Outside scroll container for best visibility like Planning's Legend */}
+            <div className="bg-[#f8f9fa] border-t px-6 py-2 flex items-center justify-start gap-1 z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] shrink-0 mx-[-1.5rem] overflow-x-auto hide-scrollbar flex-nowrap">
+                <Button
+                    variant={selectedDay === "all" ? "default" : "ghost"}
+                    size="sm"
+                    className="h-10 text-xs font-bold uppercase rounded-md px-4 shrink-0"
+                    onClick={() => setSelectedDay("all")}
+                >
+                    <Users className="w-4 h-4 mr-2" />
+                    Settimana
+                </Button>
+                <div className="h-6 w-[1px] bg-slate-300 mx-2 shrink-0" />
+                {WEEKDAYS.map(day => (
+                    <Button
+                        key={day.id}
+                        variant={selectedDay === day.id ? "default" : "ghost"}
+                        size="sm"
+                        className={`h-10 text-xs font-bold uppercase rounded-md px-4 shrink-0 ${selectedDay === day.id ? 'bg-primary text-white' : 'hover:bg-primary/10 text-[#555]'}`}
+                        onClick={() => setSelectedDay(day.id)}
+                    >
+                        {day.label}
+                    </Button>
+                ))}
+            </div>
 
             
             <CourseUnifiedModal 

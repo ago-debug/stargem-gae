@@ -11,7 +11,7 @@ export default function IndividualLessons() {
       itemLabelPlural="lezioni individuali"
       baseRoute="/scheda-lezione-individuale"
       testIdPrefix="individual-lesson"
-      activityType="individual_lesson"
+      activityType="prenotazioni"
     />
   );
 }
