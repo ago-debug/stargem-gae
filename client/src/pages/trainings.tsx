@@ -11,7 +11,7 @@ export default function Trainings() {
       itemLabelPlural="allenamenti"
       baseRoute="/scheda-allenamento"
       testIdPrefix="training"
-      activityType="training"
+      activityType="prenotazioni"
     />
   );
 }

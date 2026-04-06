@@ -14,15 +14,12 @@ export function ActiveUserAvatars() {
   const { data: users = [] } = useActiveUsers();
   const { user: currentUser } = useAuth();
 
-  // Filtriamo quelli online e in pausa (ping < 20 minuti fa e con sessione aperta)
+  // Filtriamo quelli online e in pausa (ping < 20 minuti fa e con sessione aperta) escludendo se stessi
   const activeUsers = users.filter((u) => {
+    if (u.id === currentUser?.id) return false;
     if (!u.lastSeenAt || !u.currentSessionStart) return false;
     const diff = new Date().getTime() - new Date(u.lastSeenAt).getTime();
     return diff <= 20 * 60 * 1000;
-  }).sort((a, b) => {
-    if (a.id === currentUser?.id) return -1;
-    if (b.id === currentUser?.id) return 1;
-    return 0;
   });
 
   if (activeUsers.length === 0) return null;

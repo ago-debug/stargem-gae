@@ -27,6 +27,8 @@ import { useCustomListValues } from "@/hooks/use-custom-list";
 import { MultiSelectStatus } from "@/components/multi-select-status";
 import { CustomListManagerDialog } from "@/components/custom-list-manager-dialog";
 import { CategoryManagerDialog } from "@/components/category-manager-dialog";
+import { QuickMemberAddModal } from "./QuickMemberAddModal";
+import { MessageSquare, Mail, Phone } from "lucide-react";
 import type { Course, InsertCourse, Category, Instructor, Studio, Quote, Attendance, Member, ActivityStatus } from "@shared/schema";
 
 const WEEKDAYS = [
@@ -81,7 +83,7 @@ const getSafeDateStr = (dateVal: any) => {
 
 interface EnrollmentsTabProps {
   activityId: number;
-  activityType: "course" | "workshop" | "campus";
+  activityType: "course" | "workshop" | "campus" | "prenotazioni";
 }
 function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
   const { toast } = useToast();
@@ -209,7 +211,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
 
 interface AttendancesTabProps {
   activityId: number;
-  activityType: "course" | "workshop" | "campus";
+  activityType: "course" | "workshop" | "campus" | "prenotazioni";
 }
 function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
   const { toast } = useToast();
@@ -342,7 +344,7 @@ export interface CourseUnifiedModalProps {
   defaultValues?: any;
   onSuccess?: () => void;
   onDelete?: (id: number) => void;
-  activityType?: "course" | "workshop" | "campus";
+  activityType?: "course" | "workshop" | "campus" | "prenotazioni";
 }
 
 export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, onSuccess, onDelete, activityType = "course" }: CourseUnifiedModalProps) {
@@ -360,24 +362,32 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [isPostiModalOpen, setIsPostiModalOpen] = useState(false);
   const [isLivelloModalOpen, setIsLivelloModalOpen] = useState(false);
   const [isFasciaEtaModalOpen, setIsFasciaEtaModalOpen] = useState(false);
+  const [isGruppiCampusModalOpen, setIsGruppiCampusModalOpen] = useState(false);
+  const [isQuickMemberAddOpen, setIsQuickMemberAddOpen] = useState(false);
+  const [quickMemberTarget, setQuickMemberTarget] = useState<"member1" | "member2">("member1");
 
   // Dati da Liste e DB
-  const nameListType = activityType === "campus" ? "campus" : activityType === "workshop" ? "genere" : "nomi_corsi";
+  const nameListType = activityType === "prenotazioni" ? "prenotazioni" : activityType === "campus" ? "campus" : activityType === "workshop" ? "genere" : "nomi_corsi";
   const nomiCorsi = useCustomListValues(nameListType);
   const postiDisponibili = useCustomListValues("posti_disponibili");
   const livelli = useCustomListValues("livello");
   const fasceEta = useCustomListValues("fascia_eta");
+  const gruppiCampus = useCustomListValues("gruppi_campus");
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({ queryKey: ["/api/activity-statuses"] });
   const baseStati = ["ATTIVO", "IN PROGRAMMA", "COMPLETO", "ANNULLATO"];
   const finalStati = activityStatuses && activityStatuses.length > 0 ? [...activityStatuses].filter(s => s.active).sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})).map(s => s.name) : baseStati;
   
-  const categoryEndpoint = activityType === "campus" ? "/api/campus-categories" : activityType === "workshop" ? "/api/workshop-categories" : "/api/categories";
+  const categoryEndpoint = activityType === "prenotazioni" ? "/api/individual-lesson-categories" : activityType === "campus" ? "/api/campus-categories" : activityType === "workshop" ? "/api/workshop-categories" : "/api/categories";
   const { data: rawCategories } = useQuery<Category[]>({ queryKey: [categoryEndpoint] });
   const categories = rawCategories ? [...rawCategories].sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})) : [];
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
   const { data: seasons } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
+  const pacchettiPrenotazioni = useCustomListValues("pacchetti_prenotazioni");
+  const { data: membersData } = useQuery<{ members: Member[], total: number }>({ queryKey: ["/api/members"] });
+  const membersList = membersData?.members || [];
+  const [isPacchettiModalOpen, setIsPacchettiModalOpen] = useState(false);
 
   // State della Form
   const [formData, setFormData] = useState<any>({});
@@ -385,6 +395,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   // State Operativo (Multi) e Flags Promo
   const [opStates, setOpStates] = useState<string[]>(["ATTIVO"]);
   const [promoFlags, setPromoFlags] = useState<string[]>([]);
+  const [notifySms, setNotifySms] = useState(false);
+  const [notifyEmail, setNotifyEmail] = useState(false);
+  const [notifyWa, setNotifyWa] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -401,7 +414,28 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         }
         setPromoFlags(tags.filter(t => t.startsWith("PROMO:")).map(t => t.replace("PROMO:", "")));
       } else {
-        let defaultsToUse = defaultValues || {};
+        let defaultsToUse: any = { ...(defaultValues || {}) };
+        
+        // Smart Fill
+        if (!defaultsToUse.seasonId && seasons && seasons.length > 0) {
+            const activeSeason = seasons.find((s: any) => s.active) || seasons[0];
+            if (activeSeason) defaultsToUse.seasonId = activeSeason.id;
+        }
+
+        if (!defaultsToUse.dayOfWeek) {
+            const days = ["DOM", "LUN", "MAR", "MER", "GIO", "VEN", "SAB"];
+            defaultsToUse.dayOfWeek = days[new Date().getDay()];
+        }
+
+        if (!defaultsToUse.startTime) {
+            const now = new Date();
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const targetMins = m < 30 ? "30" : "00";
+            const targetHr = m < 30 ? h : (h + 1) % 24;
+            defaultsToUse.startTime = `${targetHr.toString().padStart(2, "0")}:${targetMins}`;
+        }
+
         if (activityType === "campus" && !defaultValues?.startTime) {
           defaultsToUse = { ...defaultsToUse, recurrenceType: "daily", startTime: "08:30", endTime: "17:00" };
         }
@@ -411,7 +445,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         setPromoFlags([]);
       }
     }
-  }, [isOpen, course, defaultValues]);
+  }, [isOpen, course, defaultValues, seasons]);
 
   const updateForm = (key: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [key]: value }));
@@ -425,7 +459,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     }
   };
 
-  const apiEndpoint = activityType === "campus" ? "/api/campus-activities" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
+  const apiEndpoint = activityType === "prenotazioni" ? "/api/courses" : activityType === "campus" ? "/api/campus-activities" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -493,6 +527,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     const isActive = !opStates.includes("ANNULLATO");
 
     const payload: any = {
+      ...(activityType === "prenotazioni" && { notifySms, notifyEmail, notifyWa, packageSingle: formData.packageSingle, packageCouple: formData.packageCouple, packageGroup: formData.packageGroup, member1Id: formData.member1Id, member2Id: formData.member2Id }),
       sku: formData.sku || null,
       name: formData.name as string,
       description: formData.description || null,
@@ -597,7 +632,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-full">
         <DialogHeader>
-          <DialogTitle>{isEdit ? (activityType === "campus" ? "Modifica Campus" : activityType === "workshop" ? "Modifica Workshop" : "Modifica Corso") : (activityType === "campus" ? "Nuovo Campus" : activityType === "workshop" ? "Nuovo Workshop" : "Nuovo Corso")}</DialogTitle>
+          <DialogTitle>{isEdit ? (activityType === "prenotazioni" ? "Modifica Prenotazione" : activityType === "campus" ? "Modifica Campus" : activityType === "workshop" ? "Modifica Workshop" : "Modifica Corso") : (activityType === "prenotazioni" ? "LEZIONI INDIVIDUALI E ALLENAMENTI / AFFITTI INSEGNANTI (PER LE LORO PRIVATE O PROVE)" : activityType === "campus" ? "Nuovo Campus" : activityType === "workshop" ? "Nuovo Workshop" : "Nuovo Corso")}</DialogTitle>
           <DialogDescription>
             {isEdit ? "Gestisci informazioni e iscritti." : "Inserisci i dettagli dell'attività."}
           </DialogDescription>
@@ -637,7 +672,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                  <Label className="font-semibold text-slate-800 shrink-0">{activityType === "campus" ? "Campus *" : activityType === "workshop" ? "Nome Workshop *" : "Genere / Nome Corso *"}</Label>
+                  <Label className="font-semibold text-slate-800 shrink-0">{activityType === "prenotazioni" ? "PRENOTAZIONI *" : activityType === "campus" ? "Campus *" : activityType === "workshop" ? "Nome Workshop *" : "Genere / Nome Corso *"}</Label>
                   <Button
                     type="button"
                     size="icon"
@@ -686,7 +721,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                  <Label className="font-semibold text-slate-800 shrink-0">Categoria</Label>
+                  <Label className="font-semibold text-slate-800 shrink-0">{activityType === "prenotazioni" ? "TIPOLOGIA" : "Categoria"}</Label>
                   <Button
                     type="button"
                     size="icon"
@@ -721,19 +756,49 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {activityType === "prenotazioni" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="font-semibold text-slate-800">NOME ALLIEVO 1</Label>
+                      <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("member1"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
+                    </div>
+                    <Combobox
+                      name="member1Id"
+                      value={formData.member1Id?.toString() || "none"}
+                      onValueChange={val => updateForm("member1Id", val === "none" ? null : parseInt(val))}
+                      options={[{value: "none", label: "Nessun allievo"}, ...(membersList || []).map((m: any) => ({ value: m.id.toString(), label: `${m.lastName} ${m.firstName}` }))]}
+                      placeholder="Cerca Allievo 1..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="font-semibold text-slate-800">NOME ALLIEVO 2</Label>
+                      <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("member2"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
+                    </div>
+                    <Combobox
+                      name="member2Id"
+                      value={formData.member2Id?.toString() || "none"}
+                      onValueChange={val => updateForm("member2Id", val === "none" ? null : parseInt(val))}
+                      options={[{value: "none", label: "Nessun allievo"}, ...(membersList || []).map((m: any) => ({ value: m.id.toString(), label: `${m.lastName} ${m.firstName}` }))]}
+                      placeholder="Cerca Allievo 2..."
+                    />
+                  </div>
+                </div>
+              ) : (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="font-semibold text-slate-800 shrink-0">{activityType === "campus" ? "Gruppo" : "Livello"}</Label>
-                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsLivelloModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button>
+                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (activityType === "campus") { setIsGruppiCampusModalOpen(true); } else { setIsLivelloModalOpen(true); } }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button>
                   </div>
                   <Combobox
                     name="level"
                     value={formData.level || "none"}
                     onValueChange={(val) => updateForm("level", val === "none" ? null : val)}
                     options={activityType === "campus" 
-                        ? [{value: "none", label: "Nessun gruppo"}, {value: "Giallo", label: "Giallo"}, {value: "Blu", label: "Blu"}, {value: "Rosso", label: "Rosso"}, {value: "Verde", label: "Verde"}] 
-                        : [{value: "none", label: "Nessun livello"}, ...(livelli || []).map(val => ({ value: val, label: val }))]}
+                        ? [{value: "none", label: "Nessun gruppo"}, ...(gruppiCampus || []).map((val: string) => ({ value: val, label: val }))]
+                        : [{value: "none", label: "Nessun livello"}, ...(livelli || []).map((val: string) => ({ value: val, label: val }))]}
                     placeholder={activityType === "campus" ? "Seleziona gruppo..." : "Seleziona livello..."}
                   />
                 </div>
@@ -746,11 +811,12 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     name="ageGroup"
                     value={formData.ageGroup || "none"}
                     onValueChange={(val) => updateForm("ageGroup", val === "none" ? null : val)}
-                    options={[{value: "none", label: "Nessuna fascia"}, ...(fasceEta || []).map(val => ({ value: val, label: val }))]}
+                    options={[{value: "none", label: "Nessuna fascia"}, ...(fasceEta || []).map((val: string) => ({ value: val, label: val }))]}
                     placeholder="Seleziona fascia..."
                   />
                 </div>
               </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -775,7 +841,49 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {activityType === "prenotazioni" ? (
+                <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 bg-slate-50/50 rounded-md">
+                  <div className="space-y-2">
+                    <Label htmlFor="price" className="text-slate-800 font-bold">SINGOLA (€)</Label>
+                    <Input id="price" type="number" step="0.01" min="0" value={formData.price || ""} onChange={e => updateForm("price", e.target.value)} placeholder="0.00" />
+                    <Label className="text-xs text-slate-700 font-bold mt-2 align-middle inline-flex items-center gap-2">PACCHETTO SINGOLA <Button variant="ghost" size="icon" className="h-4 w-4" onClick={(e) => { e.preventDefault(); setIsPacchettiModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button></Label>
+                    <Combobox
+                      name="packageSingle"
+                      value={formData.packageSingle || "none"}
+                      onValueChange={(val) => updateForm("packageSingle", val === "none" ? null : val)}
+                      options={[{value: "none", label: "Nessun pacchetto"}, ...(pacchettiPrenotazioni || []).map((val: string) => ({ value: val, label: val }))]}
+                      placeholder="Seleziona..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-800 font-bold">PREZZO COPPIA (€)</Label>
+                    <Input type="number" step="0.01" min="0" value={formData.packageCouplePrice || ""} onChange={e => updateForm("packageCouplePrice", e.target.value)} placeholder="0.00" />
+                    <Label className="text-xs text-slate-700 font-bold mt-2 align-middle inline-flex items-center gap-2">PACCHETTO COPPIA <Button variant="ghost" size="icon" className="h-4 w-4" onClick={(e) => { e.preventDefault(); setIsPacchettiModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button></Label>
+                    <Combobox
+                      name="packageCouple"
+                      value={formData.packageCouple || "none"}
+                      onValueChange={(val) => updateForm("packageCouple", val === "none" ? null : val)}
+                      options={[{value: "none", label: "Nessun pacchetto"}, ...(pacchettiPrenotazioni || []).map((val: string) => ({ value: val, label: val }))]}
+                      placeholder="Seleziona..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-800 font-bold">PREZZO GRUPPO (€)</Label>
+                    <Input type="number" step="0.01" min="0" value={formData.packageGroupPrice || ""} onChange={e => updateForm("packageGroupPrice", e.target.value)} placeholder="0.00" />
+                    <Label className="text-xs text-slate-700 font-bold mt-2 align-middle inline-flex items-center gap-2">PACCHETTO GRUPPO <Button variant="ghost" size="icon" className="h-4 w-4" onClick={(e) => { e.preventDefault(); setIsPacchettiModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button></Label>
+                    <Combobox
+                      name="packageGroup"
+                      value={formData.packageGroup || "none"}
+                      onValueChange={(val) => updateForm("packageGroup", val === "none" ? null : val)}
+                      options={[{value: "none", label: "Nessun pacchetto"}, ...(pacchettiPrenotazioni || []).map((val: string) => ({ value: val, label: val }))]}
+                      placeholder="Seleziona..."
+                    />
+                  </div>
+                </div>
+                </>
+              ) : (
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Prezzo (€)</Label>
                   <Input id="price" type="number" step="0.01" min="0" value={formData.price || ""} onChange={e => updateForm("price", e.target.value)} />
@@ -821,6 +929,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   </Select>
                 </div>
               </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-md relative bg-slate-50/50">
                 <div className="absolute -top-3 left-3 bg-white px-2">
@@ -917,6 +1026,12 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
     <CustomListManagerDialog listType="livello" title="Gestione Livelli" open={isLivelloModalOpen} onOpenChange={setIsLivelloModalOpen} />
     <CustomListManagerDialog listType="fascia_eta" title="Gestione Fasce d'Età" open={isFasciaEtaModalOpen} onOpenChange={setIsFasciaEtaModalOpen} />
+    <CustomListManagerDialog listType="gruppi_campus" title="Gestione Gruppi Campus" open={isGruppiCampusModalOpen} onOpenChange={setIsGruppiCampusModalOpen} />
+    <CustomListManagerDialog listType="pacchetti_prenotazioni" title="Gestione Pacchetti Prenotazioni" open={isPacchettiModalOpen} onOpenChange={setIsPacchettiModalOpen} />
+    <QuickMemberAddModal isOpen={isQuickMemberAddOpen} onOpenChange={setIsQuickMemberAddOpen} onSuccess={(id) => {
+        if (quickMemberTarget === "member1") updateForm("member1Id", id);
+        else if (quickMemberTarget === "member2") updateForm("member2Id", id);
+    }} />
     </>
   );
 }

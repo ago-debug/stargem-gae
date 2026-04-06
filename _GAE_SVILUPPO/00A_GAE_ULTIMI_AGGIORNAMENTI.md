@@ -6,6 +6,15 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 ---
 
 
+### 06 Aprile 2026 (Fix Validazione Modali, Smart-Fill UI/UX e Preparazione Refactor Pagamenti)
+* **Aggiunta Rapida Anagrafica (Obbligatoria):** Aggiornato il modale `QuickMemberAddModal.tsx`. Rimossa la dicitura "opzionale" e inseriti controlli obbligatori (`required`) per i campi Nome, Cognome, Telefono, Email e Codice Fiscale. Il tasto "Salva e Usa" è ora dinamicamente inibito se manca anche solo uno di questi campi per assicurare dati completi nei momenti di picco alle reception.
+* **Smart Fill (Pre-compilazione Eventi):** Implementato script di auto-popolamento dinamico in `CourseUnifiedModal.tsx`. Quando la modale è in fase di creazione (insert/nuovo), rileva il Giorno corrente geolocalizzato (es. LUN), la Stagione primariamente attiva, e l'Orario di sistema (arrotondato a blocchi di 30 minuti) per azzerare i tempi di data-entry.
+* **Correzioni Cromatiche & Pennini (Pencil Edit Links):** 
+  * Ripulito interamente l'aspetto testuale della sezione prezzi/pacchetti (rimossi messaggi d'errore o label rossi "text-red-600" in favore di placeholder neutri e leggibili). 
+  * Installati i link di deep-jump dinamici (pennino Edit) su tutte le etichette anagrafiche, compreso il modulo "Gruppi" dei Campus (`CustomListManagerDialog listType="gruppi_campus"`), permettendo la gestione on-the-fly delle combobox.
+* **Progettazione Database (Da Eseguire Mercoledì):** Come stabilito al termine delle verifiche, è stata autorizzata la futura riorganizzazione massiva lato Database. Da Mercoledì mattina il focus sarà esclusivamente indirizzato a uno snellimento categorico delle logiche di memorizzazione in DB, **con assoluta precedenza e rifinitura della questione Pagamenti**, puntando alla stabilità, velocità d'uso e operatività error-free per l'interfaccia di Cassa. 
+  * *REQUIREMENT TASSATIVO:* Prima di eseguire le query martedì sera / mercoledì, dovrà essere scattato un backup integrale e parallelo **sia del sorgente (Filesystem) sia dell'engine (MariaDB)** per garanzia di failback.
+
 ### 05 Aprile 2026 (Phase 28.6: Gestione Note & Storico Globale)
 * **Nuova Dashboard Gestione Note (`/inserisci-nota`):** Trasformato il vecchio link orfano in una Dashboard globale (`gestione-note.tsx`) strutturata a livello estetico ed informativo. Centralizzate le operazioni di monitoraggio visivo per note operative incrociate.
 * **Sistema di Ordinamento Nativo e Highlight 3D Oro:** Integrate funzioni di sorting A-Z in testa-tabella (Data, Autore, Sezione, Archiviazione) con colorazione dinamica in giallino delle colonne in focus. Conformato l'impatto visivo all'Oro 3D (Gold gradients: `from-[#FFD700] via-[#D4AF37] to-[#B8860B]`) per l'iconografia madre e i pulsanti d'inserimento/salvataggio primari, rispettando rigorosamente la brand identity. Ordinamento primario forzato sulla recency cronologica d'azione (sia creazione pura che chiusura da parte dell'Admin) per non disperdere storici recenti tra i dati.

@@ -151,6 +151,9 @@ function Router() {
       <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/maschera-input" component={MascheraInputGenerale} />
+      <Route path="/maschera-input-generale">
+        <Redirect to="/maschera-input" />
+      </Route>
       <ProtectedRoute path="/anagrafica-generale" component={Members} />
       <ProtectedRoute path="/inserisci-nota" component={GestioneNote} />
       <Route path="/corsi">

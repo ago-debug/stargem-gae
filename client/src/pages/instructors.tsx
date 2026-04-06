@@ -160,7 +160,8 @@ export default function Instructors() {
         </div>
         <Button
           onClick={() => {
-            setLocation("/?type=INSEGNANTE");
+            setEditingInstructor(null);
+            setIsFormOpen(true);
           }}
           data-testid="button-add-instructor"
         >
@@ -297,7 +298,8 @@ export default function Instructors() {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              setLocation(`/?memberId=${instructor.id}`);
+                              setEditingInstructor(instructor);
+                              setIsFormOpen(true);
                             }}
                             data-testid={`button-edit-instructor-${instructor.id}`}
                           >
