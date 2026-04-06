@@ -6,6 +6,11 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 ---
 
 
+### 06 Aprile 2026 (Phase 29: Rebranding StarGem Suite & TeoCopilot)
+* **Rebranding "StarGem Suite" & Griglia Moduli:** Ristrutturata drasticamente la pagina di Login (`auth-page.tsx`), abbandonando il moniker "CourseManager". La root d'accesso ora presenta lo status di suite aziendale, esponendo una griglia luminosa con loghi dorati (Golden Gradient CSS) per tutti i 7 sotto-moduli ufficiali e riservati (GemTeam, Gemory, MedGem, BookGem, TeoCopilot, Gemdario, Clarissa).
+* **TeoCopilot (Layout "Push" Side-by-Side):** Disattivato e rimosso l'uso del componente `Sheet` a scorrimento (sovrapposizione grigia) a favore di un layout `aside` nativo stretto tra menu e canvas, ancorato saldamente al root node intermedio (`App.tsx`). L'apertura dell'Assistente AI ora "spreme" elasticamente l'applicativo principale, abilitando nativamente il multitasking e l'ispezione side-by-side senza alcuna occlusione visiva sulla dashboard.
+* **Integrazione Asset Avatar Dinamica:** Integrate in `/assets` le due versioni dell'avatar Lottie/PNG di TeoCopilot (Volo Intero e Solo Testa) realizzate esternamente. Applicato l'avanzato filtro strutturale `mix-blend-multiply` in React per generare trasparenza senza Alpha Channel nativo sulla schermata di login, snellendo l'esperienza di login. Sostituita altresì "Bot icon" con la Miniatura Teo per i baloon chat interni ad aumentare il senso di immedesimazione AI.
+
 ### 06 Aprile 2026 (Fix Validazione Modali, Smart-Fill UI/UX e Preparazione Refactor Pagamenti)
 * **Aggiunta Rapida Anagrafica (Obbligatoria):** Aggiornato il modale `QuickMemberAddModal.tsx`. Rimossa la dicitura "opzionale" e inseriti controlli obbligatori (`required`) per i campi Nome, Cognome, Telefono, Email e Codice Fiscale. Il tasto "Salva e Usa" è ora dinamicamente inibito se manca anche solo uno di questi campi per assicurare dati completi nei momenti di picco alle reception.
 * **Smart Fill (Pre-compilazione Eventi):** Implementato script di auto-popolamento dinamico in `CourseUnifiedModal.tsx`. Quando la modale è in fase di creazione (insert/nuovo), rileva il Giorno corrente geolocalizzato (es. LUN), la Stagione primariamente attiva, e l'Orario di sistema (arrotondato a blocchi di 30 minuti) per azzerare i tempi di data-entry.

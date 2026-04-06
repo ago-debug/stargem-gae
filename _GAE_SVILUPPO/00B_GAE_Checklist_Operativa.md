@@ -575,6 +575,15 @@ Questa fase sblocca la gestione del calendario su più archi temporali, gestendo
 - [ ] Creazione tabella master "Programmazione Date Strategiche" come replica esatta del foglio Excel: asse verticale con settimane numerate, asse orizzontale Lun-Dom con date, color coding attività/chiusure, totali e spazio note settimanali. Inserimento rapido e sync UI completo.
 - [ ] **FIX RIGHE MASTER TABLE:** Evitare che le righe o l'impalcatura di base/esempio spariscano inspiegabilmente quando l'operatore inizia a registrare o programmare le prime date.
 
+---
+
+## Fase 29 - Rebranding StarGem Suite & TeoCopilot (Conclusa)
+Questo blocco chiude la fase di allestimento visivo e d'integrazione base per la suite StarGem V2.
+
+- [x] Ristrutturazione Root Login: Abbandonato esteticamente il brand CourseManager, sostituzione landing con UI "StarGem Suite" e inserti di 7 loghi dorati 3D (GemTeam, Gemory, MedGem, BookGem, TeoCopilot, Gemdario, Clarissa).
+- [x] Ristrutturazione Architetturale TeoCopilot: Transizione completata da Overlay (`Sheet` UI) a Side-by-Side Push Model (`aside` nativo) per permettere lavoro congiunto senza sovrapposizione visiva.
+- [x] Asset Grafici AI Custom: Integrazione degli asset `teo-head-new.png` e `teo-full-new.png`, rimosse le stelline Sparkle superflue e impostate le dinamiche CSS `mix-blend-multiply` in AuthPage per trasparenza massiva nativa.
+
 **🖥️ DASHBOARD SEGRETERIA OPERATIVA (IN CANTIERE)**
 - [ ] Rifacimento Dashboard Segreteria Operativa (Entrate Mese + Sezione Scadenze Operative): Implementazione di un nuovo blocco "Entrate Mese" con dettaglio analitico ripartito per ogni membro del team, accompagnato dalla sostituzione del vecchio pannello "Attività Recente" a favore di una nuova "Sezione Scadenze Operative" incentrata su alert e task imminenti per le receptionist.
 
