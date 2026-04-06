@@ -138,7 +138,7 @@ export default function AuthPage() {
 
                 <div className="flex flex-wrap justify-center gap-4 md:gap-6 w-full">
                     {[
-                        { name: "GesTeam", icon: Users, desc: "Team & HR" },
+                        { name: "GemTeam", icon: Users, desc: "Team & HR" },
                         { name: "Gemory", icon: Kanban, desc: "Project Manager" },
                         { name: "MedGem", icon: Stethoscope, desc: "Studio Medico" },
                         { name: "BookGem", icon: Building, desc: "Aule & Booking" },
