@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { insertUserSchema } from "@shared/schema";
-import { Users, Kanban, Stethoscope, Building, Sparkles, CalendarDays, Megaphone } from "lucide-react";
+import { Users, Kanban, Stethoscope, Building, Sparkles, CalendarDays, Megaphone, Volume2, VolumeX } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 const logoStarGem = "/logo_stargem.png";
 
@@ -21,6 +21,47 @@ type LoginData = z.infer<typeof loginSchema>;
 
 export default function AuthPage() {
     const { user, loginMutation } = useAuth();
+    
+    // Gestione randomica delle clip di Teo e Audio
+    const videos = [
+        "/assets/teo_animato1.mp4",
+        "/assets/teo_animato2.mp4",
+        "/assets/teo_animato3.mp4",
+        "/assets/teo_animato4.mp4",
+        "/assets/teo_animato5.mp4",
+        "/assets/teo_animato6.mp4"
+    ];
+    const [teoVideo, setTeoVideo] = useState(videos[0]); // Default 1
+    const [isMuted, setIsMuted] = useState(true);
+
+    useEffect(() => {
+        // Al refresh/load, scegliamo random
+        const initialVideo = videos[Math.floor(Math.random() * videos.length)];
+        setTeoVideo(initialVideo);
+
+        // Ogni 15 secondi cambia in automatico
+        const interval = setInterval(() => {
+            setTeoVideo(current => {
+                const currentIndex = videos.indexOf(current);
+                return videos[(currentIndex + 1) % videos.length];
+            });
+        }, 15000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleVideoClick = () => {
+        setTeoVideo(current => {
+            const currentIndex = videos.indexOf(current);
+            return videos[(currentIndex + 1) % videos.length];
+        });
+    };
+
+    const toggleAudio = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsMuted(prev => !prev);
+    };
+
     const form = useForm<LoginData>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -54,20 +95,16 @@ export default function AuthPage() {
             <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[100px] animate-pulse pointer-events-none" />
             <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-blue-500/10 blur-[80px] animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
 
-            <div className="relative w-full max-w-md mx-4 z-10 animate-in fade-in zoom-in-95 duration-500 mt-10">
-                {/* Teo Fluttuante - Agganciato fisicamente al pannello */}
-                <div 
-                   className="hidden xl:block absolute -right-[230px] top-[15%] w-72 h-72 z-40 pointer-events-none"
-                   style={{ animation: 'float 6s ease-in-out infinite' }}
-                >
-                    <img src="/assets/teo-full-new.png" alt="Teo Copilot in volo" className="w-full h-full object-contain mix-blend-multiply opacity-90" />
-                </div>
-
-                <Card className="w-full shadow-2xl border-none bg-white/90 backdrop-blur-sm relative z-30">
-                    <CardHeader className="text-center space-y-3 pb-6">
-                    <div className="flex justify-center mb-2">
-                        <div className="p-3 bg-primary/5 rounded-2xl shadow-inner border border-primary/10 transition-transform duration-500 hover:scale-105 hover:rotate-3">
-                            <img src={logoStarGem} alt="StarGem" className="h-28 object-contain mix-blend-multiply" />
+            {/* Wrapper principale Unificato Form + Animazione */}
+            <div className="relative w-full max-w-4xl mx-4 z-10 animate-in fade-in zoom-in-95 duration-500 mt-10">
+                <Card className="w-full shadow-2xl border-none bg-white/90 backdrop-blur-sm relative z-30 flex flex-col lg:flex-row !overflow-visible items-center rounded-xl">
+                    
+                    {/* COLONNA SINISTRA: IL FORM DI LOGIN */}
+                    <div className="flex-1 w-full max-w-md mx-auto py-2">
+                    <CardHeader className="text-center space-y-2 pb-4">
+                    <div className="flex justify-center mb-1">
+                        <div className="p-1 px-3 bg-primary/5 rounded-xl shadow-inner border border-primary/10 transition-transform duration-500 hover:scale-105 hover:rotate-3">
+                            <img src={logoStarGem} alt="StarGem" className="h-20 object-contain mix-blend-multiply" />
                         </div>
                     </div>
                     <div className="space-y-1">
@@ -125,7 +162,32 @@ export default function AuthPage() {
                         </form>
                     </Form>
                 </CardContent>
-            </Card>
+                </div>
+
+                {/* COLONNA DESTRA: TEO COPILOT */}
+                <div className="hidden lg:flex flex-1 w-full h-full relative items-center justify-center border-l border-slate-200/60 bg-white/50 min-h-[400px] rounded-r-xl">
+                    <div className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group" onClick={handleVideoClick}>
+                        <video 
+                            key={teoVideo} /* Forza il reload del video quando cambia il src per browser più vecchi */
+                            src={teoVideo} 
+                            autoPlay 
+                            loop 
+                            muted={isMuted} 
+                            playsInline 
+                            className="w-full h-full object-contain group-hover:scale-105 mix-blend-multiply opacity-[0.98] transition-transform duration-500" 
+                        />
+                        {/* Audio Toggle Button */}
+                        <button 
+                            onClick={toggleAudio}
+                            className="absolute bottom-4 right-4 p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 rounded-full shadow-md transition-colors z-50 border border-slate-200"
+                            title={isMuted ? "Attiva audio" : "Disattiva audio"}
+                        >
+                            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                        </button>
+                    </div>
+                </div>
+
+                </Card>
             </div>
 
             {/* Griglia Moduli Suite */}
@@ -140,11 +202,11 @@ export default function AuthPage() {
                     {[
                         { name: "GemTeam", icon: Users, desc: "Team & HR" },
                         { name: "Gemory", icon: Kanban, desc: "Project Manager" },
-                        { name: "MedGem", icon: Stethoscope, desc: "Studio Medico" },
-                        { name: "BookGem", icon: Building, desc: "Aule & Booking" },
-                        { name: "TeoCopilot", icon: Sparkles, desc: "AI Aziendale" },
                         { name: "Gemdario", icon: CalendarDays, desc: "Calendario" },
-                        { name: "Clarissa", icon: Megaphone, desc: "CRM & Marketing" }
+                        { name: "BookGem", icon: Building, desc: "Aule & Booking" },
+                        { name: "MedGem", icon: Stethoscope, desc: "Studio Medico" },
+                        { name: "Clarissa", icon: Megaphone, desc: "CRM & Marketing" },
+                        { name: "TeoCopilot", icon: Sparkles, desc: "AI Aziendale" }
                     ].map((mod, idx) => (
                         <div key={idx} className="flex flex-col items-center justify-center p-4 bg-white/80 backdrop-blur-md rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-w-[120px] max-w-[140px] flex-1 group">
                             
