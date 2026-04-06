@@ -9,7 +9,7 @@ import { getSeasonLabel } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar as CalendarIcon, Save, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, Save, Plus, CalendarDays } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -144,15 +144,20 @@ export default function StrategicProgrammingTable() {
     if (seasonsLoading) return <div className="p-8">Caricamento...</div>;
 
     return (
-        <div className="flex-1 w-full bg-slate-50 p-6 flex flex-col min-h-screen">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 border-l-4 border-primary pl-4 rounded-sm">
-                        Programmazione Date Strategiche
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-2 pl-5">
-                        Tabella master per la gestione annuale di ferie, chiusure e sospensioni didattiche.
-                    </p>
+        <div className="p-6 pb-0 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2rem)] overflow-hidden">
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-4 shrink-0 overflow-hidden">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+                        <CalendarDays className="w-8 h-8 text-primary" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                            Programmazione Date
+                        </h1>
+                        <p className="text-sm text-slate-500 mt-1">
+                            Tabella master per la gestione annuale di ferie, chiusure e sospensioni didattiche.
+                        </p>
+                    </div>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="space-y-1">

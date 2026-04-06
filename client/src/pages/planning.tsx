@@ -540,7 +540,7 @@ export default function Planning() {
                 </CardContent>
             </Card>
 
-            <div className="flex flex-wrap gap-4 text-sm mt-4 p-4 border-t bg-slate-50 shrink-0 mx-[-1.5rem] px-6">
+            <div className="flex flex-wrap gap-4 text-sm p-4 border-t bg-[#f8f9fa] z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] shrink-0 mx-[-1.5rem] px-6">
                 <div className="font-semibold mr-2 flex items-center">Legenda:</div>
                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-sm"></div> Festività</div>
                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-slate-50 border border-slate-200 rounded-sm"></div> Corsi (Aggregati)</div>
