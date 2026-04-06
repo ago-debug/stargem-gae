@@ -46,6 +46,7 @@ const TIME_SLOTS = Array.from({ length: 48 * 4 }, (_, i) => {
 });
 
 const RECURRENCE_TYPES = [
+  { id: "daily", label: "Giornaliera" },
   { id: "weekly", label: "Settimanale" },
   { id: "biweekly", label: "Bisettimanale" },
   { id: "monthly", label: "Mensile" },
@@ -80,7 +81,7 @@ const getSafeDateStr = (dateVal: any) => {
 
 interface EnrollmentsTabProps {
   activityId: number;
-  activityType: "course" | "workshop";
+  activityType: "course" | "workshop" | "campus";
 }
 function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
   const { toast } = useToast();
@@ -91,8 +92,8 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
 
-  const enrollmentsQueryKey = activityType === "workshop" ? "/api/workshop-enrollments" : "/api/enrollments?type=corsi";
-  const parentQueryKey = activityType === "workshop" ? "/api/workshops" : "/api/courses";
+  const enrollmentsQueryKey = activityType === "campus" ? "/api/campus-enrollments" : activityType === "workshop" ? "/api/workshop-enrollments" : "/api/enrollments?type=corsi";
+  const parentQueryKey = activityType === "campus" ? "/api/campus-activities" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
 
   const { data: enrollments } = useQuery<any[]>({ queryKey: [enrollmentsQueryKey] });
   const { data: searchResults } = useQuery<{ members: Member[] }>({
@@ -102,7 +103,9 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
 
   const createEnrollmentMutation = useMutation({
     mutationFn: async (data: { memberId: number; activityId: number }) => {
-      if (activityType === "workshop") {
+      if (activityType === "campus") {
+        await apiRequest("POST", "/api/campus-enrollments", { memberId: data.memberId, campusActivityId: data.activityId, status: 'active' });
+      } else if (activityType === "workshop") {
         await apiRequest("POST", "/api/workshop-enrollments", { memberId: data.memberId, workshopId: data.activityId, status: 'active', startDate: new Date().toISOString().split('T')[0] });
       } else {
         await apiRequest("POST", "/api/enrollments", { memberId: data.memberId, courseId: data.activityId, status: 'active' });
@@ -120,7 +123,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
 
   const deleteEnrollmentMutation = useMutation({
     mutationFn: async (enrollmentId: number) => {
-      const endpoint = activityType === "workshop" ? `/api/workshop-enrollments/${enrollmentId}` : `/api/enrollments/${enrollmentId}`;
+      const endpoint = activityType === "campus" ? `/api/campus-enrollments/${enrollmentId}` : activityType === "workshop" ? `/api/workshop-enrollments/${enrollmentId}` : `/api/enrollments/${enrollmentId}`;
       await apiRequest("DELETE", endpoint, undefined);
     },
     onSuccess: () => {
@@ -132,7 +135,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
   });
 
   const courseEnrollments = enrollments
-    ?.filter(e => (activityType === "workshop" ? e.workshopId : e.courseId) === activityId && (e.status === 'active' || !e.status))
+    ?.filter(e => (activityType === "campus" ? e.campusActivityId : activityType === "workshop" ? e.workshopId : e.courseId) === activityId && (e.status === 'active' || !e.status))
     .map(e => ({
       enrollmentId: e.id, memberId: e.memberId, firstName: e.memberFirstName || '', lastName: e.memberLastName || '', email: e.memberEmail || '',
     })) || [];
@@ -206,7 +209,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
 
 interface AttendancesTabProps {
   activityId: number;
-  activityType: "course" | "workshop";
+  activityType: "course" | "workshop" | "campus";
 }
 function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
   const { toast } = useToast();
@@ -339,7 +342,7 @@ export interface CourseUnifiedModalProps {
   defaultValues?: any;
   onSuccess?: () => void;
   onDelete?: (id: number) => void;
-  activityType?: "course" | "workshop";
+  activityType?: "course" | "workshop" | "campus";
 }
 
 export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, onSuccess, onDelete, activityType = "course" }: CourseUnifiedModalProps) {
@@ -359,7 +362,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [isFasciaEtaModalOpen, setIsFasciaEtaModalOpen] = useState(false);
 
   // Dati da Liste e DB
-  const nameListType = activityType === "workshop" ? "genere" : "nomi_corsi";
+  const nameListType = activityType === "campus" ? "campus" : activityType === "workshop" ? "genere" : "nomi_corsi";
   const nomiCorsi = useCustomListValues(nameListType);
   const postiDisponibili = useCustomListValues("posti_disponibili");
   const livelli = useCustomListValues("livello");
@@ -368,7 +371,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const baseStati = ["ATTIVO", "IN PROGRAMMA", "COMPLETO", "ANNULLATO"];
   const finalStati = activityStatuses && activityStatuses.length > 0 ? [...activityStatuses].filter(s => s.active).sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})).map(s => s.name) : baseStati;
   
-  const categoryEndpoint = activityType === "workshop" ? "/api/workshop-categories" : "/api/categories";
+  const categoryEndpoint = activityType === "campus" ? "/api/campus-categories" : activityType === "workshop" ? "/api/workshop-categories" : "/api/categories";
   const { data: rawCategories } = useQuery<Category[]>({ queryKey: [categoryEndpoint] });
   const categories = rawCategories ? [...rawCategories].sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})) : [];
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
@@ -398,7 +401,11 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         }
         setPromoFlags(tags.filter(t => t.startsWith("PROMO:")).map(t => t.replace("PROMO:", "")));
       } else {
-        setFormData(defaultValues || {});
+        let defaultsToUse = defaultValues || {};
+        if (activityType === "campus" && !defaultValues?.startTime) {
+          defaultsToUse = { ...defaultsToUse, recurrenceType: "daily", startTime: "08:30", endTime: "17:00" };
+        }
+        setFormData(defaultsToUse);
         setActiveTab("details");
         setOpStates(["ATTIVO"]);
         setPromoFlags([]);
@@ -418,7 +425,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     }
   };
 
-  const apiEndpoint = activityType === "workshop" ? "/api/workshops" : "/api/courses";
+  const apiEndpoint = activityType === "campus" ? "/api/campus-activities" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -590,18 +597,18 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-full">
         <DialogHeader>
-          <DialogTitle>{isEdit ? (activityType === "workshop" ? "Modifica Workshop" : "Modifica Corso") : (activityType === "workshop" ? "Nuovo Workshop" : "Nuovo Corso")}</DialogTitle>
+          <DialogTitle>{isEdit ? (activityType === "campus" ? "Modifica Campus" : activityType === "workshop" ? "Modifica Workshop" : "Modifica Corso") : (activityType === "campus" ? "Nuovo Campus" : activityType === "workshop" ? "Nuovo Workshop" : "Nuovo Corso")}</DialogTitle>
           <DialogDescription>
-            {isEdit ? "Gestisci informazioni, iscritti e presenze." : "Inserisci i dettagli dell'attività."}
+            {isEdit ? "Gestisci informazioni e iscritti." : "Inserisci i dettagli dell'attività."}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {isEdit && (
-            <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsList className={cn("grid w-full mb-4", activityType === "campus" ? "grid-cols-2" : "grid-cols-3")}>
               <TabsTrigger value="details">Dettagli</TabsTrigger>
               <TabsTrigger value="enrollments"><Users className="w-4 h-4 mr-1" /> Iscritti</TabsTrigger>
-              <TabsTrigger value="attendances"><Calendar className="w-4 h-4 mr-1" /> Presenze</TabsTrigger>
+              {activityType !== "campus" && <TabsTrigger value="attendances"><Calendar className="w-4 h-4 mr-1" /> Presenze</TabsTrigger>}
             </TabsList>
           )}
 
@@ -630,7 +637,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                  <Label className="font-semibold text-slate-800 shrink-0">{activityType === "workshop" ? "Nome Workshop *" : "Genere / Nome Corso *"}</Label>
+                  <Label className="font-semibold text-slate-800 shrink-0">{activityType === "campus" ? "Campus *" : activityType === "workshop" ? "Nome Workshop *" : "Genere / Nome Corso *"}</Label>
                   <Button
                     type="button"
                     size="icon"
@@ -650,7 +657,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     value={formData.name || ""}
                     options={(nomiCorsi || []).map(val => ({ value: val, label: val }))}
                     onValueChange={(val) => updateForm("name", val)}
-                    placeholder={activityType === "workshop" ? "Cerca o inserisci nome..." : "Cerca genere..."}
+                    placeholder={activityType === "campus" ? "Cerca campus..." : activityType === "workshop" ? "Cerca o inserisci nome..." : "Cerca genere..."}
                     required
                   />
                 </div>
@@ -675,7 +682,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="sku">SKU / Codice</Label>
-                  <Input id="sku" value={formData.sku || ""} onChange={(e) => updateForm("sku", e.target.value)} placeholder="es: 2526-CORSO-1" />
+                  <Input id="sku" value={formData.sku || ""} onChange={(e) => updateForm("sku", e.target.value)} placeholder={activityType === "campus" ? "es: 2526CAMPUS-1SETTIMANA-" : "es: 2526-CORSO-1"} />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -717,15 +724,17 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Label className="font-semibold text-slate-800 shrink-0">Livello</Label>
+                    <Label className="font-semibold text-slate-800 shrink-0">{activityType === "campus" ? "Gruppo" : "Livello"}</Label>
                     <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsLivelloModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button>
                   </div>
                   <Combobox
                     name="level"
                     value={formData.level || "none"}
                     onValueChange={(val) => updateForm("level", val === "none" ? null : val)}
-                    options={[{value: "none", label: "Nessun livello"}, ...(livelli || []).map(val => ({ value: val, label: val }))]}
-                    placeholder="Seleziona livello..."
+                    options={activityType === "campus" 
+                        ? [{value: "none", label: "Nessun gruppo"}, {value: "Giallo", label: "Giallo"}, {value: "Blu", label: "Blu"}, {value: "Rosso", label: "Rosso"}, {value: "Verde", label: "Verde"}] 
+                        : [{value: "none", label: "Nessun livello"}, ...(livelli || []).map(val => ({ value: val, label: val }))]}
+                    placeholder={activityType === "campus" ? "Seleziona gruppo..." : "Seleziona livello..."}
                   />
                 </div>
                 <div className="space-y-2">
@@ -882,7 +891,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     </Button>
                   )}
                   <Button type="submit" disabled={updateMutation.isPending || createMutation.isPending} className="gold-3d-button text-black">
-                    {updateMutation.isPending ? "Salvataggio..." : (isEdit ? "Salva (Sovrascrivi / Slitta)" : (activityType === "workshop" ? "Crea Workshop" : "Crea Corso"))}
+                    {updateMutation.isPending ? "Salvataggio..." : (isEdit ? "Salva (Sovrascrivi / Slitta)" : (activityType === "campus" ? "Crea Campus" : activityType === "workshop" ? "Crea Workshop" : "Crea Corso"))}
                   </Button>
                 </div>
               </DialogFooter>
@@ -895,7 +904,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
             </TabsContent>
           )}
 
-          {isEdit && (
+          {isEdit && activityType !== "campus" && (
             <TabsContent value="attendances">
               <AttendancesTab activityId={course.id} activityType={activityType} />
             </TabsContent>
@@ -903,7 +912,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         </Tabs>
       </DialogContent>
     </Dialog>
-    <CustomListManagerDialog listType={nameListType} title={activityType === "workshop" ? "Gestione Nomi Workshop" : "Gestione Generi / Nomi Corsi"} open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
+    <CustomListManagerDialog listType={nameListType} title={activityType === "campus" ? "Gestione Nomi Campus" : activityType === "workshop" ? "Gestione Nomi Workshop" : "Gestione Generi / Nomi Corsi"} open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
     <CategoryManagerDialog open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} isWorkshop={activityType === "workshop"} />
     <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
     <CustomListManagerDialog listType="livello" title="Gestione Livelli" open={isLivelloModalOpen} onOpenChange={setIsLivelloModalOpen} />

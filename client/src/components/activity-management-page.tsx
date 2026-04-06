@@ -22,6 +22,7 @@ import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/mul
 import type { Instructor, Studio, ActivityStatus, Quote, Member } from "@shared/schema";
 import { Combobox } from "@/components/ui/combobox";
 import { useCustomListValues } from "@/hooks/use-custom-list";
+import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -81,7 +82,7 @@ interface ActivityManagementPageProps {
   itemLabelPlural: string;
   baseRoute: string; // The route prefix for the detail page
   testIdPrefix: string;
-  activityType?: "individual_lesson" | "training" | "other"; // Identificatore per il Modale Operativo Condiviso
+  activityType?: "individual_lesson" | "training" | "other" | "campus"; // Identificatore per il Modale Operativo Condiviso
 }
 
 export default function ActivityManagementPage({
@@ -836,21 +837,31 @@ export default function ActivityManagementPage({
         </Card>
       </div>
 
-      <Dialog open={isFormOpen} onOpenChange={(open) => {
-        if (!open) closeDialog();
-      }}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle data-testid={`text-${testIdPrefix}-dialog-title`}>
-              {editingItem ? `Modifica ${itemLabel.charAt(0).toUpperCase() + itemLabel.slice(1)}` : `Nuovo ${itemLabel.charAt(0).toUpperCase() + itemLabel.slice(1)}`}
-            </DialogTitle>
-            <DialogDescription>
-              {editingItem ? `Modifica i dettagli del ${itemLabel}` : `Inserisci i dettagli del ${itemLabel}`}
-            </DialogDescription>
-          </DialogHeader>
-          {editingItem ? renderForm(editingItem) : renderForm()}
-        </DialogContent>
-      </Dialog>
+      {activityType === "campus" ? (
+        <CourseUnifiedModal 
+          isOpen={isFormOpen} 
+          onOpenChange={(open) => { if (!open) closeDialog(); }} 
+          course={editingItem} 
+          activityType="campus" 
+          onSuccess={() => { closeDialog(); queryClient.invalidateQueries({ queryKey: [apiEndpoint] }); }} 
+        />
+      ) : (
+        <Dialog open={isFormOpen} onOpenChange={(open) => {
+          if (!open) closeDialog();
+        }}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle data-testid={`text-${testIdPrefix}-dialog-title`}>
+                {editingItem ? `Modifica ${itemLabel.charAt(0).toUpperCase() + itemLabel.slice(1)}` : `Nuovo ${itemLabel.charAt(0).toUpperCase() + itemLabel.slice(1)}`}
+              </DialogTitle>
+              <DialogDescription>
+                {editingItem ? `Modifica i dettagli del ${itemLabel}` : `Inserisci i dettagli del ${itemLabel}`}
+              </DialogDescription>
+            </DialogHeader>
+            {editingItem ? renderForm(editingItem) : renderForm()}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ export default function CampusActivities() {
       itemLabelPlural="campus e centri estivi"
       baseRoute="/scheda-campus"
       testIdPrefix="campus-activity"
+      activityType="campus"
     />
   );
 }
