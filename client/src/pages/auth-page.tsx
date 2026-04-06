@@ -102,15 +102,15 @@ export default function AuthPage() {
                     {/* COLONNA SINISTRA: IL FORM DI LOGIN */}
                     <div className="flex-1 w-full max-w-md mx-auto py-2">
                     <CardHeader className="text-center space-y-2 pb-4">
-                    <div className="flex justify-center mb-1">
-                        <div className="p-1 px-3 bg-primary/5 rounded-xl shadow-inner border border-primary/10 transition-transform duration-500 hover:scale-105 hover:rotate-3">
-                            <img src={logoStarGem} alt="StarGem" className="h-20 object-contain mix-blend-multiply" />
+                    <div className="flex justify-center mb-0 mt-0">
+                        <div className="overflow-hidden h-28 w-64 flex items-center justify-center scale-110">
+                            <img src={logoStarGem} alt="StarGem" className="w-full h-full object-contain scale-[1.6] mix-blend-multiply transition-transform duration-500 hover:scale-[1.7]" />
                         </div>
                     </div>
                     <div className="space-y-1">
                         <CardTitle className="text-2xl font-extrabold tracking-tight text-slate-900">La suite di StarGem</CardTitle>
                         <CardDescription className="text-sm font-medium text-slate-500">
-                            Il tuo gestionale in movimento.
+                            Il tuo gestionale per il movimento.
                         </CardDescription>
                     </div>
                 </CardHeader>
