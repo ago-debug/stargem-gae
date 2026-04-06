@@ -68,6 +68,7 @@ import { SharedActivityLog } from "@/components/shared-activity-log";
 import { getActiveActivities } from "@/config/activities";
 import { Button } from "@/components/ui/button";
 import { StarGemCopilot } from "@/components/star-gem-copilot";
+import { useCopilot } from "@/hooks/use-copilot";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 
@@ -499,10 +500,10 @@ export function AppSidebar() {
                 })}
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <Link href="/copilot" className="flex items-center gap-2 px-2 py-1.5 w-full justify-start cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
+                    <button onClick={() => useCopilot.getState().openCopilot()} className="flex items-center gap-2 px-2 py-1.5 w-full justify-start cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
                       <StarGemCopilot className="h-4 w-4 bg-transparent outline-none ring-0 shadow-none border-0 p-0" />
-                      <span className="text-sm font-medium">StarGem Copilot</span>
-                    </Link>
+                      <span className="text-sm font-medium">TeoCopilot</span>
+                    </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
