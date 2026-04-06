@@ -17,6 +17,12 @@
 - [x] Risolto bug rendering JSON Permissions e pulizia tabella ruoli (rimozione doppioni, isolati solo 5 ruoli ufficiali).
 - [x] Parser Semantico Interattivo in `activity-translator.ts` per Audit Log in lingua italiana, integrato nella tab Sicurezza.
 
+## 9. Dashboard Gestione Note & Storico Globale (Phase 28.6)
+- [x] Trasformare il pulsante/rotta "Inserisci Nota" in una vera Dashboard Tabellare cronologica.
+- [x] Forzare l'ancoraggio delle note specificando un *Target URL* nativo esplicito tra +20 rotte aziendali e abilitando "Deep Linking" da UI base (Badge Clickable).
+- [x] Conformare l'impatto grafico del Modulo Inserimento e Navbar all'estetica "Oro 3D" (Shadow e Gradient Corporate).
+- [x] Integrare ordinamento sorting (useSortableTable) "Updated/Deleted At" nativo ed Highlighting *giallino-cell* per l'intera colonna.
+
 ## 1. Cleanup Consolidation (Livelli 1-3) & Audit Preliminari
 Questi task consolidano la stabilità prima della riscrittura profonda V2 (Partecipazioni).
 

@@ -6,6 +6,11 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 ---
 
 
+### 05 Aprile 2026 (Phase 28.6: Gestione Note & Storico Globale)
+* **Nuova Dashboard Gestione Note (`/inserisci-nota`):** Trasformato il vecchio link orfano in una Dashboard globale (`gestione-note.tsx`) strutturata a livello estetico ed informativo. Centralizzate le operazioni di monitoraggio visivo per note operative incrociate.
+* **Sistema di Ordinamento Nativo e Highlight 3D Oro:** Integrate funzioni di sorting A-Z in testa-tabella (Data, Autore, Sezione, Archiviazione) con colorazione dinamica in giallino delle colonne in focus. Conformato l'impatto visivo all'Oro 3D (Gold gradients: `from-[#FFD700] via-[#D4AF37] to-[#B8860B]`) per l'iconografia madre e i pulsanti d'inserimento/salvataggio primari, rispettando rigorosamente la brand identity. Ordinamento primario forzato sulla recency cronologica d'azione (sia creazione pura che chiusura da parte dell'Admin) per non disperdere storici recenti tra i dati.
+* **Targeting Esplicito e Deep Linking UI:** Il modulo di creazione nota adesso ingloba tutte le rotte applicative canoniche attuali, dotando di url intelligenti ogni "post-it". In tabella la stringa URL si tramuta in *Badge Cliccabile* per saltare fluidamente all'anagrafica o pannello relazionato.
+
 ### 04 Aprile 2026 (Phase 28.5: Security by Design, "Knowledge Base" e Matrix dei Ruoli)
 * **Stabilizzazione Tracking Presenze e "Tempo di Lavoro" (Anti-F5):** Riscritto integralmente l'algoritmo di misurazione temporale degli operatori isolandolo dal browser. Inserita la *Tolleranza Urti* (20 minuti) in `server/routes.ts`: refresh accidentali o cadute wifi non invalidano e non azzerano la sessione (`currentSessionStart`). Uniformata la UI in "Tempo di Lavoro", blindando l'audit senza innescare finti "LOGOUT" al cambio tab. Documentate regole in Knowledge Base.
 * **Sincronizzazione Reale Permessi (30 Settori):** Divelto dal componente storico `utenti-permessi.tsx` il tracciamento dei vecchi 23 sottomenù obsoleti. Costruita la mappatura matematica di 30 viste operative definitive affinché i permessi scelti combacino 1:1 con i reali URL presenti sulla Sidebar (es. Attività, Calendario, Affitti, Processi, Admin Root).
