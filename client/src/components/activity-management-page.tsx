@@ -82,7 +82,7 @@ interface ActivityManagementPageProps {
   itemLabelPlural: string;
   baseRoute: string; // The route prefix for the detail page
   testIdPrefix: string;
-  activityType?: "prenotazioni" | "allenamenti" | "individual_lesson" | "training" | "other" | "campus"; // Identificatore per il Modale Operativo Condiviso
+  activityType?: "prenotazioni" | "allenamenti" | "individual_lesson" | "training" | "other" | "campus" | "domeniche" | "workshop" | "saggi" | "vacanze" | "affitti"; // Identificatore per il Modale Operativo Condiviso
 }
 
 export default function ActivityManagementPage({
