@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 const ALL_PATHS = [
   "/dashboard", "/maschera-input", "/anagrafica-generale", "/tessere-certificati", "/generazione-tessere", "/accessi",
   "/pagamenti", "/scheda-contabile", "/report",
-  "/attivita", "/iscritti_per_attivita", "/categorie-attivita", "/calendario-attivita", "/planning", "/programmazione-date", "/studios", "/affitto-studio",
+  "/attivita", "/iscritti_per_attivita", "/calendario-attivita", "/planning", "/programmazione-date", "/studios", "/affitto-studio",
   "/staff", "/inserisci-nota", "/commenti", "/todo-list", "/knowledge-base",
   "/listini", "/promo-sconti",
   "/admin", "/elenchi", "/importa", "/utenti-permessi", "/audit-logs", "/reset-stagione"
@@ -32,7 +32,7 @@ const rolesToSeed = [
     permissions: buildPerms([
       "/dashboard", "/maschera-input", "/anagrafica-generale", "/tessere-certificati", "/generazione-tessere", 
       "/pagamenti", "/scheda-contabile", "/report",
-      "/attivita", "/iscritti_per_attivita", "/categorie-attivita", "/calendario-attivita", "/planning", "/programmazione-date", "/studios", "/affitto-studio",
+      "/attivita", "/iscritti_per_attivita", "/calendario-attivita", "/planning", "/programmazione-date", "/studios", "/affitto-studio",
       "/staff", "/inserisci-nota", "/commenti", "/todo-list", "/knowledge-base",
       "/listini", "/promo-sconti"
       // Esclusi: admin, elenchi, importa, utenti-permessi, audit-logs, reset-stagione, accessi (secondo specifica)
@@ -44,7 +44,7 @@ const rolesToSeed = [
     permissions: buildPerms([
       "/dashboard", "/maschera-input", "/anagrafica-generale", "/tessere-certificati", "/generazione-tessere", 
       "/pagamenti", // Lista Pagamenti
-      "/attivita", "/iscritti_per_attivita", "/categorie-attivita", "/calendario-attivita", "/planning", "/programmazione-date", "/studios", "/affitto-studio",
+      "/attivita", "/iscritti_per_attivita", "/calendario-attivita", "/planning", "/programmazione-date", "/studios", "/affitto-studio",
       "/inserisci-nota", "/commenti", "/todo-list", "/knowledge-base"
       // Esclusi: Scheda Contabile, Report, Listini, Promo-Sconti, Risorse Umane globali, Configurazione globale
     ])
