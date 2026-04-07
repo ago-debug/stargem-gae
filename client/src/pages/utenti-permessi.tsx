@@ -55,7 +55,6 @@ const MENU_PATHS = [
   // ATTIVITA E DIDATTICA
   { path: "/attivita", title: "10. Attività (Corsi, Workshop...)" },
   { path: "/iscritti_per_attivita", title: "11. Iscritti per Attività" },
-  { path: "/categorie-attivita", title: "12. Categorie Attività" },
   { path: "/calendario-attivita", title: "13. Calendario Attività" },
   { path: "/planning", title: "14. Planning" },
   { path: "/programmazione-date", title: "15. Programmazione Date" },
