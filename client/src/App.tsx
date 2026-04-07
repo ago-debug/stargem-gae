@@ -48,7 +48,6 @@ import ListiniHome from "@/pages/listini-home";
 import QuoteListini from "@/pages/quote-listini";
 import Attivita from "@/pages/attivita";
 import IscrittiPerAttivita from "@/pages/iscritti_per_attivita";
-import ActivityCategories from "@/pages/activity-categories";
 import Elenchi from "@/pages/elenchi";
 import TodoList from "@/pages/todo-list";
 import Commenti from "@/pages/commenti";
@@ -195,7 +194,6 @@ function Router() {
       <ProtectedRoute path="/iscrizioni-pagamenti" component={IscrizioniPagamenti} />
       <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
       <ProtectedRoute path="/attivita" component={Attivita} />
-      <ProtectedRoute path="/categorie-attivita" component={ActivityCategories} />
       <ProtectedRoute path="/categorie-corsi" component={Categories} />
       <ProtectedRoute path="/categorie-affitti" component={RentalsCategories} />
       <ProtectedRoute path="/categorie-workshop" component={WorkshopCategories} />

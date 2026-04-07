@@ -485,7 +485,7 @@ export type Instructor = Member;
 export const instructorRates = mysqlTable("instr_rates", {
   id: int("id").primaryKey().autoincrement(),
   instructorId: int("instructor_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   rateType: varchar("rate_type", { length: 50 }).notNull(), // 'hourly', 'per_lesson', 'fixed'
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -495,10 +495,6 @@ export const instructorRatesRelations = relations(instructorRates, ({ one }) => 
   instructor: one(members, {
     fields: [instructorRates.instructorId],
     references: [members.id],
-  }),
-  category: one(categories, {
-    fields: [instructorRates.categoryId],
-    references: [categories.id],
   }),
 }));
 
@@ -607,7 +603,7 @@ export const courses = mysqlTable("courses", {
   sku: varchar("sku", { length: 100 }), // SKU univoco (es: 2526-NEMBRI-LUN-15) - unique constraint da aggiungere dopo
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }), // Studio/sala
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }), // Insegnante primario
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }), // Insegnante secondario 1
@@ -635,10 +631,6 @@ export const courses = mysqlTable("courses", {
 });
 
 export const coursesRelations = relations(courses, ({ one, many }) => ({
-  category: one(categories, {
-    fields: [courses.categoryId],
-    references: [categories.id],
-  }),
   studio: one(studios, {
     fields: [courses.studioId],
     references: [studios.id],
@@ -682,7 +674,7 @@ export const workshops = mysqlTable("workshops", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => workshopCategories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -706,10 +698,6 @@ export const workshops = mysqlTable("workshops", {
 });
 
 export const workshopsRelations = relations(workshops, ({ one, many }) => ({
-  category: one(workshopCategories, {
-    fields: [workshops.categoryId],
-    references: [workshopCategories.id],
-  }),
   studio: one(studios, {
     fields: [workshops.studioId],
     references: [studios.id],
@@ -748,7 +736,7 @@ export const paidTrials = mysqlTable("paid_trials", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -770,10 +758,6 @@ export const paidTrials = mysqlTable("paid_trials", {
 });
 
 export const paidTrialsRelations = relations(paidTrials, ({ one }) => ({
-  category: one(categories, {
-    fields: [paidTrials.categoryId],
-    references: [categories.id],
-  }),
   studio: one(studios, {
     fields: [paidTrials.studioId],
     references: [studios.id],
@@ -812,7 +796,7 @@ export const freeTrials = mysqlTable("free_trials", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -834,10 +818,6 @@ export const freeTrials = mysqlTable("free_trials", {
 });
 
 export const freeTrialsRelations = relations(freeTrials, ({ one }) => ({
-  category: one(categories, {
-    fields: [freeTrials.categoryId],
-    references: [categories.id],
-  }),
   studio: one(studios, {
     fields: [freeTrials.studioId],
     references: [studios.id],
@@ -876,7 +856,7 @@ export const singleLessons = mysqlTable("single_lessons", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => categories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -898,10 +878,6 @@ export const singleLessons = mysqlTable("single_lessons", {
 });
 
 export const singleLessonsRelations = relations(singleLessons, ({ one }) => ({
-  category: one(categories, {
-    fields: [singleLessons.categoryId],
-    references: [categories.id],
-  }),
   studio: one(studios, {
     fields: [singleLessons.studioId],
     references: [studios.id],
@@ -940,7 +916,7 @@ export const sundayActivities = mysqlTable("sunday_activities", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => sundayCategories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -962,10 +938,6 @@ export const sundayActivities = mysqlTable("sunday_activities", {
 });
 
 export const sundayActivitiesRelations = relations(sundayActivities, ({ one }) => ({
-  category: one(sundayCategories, {
-    fields: [sundayActivities.categoryId],
-    references: [sundayCategories.id],
-  }),
   studio: one(studios, {
     fields: [sundayActivities.studioId],
     references: [studios.id],
@@ -1004,7 +976,7 @@ export const trainings = mysqlTable("trainings", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => trainingCategories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -1028,10 +1000,6 @@ export const trainings = mysqlTable("trainings", {
 });
 
 export const trainingsRelations = relations(trainings, ({ one }) => ({
-  category: one(trainingCategories, {
-    fields: [trainings.categoryId],
-    references: [trainingCategories.id],
-  }),
   studio: one(studios, {
     fields: [trainings.studioId],
     references: [studios.id],
@@ -1070,7 +1038,7 @@ export const individualLessons = mysqlTable("individual_lessons", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => individualLessonCategories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -1094,10 +1062,6 @@ export const individualLessons = mysqlTable("individual_lessons", {
 });
 
 export const individualLessonsRelations = relations(individualLessons, ({ one }) => ({
-  category: one(individualLessonCategories, {
-    fields: [individualLessons.categoryId],
-    references: [individualLessonCategories.id],
-  }),
   studio: one(studios, {
     fields: [individualLessons.studioId],
     references: [studios.id],
@@ -1140,7 +1104,7 @@ export const campusActivities = mysqlTable("campus_activities", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => campusCategories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -1162,10 +1126,6 @@ export const campusActivities = mysqlTable("campus_activities", {
 });
 
 export const campusActivitiesRelations = relations(campusActivities, ({ one }) => ({
-  category: one(campusCategories, {
-    fields: [campusActivities.categoryId],
-    references: [campusCategories.id],
-  }),
   studio: one(studios, {
     fields: [campusActivities.studioId],
     references: [studios.id],
@@ -1204,7 +1164,7 @@ export const recitals = mysqlTable("recitals", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => recitalCategories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -1226,10 +1186,6 @@ export const recitals = mysqlTable("recitals", {
 });
 
 export const recitalsRelations = relations(recitals, ({ one }) => ({
-  category: one(recitalCategories, {
-    fields: [recitals.categoryId],
-    references: [recitalCategories.id],
-  }),
   studio: one(studios, {
     fields: [recitals.studioId],
     references: [studios.id],
@@ -1268,7 +1224,7 @@ export const vacationStudies = mysqlTable("vacation_studies", {
   sku: varchar("sku", { length: 100 }),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => vacationCategories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
   secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
@@ -1290,10 +1246,6 @@ export const vacationStudies = mysqlTable("vacation_studies", {
 });
 
 export const vacationStudiesRelations = relations(vacationStudies, ({ one }) => ({
-  category: one(vacationCategories, {
-    fields: [vacationStudies.categoryId],
-    references: [vacationCategories.id],
-  }),
   studio: one(studios, {
     fields: [vacationStudies.studioId],
     references: [studios.id],
@@ -1336,7 +1288,7 @@ export const members = mysqlTable("members", {
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }), // Telefono fisso
   mobile: varchar("mobile", { length: 50 }), // Cellulare
-  categoryId: int("category_id").references(() => clientCategories.id, { onDelete: "set null" }), // Categoria partecipante (Tipologia Partecipante)
+  categoryId: int("category_id"), // Categoria partecipante (Tipologia Partecipante)
   subscriptionTypeId: int("subscription_type_id").references(() => subscriptionTypes.id, { onDelete: "set null" }), // Tipo Iscrizione
 
   // Dati tessera
@@ -1440,10 +1392,6 @@ export const members = mysqlTable("members", {
 });
 
 export const membersRelations = relations(members, ({ one, many }) => ({
-  category: one(clientCategories, {
-    fields: [members.categoryId],
-    references: [clientCategories.id],
-  }),
   enrollments: many(enrollments),
   workshopEnrollments: many(workshopEnrollments),
   paidTrialEnrollments: many(paidTrialEnrollments),
@@ -2274,7 +2222,7 @@ export const bookingServices = mysqlTable("booking_services", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  categoryId: int("category_id").references(() => bookingServiceCategories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   price: decimal("price", { precision: 10, scale: 2 }),
   color: varchar("color", { length: 20 }),
   active: boolean("active").default(true),
@@ -2286,10 +2234,6 @@ export type InsertBookingService = z.infer<typeof insertBookingServiceSchema>;
 export type BookingService = typeof bookingServices.$inferSelect;
 
 export const bookingServicesRelations = relations(bookingServices, ({ one, many }) => ({
-  category: one(bookingServiceCategories, {
-    fields: [bookingServices.categoryId],
-    references: [bookingServiceCategories.id],
-  }),
   priceItems: many(priceListItems),
 }));
 
@@ -2638,7 +2582,7 @@ export type ActivityCategory = typeof activityCategories.$inferSelect;
 export const activities = mysqlTable("activities", {
   id: int("id").primaryKey().autoincrement(),
   tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
-  categoryId: int("category_id").references(() => activityCategories.id, { onDelete: "set null" }),
+  categoryId: int("category_id"),
   locationId: int("location_id").references(() => studios.id, { onDelete: "set null" }),
   name: varchar("name", { length: 255 }).notNull(),
   
@@ -2661,7 +2605,6 @@ export const activities = mysqlTable("activities", {
 
 export const activitiesRelations = relations(activities, ({ one, many }) => ({
   tenant: one(tenants, { fields: [activities.tenantId], references: [tenants.id] }),
-  category: one(activityCategories, { fields: [activities.categoryId], references: [activityCategories.id] }),
   location: one(studios, { fields: [activities.locationId], references: [studios.id] }),
   instructor: one(members, { fields: [activities.instructorId], references: [members.id] }),
   globalEnrollments: many(globalEnrollments),

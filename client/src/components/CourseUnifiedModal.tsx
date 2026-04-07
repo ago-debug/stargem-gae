@@ -23,10 +23,9 @@ import { it } from "date-fns/locale";
 import { useAuth } from "@/hooks/use-auth";
 import { hasWritePermission } from "@/App";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { useCustomListValues } from "@/hooks/use-custom-list";
+import { useCustomList, useCustomListValues } from "@/hooks/use-custom-list";
 import { MultiSelectStatus } from "@/components/multi-select-status";
 import { CustomListManagerDialog } from "@/components/custom-list-manager-dialog";
-import { CategoryManagerDialog } from "@/components/category-manager-dialog";
 import { QuickMemberAddModal } from "./QuickMemberAddModal";
 import { MessageSquare, Mail, Phone } from "lucide-react";
 import type { Course, InsertCourse, Category, Instructor, Studio, Quote, Attendance, Member, ActivityStatus } from "@shared/schema";
@@ -377,9 +376,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const baseStati = ["ATTIVO", "IN PROGRAMMA", "COMPLETO", "ANNULLATO"];
   const finalStati = activityStatuses && activityStatuses.length > 0 ? [...activityStatuses].filter(s => s.active).sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})).map(s => s.name) : baseStati;
   
-  const categoryEndpoint = activityType === "prenotazioni" ? "/api/individual-lesson-categories" : activityType === "campus" ? "/api/campus-categories" : activityType === "workshop" ? "/api/workshop-categories" : "/api/categories";
-  const { data: rawCategories } = useQuery<Category[]>({ queryKey: [categoryEndpoint] });
-  const categories = rawCategories ? [...rawCategories].sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})) : [];
+  const { data: categorieList } = useCustomList("categorie");
+  const categories = categorieList?.items ? [...categorieList.items].filter(i => i.active !== false).map(i => ({ id: i.id, name: i.value })).sort((a,b)=>a.name.localeCompare(b.name, undefined, {numeric: true})) : [];
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
@@ -1022,7 +1020,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       </DialogContent>
     </Dialog>
     <CustomListManagerDialog listType={nameListType} title={activityType === "campus" ? "Gestione Nomi Campus" : activityType === "workshop" ? "Gestione Nomi Workshop" : "Gestione Generi / Nomi Corsi"} open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
-    <CategoryManagerDialog open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} isWorkshop={activityType === "workshop"} />
+    <CustomListManagerDialog listType="categorie" title="Gestione Categorie" open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} />
     <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
     <CustomListManagerDialog listType="livello" title="Gestione Livelli" open={isLivelloModalOpen} onOpenChange={setIsLivelloModalOpen} />
     <CustomListManagerDialog listType="fascia_eta" title="Gestione Fasce d'Età" open={isFasciaEtaModalOpen} onOpenChange={setIsFasciaEtaModalOpen} />
