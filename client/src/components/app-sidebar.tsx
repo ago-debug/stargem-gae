@@ -147,11 +147,7 @@ const teachingItems = [
     url: "/iscritti_per_attivita",
     icon: ClipboardList,
   },
-  {
-    title: "Categorie Attività",
-    url: "/categorie-attivita",
-    icon: FolderTree,
-  },
+
   {
     title: "Calendario Attività",
     url: "/calendario-attivita",
