@@ -84,7 +84,7 @@ const getSafeDateStr = (dateVal: any) => {
 
 interface EnrollmentsTabProps {
   activityId: number;
-  activityType: "course" | "workshop" | "campus" | "prenotazioni" | "allenamenti";
+  activityType: "course" | "workshop" | "campus" | "prenotazioni" | "allenamenti" | "domeniche" | "saggi" | "vacanze" | "affitti";
 }
 function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
   const { toast } = useToast();
@@ -212,7 +212,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
 
 interface AttendancesTabProps {
   activityId: number;
-  activityType: "course" | "workshop" | "campus" | "prenotazioni" | "allenamenti";
+  activityType: "course" | "workshop" | "campus" | "prenotazioni" | "allenamenti" | "domeniche" | "saggi" | "vacanze" | "affitti";
 }
 function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
   const { toast } = useToast();
@@ -345,7 +345,16 @@ export interface CourseUnifiedModalProps {
   defaultValues?: any;
   onSuccess?: () => void;
   onDelete?: (id: number) => void;
-  activityType?: "course" | "workshop" | "campus" | "prenotazioni" | "allenamenti";
+  activityType?: 
+  | "course" 
+  | "workshop" 
+  | "campus" 
+  | "prenotazioni" 
+  | "allenamenti"
+  | "domeniche"
+  | "saggi"
+  | "vacanze"
+  | "affitti";
 }
 
 export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, onSuccess, onDelete, activityType = "course" }: CourseUnifiedModalProps) {
@@ -531,6 +540,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     const payload: any = {
       ...((activityType === "prenotazioni" || activityType === "allenamenti") && { notifySms, notifyEmail, notifyWa, packageSingle: formData.packageSingle, packageCouple: formData.packageCouple, packageGroup: formData.packageGroup, member1Id: formData.member1Id, member2Id: formData.member2Id }),
       sku: formData.sku || null,
+      activityType: activityType ?? null,
       name: formData.name as string,
       description: formData.description || null,
       categoryId: formData.categoryId || null,
@@ -599,6 +609,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         
         const payload: any = {
           sku: formData.sku || null,
+          activityType: activityType ?? null,
           name: formData.name as string,
           description: formData.description || null,
           categoryId: formData.categoryId || null,
@@ -635,12 +646,39 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const selectedStartTime = stripSeconds(formData.startTime);
   const selectedEndTime = stripSeconds(formData.endTime);
 
+  const modalTitle = (() => {
+    if (isEdit) {
+      const editTitles: Record<string, string> = {
+        prenotazioni: "Modifica Prenotazione",
+        allenamenti:  "Modifica Allenamento",
+        campus:       "Modifica Campus",
+        workshop:     "Modifica Workshop",
+        domeniche:    "Modifica Domenica in Movimento",
+        saggi:        "Modifica Saggio",
+        vacanze:      "Modifica Vacanze Studio",
+        affitti:      "Modifica Affitto Sala",
+      };
+      return editTitles[activityType ?? ""] ?? "Modifica Corso";
+    }
+    const newTitles: Record<string, string> = {
+      prenotazioni: "LEZIONI INDIVIDUALI E ALLENAMENTI / AFFITTI INSEGNANTI (PER LE LORO PRIVATE O PROVE)",
+      allenamenti:  "Prenotazioni Allenamenti (staff o pt per le loro private o prove)",
+      campus:       "Nuovo Campus",
+      workshop:     "Nuovo Workshop",
+      domeniche:    "Nuova Domenica in Movimento",
+      saggi:        "Nuovo Saggio",
+      vacanze:      "Nuove Vacanze Studio",
+      affitti:      "Nuovo Affitto Sala",
+    };
+    return newTitles[activityType ?? ""] ?? "Nuovo Corso";
+  })();
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-full">
         <DialogHeader>
-          <DialogTitle>{isEdit ? ((activityType === "prenotazioni" || activityType === "allenamenti") ? "Modifica Prenotazione" : activityType === "campus" ? "Modifica Campus" : activityType === "workshop" ? "Modifica Workshop" : "Modifica Corso") : (activityType === "prenotazioni" ? "LEZIONI INDIVIDUALI E ALLENAMENTI / AFFITTI INSEGNANTI (PER LE LORO PRIVATE O PROVE)" : activityType === "allenamenti" ? "Prenotazioni Allenamenti (staff o pt per le loro private o prove)" : activityType === "campus" ? "Nuovo Campus" : activityType === "workshop" ? "Nuovo Workshop" : "Nuovo Corso")}</DialogTitle>
+          <DialogTitle>{modalTitle}</DialogTitle>
           <DialogDescription>
             {isEdit ? "Gestisci informazioni e iscritti." : "Inserisci i dettagli dell'attività."}
           </DialogDescription>
