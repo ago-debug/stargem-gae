@@ -82,7 +82,7 @@ interface ActivityManagementPageProps {
   itemLabelPlural: string;
   baseRoute: string; // The route prefix for the detail page
   testIdPrefix: string;
-  activityType?: "prenotazioni" | "individual_lesson" | "training" | "other" | "campus"; // Identificatore per il Modale Operativo Condiviso
+  activityType?: "prenotazioni" | "allenamenti" | "individual_lesson" | "training" | "other" | "campus"; // Identificatore per il Modale Operativo Condiviso
 }
 
 export default function ActivityManagementPage({
@@ -837,7 +837,7 @@ export default function ActivityManagementPage({
         </Card>
       </div>
 
-      {["campus", "prenotazioni"].includes(activityType || "") ? (
+      {["campus", "prenotazioni", "allenamenti", "domeniche", "workshop", "affitti", "saggi", "vacanze"].includes(activityType || "") ? (
         <CourseUnifiedModal 
           isOpen={isFormOpen} 
           onOpenChange={(open) => { if (!open) closeDialog(); }} 

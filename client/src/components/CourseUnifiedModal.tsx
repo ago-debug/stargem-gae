@@ -84,7 +84,7 @@ const getSafeDateStr = (dateVal: any) => {
 
 interface EnrollmentsTabProps {
   activityId: number;
-  activityType: "course" | "workshop" | "campus" | "prenotazioni";
+  activityType: "course" | "workshop" | "campus" | "prenotazioni" | "allenamenti";
 }
 function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
   const { toast } = useToast();
@@ -212,7 +212,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
 
 interface AttendancesTabProps {
   activityId: number;
-  activityType: "course" | "workshop" | "campus" | "prenotazioni";
+  activityType: "course" | "workshop" | "campus" | "prenotazioni" | "allenamenti";
 }
 function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
   const { toast } = useToast();
@@ -345,7 +345,7 @@ export interface CourseUnifiedModalProps {
   defaultValues?: any;
   onSuccess?: () => void;
   onDelete?: (id: number) => void;
-  activityType?: "course" | "workshop" | "campus" | "prenotazioni";
+  activityType?: "course" | "workshop" | "campus" | "prenotazioni" | "allenamenti";
 }
 
 export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, onSuccess, onDelete, activityType = "course" }: CourseUnifiedModalProps) {
@@ -369,7 +369,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [quickMemberTarget, setQuickMemberTarget] = useState<"member1" | "member2" | "instructor" | "secondaryInstructor">("member1");
 
   // Dati da Liste e DB
-  const nameListType = activityType === "prenotazioni" ? "generi_lezioni_individuali" : activityType === "campus" ? "campus" : activityType === "workshop" ? "genere" : "nomi_corsi";
+  const nameListType = activityType === "prenotazioni" ? "generi_lezioni_individuali" : activityType === "allenamenti" ? "generi_allenamenti" : activityType === "campus" ? "campus" : activityType === "workshop" ? "genere" : "nomi_corsi";
   const nomiCorsi = useCustomListValues(nameListType);
   const postiDisponibili = useCustomListValues("posti_disponibili");
   const livelli = useCustomListValues("livello");
@@ -461,7 +461,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     }
   };
 
-  const apiEndpoint = activityType === "prenotazioni" ? "/api/courses" : activityType === "campus" ? "/api/campus-activities" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
+  const apiEndpoint = (activityType === "prenotazioni" || activityType === "allenamenti") ? "/api/courses" : activityType === "campus" ? "/api/campus-activities" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -529,7 +529,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     const isActive = !opStates.includes("ANNULLATO");
 
     const payload: any = {
-      ...(activityType === "prenotazioni" && { notifySms, notifyEmail, notifyWa, packageSingle: formData.packageSingle, packageCouple: formData.packageCouple, packageGroup: formData.packageGroup, member1Id: formData.member1Id, member2Id: formData.member2Id }),
+      ...((activityType === "prenotazioni" || activityType === "allenamenti") && { notifySms, notifyEmail, notifyWa, packageSingle: formData.packageSingle, packageCouple: formData.packageCouple, packageGroup: formData.packageGroup, member1Id: formData.member1Id, member2Id: formData.member2Id }),
       sku: formData.sku || null,
       name: formData.name as string,
       description: formData.description || null,
@@ -640,7 +640,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-full">
         <DialogHeader>
-          <DialogTitle>{isEdit ? (activityType === "prenotazioni" ? "Modifica Prenotazione" : activityType === "campus" ? "Modifica Campus" : activityType === "workshop" ? "Modifica Workshop" : "Modifica Corso") : (activityType === "prenotazioni" ? "LEZIONI INDIVIDUALI E ALLENAMENTI / AFFITTI INSEGNANTI (PER LE LORO PRIVATE O PROVE)" : activityType === "campus" ? "Nuovo Campus" : activityType === "workshop" ? "Nuovo Workshop" : "Nuovo Corso")}</DialogTitle>
+          <DialogTitle>{isEdit ? ((activityType === "prenotazioni" || activityType === "allenamenti") ? "Modifica Prenotazione" : activityType === "campus" ? "Modifica Campus" : activityType === "workshop" ? "Modifica Workshop" : "Modifica Corso") : (activityType === "prenotazioni" ? "LEZIONI INDIVIDUALI E ALLENAMENTI / AFFITTI INSEGNANTI (PER LE LORO PRIVATE O PROVE)" : activityType === "allenamenti" ? "Prenotazioni Allenamenti (staff o pt per le loro private o prove)" : activityType === "campus" ? "Nuovo Campus" : activityType === "workshop" ? "Nuovo Workshop" : "Nuovo Corso")}</DialogTitle>
           <DialogDescription>
             {isEdit ? "Gestisci informazioni e iscritti." : "Inserisci i dettagli dell'attività."}
           </DialogDescription>
@@ -680,7 +680,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                  <Label className="font-semibold text-slate-800 shrink-0">{activityType === "prenotazioni" ? "GENERI LEZIONI INDIVIDUALI *" : activityType === "campus" ? "Campus *" : activityType === "workshop" ? "Nome Workshop *" : "Genere / Nome Corso *"}</Label>
+                  <Label className="font-semibold text-slate-800 shrink-0">{activityType === "prenotazioni" ? "GENERI LEZIONI INDIVIDUALI *" : activityType === "allenamenti" ? "ALLENAMENTI *" : activityType === "campus" ? "Campus *" : activityType === "workshop" ? "Nome Workshop *" : "Genere / Nome Corso *"}</Label>
                   <Button
                     type="button"
                     size="icon"
@@ -754,7 +754,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
               </div>
 
-              {activityType === "prenotazioni" && (
+              {(activityType === "prenotazioni" || activityType === "allenamenti") && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <MultiSelectCustomList
                     systemName="tipologia_lezioni"
@@ -791,7 +791,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
               </div>
 
-              {activityType === "prenotazioni" ? (
+              {(activityType === "prenotazioni" || activityType === "allenamenti") ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
@@ -882,7 +882,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
               </div>
 
-              {activityType === "prenotazioni" ? (
+              {(activityType === "prenotazioni" || activityType === "allenamenti") ? (
                 <IndividualPricing 
                   formData={formData} 
                   updateForm={updateForm} 
@@ -1027,7 +1027,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         </Tabs>
       </DialogContent>
     </Dialog>
-    <CustomListManagerDialog listType={nameListType} title={activityType === "prenotazioni" ? "Gestione Generi Lezioni Individuali" : activityType === "campus" ? "Gestione Nomi Campus" : activityType === "workshop" ? "Gestione Nomi Workshop" : "Gestione Generi / Nomi Corsi"} open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
+    <CustomListManagerDialog listType={nameListType} title={activityType === "prenotazioni" ? "Gestione Generi Lezioni Individuali" : activityType === "allenamenti" ? "Gestione Generi Allenamenti" : activityType === "campus" ? "Gestione Nomi Campus" : activityType === "workshop" ? "Gestione Nomi Workshop" : "Gestione Generi / Nomi Corsi"} open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
     <CustomListManagerDialog listType="categorie" title="Gestione Categorie" open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} />
     <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
     <CustomListManagerDialog listType="livello" title="Gestione Livelli" open={isLivelloModalOpen} onOpenChange={setIsLivelloModalOpen} />

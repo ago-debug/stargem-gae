@@ -1,20 +1,19 @@
-import "dotenv/config";
-import { db } from "../server/db";
-import { courses } from "../shared/schema";
+import { db } from "./server/db";
+import { courses } from "./shared/schema";
 
-async function run() {
+async function main() {
   try {
-    await db.insert(courses).values({
+    const [result] = await db.insert(courses).values({
       name: "Test Course",
-      price: "10.00",
-      statusTags: ["STATE:ATTIVO"],
-      lessonType: ["test"],
-      active: true,
+      sku: "TEST-SKU-1",
+      lessonType: ["vvv2222"],
+      statusTags: ["STATE:ATTIVO"]
     });
-    console.log("Success");
+    console.log("Success:", result);
   } catch (err: any) {
-    console.error("ERROR:", err.message);
+    console.error("Error inserting course:");
+    console.error(err.message);
   }
   process.exit(0);
 }
-run();
+main();

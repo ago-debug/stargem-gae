@@ -2019,9 +2019,17 @@ export class DatabaseStorage implements IStorage {
       ...course,
       startDate: course.startDate ? (course.startDate instanceof Date ? course.startDate.toISOString().split('T')[0] : course.startDate) : null,
       endDate: course.endDate ? (course.endDate instanceof Date ? course.endDate.toISOString().split('T')[0] : course.endDate) : null,
-      seasonId: course.seasonId || activeSeason?.id || null
+      seasonId: course.seasonId || activeSeason?.id || null,
+      lessonType: course.lessonType ? JSON.stringify(course.lessonType) as any : null,
+      statusTags: course.statusTags ? JSON.stringify(course.statusTags) as any : null
     };
-    const [result] = await db.insert(courses).values(dataToSave as any);
+    let result;
+    try {
+      [result] = await db.insert(courses).values(dataToSave as any);
+    } catch (e) {
+      console.error("[Storage] db.insert error:", e);
+      throw e;
+    }
     const id = (result as any).insertId || (result as any).id;
     const fetched = await this.getCourse(id);
     return fetched!;
@@ -2037,6 +2045,8 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date(),
       startDate: course.startDate ? (course.startDate instanceof Date ? course.startDate.toISOString().split('T')[0] : course.startDate) : course.startDate,
       endDate: course.endDate ? (course.endDate instanceof Date ? course.endDate.toISOString().split('T')[0] : course.endDate) : course.endDate,
+      lessonType: course.lessonType ? JSON.stringify(course.lessonType) as any : undefined,
+      statusTags: course.statusTags ? JSON.stringify(course.statusTags) as any : undefined
     };
 
     await db
@@ -4129,8 +4139,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Trainings ====
-  async getTrainings(): Promise<Training[]> {
-    return await db.select().from(trainings).orderBy(trainings.name);
+  async getTrainings(): Promise<any[]> {
+    const allCourses = await db.select().from(courses).orderBy(courses.name);
+    return allCourses.filter(c => {
+      try {
+        const types = Array.isArray(c.lessonType) ? c.lessonType : (c.lessonType ? JSON.parse(c.lessonType as string) : []);
+        return types.includes("allenamenti") || types.includes("Allenamento") || types.includes("Scheda Allenamento");
+      } catch { return false; }
+    });
   }
   async getTraining(id: number): Promise<Training | undefined> {
     const [item] = await db.select().from(trainings).where(eq(trainings.id, id));
@@ -4141,19 +4157,25 @@ export class DatabaseStorage implements IStorage {
     const [newItem] = await db.select().from(trainings).where(eq(trainings.id, result.insertId));
     return newItem;
   }
-  async updateTraining(id: number, data: Partial<InsertTraining>): Promise<Training> {
-    await db.update(trainings).set({ ...data, updatedAt: new Date() } as any).where(eq(trainings.id, id));
-    const [item] = await db.select().from(trainings).where(eq(trainings.id, id));
-    if (!item) throw new Error("Training not found");
+  async updateTraining(id: number, data: Partial<any>): Promise<any> {
+    await db.update(courses).set({ ...data, updatedAt: new Date() } as any).where(eq(courses.id, id));
+    const [item] = await db.select().from(courses).where(eq(courses.id, id));
+    if (!item) throw new Error("Course not found");
     return item;
   }
   async deleteTraining(id: number): Promise<void> {
-    await db.delete(trainings).where(eq(trainings.id, id));
+    await db.delete(courses).where(eq(courses.id, id));
   }
 
   // ==== IndividualLessons ====
-  async getIndividualLessons(): Promise<IndividualLesson[]> {
-    return await db.select().from(individualLessons).orderBy(individualLessons.name);
+  async getIndividualLessons(): Promise<any[]> {
+    const allCourses = await db.select().from(courses).orderBy(courses.name);
+    return allCourses.filter(c => {
+      try {
+        const types = Array.isArray(c.lessonType) ? c.lessonType : (c.lessonType ? JSON.parse(c.lessonType as string) : []);
+        return types.includes("prenotazioni") || types.includes("Lezione Individuale") || types.includes("Privata");
+      } catch { return false; }
+    });
   }
   async getIndividualLesson(id: number): Promise<IndividualLesson | undefined> {
     const [item] = await db.select().from(individualLessons).where(eq(individualLessons.id, id));
@@ -4164,14 +4186,14 @@ export class DatabaseStorage implements IStorage {
     const [newItem] = await db.select().from(individualLessons).where(eq(individualLessons.id, result.insertId));
     return newItem;
   }
-  async updateIndividualLesson(id: number, data: Partial<InsertIndividualLesson>): Promise<IndividualLesson> {
-    await db.update(individualLessons).set({ ...data, updatedAt: new Date() } as any).where(eq(individualLessons.id, id));
-    const [item] = await db.select().from(individualLessons).where(eq(individualLessons.id, id));
-    if (!item) throw new Error("IndividualLesson not found");
+  async updateIndividualLesson(id: number, data: Partial<any>): Promise<any> {
+    await db.update(courses).set({ ...data, updatedAt: new Date() } as any).where(eq(courses.id, id));
+    const [item] = await db.select().from(courses).where(eq(courses.id, id));
+    if (!item) throw new Error("Course not found");
     return item;
   }
   async deleteIndividualLesson(id: number): Promise<void> {
-    await db.delete(individualLessons).where(eq(individualLessons.id, id));
+    await db.delete(courses).where(eq(courses.id, id));
   }
 
   // ==== CampusActivities ====

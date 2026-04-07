@@ -2965,6 +2965,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Decremento utilizzi pacchetti
+      for (const key of ['packageSingle', 'packageCouple', 'packageGroup'] as const) {
+        const pkgId = req.body[key];
+        if (pkgId) {
+          const pkg = await db.query.memberPackages.findFirst({ where: eq(memberPackages.id, parseInt(pkgId.toString())) });
+          if (pkg) {
+            await db.update(memberPackages).set({ usedUses: pkg.usedUses + 1 }).where(eq(memberPackages.id, pkg.id));
+          }
+        }
+      }
+
       // Sync to Google Calendar (async)
       try {
         syncCourseToGoogle(course);
