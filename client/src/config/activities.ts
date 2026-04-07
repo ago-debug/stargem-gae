@@ -87,7 +87,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
   {
     id: "prove-pagamento",
     labelUI: "Prove a Pagamento",
-    order: 3,
+    order: 99,
     family: "didattica_gruppo",
     isActive: false,  // Disattivato per passaggio a modulo unificato
     isPlaceholder: false,
@@ -100,7 +100,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
   {
     id: "prove-gratuite",
     labelUI: "Prove Gratuite",
-    order: 4,
+    order: 99,
     family: "didattica_gruppo",
     isActive: false, // Disattivato per passaggio a modulo unificato
     isPlaceholder: false,
@@ -113,7 +113,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
   {
     id: "lezioni-singole",
     labelUI: "Lezioni Singole",
-    order: 5,
+    order: 99,
     family: "didattica_gruppo",
     isActive: false, // Disattivato per passaggio a modulo unificato
     isPlaceholder: false,
@@ -124,22 +124,9 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     design: { icon: BookOpen, colorClass: "icon-gold-bg", description: "Lezioni singole o drop-in" }
   },
   {
-    id: "lezioni-individuali",
-    labelUI: "Lezioni Individuali",
-    order: 6,
-    family: "didattica_privata",
-    isActive: true,
-    isPlaceholder: false,
-    routeUrl: "/attivita/lezioni-individuali",
-    apiEndpoint: "/api/individual-lesson-categories",
-    categoryManagementUrl: "/categorie-lezioni-individuali",
-    visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
-    design: { icon: UserCheck, colorClass: "icon-gold-bg", description: "Lezioni private one-to-one" }
-  },
-  {
     id: "domeniche-movimento",
     labelUI: "Domeniche in Movimento",
-    order: 7,
+    order: 3,
     family: "evento",
     isActive: true,
     isPlaceholder: false,
@@ -150,9 +137,22 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
     design: { icon: Sun, colorClass: "icon-gold-bg", description: "Attività domenicali speciali" }
   },
   {
+    id: "lezioni-individuali",
+    labelUI: "Lezioni Individuali",
+    order: 4,
+    family: "didattica_privata",
+    isActive: true,
+    isPlaceholder: false,
+    routeUrl: "/attivita/lezioni-individuali",
+    apiEndpoint: "/api/individual-lesson-categories",
+    categoryManagementUrl: "/categorie-lezioni-individuali",
+    visibility: { sidebarMenu: true, hubAttivita: true, iscrittiPanel: true, categoriePanel: true, mascheraInput: true, listini: true, calendario: true },
+    design: { icon: UserCheck, colorClass: "icon-gold-bg", description: "Lezioni private one-to-one" }
+  },
+  {
     id: "allenamenti",
     labelUI: "Allenamenti",
-    order: 8,
+    order: 5,
     family: "didattica_gruppo",
     isActive: true,
     isPlaceholder: false,
@@ -165,7 +165,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
   {
     id: "affitti",
     labelUI: "Affitti",
-    order: 9,
+    order: 6,
     family: "affitto",
     isActive: true,
     isPlaceholder: false,
@@ -178,7 +178,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
   {
     id: "campus",
     labelUI: "Campus",
-    order: 10,
+    order: 7,
     family: "evento",
     isActive: true,
     isPlaceholder: false,
@@ -191,7 +191,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
   {
     id: "saggi",
     labelUI: "Saggi",
-    order: 11,
+    order: 8,
     family: "evento",
     isActive: true,
     isPlaceholder: false,
@@ -204,7 +204,7 @@ export const ACTIVITY_REGISTRY: ActivityDefinition[] = [
   {
     id: "vacanze-studio",
     labelUI: "Vacanze Studio",
-    order: 12,
+    order: 9,
     family: "evento",
     isActive: true,
     isPlaceholder: false,

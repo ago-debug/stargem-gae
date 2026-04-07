@@ -621,6 +621,8 @@ export const courses = mysqlTable("courses", {
   endDate: date("end_date"),
   level: varchar("level", { length: 100 }), // Livello (es. Base, Intermedio, Avanzato)
   ageGroup: varchar("age_group", { length: 100 }), // Fascia d'età (es. Bambini 3-5 anni)
+  lessonType: json("lesson_type").$type<string[]>().default([]), // Tipologia Multipla (es. [Preparazione Gara, Tecnica])
+  numberOfPeople: varchar("number_of_people", { length: 50 }), // Numero Persone
   statusTags: json("status_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   googleEventId: varchar("google_event_id", { length: 255 }),
@@ -1729,6 +1731,36 @@ export type InsertWorkshopAttendance = z.infer<typeof insertWorkshopAttendanceSc
 export type WorkshopAttendance = typeof workshopAttendances.$inferSelect;
 
 // Memberships (tessere associative)
+// --- Member Packages (Lezioni Individuali) ---
+export const memberPackages = mysqlTable("member_packages", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull(),
+  packageCode: varchar("package_code", { length: 50 }).notNull(), // Es: PAC-IND-001
+  packageType: varchar("package_type", { length: 50 }).notNull(), // SINGOLA, COPPIA, GRUPPO
+  totalUses: int("total_uses").notNull(), // numero totale ingressi
+  usedUses: int("used_uses").notNull().default(0), // ingressi già scalati
+  pricePaid: decimal("price_paid", { precision: 10, scale: 2 }), // costo pagato
+  notes: text("notes"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const memberPackagesRelations = relations(memberPackages, ({ one }) => ({
+  member: one(members, {
+    fields: [memberPackages.memberId],
+    references: [members.id],
+  }),
+}));
+
+export const insertMemberPackageSchema = createInsertSchema(memberPackages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type MemberPackage = typeof memberPackages.$inferSelect;
+export type InsertMemberPackage = z.infer<typeof insertMemberPackageSchema>;
+
 export const memberships = mysqlTable("memberships", {
   id: int("id").primaryKey().autoincrement(),
   memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),

@@ -72,7 +72,9 @@ import {
   insertGlobalEnrollmentSchema,
   insertMerchandisingCategorySchema,
   insertRentalCategorySchema,
-  insertStrategicEventSchema
+  insertStrategicEventSchema,
+  memberPackages,
+  insertMemberPackageSchema
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -3430,6 +3432,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete enrollment" });
+    }
+  });
+
+  // ==== Member Packages Routes (Lezioni Individuali) ====
+  app.get("/api/member-packages/:memberId", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = parseInt(req.params.memberId);
+      if (isNaN(memberId)) return res.status(400).json({ message: "Invalid memberId" });
+      const pkgs = await db.query.memberPackages.findMany({
+        where: eq(memberPackages.memberId, memberId),
+        orderBy: [desc(memberPackages.createdAt)],
+      });
+      res.json(pkgs);
+    } catch (e: any) {
+      res.status(500).json({ message: e.message });
+    }
+  });
+
+  app.post("/api/member-packages", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertMemberPackageSchema.parse(req.body);
+      const [result] = await db.insert(memberPackages).values(data);
+      res.status(201).json({ id: result.insertId, ...data });
+    } catch (e: any) {
+      res.status(400).json({ message: e.message });
     }
   });
 
