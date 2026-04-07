@@ -42,6 +42,7 @@ export function QuickMemberAddModal({ isOpen, onOpenChange, onSuccess, defaultRo
         fiscalCode: data.fiscalCode,
         active: true,
         categoryId: defaultCategoryId || null,
+        participantType: defaultRole === "Staff/Insegnanti" ? "INSEGNANTE" : "ALLIEVO",
       };
 
       const res = await apiRequest("POST", "/api/members", payload);
