@@ -111,7 +111,7 @@ export default function IscrittiPerAttivita() {
     "allenamenti": { data: trainings, loading: trLoading, link: "/scheda-allenamento", enrollments: allenamentiEnrollments, enrollLoading: trEnrLoading, foreignKey: "courseId" },
     "affitti": { data: [], loading: false, link: "/prenotazioni-sale", enrollments: [], enrollLoading: false, foreignKey: "id" },
     "lezioni-individuali": { data: individualLessons, loading: ilLoading, link: "/scheda-lezione-individuale", enrollments: lezioniIndividualiEnrollments, enrollLoading: ilEnrLoading, foreignKey: "courseId" },
-    "campus": { data: campusActivities, loading: caLoading, link: "/scheda-campus", enrollments: caEnrollments, enrollLoading: caEnrLoading, foreignKey: "campusActivityId" },
+    "campus": { data: campusActivities, loading: caLoading, link: "/scheda-campus", enrollments: caEnrollments, enrollLoading: caEnrLoading, foreignKey: "courseId" },
     "saggi": { data: recitals, loading: recLoading, link: "/scheda-saggio", enrollments: recEnrollments, enrollLoading: recEnrLoading, foreignKey: "recitalId" },
     "vacanze-studio": { data: vacationStudies, loading: vsLoading, link: "/scheda-vacanza-studio", enrollments: vsEnrollments, enrollLoading: vsEnrLoading, foreignKey: "vacationStudyId" },
     "merchandising": { data: [], loading: false, link: "/gestione-attivita-stub", enrollments: [], enrollLoading: false, foreignKey: "merchandisingId" },
@@ -138,7 +138,12 @@ export default function IscrittiPerAttivita() {
   } else if (activeTab === 'workshop') {
     dynamicEnrollmentsCount = totalWsEnrollments;
   } else {
-    dynamicEnrollmentsCount = 0; // Other tabs have no enrollments mapped by the universal backend endpoint yet
+    const config = extraActivitiesMap[activeTab];
+    if (config && Array.isArray(config.enrollments)) {
+      dynamicEnrollmentsCount = config.enrollments.filter(e => e.status === 'active' || !e.status).length;
+    } else {
+      dynamicEnrollmentsCount = 0;
+    }
   }
 
   const getEnrollmentsForActivity = (activityId: number, isWorkshop: boolean = false) => {

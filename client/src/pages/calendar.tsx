@@ -2045,7 +2045,9 @@ export default function CalendarPage() {
                                                     >
                                                         <div className="absolute top-2 right-2 flex flex-col items-end gap-0.5 z-30">
                                                             {(() => {
-                                                                const iconColor = evt.activityType && evt.activityType !== "course" && ACTIVITY_TYPE_COLORS[evt.activityType] ? ACTIVITY_TYPE_COLORS[evt.activityType] : undefined;
+                                                                const iconColor = evt.activityType && ACTIVITY_TYPE_COLORS[evt.activityType]
+                                                                    ? ACTIVITY_TYPE_COLORS[evt.activityType]
+                                                                    : evt.registryKey === "workshops" ? "#4338ca" : "#1e40af";
                                                                 const BadgeIcon = evt.activityType === "allenamenti" 
                                                                     ? Activity 
                                                                     : evt.activityType === "prenotazioni" 
@@ -2058,12 +2060,12 @@ export default function CalendarPage() {
 
                                                                 return (
                                                                     <>
-                                                                        <div className={`bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`} title={evt.categoryName || "CAT"}>
-                                                                            <BadgeIcon className="w-2.5 h-2.5" style={iconColor ? { color: iconColor } : {}} />
+                                                                        <div className="bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate" style={{ color: iconColor }} title={evt.categoryName || "CAT"}>
+                                                                            <BadgeIcon className="w-2.5 h-2.5" style={{ color: iconColor }} />
                                                                             {evt.categoryName || activityBadge}
                                                                         </div>
-                                                                        <div className={`bg-white/80 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5 ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`}>
-                                                                            <BadgeIcon className="w-2.5 h-2.5" style={iconColor ? { color: iconColor } : {}} />
+                                                                        <div className="bg-white/80 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5" style={{ color: iconColor }}>
+                                                                            <BadgeIcon className="w-2.5 h-2.5" style={{ color: iconColor }} />
                                                                             {activityBadge}
                                                                         </div>
                                                                     </>
