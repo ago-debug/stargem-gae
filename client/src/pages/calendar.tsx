@@ -855,19 +855,43 @@ export default function CalendarPage() {
     }, [workshops, selectedStudio, selectedInstructor, selectedCategory, selectedDay, searchQuery, instructors]);
 
     // Helper to get color for course
+    const ACTIVITY_TYPE_COLORS: Record<string,string> = {
+      allenamenti:  "#1e40af",
+      prenotazioni: "#7c3aed",
+      workshop:     "#c2410c",
+      domeniche:    "#a16207",
+      saggi:        "#be185d",
+      vacanze:      "#15803d",
+      campus:       "#0369a1",
+      affitti:      "#374151",
+    };
+
     const getCourseColor = (course: any) => {
-        const category = categories?.find(c => c.id === course.categoryId);
-        if (category?.color) {
-            const hex = category.color;
+        const type = course.activityType || course.type || "course";
+        
+        // Se NON è un corso normale → colore fisso
+        if (ACTIVITY_TYPE_COLORS[type]) {
+            const hex = ACTIVITY_TYPE_COLORS[type];
             return {
-                backgroundColor: `${hex}25`, // ~15-20% opacity
+                backgroundColor: `${hex}25`,
                 borderLeftColor: hex,
                 color: hex,
             };
         }
+        
+        // Se è un corso → colore da categoria
+        const category = categories?.find(c => c.id === course.categoryId);
+        if (category?.color) {
+            const hex = category.color;
+            return {
+                backgroundColor: `${hex}25`,
+                borderLeftColor: hex,
+                color: hex,
+            };
+        }
+        
         const id = course.categoryId || 0;
-        const colorClass = COLORS[id % COLORS.length];
-        return { className: colorClass };
+        return { className: COLORS[id % COLORS.length] };
     };
 
     const getBookingColor = (booking: any) => {
