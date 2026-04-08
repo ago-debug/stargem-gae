@@ -5,7 +5,7 @@ export default function CampusActivities() {
     <ActivityManagementPage
       title="Riepilogo Campus"
       subtitle="Gestisci campus e programmi intensivi"
-      apiEndpoint="/api/campus-activities"
+      apiEndpoint="/api/courses?activityType=campus"
       categoryApiEndpoint="/api/campus-categories"
       itemLabel="campus/centro estivo"
       itemLabelPlural="campus e centri estivi"
