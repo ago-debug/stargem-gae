@@ -95,6 +95,10 @@
               [x] (Task 1) Migrazione category_id: Normalizzati 303 record storici in courses, spostandoli da ID legacy al set custom_list_items (>400).
               [x] (Task 2) Test Calendario: Il bridge dell'Unified Calendar eroga adesso anche per i corsi storici CategoriaTestuale e Colore dinamicamente.
               [x] (Task 3-4) Analisi e Bonifica: Mappati i record legacy da eradicare in tabelle silenti (categorie, workshops, campus). Verificata caduta Foreign Keys bloccanti per i corsi.
+[08/04 12:50] F2→PM: Protocollo 053 Eseguito. Cleanup Frontend Categorico.
+              [x] (Route) Sradicate le 5 dichiarazioni di istanza `/categorie-X` da `App.tsx`.
+              [x] (File) Eliminati permanentemente i file `.tsx` orfani correlati dalle pages per scongiurare frammentazione.
+              [x] (Build) Validata asetticità logica con `tsc --noEmit` (0 nuovi fault). Tracciato log su `02_Frontend_UI_e_Routing.md`.
 [08/04 12:50] F1→PM: Esecuzione Protocolli 052-053. Analisi Cleanup DB e Migrazione Campus.
               [x] (Task 1) Migrazione `campus_activities`: Le 2 righe superstiti ("Multisport" e "Danza") sono state riversate nella root table `courses` con type 'campus'.
               [x] (Task 2) Analisi Sicurezza: Fermata la rimozione tabelle ("Stop&Go") poiché `routes.ts` e `schema.ts` contengono ancora i relativi riferimenti ai moduli CRUD.
