@@ -78,7 +78,7 @@ export default function IscrittiPerAttivita() {
   const { data: sundayActivities, isLoading: saLoading } = useQuery<any[]>({ queryKey: ["/api/sunday-activities"] });
   const { data: trainings, isLoading: trLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=allenamenti"] });
   const { data: individualLessons, isLoading: ilLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=prenotazioni"] });
-  const { data: campusActivities, isLoading: caLoading } = useQuery<CampusActivity[]>({ queryKey: ["/api/campus-activities"] });
+  const { data: campusActivities, isLoading: caLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=campus"] });
   const { data: recitals, isLoading: recLoading } = useQuery<any[]>({ queryKey: ["/api/"] });
   const { data: vacationStudies, isLoading: vsLoading } = useQuery<VacationStudy[]>({ queryKey: ["/api/vacation-studies"] });
 

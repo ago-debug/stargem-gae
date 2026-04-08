@@ -96,7 +96,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
 
   const enrollmentsQueryKey = activityType === "campus" ? "/api/campus-enrollments" : activityType === "workshop" ? "/api/workshop-enrollments" : "/api/enrollments?type=corsi";
-  const parentQueryKey = activityType === "campus" ? "/api/campus-activities" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
+  const parentQueryKey = activityType === "campus" ? "/api/courses?activityType=campus" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
 
   const { data: enrollments } = useQuery<any[]>({ queryKey: [enrollmentsQueryKey] });
   const { data: searchResults } = useQuery<{ members: Member[] }>({
@@ -543,7 +543,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     }
   };
 
-  const apiEndpoint = (activityType === "prenotazioni" || activityType === "allenamenti") ? "/api/courses" : activityType === "campus" ? "/api/campus-activities" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
+  const apiEndpoint = (activityType === "prenotazioni" || activityType === "allenamenti") ? "/api/courses" : activityType === "campus" ? "/api/courses" : activityType === "workshop" ? "/api/workshops" : "/api/courses";
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {

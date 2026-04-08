@@ -30,7 +30,7 @@ export default function SchedaCampus() {
     const activeId = Number(activeIdRaw);
     const hasValidId = Number.isFinite(activeId) && activeId > 0;
 
-    const { data: items, isLoading: itemsLoading } = useQuery<CampusActivity[]>({ queryKey: ["/api/campus-activities"] });
+    const { data: items, isLoading: itemsLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=campus"] });
     const { data: members, isLoading: membersLoading } = useQuery<{ members: Member[] }>({ queryKey: ["/api/members"] });
     const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<Enrollment[]>({ queryKey: ["/api/enrollments?type=campus"] });
     const { data: payments, isLoading: paymentsLoading } = useQuery<Payment[]>({ queryKey: ["/api/payments"] });
