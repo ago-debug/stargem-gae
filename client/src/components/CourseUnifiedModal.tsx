@@ -445,6 +445,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   });
 
   useEffect(() => {
+    let cancelled = false;
     if (isOpen) {
       if (course) {
         setFormData({ 
@@ -458,11 +459,12 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         setSearchMember2("");
         setFormData((prev: any) => ({ ...prev, member1Id: null, member2Id: null }));
         
-        // Pre-popola allievi da enrollments (STI bridge)
+        // Pre-popola allievi da enrollments (STI bridge) — con flag anti race condition
         if (course?.id) {
           fetch(`/api/enrollments?courseId=${course.id}`)
             .then(r => r.json())
             .then((enrs: any[]) => {
+              if (cancelled) return;
               if (!Array.isArray(enrs) || enrs.length === 0) 
                 return;
               const e1 = enrs[0];
@@ -471,19 +473,13 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 updateForm("member1Id", e1.memberId);
                 fetch(`/api/members/${e1.memberId}`)
                   .then(r => r.json())
-                  .then(m => m?.lastName && 
-                    setSearchMember1(
-                      `${m.lastName} ${m.firstName}`
-                    ));
+                  .then(m => { if (!cancelled && m?.lastName) setSearchMember1(`${m.lastName} ${m.firstName}`); });
               }
               if (e2?.memberId) {
                 updateForm("member2Id", e2.memberId);
                 fetch(`/api/members/${e2.memberId}`)
                   .then(r => r.json())
-                  .then(m => m?.lastName && 
-                    setSearchMember2(
-                      `${m.lastName} ${m.firstName}`
-                    ));
+                  .then(m => { if (!cancelled && m?.lastName) setSearchMember2(`${m.lastName} ${m.firstName}`); });
               }
             })
             .catch(() => {});
@@ -529,6 +525,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         setPromoFlags([]);
       }
     }
+    return () => { cancelled = true; };
   }, [isOpen, course, defaultValues, seasons]);
 
   const updateForm = (key: string, value: any) => {

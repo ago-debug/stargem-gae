@@ -2,23 +2,22 @@ import { db } from "../server/db";
 import { sql } from "drizzle-orm";
 
 async function main() {
-  console.log("--- FIX F: Verifica filtro allenamenti ---");
-  const allenamenti = await db.execute(sql`
-    SELECT e.id, e.course_id, e.member_id, c.activity_type
-    FROM enrollments e
-    LEFT JOIN courses c ON c.id = e.course_id
-    WHERE c.activity_type = 'allenamenti';
+  console.log("--- FIX CAMPUS: Verifica activity_type=campus ---");
+  const res = await db.execute(sql`
+    SELECT id, name, activity_type 
+    FROM courses 
+    WHERE activity_type = 'campus';
   `);
-  console.log("Allenamenti:", allenamenti[0]);
+  console.log("Campus trovati:", res[0]);
 
-  console.log("--- FIX F: Verifica filtro prenotazioni ---");
-  const prenotazioni = await db.execute(sql`
-    SELECT e.id, e.course_id, e.member_id, c.activity_type
-    FROM enrollments e
-    LEFT JOIN courses c ON c.id = e.course_id
-    WHERE c.activity_type = 'prenotazioni';
+  console.log("--- FIX CAMPUS: Tutti i tipi presenti nel DB ---");
+  const tipi = await db.execute(sql`
+    SELECT DISTINCT activity_type, COUNT(*) as tot
+    FROM courses
+    GROUP BY activity_type
+    ORDER BY tot DESC;
   `);
-  console.log("Prenotazioni:", prenotazioni[0]);
+  console.log("Tipi:", tipi[0]);
 
   process.exit(0);
 }
