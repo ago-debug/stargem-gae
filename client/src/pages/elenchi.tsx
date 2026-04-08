@@ -471,6 +471,7 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
                    </div>
                  </div>
               </div>
+
               <DialogFooter>
                 <Button variant="outline" onClick={() => setSettingsOpen(false)}>Annulla</Button>
                 <Button className="gold-3d-button px-6" onClick={() => {
@@ -700,7 +701,10 @@ function SimpleListsManager() {
 
       {lists && lists.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-          {[...lists].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })).map(list => (
+          {[...lists]
+            .filter(list => !['categorie', 'canale_di_acquisizione', 'come_ci_ha_conosciuto'].includes(list.systemName))
+            .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+            .map(list => (
             <SimpleListSection key={list.id} list={list} />
           ))}
         </div>
@@ -711,6 +715,26 @@ function SimpleListsManager() {
           <p className="text-sm text-muted-foreground mt-1 max-w-sm">Crea il tuo primo elenco qui sopra per poterlo utilizzare nei campi a tendina del gestionale.</p>
         </div>
       )}
+    </div>
+  );
+}
+
+function ColoredCustomListsLoader() {
+  const { data: lists } = useQuery<(CustomList & { items: CustomListItem[]; linkedActivities?: string[] })[]>({
+    queryKey: ["/api/custom-lists"],
+  });
+
+  if (!lists || lists.length === 0) return null;
+
+  const targetLists = lists.filter(l => ['categorie', 'canale_di_acquisizione', 'come_ci_ha_conosciuto'].includes(l.systemName));
+
+  if (targetLists.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {targetLists.map(list => (
+        <SimpleListSection key={list.id} list={list} />
+      ))}
     </div>
   );
 }
@@ -810,33 +834,18 @@ export default function Elenchi() {
                 testIdPrefix="note-pagamenti"
               />
               <EditableListSection
-                title="Categorie Attività"
-                queryKey="/api/custom-lists/categorie"
-                apiPath="/api/custom-lists/categorie"
-                emptyMessage="Nessuna categoria definita"
-                testIdPrefix="categorie"
-              />
-              <EditableListSection
-                title="Canale di Acquisizione"
-                queryKey="/api/custom-lists/canale_di_acquisizione"
-                apiPath="/api/custom-lists/canale_di_acquisizione"
-                emptyMessage="Nessun canale di acquisizione definito"
-                testIdPrefix="canale-acquisizione"
-              />
-              <EditableListSection
-                title="Come ci ha conosciuto"
-                queryKey="/api/custom-lists/come_ci_ha_conosciuto"
-                apiPath="/api/custom-lists/come_ci_ha_conosciuto"
-                emptyMessage="Nessuna voce definita"
-                testIdPrefix="come-conosciuto"
-              />
-              <EditableListSection
                 title="Dettaglio Iscrizione"
                 queryKey="/api/enrollment-details"
                 apiPath="/api/enrollment-details"
                 emptyMessage="Nessun dettaglio iscrizione definito"
                 testIdPrefix="dettaglio-iscrizione"
               />
+            </div>
+            
+            <div className="mt-12">
+              <h2 className="text-xl font-bold text-foreground">Custom Lists Avanzate</h2>
+              <p className="text-sm text-muted-foreground mb-6">Queste liste sono state spostate per configurazioni avanzate.</p>
+              <ColoredCustomListsLoader />
             </div>
           </div>
         </TabsContent>

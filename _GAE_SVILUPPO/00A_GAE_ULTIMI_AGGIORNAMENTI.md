@@ -19,6 +19,7 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Bonifica Dati Obsoleti (Bug B020):** Rimossi permanentemente dal database i 5 cloni di test ("test Personal Trainer", ecc.) associati alla lista Allenamenti.
 * **Risoluzione Doppia Serializzazione (Bug B027, B029):** Eliminata l'istruzione `JSON.stringify` ridondante sui campi array `lessonType` e `statusTags` nei metodi `createCourse` ed `updateCourse` di `storage.ts`, affidando a Drizzle la corretta e singola codifica JSON, ristabilendo la corretta persistenza e lettura da parte dell'UI.
 * **Evoluzione Liste Backend (Bug B030):** Generata la nuova struttura `Tipologie Allenamenti` in `custom_lists` e instanziati i 5 campi canonici (Singola, Coppia, Gruppo, Personal Trainer, Prove) per supportare il refactoring esteso del frontend F2.
+* **Estrazione Partecipanti (Bug F1-039, F1-040):** Implementato il filtro `courseId` nell'endpoint `GET /api/enrollments` per permettere a F2 il lookup in realtime degli allievi già iscritti ad una prenotazione/allenamento.
 
 ### 06 Aprile 2026 (Phase 29: Rebranding StarGem Suite & TeoCopilot)
 * **Rebranding "StarGem Suite" & Griglia Moduli:** Ristrutturata drasticamente la pagina di Login (`auth-page.tsx`), abbandonando il moniker "CourseManager". La root d'accesso ora presenta lo status di suite aziendale, esponendo una griglia luminosa con loghi dorati (Golden Gradient CSS) per tutti i 7 sotto-moduli ufficiali e riservati (GemTeam, Gemory, MedGem, BookGem, TeoCopilot, Gemdario, Clarissa).

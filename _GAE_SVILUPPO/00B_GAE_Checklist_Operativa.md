@@ -71,6 +71,9 @@
               [x] (B034) Mappatura dinamica `activityBadge` in `calendar.tsx` basata su `activityType`.
               [x] (B030) Separazione del load lista dropdown tipologia lezioni tra "allenamenti" e "prenotazioni".
               [x] (B031, B032, B033) Trasferimento esplicito ed inserimento dei blocchi "Categorie", "Canale" e "Come ci ha conosciuto" sotto "Elenchi Colorati Multi".
+[08/04 11:15] F1→PM: Esecuzione Protocolli 039-040. Endpoint Enrollments potenziato.
+              [x] (039) Analisi comportamento schema member1Id/member2Id.
+              [x] (040) Aggiunto query filter `courseId` su `GET /api/enrollments`.
 
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.

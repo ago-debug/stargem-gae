@@ -31,6 +31,7 @@ import {
   insertPaymentMethodSchema,
   insertPaymentSchema,
   insertEnrollmentSchema,
+  enrollments,
   insertWorkshopEnrollmentSchema,
   insertWorkshopAttendanceSchema,
   insertAccessLogSchema,
@@ -3296,11 +3297,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Enrollments Routes ====
   app.get("/api/enrollments", isAuthenticated, checkPermission("/iscritti-corsi", "read"), async (req, res) => {
     try {
+      if (req.query.courseId) {
+        const courseId = parseInt(req.query.courseId as string);
+        const result = await db.select({
+          id: enrollments.id,
+          memberId: enrollments.memberId,
+          courseId: enrollments.courseId,
+        })
+        .from(enrollments)
+        .where(eq(enrollments.courseId, courseId));
+        return res.json(result);
+      }
+
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
       const type = req.query.type as string; // E.g. 'corsi', 'workshop', 'campus', etc.
 
-      let enrollments: any[] = [];
+      let enrollmentsList: any[] = [];
 
       // Handle unsupported category types cleanly by returning empty arrays
       if (type && type !== 'corsi' && type !== 'workshop') {
@@ -3310,37 +3323,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle workshops specifically for backward compatibility or unified querying
       if (type === 'workshop') {
         if (memberId) {
-          enrollments = await storage.getWorkshopEnrollmentsByMember(memberId);
+          enrollmentsList = await storage.getWorkshopEnrollmentsByMember(memberId);
         } else if (seasonId) {
-          enrollments = await storage.getWorkshopEnrollmentsBySeason(seasonId);
+          enrollmentsList = await storage.getWorkshopEnrollmentsBySeason(seasonId);
         } else {
           const activeSeason = await storage.getActiveSeason();
           if (activeSeason) {
-            enrollments = await storage.getWorkshopEnrollmentsBySeason(activeSeason.id);
+            enrollmentsList = await storage.getWorkshopEnrollmentsBySeason(activeSeason.id);
           } else {
             // We fallback to getWorkshopEnrollments assuming it exists or similar fallback.
             // Default behavior without a season
-            enrollments = [];
+            enrollmentsList = [];
           }
         }
-        return res.json(enrollments);
+        return res.json(enrollmentsList);
       }
 
       // Fallback: Default to classical courses behavior
       if (memberId) {
-        enrollments = await storage.getEnrollmentsByMember(memberId);
+        enrollmentsList = await storage.getEnrollmentsByMember(memberId);
       } else if (seasonId) {
-        enrollments = await storage.getEnrollmentsBySeason(seasonId);
+        enrollmentsList = await storage.getEnrollmentsBySeason(seasonId);
       } else {
         const activeSeason = await storage.getActiveSeason();
         if (activeSeason) {
-          enrollments = await storage.getEnrollmentsBySeason(activeSeason.id);
+          enrollmentsList = await storage.getEnrollmentsBySeason(activeSeason.id);
         } else {
-          enrollments = await storage.getEnrollments();
+          enrollmentsList = await storage.getEnrollments();
         }
       }
-      console.log(`[DEBUG] /api/enrollments type=${type} seasonId=${seasonId} memberId=${memberId} returning ${enrollments.length} enrollments`);
-      res.json(enrollments);
+      console.log(`[DEBUG] /api/enrollments type=${type} seasonId=${seasonId} memberId=${memberId} returning ${enrollmentsList.length} enrollments`);
+      res.json(enrollmentsList);
     } catch (error) {
       console.error("[ERROR] Failed to fetch enrollments:", error);
       res.status(500).json({ message: "Failed to fetch enrollments" });
