@@ -673,7 +673,7 @@ export default function IscrittiPerAttivita() {
                                         <SortableTableHead sortKey="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableTableHead>
                                         <SortableTableHead sortKey="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableTableHead>
                                         <SortableTableHead sortKey="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableTableHead>
-                                        <TableHead>Dettagli</TableHead>
+                                        <TableHead>{item.id === 'allenamenti' ? 'Insegnante' : 'Dettagli'}</TableHead>
                                         <SortableTableHead sortKey="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableTableHead>
                                         <TableHead className="text-right">Azioni</TableHead>
                                       </TableRow>
@@ -685,7 +685,9 @@ export default function IscrittiPerAttivita() {
                                           <TableCell className={cn(isActivitySorted("firstName") && "sorted-column-cell")}>{enroll.memberFirstName || '-'}</TableCell>
                                           <TableCell className={cn(isActivitySorted("email") && "sorted-column-cell")}>{enroll.memberEmail || '-'}</TableCell>
                                           <TableCell>
-                                            <span className="text-xs text-muted-foreground">-</span>
+                                            <span className="text-xs text-muted-foreground">
+                                              {item.id === 'allenamenti' ? (enroll.courseInstructorName || activity.courseInstructorName || activity.instructorName || '-') : '-'}
+                                            </span>
                                           </TableCell>
                                           <TableCell className={cn(isActivitySorted("date") && "sorted-column-cell")}>
                                             {enroll.enrollmentDate
