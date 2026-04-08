@@ -2,8 +2,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Palette, Info } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-
 const ACTIVITY_LEGEND = [
   { label: "Corsi", badge: "CRS", color: null, isCategory: true, note: "da categoria" },
   { label: "Allenamenti/Prove", badge: "ALL", color: "#1e40af" },
@@ -27,13 +25,20 @@ export function ActivityColorLegend({ variant = "card" }: { variant?: "card" | "
             <Palette className="w-3 h-3 text-muted-foreground shrink-0" />
           )}
           
-          <Badge 
-            variant="outline" 
-            className="text-[10px] font-mono px-1 py-0 border-none"
-            style={item.color ? { backgroundColor: `${item.color}15`, color: item.color } : {}}
+          <span 
+            className="px-1.5 py-0.5 rounded text-[10px] font-bold"
+            style={item.color ? {
+              backgroundColor: `${item.color}20`,
+              color: item.color,
+              borderLeft: `3px solid ${item.color}`
+            } : {
+              backgroundColor: "#6b728020",
+              color: "#374151",
+              borderLeft: "3px solid #6b7280"
+            }}
           >
             {item.badge}
-          </Badge>
+          </span>
           
           <span className="text-sm font-medium">
             {item.label}
