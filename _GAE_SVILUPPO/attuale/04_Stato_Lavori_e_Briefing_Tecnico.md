@@ -230,15 +230,16 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 ---
 
 ## 9. Architettura generale / stato progetto (Database STI)
-**Stato Attuale:** 🟡 TRANSIZIONE STI (Shadow Mode Terminata, Pronti al Data Pump)
-**Sintesi:** Tutte le preparazioni Frontend (Modali operativi unificati, Calendario multi-stagione, Sicurezza a 30 settori) sono ultimate. Il progetto è ora interamente proteso al refactoring del backend (STI Data Pump), che collasserà le 11 tabelle frammentate nel Dynamic Engine.
+**Stato Attuale:** 🟡 TRANSIZIONE STI (Refactoring Unificato Backend in Corso)
+**Sintesi:** Tutte le preparazioni Frontend (Modali operativi unificati, Calendario multi-stagione, Sicurezza a 30 settori) sono ultimate. Il progetto è ora interamente proteso al refactoring del backend Single Table Inheritance (STI).
 * **Cosa è già stato fatto:** 
   - **Fase 2 (Shadow Tables):** Create `activities_unified` ed `enrollments_unified`.
-  - **Fase 3 (Read-Only Bridge):** Fuso in memoria i records dal backend per permettere al Calendario (switchato in Fase 4) di lavorare agevolmente.
-  - **Preparazione Interfacce:** La Maschera Input, il Calendario, la Knowledge base e i Ruoli sono testati e idonei.
-* **Cosa manca:** Creazione e propagazione dello script "Data-Pump" vero e proprio (Modellazione Drizzle e Travaso massivo dei dati storici).
+  - **Rimozione Vincoli:** Drop di `categoryId` bloccante su `courses` per supportare liste dinamiche ibride.
+  - **Integrazione activity_type:** Aggiunta e salvata fisicamente a database la colonna polimorfica `activity_type` su `courses` (tramite workaround script in backend) per autodicriminare semanticamente `courses`, `individual_lessons`, et similia. L'API `POST /api/courses` assorbe ed eredita nativamente l'attributo.
+  - **Task Frontend:** Allineati i backend custom sulle pagine di F2 ("Lezioni Individuali" operanti ora su `CourseUnifiedModal`).
+* **Cosa manca:** Creazione e propagazione dello script "Data-Pump" vero e proprio (Travaso massivo dei dati storici).
 * **Rischi / Attenzioni:** Essere disallineati durante il travaso potrebbe costare caro alla continuità dei dati live.
-* **Prossimo Step Consigliato:** Eseguire immediatamente la _Fase 1_ del Piano STI (vedi File 13 `Piano_Migrazione_DB.md`): Ristrutturazione di `schema.ts`.
+* **Prossimo Step Consigliato:** Promuovere la migrazione STI ad altri silos (affitti, eventi, domeniche) e poi varare il "Data-Pump" per i record antecedenti la fase 30.
 
 
 <!-- --- FINE SORGENTE: attuale/11_GAE_Stato_Lavori_Per_Sezione.md --- -->

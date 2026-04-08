@@ -186,6 +186,7 @@ export const customListItems = mysqlTable("custom_list_items", {
   value: varchar("value", { length: 255 }).notNull(), // The actual string value (e.g., 'Yoga Base')
   sortOrder: int("sort_order").default(0),
   active: boolean("active").default(true),
+  color: varchar("color", { length: 7 }),
 });
 
 export const customListsRelations = relations(customLists, ({ many }) => ({
@@ -602,6 +603,7 @@ export const courses = mysqlTable("courses", {
   id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }), // SKU univoco (es: 2526-NEMBRI-LUN-15) - unique constraint da aggiungere dopo
   name: varchar("name", { length: 255 }).notNull(),
+  activityType: varchar("activity_type", { length: 50 }),
   description: text("description"),
   categoryId: int("category_id"),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }), // Studio/sala

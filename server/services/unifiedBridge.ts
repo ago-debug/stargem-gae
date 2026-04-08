@@ -7,6 +7,7 @@ function toLocalISOString(d: Date): string {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
 }
 
+import { eq } from "drizzle-orm";
 import {
   courses,
   workshops,
@@ -25,6 +26,7 @@ import {
   users,
   members,
   studios,
+  customListItems,
   type UnifiedCalendarEventDTO
 } from "@shared/schema";
 
@@ -73,7 +75,7 @@ function resolveCategory(categoryId: number | null, dbCats: any[], prefixTag: st
     const cat = dbCats.find(c => c.id === categoryId);
     return {
         id: categoryId,
-        name: cat?.name || "Non Assegnata",
+        name: cat?.name || cat?.value || "Non Assegnata",
         tag: prefixTag,
         color: cat?.color || null
     };
@@ -127,7 +129,7 @@ function expandCourseRecurrence(
   const buildBaseDTO = (evtStart: Date, evtEnd: Date, uniqueId: string): UnifiedCalendarEventDTO => ({
     id: uniqueId,
     activityFamily: "course",
-    activityType: "standard",
+    activityType: course.activityType || "standard",
     title: course.name,
     sku: course.sku || null,
     statusLabels: parseTags(course.statusTags).length > 0 ? parseTags(course.statusTags) : (course.active ? ["active"] : ["inactive"]),
@@ -240,7 +242,8 @@ export async function getUnifiedActivitiesPreview(req: Request) {
     dbCats,
     dbWsCats,
     dbSunCats,
-    dbStudios
+    dbStudios,
+    dbCustomCats
   ] = await Promise.all([
     db.select().from(courses),
     db.select().from(workshops),
@@ -253,7 +256,8 @@ export async function getUnifiedActivitiesPreview(req: Request) {
     db.select().from(categories),
     db.select().from(workshopCategories),
     db.select().from(sundayCategories),
-    db.select().from(studios)
+    db.select().from(studios),
+    db.select().from(customListItems).where(eq(customListItems.listId, 23))
   ]);
 
   const unified: UnifiedCalendarEventDTO[] = [];
@@ -262,7 +266,7 @@ export async function getUnifiedActivitiesPreview(req: Request) {
   for (const c of dbCourses) {
     const effSeasonId = c.seasonId || defaultSeasonId;
     if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
-    unified.push(...expandCourseRecurrence(c, defaultSeasonId, { dbMembers, dbCats, dbStudios }));
+    unified.push(...expandCourseRecurrence(c, defaultSeasonId, { dbMembers, dbCats: dbCustomCats, dbStudios }));
   }
 
   // Mappa Workshop

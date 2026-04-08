@@ -5,7 +5,7 @@ export default function Trainings() {
     <ActivityManagementPage
       title="Riepilogo Allenamenti"
       subtitle="Gestisci le sessioni di allenamento"
-      apiEndpoint="/api/trainings"
+      apiEndpoint="/api/courses?activityType=allenamenti"
       categoryApiEndpoint="/api/training-categories"
       itemLabel="allenamento"
       itemLabelPlural="allenamenti"

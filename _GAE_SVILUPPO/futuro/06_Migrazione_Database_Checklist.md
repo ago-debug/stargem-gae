@@ -89,10 +89,10 @@ La transizione da un modello all'altro non è un'operazione banale, è un trapia
 
 ### Fase 1: Modellazione Database e Preparazione ORM (In Esecuzione)
 **[STATUS: SPRINT ATTIVO DA ESEGUIRE ORA]**
-- [ ] Creazione del nuovo schema Drizzle ORM (`shared/schema.ts`) introducendo le 3 macro tabelle padri: `activities`, `categories`, `activity_details`.
+- [x] Creazione del nuovo schema Drizzle ORM (`shared/schema.ts`) introducendo le 3 macro tabelle padri: `activities`, `categories`, `activity_details`. (Iniziato con introduzione `activity_type` su `courses`).
 - [ ] Creazione della nuova tabella convergente `enrollments` (Gestione iscritti universale universale).
 - [ ] Refactoring tabella `payments`: snellimento drastico tramite rimozione delle 12 foreign key a croce e configurazione dell'unica foreign key verso la neo-tabella `enrollments`.
-- [ ] Generazione della migrazione SQL (`npm run db:generate`). *(Non pushare ancora in produzione).*
+- [x] Generazione ed esecuzione della migrazione SQL (`npm run db:generate` / custom push `0010_cynical_fantastic_four.sql`).
 
 ### Fase 2: Script di Migrazione Dati "Data Pump" (Tempo stimato: 1.5 Giorni / 12 Ore)
 - [ ] Scrittura script isolato Node.js (Data Pump) progettato per eseguire dump + read iterativo dai vecchi silos pre-esistenti (`courses`, `workshops`, `vacation_studies`, ecc.).

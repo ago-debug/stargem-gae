@@ -475,6 +475,9 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Cour
 
 > **Aggiornamento Architetturale (Naming Consistency):** Il termine legacy "Nomi Corsi" è completamente deprecato in favore di **"Genere"** (System Code: `genere`). Tutte le 14 attività implementano la tendina dinamica `Combobox` agganciata a questa singola sorgente lista.
 
+> **Aggiornamento Architetturale (activityType Pass-through):** Le pagine Operative `sunday-activities.tsx`, `recitals.tsx` e `vacation-studies.tsx` passano ora esplicitamente la prop `activityType` a `ActivityManagementPage` per garantire continuità tecnica e salvataggio Type Safe nel backend. Il type `activityType` è stato esteso per sopportare i literal type di queste nuove categorie.
+
+> **Aggiornamento Architetturale (CourseUnifiedModal):** Refactoring del modale unificato. Disinnescato l'early-return ternario hardcoded del DialogTitle tramite `modalTitle` dinamico derivato per activityType. Il campo `activityType` viene ora impacchettato e iniettato nativamente nelle chiamate `POST` e `PATCH` dentro i metodi payload nativi `handleSubmit` ed `handleDuplicateFromModal`. Estesa strict type-safety ricorsiva anche ai sub-componenti tab (Enrollments/Attendances).
 
 <!-- --- FINE SORGENTE: attuale/06_GAE_Route_Audit_e_Stato.md --- -->
 

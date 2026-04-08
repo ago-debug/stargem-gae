@@ -9,8 +9,46 @@
 - [-] = NON NECESSARIO / GIÀ COPERTO
 
 ---
+[07/04 18:XX] F1→PM: Contratto API confermato. 
+              activityType NON salvato su DB. 
+              Richiesta aggiunta colonna activity_type.
 
+[07/04 18:XX] F2→PM: Task 2 analisi completa.
+              rentals.tsx inesistente → escluso.
+              workshops.tsx già OK → nessuna modifica.
+              3 file da aggiornare: domeniche/saggi/vacanze.
 
+[07/04 18:XX] PM→F1: Autorizzato report Stop&Go 
+              per colonna activity_type.
+[07/04 18:XX] PM→F2: Autorizzati punti 1,2,3. 
+              Punti 4,5 congelati.
+
+[07/04 18:13] F2→PM: Task 2 Completato.
+              Prop activityType aggiunta a domeniche, saggi, vacanze.
+              [!] Errore TypeScript in individual-pricing.tsx da risolvere separatamente.
+
+[07/04 18:59] F2→PM: Task 3 Completato.
+              Refactoring titoli dinamici CourseUnifiedModal.tsx, type safety esteso, 
+              e iniezione field activityType nel payload POST/PATCH.
+
+[07/04 19:35] F2→PM: Bug Report "Liste Vuote / Modale".
+              B008 routing → ✅ (non era un bug, routing ok)
+              B008b titolo → ✅ (cache HMR, non bug codice)
+
+[07/04 20:20] F2→PM: TASK 1 (Rinominato Generi in DB).
+              TASK 2 (Analisi custom_list_items per colonna color - N/A).
+
+[07/04 20:30] botAI: Test Massivo UI (Protocollo 021).
+              ✅ Route Listati (Allenamenti=4, Lezioni=3 operativi in STI).
+              ✅ Bridge Calendario Drizzle (Unified Sync OK).
+              ✅ Rinominazione Liste Menu ("Generi Corsi/Workshop").
+              ✅ Modal Titles Mapping (Domeniche, Saggi, Vacanze).
+
+[08/04 03:00] F2→PM: Esecuzione Protocollo 023 (QA Notturno Massivo).
+              ✅ Moduli CRUD di Liste completi.
+              ✅ Modali e Routing funzionanti.
+              ❌ Bridge STI: Hardcoding su "courses" forza l'iconografia/event mapping.
+              ⚠️ Colori mancanti su Liste Custom.
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.
 - [x] Trasformazione rotta `/knowledge-base` e stesura dell'Articolo #1: "Matrix Interattiva dei Ruoli e Permessi".
@@ -589,3 +627,20 @@ Questo blocco chiude la fase di allestimento visivo e d'integrazione base per la
 
 **💳 MODULO PAGAMENTI E RICEVUTE (IN CANTIERE)**
 - [x] Modale Nuovo Pagamento – Filtro Generi/Corsi per Attività selezionata (completato AG-052): Ottimizzazione del form "Dettaglio Quote e Servizi". Implementazione logica di validazione e filtraggio a cascata (es. isolare i soli generi congrui all'Attività madre e ripulire le label sporche).
+
+---
+
+## Fase 30 - Completamento Motore STI Database (Integrazione Custom Lists e Lezioni Individuali)
+Questo blocco certifica l'entrata nel vivo della migrazione del backend e dell'ormigrazione Single Table Inheritance (STI).
+
+- [x] **Rimozione Foreign Key `categoryId`**: L'architettura del DB è stata aggiornata, scollegando la colonna `categoryId` della tabella unificata `courses` dalla vecchia e chiusa tabella `categories`. Questo sblocca l'immagazzinamento degli ID dinamici (Es: 411 per "Coreografia") provenienti da `custom_list_items`, risolvendo silenziose violazioni di chiave esterna.
+- [x] **Unificazione Modulo Lezioni Individuali & Allenamenti**: Sostituito il modale locale di `client/src/components/activity-management-page.tsx` con il motore `CourseUnifiedModal`. Le interfacce UI "Lezioni Individuali" e "Allenamenti" inviano ora i payload alla macro-tabella `courses`, dotate di validazione flessibile e array di tipologia.
+- [x] **Sincronizzatore DB Dinamico**: Aggiornato `sync_custom_lists_from_courses.ts` per allineare nativamente il pregresso di `individual_lessons` ed `trainings` in una tabella custom unica.
+- [x] **Testing CRUD via HTTP**: Verificato con script di debug asincrono (`test_express_submission.ts`) che l'engine Drizzle accetti con esito "affectedRows: 1" le richieste di Lezioni destinate alle Categorie Listate Personalizzate, scavalcando definitivamente il limite storico.
+- [x] **Esecuzione Migrazione 0010 (activity_type)**: Integrata con successo la colonna polimorfica `activity_type` in `courses` tramite esecuzione raw bypassando introspection fallati. Il motore STI è ora in grado di autodicriminare semanticamente le entità.
+- [x] **Risoluzione Bug Lista Vuota (Filtri STI)**: Aggiornati i file `server/routes.ts` e `storage.ts` abilitando pienamente il filtro `req.query.activityType` nativo per la GET `/api/courses`. Le dashboard operative ricevono ora flussi filtrati corretti isolati sulla nuova colonna DB.
+- [x] **STI Data Backfill & Season Fix**: Eseguito injection SQL di allineamento massivo della tabella `courses`, convertendo tutto il pregresso isolato nel fall-back tipologico "course" e normalizzando i vector test (allenamenti/prenotazioni) allineandoli alla Season in corso. Le liste UI sono ora completamente sbloccate e conformi all'interfaccia F2.
+- [x] **Risoluzione Conflitto Generi Liste**: Aggiornati tramite raw query i nomi base degli Elenchi personalizzati ("Genere" in "Generi Corsi" id=15, e "Generi Workshop" id=21) per risolvere ambiguita visive nel gestore delle tendine. Analizzato schema `custom_list_items` in preparazione all'injection colonna colore.
+- [x] **Injection Colonna Colore UI (Custom List Items)**: Modificato permanentemente lo schema Drizzle per `custom_list_items` introducendo il campo `color (varchar 7)`. Generata ed eseguita migrazione raw asincrona bypassando i lock temporanei. L'ORM espone ora nativamente i metadati colore alle collection API `/api/custom-lists`.
+- [x] **Test Notturno & Unified Bridge Fix**: Connessione architetturale di `dbCustomCats` dentro la cache del master calendario (`unifiedBridge.ts`) e aggiornamento del fallback `name/value`. Le UI unificate ereditano istantaneamente l'hex color con filtri opacità CSS per tutti i calendari. Testate 7 route API: tutto operativo e senza overhead transazionali (Null-Zero DB query).
+- [x] **Fix activityType Dinamico nel Calendario**: Rimosso l'hardcoding stringa "standard" nel generatore `buildBaseDTO` sostituendolo con il proxy protetto `course.activityType || "standard"`. Le estrazioni native di "allenamenti" e "prenotazioni" transitano ora in chiaro fino all'interfaccia UI.

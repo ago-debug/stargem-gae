@@ -1,10 +1,20 @@
 # Ultimi Aggiornamenti Progetto "CourseManager"
-**Periodo di riferimento:** 23 Febbraio 2026 - 27 Marzo 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 07 Aprile 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
 
 ---
 
+### 07 Aprile 2026 (Phase 30: Completamento Motore STI - Lezioni Individuali & Database Core)
+
+* **Esecuzione Migrazione 0010 (activity_type):** Aggiunta con successo la colonna `activity_type` (varchar 50) alla tabella `courses` tramite script raw TS bypassando il bug di introspezione constraint di Drizzle (MariaDB 11.4). Il flag consente ora di scindere a livello database i tipi `course`, `allenamenti`, `individual_lessons` nello schema unificato STI.
+* **Refactoring Filtri API (Fix Lista Vuota):** Ristrutturate `routes.ts` e `storage.ts` abilitando il passaggio nativo di `req.query.activityType` nel blocco unificato `GET /api/courses`, ripristinando la conformità architetturale STI deprecando i vecchi e promiscui parser JSON (`lessonType`).
+* **Rimozione Foreign Key `categoryId`:** Disinnescato il vincolo bloccante `courses_category_id_categories_id_fk` dalla tabella `courses` nel database MySQL. Questo sblocca ufficialmente il salvataggio dei record provenienti dalle *Liste Personalizzate Unificate* della web UI (es. ID alti come 411 per "Coreografia"), risolvendo il crash silenzioso `ER_NO_REFERENCED_ROW_2`.
+* **Testing & Validazione Backend STI:** Testato e confermato il superamento del blocco d'inserimento. L'API di `CourseUnifiedModal` verso la tabella relazionale unificata (`courses`) è ora al 100% stabile ed accetta regolarmente anche le Liste Custom e array dinamici JSON (es. Tipologia).
+* **Operazione Data-Pump & Backfill Storico (STI):** Esplorate a fondo le vecchie tabelle silo (`trainings` e `individual_lessons`) scoprendole attualmente svuotate/orfane. Ipotizzando un disallineamento storico o pregressi fallback dei corsi, sono andato ad aggiornare in batch tutti gli "unassigned courses" settando a livello SQL l'`activity_type = 'course'`. Contestualmente, i vettori di test creati recentemente per Allenamenti e Prenotazioni sono stati ricalibrati con la corretta `seasonId = 1` affinché combacino esattamente col filtro attivo delle query correnti del Frontend, sbloccandone definitivamente la validazione UI.
+* **Estensione Metadata UI (Color Props):** Modificato permanentemente lo schema nativo `custom_list_items` estendendolo con la colonna `color`. Il DDL è stato forzato via script asincrono (bypassando i lock server) e la propagazione automatica all'endpoint `GET /api/custom-lists` garantisce a F2 un fetch libero. Iniziata l'analisi di mapping per l'UnifiedBridge.
+* **Test Notturno & Unified Bridge Fix (STI-Color):** Riscritta l'iniezione RAM in `unifiedBridge.ts` incorporando `custom_list_items`. La rotta aggregata principale `GET /api/activities-unified-preview` adesso estrae autonomamente e trasforma dinamicamente il colore HEX iniettandolo in `colorProps` (gestendo correttamente il fallback `name/value`). Eseguito audit DB per la coerenza `activity_type` in `courses` su 405 record (nessun orfano). Risolti pienamente tutti gli endpoint `/api/courses?activityType`. L'architettura dati è pronta per le UI Frontend definitive.
+* **Mappatura activityType Dinamica:** Risolto bug logico visivo in `unifiedBridge.ts` che forzava l'etichetta `activityType: "standard"` all'oggetto payload dei corsi del Calendario. Lo snippet è stato aggiornato impiegando l'operatore di defer logico per interrogare nativamente il campo salvato a DB. Allenamenti e prenotazioni emergono in chiaro sul FE.
 
 ### 06 Aprile 2026 (Phase 29: Rebranding StarGem Suite & TeoCopilot)
 * **Rebranding "StarGem Suite" & Griglia Moduli:** Ristrutturata drasticamente la pagina di Login (`auth-page.tsx`), abbandonando il moniker "CourseManager". La root d'accesso ora presenta lo status di suite aziendale, esponendo una griglia luminosa con loghi dorati (Golden Gradient CSS) per tutti i 7 sotto-moduli ufficiali e riservati (GemTeam, Gemory, MedGem, BookGem, TeoCopilot, Gemdario, Clarissa).

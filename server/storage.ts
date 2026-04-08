@@ -355,7 +355,7 @@ export interface IStorage {
   deleteStudio(id: number): Promise<void>;
 
   // Courses
-  getCourses(): Promise<Course[]>;
+  getCourses(activityType?: string): Promise<Course[]>;
   getCourse(id: number): Promise<Course | undefined>;
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course>;
@@ -2003,7 +2003,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Courses ====
-  async getCourses(): Promise<Course[]> {
+  async getCourses(activityType?: string): Promise<Course[]> {
+    if (activityType) {
+      return await db.select().from(courses)
+        .where(eq(courses.activityType, activityType))
+        .orderBy(desc(courses.createdAt));
+    }
     return await db.select().from(courses).orderBy(desc(courses.createdAt));
   }
 

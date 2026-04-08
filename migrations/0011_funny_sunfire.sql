@@ -1,0 +1,1 @@
+ALTER TABLE `custom_list_items` ADD `color` varchar(7);
