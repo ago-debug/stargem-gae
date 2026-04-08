@@ -2,29 +2,24 @@ import { db } from "../server/db";
 import { sql } from "drizzle-orm";
 
 async function main() {
-  console.log("--- BUG N: Verifica custom_lists campus/group ---");
-  const exists = await db.execute(sql`
-    SELECT id, name, system_name 
-    FROM custom_lists 
-    WHERE system_name LIKE '%campus%'
-       OR system_name LIKE '%group%'
-       OR system_name LIKE '%gruppo%';
+  console.log("--- TEST: Logica seasonId=active (stagione attiva) ---");
+  const activeSeason = await db.execute(sql`
+    SELECT id, name FROM seasons WHERE active = 1 LIMIT 1;
   `);
-  console.log("Liste trovate:", exists[0]);
+  console.log("Stagione attiva:", activeSeason[0]);
 
-  if ((exists[0] as unknown as any[]).length === 0) {
-    console.log("Nessuna lista trovata → Creo 'gruppi_campus'...");
-    await db.execute(sql`
-      INSERT INTO custom_lists (name, system_name, description)
-      VALUES ('Gruppi Campus', 'gruppi_campus', 'Gruppi per i campus estivi');
-    `);
-    const created = await db.execute(sql`
-      SELECT id, name, system_name FROM custom_lists WHERE system_name = 'gruppi_campus';
-    `);
-    console.log("Lista creata:", created[0]);
-  } else {
-    console.log("Lista già presente — nessuna creazione necessaria.");
+  const activeSeasonId = (activeSeason[0] as unknown as any[])[0]?.id;
+  if (!activeSeasonId) {
+    console.log("Nessuna stagione attiva trovata!");
+    process.exit(0);
   }
+
+  const corsi = await db.execute(sql`
+    SELECT COUNT(*) as tot FROM courses
+    WHERE activity_type = 'course'
+    AND (season_id = ${activeSeasonId} OR season_id IS NULL);
+  `);
+  console.log("Corsi stagione attiva:", (corsi[0] as unknown as any[])[0]);
 
   process.exit(0);
 }
