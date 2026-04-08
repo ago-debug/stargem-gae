@@ -857,11 +857,6 @@ export default function Elenchi() {
                 emptyMessage="Nessun dettaglio iscrizione definito"
                 testIdPrefix="dettaglio-iscrizione"
               />
-            </div>
-            
-            <div className="mt-12">
-              <h2 className="text-xl font-bold text-foreground">Custom Lists Avanzate</h2>
-              <p className="text-sm text-muted-foreground mb-6">Queste liste sono state spostate per configurazioni avanzate.</p>
               <ColoredCustomListsLoader />
             </div>
           </div>
