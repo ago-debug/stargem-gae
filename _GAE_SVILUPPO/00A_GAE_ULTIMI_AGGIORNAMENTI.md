@@ -5,6 +5,13 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 08 Aprile 2026 (Phase 32: Cleanup Massiccio & Unificazione Totale STI)
+* **[F1-PROTOCOLLO-067/068] Stabilizzazione TS & Architettura STI:** Eseguito il più vasto cleanup di refactoring TypeScript portando gli errori di compilazione da 228 a 0 (zero assoluto).
+* **API `activities-summary` a regime STI:** Disinnescata e rimossa la vecchia logica multi-silos. L'endpoint usa in tempo reale una query aggregata SQL nativa dalla super-tabella `courses`, mappando le chiavi (`corsi`, `allenamenti`, `lezioni-individuali`, ecc.) direttamente al FrontEnd.
+* **Deprecazione e DROP Codice Obsoleto:** Piallati **52 endpoint obsoleti** in `routes.ts`, rimossi **120 metodi** silenti in `storage.ts`, e purificato il layer `unifiedBridge.ts`.
+* **Mappatura Database STI (16 Tabelle Droppate):** Chiuso e storicizzato il delete massivo dal DB delle sovrastrutture legacy (`workshops`, `trainings`, `individual_lessons`, ecc. compresi gli enrollments). Il perimetro del progetto cala a **72 Tabelle attive**, consacrando ufficialmente la *Single Table Inheritance* (STI) al 100%.
+
+
 ### 08 Aprile 2026 (Phase 31: Migrazione Definitiva Category ID e Semplificazione STI)
 * **[F1-PROTOCOLLO-063] Cleanup Schema e DROP Tabelle:** Eseguito DROP massivo dal database MySQL (`stargem_v2`) di 16 tabelle legacy (tutti i vecchi silos `trainings`, `individual_lessons`, ecc., più le viste unificate obsolete `activities_unified` e `enrollments_unified` e le tabelle enrollments speculari). Il numero totale di tabelle scende a 72. Ripulite oltre 78 definizioni e relazioni obsolete in `shared/schema.ts`, eliminando vincoli pregressi. Inoltrato git commit definitivo.
 * **[F1-PROTOCOLLO-064] Verifica Dati STI:** Analisi diagnostica (Corsi e Iscritti). Verificata l'integrità del datalayer: certificata la presenza di "allenamenti" (6 corsi, 1 iscritto) e "prenotazioni" (3 corsi, 1 iscritto) nella tabella `courses` e nell'associazione `enrollments`. L'assenza visiva segnalata sulle UI Panoramica (iscritti a zero) è riconducibile esclusivamente al binding frontend/API, isolando la natura del bug fuori dal database.

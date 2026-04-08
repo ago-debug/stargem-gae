@@ -648,6 +648,6 @@ Al fine di sbloccare l'operatività di base, sono stati consolidati e protetti i
 - L'`activityType` viene passato in maniera type-safe dal calendario direttamente al modale anche in fase di edit, sostituendo logiche hardcoded e guidando dinamicamente la customizzazione del popup.
 - Le card del calendario (e di listato) presentano ora Badge nativi e referenziali (`ALL`, `IND`, `WS`, `DOM`), calcolati in appoggio all'ecosistema polimorfo piuttosto che alla staticità legacy "CRS".
 - La palette cromatica delle categorie pesca e renderizza nativamente i valori esatti estratti dalla colonna `custom_list_items.color`, amministrati attivamente da UI (`/elenchi` -> `SimpleListSection`).
+- I colori delle card a calendario vantano un flusso logico rigoroso: il colore semantico/fisso tipico del parent STI (`ALL` = Blu, `IND` = Viola) riceve precedenza assoluta d'esposizione rispetto al colore generico della "Categoria", eliminando le sovrascritture visive (Fix B066).
 
 <!-- --- FINE SORGENTE: attuale/17_GAE_Calendario_Multi_Stagione.md --- -->
-
