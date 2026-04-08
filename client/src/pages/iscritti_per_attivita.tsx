@@ -76,8 +76,8 @@ export default function IscrittiPerAttivita() {
   const { data: freeTrials, isLoading: ftLoading } = useQuery<FreeTrial[]>({ queryKey: ["/api/free-trials"] });
   const { data: singleLessons, isLoading: slLoading } = useQuery<SingleLesson[]>({ queryKey: ["/api/single-lessons"] });
   const { data: sundayActivities, isLoading: saLoading } = useQuery<SundayActivity[]>({ queryKey: ["/api/sunday-activities"] });
-  const { data: trainings, isLoading: trLoading } = useQuery<Training[]>({ queryKey: ["/api/trainings"] });
-  const { data: individualLessons, isLoading: ilLoading } = useQuery<IndividualLesson[]>({ queryKey: ["/api/individual-lessons"] });
+  const { data: trainings, isLoading: trLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=allenamenti"] });
+  const { data: individualLessons, isLoading: ilLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=lezioni-individuali"] });
   const { data: campusActivities, isLoading: caLoading } = useQuery<CampusActivity[]>({ queryKey: ["/api/campus-activities"] });
   const { data: recitals, isLoading: recLoading } = useQuery<Recital[]>({ queryKey: ["/api/recitals"] });
   const { data: vacationStudies, isLoading: vsLoading } = useQuery<VacationStudy[]>({ queryKey: ["/api/vacation-studies"] });
@@ -87,8 +87,8 @@ export default function IscrittiPerAttivita() {
   const { data: ftEnrollments, isLoading: ftEnrLoading } = useQuery<any[]>({ queryKey: ["/api/free-trial-enrollments"] });
   const { data: slEnrollments, isLoading: slEnrLoading } = useQuery<any[]>({ queryKey: ["/api/single-lesson-enrollments"] });
   const { data: saEnrollments, isLoading: saEnrLoading } = useQuery<any[]>({ queryKey: ["/api/sunday-activity-enrollments"] });
-  const { data: trEnrollments, isLoading: trEnrLoading } = useQuery<any[]>({ queryKey: ["/api/training-enrollments"] });
-  const { data: ilEnrollments, isLoading: ilEnrLoading } = useQuery<any[]>({ queryKey: ["/api/individual-lesson-enrollments"] });
+  const { data: allenamentiEnrollments, isLoading: trEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=allenamenti"] });
+  const { data: lezioniIndividualiEnrollments, isLoading: ilEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=lezioni-individuali"] });
   const { data: caEnrollments, isLoading: caEnrLoading } = useQuery<any[]>({ queryKey: ["/api/campus-enrollments"] });
   const { data: recEnrollments, isLoading: recEnrLoading } = useQuery<any[]>({ queryKey: ["/api/recital-enrollments"] });
   const { data: vsEnrollments, isLoading: vsEnrLoading } = useQuery<any[]>({ queryKey: ["/api/vacation-study-enrollments"] });
@@ -108,9 +108,9 @@ export default function IscrittiPerAttivita() {
     "prove-gratuite": { data: freeTrials, loading: ftLoading, link: "/scheda-prova-gratuita", enrollments: ftEnrollments, enrollLoading: ftEnrLoading, foreignKey: "freeTrialId" },
     "lezioni-singole": { data: singleLessons, loading: slLoading, link: "/scheda-lezione-singola", enrollments: slEnrollments, enrollLoading: slEnrLoading, foreignKey: "singleLessonId" },
     "domeniche-movimento": { data: sundayActivities, loading: saLoading, link: "/scheda-domenica", enrollments: saEnrollments, enrollLoading: saEnrLoading, foreignKey: "sundayActivityId" },
-    "allenamenti": { data: trainings, loading: trLoading, link: "/scheda-allenamento", enrollments: trEnrollments, enrollLoading: trEnrLoading, foreignKey: "trainingId" },
+    "allenamenti": { data: trainings, loading: trLoading, link: "/scheda-allenamento", enrollments: allenamentiEnrollments, enrollLoading: trEnrLoading, foreignKey: "courseId" },
     "affitti": { data: [], loading: false, link: "/prenotazioni-sale", enrollments: [], enrollLoading: false, foreignKey: "id" },
-    "lezioni-individuali": { data: individualLessons, loading: ilLoading, link: "/scheda-lezione-individuale", enrollments: ilEnrollments, enrollLoading: ilEnrLoading, foreignKey: "individualLessonId" },
+    "lezioni-individuali": { data: individualLessons, loading: ilLoading, link: "/scheda-lezione-individuale", enrollments: lezioniIndividualiEnrollments, enrollLoading: ilEnrLoading, foreignKey: "courseId" },
     "campus": { data: campusActivities, loading: caLoading, link: "/scheda-campus", enrollments: caEnrollments, enrollLoading: caEnrLoading, foreignKey: "campusActivityId" },
     "saggi": { data: recitals, loading: recLoading, link: "/scheda-saggio", enrollments: recEnrollments, enrollLoading: recEnrLoading, foreignKey: "recitalId" },
     "vacanze-studio": { data: vacationStudies, loading: vsLoading, link: "/scheda-vacanza-studio", enrollments: vsEnrollments, enrollLoading: vsEnrLoading, foreignKey: "vacationStudyId" },

@@ -123,6 +123,9 @@
               [x] (B048) Rimappata UI di `ActivityColorLegend` da layout estesi verso una griglia impilata (`flex-col gap-2`) per presentazioni Popover verticalizzate.
               [x] (B046) Ispezionato `studio-bookings.tsx`: renderizzazione menù confermata in cima al flow del content grid.
               [x] (B049) Epigrafe di "+ Crea Attività" rimosso definitivamente anche da referenze remote/cache.
+[08/04 15:10] F2→PM: Protocollo 068/069 Eseguito (Fix B040b List Iscritti STI)
+              [x] Rimpiazzate le chiamate API frontend in `iscritti_per_attivita.tsx` per Allenamenti e Lezioni Individuali, interfacciandole alla nuova struttura root di Single Table Inheritance tramite i filtri `/api/courses?activityType=X` e `/api/enrollments?type=X`.
+              [x] Convertito binding mappa per sfruttare `courseId` al posto degli indici deprecati `trainingId` e `individualLessonId`.
 [08/04 12:50] F1→PM: Esecuzione Protocolli 052-053. Analisi Cleanup DB e Migrazione Campus.
               [x] (Task 1) Migrazione `campus_activities`: Le 2 righe superstiti ("Multisport" e "Danza") sono state riversate nella root table `courses` con type 'campus'.
               [x] (Task 2) Analisi Sicurezza: Fermata la rimozione tabelle ("Stop&Go") poiché `routes.ts` e `schema.ts` contengono ancora i relativi riferimenti ai moduli CRUD.
