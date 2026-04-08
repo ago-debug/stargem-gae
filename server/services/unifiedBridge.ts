@@ -20,6 +20,17 @@ import {
   type UnifiedCalendarEventDTO
 } from "@shared/schema";
 
+const ACTIVITY_TYPE_COLORS: Record<string, string> = {
+  allenamenti:  "#1e40af",
+  prenotazioni: "#7c3aed",
+  workshop:     "#c2410c",
+  domeniche:    "#a16207",
+  saggi:        "#be185d",
+  vacanze:      "#15803d",
+  campus:       "#0369a1",
+  affitti:      "#374151",
+};
+
 const COLORS = [
     "bg-red-100 border-l-red-500 text-red-700",
     "bg-blue-100 border-l-blue-500 text-blue-700",
@@ -114,7 +125,11 @@ function expandCourseRecurrence(
   const { ids: insIds, names: insNames } = resolveInstructor(course.instructorId, ctx.dbMembers);
   const catInfo = resolveCategory(course.categoryId, ctx.dbCats, "CRS");
   const studioInfo = resolveStudio(course.studioId, ctx.dbStudios);
-  const colors = buildColorProps(catInfo.color, catInfo.id, "course");
+  const type = course.activityType || "course";
+  const fixedColor = ACTIVITY_TYPE_COLORS[type];
+  const colors = (fixedColor && type !== "course")
+    ? buildColorProps(fixedColor, 0, type)
+    : buildColorProps(catInfo.color, catInfo.id, "course");
 
   const buildBaseDTO = (evtStart: Date, evtEnd: Date, uniqueId: string): UnifiedCalendarEventDTO => ({
     id: uniqueId,
