@@ -230,17 +230,22 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 ---
 
 ## 9. Architettura generale / stato progetto (Database STI)
-**Stato Attuale:** 🟡 TRANSIZIONE STI (Refactoring Unificato Backend in Corso)
+**Stato Attuale:** 🟢 TRANSIZIONE STI (Refactoring Unificato Backend in Costante Avanzamento)
 **Sintesi:** Tutte le preparazioni Frontend (Modali operativi unificati, Calendario multi-stagione, Sicurezza a 30 settori) sono ultimate. Il progetto è ora interamente proteso al refactoring del backend Single Table Inheritance (STI).
-* **Cosa è già stato fatto:** 
-  - **Fase 2 (Shadow Tables):** Create `activities_unified` ed `enrollments_unified`.
-  - **Rimozione Vincoli:** Drop di `categoryId` bloccante su `courses` per supportare liste dinamiche ibride.
-  - **Integrazione activity_type:** Aggiunta e salvata fisicamente a database la colonna polimorfica `activity_type` su `courses` (tramite workaround script in backend) per autodicriminare semanticamente `courses`, `individual_lessons`, et similia. L'API `POST /api/courses` assorbe ed eredita nativamente l'attributo.
-  - **Task Frontend:** Allineati i backend custom sulle pagine di F2 ("Lezioni Individuali" operanti ora su `CourseUnifiedModal`).
-* **Cosa manca:** Creazione e propagazione dello script "Data-Pump" vero e proprio (Travaso massivo dei dati storici).
-* **Rischi / Attenzioni:** Essere disallineati durante il travaso potrebbe costare caro alla continuità dei dati live.
-* **Prossimo Step Consigliato:** Promuovere la migrazione STI ad altri silos (affitti, eventi, domeniche) e poi varare il "Data-Pump" per i record antecedenti la fase 30.
 
+**Riepilogo Sessione 07-08/04/2026 (Protocollo 054):**
+- 20+ bug UI/UX e di sincronizzazione RISOLTI.
+- Migrazione STI completata al 90% per quanto riguarda il database core.
+- Calendario con colori e categorie asincrone ✅
+- Modali con titoli e label dinamiche 100% dipendenti da `activity_type` ✅
+- Ricerca allievi asincrona su componenti `QuickSearch` ✅
+- Color picker categorie (su `custom_list_items`) operativo ✅
 
-<!-- --- FINE SORGENTE: attuale/11_GAE_Stato_Lavori_Per_Sezione.md --- -->
+**Prossimi task (Immediato Futuro):**
+- **Clean-up Backend:** Rimuovere rotte API silos obsolete da `routes.ts`.
+- **Clean-up Storage:** Rimuovere metodi Drizzle legacy da `storage.ts`.
+- **Clean-up DB:** Eseguire fisicamente i DROP delle tabelle vuote o migrate (es. `trainings`, `individual_lessons`, `campus_activities`).
+- **Fix B037:** Allievo non persiste nell'aggiornamento UI backend.
+- **Fix B040:** Label fallace (iscritti per attività riporta 0 a visivo su tabelle unificate).
+
 

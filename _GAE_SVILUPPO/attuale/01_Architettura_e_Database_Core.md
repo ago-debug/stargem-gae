@@ -79,15 +79,15 @@ Ogni blocco ha:
 
 I modelli parificati dei suddetti "11 silos" sono:
 1.  **Corsi** (`courses`, `enrollments`)
-2.  **Workshop** (`workshops`, `ws_enrollments`)
+2.  **Workshop** (`workshops`, `ws_enrollments`) [MIGRATE IN `courses` STI]
 3.  **Prove Pagate** (`paid_trials`, `pt_enrollments`)
 4.  **Prove Gratuite** (`free_trials`, `ft_enrollments`)
 5.  **Lezioni Singole** (`single_lessons`, `sl_enrollments`)
-6.  **Attività Domenicali** (`sunday_activities`, `sa_enrollments`)
-7.  **Allenamenti** (`trainings`, `tr_enrollments`)
-8.  **Lezioni Individuali** (`individual_lessons`, `il_enrollments`)
-9.  **Campus** (`campus_activities`, `ca_enrollments`)
-10.  **Saggi / Spettacoli** (`recitals`, `rec_enrollments`)
+6.  **Attività Domenicali** (`sunday_activities`, `sa_enrollments`) [DEPRECATO]
+7.  **Allenamenti** (`trainings`, `tr_enrollments`) [DEPRECATO]
+8.  **Lezioni Individuali** (`individual_lessons`, `il_enrollments`) [DEPRECATO]
+9.  **Campus** (`campus_activities`, `ca_enrollments`) [MIGRATE IN `courses` STI]
+10.  **Saggi / Spettacoli** (`recitals`, `rec_enrollments`) [DEPRECATO]
 11.  **Vacanze Studio** (`vacation_studies`, `vs_enrollments`)
 12. **[NEW] Tabelle Ombra STI** (`activities_unified`, `enrollments_unified`) - *Strato Data-Pump attualmente in sola lettura (Bridge API)*
 
@@ -135,8 +135,8 @@ Attualmente il sistema gestisce l'offerta didattica **duplicando la struttura di
 
 ```mermaid
 erDiagram
-    %% Esempio 1: CORSI
-    CATEGORIES ||--o{ COURSES : "raggruppa in stili"
+    %% Esempio 1: CORSI (Migrati a STI + Custom List)
+    CUSTOM_LIST_ITEMS ||--o{ COURSES : "raggruppa in stili (list_id=23, colonna color usata per layout)"
     STUDIOS ||--o{ COURSES : "ospita"
     MEMBERS ||--o{ COURSES : "insegna (INSEGNANTE)"
     MEMBERS ||--o{ ENROLLMENTS : "iscritti"
@@ -179,6 +179,8 @@ erDiagram
 - The database is heavily denormalized horizontally across the 11 activity types. While `courses` and `workshops` share exactly the same columns, they use distinct tables.
 - The `payments` table acts as a massive junction point, containing foreign keys (`enrollment_id`, `ws_enroll_id`, `booking_id`, etc.) to point back to the origin of the transaction.
 - Members contain highly flattened data regarding parents (e.g. `motherFirstName`, `fatherFirstName` are directly inside `members` when `isMinor` is true, backed up optionally by `member_relationships`).
+- **[STI UPDATE]**: `courses.category_id` ora punta permanentemente a `custom_list_items` (ID>400), svincolandosi dalla legacy `categories`. I colori delle entità sono stoccati nativamente in `custom_list_items.color`.
+- **[DEPRECATION]**: Il codice applicativo che coinvolge tabelle a silo ridondanti (individualLessons, trainings, sundayActivities, recitals) è ancora presente, ma le tabelle sono formalmente marcate come DEPRECATO e in attesa di eliminazione fisica (DROP). Le `campus_activities` e `workshops` sono già logicamente migrate in `courses` tramite attributo `activity_type`.
 
 
 <!-- --- FINE SORGENTE: attuale/01_GAE_Database_Attuale.md --- -->

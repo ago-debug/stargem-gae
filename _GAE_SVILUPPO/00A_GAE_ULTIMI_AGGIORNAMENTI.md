@@ -5,6 +5,14 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 08 Aprile 2026 (Phase 31: Migrazione Definitiva Category ID e Semplificazione STI)
+* **[F1-PROTOCOLLO-048/051/053/054] Migrazione `category_id` (Corsi):** Eseguita la query SQL di cross-reference che ha allineato definitivamente i 303 `courses` attivi: i vecchi flag legacy (ID 1-5) che causavano la rottura grafica nel Bridge STI sono stati re-mappati (via JOIN nome categoria) ai rispetti valori universali nativi dentro `custom_list_items` (ID > 400).
+* **Fix UI/UX Calendario STI:** Rimosso il bug dei Box grigi. L'`unifiedBridge` ed il Calendario Front-End comunicano nativamente processando i `colorProps` originali (borderLeftColor) recuperati asincronamente dalla custom list `Categorie`.
+* **Shutdown e Unificazione Silos (`campus_activities`):** Analisi quantitativa dei vecchi silos isolati. Migrati al volo i 2 record restanti da `campus_activities` trasferendoli dentro `courses` tramite `activity_type = 'campus'`. Questo convalida compiutamente l'astrazione STI (Single Table Inheritance).
+* **Deprecazione Drizzle ORM (`schema.ts`):** Marcatura visuale chiara di `// DEPRECATO` nel file struct per indicare i silos fisici svuotati e desueti: `individualLessons`, `trainings`, `sundayActivities`, `recitals`.
+* **Audit per Eliminazione Massiva (DROP TABLE):** Sviluppata l'analisi di sicurezza pre-DROP per la cancellazione delle tabelle (inclusa la tabella root `categories`), la quale verrà finalizzata in via definitiva subordinatamente alla dismissione delle chiavi estranee e pulizia di `routes.ts`.
+* **Sync Globale Documentazione:** I manuali operativi e le checklist cronologiche (`01_Architettura`, `04_Stato_Lavori`, `06_Checklist`) sono stati integralmente sincronizzati e riflettono l'azzeramento infrastrutturale e le priorità odierne (Drop Tabelle, Fix B037, Fix B040).
+
 ### 07 Aprile 2026 (Phase 30: Completamento Motore STI - Lezioni Individuali & Database Core)
 
 * **Esecuzione Migrazione 0010 (activity_type):** Aggiunta con successo la colonna `activity_type` (varchar 50) alla tabella `courses` tramite script raw TS bypassando il bug di introspezione constraint di Drizzle (MariaDB 11.4). Il flag consente ora di scindere a livello database i tipi `course`, `allenamenti`, `individual_lessons` nello schema unificato STI.
