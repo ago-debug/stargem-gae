@@ -404,6 +404,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   
   const { data: categorieList } = useCustomList("categorie");
   const categories = categorieList?.items ? [...categorieList.items].filter(i => i.active !== false).map(i => ({ id: i.id, name: i.value })).sort((a,b)=>a.name.localeCompare(b.name, undefined, {numeric: true})) : [];
+
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
@@ -426,8 +427,10 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [searchMember1, setSearchMember1] = useState("");
   const [searchMember2, setSearchMember2] = useState("");
 
-  console.log("CAT LIST:", categorieList?.items);
-  console.log("FORM CAT:", formData.categoryId);
+  console.log("CATEGORIES:", categories?.map(
+    c => ({id: c.id, type: typeof c.id})
+  ));
+  console.log("FORM categoryId:", formData.categoryId, typeof formData.categoryId);
 
   const { data: searchResults1 } = useQuery({
     queryKey: ["/api/members", searchMember1],
