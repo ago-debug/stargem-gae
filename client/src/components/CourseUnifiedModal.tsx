@@ -453,6 +453,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
         setSearchMember1("");
         setSearchMember2("");
+        setFormData((prev: any) => ({ ...prev, member1Id: null, member2Id: null }));
         
         // Pre-popola allievi da enrollments (STI bridge)
         if (course?.id) {
