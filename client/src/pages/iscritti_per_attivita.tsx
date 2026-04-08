@@ -284,6 +284,11 @@ export default function IscrittiPerAttivita() {
                       enrollCount = totalCourseEnrollments;
                     } else if (item.id === "workshop") {
                       enrollCount = totalWsEnrollments;
+                    } else {
+                      const config = extraActivitiesMap[item.id];
+                      if (config && Array.isArray(config.enrollments)) {
+                         enrollCount = config.enrollments.filter(e => e.status === 'active' || !e.status).length;
+                      }
                     }
 
                     return (
