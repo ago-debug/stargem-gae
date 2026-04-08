@@ -82,6 +82,11 @@
               [x] (B042) Rimosso fallback "ATTIVO" hardcoded in `CourseUnifiedModal.tsx` inizializzando lo state primario ad un array neutro.
               [x] (B042) Sostituito bypass booleano con un direct mapping di `parseStatusTags` per idratare con precisione `opStates`.
               [x] (B042) Aggiornato il payload display delle calendar cards per recepire le etichette di badge direttamente dagli status array invece che dal flag binario interno.
+[08/04 11:38] F2→PM: Protocollo 043 Eseguito. Test E2E completati.
+              [x] TEST 1 (Allenamenti): L'allievo si pre-popola correttamente in edit mode, le tipologie sono visibili ed isolate, e lo stato rimane "(Nessuno stato)" di default senza più il residuo di stringhe cablate.
+              [x] TEST 2 (Lezioni Individuali): Comportamento analogo al 100% rispetto al TEST 1. Stabilità raggiunta col modale unificato.
+              [x] TEST 3 (Calendario): Transizione architetturale validata a schermo. Non compare più "CRS" ma i badge di referenza nativi "ALL"/"IND". Eliminati trigger spuri dell'etichetta "ATTIVO". Il pennino instanzia il payload sul layer corretto.
+              [x] TEST 4 (Elenchi Multi): Tab ri-abilitata, assenza totale di map-crash, e le custom lists target ("Categorie", "Canale", "Come ci ha conosciuto") troneggiano nella sezione dedicata.
 
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.

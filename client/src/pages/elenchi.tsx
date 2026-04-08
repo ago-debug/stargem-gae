@@ -292,6 +292,7 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
   const [newValue, setNewValue] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState("");
+  const [editingColor, setEditingColor] = useState<string>("#cccccc");
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkValues, setBulkValues] = useState("");
 
@@ -353,8 +354,8 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
   });
 
   const updateItemMutation = useMutation({
-    mutationFn: async ({ id, value }: { id: number; value: string }) => {
-      await apiRequest("PATCH", `/api/custom-lists/${list.id}/items/${id}`, { value });
+    mutationFn: async ({ id, value, color }: { id: number; value: string; color?: string }) => {
+      await apiRequest("PATCH", `/api/custom-lists/${list.id}/items/${id}`, { value, color });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
@@ -595,7 +596,7 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && editingValue.trim()) {
                         e.preventDefault();
-                        updateItemMutation.mutate({ id: item.id, value: editingValue.trim() });
+                        updateItemMutation.mutate({ id: item.id, value: editingValue.trim(), color: editingColor });
                       }
                       if (e.key === "Escape") {
                         setEditingId(null);
@@ -604,13 +605,20 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
                     }}
                     autoFocus
                   />
+                  <input
+                    type="color"
+                    value={editingColor}
+                    onChange={e => setEditingColor(e.target.value)}
+                    className="h-8 w-10 cursor-pointer rounded border border-gray-300"
+                    title="Scegli colore categoria"
+                  />
                   <Button
                     type="button"
                     size="icon"
                     className="gold-3d-button flex-shrink-0 h-8 w-8"
                     onClick={() => {
                       if (editingValue.trim()) {
-                        updateItemMutation.mutate({ id: item.id, value: editingValue.trim() });
+                        updateItemMutation.mutate({ id: item.id, value: editingValue.trim(), color: editingColor });
                       }
                     }}
                   >
@@ -619,8 +627,16 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
                 </div>
               ) : (
                 <>
-                  <div className="flex-1 min-w-0 text-[13px] font-medium text-foreground">
-                    {item.value}
+                  <div className="flex items-center gap-2 flex-1">
+                    {item.color && (
+                      <div 
+                        className="w-4 h-4 rounded-full flex-shrink-0 border border-gray-200"
+                        style={{ backgroundColor: item.color }}
+                      />
+                    )}
+                    <div className="flex-1 min-w-0 text-[13px] font-medium text-foreground">
+                      {item.value}
+                    </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                     <Button
@@ -631,6 +647,7 @@ function SimpleListSection({ list }: SimpleListSectionProps) {
                       onClick={() => {
                         setEditingId(item.id);
                         setEditingValue(item.value);
+                        setEditingColor(item.color || "#cccccc");
                       }}
                     >
                       <Edit className="w-3.5 h-3.5" />
