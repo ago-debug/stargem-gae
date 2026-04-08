@@ -87,8 +87,8 @@ export default function IscrittiPerAttivita() {
   const { data: ftEnrollments, isLoading: ftEnrLoading } = useQuery<any[]>({ queryKey: ["/api/free-trial-enrollments"] });
   const { data: slEnrollments, isLoading: slEnrLoading } = useQuery<any[]>({ queryKey: ["/api/single-lesson-enrollments"] });
   const { data: saEnrollments, isLoading: saEnrLoading } = useQuery<any[]>({ queryKey: ["/api/sunday-activity-enrollments"] });
-  const { data: allenamentiEnrollments, isLoading: trEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=allenamenti"] });
-  const { data: lezioniIndividualiEnrollments, isLoading: ilEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=lezioni-individuali"] });
+  const { data: allenamentiEnrollments, isLoading: trEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=allenamenti"] });
+  const { data: lezioniIndividualiEnrollments, isLoading: ilEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=prenotazioni"] });
   const { data: caEnrollments, isLoading: caEnrLoading } = useQuery<any[]>({ queryKey: ["/api/campus-enrollments"] });
   const { data: recEnrollments, isLoading: recEnrLoading } = useQuery<any[]>({ queryKey: ["/api/recital-enrollments"] });
   const { data: vsEnrollments, isLoading: vsEnrLoading } = useQuery<any[]>({ queryKey: ["/api/vacation-study-enrollments"] });
