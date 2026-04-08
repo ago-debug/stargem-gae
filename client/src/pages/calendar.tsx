@@ -869,8 +869,6 @@ export default function CalendarPage() {
 
     const getCourseColor = (course: any) => {
         const type = course.activityType || 
-                     course.type || 
-                     (course as any).activityFamily || 
                      course.rawPayload?.activityType ||
                      "course";
                      
