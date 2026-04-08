@@ -2477,6 +2477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Aggiorna enrollments se cambiano gli allievi
       const { member1Id, member2Id } = req.body;
+      console.log("BODY:", req.body.member1Id, req.body.member2Id);
       if (member1Id !== undefined || member2Id !== undefined) {
         // Cancella enrollment esistenti
         await db.delete(enrollments)
