@@ -558,6 +558,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     },
     onSuccess: (newRecord: any) => {
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+      queryClient.invalidateQueries({ queryKey: ["/api/courses"] }); // broad: colpisce tutte le varianti activityType
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
       
       console.log("onSuccess called:", {
@@ -601,6 +602,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+      queryClient.invalidateQueries({ queryKey: ["/api/courses"] }); // broad: colpisce tutte le varianti activityType
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
       toast({ title: "Attività aggiornata con successo" });
       onOpenChange(false);
