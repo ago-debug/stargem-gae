@@ -2549,27 +2549,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const type = req.query.type;
+      const activityType = req.query.type as string | undefined;
       let enrollmentsList: any[] = [];
 
-      // Type check removed as it is safely handled
-      // For enrollments, the DB simply responds with general enrollments.
-      // Detailed activity querying happens via courseId/seasonId
-
-      // Fallback: Default to classical courses behavior
       if (memberId) {
         enrollmentsList = await storage.getEnrollmentsByMember(memberId);
       } else if (seasonId) {
-        enrollmentsList = await storage.getEnrollmentsBySeason(seasonId);
+        // Passa activityType per filtrare via LEFT JOIN su courses
+        enrollmentsList = await storage.getEnrollmentsBySeason(seasonId, activityType);
       } else {
         const activeSeason = await storage.getActiveSeason();
         if (activeSeason) {
-          enrollmentsList = await storage.getEnrollmentsBySeason(activeSeason.id);
+          enrollmentsList = await storage.getEnrollmentsBySeason(activeSeason.id, activityType);
         } else {
           enrollmentsList = await storage.getEnrollments();
         }
       }
-      console.log(`[DEBUG] /api/enrollments type=${type} seasonId=${seasonId} memberId=${memberId} returning ${enrollmentsList.length} enrollments`);
+      console.log(`[DEBUG] /api/enrollments activityType=${activityType} seasonId=${seasonId} memberId=${memberId} returning ${enrollmentsList.length} enrollments`);
       res.json(enrollmentsList);
     } catch (error) {
       console.error("[ERROR] Failed to fetch enrollments:", error);
