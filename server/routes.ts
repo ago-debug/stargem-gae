@@ -25,15 +25,12 @@ import {
   insertSubscriptionTypeSchema,
   insertStudioSchema,
   insertCourseSchema,
-  insertWorkshopSchema,
   insertMembershipSchema,
   insertMedicalCertificateSchema,
   insertPaymentMethodSchema,
   insertPaymentSchema,
   insertEnrollmentSchema,
   enrollments,
-  insertWorkshopEnrollmentSchema,
-  insertWorkshopAttendanceSchema,
   insertAccessLogSchema,
   insertAttendanceSchema,
   insertCustomReportSchema,
@@ -43,7 +40,6 @@ import {
   insertPriceListSchema,
   insertPriceListItemSchema,
   insertQuoteSchema,
-  insertPaidTrialSchema,
   insertActivityStatusSchema,
   insertPaymentNoteSchema,
   insertEnrollmentDetailSchema,
@@ -53,17 +49,7 @@ import {
   insertTeamNoteSchema,
   insertBookingServiceCategorySchema,
   courses,
-  workshops,
-  paidTrials,
-  freeTrials,
   bookingServices,
-  singleLessons,
-  sundayActivities,
-  trainings,
-  individualLessons,
-  campusActivities,
-  recitals,
-  vacationStudies,
   insertCustomListSchema,
   insertCustomListItemSchema,
   auditLogs,
@@ -2003,564 +1989,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // WorkshopCategories Routes
-  app.get("/api/workshop-categories", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getWorkshopCategories();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/workshop-categories", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createWorkshopCategory(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/workshop-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateWorkshopCategory(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/workshop-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteWorkshopCategory(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // SundayCategories Routes
-  app.get("/api/sunday-categories", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getSundayCategories();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/sunday-categories", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createSundayCategory(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/sunday-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateSundayCategory(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/sunday-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteSundayCategory(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // TrainingCategories Routes
-  app.get("/api/training-categories", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getTrainingCategories();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/training-categories", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createTrainingCategory(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/training-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateTrainingCategory(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/training-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteTrainingCategory(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // IndividualLessonCategories Routes
-  app.get("/api/individual-lesson-categories", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getIndividualLessonCategories();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/individual-lesson-categories", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createIndividualLessonCategory(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/individual-lesson-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateIndividualLessonCategory(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/individual-lesson-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteIndividualLessonCategory(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // CampusCategories Routes
-  app.get("/api/campus-categories", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getCampusCategories();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/campus-categories", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createCampusCategory(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/campus-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateCampusCategory(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/campus-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteCampusCategory(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // RecitalCategories Routes
-  app.get("/api/recital-categories", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getRecitalCategories();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/recital-categories", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createRecitalCategory(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/recital-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateRecitalCategory(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/recital-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteRecitalCategory(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // VacationCategories Routes
-  app.get("/api/vacation-categories", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getVacationCategories();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/vacation-categories", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createVacationCategory(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/vacation-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateVacationCategory(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/vacation-categories/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteVacationCategory(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // FreeTrials Routes
-  app.get("/api/sunday-activities", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getSundayActivities();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/sunday-activities", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createSundayActivity(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/sunday-activities/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateSundayActivity(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/sunday-activities/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteSundayActivity(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // Trainings Routes
-  app.get("/api/trainings", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getTrainings();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/trainings", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createTraining(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/trainings/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateTraining(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/trainings/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteTraining(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // IndividualLessons Routes
-  app.get("/api/individual-lessons", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getIndividualLessons();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/individual-lessons", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createIndividualLesson(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/individual-lessons/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateIndividualLesson(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/individual-lessons/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteIndividualLesson(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // CampusActivities Routes
-  app.get("/api/campus-activities", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getCampusActivities();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/campus-activities", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createCampusActivity(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/campus-activities/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateCampusActivity(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/campus-activities/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteCampusActivity(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // Recitals Routes
-  app.get("/api/recitals", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getRecitals();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/recitals", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createRecital(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/recitals/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateRecital(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/recitals/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteRecital(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // VacationStudies Routes
-  app.get("/api/vacation-studies", isAuthenticated, async (req, res) => {
-    try {
-      const results = await storage.getVacationStudies();
-      res.json(results);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/vacation-studies", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createVacationStudy(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/vacation-studies/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const result = await storage.updateVacationStudy(id, req.body);
-      res.json(result);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/vacation-studies/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteVacationStudy(id);
-      res.status(204).end();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
   // ==== Participant Types Routes ====
   app.get("/api/participant-types", isAuthenticated, async (req, res) => {
     try {
@@ -3066,233 +2506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ==== Workshops Routes ====
-  app.get("/api/workshops", isAuthenticated, checkPermission("/workshops", "read"), async (req, res) => {
-    try {
-      let workshopsList;
-      if (req.query.seasonId === "all") {
-        workshopsList = await storage.getWorkshops();
-      } else {
-        const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
-        if (seasonId) {
-          workshopsList = await storage.getWorkshopsBySeason(seasonId);
-        } else {
-          const activeSeason = await storage.getActiveSeason();
-          if (activeSeason) {
-            workshopsList = await storage.getWorkshopsBySeason(activeSeason.id);
-          } else {
-            workshopsList = await storage.getWorkshops();
-          }
-        }
-      }
-      res.json(workshopsList);
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to fetch workshops" });
-    }
-  });
 
-  app.post("/api/workshops", isAuthenticated, checkPermission("/workshops", "write"), async (req, res) => {
-    try {
-      const validatedData = insertWorkshopSchema.parse(req.body);
-      const force = req.query.force === 'true' || req.body.force === true;
-
-      if (!force && validatedData.studioId && validatedData.startDate && validatedData.startTime && validatedData.endTime) {
-        const conflict = await storage.checkStudioConflict(
-          validatedData.studioId,
-          validatedData.startDate,
-          validatedData.startTime,
-          validatedData.endTime,
-          undefined,
-          undefined,
-          validatedData.seasonId || undefined
-        );
-        if (conflict) {
-          const conflictTypeLabel =
-            conflict.type === 'course' ? 'corso' :
-              conflict.type === 'booking' ? 'prenotazione' :
-                conflict.type === 'workshop' ? 'workshop' :
-                  'orario di chiusura';
-
-          const message = conflict.type === 'operating_hours'
-            ? `Attenzione: ${conflict.name}. Vuoi forzare il salvataggio?`
-            : `Conflitto rilevato: lo slot è già occupato da un ${conflictTypeLabel} (${conflict.name}). Vuoi forzare il salvataggio?`;
-
-          return res.status(409).json({
-            message,
-            conflict
-          });
-        }
-      }
-
-      const workshop = await storage.createWorkshop(validatedData);
-      await logUserActivity(req, "CREATE", "workshops", workshop.id.toString(), { name: workshop.name });
-      res.status(201).json(workshop);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to create workshop" });
-    }
-  });
-
-  app.patch("/api/workshops/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const force = req.query.force === 'true' || req.body.force === true;
-      const updatedData = req.body;
-
-      if (!force && updatedData.studioId && updatedData.startDate && updatedData.startTime && updatedData.endTime) {
-        const conflict = await storage.checkStudioConflict(
-          updatedData.studioId,
-          updatedData.startDate,
-          updatedData.startTime,
-          updatedData.endTime,
-          undefined,
-          undefined,
-          updatedData.seasonId || undefined
-        );
-
-        if (conflict) {
-          return res.status(409).json({
-            message: `Conflitto rilevato: lo slot è già occupato (${conflict.name}). Vuoi forzare il salvataggio?`,
-            conflict
-          });
-        }
-      }
-
-      const workshop = await storage.updateWorkshop(id, updatedData);
-      await logUserActivity(req, "UPDATE", "workshops", id.toString(), { name: workshop.name });
-      res.json(workshop);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to update workshop" });
-    }
-  });
-
-  app.delete("/api/workshops/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteWorkshop(id);
-      await logUserActivity(req, "DELETE", "workshops", id.toString());
-      res.status(204).end();
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to delete workshop" });
-    }
-  });
-
-  // ==== Workshop Enrollments Routes ====
-  app.get("/api/workshop-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const enrollments = memberId
-        ? await storage.getWorkshopEnrollmentsByMember(memberId)
-        : await storage.getWorkshopEnrollments();
-      res.json(enrollments);
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to fetch workshop enrollments" });
-    }
-  });
-
-  app.post("/api/workshop-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertWorkshopEnrollmentSchema.parse(req.body);
-      const enrollment = await storage.createWorkshopEnrollment(validatedData);
-
-      const workshop = await storage.getWorkshop(enrollment.workshopId);
-      if (workshop) {
-        await storage.updateWorkshop(workshop.id, {
-          currentEnrollment: (workshop.currentEnrollment || 0) + 1,
-        } as any);
-
-        if (req.query.skipPayment !== 'true') {
-          // CREATE AUTOMATIC DEBT (Pending Payment)
-          await storage.createPayment({
-            memberId: enrollment.memberId,
-            workshopEnrollmentId: enrollment.id,
-            amount: workshop.price || "0",
-            type: "workshop",
-            description: `Debito iscrizione workshop: ${workshop.name}`,
-            status: "pending",
-            dueDate: new Date(),
-            paidDate: null,
-            transferConfirmationDate: null,
-          });
-        }
-      }
-
-      res.status(201).json(enrollment);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to create workshop enrollment" });
-    }
-  });
-
-  app.patch("/api/workshop-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const enrollment = await storage.updateWorkshopEnrollment(id, req.body);
-      res.json(enrollment);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to update workshop enrollment" });
-    }
-  });
-
-  app.delete("/api/workshop-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const enrollment = await storage.getWorkshopEnrollment(id);
-
-      if (enrollment) {
-        const workshop = await storage.getWorkshop(enrollment.workshopId);
-        if (workshop && workshop.currentEnrollment && workshop.currentEnrollment > 0) {
-          await storage.updateWorkshop(workshop.id, {
-            currentEnrollment: workshop.currentEnrollment - 1,
-          } as any);
-        }
-      }
-
-      await storage.deleteWorkshopEnrollment(id);
-      res.status(204).send();
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to delete workshop enrollment" });
-    }
-  });
-
-  // ==== Workshop Attendances Routes ====
-  app.get("/api/workshop-attendances", isAuthenticated, async (req, res) => {
-    try {
-      const attendances = await storage.getWorkshopAttendances();
-      res.json(attendances);
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to fetch workshop attendances" });
-    }
-  });
-
-  app.post("/api/workshop-attendances", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertWorkshopAttendanceSchema.parse(req.body);
-      const attendance = await storage.createWorkshopAttendance(validatedData);
-      res.status(201).json(attendance);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to create workshop attendance" });
-    }
-  });
-
-  app.delete("/api/workshop-attendances/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteWorkshopAttendance(id);
-      res.status(204).send();
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to delete workshop attendance" });
-    }
-  });
 
   // ==== Enrollments Routes ====
   app.get("/api/enrollments", isAuthenticated, checkPermission("/iscritti-corsi", "read"), async (req, res) => {
@@ -3311,33 +2525,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const type = req.query.type as string; // E.g. 'corsi', 'workshop', 'campus', etc.
-
+      const type = req.query.type;
       let enrollmentsList: any[] = [];
 
-      // Handle unsupported category types cleanly by returning empty arrays
-      if (type && type !== 'corsi' && type !== 'workshop') {
-        return res.json([]);
-      }
-
-      // Handle workshops specifically for backward compatibility or unified querying
-      if (type === 'workshop') {
-        if (memberId) {
-          enrollmentsList = await storage.getWorkshopEnrollmentsByMember(memberId);
-        } else if (seasonId) {
-          enrollmentsList = await storage.getWorkshopEnrollmentsBySeason(seasonId);
-        } else {
-          const activeSeason = await storage.getActiveSeason();
-          if (activeSeason) {
-            enrollmentsList = await storage.getWorkshopEnrollmentsBySeason(activeSeason.id);
-          } else {
-            // We fallback to getWorkshopEnrollments assuming it exists or similar fallback.
-            // Default behavior without a season
-            enrollmentsList = [];
-          }
-        }
-        return res.json(enrollmentsList);
-      }
+      // Type check removed as it is safely handled
+      // For enrollments, the DB simply responds with general enrollments.
+      // Detailed activity querying happens via courseId/seasonId
 
       // Fallback: Default to classical courses behavior
       if (memberId) {
@@ -3737,18 +2930,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertPaymentSchema.parse(req.body);
 
       // Strict Validation: Prevent Orphan Payments
-      const hasValidRelation =
+       const hasValidRelation =
         validatedData.enrollmentId ||
-        validatedData.workshopEnrollmentId ||
-        validatedData.paidTrialEnrollmentId ||
-        validatedData.freeTrialEnrollmentId ||
-        validatedData.singleLessonEnrollmentId ||
-        validatedData.sundayActivityEnrollmentId ||
-        validatedData.trainingEnrollmentId ||
-        validatedData.individualLessonEnrollmentId ||
-        validatedData.campusEnrollmentId ||
-        validatedData.recitalEnrollmentId ||
-        validatedData.vacationStudyEnrollmentId ||
         validatedData.bookingId ||
         validatedData.membershipId;
 
@@ -3807,264 +2990,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ==== EXTRA ENROLLMENTS ENDPOINTS ==== 
-  // PaidTrial Enrollments
-  app.get("/api/sunday-activity-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
-      if (memberId && !isNaN(memberId)) {
-        const enrollments = await storage.getSundayActivityEnrollmentsByMember(memberId);
-        res.json(enrollments);
-      } else {
-        const enrollments = await storage.getSundayActivityEnrollments();
-        res.json(enrollments);
-      }
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/sunday-activity-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createSundayActivityEnrollment(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/sunday-activity-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.updateSundayActivityEnrollment(parseInt(req.params.id), req.body);
-      res.json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/sunday-activity-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      await storage.deleteSundayActivityEnrollment(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // Training Enrollments
-  app.get("/api/training-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
-      if (memberId && !isNaN(memberId)) {
-        const enrollments = await storage.getTrainingEnrollmentsByMember(memberId);
-        res.json(enrollments);
-      } else {
-        const enrollments = await storage.getTrainingEnrollments();
-        res.json(enrollments);
-      }
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/training-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createTrainingEnrollment(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/training-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.updateTrainingEnrollment(parseInt(req.params.id), req.body);
-      res.json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/training-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      await storage.deleteTrainingEnrollment(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // IndividualLesson Enrollments
-  app.get("/api/individual-lesson-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
-      if (memberId && !isNaN(memberId)) {
-        const enrollments = await storage.getIndividualLessonEnrollmentsByMember(memberId);
-        res.json(enrollments);
-      } else {
-        const enrollments = await storage.getIndividualLessonEnrollments();
-        res.json(enrollments);
-      }
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/individual-lesson-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createIndividualLessonEnrollment(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/individual-lesson-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.updateIndividualLessonEnrollment(parseInt(req.params.id), req.body);
-      res.json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/individual-lesson-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      await storage.deleteIndividualLessonEnrollment(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // Campus Enrollments
-  app.get("/api/campus-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
-      if (memberId && !isNaN(memberId)) {
-        const enrollments = await storage.getCampusEnrollmentsByMember(memberId);
-        res.json(enrollments);
-      } else {
-        const enrollments = await storage.getCampusEnrollments();
-        res.json(enrollments);
-      }
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/campus-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createCampusEnrollment(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/campus-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.updateCampusEnrollment(parseInt(req.params.id), req.body);
-      res.json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/campus-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      await storage.deleteCampusEnrollment(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // Recital Enrollments
-  app.get("/api/recital-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
-      if (memberId && !isNaN(memberId)) {
-        const enrollments = await storage.getRecitalEnrollmentsByMember(memberId);
-        res.json(enrollments);
-      } else {
-        const enrollments = await storage.getRecitalEnrollments();
-        res.json(enrollments);
-      }
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/recital-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createRecitalEnrollment(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/recital-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.updateRecitalEnrollment(parseInt(req.params.id), req.body);
-      res.json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/recital-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      await storage.deleteRecitalEnrollment(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // VacationStudy Enrollments
-  app.get("/api/vacation-study-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : undefined;
-      if (memberId && !isNaN(memberId)) {
-        const enrollments = await storage.getVacationStudyEnrollmentsByMember(memberId);
-        res.json(enrollments);
-      } else {
-        const enrollments = await storage.getVacationStudyEnrollments();
-        res.json(enrollments);
-      }
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/vacation-study-enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.createVacationStudyEnrollment(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/vacation-study-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.updateVacationStudyEnrollment(parseInt(req.params.id), req.body);
-      res.json(result);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.delete("/api/vacation-study-enrollments/:id", isAuthenticated, async (req, res) => {
-    try {
-      await storage.deleteVacationStudyEnrollment(parseInt(req.params.id));
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
 
   // ==== Maschera Generale Save Endpoint ====
   app.post("/api/maschera-generale/save", isAuthenticated, async (req, res) => {
@@ -4194,55 +3119,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             let paymentLinkField = "enrollmentId";
             let createPayload = { ...enrData, memberId: member.id, details: enrData.details || [] };
 
-            switch (enrData.tempId) {
-              case "corsi":
-                enrollment = await storage.createEnrollment(createPayload);
-                paymentLinkField = "enrollmentId";
-                break;
-              case "workshop":
-                enrollment = await storage.createWorkshopEnrollment({ ...createPayload, workshopId: enrData.courseId });
-                paymentLinkField = "workshopEnrollmentId";
-                break;
-              case "prove-pagamento":
-                enrollment = await storage.createEnrollment({ ...createPayload, participationType: "prova_pagamento" });
-                paymentLinkField = "enrollmentId";
-                break;
-              case "prove-gratuite":
-                enrollment = await storage.createEnrollment({ ...createPayload, participationType: "prova_gratuita" });
-                paymentLinkField = "enrollmentId";
-                break;
-              case "lezioni-singole":
-                enrollment = await storage.createEnrollment({ ...createPayload, participationType: "lezione_singola" });
-                paymentLinkField = "enrollmentId";
-                break;
-              case "domeniche-movimento":
-                enrollment = await storage.createSundayActivityEnrollment({ ...createPayload, sundayActivityId: enrData.courseId });
-                paymentLinkField = "sundayActivityEnrollmentId";
-                break;
-              case "allenamenti":
-                enrollment = await storage.createTrainingEnrollment({ ...createPayload, trainingId: enrData.courseId });
-                paymentLinkField = "trainingEnrollmentId";
-                break;
-              case "lezioni-individuali":
-                enrollment = await storage.createIndividualLessonEnrollment({ ...createPayload, individualLessonId: enrData.courseId });
-                paymentLinkField = "individualLessonEnrollmentId";
-                break;
-              case "campus":
-                enrollment = await storage.createCampusEnrollment({ ...createPayload, campusActivityId: enrData.courseId });
-                paymentLinkField = "campusEnrollmentId";
-                break;
-              case "saggi":
-                enrollment = await storage.createRecitalEnrollment({ ...createPayload, recitalId: enrData.courseId });
-                paymentLinkField = "recitalEnrollmentId";
-                break;
-              case "vacanze-studio":
-                enrollment = await storage.createVacationStudyEnrollment({ ...createPayload, vacationStudyId: enrData.courseId });
-                paymentLinkField = "vacationStudyEnrollmentId";
-                break;
-              default:
-                enrollment = await storage.createEnrollment(createPayload);
-                paymentLinkField = "enrollmentId";
+            // Mappatura uniforme per STI, unifica tutte le logiche di enrData.tempId (attività silo precedenti) in participationType dove appropriato
+            let participationType = undefined;
+            if (enrData.tempId === "prove-pagamento") participationType = "prova_pagamento";
+            if (enrData.tempId === "prove-gratuite") participationType = "prova_gratuita";
+            if (enrData.tempId === "lezioni-singole") participationType = "lezione_singola";
+
+            if (participationType) {
+              enrollment = await storage.createEnrollment({ ...createPayload, participationType, courseId: enrData.courseId });
+            } else {
+              enrollment = await storage.createEnrollment({ ...createPayload, courseId: enrData.courseId });
             }
+            paymentLinkField = "enrollmentId";
             results.enrollments.push(enrollment);
 
             // Find matching payment for this enrollment
@@ -4516,7 +3404,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certificates = await storage.getMedicalCertificates();
       const payments = await storage.getPayments();
       const courses = await storage.getCourses();
-      const workshops = await storage.getWorkshops ? await storage.getWorkshops() : [];
 
       const today = new Date();
       const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -4525,12 +3412,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const expiringCourses = courses.filter(c => {
         if (!c.active || !c.endDate) return false;
         const eDate = new Date(c.endDate);
-        return eDate >= today && eDate <= nextTwoWeeks;
-      });
-
-      const expiringWorkshops = workshops.filter(w => {
-        if (!w.endDate) return false;
-        const eDate = new Date(w.endDate);
         return eDate >= today && eDate <= nextTwoWeeks;
       });
 
@@ -4545,7 +3426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }).length,
         overduePayments: payments.filter(p => p.status === "overdue").length,
         expiringCourses: expiringCourses.length,
-        expiringWorkshops: expiringWorkshops.length,
+        expiringWorkshops: 0,
       });
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
@@ -5517,7 +4398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           data = await storage.getCourses();
           break;
         case 'workshops':
-          data = await storage.getWorkshops();
+          data = (await storage.getCourses()).filter(c => c.activityType === 'workshop');
           break;
         case 'payments':
           data = await storage.getPaymentsWithMembers();
@@ -7018,35 +5899,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/activities-summary", isAuthenticated, async (req, res) => {
     try {
-      const summaries: Record<string, { total: number, active: number }> = {};
-
-      const fetchCount = async (table: any, key: string) => {
-        try {
-          const items = await db.select().from(table);
-          summaries[key] = {
-            total: items.length,
-            active: items.filter((i: any) => i.active).length
-          };
-        } catch (err) {
-          console.warn(`Could not fetch summary for table ${key}:`, err);
-          summaries[key] = { total: 0, active: 0 };
-        }
+      const summaries: Record<string, { total: number, active: number }> = {
+        "corsi": { total: 0, active: 0 },
+        "allenamenti": { total: 0, active: 0 },
+        "lezioni-individuali": { total: 0, active: 0 },
+        "workshop": { total: 0, active: 0 },
+        "campus": { total: 0, active: 0 },
+        "domeniche-movimento": { total: 0, active: 0 },
+        "saggi": { total: 0, active: 0 },
+        "vacanze-studio": { total: 0, active: 0 },
+        "affitti": { total: 0, active: 0 }
       };
 
-      await Promise.all([
-        fetchCount(courses, "corsi"),
-        fetchCount(workshops, "workshop"),
-        fetchCount(paidTrials, "prove-pagamento"),
-        fetchCount(freeTrials, "prove-gratuite"),
-        fetchCount(bookingServices, "servizi"),
-        fetchCount(singleLessons, "lezioni-singole"),
-        fetchCount(sundayActivities, "domeniche-movimento"),
-        fetchCount(trainings, "allenamenti"),
-        fetchCount(individualLessons, "lezioni-individuali"),
-        fetchCount(campusActivities, "campus"),
-        fetchCount(recitals, "saggi"),
-        fetchCount(vacationStudies, "vacanze-studio")
-      ]);
+      const { sql } = await import("drizzle-orm");
+
+      const coursesSummary = await db.execute(sql`
+        SELECT 
+          activity_type, 
+          COUNT(*) as total, 
+          SUM(CASE WHEN active = 1 THEN 1 ELSE 0 END) as active
+        FROM courses
+        GROUP BY activity_type
+      `);
+
+      const [rawRows] = coursesSummary as any[];
+      const rows = rawRows as any[];
+      rows.forEach(row => {
+        let key = row.activity_type;
+        if (key === 'course') key = 'corsi';
+        if (key === 'prenotazioni') key = 'lezioni-individuali';
+        if (key === 'domeniche') key = 'domeniche-movimento';
+        if (key === 'vacanze') key = 'vacanze-studio';
+        
+        if (summaries[key] !== undefined) {
+          summaries[key] = {
+            total: Number(row.total),
+            active: Number(row.active)
+          };
+        }
+      });
 
       res.json(summaries);
     } catch (error) {

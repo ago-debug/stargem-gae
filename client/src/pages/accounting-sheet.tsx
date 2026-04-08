@@ -140,7 +140,7 @@ export default function AccountingSheet() {
 
     // Calculation of Total Due and Total Paid
     const memberEnrollments = enrollments?.filter(e => e.memberId === selectedMember?.id) || [];
-    const memberWorkshopEnrollments = workshopEnrollments?.filter(e => e.memberId === selectedMember?.id) || [];
+    const members = workshopEnrollments?.filter(e => e.memberId === selectedMember?.id) || [];
     const memberStudioBookings = studioBookings?.filter(b => b.memberId === selectedMember?.id) || [];
     const memberMemberships = membershipsDataList?.filter(m => m.memberId === selectedMember?.id) || [];
 
@@ -150,7 +150,7 @@ export default function AccountingSheet() {
             const course = courses?.find(c => c.id === e.courseId);
             return parseFloat(course?.price || "0");
         }),
-        ...memberWorkshopEnrollments.map(e => {
+        ...members.map(e => {
             const workshop = workshops?.find(w => w.id === e.workshopId);
             return parseFloat(workshop?.price || "0");
         }),
@@ -170,7 +170,7 @@ export default function AccountingSheet() {
             const paid = memberPayments.filter(p => p.enrollmentId === e.id && (p.status === 'paid' || p.status === 'completed')).reduce((s, p) => s + parseFloat(p.amount), 0);
             return Math.max(0, total - paid);
         }),
-        ...memberWorkshopEnrollments.map(e => {
+        ...members.map(e => {
             const workshop = workshops?.find(w => w.id === e.workshopId);
             const total = parseFloat(workshop?.price || "0");
             const paid = memberPayments.filter(p => p.workshopEnrollmentId === e.id && (p.status === 'paid' || p.status === 'completed')).reduce((s, p) => s + parseFloat(p.amount), 0);
@@ -223,7 +223,7 @@ export default function AccountingSheet() {
                 createdAt: e.createdAt,
             };
         }),
-        ...memberWorkshopEnrollments.map(e => {
+        ...members.map(e => {
             const workshop = workshops?.find(w => w.id === e.workshopId);
             const total = parseFloat(workshop?.price || "0");
             const paid = memberPayments

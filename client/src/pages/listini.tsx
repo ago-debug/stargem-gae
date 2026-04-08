@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { PriceList, PriceListItem, InsertPriceList, InsertPriceListItem, Course, Workshop, BookingService, Quote, InsertQuote, insertQuoteSchema, PaidTrial, FreeTrial, SingleLesson, SundayActivity, Training, IndividualLesson, CampusActivity, Recital, VacationStudy } from "@shared/schema";
+import { PriceList, PriceListItem, InsertPriceList, InsertPriceListItem, Course, Workshop, BookingService, Quote, InsertQuote, insertQuoteSchema, PaidTrial, FreeTrial, SingleLesson, Training, CampusActivity, VacationStudy } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -249,11 +249,11 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
     const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
     const { data: workshops } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
     const { data: services } = useQuery<BookingService[]>({ queryKey: ["/api/booking-services"] });
-    const { data: sundayActivities } = useQuery<SundayActivity[]>({ queryKey: ["/api/sunday-activities"] });
-    const { data: trainings } = useQuery<Training[]>({ queryKey: ["/api/trainings"] });
-    const { data: individualLessons } = useQuery<IndividualLesson[]>({ queryKey: ["/api/individual-lessons"] });
+    const { data:  } = useQuery<[]>({ queryKey: ["/api/sunday-activities"] });
+    const { data:  } = useQuery<Training[]>({ queryKey: ["/api/"] });
+    const { data:  } = useQuery<[]>({ queryKey: ["/api/individual-lessons"] });
     const { data: campusActivities } = useQuery<CampusActivity[]>({ queryKey: ["/api/campus-activities"] });
-    const { data: recitals } = useQuery<Recital[]>({ queryKey: ["/api/recitals"] });
+    const { data:  } = useQuery<[]>({ queryKey: ["/api/"] });
     const { data: vacationStudies } = useQuery<VacationStudy[]>({ queryKey: ["/api/vacation-studies"] });
     const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
 
@@ -412,7 +412,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                     <TabsContent value="domeniche" className="space-y-4">
                         <PriceItemManager
                             type="sunday_activity"
-                            entities={sundayActivities || []}
+                            entities={ || []}
                             activeItems={getItemsByType("sunday_activity")}
                             quotes={quotes || []}
                             onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "sunday_activity", entityId: id, price: price.toString(), quoteId })}
@@ -423,7 +423,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                     <TabsContent value="allenamenti" className="space-y-4">
                         <PriceItemManager
                             type="training"
-                            entities={trainings || []}
+                            entities={ || []}
                             activeItems={getItemsByType("training")}
                             quotes={quotes || []}
                             onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "training", entityId: id, price: price.toString(), quoteId })}
@@ -434,7 +434,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                     <TabsContent value="lezioni-individuali" className="space-y-4">
                         <PriceItemManager
                             type="individual_lesson"
-                            entities={individualLessons || []}
+                            entities={ || []}
                             activeItems={getItemsByType("individual_lesson")}
                             quotes={quotes || []}
                             onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "individual_lesson", entityId: id, price: price.toString(), quoteId })}
@@ -456,7 +456,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                     <TabsContent value="saggi" className="space-y-4">
                         <PriceItemManager
                             type="recital"
-                            entities={recitals || []}
+                            entities={ || []}
                             activeItems={getItemsByType("recital")}
                             quotes={quotes || []}
                             onUpsert={(id, price, quoteId) => upsertItemMutation.mutate({ priceListId: list.id, entityType: "recital", entityId: id, price: price.toString(), quoteId })}

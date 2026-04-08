@@ -20,7 +20,7 @@ import { SortableTableHead, useSortableTable } from "@/components/sortable-table
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Recital, Member, Enrollment, Payment, Attendance } from "@shared/schema";
+import type {  Member, Enrollment, Payment, Attendance } from "@shared/schema";
 import { buildEnrolledMembersData } from "@/lib/enrollments";
 
 export default function SchedaSaggio() {
@@ -30,7 +30,7 @@ export default function SchedaSaggio() {
     const activeId = Number(activeIdRaw);
     const hasValidId = Number.isFinite(activeId) && activeId > 0;
 
-    const { data: items, isLoading: itemsLoading } = useQuery<Recital[]>({ queryKey: ["/api/recitals"] });
+    const { data: items, isLoading: itemsLoading } = useQuery<[]>({ queryKey: ["/api/"] });
     const { data: members, isLoading: membersLoading } = useQuery<{ members: Member[] }>({ queryKey: ["/api/members"] });
     const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<Enrollment[]>({ queryKey: ["/api/enrollments?type=saggio"] });
     const { data: payments, isLoading: paymentsLoading } = useQuery<Payment[]>({ queryKey: ["/api/payments"] });
