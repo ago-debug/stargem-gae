@@ -748,11 +748,11 @@ function ColoredCustomListsLoader() {
   if (targetLists.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <>
       {targetLists.map(list => (
         <SimpleListSection key={list.id} list={list} />
       ))}
-    </div>
+    </>
   );
 }
 
