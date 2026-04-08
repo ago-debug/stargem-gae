@@ -78,6 +78,10 @@
               [x] (B036) Reindirizzato pre-popolamento allievo in edit su `/api/enrollments?courseId=` in `CourseUnifiedModal.tsx`.
               [x] (B035b) Eliminata verbosità visiva filtrando "ATTIVO" in `activity-management-page.tsx` (`!== "ATTIVO"`).
               [x] (B031-B033) Risolto TypeCrash in `elenchi.tsx` spostando le categorie in una Sandbox dedicata `ColoredCustomListsLoader` riutilizzando il bridge standard `SimpleListSection` e inibendole dalla coda principale.
+[08/04 11:30] F2→PM: Protocollo 042 Eseguito.
+              [x] (B042) Rimosso fallback "ATTIVO" hardcoded in `CourseUnifiedModal.tsx` inizializzando lo state primario ad un array neutro.
+              [x] (B042) Sostituito bypass booleano con un direct mapping di `parseStatusTags` per idratare con precisione `opStates`.
+              [x] (B042) Aggiornato il payload display delle calendar cards per recepire le etichette di badge direttamente dagli status array invece che dal flag binario interno.
 
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.
