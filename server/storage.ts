@@ -394,7 +394,7 @@ export interface IStorage {
   // Enrollments
   getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
   getEnrollmentsByMember(memberId: number): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
-  getEnrollmentsBySeason(seasonId: number, activityType?: string): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
+  getEnrollmentsBySeason(seasonId: number, activityType?: string): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null; courseSku?: string | null; courseInstructorName?: string | null })[]>;
   getEnrollment(id: number): Promise<Enrollment | undefined>;
   createEnrollment(enrollment: InsertEnrollment): Promise<Enrollment>;
   updateEnrollment(id: number, enrollment: Partial<InsertEnrollment>): Promise<Enrollment>;
@@ -2333,7 +2333,8 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getEnrollmentsBySeason(seasonId: number, activityType?: string): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
+  async getEnrollmentsBySeason(seasonId: number, activityType?: string): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null; courseSku?: string | null; courseInstructorName?: string | null })[]> {
+    const instructorMember = alias(members, "instructorMember");
     const baseQuery = db
       .select({
         id: enrollments.id,
@@ -2352,10 +2353,14 @@ export class DatabaseStorage implements IStorage {
         memberFiscalCode: members.fiscalCode,
         memberGender: members.gender,
         seasonId: enrollments.seasonId,
+        // Campi corso aggiuntivi (F1-PROTOCOLLO-097)
+        courseSku: courses.sku,
+        courseInstructorName: sql<string>`CONCAT(COALESCE(${instructorMember.firstName}, ''), ' ', COALESCE(${instructorMember.lastName}, ''))`,
       })
       .from(enrollments)
       .leftJoin(members, eq(enrollments.memberId, members.id))
-      .leftJoin(courses, eq(enrollments.courseId, courses.id));
+      .leftJoin(courses, eq(enrollments.courseId, courses.id))
+      .leftJoin(instructorMember, eq(courses.instructorId, instructorMember.id));
 
     const result = activityType
       ? await baseQuery
