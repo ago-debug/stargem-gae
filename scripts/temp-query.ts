@@ -2,22 +2,29 @@ import { db } from "../server/db";
 import { sql } from "drizzle-orm";
 
 async function main() {
-  console.log("--- FIX CAMPUS: Verifica activity_type=campus ---");
-  const res = await db.execute(sql`
-    SELECT id, name, activity_type 
-    FROM courses 
-    WHERE activity_type = 'campus';
+  console.log("--- BUG N: Verifica custom_lists campus/group ---");
+  const exists = await db.execute(sql`
+    SELECT id, name, system_name 
+    FROM custom_lists 
+    WHERE system_name LIKE '%campus%'
+       OR system_name LIKE '%group%'
+       OR system_name LIKE '%gruppo%';
   `);
-  console.log("Campus trovati:", res[0]);
+  console.log("Liste trovate:", exists[0]);
 
-  console.log("--- FIX CAMPUS: Tutti i tipi presenti nel DB ---");
-  const tipi = await db.execute(sql`
-    SELECT DISTINCT activity_type, COUNT(*) as tot
-    FROM courses
-    GROUP BY activity_type
-    ORDER BY tot DESC;
-  `);
-  console.log("Tipi:", tipi[0]);
+  if ((exists[0] as unknown as any[]).length === 0) {
+    console.log("Nessuna lista trovata → Creo 'gruppi_campus'...");
+    await db.execute(sql`
+      INSERT INTO custom_lists (name, system_name, description)
+      VALUES ('Gruppi Campus', 'gruppi_campus', 'Gruppi per i campus estivi');
+    `);
+    const created = await db.execute(sql`
+      SELECT id, name, system_name FROM custom_lists WHERE system_name = 'gruppi_campus';
+    `);
+    console.log("Lista creata:", created[0]);
+  } else {
+    console.log("Lista già presente — nessuna creazione necessaria.");
+  }
 
   process.exit(0);
 }
