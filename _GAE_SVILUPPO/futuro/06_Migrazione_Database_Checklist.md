@@ -87,14 +87,15 @@ erDiagram
 La transizione da un modello all'altro non è un'operazione banale, è un trapianto di cuore a sistema avviato. Il seguente programma di lavoro è stato delineato per minimizzare i rischi di corruzione dati o downtime. 
 **Regola d'oro:** Tutto il lavoro deve svolgersi in un branch isolato (es. `feature/sti-architecture-revamp`).
 
-### Stato Attuale Migrazione STI (Update Protocollo 054)
+### Stato Attuale Migrazione STI (Update Protocollo 068 - FASE 32)
 - ✅ Colonna `activity_type` aggiunta in DB con script forzato
 - ✅ 303 corsi migrati (`category_id` 1-5 convertito in 400+ custom_lists)
 - ✅ `campus_activities` → `courses` (2 record migrati)
-- ✅ `individual_lessons` → vuota (il frontend usa già il Modale STI e master `courses`)
-- ✅ `trainings` → vuota (già migrato in STI)
-- 🔄 **DROP tabelle silo** → Rimandato a prossima sessione (richiede rimozione fisica delle vecchie API route da `routes.ts` e metodi `storage.ts`)
-- 🔄 **DROP `categories` table** → In attesa (eliminare prima 5 constraint FK dipendenti in vecchi silos e payments)
+- ✅ Tutte le attività (individuali, saggi, domeniche, etc.) migrati in `courses` e `enrollments` universali
+- ✅ **DROP tabelle silo** → Completato in Fase 32 (rimosse 16 tabelle legacy inclusi i vecchi enrollments).
+- ✅ **Clean-up API e Storage** → Completato (rimosse 52 routes e 120+ metodi ORM legati ai silos).
+- ✅ Ambiente TypeScript ripulito a ZERO errori.
+- 🔄 **DROP `categories` table** → In attesa (eliminare prima 5 constraint FK dipendenti nei legacy payments rimasti).
 
 ### Fase 1: Modellazione Database e Preparazione ORM (In Esecuzione)
 **[STATUS: SPRINT ATTIVO DA ESEGUIRE ORA]**

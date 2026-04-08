@@ -23,9 +23,9 @@ Per avere la visione d'insieme prima, durante e dopo i futuri refactoring, fai a
 
 ---
 
-## Moduli Logici (73 Tabelle Fisiche suddivise in 8 Macro-Aree)
+## Moduli Logici (72 Tabelle Fisiche suddivise in 8 Macro-Aree)
 
-L'attuale architettura Drizzle ORM / MySQL conta ben **73 tabelle fisiche**. Per renderne comprensibile la gestione, l'intero database è stato astratto in **8 macro-aree logiche** (Autenticazione, Configurazione, Località, Comunicazioni, Anagrafica, Attività, Servizi Extra, Finanza). Seguono i blocchi dettagliati:
+L'attuale architettura Drizzle ORM / MySQL conta ben **72 tabelle fisiche**. Per renderne comprensibile la gestione, l'intero database è stato astratto in **8 macro-aree logiche** (Autenticazione, Configurazione, Località, Comunicazioni, Anagrafica, Attività, Servizi Extra, Finanza). Seguono i blocchi dettagliati:
 ### 1. Autenticazione & Utenti (Authentication & Users)
 - **`users`**: La tabella base degli account per lo staff e gli operatori.
 - **`user_roles`**: Ruoli generici e permessi scritti in JSON per gli utenti.
@@ -180,7 +180,7 @@ erDiagram
 - The `payments` table acts as a massive junction point, containing foreign keys (`enrollment_id`, `ws_enroll_id`, `booking_id`, etc.) to point back to the origin of the transaction.
 - Members contain highly flattened data regarding parents (e.g. `motherFirstName`, `fatherFirstName` are directly inside `members` when `isMinor` is true, backed up optionally by `member_relationships`).
 - **[STI UPDATE]**: `courses.category_id` ora punta permanentemente a `custom_list_items` (ID>400), svincolandosi dalla legacy `categories`. I colori delle entità sono stoccati nativamente in `custom_list_items.color`.
-- **[DEPRECATION]**: Il codice applicativo che coinvolge tabelle a silo ridondanti (individualLessons, trainings, sundayActivities, recitals) è ancora presente, ma le tabelle sono formalmente marcate come DEPRECATO e in attesa di eliminazione fisica (DROP). Le `campus_activities` e `workshops` sono già logicamente migrate in `courses` tramite attributo `activity_type`.
+- **[DEPRECATION & DROP COMPLETO]**: In Fase 32, i 16 silos ridondanti (workshops, trainings, individualLessons, sundayActivities, recitals, campus_activities, ecc.) assieme alle relative tabelle di `enrollments` **sono stati formalmente rimossi dal database**. L'API `activities-summary` e tutta la reportistica si basano in tempo reale al 100% su aggregazioni della supertabella `courses` tramite Single Table Inheritance. Schema pulito da tutte le refs legacy.
 
 
 <!-- --- FINE SORGENTE: attuale/01_GAE_Database_Attuale.md --- -->

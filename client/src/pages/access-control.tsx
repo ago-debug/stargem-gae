@@ -92,7 +92,7 @@ export default function AccessControl() {
     queryKey: ["/api/enrollments?type=corsi"],
   });
 
-  const { data: workshopEnrollments } = useQuery<[]>({
+  const { data: workshopEnrollments } = useQuery<any[]>({
     queryKey: ["/api/workshop-enrollments"],
   });
 

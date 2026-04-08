@@ -233,19 +233,15 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 **Stato Attuale:** 🟢 TRANSIZIONE STI (Refactoring Unificato Backend in Costante Avanzamento)
 **Sintesi:** Tutte le preparazioni Frontend (Modali operativi unificati, Calendario multi-stagione, Sicurezza a 30 settori) sono ultimate. Il progetto è ora interamente proteso al refactoring del backend Single Table Inheritance (STI).
 
-**Riepilogo Sessione 07-08/04/2026 (Protocollo 054):**
-- 20+ bug UI/UX e di sincronizzazione RISOLTI.
-- Migrazione STI completata al 90% per quanto riguarda il database core.
-- Calendario con colori e categorie asincrone ✅
-- Modali con titoli e label dinamiche 100% dipendenti da `activity_type` ✅
-- Ricerca allievi asincrona su componenti `QuickSearch` ✅
-- Color picker categorie (su `custom_list_items`) operativo ✅
+**Riepilogo Sessione Fase 32 (Protocollo 068):**
+- Migrazione STI completata al 100% per quanto riguarda il database core.
+- DROP COMPLETO di 16 tabelle silo (workshops, trainings, individualLessons, sundayActivities, recitals, campus_activities, e relative tabelle enrollments) eseguito con successo ✅
+- Clean-up backend: rimosse 52 rotte API silos obsolete da `routes.ts` ✅
+- Clean-up storage: rimossi oltre 120 metodi Drizzle legacy da `storage.ts` ✅
+- Refactoring `activities-summary`: ora estrae tutto in tempo reale tramite STI aggregato ✅
+- Ambiente TypeScript: ZERO errori (`npx tsc --noEmit` passa con successo).
 
-**Prossimi task (Immediato Futuro):**
-- **Clean-up Backend:** Rimuovere rotte API silos obsolete da `routes.ts`.
-- **Clean-up Storage:** Rimuovere metodi Drizzle legacy da `storage.ts`.
-- **Clean-up DB:** Eseguire fisicamente i DROP delle tabelle vuote o migrate (es. `trainings`, `individual_lessons`, `campus_activities`).
-- **Fix B037:** Allievo non persiste nell'aggiornamento UI backend.
-- **Fix B040:** Label fallace (iscritti per attività riporta 0 a visivo su tabelle unificate).
+**Stato Infrastruttura Logica:**
+Il backend è ora saldamente radicato sulle entità unificate `courses` e `enrollments`. La frammentazione passata è un ricordo e il debito tecnico massivo è stato estinto.
 
 

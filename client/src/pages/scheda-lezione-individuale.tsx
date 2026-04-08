@@ -30,7 +30,7 @@ export default function SchedaLezioneIndividuale() {
     const activeId = Number(activeIdRaw);
     const hasValidId = Number.isFinite(activeId) && activeId > 0;
 
-    const { data: items, isLoading: itemsLoading } = useQuery<[]>({ queryKey: ["/api/individual-lessons"] });
+    const { data: items, isLoading: itemsLoading } = useQuery<any[]>({ queryKey: ["/api/individual-lessons"] });
     const { data: members, isLoading: membersLoading } = useQuery<{ members: Member[] }>({ queryKey: ["/api/members"] });
     const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<Enrollment[]>({ queryKey: ["/api/enrollments?type=lezione-individuale"] });
     const { data: payments, isLoading: paymentsLoading } = useQuery<Payment[]>({ queryKey: ["/api/payments"] });
