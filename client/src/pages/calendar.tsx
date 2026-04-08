@@ -872,8 +872,6 @@ export default function CalendarPage() {
                      course.rawPayload?.activityType ||
                      "course";
                      
-        console.log("TYPE:", type, course);
-        
         // Se NON è un corso normale → colore fisso
         if (ACTIVITY_TYPE_COLORS[type] && type !== "course") {
             const hex = ACTIVITY_TYPE_COLORS[type];
