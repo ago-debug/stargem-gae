@@ -99,6 +99,10 @@
               [x] (B043) Modificata logica assegnazione colore cards in `calendar.tsx` usando root parameter o dizionario locale `ACTIVITY_TYPE_COLORS`.
               [x] (B044) Ricollocato il widget backend CustomList `ColoredCustomListsLoader` all'interno della griglia elenchi e bonificato il suo parent UI obsoleto.
               [x] (B045/B046) Sottoposto ispezione visiva frammenti file (Modale "Duplica" e interfaccia di Affitti) in attesa di istruzioni su fix puntuali.
+[08/04 14:02] F2→PM: Protocollo 058 Eseguito (Fix B044/B045/B046 definitivi)
+              [x] (B044) Sostituzione wrapper `div.grid` in `<>` per `ColoredCustomListsLoader` al fine di innescare l'unificazione e auto-grigliamento visivo delle custom lists.
+              [x] (B045) Inserito state `isDuplicating` al modale unificato affinché alla duplicazione la query mantenga lo state aperto (re-idratato) sul copy record via ID di ritorno.
+              [x] (B046) Emesso comando `touch server/routes.ts` per invalidamento cache Vercel/VPS (interfaccia frontend era già corretta al deploy).
               [x] (Route) Sradicate le 5 dichiarazioni di istanza `/categorie-X` da `App.tsx`.
               [x] (File) Eliminati permanentemente i file `.tsx` orfani correlati dalle pages per scongiurare frammentazione.
               [x] (Build) Validata asetticità logica con `tsc --noEmit` (0 nuovi fault). Tracciato log su `02_Frontend_UI_e_Routing.md`.
