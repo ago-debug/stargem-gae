@@ -6,6 +6,7 @@ import {
   Activity, Calendar, Sparkles, CreditCard, Gift, BookOpen,
   Sun, Dumbbell, UserCheck, Users, Award, Music, Building2, Globe, ShoppingBag
 } from "lucide-react";
+import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 
 const activityMenuItems = [
   { id: "panoramica", label: "Panoramica", icon: Activity, url: "/attivita" },
@@ -46,6 +47,9 @@ export function ActivityNavMenu() {
           </Button>
         );
       })}
+      <div className="ml-auto pl-2 flex-shrink-0">
+        <ActivityColorLegend variant="popover" />
+      </div>
     </div>
   );
 }
