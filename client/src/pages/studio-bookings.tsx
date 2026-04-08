@@ -500,16 +500,16 @@ export default function StudioBookings() {
                 <div>
                     <div className="flex items-center gap-3">
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0"
                             onClick={() => window.history.back()}
                         >
-                            <ArrowLeft className="h-4 w-4" />
+                            <ArrowLeft className="h-4 w-4 text-white" />
                         </Button>
-                        <h1 className="text-2xl font-bold tracking-tight">Riepilogo Affitti</h1>
+                        <h1 className="text-2xl font-semibold text-foreground">Riepilogo Affitti</h1>
                     </div>
-                    <p className="text-muted-foreground ml-11">Gestione completa delle prenotazioni e affitti</p>
+                    <p className="text-muted-foreground text-sm ml-11">Gestione completa delle prenotazioni e affitti</p>
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -517,8 +517,8 @@ export default function StudioBookings() {
                         <Download className="h-4 w-4" />
                         Esporta CSV
                     </Button>
-                    <Button onClick={handleCreateBooking} className="font-semibold text-black gap-2 max-w-[200px]" style={{ backgroundColor: "#ffb000" }}>
-                        <Plus className="w-5 h-5" /> Nuova Prenotazione
+                    <Button onClick={handleCreateBooking} className="gold-3d-button">
+                        <Plus className="w-4 h-4 mr-2" /> Nuova Prenotazione
                     </Button>
                 </div>
             </div>
