@@ -57,6 +57,11 @@
               [x] (B018) activityType dinamico da STI payload verso modale in calendar.tsx.
               [x] (B021) Ricerca allievi asincrona su /api/members?search in CourseUnifiedModal.tsx.
               [x] (B022) Label bottone di invio dinamico per activityType.
+[08/04 10:45] F2→PM: Task 035 Completato. Fix Multiplo B023-B024-B025-B026.
+              [x] (B023) Header "Genere" condizionale in `activity-management-page.tsx`.
+              [x] (B024) Parsing preventivo `categoryName` dall'API per bypassare il mancato match lookup con le liste custom.
+              [x] (B025) Refactoring `parseStatusTags` per disinnescare la doppia serializzazione JSON di SQLite.
+              [x] (B026) Header nominale "GENERE ALLENAMENTO/LEZIONE" dinamico nel modal prima colonna.
 
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.
