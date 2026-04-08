@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { eq, or, desc, sql, asc, inArray, isNull, isNotNull, and, gte, lte, sum, sql as dql, aliasedTable } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
-import { ilike } from "drizzle-orm";
+import { ilike, getTableColumns } from "drizzle-orm";
 import {
   users,
   members,
@@ -355,12 +355,12 @@ export interface IStorage {
   deleteStudio(id: number): Promise<void>;
 
   // Courses
-  getCourses(activityType?: string): Promise<Course[]>;
+  getCourses(activityType?: string): Promise<(Course & { categoryName?: string | null })[]>;
   getCourse(id: number): Promise<Course | undefined>;
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course>;
   deleteCourse(id: number): Promise<void>;
-  getCoursesBySeason(seasonId: number): Promise<Course[]>;
+  getCoursesBySeason(seasonId: number): Promise<(Course & { categoryName?: string | null })[]>;
 
   // Activity Statuses
   getActivityStatuses(): Promise<ActivityStatus[]>;
@@ -2003,13 +2003,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Courses ====
-  async getCourses(activityType?: string): Promise<Course[]> {
+  async getCourses(activityType?: string): Promise<(Course & { categoryName?: string | null })[]> {
+    const query = db
+      .select({
+        ...getTableColumns(courses),
+        categoryName: customListItems.value,
+      })
+      .from(courses)
+      .leftJoin(
+        customListItems,
+        eq(courses.categoryId, customListItems.id)
+      );
+    
     if (activityType) {
-      return await db.select().from(courses)
+      return await query
         .where(eq(courses.activityType, activityType))
         .orderBy(desc(courses.createdAt));
     }
-    return await db.select().from(courses).orderBy(desc(courses.createdAt));
+    return await query.orderBy(desc(courses.createdAt));
   }
 
   async getCourse(id: number): Promise<Course | undefined> {
@@ -2040,8 +2051,21 @@ export class DatabaseStorage implements IStorage {
     return fetched!;
   }
 
-  async getCoursesBySeason(seasonId: number): Promise<Course[]> {
-    return await db.select().from(courses).where(eq(courses.seasonId, seasonId)).orderBy(desc(courses.createdAt));
+  async getCoursesBySeason(seasonId: number): Promise<(Course & { categoryName?: string | null })[]> {
+    const query = db
+      .select({
+        ...getTableColumns(courses),
+        categoryName: customListItems.value,
+      })
+      .from(courses)
+      .leftJoin(
+        customListItems,
+        eq(courses.categoryId, customListItems.id)
+      )
+      .where(eq(courses.seasonId, seasonId))
+      .orderBy(desc(courses.createdAt));
+      
+    return await query;
   }
 
   async updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course> {

@@ -773,7 +773,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                  <Label className="font-semibold text-slate-800 shrink-0">{activityType === "prenotazioni" ? "GENERI LEZIONI INDIVIDUALI *" : activityType === "allenamenti" ? "ALLENAMENTI *" : activityType === "campus" ? "Campus *" : activityType === "workshop" ? "Nome Workshop *" : "Genere / Nome Corso *"}</Label>
+                  <Label className="font-semibold text-slate-800 shrink-0">
+                      {activityType === "allenamenti" ? "GENERE ALLENAMENTO" : activityType === "prenotazioni" ? "GENERE LEZIONE" : "GENERE / NOME CORSO"} *
+                    </Label>
                   <Button
                     type="button"
                     size="icon"
