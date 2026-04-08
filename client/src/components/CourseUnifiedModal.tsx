@@ -451,13 +451,14 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         setFormData({ 
           ...course,
           categoryId: course.categoryId || null,
+          member1Id: null,   // verrà dalla fetch enrollments
+          member2Id: null,   // verrà dalla fetch enrollments
           lessonType: parseJsonArray(course.lessonType)
         });
         setActiveTab("details");
 
         setSearchMember1("");
         setSearchMember2("");
-        setFormData((prev: any) => ({ ...prev, member1Id: null, member2Id: null }));
         
         // Pre-popola allievi da enrollments (STI bridge) — con flag anti race condition
         if (course?.id) {
@@ -484,14 +485,10 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
             })
             .catch(() => {});
         }
-        // Estrazione Op State e Promos
+        // Estrazione Op State e Promos — SOLO i tag con prefisso STATE:
         const tags = parseStatusTags(course.statusTags);
         const opTags = tags.filter(t => t.startsWith("STATE:")).map(t => t.replace("STATE:", ""));
-        if (opTags.length > 0) {
-          setOpStates(opTags);
-        } else {
-          setOpStates(parseStatusTags(course.statusTags));
-        }
+        setOpStates(opTags); // se vuoto → nessuno stato selezionato di default
         setPromoFlags(tags.filter(t => t.startsWith("PROMO:")).map(t => t.replace("PROMO:", "")));
       } else {
         let defaultsToUse: any = { ...(defaultValues || {}) };
@@ -673,23 +670,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     }
     
     try {
-        const res = await fetch(`${apiEndpoint}?seasonId=${formData.seasonId}`);
-        const existing = await res.json();
-        
         const safeDayOfWeek = normalizeDay(formData.dayOfWeek);
         const safeStartTime = stripSeconds(formData.startTime);
-
-        const duplicateCheck = existing.find((tc: any) => 
-            tc.name === formData.name &&
-            tc.dayOfWeek === safeDayOfWeek &&
-            tc.startTime === safeStartTime &&
-            tc.studioId === formData.studioId
-        );
-
-        if (duplicateCheck) {
-            toast({ title: "Attenzione: Corso già presente", description: `Stai duplicando lo stesso corso per errore. Il corso ${duplicateCheck.name} in data ${duplicateCheck.dayOfWeek} ${duplicateCheck.startTime} esiste già nella stagione target.`, variant: "destructive" });
-            return;
-        }
 
         const mergedTags = [...opStates.map(s => `STATE:${s}`), ...promoFlags.map(p => `PROMO:${p}`)];
         const isActive = !opStates.includes("ANNULLATO");
