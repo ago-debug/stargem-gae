@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -377,7 +377,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const canWrite = hasWritePermission(user, "/corsi");
 
   const [activeTab, setActiveTab] = useState("details");
-  const [isDuplicating, setIsDuplicating] = useState(false);
+  const isDuplicatingRef = useRef(false);
   const isEdit = !!course?.id;
 
   const [isGenereModalOpen, setIsGenereModalOpen] = useState(false);
@@ -448,6 +448,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         });
         setActiveTab("details");
 
+        setSearchMember1("");
+        setSearchMember2("");
+        
         // Pre-popola allievi da enrollments (STI bridge)
         if (course?.id) {
           fetch(`/api/enrollments?courseId=${course.id}`)
@@ -515,7 +518,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         }
         setFormData(defaultsToUse);
         setActiveTab("details");
-        setOpStates(["ATTIVO"]);
+        setOpStates([]);
         setPromoFlags([]);
       }
     }
@@ -553,8 +556,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
       
-      if (isDuplicating && newRecord?.id) {
-        setIsDuplicating(false);
+      if (isDuplicatingRef.current && newRecord?.id) {
+        isDuplicatingRef.current = false;
         toast({ title: "Copia creata! Modifica i dati." });
         setFormData({ ...newRecord });
         setActiveTab("details");
@@ -708,7 +711,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           seasonId: parseInt(formData.seasonId.toString()),
         };
 
-        setIsDuplicating(true);
+        isDuplicatingRef.current = true;
         createMutation.mutate(payload);
     } catch (err: any) {
         toast({ title: "Errore durante la duplicazione", description: err.message, variant: "destructive" });
