@@ -784,8 +784,10 @@ export default function ActivityManagementPage({
                       </TableCell>
                       <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : undefined}>
                         <div className="flex flex-wrap gap-1">
-                          {parseStatusTags(item.statusTags).length > 0 ? (
-                            parseStatusTags(item.statusTags).map((tag) => (
+                          {parseStatusTags(item.statusTags).filter(tag => tag.replace(/^STATE:/i, "") !== "ATTIVO").length > 0 ? (
+                            parseStatusTags(item.statusTags)
+                              .filter(tag => tag.replace(/^STATE:/i, "") !== "ATTIVO")
+                              .map((tag) => (
                               <StatusBadge
                                 key={tag}
                                 name={tag.replace(/^STATE:/i, "")}

@@ -446,13 +446,35 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         });
         setActiveTab("details");
 
-        if (course.member1Id && membersList) {
-          const m = membersList.find(x => x.id === course.member1Id);
-          if (m) setSearchMember1(`${m.lastName} ${m.firstName}`);
-        }
-        if (course.member2Id && membersList) {
-          const m = membersList.find(x => x.id === course.member2Id);
-          if (m) setSearchMember2(`${m.lastName} ${m.firstName}`);
+        // Pre-popola allievi da enrollments (STI bridge)
+        if (course?.id) {
+          fetch(`/api/enrollments?courseId=${course.id}`)
+            .then(r => r.json())
+            .then((enrs: any[]) => {
+              if (!Array.isArray(enrs) || enrs.length === 0) 
+                return;
+              const e1 = enrs[0];
+              const e2 = enrs[1];
+              if (e1?.memberId) {
+                updateForm("member1Id", e1.memberId);
+                fetch(`/api/members/${e1.memberId}`)
+                  .then(r => r.json())
+                  .then(m => m?.lastName && 
+                    setSearchMember1(
+                      `${m.lastName} ${m.firstName}`
+                    ));
+              }
+              if (e2?.memberId) {
+                updateForm("member2Id", e2.memberId);
+                fetch(`/api/members/${e2.memberId}`)
+                  .then(r => r.json())
+                  .then(m => m?.lastName && 
+                    setSearchMember2(
+                      `${m.lastName} ${m.firstName}`
+                    ));
+              }
+            })
+            .catch(() => {});
         }
         // Estrazione Op State e Promos
         const tags = parseStatusTags(course.statusTags);
