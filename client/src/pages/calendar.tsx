@@ -1174,7 +1174,7 @@ export default function CalendarPage() {
     });
 
     const handleEditCourse = (course: Course) => {
-        setUnifiedFormType("course");
+        setUnifiedFormType((course as any).activityType || "course");
         setEditingCourse(course);
         setEditForm(course);
     };
@@ -2112,6 +2112,7 @@ export default function CalendarPage() {
 
             
             <CourseUnifiedModal 
+              activityType={unifiedFormType as any}
               isOpen={!!editingCourse} 
               onOpenChange={(open) => { 
                 if (!open) {

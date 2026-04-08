@@ -49,6 +49,10 @@
               ✅ Modali e Routing funzionanti.
               ❌ Bridge STI: Hardcoding su "courses" forza l'iconografia/event mapping.
               ⚠️ Colori mancanti su Liste Custom.
+
+[08/04 09:44] F2→PM: Task 026/027 Completato. Fix B017 (Pennino Edit crash).
+              [x] Iniezione parser `parseJsonArray` su campo lessonType str in CourseUnifiedModal.tsx
+
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.
 - [x] Trasformazione rotta `/knowledge-base` e stesura dell'Articolo #1: "Matrix Interattiva dei Ruoli e Permessi".

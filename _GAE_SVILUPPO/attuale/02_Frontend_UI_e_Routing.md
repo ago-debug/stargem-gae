@@ -479,5 +479,6 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Cour
 
 > **Aggiornamento Architetturale (CourseUnifiedModal):** Refactoring del modale unificato. Disinnescato l'early-return ternario hardcoded del DialogTitle tramite `modalTitle` dinamico derivato per activityType. Il campo `activityType` viene ora impacchettato e iniettato nativamente nelle chiamate `POST` e `PATCH` dentro i metodi payload nativi `handleSubmit` ed `handleDuplicateFromModal`. Estesa strict type-safety ricorsiva anche ai sub-componenti tab (Enrollments/Attendances).
 
-<!-- --- FINE SORGENTE: attuale/06_GAE_Route_Audit_e_Stato.md --- -->
+> **Aggiornamento Architetturale (SQLite JSON Parsing):** Risolto bug fatale nell'elaborazione dei campi array archiviati su Drizzle SQLite (es. `lessonType`). L'approccio attuale prevede l'utilizzo sistematico dell'helper `parseJsonArray` all'interno di `CourseUnifiedModal.tsx` durante il fetch del mount (`setFormData`) per evitare crash indotti dalle stringhe piatte `"[]"` elaborate da operatori iterativi in `MultiSelectCustomList`.
 
+<!-- --- FINE SORGENTE: attuale/06_GAE_Route_Audit_e_Stato.md --- -->
