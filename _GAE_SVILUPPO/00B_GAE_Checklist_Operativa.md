@@ -111,6 +111,10 @@
               [x] Creato ed esportato `ActivityColorLegend.tsx` con design polimorfico (`popover` / `card`).
               [x] Inserito widget `ActivityColorLegend` negli header di `calendar.tsx` e in cima alle dashboard analytics su `attivita.tsx`.
               [x] Perfezionata la funzione `getCourseColor` su `calendar.tsx` per espandere il fallback del `type` sui vettori nidificati `rawPayload` e bloccare il mapping categorie se `type !== "course"`, sbloccando le card "Salsa" e "Total Body".
+[08/04 14:35] F2→PM: Protocollo 064 Eseguito (Pull-Out Bottone, Compact Legenda, Console.log Debugger)
+              [x] (B047) Inserito `console.log("TYPE:", type, course)` dentro la funzione color mapping di `calendar.tsx` per sessione di debugging asincrono locale da parte del PM.
+              [x] (B048) Dismesso il blocco esteso `variant="card"` su panoramica in favore dell'allocazione inline (bottone Popover) aggregato dentro `ActivityNavMenu` per ottimizzazione spazi verticali.
+              [x] (B049) Epurato Dropdown e trigger button primario "+ Crea Attività" dalla header banner di `attivita.tsx`.
 [08/04 12:50] F1→PM: Esecuzione Protocolli 052-053. Analisi Cleanup DB e Migrazione Campus.
               [x] (Task 1) Migrazione `campus_activities`: Le 2 righe superstiti ("Multisport" e "Danza") sono state riversate nella root table `courses` con type 'campus'.
               [x] (Task 2) Analisi Sicurezza: Fermata la rimozione tabelle ("Stop&Go") poiché `routes.ts` e `schema.ts` contengono ancora i relativi riferimenti ai moduli CRUD.

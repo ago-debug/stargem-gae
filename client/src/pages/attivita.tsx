@@ -348,56 +348,6 @@ export default function Attivita() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="gold-3d-button" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crea Attività
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Seleziona Tipo</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/attivita/corsi?action=create")}>
-                    <Calendar className="w-4 h-4 mr-2" /> Corsi
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/workshops?action=create")}>
-                    <Sparkles className="w-4 h-4 mr-2" /> Workshop
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/prove-pagamento?action=create")}>
-                    <CreditCard className="w-4 h-4 mr-2" /> Prova a Pagamento
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/prove-gratuite?action=create")}>
-                    <Gift className="w-4 h-4 mr-2" /> Prova Gratuita
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/servizi?action=create")}>
-                    <Database className="w-4 h-4 mr-2" /> Servizio Extra
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/lezioni-singole?action=create")}>
-                    <BookOpen className="w-4 h-4 mr-2" /> Lezione Singola
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/domeniche-movimento?action=create")}>
-                    <Sun className="w-4 h-4 mr-2" /> Domenica in Movimento
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/allenamenti?action=create")}>
-                    <Dumbbell className="w-4 h-4 mr-2" /> Allenamento/Affitto
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/lezioni-individuali?action=create")}>
-                    <UserCheck className="w-4 h-4 mr-2" /> Lezione Individuale
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/campus?action=create")}>
-                    <Users className="w-4 h-4 mr-2" /> Campus
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/saggi?action=create")}>
-                    <Award className="w-4 h-4 mr-2" /> Saggio
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/attivita/vacanze-studio?action=create")}>
-                    <Music className="w-4 h-4 mr-2" /> Vacanza Studio
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </div>
           <ActivityNavMenu />
         </div>
@@ -413,7 +363,6 @@ export default function Attivita() {
           setActiveTab(value);
         }} className="w-full">
           <TabsContent value="panoramica" className="space-y-6 mt-6">
-            <ActivityColorLegend variant="card" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <Card data-testid="card-stats-corsi">
                 <CardHeader className="pb-2">
