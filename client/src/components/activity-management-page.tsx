@@ -788,7 +788,7 @@ export default function ActivityManagementPage({
                             parseStatusTags(item.statusTags).map((tag) => (
                               <StatusBadge
                                 key={tag}
-                                name={tag}
+                                name={tag.replace(/^STATE:/i, "")}
                                 color={getStatusColor(tag, activityStatuses)}
                               />
                             ))

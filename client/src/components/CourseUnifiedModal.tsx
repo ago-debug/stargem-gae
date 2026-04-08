@@ -852,7 +852,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               {(activityType === "prenotazioni" || activityType === "allenamenti") && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <MultiSelectCustomList
-                    systemName="tipologia_lezioni"
+                    systemName={activityType === "allenamenti" ? "tipologie_allenamenti" : "tipologia_lezioni"}
                     listName="TIPOLOGIA"
                     selectedValues={formData.lessonType || []}
                     onChange={(vals) => updateForm("lessonType", vals)}
