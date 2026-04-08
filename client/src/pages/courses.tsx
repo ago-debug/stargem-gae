@@ -114,7 +114,7 @@ export default function Courses() {
   const postiDisponibili = useCustomListValues("posti_disponibili");
 
   const { data: courses, isLoading } = useQuery<Course[]>({
-    queryKey: [`/api/courses?seasonId=${selectedSeasonId}`],
+    queryKey: [`/api/courses?activityType=course&seasonId=${selectedSeasonId}`],
   });
 
   const editId = urlParams.get('editId') || urlParams.get('courseId');
@@ -232,7 +232,7 @@ export default function Courses() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/courses?seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?activityType=course&seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
       toast({ title: "Corso creato con successo" });
       setIsFormOpen(false);
       setEditingCourse(null);
@@ -416,7 +416,7 @@ export default function Courses() {
       await Promise.all(Array.from(selectedIds).map(id => apiRequest("DELETE", `/api/courses/${id}`)));
       toast({ title: "Eliminazione completata" });
       setSelectedIds(new Set());
-      queryClient.invalidateQueries({ queryKey: [`/api/courses?seasonId=${selectedSeasonId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?activityType=course&seasonId=${selectedSeasonId}`] });
     } catch (e) {
       toast({ title: "Errore durante l'eliminazione", variant: "destructive" });
     }
@@ -442,7 +442,7 @@ export default function Courses() {
       toast({ title: "Duplicazione massiva completata" });
       setShowBulkDuplicateDialog(false);
       setSelectedIds(new Set());
-      queryClient.invalidateQueries({ queryKey: [`/api/courses?seasonId=${targetSeasonId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?activityType=course&seasonId=${targetSeasonId}`] });
     } catch (e) {
       toast({ title: "Errore duplicazione", variant: "destructive" });
     }
