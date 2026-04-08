@@ -1999,16 +1999,9 @@ export default function CalendarPage() {
                                             const availability = (maxCap && stats) ? Math.max(0, maxCap - stats.total) : null;
 
                                             const codeLabel = evt.rawPayload?.sku || (evt.registryKey === "courses" ? `CRS-${evt.sourceId}` : "");
-                                            const parsedTags = parseStatusTags(evt.rawPayload?.statusTags);
-                                            let statusLabels: string[] = [];
-                                            if (parsedTags && parsedTags.length > 0) {
-                                                statusLabels = parsedTags
-                                                    .filter((t: string) => t.startsWith("STATE:"))
-                                                    .map((t: string) => t.replace("STATE:", ""));
-                                            }
-                                            if (statusLabels.length === 0) {
-                                                statusLabels = parseStatusTags(evt.rawPayload?.statusTags);
-                                            }
+                                            let statusLabels: string[] = parseStatusTags(evt.rawPayload?.statusTags)
+                                                .map(t => t.replace(/^STATE:/i, ""))
+                                                .filter(t => t.length > 0);
                                             const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
                                             const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
                                             const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
