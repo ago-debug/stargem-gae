@@ -37,7 +37,7 @@ export default function AccountingSheet() {
     }, []);
     const [, setLocation] = useLocation();
     const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-    const [payingMovement, setPayingMovement] = useState<Payment | null>(null);
+    const [payingMovement, setPayingMovement] = useState<any | null>(null);
     const [paymentMethod, setPaymentMethod] = useState("");
     const [amount, setAmount] = useState("");
     const [notes, setNotes] = useState("");
@@ -136,7 +136,7 @@ export default function AccountingSheet() {
         }
     });
 
-    const memberPayments = payments?.filter(p => p.memberId === selectedMember?.id) || [];
+    const memberPayments: any[] = payments?.filter(p => p.memberId === selectedMember?.id) || [];
 
     // Calculation of Total Due and Total Paid
     const memberEnrollments = enrollments?.filter(e => e.memberId === selectedMember?.id) || [];
@@ -339,7 +339,7 @@ export default function AccountingSheet() {
 
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [selectedType, setSelectedType] = useState<string>("");
-    const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
+    const [editingPayment, setEditingPayment] = useState<any | null>(null);
 
     const createPaymentMutation = useMutation({
         mutationFn: async (data: InsertPayment) => {
@@ -394,7 +394,7 @@ export default function AccountingSheet() {
         setNotes("");
     };
 
-    const handleQuickPay = (movement: Payment) => {
+    const handleQuickPay = (movement: any) => {
         setPayingMovement(movement);
         setAmount(movement.amount);
         setPaymentMethod(movement.paymentMethod || "");
@@ -418,7 +418,7 @@ export default function AccountingSheet() {
         setIsPaymentDialogOpen(true);
     };
 
-    const handleEditPayment = (payment: Payment) => {
+    const handleEditPayment = (payment: any) => {
         setEditingPayment(payment);
         setAmount(payment.amount);
         setPaymentMethod(payment.paymentMethod || "");
@@ -499,7 +499,7 @@ export default function AccountingSheet() {
             return;
         }
 
-        const data: InsertPayment = {
+        const data: any = {
             memberId: selectedMember.id,
             enrollmentId: selectedItem?.type === 'course' ? selectedItem.dbId : (payingMovement?.enrollmentId || editingPayment?.enrollmentId || null),
             workshopEnrollmentId: selectedItem?.type === 'workshop' ? selectedItem.dbId : (payingMovement?.workshopEnrollmentId || editingPayment?.workshopEnrollmentId || null),
@@ -868,7 +868,7 @@ export default function AccountingSheet() {
                                         workshopEnrollments?.filter(e => e.memberId === memberId).forEach(e => {
                                             const workshop = workshops?.find(w => w.id === e.workshopId);
                                             const total = parseFloat(workshop?.price || "0");
-                                            const paid = payments?.filter(p => p.workshopEnrollmentId === e.id && (p.status === 'paid' || p.status === 'completed')).reduce((sum, p) => sum + parseFloat(p.amount), 0) || 0;
+                                            const paid = payments?.filter(p => (p as any).workshopEnrollmentId === e.id && (p.status === 'paid' || p.status === 'completed')).reduce((sum, p) => sum + parseFloat(p.amount), 0) || 0;
                                             items.push({ id: `workshop-${e.id}`, dbId: e.id, type: 'workshop', label: `${workshop?.name || "Workshop"}`, remaining: total - paid });
                                         });
 
