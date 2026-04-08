@@ -1977,7 +1977,7 @@ export default function CalendarPage() {
                                                     .map((t: string) => t.replace("STATE:", ""));
                                             }
                                             if (statusLabels.length === 0) {
-                                                statusLabels = [evt.rawPayload?.status === 'active' || evt.rawPayload?.active ? "ATTIVO" : "INATTIVO"];
+                                                statusLabels = parseStatusTags(evt.rawPayload?.statusTags);
                                             }
                                             const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
                                             const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);

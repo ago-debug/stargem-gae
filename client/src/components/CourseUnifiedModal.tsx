@@ -416,7 +416,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [formData, setFormData] = useState<any>({});
   
   // State Operativo (Multi) e Flags Promo
-  const [opStates, setOpStates] = useState<string[]>(["ATTIVO"]);
+  const [opStates, setOpStates] = useState<string[]>([]);
   const [promoFlags, setPromoFlags] = useState<string[]>([]);
   const [notifySms, setNotifySms] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState(false);
@@ -482,7 +482,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         if (opTags.length > 0) {
           setOpStates(opTags);
         } else {
-          setOpStates(course.active === false || tags.includes("ANNULLATO") || tags.includes("INATTIVO") ? ["ANNULLATO"] : ["ATTIVO"]);
+          setOpStates(parseStatusTags(course.statusTags));
         }
         setPromoFlags(tags.filter(t => t.startsWith("PROMO:")).map(t => t.replace("PROMO:", "")));
       } else {
