@@ -338,6 +338,18 @@ function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
 // MAIN COMPONENT: CourseUnifiedModal
 // ============================================
 
+const parseJsonArray = (val: any): string[] => {
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string") {
+    try { 
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch { return []; }
+  }
+  return [];
+};
+
+
 export interface CourseUnifiedModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -413,7 +425,10 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   useEffect(() => {
     if (isOpen) {
       if (course) {
-        setFormData({ ...course });
+        setFormData({ 
+          ...course,
+          lessonType: parseJsonArray(course.lessonType)
+        });
         setActiveTab("details");
         // Estrazione Op State e Promos
         const tags = parseStatusTags(course.statusTags);

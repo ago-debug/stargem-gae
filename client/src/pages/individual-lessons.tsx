@@ -5,7 +5,7 @@ export default function IndividualLessons() {
     <ActivityManagementPage
       title="Riepilogo Lezioni Individuali"
       subtitle="Gestisci le lezioni private one-to-one"
-      apiEndpoint="/api/individual-lessons"
+      apiEndpoint="/api/courses?activityType=prenotazioni"
       categoryApiEndpoint="/api/individual-lesson-categories"
       itemLabel="lezione individuale"
       itemLabelPlural="lezioni individuali"

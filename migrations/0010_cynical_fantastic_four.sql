@@ -1,0 +1,1 @@
+ALTER TABLE `courses` ADD `activity_type` varchar(50);

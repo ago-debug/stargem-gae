@@ -2891,18 +2891,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/courses", isAuthenticated, checkPermission("/corsi", "read"), async (req, res) => {
     try {
       const seasonId = req.query.seasonId && req.query.seasonId !== "all" ? parseInt(req.query.seasonId as string) : null;
+      const activityType = req.query.activityType ? (req.query.activityType as string) : undefined;
       let coursesList;
         const activeSeason = await storage.getActiveSeason();
         const targetSeasonId = req.query.seasonId === "all" ? null : (seasonId || activeSeason?.id);
 
         if (targetSeasonId) {
-          const allCourses = await storage.getCourses(); // Fetch all to include legacy NULLs
+          const allCourses = await storage.getCourses(activityType); // Fetch all to include legacy NULLs
           coursesList = allCourses.filter(c => {
             const effSeasonId = c.seasonId || activeSeason?.id;
             return effSeasonId === targetSeasonId;
           });
         } else {
-          coursesList = await storage.getCourses();
+          coursesList = await storage.getCourses(activityType);
         }
       res.json(coursesList);
     } catch (error) {
