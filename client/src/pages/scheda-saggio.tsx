@@ -30,7 +30,7 @@ export default function SchedaSaggio() {
     const activeId = Number(activeIdRaw);
     const hasValidId = Number.isFinite(activeId) && activeId > 0;
 
-    const { data: items, isLoading: itemsLoading } = useQuery<[]>({ queryKey: ["/api/"] });
+    const { data: items, isLoading: itemsLoading } = useQuery<any[]>({ queryKey: ["/api/"] });
     const { data: members, isLoading: membersLoading } = useQuery<{ members: Member[] }>({ queryKey: ["/api/members"] });
     const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<Enrollment[]>({ queryKey: ["/api/enrollments?type=saggio"] });
     const { data: payments, isLoading: paymentsLoading } = useQuery<Payment[]>({ queryKey: ["/api/payments"] });
