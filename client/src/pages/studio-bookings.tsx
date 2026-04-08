@@ -496,8 +496,6 @@ export default function StudioBookings() {
     return (
         
         <div className="p-4 md:p-6 space-y-6 mx-auto">
-            <ActivityNavMenu />
-            
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <div className="flex items-center gap-3">
@@ -525,7 +523,7 @@ export default function StudioBookings() {
                 </div>
             </div>
 
-
+            <ActivityNavMenu />
             <Card>
                 <CardHeader className="pb-3">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

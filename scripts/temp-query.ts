@@ -2,23 +2,21 @@ import { db } from "../server/db";
 import { sql } from "drizzle-orm";
 
 async function main() {
-  // Eseguo la DELETE
-  await db.execute(sql`
-    DELETE FROM courses 
-    WHERE id IN (469, 470, 471);
+  console.log("--- FIX L: Enrollments for course 473 ---");
+  const enrolls = await db.execute(sql`
+    SELECT id, course_id, member_id 
+    FROM enrollments WHERE course_id = 473;
   `);
-  
-  // Verifico
-  const res = await db.execute(sql`
-    SELECT COUNT(*) as count 
-    FROM courses
-    WHERE activity_type IN (
-      'recitals','sunday_activities','vacation_studies'
-    );
+  console.log("Enrollments:", enrolls[0]);
+
+  console.log("--- FIX H: Custom list item 406 ---");
+  const cat = await db.execute(sql`
+    SELECT id, value, list_id, color 
+    FROM custom_list_items 
+    WHERE id = 406;
   `);
+  console.log("Category 406:", cat[0]);
   
-  console.log("Delete completata.");
-  console.log("Record residui per tipi obsoleti:", res[0][0].count ?? res[0][0]);
   process.exit(0);
 }
 main().catch(console.error);
