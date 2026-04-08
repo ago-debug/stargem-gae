@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
+import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 import type {
   Course, Workshop, Category, WorkshopCategory, Instructor, Studio,
   SundayCategory, TrainingCategory, IndividualLessonCategory,
@@ -412,6 +413,7 @@ export default function Attivita() {
           setActiveTab(value);
         }} className="w-full">
           <TabsContent value="panoramica" className="space-y-6 mt-6">
+            <ActivityColorLegend variant="card" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <Card data-testid="card-stats-corsi">
                 <CardHeader className="pb-2">
