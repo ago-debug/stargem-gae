@@ -394,7 +394,7 @@ export interface IStorage {
   // Enrollments
   getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
   getEnrollmentsByMember(memberId: number): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
-  getEnrollmentsBySeason(seasonId: number): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
+  getEnrollmentsBySeason(seasonId: number, activityType?: string): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
   getEnrollment(id: number): Promise<Enrollment | undefined>;
   createEnrollment(enrollment: InsertEnrollment): Promise<Enrollment>;
   updateEnrollment(id: number, enrollment: Partial<InsertEnrollment>): Promise<Enrollment>;
@@ -2333,8 +2333,8 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getEnrollmentsBySeason(seasonId: number): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
-    const result = await db
+  async getEnrollmentsBySeason(seasonId: number, activityType?: string): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
+    const baseQuery = db
       .select({
         id: enrollments.id,
         memberId: enrollments.memberId,
@@ -2355,8 +2355,16 @@ export class DatabaseStorage implements IStorage {
       })
       .from(enrollments)
       .leftJoin(members, eq(enrollments.memberId, members.id))
-      .where(eq(enrollments.seasonId, seasonId))
-      .orderBy(desc(enrollments.enrollmentDate));
+      .leftJoin(courses, eq(enrollments.courseId, courses.id));
+
+    const result = activityType
+      ? await baseQuery
+          .where(and(eq(enrollments.seasonId, seasonId), eq(courses.activityType, activityType)))
+          .orderBy(desc(enrollments.enrollmentDate))
+      : await baseQuery
+          .where(eq(enrollments.seasonId, seasonId))
+          .orderBy(desc(enrollments.enrollmentDate));
+
     return result;
   }
 
