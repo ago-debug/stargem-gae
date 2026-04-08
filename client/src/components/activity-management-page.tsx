@@ -53,6 +53,7 @@ export interface ActivityItem {
   name: string;
   description: string | null;
   categoryId: number | null;
+  categoryName?: string | null;
   quoteId: number | null;
   studioId: number | null;
   instructorId: number | null;
@@ -743,7 +744,9 @@ export default function ActivityManagementPage({
                 <TableHeader>
                   <TableRow>
                     <SortableTableHead sortKey="sku" currentSort={sortConfig} onSort={handleSort}>SKU/Codice</SortableTableHead>
-                    <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                    <SortableTableHead sortKey="name" currentSort={sortConfig} onSort={handleSort}>
+                      {(activityType === "allenamenti" || activityType === "prenotazioni") ? "Genere" : "Nome"}
+                    </SortableTableHead>
                     <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>Categoria</SortableTableHead>
                     <SortableTableHead sortKey="instructor" currentSort={sortConfig} onSort={handleSort}>Staff/Insegnante</SortableTableHead>
                     <SortableTableHead sortKey="price" currentSort={sortConfig} onSort={handleSort}>Prezzo</SortableTableHead>
@@ -762,7 +765,7 @@ export default function ActivityManagementPage({
                       </TableCell>
                       <TableCell className={cn("font-medium", isSortedColumn("name") && "sorted-column-cell")}>{item.name}</TableCell>
                       <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : undefined}>
-                        {categories?.find(c => c.id === item.categoryId)?.name || "-"}
+                        {item.categoryName || categories?.find(c => c.id === item.categoryId)?.name || "-"}
                       </TableCell>
                       <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : undefined}>
                         {instructors?.find(i => i.id === item.instructorId)

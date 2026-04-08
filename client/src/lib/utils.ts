@@ -5,19 +5,20 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function parseStatusTags(tags: any): string[] {
-  if (!tags) return [];
-  if (Array.isArray(tags)) return tags;
-  if (typeof tags === 'string') {
-    try {
-      const parsed = JSON.parse(tags);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-      return [];
+export const parseStatusTags = (val: any): string[] => {
+  if (Array.isArray(val)) return val;
+  if (typeof val !== "string") return [];
+  try {
+    let parsed = JSON.parse(val);
+    // Gestisce doppia serializzazione
+    if (typeof parsed === "string") {
+      parsed = JSON.parse(parsed);
     }
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
   }
-  return [];
-}
+};
 
 export function formatSeasonName(name?: string): string {
   if (!name) return "";
