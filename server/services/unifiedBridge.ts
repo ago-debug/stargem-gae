@@ -260,10 +260,13 @@ export async function getUnifiedActivitiesPreview(req: Request) {
     if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
     unified.push(...expandCourseRecurrence(c, defaultSeasonId, { dbMembers, dbCats: dbCustomCats, dbStudios }));
   }
-
-
-
-  return unified;
+  // Dedup finale: rimuove eventi con id duplicato (stesso corso+data da stagioni diverse)
+  const seen = new Set<string>();
+  return unified.filter(e => {
+    if (seen.has(e.id)) return false;
+    seen.add(e.id);
+    return true;
+  });
 }
 
 export async function getUnifiedActivityById(req: Request) {

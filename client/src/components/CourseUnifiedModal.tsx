@@ -926,6 +926,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     </div>
                     <div className="space-y-1 relative">
                       <Input
+                        key={`member1-${course?.id ?? 'new'}`}
                         placeholder="Cerca allievo..."
                         value={searchMember1}
                         onChange={e => setSearchMember1(e.target.value)}
@@ -955,6 +956,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     </div>
                     <div className="space-y-1 relative">
                       <Input
+                        key={`member2-${course?.id ?? 'new'}`}
                         placeholder="Cerca allievo..."
                         value={searchMember2}
                         onChange={e => setSearchMember2(e.target.value)}
