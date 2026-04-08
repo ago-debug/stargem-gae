@@ -1,0 +1,21 @@
+server/storage.ts(19,3): error TS2305: Module '"@shared/schema"' has no exported member 'workshopEnrollments'.
+server/storage.ts(66,8): error TS2305: Module '"@shared/schema"' has no exported member 'WorkshopEnrollment'.
+server/storage.ts(67,8): error TS2724: '"@shared/schema"' has no exported member named 'InsertWorkshopEnrollment'. Did you mean 'InsertEnrollment'?
+server/storage.ts(128,3): error TS2305: Module '"@shared/schema"' has no exported member 'sundayActivities'.
+server/storage.ts(129,8): error TS2305: Module '"@shared/schema"' has no exported member 'SundayActivity'.
+server/storage.ts(130,8): error TS2724: '"@shared/schema"' has no exported member named 'InsertSundayActivity'. Did you mean 'InsertActivity'?
+server/storage.ts(131,3): error TS2305: Module '"@shared/schema"' has no exported member 'trainings'.
+server/storage.ts(132,8): error TS2305: Module '"@shared/schema"' has no exported member 'Training'.
+server/storage.ts(133,8): error TS2305: Module '"@shared/schema"' has no exported member 'InsertTraining'.
+server/storage.ts(134,3): error TS2305: Module '"@shared/schema"' has no exported member 'individualLessons'.
+server/storage.ts(135,8): error TS2305: Module '"@shared/schema"' has no exported member 'IndividualLesson'.
+server/storage.ts(136,8): error TS2305: Module '"@shared/schema"' has no exported member 'InsertIndividualLesson'.
+server/storage.ts(140,3): error TS2305: Module '"@shared/schema"' has no exported member 'recitals'.
+server/storage.ts(141,8): error TS2305: Module '"@shared/schema"' has no exported member 'Recital'.
+server/storage.ts(142,8): error TS2724: '"@shared/schema"' has no exported member named 'InsertRecital'. Did you mean 'InsertCity'?
+server/storage.ts(179,3): error TS2305: Module '"@shared/schema"' has no exported member 'ActivitiesUnified'.
+server/storage.ts(180,3): error TS2305: Module '"@shared/schema"' has no exported member 'InsertActivitiesUnified'.
+server/storage.ts(181,3): error TS2305: Module '"@shared/schema"' has no exported member 'activitiesUnified'.
+server/storage.ts(2335,40): error TS2339: Property 'workshopEnrollmentId' does not exist on type 'MySqlTableWithColumns<{ name: "payments"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payments"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 34 more ...; updatedAt: MySqlColumn...'.
+server/storage.ts(2374,40): error TS2339: Property 'workshopEnrollmentId' does not exist on type 'MySqlTableWithColumns<{ name: "payments"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payments"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 34 more ...; updatedAt: MySqlColumn...'.
+server/storage.ts(3526,40): error TS2339: Property 'workshopEnrollmentId' does not exist on type 'MySqlTableWithColumns<{ name: "payments"; schema: undefined; columns: { id: MySqlColumn<{ name: "id"; tableName: "payments"; dataType: "number"; columnType: "MySqlInt"; data: number; driverParam: string | number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 34 more ...; updatedAt: MySqlColumn...'.

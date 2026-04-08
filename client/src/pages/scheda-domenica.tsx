@@ -20,7 +20,7 @@ import { SortableTableHead, useSortableTable } from "@/components/sortable-table
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SundayActivity, Member, Enrollment, Payment, Attendance } from "@shared/schema";
+import type {  Member, Enrollment, Payment, Attendance } from "@shared/schema";
 import { buildEnrolledMembersData } from "@/lib/enrollments";
 
 export default function SchedaDomenica() {
@@ -30,7 +30,7 @@ export default function SchedaDomenica() {
     const activeId = Number(activeIdRaw);
     const hasValidId = Number.isFinite(activeId) && activeId > 0;
 
-    const { data: items, isLoading: itemsLoading } = useQuery<SundayActivity[]>({ queryKey: ["/api/sunday-activities"] });
+    const { data: items, isLoading: itemsLoading } = useQuery<[]>({ queryKey: ["/api/sunday-activities"] });
     const { data: members, isLoading: membersLoading } = useQuery<{ members: Member[] }>({ queryKey: ["/api/members"] });
     const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<Enrollment[]>({ queryKey: ["/api/enrollments?type=domenica"] });
     const { data: payments, isLoading: paymentsLoading } = useQuery<Payment[]>({ queryKey: ["/api/payments"] });

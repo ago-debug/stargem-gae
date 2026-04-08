@@ -39,7 +39,7 @@ import type {
   InsertAccessLog,
   Member,
   Enrollment,
-  WorkshopEnrollment,
+  
   Payment,
   Membership,
   MedicalCertificate,
@@ -50,7 +50,7 @@ import type {
 interface MemberSearchResult {
   member: Member;
   enrollments: Enrollment[];
-  workshopEnrollments: WorkshopEnrollment[];
+  workshopEnrollments: [];
   payments: Payment[];
   memberships: Membership[];
   medicalCertificates: MedicalCertificate[];
@@ -92,7 +92,7 @@ export default function AccessControl() {
     queryKey: ["/api/enrollments?type=corsi"],
   });
 
-  const { data: workshopEnrollments } = useQuery<WorkshopEnrollment[]>({
+  const { data: workshopEnrollments } = useQuery<[]>({
     queryKey: ["/api/workshop-enrollments"],
   });
 
@@ -118,7 +118,7 @@ export default function AccessControl() {
 
   const getMemberDetails = (member: Member): MemberSearchResult => {
     const memberEnrollments = enrollments?.filter(e => e.memberId === member.id) || [];
-    const memberWorkshopEnrollments = workshopEnrollments?.filter(e => e.memberId === member.id) || [];
+    const members = workshopEnrollments?.filter(e => e.memberId === member.id) || [];
     const memberPayments = payments?.filter(p => p.memberId === member.id) || [];
     const memberMemberships = membershipsData?.filter(m => m.memberId === member.id) || [];
     const memberMedicalCerts = medicalCerts?.filter(c => c.memberId === member.id) || [];
@@ -203,7 +203,7 @@ export default function AccessControl() {
     return {
       member,
       enrollments: memberEnrollments,
-      workshopEnrollments: memberWorkshopEnrollments,
+      workshopEnrollments: members,
       payments: memberPayments,
       memberships: memberMemberships,
       medicalCertificates: memberMedicalCerts,

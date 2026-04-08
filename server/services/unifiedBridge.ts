@@ -10,19 +10,9 @@ function toLocalISOString(d: Date): string {
 import { eq } from "drizzle-orm";
 import {
   courses,
-  workshops,
   studioBookings,
-  campusActivities,
-  sundayActivities,
-  recitals,
   enrollments,
-  workshopEnrollments,
-  campusEnrollments,
-  sundayActivityEnrollments,
-  recitalEnrollments,
   categories,
-  workshopCategories,
-  sundayCategories,
   users,
   members,
   studios,
@@ -232,30 +222,17 @@ export async function getUnifiedActivitiesPreview(req: Request) {
   // Mass RAM DB Extractions
   const [
     dbCourses,
-    dbWorkshops,
     dbRentals,
-    dbCampus,
-    dbSunday,
-    dbRecitals,
-    
     dbMembers,
     dbCats,
-    dbWsCats,
-    dbSunCats,
     dbStudios,
     dbCustomCats
   ] = await Promise.all([
     db.select().from(courses),
-    db.select().from(workshops),
     db.select().from(studioBookings),
-    db.select().from(campusActivities),
-    db.select().from(sundayActivities),
-    db.select().from(recitals),
     
     db.select().from(members),
     db.select().from(categories),
-    db.select().from(workshopCategories),
-    db.select().from(sundayCategories),
     db.select().from(studios),
     db.select().from(customListItems).where(eq(customListItems.listId, 23))
   ]);
@@ -269,192 +246,7 @@ export async function getUnifiedActivitiesPreview(req: Request) {
     unified.push(...expandCourseRecurrence(c, defaultSeasonId, { dbMembers, dbCats: dbCustomCats, dbStudios }));
   }
 
-  // Mappa Workshop
-  for (const w of dbWorkshops) {
-    const effSeasonId = w.seasonId || defaultSeasonId;
-    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
 
-    const { ids: insIds, names: insNames } = resolveInstructor(w.instructorId, dbMembers);
-    const catInfo = resolveCategory(w.categoryId, dbWsCats, "WKS");
-    const studioInfo = resolveStudio(w.studioId, dbStudios);
-    const colors = buildColorProps(catInfo.color, catInfo.id, "workshop");
-    
-    const fallbackStart = w.startDate ? new Date(w.startDate) : new Date();
-    const fallbackEnd = w.endDate ? new Date(w.endDate) : new Date(fallbackStart.getTime() + 3600000);
-
-    unified.push({
-      id: `workshop_${w.id}`,
-      activityFamily: "workshop",
-      activityType: "standard",
-      title: w.name || "Workshop",
-      sku: w.sku || null,
-      statusLabels: parseTags(w.statusTags).length > 0 ? parseTags(w.statusTags) : (w.active ? ["active"] : ["inactive"]),
-      isActive: !!w.active,
-      categoryId: catInfo.id,
-      categoryName: catInfo.name,
-      categoryTag: catInfo.tag,
-      colorProps: colors,
-      instructorIds: insIds,
-      instructorNames: insNames,
-      studioId: studioInfo.id,
-      studioName: studioInfo.name,
-      startDatetime: toLocalISOString(fallbackStart),
-      endDatetime: toLocalISOString(fallbackEnd),
-      uiRenderingType: "STANDARD_WORKSHOP",
-      rawPayload: { ...w, legacy_source_type: "workshops" }
-    });
-  }
-
-  // Mappa Affitti (Rentals)
-  for (const r of dbRentals) {
-    const effSeasonId = r.seasonId || defaultSeasonId;
-    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
-
-    const { ids: insIds, names: insNames } = resolveInstructor(r.instructorId, dbMembers);
-    const studioInfo = resolveStudio(r.studioId, dbStudios);
-    const colors = buildColorProps(null, null, "rental");
-    
-    const bDateStr = r.bookingDate instanceof Date ? toLocalISOString(r.bookingDate).split('T')[0] : (r.bookingDate as any)?.split?.('T')[0] || null;
-    let fallStart = new Date();
-    if (bDateStr && r.startTime) {
-       const parsedStart = new Date(`${bDateStr}T${r.startTime}`);
-       if (!isNaN(parsedStart.getTime())) fallStart = parsedStart;
-    }
-    
-    let fallEnd = new Date(fallStart.getTime() + 3600000);
-    if (bDateStr && r.endTime) {
-       const parsedEnd = new Date(`${bDateStr}T${r.endTime}`);
-       if (!isNaN(parsedEnd.getTime())) fallEnd = parsedEnd;
-    }
-
-    unified.push({
-      id: `rental_${r.id}`,
-      activityFamily: "rental",
-      activityType: "standard",
-      title: r.title || "Affitto Sala",
-      sku: null,
-      statusLabels: [(r.status || "active")],
-      isActive: r.status !== 'cancelled',
-      categoryId: null,
-      categoryName: "Affitti e Booking",
-      categoryTag: "RNT",
-      colorProps: colors,
-      instructorIds: insIds,
-      instructorNames: insNames,
-      studioId: studioInfo.id,
-      studioName: studioInfo.name,
-      startDatetime: toLocalISOString(fallStart),
-      endDatetime: toLocalISOString(fallEnd),
-      uiRenderingType: "RENTAL_SLOT",
-      rawPayload: { ...r, legacy_source_type: "rentals" }
-    });
-  }
-
-  // Mappa Campus
-  for (const c of dbCampus) {
-    const effSeasonId = (c as any).seasonId || defaultSeasonId;
-    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
-
-    const { ids: insIds, names: insNames } = resolveInstructor(c.instructorId, dbMembers);
-    const studioInfo = resolveStudio(c.studioId, dbStudios);
-    const colors = buildColorProps(null, c.id, "campus");
-
-    const fallbackStart = c.startDate ? new Date(c.startDate) : new Date();
-    const fallbackEnd = c.endDate ? new Date(c.endDate) : new Date(fallbackStart.getTime() + 3600000);
-
-    unified.push({
-      id: `campus_${c.id}`,
-      activityFamily: "campus",
-      activityType: "standard",
-      title: c.name || "Campus",
-      sku: null,
-      statusLabels: parseTags(c.statusTags).length > 0 ? parseTags(c.statusTags) : (c.active ? ["active"] : ["inactive"]),
-      isActive: !!c.active,
-      categoryId: null,
-      categoryName: "Campus",
-      categoryTag: "CMP",
-      colorProps: colors,
-      instructorIds: insIds,
-      instructorNames: insNames,
-      studioId: studioInfo.id,
-      studioName: studioInfo.name,
-      startDatetime: toLocalISOString(fallbackStart),
-      endDatetime: toLocalISOString(fallbackEnd),
-      uiRenderingType: "CAMPUS_EVENT",
-      rawPayload: { ...c, legacy_source_type: "campus" }
-    });
-  }
-
-  // Mappa Domeniche (Sunday)
-  for (const s of dbSunday) {
-    const effSeasonId = (s as any).seasonId || defaultSeasonId;
-    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
-
-    const { ids: insIds, names: insNames } = resolveInstructor(s.instructorId, dbMembers);
-    const catInfo = resolveCategory((s as any).categoryId, dbSunCats, "SUN");
-    const studioInfo = resolveStudio(s.studioId, dbStudios);
-    const colors = buildColorProps(catInfo.color, catInfo.id, "sunday");
-
-    const fallbackStart = s.startDate ? new Date(s.startDate) : new Date();
-    const fallbackEnd = s.endDate ? new Date(s.endDate) : new Date(fallbackStart.getTime() + 3600000);
-
-    unified.push({
-      id: `sunday_activities_${s.id}`,
-      activityFamily: "sunday",
-      activityType: "sunday",
-      title: s.name || "Evento Domenicale",
-      sku: null,
-      statusLabels: parseTags((s as any).statusTags).length > 0 ? parseTags((s as any).statusTags) : (s.active ? ["active"] : ["inactive"]),
-      isActive: !!s.active,
-      categoryId: catInfo.id,
-      categoryName: catInfo.name,
-      categoryTag: catInfo.tag,
-      colorProps: colors,
-      instructorIds: insIds,
-      instructorNames: insNames,
-      studioId: studioInfo.id,
-      studioName: studioInfo.name,
-      startDatetime: toLocalISOString(fallbackStart),
-      endDatetime: toLocalISOString(fallbackEnd),
-      uiRenderingType: "SUNDAY_EVENT",
-      rawPayload: { ...s, legacy_source_type: "sunday_activities" }
-    });
-  }
-
-  // Mappa Saggi (Recitals)
-  for (const r of dbRecitals) {
-    const effSeasonId = (r as any).seasonId || defaultSeasonId;
-    if (querySeasonId !== null && effSeasonId !== querySeasonId) continue;
-
-    const { ids: insIds, names: insNames } = resolveInstructor(r.instructorId, dbMembers);
-    const studioInfo = resolveStudio(r.studioId, dbStudios);
-    const colors = buildColorProps(null, r.id, "recital");
-    
-    const fallbackStart = r.startDate ? new Date(r.startDate) : new Date();
-    const fallbackEnd = r.endDate ? new Date(r.endDate) : new Date(fallbackStart.getTime() + 3600000);
-
-    unified.push({
-      id: `recital_${r.id}`,
-      activityFamily: "recital",
-      activityType: "recital",
-      title: r.name || "Saggio",
-      sku: null,
-      statusLabels: parseTags((r as any).statusTags).length > 0 ? parseTags((r as any).statusTags) : (r.active ? ["active"] : ["inactive"]),
-      isActive: !!r.active,
-      categoryId: null,
-      categoryName: "Saggi / Esibizioni",
-      categoryTag: "REC",
-      colorProps: colors,
-      instructorIds: insIds,
-      instructorNames: insNames,
-      studioId: studioInfo.id,
-      studioName: studioInfo.name,
-      startDatetime: toLocalISOString(fallbackStart),
-      endDatetime: toLocalISOString(fallbackEnd),
-      uiRenderingType: "RECITAL_EVENT",
-      rawPayload: { ...r, legacy_source_type: "recitals" }
-    });
-  }
 
   return unified;
 }
@@ -474,16 +266,8 @@ export async function getUnifiedEnrollmentsPreview(req: Request) {
 
   const [
     dbEnrollments,
-    dbWsEnrollments,
-    dbCaEnrollments,
-    dbSaEnrollments,
-    dbRecEnrollments
   ] = await Promise.all([
     db.select().from(enrollments),
-    db.select().from(workshopEnrollments),
-    db.select().from(campusEnrollments),
-    db.select().from(sundayActivityEnrollments),
-    db.select().from(recitalEnrollments)
   ]);
 
   const unified = [];
@@ -502,62 +286,6 @@ export async function getUnifiedEnrollmentsPreview(req: Request) {
       participation_type: pType,
       target_date: tDate,
       payment_status: e.status, // Usa status come proxy per payment_status in read-only
-      notes: e.notes,
-      season_id: e.seasonId || defaultSeasonId
-    });
-  }
-
-  // Workshops
-  for (const e of dbWsEnrollments) {
-    unified.push({
-      id: `wse_${e.id}`,
-      member_id: e.memberId,
-      activity_unified_id: `workshop_${e.workshopId}`,
-      participation_type: "STANDARD_COURSE",
-      target_date: null,
-      payment_status: e.status,
-      notes: e.notes,
-      season_id: e.seasonId || defaultSeasonId
-    });
-  }
-
-  // Campus
-  for (const e of dbCaEnrollments) {
-    unified.push({
-      id: `cae_${e.id}`,
-      member_id: e.memberId,
-      activity_unified_id: `campus_${e.campusActivityId}`,
-      participation_type: "STANDARD_COURSE",
-      target_date: null,
-      payment_status: e.status,
-      notes: e.notes,
-      season_id: e.seasonId || defaultSeasonId
-    });
-  }
-
-  // Sunday
-  for (const e of dbSaEnrollments) {
-    unified.push({
-      id: `sae_${e.id}`,
-      member_id: e.memberId,
-      activity_unified_id: `sunday_activities_${e.sundayActivityId}`,
-      participation_type: "STANDARD_COURSE",
-      target_date: null,
-      payment_status: e.status,
-      notes: e.notes,
-      season_id: e.seasonId || defaultSeasonId
-    });
-  }
-
-  // Recitals
-  for (const e of dbRecEnrollments) {
-    unified.push({
-      id: `rece_${e.id}`,
-      member_id: e.memberId,
-      activity_unified_id: `recital_${e.recitalId}`,
-      participation_type: "STANDARD_COURSE",
-      target_date: null,
-      payment_status: e.status,
       notes: e.notes,
       season_id: e.seasonId || defaultSeasonId
     });
