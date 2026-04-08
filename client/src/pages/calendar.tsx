@@ -2050,18 +2050,32 @@ export default function CalendarPage() {
                                                         }}
                                                     >
                                                         <div className="absolute top-2 right-2 flex flex-col items-end gap-0.5 z-30">
-                                                            {(() => {
-                                                                const badgeColor = ACTIVITY_TYPE_COLORS[evt.activityType || "course"] || "#6b7280";
-                                                                return (
-                                                                    <span style={{
-                                                                        backgroundColor: `${badgeColor}25`,
-                                                                        color: badgeColor,
-                                                                        borderLeft: `2px solid ${badgeColor}`
-                                                                    }} className="px-1 py-0.5 rounded text-[9px] font-bold uppercase shadow-sm">
-                                                                        {evt.categoryTag || activityBadge || "CRS"}
-                                                                    </span>
-                                                                );
-                                                            })()}
+                                                            <div className={`bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`} title={evt.categoryName || "CAT"}>
+                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" /> : <MapPin className="w-2.5 h-2.5" />}
+                                                                {evt.categoryName || activityBadge}
+                                                            </div>
+                                                            <div className={`bg-white/80 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5 ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`}>
+                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" /> : <MapPin className="w-2.5 h-2.5" />}
+                                                                {activityBadge}
+                                                            </div>
+                                                            {evt.activityType && evt.activityType !== "course" && ACTIVITY_TYPE_COLORS[evt.activityType] && (
+                                                              <span style={{
+                                                                backgroundColor: `${ACTIVITY_TYPE_COLORS[evt.activityType]}25`,
+                                                                color: ACTIVITY_TYPE_COLORS[evt.activityType],
+                                                                border: `1px solid ${ACTIVITY_TYPE_COLORS[evt.activityType]}60`
+                                                              }} className="px-1 py-0.5 rounded text-[9px] font-bold uppercase mt-1">
+                                                                {({
+                                                                  allenamenti: "ALL",
+                                                                  prenotazioni: "IND",
+                                                                  workshop: "WS",
+                                                                  domeniche: "DOM",
+                                                                  saggi: "SAG",
+                                                                  vacanze: "VAC",
+                                                                  campus: "CAM",
+                                                                  affitti: "AFT",
+                                                                } as Record<string, string>)[evt.activityType]}
+                                                              </span>
+                                                            )}
                                                         </div>
                                                         <div className="font-bold text-[10px] mb-0.5 opacity-90 w-[calc(100%-40px)]">{evt.startTime} - {evt.endTime}</div>
                                                         <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[30px] break-normal overflow-hidden">{evt.title}</div>
