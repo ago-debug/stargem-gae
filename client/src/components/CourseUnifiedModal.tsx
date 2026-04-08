@@ -377,6 +377,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const canWrite = hasWritePermission(user, "/corsi");
 
   const [activeTab, setActiveTab] = useState("details");
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const isEdit = !!course?.id;
 
   const [isGenereModalOpen, setIsGenereModalOpen] = useState(false);
@@ -536,24 +537,31 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
       try {
-        await apiRequest("POST", apiEndpoint, data);
+        return await apiRequest("POST", apiEndpoint, data);
       } catch (err: any) {
         if (err.status === 409) {
           if (confirm(err.message || "Conflitto rilevato. Forzare inserimento?")) {
-            await apiRequest("POST", apiEndpoint, { ...data, force: true });
-            return;
+            return await apiRequest("POST", apiEndpoint, { ...data, force: true });
           }
           throw new Error("Operazione annullata");
         }
         throw err;
       }
     },
-    onSuccess: () => {
+    onSuccess: (newRecord: any) => {
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
-      toast({ title: "Attività creata con successo" });
-      onOpenChange(false);
-      onSuccess?.();
+      
+      if (isDuplicating && newRecord?.id) {
+        setIsDuplicating(false);
+        toast({ title: "Copia creata! Modifica i dati." });
+        setFormData({ ...newRecord });
+        setActiveTab("details");
+      } else {
+        toast({ title: "Attività creata con successo" });
+        onOpenChange(false);
+        onSuccess?.();
+      }
     },
     onError: (error: Error) => {
       if (error.message !== "Operazione annullata") {
@@ -697,6 +705,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           seasonId: parseInt(formData.seasonId.toString()),
         };
 
+        setIsDuplicating(true);
         createMutation.mutate(payload);
     } catch (err: any) {
         toast({ title: "Errore durante la duplicazione", description: err.message, variant: "destructive" });

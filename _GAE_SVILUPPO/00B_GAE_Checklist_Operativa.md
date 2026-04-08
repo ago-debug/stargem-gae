@@ -95,7 +95,10 @@
               [x] (Task 1) Migrazione category_id: Normalizzati 303 record storici in courses, spostandoli da ID legacy al set custom_list_items (>400).
               [x] (Task 2) Test Calendario: Il bridge dell'Unified Calendar eroga adesso anche per i corsi storici CategoriaTestuale e Colore dinamicamente.
               [x] (Task 3-4) Analisi e Bonifica: Mappati i record legacy da eradicare in tabelle silenti (categorie, workshops, campus). Verificata caduta Foreign Keys bloccanti per i corsi.
-[08/04 12:50] F2→PM: Protocollo 053 Eseguito. Cleanup Frontend Categorico.
+[08/04 13:58] F2→PM: Protocollo 056 (Fix B043/B044/B045/B046)
+              [x] (B043) Modificata logica assegnazione colore cards in `calendar.tsx` usando root parameter o dizionario locale `ACTIVITY_TYPE_COLORS`.
+              [x] (B044) Ricollocato il widget backend CustomList `ColoredCustomListsLoader` all'interno della griglia elenchi e bonificato il suo parent UI obsoleto.
+              [x] (B045/B046) Sottoposto ispezione visiva frammenti file (Modale "Duplica" e interfaccia di Affitti) in attesa di istruzioni su fix puntuali.
               [x] (Route) Sradicate le 5 dichiarazioni di istanza `/categorie-X` da `App.tsx`.
               [x] (File) Eliminati permanentemente i file `.tsx` orfani correlati dalle pages per scongiurare frammentazione.
               [x] (Build) Validata asetticità logica con `tsc --noEmit` (0 nuovi fault). Tracciato log su `02_Frontend_UI_e_Routing.md`.
