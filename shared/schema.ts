@@ -915,6 +915,7 @@ export type SingleLesson = typeof singleLessons.$inferSelect;
 // ============================================================================
 // SUNDAY ACTIVITIES (identical structure to workshops, uses sundayCategories)
 // ============================================================================
+// DEPRECATO
 export const sundayActivities = mysqlTable("sunday_activities", {
   id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
@@ -975,6 +976,7 @@ export type SundayActivity = typeof sundayActivities.$inferSelect;
 // ============================================================================
 // TRAININGS (identical structure to workshops, uses trainingCategories)
 // ============================================================================
+// DEPRECATO
 export const trainings = mysqlTable("trainings", {
   id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
@@ -1037,6 +1039,7 @@ export type Training = typeof trainings.$inferSelect;
 // ============================================================================
 // INDIVIDUAL LESSONS (identical structure to workshops, uses individualLessonCategories)
 // ============================================================================
+// DEPRECATO
 export const individualLessons = mysqlTable("individual_lessons", {
   id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
@@ -1163,6 +1166,7 @@ export type CampusActivity = typeof campusActivities.$inferSelect;
 // ============================================================================
 // RECITALS (identical structure to workshops, uses recitalCategories)
 // ============================================================================
+// DEPRECATO
 export const recitals = mysqlTable("recitals", {
   id: int("id").primaryKey().autoincrement(),
   sku: varchar("sku", { length: 100 }),
