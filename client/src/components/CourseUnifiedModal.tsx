@@ -447,6 +447,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   useEffect(() => {
     let cancelled = false;
     if (isOpen) {
+      // Reset immediato campi allievo — PRIMA di tutto
+      setSearchMember1("");
+      setSearchMember2("");
       if (course) {
         setFormData({ 
           ...course,
@@ -457,8 +460,6 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         });
         setActiveTab("details");
 
-        setSearchMember1("");
-        setSearchMember2("");
         
         // Pre-popola allievi da enrollments (STI bridge) — con flag anti race condition
         if (course?.id) {

@@ -2047,16 +2047,14 @@ export default function CalendarPage() {
                                                             {(() => {
                                                                 const iconColor = evt.activityType && ACTIVITY_TYPE_COLORS[evt.activityType]
                                                                     ? ACTIVITY_TYPE_COLORS[evt.activityType]
-                                                                    : evt.registryKey === "workshops" ? "#4338ca" : "#1e40af";
-                                                                const BadgeIcon = evt.activityType === "allenamenti" 
-                                                                    ? Activity 
-                                                                    : evt.activityType === "prenotazioni" 
-                                                                    ? User 
-                                                                    : evt.registryKey === "workshops" 
-                                                                    ? Sparkles 
-                                                                    : evt.registryKey === "courses"
-                                                                    ? CalendarIcon
-                                                                    : MapPin;
+                                                                    : "#1e40af";
+                                                                const BadgeIcon =
+                                                                    evt.activityType === "allenamenti" ? Activity :
+                                                                    evt.activityType === "prenotazioni" ? User :
+                                                                    evt.activityType === "workshop" ? Sparkles :
+                                                                    evt.activityType === "campus" ? MapPin :
+                                                                    evt.registryKey === "workshops" ? Sparkles :
+                                                                    CalendarIcon;
 
                                                                 return (
                                                                     <>
