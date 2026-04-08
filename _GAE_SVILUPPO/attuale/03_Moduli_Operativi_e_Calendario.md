@@ -644,6 +644,10 @@ Al fine di sbloccare l'operatività di base, sono stati consolidati e protetti i
 - **11.2 Edit Form Studi Logici:** Disattivare l'eventuale costrutto statico che blindava le locazioni denominate `Studi 23-24-25`. Tali sale dovranno rendersi inequivocabilmente *modificabili* dall'operatore.
 - **11.3 Sanitizzazione Maschera Input:** Il trigger di init che lancia irrazionalmente "errori di default rossi" alla mera apertura del modale deve essere intercettato e neutralizzato. La validation map (Zod o React Hook Form) scatterà esclusivamente a validazione sfidata (onSubmit o onChange post-interazione) e mai al boot visivo neutro.
 
+## 12. Consolidamento Interfaccia STI (Sessione Aprile)
+- L'`activityType` viene passato in maniera type-safe dal calendario direttamente al modale anche in fase di edit, sostituendo logiche hardcoded e guidando dinamicamente la customizzazione del popup.
+- Le card del calendario (e di listato) presentano ora Badge nativi e referenziali (`ALL`, `IND`, `WS`, `DOM`), calcolati in appoggio all'ecosistema polimorfo piuttosto che alla staticità legacy "CRS".
+- La palette cromatica delle categorie pesca e renderizza nativamente i valori esatti estratti dalla colonna `custom_list_items.color`, amministrati attivamente da UI (`/elenchi` -> `SimpleListSection`).
 
 <!-- --- FINE SORGENTE: attuale/17_GAE_Calendario_Multi_Stagione.md --- -->
 
