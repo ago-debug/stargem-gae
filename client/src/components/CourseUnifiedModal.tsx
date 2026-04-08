@@ -443,6 +443,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       if (course) {
         setFormData({ 
           ...course,
+          categoryId: course.categoryId || null,
           lessonType: parseJsonArray(course.lessonType)
         });
         setActiveTab("details");
