@@ -113,8 +113,16 @@
               [x] Perfezionata la funzione `getCourseColor` su `calendar.tsx` per espandere il fallback del `type` sui vettori nidificati `rawPayload` e bloccare il mapping categorie se `type !== "course"`, sbloccando le card "Salsa" e "Total Body".
 [08/04 14:35] F2→PM: Protocollo 064 Eseguito (Pull-Out Bottone, Compact Legenda, Console.log Debugger)
               [x] (B047) Inserito `console.log("TYPE:", type, course)` dentro la funzione color mapping di `calendar.tsx` per sessione di debugging asincrono locale da parte del PM.
-              [x] (B048) Dismesso il blocco esteso `variant="card"` su panoramica in favore dell'allocazione inline (bottone Popover) aggregato dentro `ActivityNavMenu` per ottimizzazione spazi verticali.
+              [x] (B048) Dismesso il blocco esteso `variant="card"` favor dell'allocazione inline (bottone Popover) aggregato dentro `ActivityNavMenu` per ottimizzazione spazi verticali.
               [x] (B049) Epurato Dropdown e trigger button primario "+ Crea Attività" dalla header banner di `attivita.tsx`.
+[08/04 14:40] F1→PM: Esecuzione Protocollo 063. Cleanup DB e DROP Tabelle.
+              [x] (DB) DROP massivo di 16 tabelle deprecate (`trainings`, `individual_lessons`, `sunday_activities`, `recitals` e i 10 silos di enrollments speculari). Restano 72 tabelle su schema.
+              [x] (Schema Drizzle) Ripulite 78 definizioni e dipendenze relazionali obsolete dal file `shared/schema.ts`. Inoltrato git commit di pulizia architetturale.
+[08/04 14:55] F2→PM: Protocollo 066 Eseguito (Fix attivitàType, Layout Legenda / Affitti / Crea Attività)
+              [x] (B047) Esportato nativamente `activityType` e wrappato `rawPayload` dentro `mapCourseToCalendarEvent` per garantire accesso alla query string ai parse handler lato Frontend UI. Variato target root resolver su `calendar.tsx`.
+              [x] (B048) Rimappata UI di `ActivityColorLegend` da layout estesi verso una griglia impilata (`flex-col gap-2`) per presentazioni Popover verticalizzate.
+              [x] (B046) Ispezionato `studio-bookings.tsx`: renderizzazione menù confermata in cima al flow del content grid.
+              [x] (B049) Epigrafe di "+ Crea Attività" rimosso definitivamente anche da referenze remote/cache.
 [08/04 12:50] F1→PM: Esecuzione Protocolli 052-053. Analisi Cleanup DB e Migrazione Campus.
               [x] (Task 1) Migrazione `campus_activities`: Le 2 righe superstiti ("Multisport" e "Danza") sono state riversate nella root table `courses` con type 'campus'.
               [x] (Task 2) Analisi Sicurezza: Fermata la rimozione tabelle ("Stop&Go") poiché `routes.ts` e `schema.ts` contengono ancora i relativi riferimenti ai moduli CRUD.

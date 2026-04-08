@@ -18,7 +18,7 @@ const ACTIVITY_LEGEND = [
 
 export function ActivityColorLegend({ variant = "card" }: { variant?: "card" | "popover" }) {
   const LegendItems = () => (
-    <div className="flex flex-wrap gap-4 items-center">
+    <div className="flex flex-col gap-2">
       {ACTIVITY_LEGEND.map((item, idx) => (
         <div key={idx} className="flex items-center gap-2">
           {item.color ? (

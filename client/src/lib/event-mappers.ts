@@ -116,7 +116,8 @@ export function mapCourseToCalendarEvent(
         registryLabel: registryConf?.labelUI || "Corso",
         active: c.active !== false,
         colorProps: colorPropsValue,
-        rawPayload: c
+        activityType: (c as any).activityType || "course",
+        rawPayload: { ...c }
     };
 }
 
@@ -151,7 +152,8 @@ export function mapWorkshopToCalendarEvent(
         registryLabel: registryConf?.labelUI || "Workshop",
         active: w.active !== false,
         colorProps: colorPropsValue,
-        rawPayload: w
+        activityType: (w as any).activityType || "workshop",
+        rawPayload: { ...w }
     };
 }
 
