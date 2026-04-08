@@ -422,6 +422,21 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [notifyEmail, setNotifyEmail] = useState(false);
   const [notifyWa, setNotifyWa] = useState(false);
 
+  const [searchMember1, setSearchMember1] = useState("");
+  const [searchMember2, setSearchMember2] = useState("");
+
+  const { data: searchResults1 } = useQuery({
+    queryKey: ["/api/members", searchMember1],
+    queryFn: () => fetch(`/api/members?search=${searchMember1}`).then(r => r.json()),
+    enabled: searchMember1.length >= 2,
+  });
+
+  const { data: searchResults2 } = useQuery({
+    queryKey: ["/api/members", searchMember2],
+    queryFn: () => fetch(`/api/members?search=${searchMember2}`).then(r => r.json()),
+    enabled: searchMember2.length >= 2,
+  });
+
   useEffect(() => {
     if (isOpen) {
       if (course) {
@@ -430,6 +445,15 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           lessonType: parseJsonArray(course.lessonType)
         });
         setActiveTab("details");
+
+        if (course.member1Id && membersList) {
+          const m = membersList.find(x => x.id === course.member1Id);
+          if (m) setSearchMember1(`${m.lastName} ${m.firstName}`);
+        }
+        if (course.member2Id && membersList) {
+          const m = membersList.find(x => x.id === course.member2Id);
+          if (m) setSearchMember2(`${m.lastName} ${m.firstName}`);
+        }
         // Estrazione Op State e Promos
         const tags = parseStatusTags(course.statusTags);
         const opTags = tags.filter(t => t.startsWith("STATE:")).map(t => t.replace("STATE:", ""));
@@ -688,6 +712,22 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     return newTitles[activityType ?? ""] ?? "Nuovo Corso";
   })();
 
+  const submitLabel = (() => {
+    if (isEdit) return "Salva (Sovrascrivi / Slitta)";
+    const labels: Record<string, string> = {
+      course:       "Crea Corso",
+      allenamenti:  "Crea Allenamento",
+      prenotazioni: "Crea Lezione Individuale",
+      workshop:     "Crea Workshop",
+      domeniche:    "Crea Domenica in Movimento",
+      saggi:        "Crea Saggio",
+      vacanze:      "Crea Vacanze Studio",
+      campus:       "Crea Campus",
+      affitti:      "Crea Prenotazione Affitto",
+    };
+    return labels[activityType ?? ""] ?? "Crea Corso";
+  })();
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -851,26 +891,58 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       <Label className="font-semibold text-slate-800">NOME ALLIEVO 1</Label>
                       <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("member1"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
                     </div>
-                    <Combobox
-                      name="member1Id"
-                      value={formData.member1Id?.toString() || "none"}
-                      onValueChange={val => updateForm("member1Id", val === "none" ? null : parseInt(val))}
-                      options={[{value: "none", label: "Nessun allievo"}, ...(membersList || []).map((m: any) => ({ value: m.id.toString(), label: `${m.lastName} ${m.firstName}` }))]}
-                      placeholder="Cerca Allievo 1..."
-                    />
+                    <div className="space-y-1 relative">
+                      <Input
+                        placeholder="Cerca allievo..."
+                        value={searchMember1}
+                        onChange={e => setSearchMember1(e.target.value)}
+                      />
+                      {searchMember1.length >= 2 && searchResults1?.members?.length > 0 && (
+                        <div className="border rounded-md max-h-40 overflow-y-auto bg-white shadow absolute z-50 w-full">
+                          {searchResults1.members.map((m: any) => (
+                            <div
+                              key={m.id}
+                              className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm"
+                              onClick={() => {
+                                updateForm("member1Id", m.id)
+                                setSearchMember1(`${m.lastName} ${m.firstName}`)
+                              }}
+                            >
+                              {m.lastName} {m.firstName}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <Label className="font-semibold text-slate-800">NOME ALLIEVO 2</Label>
                       <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("member2"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
                     </div>
-                    <Combobox
-                      name="member2Id"
-                      value={formData.member2Id?.toString() || "none"}
-                      onValueChange={val => updateForm("member2Id", val === "none" ? null : parseInt(val))}
-                      options={[{value: "none", label: "Nessun allievo"}, ...(membersList || []).map((m: any) => ({ value: m.id.toString(), label: `${m.lastName} ${m.firstName}` }))]}
-                      placeholder="Cerca Allievo 2..."
-                    />
+                    <div className="space-y-1 relative">
+                      <Input
+                        placeholder="Cerca allievo..."
+                        value={searchMember2}
+                        onChange={e => setSearchMember2(e.target.value)}
+                      />
+                      {searchMember2.length >= 2 && searchResults2?.members?.length > 0 && (
+                        <div className="border rounded-md max-h-40 overflow-y-auto bg-white shadow absolute z-50 w-full">
+                          {searchResults2.members.map((m: any) => (
+                            <div
+                              key={m.id}
+                              className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm"
+                              onClick={() => {
+                                updateForm("member2Id", m.id)
+                                setSearchMember2(`${m.lastName} ${m.firstName}`)
+                              }}
+                            >
+                              {m.lastName} {m.firstName}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -1059,7 +1131,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     </Button>
                   )}
                   <Button type="submit" disabled={updateMutation.isPending || createMutation.isPending} className="gold-3d-button text-black">
-                    {updateMutation.isPending ? "Salvataggio..." : (isEdit ? "Salva (Sovrascrivi / Slitta)" : (activityType === "campus" ? "Crea Campus" : activityType === "workshop" ? "Crea Workshop" : "Crea Corso"))}
+                    {updateMutation.isPending ? "Salvataggio..." : submitLabel}
                   </Button>
                 </div>
               </DialogFooter>
