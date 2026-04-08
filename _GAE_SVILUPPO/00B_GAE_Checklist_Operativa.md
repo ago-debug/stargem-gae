@@ -87,6 +87,19 @@
               [x] TEST 2 (Lezioni Individuali): Comportamento analogo al 100% rispetto al TEST 1. Stabilità raggiunta col modale unificato.
               [x] TEST 3 (Calendario): Transizione architetturale validata a schermo. Non compare più "CRS" ma i badge di referenza nativi "ALL"/"IND". Eliminati trigger spuri dell'etichetta "ATTIVO". Il pennino instanzia il payload sul layer corretto.
               [x] TEST 4 (Elenchi Multi): Tab ri-abilitata, assenza totale di map-crash, e le custom lists target ("Categorie", "Canale", "Come ci ha conosciuto") troneggiano nella sezione dedicata.
+[08/04 12:28] F2→PM: Protocolli 044-048 Eseguiti. Color Picker Attivo.
+              [x] (B039) Iniettato `<input type="color">` dinamico nell'interfaccia di editing per le righe `SimpleListSection` (`elenchi.tsx`).
+              [x] (B039) Estensione dell'estrazione asincrona e del transito API per il campo `color` verso il DB e il client store locale.
+              [x] (B039) Aggiunta la renderizzazione dei pallini `rounded-full` come preview cromatiche dirette in modalità tabella in sola lettura.
+[08/04 12:40] F1→PM: Esecuzione Protocolli 049-051. Migrazione Architetturale STI completata.
+              [x] (Task 1) Migrazione category_id: Normalizzati 303 record storici in courses, spostandoli da ID legacy al set custom_list_items (>400).
+              [x] (Task 2) Test Calendario: Il bridge dell'Unified Calendar eroga adesso anche per i corsi storici CategoriaTestuale e Colore dinamicamente.
+              [x] (Task 3-4) Analisi e Bonifica: Mappati i record legacy da eradicare in tabelle silenti (categorie, workshops, campus). Verificata caduta Foreign Keys bloccanti per i corsi.
+[08/04 12:50] F1→PM: Esecuzione Protocolli 052-053. Analisi Cleanup DB e Migrazione Campus.
+              [x] (Task 1) Migrazione `campus_activities`: Le 2 righe superstiti ("Multisport" e "Danza") sono state riversate nella root table `courses` con type 'campus'.
+              [x] (Task 2) Analisi Sicurezza: Fermata la rimozione tabelle ("Stop&Go") poiché `routes.ts` e `schema.ts` contengono ancora i relativi riferimenti ai moduli CRUD.
+              [x] (Task 3) Deprecazione: Aggiunti i tag `// DEPRECATO` alle 4 tabelle inattive native per segnalare la preparazione al DROP.
+              [x] (Task 4) GitHub Sync: Commit massivo e master push effettuati con successo.
 
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.

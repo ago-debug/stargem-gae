@@ -71,12 +71,7 @@ import CampusActivities from "@/pages/campus-activities";
 import Recitals from "@/pages/recitals";
 import VacationStudies from "@/pages/vacation-studies";
 
-import WorkshopCategories from "@/pages/workshop-categories";
-import SundayCategories from "@/pages/sunday-categories";
-import TrainingCategories from "@/pages/training-categories";
-import IndividualLessonCategories from "@/pages/individual-lesson-categories";
 import CampusCategories from "@/pages/campus-categories";
-import RecitalCategories from "@/pages/recital-categories";
 import VacationCategories from "@/pages/vacation-categories";
 import RentalsCategories from "@/pages/rentals-categories";
 import MerchandisingCategories from "@/pages/merchandising-categories";
@@ -196,12 +191,7 @@ function Router() {
       <ProtectedRoute path="/attivita" component={Attivita} />
       <ProtectedRoute path="/categorie-corsi" component={Categories} />
       <ProtectedRoute path="/categorie-affitti" component={RentalsCategories} />
-      <ProtectedRoute path="/categorie-workshop" component={WorkshopCategories} />
-      <ProtectedRoute path="/categorie-domeniche" component={SundayCategories} />
-      <ProtectedRoute path="/categorie-allenamenti" component={TrainingCategories} />
-      <ProtectedRoute path="/categorie-lezioni-individuali" component={IndividualLessonCategories} />
       <ProtectedRoute path="/categorie-campus" component={CampusCategories} />
-      <ProtectedRoute path="/categorie-saggi" component={RecitalCategories} />
       <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
       <ProtectedRoute path="/categorie-eventi-esterni" component={BookingServiceCategories} />
       <ProtectedRoute path="/categorie-merchandising" component={MerchandisingCategories} />
