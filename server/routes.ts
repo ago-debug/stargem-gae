@@ -2331,11 +2331,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==== Courses Routes ====
   app.get("/api/courses", isAuthenticated, checkPermission("/corsi", "read"), async (req, res) => {
     try {
-      const seasonId = req.query.seasonId && req.query.seasonId !== "all" ? parseInt(req.query.seasonId as string) : null;
+      const seasonIdParam = req.query.seasonId as string | undefined;
+      // "all"    → nessun filtro stagione
+      // "active" → usa stagione attiva (come se non fosse passato)
+      // numero   → stagione specifica
+      const seasonId = (seasonIdParam && seasonIdParam !== "all" && seasonIdParam !== "active")
+        ? parseInt(seasonIdParam)
+        : null;
       const activityType = req.query.activityType ? (req.query.activityType as string) : undefined;
       let coursesList;
         const activeSeason = await storage.getActiveSeason();
-        const targetSeasonId = req.query.seasonId === "all" ? null : (seasonId || activeSeason?.id);
+        const targetSeasonId = seasonIdParam === "all" ? null : (seasonId || activeSeason?.id);
 
         if (targetSeasonId) {
           const allCourses = await storage.getCourses(activityType); // Fetch all to include legacy NULLs
