@@ -2362,36 +2362,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/courses", isAuthenticated, checkPermission("/corsi", "write"), async (req, res) => {
     try {
       const validatedData = insertCourseSchema.parse(req.body);
-      const force = req.query.force === 'true' || req.body.force === true;
 
-      if (!force && validatedData.studioId && validatedData.startDate && validatedData.startTime && validatedData.endTime) {
-        const conflict = await storage.checkStudioConflict(
-          validatedData.studioId!,
-          validatedData.startDate!,
-          validatedData.startTime!,
-          validatedData.endTime!,
-          undefined,
-          undefined,
-          validatedData.seasonId || undefined
-        );
-        if (conflict) {
-          const conflictTypeLabel =
-            conflict.type === 'course' ? 'corso' :
-              conflict.type === 'booking' ? 'prenotazione' :
-                conflict.type === 'workshop' ? 'workshop' :
-                  'orario di chiusura';
-
-          const message = conflict.type === 'operating_hours'
-            ? `Attenzione: ${conflict.name}. Vuoi forzare il salvataggio?`
-            : `Conflitto rilevato: lo slot è già occupato da un ${conflictTypeLabel} (${conflict.name}). Vuoi forzare il salvataggio?`;
-
-          return res.status(409).json({
-            message,
-            conflict
-          });
-        }
-      }
-
+      // [BACKEND] Remove slot conflict check - save always
       const course = await storage.createCourse(validatedData);
 
       // Integrazioni Prenotazioni (Auto-Enroll & Notify)
@@ -2442,43 +2414,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertCourseSchema.partial().parse(req.body);
-      const force = req.query.force === 'true' || req.body.force === true;
 
-      const existingCourse = await storage.getCourse(id);
-      if (existingCourse && !force) {
-        const studioId = validatedData.studioId !== undefined ? validatedData.studioId : existingCourse.studioId;
-        const startDate = validatedData.startDate !== undefined ? validatedData.startDate : existingCourse.startDate;
-        const startTime = validatedData.startTime !== undefined ? validatedData.startTime : existingCourse.startTime;
-        const endTime = validatedData.endTime !== undefined ? validatedData.endTime : existingCourse.endTime;
-
-        if (studioId && startDate && startTime && endTime) {
-          const conflict = await storage.checkStudioConflict(
-            studioId,
-            startDate,
-            startTime,
-            endTime,
-            undefined, // no booking ID
-            id,        // current course ID
-            (validatedData.seasonId ?? existingCourse.seasonId) || undefined
-          );
-          if (conflict) {
-            const conflictTypeLabel =
-              conflict.type === 'course' ? 'corso' :
-                conflict.type === 'booking' ? 'prenotazione' :
-                  conflict.type === 'workshop' ? 'workshop' :
-                    'orario di chiusura';
-
-            const message = conflict.type === 'operating_hours'
-              ? `Attenzione: ${conflict.name}. Vuoi forzare il salvataggio?`
-              : `Conflitto rilevato: lo slot è già occupato da un ${conflictTypeLabel} (${conflict.name}). Vuoi forzare il salvataggio?`;
-
-            return res.status(409).json({
-              message,
-              conflict
-            });
-          }
-        }
-      }
+      // [BACKEND] Remove slot conflict check - save always
       const course = await storage.updateCourse(id, validatedData);
 
       // Aggiorna enrollments se cambiano gli allievi

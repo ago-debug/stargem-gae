@@ -848,6 +848,10 @@ export default function ActivityManagementPage({
           onOpenChange={(open) => { if (!open) closeDialog(); }} 
           course={editingItem} 
           activityType={activityType as any} 
+          onDuplicated={(newRecord) => {
+            // F2-102: aggiorna editingItem col nuovo record (mantiene isFormOpen=true)
+            setEditingItem(newRecord);
+          }}
           onSuccess={() => { closeDialog(); queryClient.invalidateQueries({ queryKey: [apiEndpoint] }); }} 
         />
       ) : (
