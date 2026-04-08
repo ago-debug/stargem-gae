@@ -74,6 +74,10 @@
 [08/04 11:15] F1→PM: Esecuzione Protocolli 039-040. Endpoint Enrollments potenziato.
               [x] (039) Analisi comportamento schema member1Id/member2Id.
               [x] (040) Aggiunto query filter `courseId` su `GET /api/enrollments`.
+[08/04 11:24] F2→PM: Protocollo 041 Eseguito.
+              [x] (B036) Reindirizzato pre-popolamento allievo in edit su `/api/enrollments?courseId=` in `CourseUnifiedModal.tsx`.
+              [x] (B035b) Eliminata verbosità visiva filtrando "ATTIVO" in `activity-management-page.tsx` (`!== "ATTIVO"`).
+              [x] (B031-B033) Risolto TypeCrash in `elenchi.tsx` spostando le categorie in una Sandbox dedicata `ColoredCustomListsLoader` riutilizzando il bridge standard `SimpleListSection` e inibendole dalla coda principale.
 
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.
