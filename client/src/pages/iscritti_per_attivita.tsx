@@ -66,7 +66,7 @@ export default function IscrittiPerAttivita() {
     }
   };
 
-  const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
+  const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({ queryKey: ["/api/courses?activityType=course"] });
   const { data: workshops, isLoading: workshopsLoading } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
   const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=corsi"] });
   const { data: wsEnrollments, isLoading: wsEnrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/workshop-enrollments"] });
@@ -77,7 +77,7 @@ export default function IscrittiPerAttivita() {
   const { data: singleLessons, isLoading: slLoading } = useQuery<SingleLesson[]>({ queryKey: ["/api/single-lessons"] });
   const { data: sundayActivities, isLoading: saLoading } = useQuery<any[]>({ queryKey: ["/api/sunday-activities"] });
   const { data: trainings, isLoading: trLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=allenamenti"] });
-  const { data: individualLessons, isLoading: ilLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=lezioni-individuali"] });
+  const { data: individualLessons, isLoading: ilLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=prenotazioni"] });
   const { data: campusActivities, isLoading: caLoading } = useQuery<CampusActivity[]>({ queryKey: ["/api/campus-activities"] });
   const { data: recitals, isLoading: recLoading } = useQuery<any[]>({ queryKey: ["/api/"] });
   const { data: vacationStudies, isLoading: vsLoading } = useQuery<VacationStudy[]>({ queryKey: ["/api/vacation-studies"] });

@@ -426,6 +426,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [searchMember1, setSearchMember1] = useState("");
   const [searchMember2, setSearchMember2] = useState("");
 
+  console.log("CAT LIST:", categorieList?.items);
+  console.log("FORM CAT:", formData.categoryId);
+
   const { data: searchResults1 } = useQuery({
     queryKey: ["/api/members", searchMember1],
     queryFn: () => fetch(`/api/members?search=${searchMember1}`).then(r => r.json()),
@@ -555,6 +558,12 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     onSuccess: (newRecord: any) => {
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
+      
+      console.log("onSuccess called:", {
+        isDuplicating: isDuplicatingRef.current,
+        newRecord,
+        newRecordId: newRecord?.id
+      });
       
       if (isDuplicatingRef.current && newRecord?.id) {
         isDuplicatingRef.current = false;

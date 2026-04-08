@@ -16,7 +16,7 @@ const activityMenuItems = [
   { id: "domeniche-movimento", label: "Domeniche in Movimento", icon: Sun, url: "/attivita/domeniche-movimento" },
   { id: "lezioni-individuali", label: "Lezioni Individuali", icon: UserCheck, url: "/attivita/lezioni-individuali" },
   { id: "allenamenti", label: "Allenamenti", icon: Dumbbell, url: "/attivita/allenamenti" },
-  { id: "affitti", label: "Affitti", icon: Building2, url: "/prenotazioni-sale" },
+  { id: "affitti", label: "Affitti", icon: Building2, url: "/attivita/affitti" },
   { id: "campus", label: "Campus", icon: Users, url: "/attivita/campus" },
   { id: "saggi", label: "Saggi", icon: Award, url: "/attivita/saggi" },
   { id: "vacanze-studio", label: "Vacanze Studio", icon: Music, url: "/attivita/vacanze-studio" }
