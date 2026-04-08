@@ -99,7 +99,7 @@ export function IndividualPricing({ formData, updateForm, membersList }: { formD
             onValueChange={(val) => updateForm("packageSingle", val === "none" ? null : val)}
             options={[
               {value: "none", label: "Nessun pacchetto usato"},
-              ...(memberPackages || []).filter((p: any) => p.active && p.usedUses < p.totalUses).map((p: any) => ({ 
+              ...((memberPackages as any[]) || []).filter((p: any) => p.active && p.usedUses < p.totalUses).map((p: any) => ({ 
                 value: p.packageCode, 
                 label: `${p.packageCode} (${p.packageType}) - Restanti: ${p.totalUses - p.usedUses}` 
               }))

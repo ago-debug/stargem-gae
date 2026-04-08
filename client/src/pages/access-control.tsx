@@ -50,7 +50,7 @@ import type {
 interface MemberSearchResult {
   member: Member;
   enrollments: Enrollment[];
-  workshopEnrollments: [];
+  workshopEnrollments: any[];
   payments: Payment[];
   memberships: Membership[];
   medicalCertificates: MedicalCertificate[];
