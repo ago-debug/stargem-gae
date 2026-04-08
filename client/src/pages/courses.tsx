@@ -379,7 +379,7 @@ export default function Courses() {
     switch (key) {
       case "sku": return course.sku;
       case "name": return course.name;
-      case "category": return categories?.find(c => c.id === course.categoryId)?.name;
+      case "category": return (course as any).categoryName || categories?.find(c => c.id === course.categoryId)?.name;
       case "instructor": {
         const inst = instructors?.find(i => i.id === course.instructorId);
         return inst ? `${inst.lastName} ${inst.firstName}` : null;
@@ -463,7 +463,7 @@ export default function Courses() {
         course.sku || "",
         course.name,
         course.description || "",
-        category?.name || "",
+        (course as any).categoryName || category?.name || "",
         instructor ? `${instructor.lastName} ${instructor.firstName}` : "",
         course.price || "",
         course.maxCapacity || "",
@@ -655,7 +655,7 @@ export default function Courses() {
                           </div>
                         </TableCell>
                         <TableCell className={isSortedColumn("category") ? "sorted-column-cell" : ""}>
-                          {categories?.find(c => c.id === course.categoryId)?.name || "-"}
+                          {(course as any).categoryName || categories?.find(c => c.id === course.categoryId)?.name || "-"}
                         </TableCell>
                         <TableCell className={isSortedColumn("instructor") ? "sorted-column-cell" : ""}>
                           {instructors?.find(i => i.id === course.instructorId)
