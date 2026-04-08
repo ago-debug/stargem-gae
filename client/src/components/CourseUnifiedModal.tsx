@@ -357,6 +357,8 @@ export interface CourseUnifiedModalProps {
   defaultValues?: any;
   onSuccess?: () => void;
   onDelete?: (id: number) => void;
+  /** Chiamato solo in caso di duplicazione: fornisce al parent il nuovo record già parsato */
+  onDuplicated?: (newRecord: any) => void;
   activityType?: 
   | "course" 
   | "workshop" 
@@ -369,7 +371,7 @@ export interface CourseUnifiedModalProps {
   | "affitti";
 }
 
-export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, onSuccess, onDelete, activityType = "course" }: CourseUnifiedModalProps) {
+export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, onSuccess, onDelete, onDuplicated, activityType = "course" }: CourseUnifiedModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -423,6 +425,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const [notifySms, setNotifySms] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState(false);
   const [notifyWa, setNotifyWa] = useState(false);
+  // F2-103: flag visivo che indica che si sta modificando una copia
+  const [isCopy, setIsCopy] = useState(false);
 
   const [searchMember1, setSearchMember1] = useState("");
   const [searchMember2, setSearchMember2] = useState("");
@@ -446,6 +450,10 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
   useEffect(() => {
     let cancelled = false;
+    if (!isOpen) {
+      // Reset isCopy quando il modale si chiude
+      setIsCopy(false);
+    }
     if (isOpen) {
       // Reset immediato campi allievo — PRIMA di tutto
       setSearchMember1("");
@@ -471,17 +479,13 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 return;
               const e1 = enrs[0];
               const e2 = enrs[1];
+              // Bug D fix (F2-PROTOCOLLO-098): manteniamo solo i memberId nel form.
+              // Il campo testo resta vuoto in edit mode: l'allievo è visibile nel tab Iscritti.
               if (e1?.memberId) {
                 updateForm("member1Id", e1.memberId);
-                fetch(`/api/members/${e1.memberId}`)
-                  .then(r => r.json())
-                  .then(m => { if (!cancelled && m?.lastName) setSearchMember1(`${m.lastName} ${m.firstName}`); });
               }
               if (e2?.memberId) {
                 updateForm("member2Id", e2.memberId);
-                fetch(`/api/members/${e2.memberId}`)
-                  .then(r => r.json())
-                  .then(m => { if (!cancelled && m?.lastName) setSearchMember2(`${m.lastName} ${m.firstName}`); });
               }
             })
             .catch(() => {});
@@ -546,10 +550,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         return await apiRequest("POST", apiEndpoint, data);
       } catch (err: any) {
         if (err.status === 409) {
-          if (confirm(err.message || "Conflitto rilevato. Forzare inserimento?")) {
-            return await apiRequest("POST", apiEndpoint, { ...data, force: true });
-          }
-          throw new Error("Operazione annullata");
+          // Conflitto slot: procede sempre senza chiedere (F2-PROTOCOLLO-097)
+          return await apiRequest("POST", apiEndpoint, { ...data, force: true });
         }
         throw err;
       }
@@ -559,17 +561,37 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] }); // broad: colpisce tutte le varianti activityType
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
       
-      console.log("onSuccess called:", {
-        isDuplicating: isDuplicatingRef.current,
-        newRecord,
-        newRecordId: newRecord?.id
-      });
-      
-      if (isDuplicatingRef.current && newRecord?.id) {
+      if (isDuplicatingRef.current) {
+        // Bug B fix (F2-PROTOCOLLO-099/101): in duplicazione NON chiudiamo mai il modale.
         isDuplicatingRef.current = false;
+        if (newRecord?.id) {
+          console.log("[DUP] onSuccess id:", newRecord?.id);
+          try {
+            // F2-101: applica lo stesso parsing dell'useEffect edit mode
+            // (lessonType e statusTags possono arrivare come JSON string dal backend)
+            const parsed = {
+              ...newRecord,
+              lessonType: parseJsonArray(newRecord.lessonType),
+              statusTags: parseJsonArray(newRecord.statusTags),
+            };
+            setFormData(parsed);
+            // Aggiorna anche opStates e promoFlags col nuovo record
+            const tags = parseJsonArray(newRecord.statusTags);
+            const opTags = tags.filter((t: string) => t.startsWith("STATE:")).map((t: string) => t.replace("STATE:", ""));
+            setOpStates(opTags);
+            setPromoFlags(tags.filter((t: string) => t.startsWith("PROMO:")).map((t: string) => t.replace("PROMO:", "")));
+            // F2-102: comunica il nuovo record al parent (aggiorna editingCourse/editingItem)
+            onDuplicated?.(parsed);
+            // F2-103: attiva il banner COPIA
+            setIsCopy(true);
+          } catch (e) {
+            console.error("[DUP] crash in setFormData:", e);
+          }
+        }
+        console.log("[DUP] modal still open?", isOpen);
         toast({ title: "Copia creata! Modifica i dati." });
-        setFormData({ ...newRecord });
         setActiveTab("details");
+        // Non chiamare onOpenChange(false) né onSuccess?.() — il modale resta aperto
       } else {
         toast({ title: "Attività creata con successo" });
         onOpenChange(false);
@@ -589,11 +611,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         await apiRequest("PATCH", `${apiEndpoint}/${id}`, data);
       } catch (err: any) {
         if (err.status === 409) {
-          if (confirm(err.message || "Conflitto rilevato. Forzare aggiornamento?")) {
-            await apiRequest("PATCH", `${apiEndpoint}/${id}`, { ...data, force: true });
-            return;
-          }
-          throw new Error("Operazione annullata");
+          // Conflitto slot: procede sempre senza chiedere (F2-PROTOCOLLO-097)
+          await apiRequest("PATCH", `${apiEndpoint}/${id}`, { ...data, force: true });
+          return;
         }
         throw err;
       }
@@ -603,6 +623,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] }); // broad: colpisce tutte le varianti activityType
       queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
       toast({ title: "Attività aggiornata con successo" });
+      setIsCopy(false); // F2-103: rimuove il banner COPIA al primo salvataggio
       onOpenChange(false);
       onSuccess?.();
     },
@@ -771,6 +792,17 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           </DialogDescription>
         </DialogHeader>
 
+        {/* F2-103: banner visivo COPIA */}
+        {isCopy && (
+          <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 text-sm rounded px-3 py-2 mb-3 flex items-start gap-2 flex-col">
+            <div className="flex items-center gap-2">
+              <span>📋</span>
+              <span><strong>Stai modificando una COPIA</strong> — salva per confermare il nuovo record.</span>
+            </div>
+            <p className="text-xs text-yellow-700 ml-6">I campi in rosso sono copiati dall'originale — verificali prima di salvare.</p>
+          </div>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {isEdit && (
             <TabsList className={cn("grid w-full mb-4", activityType === "campus" ? "grid-cols-2" : "grid-cols-3")}>
@@ -782,7 +814,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
           <TabsContent value="details" className="pt-2">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="flex justify-between items-center gap-2 flex-wrap bg-slate-50 p-3 rounded-md border text-sm">
+              <div className={cn("flex justify-between items-center gap-2 flex-wrap p-3 rounded-md border text-sm", (isCopy && opStates.length > 0) ? "bg-red-50 border-red-400" : "bg-slate-50")}>
                 <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
 
                 <div className="flex items-center gap-4 border-l border-slate-300 pl-4 shrink-0 flex-wrap">
@@ -822,6 +854,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     <Edit className="w-3 h-3 sidebar-icon-gold" />
                   </Button>
                 </div>
+                  <div className={(isCopy && !!formData.name) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Combobox
                     name="name"
                     value={formData.name || ""}
@@ -830,9 +863,11 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     placeholder={activityType === "campus" ? "Cerca campus..." : activityType === "workshop" ? "Cerca o inserisci nome..." : "Cerca genere..."}
                     required
                   />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="font-semibold text-slate-800">Stagione</Label>
+                  <div className={(isCopy && !!formData.seasonId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Select 
                      value={formData.seasonId?.toString() || "none"}
                      onValueChange={val => updateForm("seasonId", val === "none" ? null : parseInt(val))}
@@ -846,13 +881,14 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                         ))}
                      </SelectContent>
                   </Select>
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="sku">SKU / Codice</Label>
-                  <Input id="sku" value={formData.sku || ""} onChange={(e) => updateForm("sku", e.target.value)} placeholder={activityType === "campus" ? "es: 2526CAMPUS-1SETTIMANA-" : "es: 2526-CORSO-1"} />
+                  <Input id="sku" value={formData.sku || ""} onChange={(e) => updateForm("sku", e.target.value)} placeholder={activityType === "campus" ? "es: 2526CAMPUS-1SETTIMANA-" : "es: 2526-CORSO-1"} className={(isCopy && !!formData.sku) ? "border-red-400 bg-red-50" : ""} />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -871,6 +907,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       <Edit className="w-3 h-3 sidebar-icon-gold" />
                     </Button>
                   </div>
+                  <div className={(isCopy && !!formData.categoryId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Combobox
                     name="categoryId"
                     value={formData.categoryId?.toString() || "none"}
@@ -878,6 +915,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     options={[{value: "none", label: "Nessuna categoria"}, ...(categories || []).map(c => ({ value: c.id.toString(), label: c.name }))]}
                     placeholder="Seleziona categoria"
                   />
+                  </div>
                 </div>
               </div>
 
@@ -894,6 +932,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       <Label className="font-semibold text-slate-800 shrink-0">NUMERO PERSONE</Label>
                       <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsNumeroPersoneModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button>
                     </div>
+                    <div className={(isCopy && !!formData.numberOfPeople && formData.numberOfPeople !== "none") ? "rounded-md border border-red-400 bg-red-50" : ""}>
                     <Combobox
                       name="numberOfPeople"
                       value={formData.numberOfPeople || "none"}
@@ -901,6 +940,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       options={[{value: "none", label: "Seleziona..."}, ...(numeroPersone || []).map((val: string) => ({ value: val, label: val }))]}
                       placeholder="Trascina num persone..."
                     />
+                    </div>
                   </div>
                 </div>
               )}
@@ -908,6 +948,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Studio / Sala</Label>
+                  <div className={(isCopy && !!formData.studioId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Combobox
                     name="studioId"
                     value={formData.studioId?.toString() || "none"}
@@ -915,6 +956,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     options={[{value: "none", label: "Nessuno studio"}, ...(studios || []).map(s => ({ value: s.id.toString(), label: s.name }))]}
                     placeholder="Seleziona studio"
                   />
+                  </div>
                 </div>
               </div>
 
@@ -1020,6 +1062,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     <Label className="font-semibold text-slate-800">Insegnante Principale</Label>
                     <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("instructor"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
                   </div>
+                  <div className={(isCopy && !!formData.instructorId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Combobox
                     name="instructorId"
                     value={formData.instructorId?.toString() || "none"}
@@ -1027,6 +1070,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     options={[{value: "none", label: "Nessuno"}, ...(instructors || []).map(i => ({ value: i.id.toString(), label: `${i.lastName} ${i.firstName}` }))]}
                     placeholder="Cerca Insegnante..."
                   />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
@@ -1053,7 +1097,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Prezzo (€)</Label>
-                  <Input id="price" type="number" step="0.01" min="0" value={formData.price || ""} onChange={e => updateForm("price", e.target.value)} />
+                  <Input id="price" type="number" step="0.01" min="0" value={formData.price || ""} onChange={e => updateForm("price", e.target.value)} className={(isCopy && !!formData.price) ? "border-red-400 bg-red-50" : ""} />
                 </div>
                 <div className="space-y-2">
                   <Label>Quota da usare come base (opzionale)</Label>
@@ -1104,6 +1148,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <Label>Giorno</Label>
+                  <div className={(isCopy && !!formData.dayOfWeek) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Select value={selectedDayOfWeek || "none"} onValueChange={val => updateForm("dayOfWeek", val === "none" ? null : val)}>
                     <SelectTrigger><SelectValue placeholder="Giorno" /></SelectTrigger>
                     <SelectContent>
@@ -1111,17 +1156,19 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       {WEEKDAYS.map(d => <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Inizio</Label>
-                  <Input type="time" value={selectedStartTime} onChange={(e) => updateForm("startTime", e.target.value || null)} className="min-w-[100px]" />
+                  <Input type="time" value={selectedStartTime} onChange={(e) => updateForm("startTime", e.target.value || null)} className={cn("min-w-[100px]", (isCopy && !!formData.startTime) && "border-red-400 bg-red-50")} />
                 </div>
                 <div className="space-y-2">
                   <Label>Fine</Label>
-                  <Input type="time" value={selectedEndTime} onChange={(e) => updateForm("endTime", e.target.value || null)} className="min-w-[100px]" />
+                  <Input type="time" value={selectedEndTime} onChange={(e) => updateForm("endTime", e.target.value || null)} className={cn("min-w-[100px]", (isCopy && !!formData.endTime) && "border-red-400 bg-red-50")} />
                 </div>
                 <div className="space-y-2">
                   <Label>Ricorrenza</Label>
+                  <div className={(isCopy && !!formData.recurrenceType) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Select value={formData.recurrenceType || "none"} onValueChange={val => updateForm("recurrenceType", val === "none" ? null : val)}>
                     <SelectTrigger><SelectValue placeholder="Periodo" /></SelectTrigger>
                     <SelectContent>
@@ -1129,16 +1176,17 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       {RECURRENCE_TYPES.map(r => <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  </div>
                 </div>
                 
                 <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                   <div className="space-y-2">
                     <Label>Validità Dal</Label>
-                    <Input type="date" value={getSafeDateStr(formData.startDate)} onChange={e => updateForm("startDate", e.target.value || null)} />
+                    <Input type="date" value={getSafeDateStr(formData.startDate)} onChange={e => updateForm("startDate", e.target.value || null)} className={(isCopy && !!formData.startDate) ? "border-red-400 bg-red-50" : ""} />
                   </div>
                   <div className="space-y-2">
                     <Label>Validità Al</Label>
-                    <Input type="date" value={getSafeDateStr(formData.endDate)} onChange={e => updateForm("endDate", e.target.value || null)} />
+                    <Input type="date" value={getSafeDateStr(formData.endDate)} onChange={e => updateForm("endDate", e.target.value || null)} className={(isCopy && !!formData.endDate) ? "border-red-400 bg-red-50" : ""} />
                   </div>
                 </div>
               </div>

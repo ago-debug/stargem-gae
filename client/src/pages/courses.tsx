@@ -222,11 +222,9 @@ export default function Courses() {
         await apiRequest("POST", "/api/courses", data);
       } catch (err: any) {
         if (err.status === 409) {
-          if (confirm(err.message)) {
-            await apiRequest("POST", "/api/courses", { ...data, force: true });
-            return;
-          }
-          throw new Error("Operazione annullata");
+          // Conflitto slot: procede sempre senza chiedere (F2-PROTOCOLLO-097)
+          await apiRequest("POST", "/api/courses", { ...data, force: true });
+          return;
         }
         throw err;
       }
@@ -239,9 +237,7 @@ export default function Courses() {
       setStatusTags([]);
     },
     onError: (error: Error) => {
-      if (error.message !== "Operazione annullata") {
-        toast({ title: "Errore", description: error.message, variant: "destructive" });
-      }
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
     },
   });
 
@@ -251,11 +247,9 @@ export default function Courses() {
         await apiRequest("PATCH", `/api/courses/${id}`, data);
       } catch (err: any) {
         if (err.status === 409) {
-          if (confirm(err.message)) {
-            await apiRequest("PATCH", `/api/courses/${id}`, { ...data, force: true });
-            return;
-          }
-          throw new Error("Operazione annullata");
+          // Conflitto slot: procede sempre senza chiedere (F2-PROTOCOLLO-097)
+          await apiRequest("PATCH", `/api/courses/${id}`, { ...data, force: true });
+          return;
         }
         throw err;
       }
@@ -268,9 +262,7 @@ export default function Courses() {
       setStatusTags([]);
     },
     onError: (error: Error) => {
-      if (error.message !== "Operazione annullata") {
-        toast({ title: "Errore", description: error.message, variant: "destructive" });
-      }
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
     },
   });
 
@@ -695,8 +687,10 @@ export default function Courses() {
                         </TableCell>
                         <TableCell className={isSortedColumn("status") ? "sorted-column-cell" : ""}>
                           <div className="flex flex-col gap-1 items-start">
-                            {parseStatusTags(course.statusTags).length > 0 ? (
-                                parseStatusTags(course.statusTags).map((tag) => (
+                            {parseStatusTags(course.statusTags).filter(tag => formatStatusBadge(tag) !== "ATTIVO").length > 0 ? (
+                                parseStatusTags(course.statusTags)
+                                  .filter(tag => formatStatusBadge(tag) !== "ATTIVO")
+                                  .map((tag) => (
                                   <StatusBadge
                                     key={tag}
                                     name={formatStatusBadge(tag)}

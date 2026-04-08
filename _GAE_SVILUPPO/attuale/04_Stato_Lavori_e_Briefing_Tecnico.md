@@ -241,7 +241,17 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 - Refactoring `activities-summary`: ora estrae tutto in tempo reale tramite STI aggregato ✅
 - Ambiente TypeScript: ZERO errori (`npx tsc --noEmit` passa con successo).
 
-**Stato Infrastruttura Logica:**
-Il backend è ora saldamente radicato sulle entità unificate `courses` e `enrollments`. La frammentazione passata è un ricordo e il debito tecnico massivo è stato estinto.
+**Riepilogo Sessione Fase 33 (Protocolli 094→107B) — 09/04/2026:**
+- **[F1-094]** Rimossa validazione conflict check backend (`routes.ts`) su POST/PATCH `/api/courses` ✅
+- **[F1-095/096]** Eliminati 7 record duplicati (3 Salsa + 4 Salsa/Pilates) dalla tabella `courses` ✅
+- **[F2-097]** Rimosso `window.confirm` di blocco conflitto slot in `CourseUnifiedModal.tsx` ✅
+- **[F2-098]** Fix `searchMember1` vuoto in modalità edit del modale iscritto ✅
+- **[F2-099/101/102]** Stabilizzato il workflow "Crea Copia": crash risolto, modale resta aperto sul clone, callback `onDuplicated` implementato ✅
+- **[F2-100]** Filtro badge "ATTIVO" rimosso dalla lista `courses.tsx` ✅
+- **[F2-103]** Banner giallo COPIA aggiunto in `CourseUnifiedModal.tsx` ✅
+- **[F2-104/105/106/107]** Campi `Giorno`, `Orario Inizio`, `Orario Fine`, `Studio` evidenziati in rosso in modalità COPIA ✅
+- **[F2-107B]** Badge calendario con colori pieni allineati alla legenda `ActivityColorLegend` ✅
 
+**Stato Infrastruttura Logica (Post Phase 33):**
+Il backend è saldamente radicato sulle entità unificate `courses` e `enrollments`. Il workflow di duplicazione corsi è ora stabile end-to-end. Il conflict check orario è stato rimosso intenzionalmente dal backend; la UI di copia è completamente guidata (banner + campi rossi) per prevenire errori operativi.
 

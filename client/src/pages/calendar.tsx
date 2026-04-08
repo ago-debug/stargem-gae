@@ -2071,9 +2071,8 @@ export default function CalendarPage() {
                                                             })()}
                                                             {evt.activityType && evt.activityType !== "course" && ACTIVITY_TYPE_COLORS[evt.activityType] && (
                                                               <span style={{
-                                                                backgroundColor: `${ACTIVITY_TYPE_COLORS[evt.activityType]}25`,
-                                                                color: ACTIVITY_TYPE_COLORS[evt.activityType],
-                                                                border: `1px solid ${ACTIVITY_TYPE_COLORS[evt.activityType]}60`
+                                                                backgroundColor: ACTIVITY_TYPE_COLORS[evt.activityType],
+                                                                color: "#ffffff",
                                                               }} className="px-1 py-0.5 rounded text-[9px] font-bold uppercase mt-1">
                                                                 {({
                                                                   allenamenti: "ALL",
@@ -2199,6 +2198,11 @@ export default function CalendarPage() {
                  if (typeof deleteCourseMutation !== 'undefined') {
                     deleteCourseMutation.mutate(id);
                  }
+              }}
+              onDuplicated={(newRecord) => {
+                // F2-102: mantiene il modale aperto aggiornando il parent con il nuovo record
+                setEditingCourse(newRecord as Course);
+                setEditForm(newRecord);
               }}
               onSuccess={() => {
                 setEditingCourse(null);

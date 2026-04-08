@@ -1,7 +1,22 @@
 # Ultimi Aggiornamenti Progetto "CourseManager"
-**Periodo di riferimento:** 23 Febbraio 2026 - 07 Aprile 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 09 Aprile 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
+
+---
+
+### 09 Aprile 2026 (Phase 33: Stabilizzazione UI Crea-Copia & Cleanup Backend Conflict)
+
+* **[F1-PROTOCOLLO-094] Rimosso Conflict Check Backend (POST/PATCH courses):** Eliminata la validazione anti-sovrapposizione slot dal backend (`server/routes.ts`) sugli endpoint `POST /api/courses` e `PATCH /api/courses/:id`. Il controllo bloccava salvataggi legittimi in scenari multi-sala e generava falsi negativi. Rimosso per consapevole scelta operativa; la validazione visiva resta a carico del frontend.
+* **[F1-PROTOCOLLO-095] DELETE Duplicati SALSA (3 record):** Rimossi direttamente dalla tabella `courses` 3 record duplicati di tipo "Salsa" generati da precedenti sessioni di test/duplicazione. Ripristinata la consistenza della lista attività.
+* **[F1-PROTOCOLLO-096] DELETE Duplicati SALSA/PILATES (4 record):** Rimossi ulteriori 4 record duplicati misti ("Salsa" e "Pilates") dalla tabella `courses`. La pulizia completa dei duplicati garantisce rendering corretto delle liste in `courses.tsx` e `activity-management-page.tsx`.
+* **[F2-PROTOCOLLO-097] Rimosso `window.confirm` Conflitto Slot (Frontend):** Eliminato il `window.confirm` che interrompeva il flusso di salvataggio in `CourseUnifiedModal.tsx` quando veniva rilevato un potenziale conflitto orario. L'UX è ora fluida e non bloccante; la responsabilità di validazione è delegata esclusivamente al backend REST.
+* **[F2-PROTOCOLLO-098] Fix Allievo Doppio in Modalità Edit (searchMember1 vuoto):** Corretto bug in `CourseUnifiedModal.tsx` per cui, all'apertura del modale in modalità edit, il campo `searchMember1` risultava vuoto anche se un allievo era già associato. Ora il campo viene pre-popolato correttamente con nome e cognome dell'iscritto esistente, evitando la doppia entry accidentale.
+* **[F2-PROTOCOLLO-099/101/102] Fix Crea Copia (Crash + Modale + onDuplicated):** Risolto un crash critico nel workflow "Crea Copia" di `CourseUnifiedModal.tsx`. (099) Il crash derivava da un accesso a `undefined` su `formData.id` dopo la duplicazione. (101) Corretta la logica che chiudeva il modale immediatamente dopo la duplicazione invece di mantenerlo aperto sul record clonato. (102) Implementato il callback `onDuplicated(newId)` per trasmettere l'ID del nuovo record clonato al componente padre (`courses.tsx`), consentendo l'invalidazione corretta della query e la riapertura automatica del modale sul clone.
+* **[F2-PROTOCOLLO-100] Filtro Badge ATTIVO in `courses.tsx`:** Rimosso il badge ridondante "ATTIVO" dalla visualizzazione nella lista corsi in `courses.tsx`. I corsi attivi non necessitano di un badge esplicito; il badge viene mostrato solo per stati diversi da "ATTIVO" (es. SOSPESO, COMPLETO), snellendo l'interfaccia visiva.
+* **[F2-PROTOCOLLO-103] Banner Giallo COPIA nel Modale:** Aggiunto un banner di avviso di colore giallo/ambra nella parte superiore del `CourseUnifiedModal.tsx` quando il modale si trova in modalità "COPIA". Il banner riporta la dicitura "📋 MODALITÀ COPIA — Stai modificando una copia del record originale" per evitare confusione operativa all'utente.
+* **[F2-PROTOCOLLO-104/105/106/107] Campi Rossi in Modalità COPIA:** Implementata la colorazione rosso dei campi chiave (`Giorno`, `Orario Inizio`, `Orario Fine`, `Studio`) nel `CourseUnifiedModal.tsx` quando il modale è in modalità COPIA. Il segnale visivo impone all'operatore di aggiornare consapevolmente i dati temporali prima di salvare il record duplicato, prevenendo conflitti accidentali.
+* **[F2-PROTOCOLLO-107B] Badge Calendario Colori Pieni Allineati Legenda:** Corretti i badge degli eventi nel `calendar.tsx` per utilizzare colori pieni (background solid) coerenti con la legenda colori dell'`ActivityColorLegend`. Eliminata la discrepanza visiva tra legenda e badge effettivi sulla griglia settimanale.
 
 ---
 

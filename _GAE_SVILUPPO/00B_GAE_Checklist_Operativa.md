@@ -9,6 +9,52 @@
 - [-] = NON NECESSARIO / GIÀ COPERTO
 
 ---
+
+[09/04 01:00] F1→PM: Esecuzione Protocollo 094. Rimosso conflict check backend POST/PATCH courses.
+               [x] Eliminata la validazione anti-sovrapposizione slot da `server/routes.ts` per POST/PATCH `/api/courses`.
+               [x] Il controllo generava falsi negativi in scenari multi-sala. Rimosso per scelta operativa consapevole.
+
+[09/04 01:05] F1→PM: Esecuzione Protocollo 095. DELETE duplicati SALSA.
+               [x] Rimossi 3 record duplicati di tipo "Salsa" dalla tabella `courses`.
+               [x] Ripristinata la consistenza della lista attività.
+
+[09/04 01:10] F1→PM: Esecuzione Protocollo 096. DELETE duplicati SALSA/PILATES.
+               [x] Rimossi 4 record duplicati misti ("Salsa" e "Pilates") dalla tabella `courses`.
+               [x] Rendering corretto delle liste in `courses.tsx` e `activity-management-page.tsx` ripristinato.
+
+[09/04 01:15] F2→PM: Protocollo 097 Eseguito. Rimosso window.confirm conflitto slot.
+               [x] Eliminato il `window.confirm` bloccante in `CourseUnifiedModal.tsx` sul rilevamento conflitto orario.
+               [x] Flusso di salvataggio ora fluido e non bloccante. Validazione delegata al backend REST.
+
+[09/04 01:20] F2→PM: Protocollo 098 Eseguito. Fix allievo doppio in modalità edit.
+               [x] Corretto bug: campo `searchMember1` vuoto all'apertura del modale in edit anche se allievo già associato.
+               [x] Ora il campo viene pre-popolato correttamente con nome e cognome dell'iscritto esistente.
+
+[09/04 01:25] F2→PM: Protocolli 099/101/102 Eseguiti. Fix Crea Copia (Crash + Modale + onDuplicated).
+               [x] (099) Risolto crash: accesso a `undefined` su `formData.id` post-duplicazione in `CourseUnifiedModal.tsx`.
+               [x] (101) Corretta logica che chiudeva il modale invece di mantenerlo aperto sul record clonato.
+               [x] (102) Implementato callback `onDuplicated(newId)` verso `courses.tsx` per invalidazione query e riapertura modale sul clone.
+
+[09/04 01:30] F2→PM: Protocollo 100 Eseguito. Filtro badge ATTIVO in courses.tsx.
+               [x] Rimosso badge ridondante "ATTIVO" dalla lista corsi in `courses.tsx`.
+               [x] Badge mostrato solo per stati diversi da "ATTIVO" (es. SOSPESO, COMPLETO).
+
+[09/04 01:35] F2→PM: Protocollo 103 Eseguito. Banner giallo COPIA nel modale.
+               [x] Aggiunto banner giallo/ambra in `CourseUnifiedModal.tsx` visibile solo in modalità COPIA.
+               [x] Testo: "📋 MODALITÀ COPIA — Stai modificando una copia del record originale".
+
+[09/04 01:40] F2→PM: Protocolli 104/105/106/107 Eseguiti. Campi rossi in modalità COPIA.
+               [x] (104) Campo `Giorno` evidenziato in rosso in modalità COPIA.
+               [x] (105) Campo `Orario Inizio` evidenziato in rosso in modalità COPIA.
+               [x] (106) Campo `Orario Fine` evidenziato in rosso in modalità COPIA.
+               [x] (107) Campo `Studio` evidenziato in rosso in modalità COPIA.
+               [x] Il segnale visivo impone all'operatore di aggiornare i dati temporali prima del salvataggio.
+
+[09/04 01:45] F2→PM: Protocollo 107B Eseguito. Badge calendario colori pieni allineati legenda.
+               [x] Corretti i badge eventi in `calendar.tsx` per usare colori pieni (background solid).
+               [x] Eliminata discrepanza visiva tra legenda `ActivityColorLegend` e badge effettivi sulla griglia.
+
+---
 [07/04 18:XX] F1→PM: Contratto API confermato. 
               activityType NON salvato su DB. 
               Richiesta aggiunta colonna activity_type.
