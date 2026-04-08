@@ -62,6 +62,10 @@
               [x] (B024) Parsing preventivo `categoryName` dall'API per bypassare il mancato match lookup con le liste custom.
               [x] (B025) Refactoring `parseStatusTags` per disinnescare la doppia serializzazione JSON di SQLite.
               [x] (B026) Header nominale "GENERE ALLENAMENTO/LEZIONE" dinamico nel modal prima colonna.
+[08/04 10:50] F1→PM: Esecuzione Protocollo 036. Fix DB Custom Lists e Serializzazione JSON.
+              [x] (B020) Rimossi i 5 cloni di test obsoleti dalla custom_list (id: 430-434).
+              [x] (B027, B029) Rimossa serializzazione JSON.stringify ridondante in createCourse/updateCourse.
+              [x] (B030) Creata ed inizializzata nuova custom_list "Tipologie Allenamenti" completa di 5 stringhe canoniche.
 
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.

@@ -810,6 +810,27 @@ export default function Elenchi() {
                 testIdPrefix="note-pagamenti"
               />
               <EditableListSection
+                title="Categorie Attività"
+                queryKey="/api/custom-lists/categorie"
+                apiPath="/api/custom-lists/categorie"
+                emptyMessage="Nessuna categoria definita"
+                testIdPrefix="categorie"
+              />
+              <EditableListSection
+                title="Canale di Acquisizione"
+                queryKey="/api/custom-lists/canale_di_acquisizione"
+                apiPath="/api/custom-lists/canale_di_acquisizione"
+                emptyMessage="Nessun canale di acquisizione definito"
+                testIdPrefix="canale-acquisizione"
+              />
+              <EditableListSection
+                title="Come ci ha conosciuto"
+                queryKey="/api/custom-lists/come_ci_ha_conosciuto"
+                apiPath="/api/custom-lists/come_ci_ha_conosciuto"
+                emptyMessage="Nessuna voce definita"
+                testIdPrefix="come-conosciuto"
+              />
+              <EditableListSection
                 title="Dettaglio Iscrizione"
                 queryKey="/api/enrollment-details"
                 apiPath="/api/enrollment-details"

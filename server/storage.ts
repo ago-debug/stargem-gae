@@ -2036,8 +2036,8 @@ export class DatabaseStorage implements IStorage {
       startDate: course.startDate ? (course.startDate instanceof Date ? course.startDate.toISOString().split('T')[0] : course.startDate) : null,
       endDate: course.endDate ? (course.endDate instanceof Date ? course.endDate.toISOString().split('T')[0] : course.endDate) : null,
       seasonId: course.seasonId || activeSeason?.id || null,
-      lessonType: course.lessonType ? JSON.stringify(course.lessonType) as any : null,
-      statusTags: course.statusTags ? JSON.stringify(course.statusTags) as any : null
+      lessonType: course.lessonType ? course.lessonType : null,
+      statusTags: course.statusTags ? course.statusTags : null
     };
     let result;
     try {
@@ -2074,8 +2074,8 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date(),
       startDate: course.startDate ? (course.startDate instanceof Date ? course.startDate.toISOString().split('T')[0] : course.startDate) : course.startDate,
       endDate: course.endDate ? (course.endDate instanceof Date ? course.endDate.toISOString().split('T')[0] : course.endDate) : course.endDate,
-      lessonType: course.lessonType ? JSON.stringify(course.lessonType) as any : undefined,
-      statusTags: course.statusTags ? JSON.stringify(course.statusTags) as any : undefined
+      lessonType: course.lessonType ? course.lessonType : undefined,
+      statusTags: course.statusTags ? course.statusTags : undefined
     };
 
     await db

@@ -1983,6 +1983,18 @@ export default function CalendarPage() {
                                             const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
                                             const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
 
+                                            const activityBadge = ({
+                                              course: "CRS",
+                                              allenamenti: "ALL",
+                                              prenotazioni: "IND", 
+                                              workshop: "WS",
+                                              domeniche: "DOM",
+                                              saggi: "SAG",
+                                              vacanze: "VAC",
+                                              campus: "CAM",
+                                              affitti: "AFT",
+                                            } as Record<string, string>)[(evt as any).activityType || (evt.rawPayload as any)?.activityType || "course"] ?? "CRS";
+
                                             return (
                                                 <div
                                                     key={evt.eventId}
@@ -2010,11 +2022,11 @@ export default function CalendarPage() {
                                                         <div className="absolute top-2 right-2 flex flex-col items-end gap-0.5 z-30">
                                                             <div className={`bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`} title={evt.categoryName || "CAT"}>
                                                                 {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" /> : <MapPin className="w-2.5 h-2.5" />}
-                                                                {evt.categoryName || (evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO")}
+                                                                {evt.categoryName || activityBadge}
                                                             </div>
                                                             <div className={`bg-white/80 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5 ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`}>
                                                                 {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" /> : <MapPin className="w-2.5 h-2.5" />}
-                                                                {evt.registryKey === "workshops" ? "WKS" : evt.registryKey === "courses" ? "CRS" : "AFFITTO"}
+                                                                {activityBadge}
                                                             </div>
                                                         </div>
                                                         <div className="font-bold text-[10px] mb-0.5 opacity-90 w-[calc(100%-40px)]">{evt.startTime} - {evt.endTime}</div>
