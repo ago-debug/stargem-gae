@@ -184,7 +184,7 @@ function Router() {
       <ProtectedRoute path="/admin" component={AdminPanel} />
       <ProtectedRoute path="/copilot" component={StubCopilot} />
       <ProtectedRoute path="/booking-services" component={BookingServices} />
-      <ProtectedRoute path="/prenotazioni-sale" component={StudioBookings} />
+      <ProtectedRoute path="/attivita/affitti" component={StudioBookings} />
       <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
       <ProtectedRoute path="/iscrizioni-pagamenti" component={IscrizioniPagamenti} />
       <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />

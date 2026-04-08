@@ -2050,14 +2050,21 @@ export default function CalendarPage() {
                                                         }}
                                                     >
                                                         <div className="absolute top-2 right-2 flex flex-col items-end gap-0.5 z-30">
-                                                            <div className={`bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`} title={evt.categoryName || "CAT"}>
-                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" /> : <MapPin className="w-2.5 h-2.5" />}
-                                                                {evt.categoryName || activityBadge}
-                                                            </div>
-                                                            <div className={`bg-white/80 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5 ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`}>
-                                                                {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" /> : <MapPin className="w-2.5 h-2.5" />}
-                                                                {activityBadge}
-                                                            </div>
+                                                            {(() => {
+                                                                const iconColor = evt.activityType && evt.activityType !== "course" && ACTIVITY_TYPE_COLORS[evt.activityType] ? ACTIVITY_TYPE_COLORS[evt.activityType] : undefined;
+                                                                return (
+                                                                    <>
+                                                                        <div className={`bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`} title={evt.categoryName || "CAT"}>
+                                                                            {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" style={iconColor ? { color: iconColor } : {}} /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" style={iconColor ? { color: iconColor } : {}} /> : <MapPin className="w-2.5 h-2.5" style={iconColor ? { color: iconColor } : {}} />}
+                                                                            {evt.categoryName || activityBadge}
+                                                                        </div>
+                                                                        <div className={`bg-white/80 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5 ${evt.registryKey === 'workshops' ? 'text-indigo-800' : evt.registryKey === 'courses' ? 'text-blue-800' : 'text-slate-800'}`}>
+                                                                            {evt.registryKey === "workshops" ? <Sparkles className="w-2.5 h-2.5" style={iconColor ? { color: iconColor } : {}} /> : evt.registryKey === "courses" ? <CalendarIcon className="w-2.5 h-2.5" style={iconColor ? { color: iconColor } : {}} /> : <MapPin className="w-2.5 h-2.5" style={iconColor ? { color: iconColor } : {}} />}
+                                                                            {activityBadge}
+                                                                        </div>
+                                                                    </>
+                                                                );
+                                                            })()}
                                                             {evt.activityType && evt.activityType !== "course" && ACTIVITY_TYPE_COLORS[evt.activityType] && (
                                                               <span style={{
                                                                 backgroundColor: `${ACTIVITY_TYPE_COLORS[evt.activityType]}25`,

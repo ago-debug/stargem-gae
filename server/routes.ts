@@ -2473,8 +2473,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       }
-
       const course = await storage.updateCourse(id, validatedData);
+
+      // Aggiorna enrollments se cambiano gli allievi
+      const { member1Id, member2Id } = req.body;
+      if (member1Id !== undefined || member2Id !== undefined) {
+        // Cancella enrollment esistenti
+        await db.delete(enrollments)
+          .where(eq(enrollments.courseId, id));
+        
+        // Reinserisci con i nuovi allievi
+        if (member1Id && member1Id !== "none") {
+          await db.insert(enrollments).values({
+            courseId: id,
+            memberId: parseInt(member1Id),
+            seasonId: course.seasonId || 1,
+          });
+        }
+        if (member2Id && member2Id !== "none") {
+          await db.insert(enrollments).values({
+            courseId: id,
+            memberId: parseInt(member2Id),
+            seasonId: course.seasonId || 1,
+          });
+        }
+      }
 
       // Sync to Google Calendar (async)
       try {
