@@ -636,12 +636,14 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       seasonId: formData.seasonId ? parseInt(formData.seasonId.toString()) : undefined,
     };
 
-    if (isEdit && course?.id) {
-      if (payload.seasonId !== course.seasonId && formData.seasonId) {
+    const targetId = formData.id || course?.id;
+    
+    if (targetId) {
+      if (targetId === course?.id && payload.seasonId !== course?.seasonId && formData.seasonId) {
           toast({ title: "Spostamento bloccato", description: "Per ragioni di integrità degli iscritti, non è possibile muovere un corso da una stagione all'altra. Se desideri il corso per un'altra stagione, usa invece il tasto 'Crea Copia (Duplica)'.", variant: "destructive" });
           return;
       }
-      updateMutation.mutate({ id: course.id, data: payload });
+      updateMutation.mutate({ id: targetId, data: payload });
     } else {
       createMutation.mutate(payload);
     }
