@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import { CourseDuplicationWizard } from "@/components/CourseDuplicationWizard";
+import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 import { useCustomListValues } from "@/hooks/use-custom-list";
 import { Combobox } from "@/components/ui/combobox";
 import { getStatusColor } from "@/components/multi-select-status";
@@ -867,10 +868,14 @@ export default function CalendarPage() {
     };
 
     const getCourseColor = (course: any) => {
-        const type = course.activityType || course.type || "course";
+        const type = course.activityType || 
+                     course.type || 
+                     (course as any).activityFamily || 
+                     course.rawPayload?.activityType ||
+                     "course";
         
         // Se NON è un corso normale → colore fisso
-        if (ACTIVITY_TYPE_COLORS[type]) {
+        if (ACTIVITY_TYPE_COLORS[type] && type !== "course") {
             const hex = ACTIVITY_TYPE_COLORS[type];
             return {
                 backgroundColor: `${hex}25`,
@@ -1688,6 +1693,9 @@ export default function CalendarPage() {
                                     ))}
                                 </SelectContent>
                             </Select>
+                        </div>
+                        <div className="shrink-0 hidden md:block">
+                            <ActivityColorLegend variant="popover" />
                         </div>
                     </div>
                 </div>

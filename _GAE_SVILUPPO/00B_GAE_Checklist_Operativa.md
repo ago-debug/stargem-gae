@@ -103,9 +103,14 @@
               [x] (B044) Sostituzione wrapper `div.grid` in `<>` per `ColoredCustomListsLoader` al fine di innescare l'unificazione e auto-grigliamento visivo delle custom lists.
               [x] (B045) Inserito state `isDuplicating` al modale unificato affinché alla duplicazione la query mantenga lo state aperto (re-idratato) sul copy record via ID di ritorno.
               [x] (B046) Emesso comando `touch server/routes.ts` per invalidamento cache Vercel/VPS (interfaccia frontend era già corretta al deploy).
+[08/04 14:15] F2→PM: Protocollo 060 Eseguito (Fix B045 critico sovrascrittura)
+              [x] Modificato `handleSubmit` in `CourseUnifiedModal.tsx` per eseguire fallback prioritario su `formData.id` rispetto al course passato in prop. Garantita immunità dell'evento `updateMutation` contro record di origine durante i salvataggi di iterazioni clonate.
               [x] (Route) Sradicate le 5 dichiarazioni di istanza `/categorie-X` da `App.tsx`.
               [x] (File) Eliminati permanentemente i file `.tsx` orfani correlati dalle pages per scongiurare frammentazione.
-              [x] (Build) Validata asetticità logica con `tsc --noEmit` (0 nuovi fault). Tracciato log su `02_Frontend_UI_e_Routing.md`.
+[08/04 14:26] F2→PM: Protocollo 063 Eseguito (Fix B043 residuo e Legenda)
+              [x] Creato ed esportato `ActivityColorLegend.tsx` con design polimorfico (`popover` / `card`).
+              [x] Inserito widget `ActivityColorLegend` negli header di `calendar.tsx` e in cima alle dashboard analytics su `attivita.tsx`.
+              [x] Perfezionata la funzione `getCourseColor` su `calendar.tsx` per espandere il fallback del `type` sui vettori nidificati `rawPayload` e bloccare il mapping categorie se `type !== "course"`, sbloccando le card "Salsa" e "Total Body".
 [08/04 12:50] F1→PM: Esecuzione Protocolli 052-053. Analisi Cleanup DB e Migrazione Campus.
               [x] (Task 1) Migrazione `campus_activities`: Le 2 righe superstiti ("Multisport" e "Danza") sono state riversate nella root table `courses` con type 'campus'.
               [x] (Task 2) Analisi Sicurezza: Fermata la rimozione tabelle ("Stop&Go") poiché `routes.ts` e `schema.ts` contengono ancora i relativi riferimenti ai moduli CRUD.
