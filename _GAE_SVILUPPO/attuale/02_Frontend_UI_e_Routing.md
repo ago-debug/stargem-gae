@@ -484,4 +484,6 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Cour
 
 > **Aggiornamento Architetturale (Parsing JSON API & UI Mapping):** Adottato `categoryName` come parametro nominale supplementare in transito dall'API root sulla pagina `activity-management-page.tsx`. Tale prop (aggiunto all'interfaccia `ActivityItem`) by-passa l'albero di dipendenza errato creato dalla separazione tra `custom_list_items` e le root `categories` nel rendering tabellare. Contestualmente, la prop `statusTags` proveniente da SQLite in "Double Stringified JSON" subisce un unpacking ricorsivo in `parseStatusTags()` per abbattere l'escaping nativo di drizzle ed elaborare correttamente gli array di stato sulle Badge del Riepilogo.
 
+> **Aggiornamento Architetturale (Calendar e Liste Custom):** Il mapping visivo del badge nel rendering calendario (`calendar.tsx`) è stato generalizzato dal dominio "courses" ad una mappa polimorfa per i campi testuali in miniatura, dipendente da `activityType`. Contestualmente, le Custom Lists di sistema hanno riorganizzato la gerarchia UI in `elenchi.tsx`, traslando i descrittori "Categorie", "Canale" e "Come ci ha conosciuto" verso sub-tab unificate in `Elenchi Colorati Multi`.
+
 <!-- --- FINE SORGENTE: attuale/06_GAE_Route_Audit_e_Stato.md --- -->

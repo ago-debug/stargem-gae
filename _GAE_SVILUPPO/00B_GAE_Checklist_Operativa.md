@@ -66,6 +66,11 @@
               [x] (B020) Rimossi i 5 cloni di test obsoleti dalla custom_list (id: 430-434).
               [x] (B027, B029) Rimossa serializzazione JSON.stringify ridondante in createCourse/updateCourse.
               [x] (B030) Creata ed inizializzata nuova custom_list "Tipologie Allenamenti" completa di 5 stringhe canoniche.
+[08/04 11:00] F2→PM: Task 037 Completato. Fix Multiplo B035-B034-B030-B031-B032-B033.
+              [x] (B035) Rimozione prefisso "STATE:" sui badge in `activity-management-page.tsx`.
+              [x] (B034) Mappatura dinamica `activityBadge` in `calendar.tsx` basata su `activityType`.
+              [x] (B030) Separazione del load lista dropdown tipologia lezioni tra "allenamenti" e "prenotazioni".
+              [x] (B031, B032, B033) Trasferimento esplicito ed inserimento dei blocchi "Categorie", "Canale" e "Come ci ha conosciuto" sotto "Elenchi Colorati Multi".
 
 ## 8. Security by Design & Matrix dei Ruoli (Phase 28.5)
 - [x] Smantellamento dei 23 sottomenù obsoleti e cablaggio matematico delle 30 viste operative definitive in `utenti-permessi.tsx`.
