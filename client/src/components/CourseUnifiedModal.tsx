@@ -397,7 +397,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const livelli = useCustomListValues("livello");
   const fasceEta = useCustomListValues("fascia_eta");
   const numeroPersone = useCustomListValues("numero_persone");
-  const gruppiCampus = useCustomListValues("gruppi_campus");
+  const gruppiCampus = useCustomListValues("campus");
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({ queryKey: ["/api/activity-statuses"] });
   const baseStati = ["ATTIVO", "IN PROGRAMMA", "COMPLETO", "ANNULLATO"];
   const finalStati = activityStatuses && activityStatuses.length > 0 ? [...activityStatuses].filter(s => s.active).sort((a,b)=>String(a.name).localeCompare(String(b.name), undefined, {numeric: true})).map(s => s.name) : baseStati;
@@ -1190,7 +1190,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
     <CustomListManagerDialog listType="livello" title="Gestione Livelli" open={isLivelloModalOpen} onOpenChange={setIsLivelloModalOpen} />
     <CustomListManagerDialog listType="fascia_eta" title="Gestione Fasce d'Età" open={isFasciaEtaModalOpen} onOpenChange={setIsFasciaEtaModalOpen} />
-    <CustomListManagerDialog listType="gruppi_campus" title="Gestione Gruppi Campus" open={isGruppiCampusModalOpen} onOpenChange={setIsGruppiCampusModalOpen} />
+    <CustomListManagerDialog listType="campus" title="Gestione Gruppi Campus" open={isGruppiCampusModalOpen} onOpenChange={setIsGruppiCampusModalOpen} />
     <CustomListManagerDialog listType="pacchetti_prenotazioni" title="Gestione Pacchetti Prenotazioni" open={isPacchettiModalOpen} onOpenChange={setIsPacchettiModalOpen} />
     <CustomListManagerDialog listType="numero_persone" title="Gestione Numero Persone" open={isNumeroPersoneModalOpen} onOpenChange={setIsNumeroPersoneModalOpen} />
     <QuickMemberAddModal isOpen={isQuickMemberAddOpen} onOpenChange={setIsQuickMemberAddOpen} defaultRole={quickMemberTarget.includes('instructor') ? "Staff/Insegnanti" : "Non Tesserato"} onSuccess={(id) => {
