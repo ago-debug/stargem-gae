@@ -2044,48 +2044,16 @@ export default function CalendarPage() {
                                                         }}
                                                     >
                                                         <div className="absolute top-2 right-2 flex flex-col items-end gap-0.5 z-30">
-                                                            {(() => {
-                                                                const iconColor = evt.activityType && ACTIVITY_TYPE_COLORS[evt.activityType]
-                                                                    ? ACTIVITY_TYPE_COLORS[evt.activityType]
-                                                                    : "#1e40af";
-                                                                const BadgeIcon =
-                                                                    evt.activityType === "allenamenti" ? Activity :
-                                                                    evt.activityType === "prenotazioni" ? User :
-                                                                    evt.activityType === "workshop" ? Sparkles :
-                                                                    evt.activityType === "campus" ? MapPin :
-                                                                    evt.registryKey === "workshops" ? Sparkles :
-                                                                    CalendarIcon;
-
-                                                                return (
-                                                                    <>
-                                                                        <div className="bg-white/60 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase max-w-[65px] truncate" style={{ color: iconColor }} title={evt.categoryName || "CAT"}>
-                                                                            <BadgeIcon className="w-2.5 h-2.5" style={{ color: iconColor }} />
-                                                                            {evt.categoryName || activityBadge}
-                                                                        </div>
-                                                                        <div className="bg-white/80 px-1 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5 uppercase shadow-sm border border-black/5" style={{ color: iconColor }}>
-                                                                            <BadgeIcon className="w-2.5 h-2.5" style={{ color: iconColor }} />
-                                                                            {activityBadge}
-                                                                        </div>
-                                                                    </>
-                                                                );
-                                                            })()}
-                                                            {evt.activityType && evt.activityType !== "course" && ACTIVITY_TYPE_COLORS[evt.activityType] && (
-                                                              <span style={{
-                                                                backgroundColor: ACTIVITY_TYPE_COLORS[evt.activityType],
-                                                                color: "#ffffff",
-                                                              }} className="px-1 py-0.5 rounded text-[9px] font-bold uppercase mt-1">
-                                                                {({
-                                                                  allenamenti: "ALL",
-                                                                  prenotazioni: "IND",
-                                                                  workshop: "WS",
-                                                                  domeniche: "DOM",
-                                                                  saggi: "SAG",
-                                                                  vacanze: "VAC",
-                                                                  campus: "CAM",
-                                                                  affitti: "AFT",
-                                                                } as Record<string, string>)[evt.activityType]}
-                                                              </span>
-                                                            )}
+                                                            <span style={{
+                                                              backgroundColor: ACTIVITY_TYPE_COLORS[evt.activityType] || ACTIVITY_TYPE_COLORS["course"] || "#1e40af",
+                                                              color: "#ffffff",
+                                                              borderRadius: "4px",
+                                                              padding: "1px 5px",
+                                                              fontSize: "10px",
+                                                              fontWeight: "bold"
+                                                            }}>
+                                                              {activityBadge}
+                                                            </span>
                                                         </div>
                                                         <div className="font-bold text-[10px] mb-0.5 opacity-90 w-[calc(100%-40px)]">{evt.startTime} - {evt.endTime}</div>
                                                         <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[30px] break-normal overflow-hidden">{evt.title}</div>
