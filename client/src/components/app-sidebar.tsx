@@ -110,6 +110,11 @@ const registrationItems = [
 // 2. AMMINISTRAZIONE & CASSA
 const accountingItems = [
   {
+    title: "Quote e Promo",
+    url: "/quote-promo",
+    icon: BadgePercent,
+  },
+  {
     title: "Lista Pagamenti",
     url: "/pagamenti",
     icon: Wallet,
@@ -206,13 +211,7 @@ const secretariatItems = [
 ];
 
 // 5. CONFIGURAZIONI CORE
-const configItems = [
-  {
-    title: "Quote e Promo",
-    url: "/quote-promo",
-    icon: BadgePercent,
-  },
-];
+const configItems: any[] = [];
 
 const adminItems = [
   {

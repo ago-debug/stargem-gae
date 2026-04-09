@@ -22,9 +22,18 @@ export type ExpandedAgreement = InstructorAgreement & {
    baseAmount?: number | string;
 };
 
-export function AccordiTab() {
+interface AccordiTabProps {
+  seasonId: number | "active";
+}
+
+export function AccordiTab({ seasonId }: AccordiTabProps) {
   const { data: agreements, isLoading, error } = useQuery<ExpandedAgreement[]>({
-    queryKey: ["/api/instructor-agreements", { active: true }],
+    queryKey: ["/api/instructor-agreements", seasonId, { active: true }],
+    queryFn: async () => {
+      const res = await fetch(`/api/instructor-agreements?seasonId=${seasonId}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+      return res.json();
+    },
     retry: 1
   });
 

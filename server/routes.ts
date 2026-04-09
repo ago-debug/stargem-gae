@@ -495,6 +495,26 @@ async function seedParticipantCategories() {
   }
 }
 
+
+  async function resolveSeason(reqQuery: any) {
+    let seasonId = reqQuery.seasonId;
+    let startDate = reqQuery.startDate;
+    let endDate = reqQuery.endDate;
+    
+    if (seasonId === 'active') {
+      const { db } = await import('./db');
+      const { seasons } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+      const [activeSeason] = await db.select().from(seasons).where(eq(seasons.active, true)).limit(1);
+      if (activeSeason) {
+        seasonId = activeSeason.id;
+        startDate = activeSeason.startDate.toISOString();
+        endDate = activeSeason.endDate.toISOString();
+      }
+    }
+    return { seasonId, startDate, endDate };
+  }
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const { db } = await import("./db");
   const { sql } = await import("drizzle-orm");
@@ -6047,7 +6067,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================
   app.get("/api/promo-rules", isAuthenticated, async (req, res) => {
     try {
-      res.json(await storage.getPromoRules(req.query));
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      res.json(await storage.getPromoRules(q));
     } catch(err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -6143,7 +6164,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================
   app.get("/api/carnet-wallets", isAuthenticated, async (req, res) => {
     try {
-      res.json(await storage.getCarnetWallets(req.query));
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      res.json(await storage.getCarnetWallets(q));
     } catch(err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -6183,7 +6205,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================
   app.get("/api/instructor-agreements", isAuthenticated, async (req, res) => {
     try {
-      res.json(await storage.getInstructorAgreements(req.query));
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      res.json(await storage.getInstructorAgreements(q));
     } catch(err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -6273,7 +6296,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/accounting-periods", isAuthenticated, async (req, res) => {
     try {
-      res.json(await storage.getAccountingPeriods(req.query));
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      res.json(await storage.getAccountingPeriods(q));
     } catch(err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -6429,6 +6453,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==========================================
   // PRICING RULES (F1-008)
   // ==========================================
+
+  app.get("/api/price-matrix", isAuthenticated, async (req, res) => {
+    try {
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      res.json(await storage.getPriceMatrix(q));
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
 
   app.get("/api/pricing-rules", isAuthenticated, async (req, res) => {
     try {

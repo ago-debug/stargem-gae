@@ -3537,6 +3537,10 @@ export class DatabaseStorage implements IStorage {
     if (query.targetType) conditions.push(eq(promoRules.targetType, query.targetType));
     if (query.search) conditions.push(like(promoRules.code, `%${query.search}%`));
     
+    // date range filtering
+    if (query.startDate) conditions.push(gte(promoRules.validFrom, query.startDate));
+    if (query.endDate) conditions.push(lte(promoRules.validTo, query.endDate));
+    
     const results = await db.select().from(promoRules)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(promoRules.createdAt));
@@ -3595,6 +3599,10 @@ export class DatabaseStorage implements IStorage {
     if (query.active !== undefined) conditions.push(eq(carnetWallets.isActive, query.active === "true"));
     if (query.memberId) conditions.push(eq(carnetWallets.memberId, parseInt(query.memberId)));
     if (query.type) conditions.push(eq(carnetWallets.walletType, query.type));
+    
+    // date range filtering
+    if (query.startDate) conditions.push(gte(carnetWallets.purchasedAt, new Date(query.startDate)));
+    if (query.endDate) conditions.push(lte(carnetWallets.purchasedAt, new Date(query.endDate)));
     
     if (query.expiring) {
       const targetDate = new Date();
@@ -3835,6 +3843,7 @@ export class DatabaseStorage implements IStorage {
   async getAccountingPeriods(query: any) {
     let conds = [];
     if (query.year) conds.push(eq(accountingPeriods.year, parseInt(query.year)));
+    if (query.seasonId) conds.push(eq(accountingPeriods.seasonId, parseInt(query.seasonId)));
     if (query.isClosed !== undefined) conds.push(eq(accountingPeriods.isClosed, query.isClosed === "true"));
     return await db.select().from(accountingPeriods)
       .where(conds.length > 0 ? and(...conds) : undefined)

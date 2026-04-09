@@ -3,7 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import QuoteListini from "@/pages/quote-listini";
 
-export function ListinoTab() {
+interface ListinoTabProps {
+  seasonId: number | "active";
+}
+
+export function ListinoTab({ seasonId }: ListinoTabProps) {
   const [selectedType, setSelectedType] = useState("adulti");
 
   const activityTypes = [
@@ -39,7 +43,7 @@ export function ListinoTab() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <QuoteListini activityType={selectedType} embeddedMode={true} />
+          <QuoteListini activityType={selectedType} embeddedMode={true} seasonId={seasonId} />
         </CardContent>
       </Card>
     </div>
