@@ -25,7 +25,11 @@ export type ExpandedCarnet = CarnetWallet & {
    maxUses?: number;
 };
 
-export function CarnetTab() {
+interface CarnetTabProps {
+  seasonId: number | "active";
+}
+
+export function CarnetTab({ seasonId }: CarnetTabProps) {
   const [filter, setFilter] = useState("all");
   const [useModalOpen, setUseModalOpen] = useState(false);
   const [selectedCarnet, setSelectedCarnet] = useState<ExpandedCarnet | null>(null);
@@ -73,12 +77,19 @@ export function CarnetTab() {
     calculatePrice();
   }, [selectedGroupSize, selectedLocationType, selectedCarnet, useModalOpen]);
 
-  const { data: instructors } = useQuery<Member[]>({
+  const { data: rawInstructors } = useQuery<any>({
     queryKey: ["/api/members?participantType=INSEGNANTE"],
   });
+  const instructorsList = rawInstructors?.members ?? rawInstructors?.data ?? rawInstructors ?? [];
+  const safeInstructors: Member[] = Array.isArray(instructorsList) ? instructorsList : [];
 
   const { data: carnets, isLoading, error } = useQuery<ExpandedCarnet[]>({
-    queryKey: ["/api/carnet-wallets"],
+    queryKey: ["/api/carnet-wallets", seasonId],
+    queryFn: async () => {
+      const res = await fetch(`/api/carnet-wallets?seasonId=${seasonId}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+      return res.json();
+    },
     retry: 1
   });
 
@@ -177,10 +188,10 @@ export function CarnetTab() {
                 else if (percent >= 70) barColor = "bg-amber-500";
                 if (carnet.status === 'exhausted') barColor = "bg-slate-400";
 
-                const daysLeft = carnet.expiresAt ? differenceInDays(new Date(carnet.expiresAt), new Date()) : 999;
+                const daysLeft = carnet.expiresAt ? differenceInDays(new Date(carnet.expiresAt), new Date()) : null;
                 let badgeColor = "bg-green-100 text-green-800";
-                if (daysLeft < 10) badgeColor = "bg-red-100 text-red-800 border-red-300";
-                else if (daysLeft <= 30) badgeColor = "bg-amber-100 text-amber-800 border-amber-300";
+                if (daysLeft !== null && daysLeft < 10) badgeColor = "bg-red-100 text-red-800 border-red-300";
+                else if (daysLeft !== null && daysLeft <= 30) badgeColor = "bg-amber-100 text-amber-800 border-amber-300";
 
                 const grpSizeNum = carnet.groupSize || 1;
                 const groupLabel = grpSizeNum === 1 ? "Singola" : (grpSizeNum === 2 ? "Coppia" : `Gruppo ${grpSizeNum}`);
@@ -265,7 +276,7 @@ export function CarnetTab() {
                      <Select value={instructorId} onValueChange={setInstructorId}>
                         <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
                         <SelectContent>
-                           {instructors?.map(i => (
+                           {safeInstructors.map((i: Member) => (
                               <SelectItem key={i.id} value={String(i.id)}>{i.firstName} {i.lastName}</SelectItem>
                            ))}
                         </SelectContent>

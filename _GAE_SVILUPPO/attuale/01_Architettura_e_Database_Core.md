@@ -470,3 +470,40 @@ Estesa l'architettura dei wallet per gestire scenari custom, maggiorazioni compl
 - `carnet_wallets`: Aggiunti i campi avanzati `group_size`, `location_type`, `price_per_unit`, `total_paid` e `bonus_units` per tracciare il numero di allievi in un pack, l'eventuale sede esterna (domicilio) e i pacchetti pre-pagati omaggio.
 - `pricing_rules`: Nuova tabella rules-engine per il calcolo dinamico. Consente configurazione di override scalari (es: +5€ per allievo extra over 3, lezione omaggio per fine pack, maggiorazione domicilio +10€ o +100€).
 - `price_matrix`: Popolata programmaticamente come base-truth con 22 varianti di prezzo fisse per lezioni individuali private (in sede, domicilio, coppia e aerea) e per gli affitti location (singoli, pack e per l'intera accademia).
+
+---
+
+## 9. Mappatura Front-end Login vs Database (Suite StarGem)
+Questa sezione decodifica la relazione tra i moduli commerciali mostrati sulla schermata di **Login** ("La Suite StarGem") e l'architettura tecnica del database:
+
+| Dicitura Login | Descrizione a Schermo | Tabelle DB di Riferimento |
+| :--- | :--- | :--- |
+| **`GemTeam`** | *Team & HR* | Si appoggia a `users` e `user_roles` per gli accessi fisici, e `staff_rates` per le paghe. |
+| **`Gemory`** | *Project Manager* | Comunicazione p2p: `todos`, `team_notes`, `team_comments`. |
+| **`Gemdario`** | *Calendario* | Motore STI: Interroga brutalmente `courses` e `enrollments`. |
+| **`BookGem`** | *Aule & Booking* | Interroga `studios` e `studio_bookings`. |
+| **`MedGem`** | *Studio Medico* | Alimentato in toto da `medical_certificates` e `members`. |
+| **`Clarissa`** | *CRM & Marketing* | Attualmente legge i tag da `members`. Predisposto in futuro per logiche DEM. |
+| **`GemStaff`** | *Staff Manager* | Modulo in divenire per automatizzare marketing, amministrazione e conformità burocratica collaboratori. |
+| **`TeoCopilot`** | *AI Aziendale* | Read-only. Genera query SQL o supporto alle UI tramite AI e `knowledge`. |
+
+---
+
+## 10. Il Potenziale Inespresso: Integrazioni Periferiche (Roadmap)
+Il motore centrale è pronto. Per scalare SaaS al 100%, la roadmap prevede l'implementazione periferica di questi 5 nuovi moduli (i "pezzettini" futuri):
+
+1. **CRM e Marketing Automation (Clarissa Attiva):**
+   *Manca:* `marketing_campaigns`, `email_logs_history`, `automation_rules`.
+   *Scope:* Invio automatico SMS per certificati scaduti o email di re-engagement dopo inattività.
+2. **Modulistica e Firma Digitale Front-Desk (Kiosk Mode):**
+   *Manca:* `member_forms_submissions` (JSON payload + firma) e UI su iPad.
+   *Scope:* Sostituzione cartacea per consensi Privacy, GDPR, Anamnesi Sportiva, agganciati nativamente a `member_id`.
+3. **Gestione Scorte, Buvette e POS:**
+   *Manca:* `inventory_items`, `stock_movements`.
+   *Scope:* Vendita prodotti fisici (Gatorade, magliette) scalando quantità scorte, agganciabile al Borsellino Elettronico del membro.
+4. **GemStaff (Motore HR e Conformità Collaboratori):**
+   *Manca:* `staff_shifts`, `payslips`, `staff_contracts_compliance`.
+   *Scope:* Trasformare la mera anagrafica collaboratori in un motore digitale integrato. Automatizzerà la conformità burocratica (es. controllo durc, scadenze contratti sportivi), calcolo cedolini presenze live e marketing/reclutamento risorse umane dell'accademia.
+5. **L'Area Personale Cliente (Self-Service Mobile):**
+   *Manca:* Modulo Client-Facing (App/Web).
+   *Scope:* Il cliente si autentica, paga una `quote` arretrata con Stripe e si prenota autonomamente un posto in un `course`.

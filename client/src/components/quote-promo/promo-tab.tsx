@@ -21,14 +21,23 @@ const getTargetBadgeColor = (target: string) => {
   }
 };
 
-export function PromoTab() {
+interface PromoTabProps {
+  seasonId: number | "active";
+}
+
+export function PromoTab({ seasonId }: PromoTabProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPromo, setEditingPromo] = useState<PromoRule | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: promos, isLoading, error } = useQuery<PromoRule[]>({
-    queryKey: ["/api/promo-rules"],
+    queryKey: ["/api/promo-rules", seasonId],
+    queryFn: async () => {
+      const res = await fetch(`/api/promo-rules?seasonId=${seasonId}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+      return res.json();
+    },
     retry: 1
   });
 

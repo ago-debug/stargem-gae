@@ -33,13 +33,17 @@ export function LezioneSpotDialog() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: members, isLoading: loadingMembers } = useQuery<Member[]>({
+  const { data: rawMembers, isLoading: loadingMembers } = useQuery<any>({
     queryKey: ["/api/members"],
   });
+  const membersList = rawMembers?.members ?? rawMembers?.data ?? rawMembers ?? [];
+  const safeMembers: Member[] = Array.isArray(membersList) ? membersList : [];
 
-  const { data: instructors } = useQuery<Member[]>({
+  const { data: rawInstructors } = useQuery<any>({
     queryKey: ["/api/members?participantType=INSEGNANTE"],
   });
+  const instructorsList = rawInstructors?.members ?? rawInstructors?.data ?? rawInstructors ?? [];
+  const safeInstructors: Member[] = Array.isArray(instructorsList) ? instructorsList : [];
 
   const { data: paymentMethods } = useQuery<any[]>({
     queryKey: ["/api/custom-list-items/metodi-pagamento"],
@@ -51,14 +55,14 @@ export function LezioneSpotDialog() {
   });
 
   // Derived filtered members
-  const filteredMembers = members?.filter((m) => {
+  const filteredMembers = safeMembers.filter((m) => {
     if (!memberSearchQuery) return true;
     const lowerQuery = memberSearchQuery.toLowerCase();
     const fullName = `${m.firstName} ${m.lastName}`.toLowerCase();
     return fullName.includes(lowerQuery) || m.fiscalCode?.toLowerCase().includes(lowerQuery);
   }) || [];
 
-  const selectedMemberObj = members?.find(m => m.id === memberId);
+  const selectedMemberObj = safeMembers.find(m => m.id === memberId);
 
   useEffect(() => {
     // Auto-calculate base amount
@@ -163,7 +167,7 @@ export function LezioneSpotDialog() {
                 <Select value={instructorId} onValueChange={setInstructorId}>
                    <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
                    <SelectContent>
-                      {instructors?.map(i => (
+                      {safeInstructors.map(i => (
                          <SelectItem key={i.id} value={String(i.id)}>{i.firstName} {i.lastName}</SelectItem>
                       ))}
                    </SelectContent>

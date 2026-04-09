@@ -9,11 +9,20 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Building2, ChevronDown, ChevronRight, Plus, Users, Landmark, Shield, GraduationCap, Building, Briefcase } from "lucide-react";
 import type { CompanyAgreement } from "@shared/schema";
 
-export function ConvenzioniTab() {
+interface ConvenzioniTabProps {
+  seasonId: number | "active";
+}
+
+export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
   const [filter, setFilter] = useState("all");
 
   const { data: convenzioni, isLoading } = useQuery<CompanyAgreement[]>({
-    queryKey: ["/api/company-agreements", { active: true }],
+    queryKey: ["/api/company-agreements", seasonId, { active: true }],
+    queryFn: async () => {
+      const res = await fetch(`/api/company-agreements?seasonId=${seasonId}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+      return res.json();
+    },
   });
 
   const filteredConvenzioni = convenzioni?.filter(c => filter === "all" || c.companyType === filter);

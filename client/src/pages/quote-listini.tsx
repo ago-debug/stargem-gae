@@ -39,6 +39,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 interface QuoteListiniProps {
     activityType?: string;
     embeddedMode?: boolean;
+    seasonId?: number | "active";
 }
 
 export default function QuoteListini(props: QuoteListiniProps) {
@@ -53,9 +54,9 @@ export default function QuoteListini(props: QuoteListiniProps) {
 
     // Query to fetch initial list data
     const { data: gridData = [], isLoading } = useQuery<CourseQuotesGrid[]>({
-        queryKey: ["/api/course-quotes-grid", activityType],
+        queryKey: ["/api/course-quotes-grid", activityType, props.seasonId || "active"],
         queryFn: async () => {
-            const res = await apiRequest("GET", `/api/course-quotes-grid?activityType=${activityType}`);
+            const res = await apiRequest("GET", `/api/course-quotes-grid?activityType=${activityType}&seasonId=${props.seasonId || "active"}`);
             return res;
         }
     });

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { insertUserSchema } from "@shared/schema";
-import { Users, Kanban, Stethoscope, Building, Sparkles, CalendarDays, Megaphone, Volume2, VolumeX } from "lucide-react";
+import { Users, Kanban, Stethoscope, Building, Sparkles, CalendarDays, Megaphone, Volume2, VolumeX, BriefcaseBusiness } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 const logoStarGem = "/logo_stargem.png";
 
@@ -206,6 +206,7 @@ export default function AuthPage() {
                         { name: "BookGem", icon: Building, desc: "Aule & Booking" },
                         { name: "MedGem", icon: Stethoscope, desc: "Studio Medico" },
                         { name: "Clarissa", icon: Megaphone, desc: "CRM & Marketing" },
+                        { name: "GemStaff", icon: BriefcaseBusiness, desc: "Staff Manager" },
                         { name: "TeoCopilot", icon: Sparkles, desc: "AI Aziendale" }
                     ].map((mod, idx) => (
                         <div key={idx} className="flex flex-col items-center justify-center p-4 bg-white/80 backdrop-blur-md rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-w-[120px] max-w-[140px] flex-1 group">

@@ -2224,6 +2224,7 @@ export const accountingPeriods = mysqlTable(
   "accounting_periods",{
   id: int("id").autoincrement().primaryKey(),
   tenantId: int("tenant_id").notNull().default(1),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: 'set null' }),
   year: smallint("year").notNull(),
   month: tinyint("month").notNull(),
   label: varchar("label",{length:50}).notNull(),
