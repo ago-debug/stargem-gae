@@ -5,8 +5,14 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
-### 09 Aprile 2026 (Phase 33: Stabilizzazione UI Crea-Copia & Cleanup Backend Conflict)
+### 09 Aprile 2026 (Phase 33: Stabilizzazione UI Crea-Copia, Calendario & Cleanup Backend Conflict)
 
+* **[F2-PROTOCOLLO-109/110] UI Refinement Calendario:** Rimozione icone superflue dalle card del calendario; spostamento badge identificativo ([CRS], [ALL], ecc.) in colonna overlay (vertical-stack) nell'angolo in alto a destra per formattazione responsiva senza collisioni testo.
+* **[FRONTEND-FIX] Styling Cromatico Avanzato & Bordi Doppi Calendario:**
+  * **Corsi Standard:** Implementata l'ereditarietà di colore tailwind dalla palette card alla pillola Categoria (es. testo Categoria Azzurro su Sfondo Azzurro); assegnato formalmente il grigio morbido `slate-400` al modulo badge Corsi ([CRS]).
+  * **Attività Ausiliarie (Non-Corsi):** Isolamento visivo massiccio dalle card ordinarie tramite implementazione dinamica di una **doppia banda tratteggiata** sul fianco sinistro (spessore maggiorato 3px per linea), forzata all'assunzione esatta del colore indicato dalla Legenda Generale.
+* **[FRONTEND-FIX] Hydration Glitch Colori (Refresh Calendario):** Disinnescata e distrutta la render logic di fallback `legacy` durante i caricamenti asincroni React Query. La transizione disordinata "Colori Hash Casuali -> Colore Definitivo" visibile al refresh (FOUC visual glitch) è stata bonificata forzando l'attesa stretta dello stream `USE_STI_BRIDGE`, garantendo UI immacolata al boot.
+* **[F2-PROTOCOLLO-108] Iscritti Allenamenti:** Aggiunta dinamicamente la colonna "Insegnante" nel modulo `iscritti_per_attivita.tsx` per il sub-tab Allenamenti, valorizzandola direttamente dal payload `courseInstructorName` nativo.
 * **[F1-PROTOCOLLO-094] Rimosso Conflict Check Backend (POST/PATCH courses):** Eliminata la validazione anti-sovrapposizione slot dal backend (`server/routes.ts`) sugli endpoint `POST /api/courses` e `PATCH /api/courses/:id`. Il controllo bloccava salvataggi legittimi in scenari multi-sala e generava falsi negativi. Rimosso per consapevole scelta operativa; la validazione visiva resta a carico del frontend.
 * **[F1-PROTOCOLLO-095] DELETE Duplicati SALSA (3 record):** Rimossi direttamente dalla tabella `courses` 3 record duplicati di tipo "Salsa" generati da precedenti sessioni di test/duplicazione. Ripristinata la consistenza della lista attività.
 * **[F1-PROTOCOLLO-096] DELETE Duplicati SALSA/PILATES (4 record):** Rimossi ulteriori 4 record duplicati misti ("Salsa" e "Pilates") dalla tabella `courses`. La pulizia completa dei duplicati garantisce rendering corretto delle liste in `courses.tsx` e `activity-management-page.tsx`.
