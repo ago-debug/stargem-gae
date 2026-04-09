@@ -910,7 +910,8 @@ export default function CalendarPage() {
 
     // --- UNIFIED EVENT MAPPER (Registro Centrale Source of Truth) ---
     const unifiedEvents = useMemo<CalendarEvent[]>(() => {
-        if (USE_STI_BRIDGE && unifiedBridgeActivities) {
+        if (USE_STI_BRIDGE) {
+            if (!unifiedBridgeActivities) return [];
             console.log("STI MODE ACTIVE");
             console.log("Unified Activities Input:", unifiedBridgeActivities.length);
             
