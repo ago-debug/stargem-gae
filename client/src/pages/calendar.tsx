@@ -2056,7 +2056,7 @@ export default function CalendarPage() {
                                                                         </div>
                                                                     )}
                                                                     <span style={{
-                                                                      backgroundColor: currentActType === "course" ? "#64748b" : (ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"]),
+                                                                      backgroundColor: currentActType === "course" ? "#94a3b8" : (ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"]),
                                                                       color: "#ffffff",
                                                                       borderRadius: "3px",
                                                                       padding: "2px 5px",
