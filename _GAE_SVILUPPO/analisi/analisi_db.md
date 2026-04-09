@@ -2,6 +2,26 @@
 
 In base allo stato attuale dell'infrastruttura (unificazione STI completata, Modulo Quote e Promo implementato) e a quanto discusso, ecco l'analisi delle prossime implementazioni suggerite per finalizzare l'efficienza del gestionale e completare la migrazione da Excel.
 
+## 0. Contesto Attuale: Dimensionamento Database
+
+Ecco una "fotografia" cruda e veloce dei numeri attuali del database in tempo reale sul main locale:
+
+| Entità / Modulo | Tabella Fisica DB | Ruolo e Funzione | Totale Record |
+| :--- | :--- | :--- | :---: |
+| **Membri e Anagrafiche** | `members` | Profilo centrale di tutti gli iscritti, staff, minorenni e PT. | **9.504** |
+| **Corsi e Attività STI** | `courses` | Classi, Workshop e Campus fusi nell'unico motore erogativo. | **421** |
+| **Iscrizioni (Enrollments)**| `enrollments` | L'aggancio tra l'allievo (`member`) e una classe (`course`). | **13** |
+| **Pagamenti (Libro Mastro)** | `payments` | Registratore di cassa globale per qualsiasi transazione economica. | **30** |
+| **Regole e Sconti Promo** | `promo_rules` | Codici promozionali, sconti Black Friday o % cumulative. | **50** |
+| **Aule / Spazi Fisici** | `studios` | Le sale della struttura (es. Sala 1, Sala Pesi, Studio Medico). | **13** |
+| **Accordi Insegnanti** | `instructor_agreements`| Relazione tra `members` (docenti), % di paga e stagione. | **9** |
+| **Carnet Prepagati** | `carnet_wallets` | Portafogli ingressi a scalare acquistati dagli iscritti. | **0** |
+| **Prenotazioni Aule Extra** | `studio_bookings` | Feste, noleggi sale, ore di personal libere non istituzionali. | **0** |
+
+*(Per un totale di **75 tabelle orizzontali e di snodo strutturale** che configurano il sistema).*
+
+---
+
 ## 1. Gestione Risorse Umane (La netta divisione Staff / Team)
 
 Il sistema necessita di un disaccoppiamento logico per gestire due mondi operativi distinti:
