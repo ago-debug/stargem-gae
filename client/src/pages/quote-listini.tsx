@@ -36,11 +36,16 @@ const CATEGORY_COLORS: Record<string, string> = {
     "DEFAULT": "bg-slate-100 text-slate-800 border-slate-300"
 };
 
-export default function QuoteListini() {
+interface QuoteListiniProps {
+    activityType?: string;
+    embeddedMode?: boolean;
+}
+
+export default function QuoteListini(props: QuoteListiniProps) {
     const { toast } = useToast();
     const queryClient = useQueryClient();
     const [, params] = useRoute("/quote-listini/:activityType");
-    const activityType = params?.activityType || "corsi";
+    const activityType = props.activityType ?? params?.activityType ?? "corsi";
 
     // State to manage input values before they are saved to DB
     const [rows, setRows] = useState<CourseQuotesGrid[]>([]);
@@ -185,18 +190,34 @@ export default function QuoteListini() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8 overflow-hidden bg-slate-50 relative">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 shrink-0">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-1">
-                        Quote e Agevolazioni Corsi
-                    </h1>
-                    <p className="text-sm text-slate-500">
-                        Replica interattiva Q1C - Gestione Listini Mensili
-                    </p>
-                </div>
+        <div className={`flex flex-col ${props.embeddedMode ? 'h-[75vh] p-0' : 'h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8'} overflow-hidden bg-slate-50 relative`}>
+            {!props.embeddedMode ? (
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 shrink-0">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-1">
+                            Quote e Agevolazioni Corsi
+                        </h1>
+                        <p className="text-sm text-slate-500">
+                            Replica interattiva Q1C - Gestione Listini Mensili
+                        </p>
+                    </div>
 
-                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" onClick={addRow} className="shadow-sm">
+                            + Aggiungi Riga
+                        </Button>
+                        <Button
+                            onClick={() => saveMutation.mutate(rows)}
+                            disabled={saveMutation.isPending}
+                            className="bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white shadow-md border-0 ring-1 ring-amber-700/20"
+                        >
+                            {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                            Salva Griglia
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex items-center justify-end mb-4 gap-2 shrink-0">
                     <Button variant="outline" onClick={addRow} className="shadow-sm">
                         + Aggiungi Riga
                     </Button>
@@ -209,7 +230,7 @@ export default function QuoteListini() {
                         Salva Griglia
                     </Button>
                 </div>
-            </div>
+            )}
 
             <Alert className="mb-4 bg-amber-50 border-amber-200 shrink-0">
                 <Info className="h-4 w-4 text-amber-600" />

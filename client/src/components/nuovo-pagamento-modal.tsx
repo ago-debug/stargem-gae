@@ -17,6 +17,7 @@ import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollme
 import { PaymentModuleConnector } from "@/components/PaymentModuleConnector";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { getActiveActivities } from "@/config/activities";
 import type { Member, PriceList, Course, Quote, PriceListItem } from "@shared/schema";
@@ -458,8 +459,9 @@ export function NuovoPagamentoModal({
                 const base = parseFloat(updated.basePrice) || 0;
                 const s1 = parseFloat(updated.discountPercent1) || 0;
                 const s2 = parseFloat(updated.discountPercent2) || 0;
+                const dAmount = parseFloat(updated.discountAmount) || 0;
                 const stage1 = base * (1 - (s1 / 100));
-                updated.subtotal = stage1 * (1 - (s2 / 100));
+                updated.subtotal = Math.max(0, (stage1 * (1 - (s2 / 100))) - dAmount);
                 return updated;
             }
             return r;
@@ -473,12 +475,51 @@ export function NuovoPagamentoModal({
                 const base = parseFloat(updated.basePrice) || 0;
                 const s1 = parseFloat(updated.discountPercent1) || 0;
                 const s2 = parseFloat(updated.discountPercent2) || 0;
+                const dAmount = parseFloat(updated.discountAmount) || 0;
                 const stage1 = base * (1 - (s1 / 100));
-                updated.subtotal = stage1 * (1 - (s2 / 100));
+                updated.subtotal = Math.max(0, (stage1 * (1 - (s2 / 100))) - dAmount);
                 return updated;
             }
             return r;
         }));
+    };
+
+    const validatePromoCode = async (rowId: string, code: string, basePrice: number, activityType: string) => {
+        if (!code || !selectedMemberId || basePrice <= 0) return;
+        
+        updateRowBatch(rowId, { promoCodeStatus: 'validating' });
+        
+        try {
+            const res = await apiRequest("POST", "/api/promo-rules/validate", {
+                code,
+                amount: basePrice,
+                activityType: activityType || "all",
+                memberId: parseInt(selectedMemberId)
+            });
+            
+            const data = await res.json();
+            
+            if (data.valid) {
+                 updateRowBatch(rowId, {
+                     promoCodeStatus: 'valid',
+                     promoCodeMessage: 'Codice valido',
+                     discountAmount: data.discountAmount,
+                     discountCode: code
+                 });
+            } else {
+                 updateRowBatch(rowId, {
+                     promoCodeStatus: 'invalid',
+                     promoCodeMessage: data.reason || 'Codice non valido',
+                     discountAmount: 0
+                 });
+            }
+        } catch (e) {
+            updateRowBatch(rowId, {
+                promoCodeStatus: 'error',
+                promoCodeMessage: 'Verifica non disponibile',
+                discountAmount: 0
+            });
+        }
     };
 
     const totalCart = cartRows.reduce((sum, r) => sum + (parseFloat(r.subtotal) || 0), 0);
@@ -760,6 +801,7 @@ export function NuovoPagamentoModal({
                                                 updateRowBatch={updateRowBatch}
                                                 removeCartRow={removeCartRow}
                                                 index={idx}
+                                                validatePromoCode={validatePromoCode}
                                             />
                                         ))}
 
@@ -871,14 +913,14 @@ function CartTableRow({
     row, courses, workshops, paidTrials, freeTrials, singleLessons,
     sundayActivities, trainings, individualLessons, campusActivities,
     recitals, vacationStudies, studios, bookingServices, priceLists, quotes,
-    updateRow, updateRowBatch, removeCartRow, index
+    updateRow, updateRowBatch, removeCartRow, index, validatePromoCode
 }: {
     row: any, courses: Course[], workshops: any[], paidTrials: any[],
     freeTrials: any[], singleLessons: any[], sundayActivities: any[],
     trainings: any[], individualLessons: any[], campusActivities: any[],
     recitals: any[], vacationStudies: any[], studios: any[], bookingServices: any[],
     priceLists: PriceList[], quotes: Quote[], updateRow: any,
-    updateRowBatch: any, removeCartRow: any, index: number
+    updateRowBatch: any, removeCartRow: any, index: number, validatePromoCode: any
 }) {
     const { data: listinoItems } = useQuery<PriceListItem[]>({
         queryKey: [`/api/price-lists/${row.periodId}/items`],
@@ -1165,12 +1207,30 @@ function CartTableRow({
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-xs text-blue-700 truncate">Cod. Sconto</Label>
-                        <Input className="h-9 bg-blue-50/30 font-mono text-xs uppercase" placeholder="COD. CAMPAGNA" value={row.discountCode || ""} onChange={(e) => updateRow(row.id, 'discountCode', e.target.value)} />
+                        <div className="flex justify-between items-center">
+                           <Label className="text-xs text-blue-700 truncate">Cod. Sconto</Label>
+                           {row.promoCodeStatus === 'valid' && <Badge variant="outline" className="h-4 text-[9px] px-1 bg-green-50 text-green-700 border-green-200" title={row.promoCodeMessage}>VALIDO</Badge>}
+                           {row.promoCodeStatus === 'invalid' && <Badge variant="destructive" className="h-4 text-[9px] px-1" title={row.promoCodeMessage}>NON VALIDO</Badge>}
+                           {row.promoCodeStatus === 'error' && <Badge variant="outline" className="h-4 text-[9px] px-1 bg-amber-50 text-amber-700 border-amber-200" title={row.promoCodeMessage}>ERRORE</Badge>}
+                           {row.promoCodeStatus === 'validating' && <Loader2 className="w-3 h-3 animate-spin text-blue-500" />}
+                        </div>
+                        <Input 
+                           className="h-9 bg-blue-50/30 font-mono text-xs uppercase" 
+                           placeholder="COD. CAMPAGNA" 
+                           value={row.discountCode || ""} 
+                           onChange={(e) => updateRow(row.id, 'discountCode', e.target.value)} 
+                           onBlur={() => validatePromoCode(row.id, row.discountCode, row.basePrice, row.activityType)}
+                           onKeyDown={(e) => {
+                               if (e.key === 'Enter') {
+                                   e.preventDefault();
+                                   validatePromoCode(row.id, row.discountCode, row.basePrice, row.activityType);
+                               }
+                           }}
+                        />
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-blue-700 truncate">Valore</Label>
-                        <Input type="number" className="h-9 bg-blue-50/30 text-right" placeholder="€ 0.00" />
+                        <Input type="number" className="h-9 bg-blue-50/30 text-right text-green-700 font-bold" placeholder="€ 0.00" value={row.discountAmount || ""} readOnly />
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-blue-700 truncate">% Sconto</Label>

@@ -39,6 +39,7 @@ import {
   UserPlus,
   Trash2,
   ChevronRight,
+  BadgePercent,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { format } from "date-fns";
@@ -207,14 +208,9 @@ const secretariatItems = [
 // 5. CONFIGURAZIONI CORE
 const configItems = [
   {
-    title: "Listini e Quote",
-    url: "/listini",
-    icon: Database,
-  },
-  {
-    title: "Promo / Sconti",
-    url: "/promo-sconti",
-    icon: Ticket,
+    title: "Quote e Promo",
+    url: "/quote-promo",
+    icon: BadgePercent,
   },
 ];
 

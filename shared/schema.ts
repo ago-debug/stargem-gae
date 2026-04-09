@@ -13,6 +13,11 @@ import {
   date,
   datetime,
   longtext,
+  mysqlEnum,
+  tinyint,
+  smallint,
+  time,
+  uniqueIndex,
 } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -259,7 +264,6 @@ export const workshopCategoriesRelations = relations(workshopCategories, ({ one,
     relationName: "subcategories",
   }),
   subcategories: many(workshopCategories, { relationName: "subcategories" }),
-  workshops: many(workshops),
 }));
 
 export const insertWorkshopCategorySchema = createInsertSchema(workshopCategories).omit({
@@ -673,364 +677,38 @@ export type Course = typeof courses.$inferSelect;
 // ============================================================================
 // WORKSHOPS (identical structure to courses)
 // ============================================================================
-export const workshops = mysqlTable("workshops", {
-  id: int("id").primaryKey().autoincrement(),
-  sku: varchar("sku", { length: 100 }),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  categoryId: int("category_id"),
-  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
-  price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: int("max_capacity"),
-  currentEnrollment: int("current_enrollment").default(0),
-  dayOfWeek: varchar("day_of_week", { length: 20 }),
-  startTime: varchar("start_time", { length: 10 }),
-  endTime: varchar("end_time", { length: 10 }),
-  recurrenceType: varchar("recurrence_type", { length: 20 }),
-  schedule: text("schedule"),
-  startDate: date("start_date"),
-  endDate: date("end_date"),
-  statusTags: json("status_tags").$type<string[]>().default([]),
-  active: boolean("active").default(true),
-  googleEventId: varchar("google_event_id", { length: 255 }),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
-  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const workshopsRelations = relations(workshops, ({ one, many }) => ({
-  studio: one(studios, {
-    fields: [workshops.studioId],
-    references: [studios.id],
-  }),
-  quote: one(quotes, {
-    fields: [workshops.quoteId],
-    references: [quotes.id],
-  }),
-  instructor: one(members, {
-    fields: [workshops.instructorId],
-    references: [members.id],
-  }),
-  secondaryInstructor1: one(members, {
-    fields: [workshops.secondaryInstructor1Id],
-    references: [members.id],
-  }),
-  priceItems: many(priceListItems),
-}));
 
-export const insertWorkshopSchema = createInsertSchema(workshops, {
-  startDate: z.coerce.date().nullish(),
-  endDate: z.coerce.date().nullish(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertWorkshop = z.infer<typeof insertWorkshopSchema>;
-export type Workshop = typeof workshops.$inferSelect;
 
 // ============================================================================
 // PAID TRIALS (identical structure to workshops, uses categories)
 // ============================================================================
-export const paidTrials = mysqlTable("paid_trials", {
-  id: int("id").primaryKey().autoincrement(),
-  sku: varchar("sku", { length: 100 }),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  categoryId: int("category_id"),
-  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
-  price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: int("max_capacity"),
-  currentEnrollment: int("current_enrollment").default(0),
-  dayOfWeek: varchar("day_of_week", { length: 20 }),
-  startTime: varchar("start_time", { length: 10 }),
-  endTime: varchar("end_time", { length: 10 }),
-  recurrenceType: varchar("recurrence_type", { length: 20 }),
-  schedule: text("schedule"),
-  startDate: date("start_date"),
-  endDate: date("end_date"),
-  statusTags: json("status_tags").$type<string[]>().default([]),
-  active: boolean("active").default(true),
-  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const paidTrialsRelations = relations(paidTrials, ({ one }) => ({
-  studio: one(studios, {
-    fields: [paidTrials.studioId],
-    references: [studios.id],
-  }),
-  quote: one(quotes, {
-    fields: [paidTrials.quoteId],
-    references: [quotes.id],
-  }),
-  instructor: one(members, {
-    fields: [paidTrials.instructorId],
-    references: [members.id],
-  }),
-  secondaryInstructor1: one(members, {
-    fields: [paidTrials.secondaryInstructor1Id],
-    references: [members.id],
-  }),
-}));
 
-export const insertPaidTrialSchema = createInsertSchema(paidTrials, {
-  startDate: z.coerce.date().nullish(),
-  endDate: z.coerce.date().nullish(),
-}).omit({
-  id: true,
-  currentEnrollment: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertPaidTrial = z.infer<typeof insertPaidTrialSchema>;
-export type PaidTrial = typeof paidTrials.$inferSelect;
 
 // ============================================================================
 // FREE TRIALS (identical structure to workshops, uses categories)
 // ============================================================================
-export const freeTrials = mysqlTable("free_trials", {
-  id: int("id").primaryKey().autoincrement(),
-  sku: varchar("sku", { length: 100 }),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  categoryId: int("category_id"),
-  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
-  price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: int("max_capacity"),
-  currentEnrollment: int("current_enrollment").default(0),
-  dayOfWeek: varchar("day_of_week", { length: 20 }),
-  startTime: varchar("start_time", { length: 10 }),
-  endTime: varchar("end_time", { length: 10 }),
-  recurrenceType: varchar("recurrence_type", { length: 20 }),
-  schedule: text("schedule"),
-  startDate: date("start_date"),
-  endDate: date("end_date"),
-  statusTags: json("status_tags").$type<string[]>().default([]),
-  active: boolean("active").default(true),
-  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const freeTrialsRelations = relations(freeTrials, ({ one }) => ({
-  studio: one(studios, {
-    fields: [freeTrials.studioId],
-    references: [studios.id],
-  }),
-  quote: one(quotes, {
-    fields: [freeTrials.quoteId],
-    references: [quotes.id],
-  }),
-  instructor: one(members, {
-    fields: [freeTrials.instructorId],
-    references: [members.id],
-  }),
-  secondaryInstructor1: one(members, {
-    fields: [freeTrials.secondaryInstructor1Id],
-    references: [members.id],
-  }),
-}));
 
-export const insertFreeTrialSchema = createInsertSchema(freeTrials, {
-  startDate: z.coerce.date().nullish(),
-  endDate: z.coerce.date().nullish(),
-}).omit({
-  id: true,
-  currentEnrollment: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertFreeTrial = z.infer<typeof insertFreeTrialSchema>;
-export type FreeTrial = typeof freeTrials.$inferSelect;
 
 // ============================================================================
 // SINGLE LESSONS (identical structure to workshops, uses categories)
 // ============================================================================
-export const singleLessons = mysqlTable("single_lessons", {
-  id: int("id").primaryKey().autoincrement(),
-  sku: varchar("sku", { length: 100 }),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  categoryId: int("category_id"),
-  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
-  price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: int("max_capacity"),
-  currentEnrollment: int("current_enrollment").default(0),
-  dayOfWeek: varchar("day_of_week", { length: 20 }),
-  startTime: varchar("start_time", { length: 10 }),
-  endTime: varchar("end_time", { length: 10 }),
-  recurrenceType: varchar("recurrence_type", { length: 20 }),
-  schedule: text("schedule"),
-  startDate: date("start_date"),
-  endDate: date("end_date"),
-  statusTags: json("status_tags").$type<string[]>().default([]),
-  active: boolean("active").default(true),
-  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const singleLessonsRelations = relations(singleLessons, ({ one }) => ({
-  studio: one(studios, {
-    fields: [singleLessons.studioId],
-    references: [studios.id],
-  }),
-  quote: one(quotes, {
-    fields: [singleLessons.quoteId],
-    references: [quotes.id],
-  }),
-  instructor: one(members, {
-    fields: [singleLessons.instructorId],
-    references: [members.id],
-  }),
-  secondaryInstructor1: one(members, {
-    fields: [singleLessons.secondaryInstructor1Id],
-    references: [members.id],
-  }),
-}));
 
-export const insertSingleLessonSchema = createInsertSchema(singleLessons, {
-  startDate: z.coerce.date().nullish(),
-  endDate: z.coerce.date().nullish(),
-}).omit({
-  id: true,
-  currentEnrollment: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertSingleLesson = z.infer<typeof insertSingleLessonSchema>;
-export type SingleLesson = typeof singleLessons.$inferSelect;
 
 // ============================================================================
 // CAMPUS ACTIVITIES (identical structure to workshops, uses campusCategories)
 // ============================================================================
-export const campusActivities = mysqlTable("campus_activities", {
-  id: int("id").primaryKey().autoincrement(),
-  sku: varchar("sku", { length: 100 }),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  categoryId: int("category_id"),
-  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
-  price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: int("max_capacity"),
-  currentEnrollment: int("current_enrollment").default(0),
-  dayOfWeek: varchar("day_of_week", { length: 20 }),
-  startTime: varchar("start_time", { length: 10 }),
-  endTime: varchar("end_time", { length: 10 }),
-  recurrenceType: varchar("recurrence_type", { length: 20 }),
-  schedule: text("schedule"),
-  startDate: date("start_date"),
-  endDate: date("end_date"),
-  statusTags: json("status_tags").$type<string[]>().default([]),
-  active: boolean("active").default(true),
-  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const campusActivitiesRelations = relations(campusActivities, ({ one }) => ({
-  studio: one(studios, {
-    fields: [campusActivities.studioId],
-    references: [studios.id],
-  }),
-  quote: one(quotes, {
-    fields: [campusActivities.quoteId],
-    references: [quotes.id],
-  }),
-  instructor: one(members, {
-    fields: [campusActivities.instructorId],
-    references: [members.id],
-  }),
-  secondaryInstructor1: one(members, {
-    fields: [campusActivities.secondaryInstructor1Id],
-    references: [members.id],
-  }),
-}));
 
-export const insertCampusActivitySchema = createInsertSchema(campusActivities, {
-  startDate: z.coerce.date().nullish(),
-  endDate: z.coerce.date().nullish(),
-}).omit({
-  id: true,
-  currentEnrollment: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertCampusActivity = z.infer<typeof insertCampusActivitySchema>;
-export type CampusActivity = typeof campusActivities.$inferSelect;
 
 // ============================================================================
 // VACATION STUDIES (identical structure to workshops, uses vacationCategories)
 // ============================================================================
-export const vacationStudies = mysqlTable("vacation_studies", {
-  id: int("id").primaryKey().autoincrement(),
-  sku: varchar("sku", { length: 100 }),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  categoryId: int("category_id"),
-  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
-  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }),
-  price: decimal("price", { precision: 10, scale: 2 }),
-  maxCapacity: int("max_capacity"),
-  currentEnrollment: int("current_enrollment").default(0),
-  dayOfWeek: varchar("day_of_week", { length: 20 }),
-  startTime: varchar("start_time", { length: 10 }),
-  endTime: varchar("end_time", { length: 10 }),
-  recurrenceType: varchar("recurrence_type", { length: 20 }),
-  schedule: text("schedule"),
-  startDate: date("start_date"),
-  endDate: date("end_date"),
-  statusTags: json("status_tags").$type<string[]>().default([]),
-  active: boolean("active").default(true),
-  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const vacationStudiesRelations = relations(vacationStudies, ({ one }) => ({
-  studio: one(studios, {
-    fields: [vacationStudies.studioId],
-    references: [studios.id],
-  }),
-  quote: one(quotes, {
-    fields: [vacationStudies.quoteId],
-    references: [quotes.id],
-  }),
-  instructor: one(members, {
-    fields: [vacationStudies.instructorId],
-    references: [members.id],
-  }),
-  secondaryInstructor1: one(members, {
-    fields: [vacationStudies.secondaryInstructor1Id],
-    references: [members.id],
-  }),
-}));
 
-export const insertVacationStudySchema = createInsertSchema(vacationStudies, {
-  startDate: z.coerce.date().nullish(),
-  endDate: z.coerce.date().nullish(),
-}).omit({
-  id: true,
-  currentEnrollment: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertVacationStudy = z.infer<typeof insertVacationStudySchema>;
-export type VacationStudy = typeof vacationStudies.$inferSelect;
 
 // Members (iscritti)
 export const members = mysqlTable("members", {
@@ -1251,34 +929,8 @@ export type InsertEnrollment = z.infer<typeof insertEnrollmentSchema>;
 export type Enrollment = typeof enrollments.$inferSelect;
 
 // Workshop Attendances (presenze ai workshop)
-export const workshopAttendances = mysqlTable("ws_attendances", {
-  id: int("id").primaryKey().autoincrement(),
-  workshopId: int("workshop_id").notNull().references(() => workshops.id, { onDelete: "cascade" }),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  attendanceDate: timestamp("attendance_date").notNull(),
-  type: varchar("type", { length: 20 }).default("manual"),
-  notes: text("notes"),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
-export const workshopAttendancesRelations = relations(workshopAttendances, ({ one }) => ({
-  workshop: one(workshops, {
-    fields: [workshopAttendances.workshopId],
-    references: [workshops.id],
-  }),
-  member: one(members, {
-    fields: [workshopAttendances.memberId],
-    references: [members.id],
-  }),
-}));
 
-export const insertWorkshopAttendanceSchema = createInsertSchema(workshopAttendances).omit({
-  id: true,
-  createdAt: true,
-});
-export type InsertWorkshopAttendance = z.infer<typeof insertWorkshopAttendanceSchema>;
-export type WorkshopAttendance = typeof workshopAttendances.$inferSelect;
 
 // Memberships (tessere associative)
 // --- Member Packages (Lezioni Individuali) ---
@@ -1447,6 +1099,9 @@ export const payments = mysqlTable("payments", {
   paymentMethodId: int("payment_method_id").references(() => paymentMethods.id, { onDelete: "set null" }), // Riferimento a tabella payment_methods
   paymentMethod: varchar("payment_method", { length: 100 }), // Legacy - mantenuto per compatibilità
   notes: text("notes"),
+  accountingCode: varchar("accounting_code", { length: 20 }), // Codice conto es. 4010-RicaviCorsi
+  vatCode: varchar("vat_code", { length: 10 }).default("ESENTE"), // Codice IVA: ESENTE|IVA22|IVA10|IVA4
+  costCenterCode: varchar("cost_center_code", { length: 50 }), // Centro di costo: CORSI|AFFITTI|PRIVATI|TESSERE
   seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdById: varchar("created_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   updatedById: varchar("updated_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
@@ -2024,17 +1679,9 @@ export const priceListItemsRelations = relations(priceListItems, ({ one }) => ({
     fields: [priceListItems.entityId],
     references: [courses.id],
   }),
-  workshop: one(workshops, {
-    fields: [priceListItems.entityId],
-    references: [workshops.id],
-  }),
   bookingService: one(bookingServices, {
     fields: [priceListItems.entityId],
     references: [bookingServices.id],
-  }),
-  paidTrial: one(paidTrials, {
-    fields: [priceListItems.entityId],
-    references: [paidTrials.id],
   }),
 }));
 
@@ -2388,3 +2035,368 @@ export const insertStrategicEventSchema = createInsertSchema(strategicEvents, {
 
 export type InsertStrategicEvent = z.infer<typeof insertStrategicEventSchema>;
 export type StrategicEvent = typeof strategicEvents.$inferSelect;
+
+// ============================================================================
+// MODULO QUOTE E PROMO
+// ============================================================================
+
+export const promoRules = mysqlTable("promo_rules", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  code: varchar("code", { length: 50 }).notNull(),
+  label: varchar("label", { length: 120 }).notNull(),
+  ruleType: mysqlEnum("rule_type", [
+    "percentage", "fixed", "blocked_price"
+  ]).notNull(),
+  value: decimal("value", { precision: 8, scale: 2 }).notNull(),
+  validFrom: date("valid_from"),
+  validTo: date("valid_to"),
+  maxUses: int("max_uses"),
+  usedCount: int("used_count").default(0),
+  excludeOpen: boolean("exclude_open").default(false),
+  notCumulative: boolean("not_cumulative").default(false),
+  targetType: varchar("target_type", { length: 30 })
+    .notNull().default("public"),
+  companyName: varchar("company_name", { length: 120 }),
+  memberId: int("member_id")
+    .references(() => members.id, { onDelete: "set null" }),
+  approvedBy: varchar("approved_by", { length: 50 }),
+  internalNotes: text("internal_notes"),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow().onUpdateNow(),
+}, (table) => ({
+  uniqueCodePerTenant: uniqueIndex("uq_promo_tenant_code")
+    .on(table.tenantId, table.code),
+}));
+
+export const welfareProviders = mysqlTable("welfare_providers", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  name: varchar("name", { length: 80 }).notNull(),
+  requiresMembershipFee: boolean("requires_membership_fee")
+    .default(true),
+  requiresMedicalCert: boolean("requires_medical_cert")
+    .default(true),
+  extraFeePercent: decimal("extra_fee_percent",
+    { precision: 5, scale: 2 }).default("0"),
+  availableCategories: text("available_categories"),
+  operativeNotes: text("operative_notes"),
+  isActive: boolean("is_active").default(true),
+  metadata: json("metadata"),
+  updatedAt: timestamp("updated_at")
+    .defaultNow().onUpdateNow(),
+}, (table) => ({
+  uniqueNamePerTenant: uniqueIndex("uq_welfare_tenant_name")
+    .on(table.tenantId, table.name),
+}));
+
+export const carnetWallets = mysqlTable("carnet_wallets", {
+  id: int("id").autoincrement().primaryKey(),
+  memberId: int("member_id").notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+  walletTypeId: int("wallet_type_id").notNull()
+    .references(() => customListItems.id),
+  totalUnits: tinyint("total_units").notNull().default(10),
+  usedUnits: tinyint("used_units").notNull().default(0),
+  expiryDays: tinyint("expiry_days").notNull(),
+  paymentId: int("payment_id")
+    .references(() => payments.id, { onDelete: "set null" }),
+  trialDate: date("trial_date"),
+  purchasedAt: date("purchased_at").notNull(),
+  expiresAt: date("expires_at").notNull(),
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"),
+  groupSize: tinyint("group_size").default(1),
+  locationType: varchar("location_type", {length:30}).default("in_sede"),
+  pricePerUnit: decimal("price_per_unit", {precision:8,scale:2}),
+  totalPaid: decimal("total_paid", {precision:8,scale:2}),
+  bonusUnits: tinyint("bonus_units").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow().onUpdateNow(),
+});
+
+export const carnetSessions = mysqlTable("carnet_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("wallet_id").notNull()
+    .references(() => carnetWallets.id, 
+      { onDelete: "cascade" }),
+  sessionNumber: tinyint("session_number").notNull(),
+  sessionDate: date("session_date").notNull(),
+  sessionTimeStart: time("session_time_start"),
+  sessionTimeEnd: time("session_time_end"),
+  instructorId: int("instructor_id")
+    .references(() => members.id, { onDelete: "set null" }),
+  isBonus: boolean("is_bonus").default(false),
+  notes: varchar("notes", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueSession: uniqueIndex("uq_wallet_session")
+    .on(table.walletId, table.sessionNumber),
+}));
+
+export const instructorAgreements = mysqlTable("instructor_agreements", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  memberId: int("member_id").notNull()
+    .references(() => members.id, { onDelete: "restrict" }),
+  seasonId: int("season_id")
+    .references(() => seasons.id, { onDelete: "set null" }),
+  agreementType: mysqlEnum("agreement_type", [
+    "flat_monthly", "pack_hours", "variable_monthly"
+  ]).notNull(),
+  baseMonthlyAmount: decimal("base_monthly_amount",
+    { precision: 8, scale: 2 }),
+  packHours: tinyint("pack_hours"),
+  speseMensili: decimal("spese_mensili",
+    { precision: 8, scale: 2 }).default("0"),
+  billingDay: tinyint("billing_day").default(1),
+  paymentMode: mysqlEnum("payment_mode", [
+    "contanti", "bonifico", "fattura", "pos"
+  ]).notNull(),
+  studioId: int("studio_id")
+    .references(() => studios.id, { onDelete: "set null" }),
+  scheduleNotes: text("schedule_notes"),
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow().onUpdateNow(),
+});
+
+export const agreementMonthlyOverrides = mysqlTable("agreement_monthly_overrides", {
+  id: int("id").autoincrement().primaryKey(),
+  agreementId: int("agreement_id").notNull()
+    .references(() => instructorAgreements.id,
+      { onDelete: "cascade" }),
+  seasonId: int("season_id")
+    .references(() => seasons.id, { onDelete: "set null" }),
+  month: tinyint("month").notNull(),
+  overrideAmount: decimal("override_amount",
+    { precision: 8, scale: 2 }).notNull(),
+  notes: varchar("notes", { length: 255 }),
+}, (table) => ({
+  uniqueMonthPerAgreement: uniqueIndex("uq_override_month")
+    .on(table.agreementId, table.seasonId, table.month),
+}));
+
+export const pagodilTiers = mysqlTable("pagodil_tiers", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  providerName: varchar("provider_name", { length: 50 })
+    .notNull().default("pagodil"),
+  rangeMin: decimal("range_min",
+    { precision: 8, scale: 2 }).notNull(),
+  rangeMax: decimal("range_max",
+    { precision: 8, scale: 2 }).notNull(),
+  feeAmount: decimal("fee_amount",
+    { precision: 8, scale: 2 }).notNull(),
+  feeType: varchar("fee_type", { length: 20 })
+    .notNull().default("fixed"),
+  installmentsMax: tinyint("installments_max").notNull(),
+  isActive: boolean("is_active").default(true),
+}, (table) => ({
+  uniqueTier: uniqueIndex("uq_pagodil_tier")
+    .on(table.tenantId, table.providerName, table.rangeMin),
+}));
+
+// ============================================================================
+// STRUTTURA CONTABILE BASE
+// ============================================================================
+
+export const costCenters = mysqlTable("cost_centers",{
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  code: varchar("code",{length:30}).notNull(),
+  label: varchar("label",{length:120}).notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+},(t)=>({
+  uqCode: uniqueIndex("uq_cost_center_code")
+    .on(t.tenantId, t.code),
+}));
+
+export const accountingPeriods = mysqlTable(
+  "accounting_periods",{
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  year: smallint("year").notNull(),
+  month: tinyint("month").notNull(),
+  label: varchar("label",{length:50}).notNull(),
+  isClosed: boolean("is_closed").default(false),
+  closedAt: timestamp("closed_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+},(t)=>({
+  uqPeriod: uniqueIndex("uq_accounting_period")
+    .on(t.tenantId, t.year, t.month),
+}));
+
+export const journalEntries = mysqlTable(
+  "journal_entries",{
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  periodId: int("period_id")
+    .references(()=>accountingPeriods.id,
+      {onDelete:"restrict"}),
+  paymentId: int("payment_id")
+    .references(()=>payments.id,
+      {onDelete:"set null"}),
+  entryDate: date("entry_date").notNull(),
+  description: varchar("description",
+    {length:255}).notNull(),
+  debitAccount: varchar("debit_account",{length:50}),
+  creditAccount: varchar("credit_account",{length:50}),
+  amount: decimal("amount",
+    {precision:10,scale:2}).notNull(),
+  vatAmount: decimal("vat_amount",
+    {precision:10,scale:2}).default("0"),
+  vatCode: varchar("vat_code",{length:10})
+    .default("ESENTE"),
+  costCenterId: int("cost_center_id")
+    .references(()=>costCenters.id,
+      {onDelete:"set null"}),
+  isAuto: boolean("is_auto").default(true),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdById: varchar("created_by_id",{length:50}),
+});
+export const companyAgreements = mysqlTable(
+  "company_agreements", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  companyName: varchar("company_name",{length:150}).notNull(),
+  companyType: varchar("company_type",{length:50}),
+  discountCourses: decimal("discount_courses",{precision:5,scale:2}).default("0"),
+  discountMerch: decimal("discount_merch",{precision:5,scale:2}).default("0"),
+  discountOther: decimal("discount_other",{precision:5,scale:2}).default("0"),
+  excludeOpen: boolean("exclude_open").default(true),
+  excludeOtherPromos: boolean("exclude_other_promos").default(true),
+  eligibleWho: text("eligible_who"),
+  specialRules: text("special_rules"),
+  promoRuleId: int("promo_rule_id").references(()=>promoRules.id,{onDelete:"set null"}),
+  validFrom: date("valid_from"),
+  validTo: date("valid_to"),
+  isActive: boolean("is_active").default(true),
+  approvedBy: varchar("approved_by",{length:50}).default("Direzione"),
+  requiresVerification: boolean("requires_verification").default(true),
+  verificationNotes: text("verification_notes"),
+  metadata: json("metadata"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+},(t)=>({
+  idxName: index("idx_company_agreements_name").on(t.tenantId, t.companyName),
+  idxActive: index("idx_company_agreements_active").on(t.tenantId, t.isActive),
+}));
+
+export const memberDiscounts = mysqlTable(
+  "member_discounts", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  memberId: int("member_id").notNull().references(()=>members.id,{onDelete:"cascade"}),
+  promoRuleId: int("promo_rule_id").references(()=>promoRules.id,{onDelete:"set null"}),
+  discountType: varchar("discount_type",{length:30}).notNull(),
+  discountValue: decimal("discount_value",{precision:8,scale:2}),
+  discountPercent: decimal("discount_percent",{precision:5,scale:2}),
+  approvedBy: varchar("approved_by",{length:50}),
+  approvedAt: date("approved_at"),
+  validForSeasonId: int("valid_for_season_id").references(()=>seasons.id,{onDelete:"set null"}),
+  validFrom: date("valid_from"),
+  validTo: date("valid_to"),
+  isUsed: boolean("is_used").default(false),
+  usedAt: timestamp("used_at"),
+  paymentId: int("payment_id").references(()=>payments.id,{onDelete:"set null"}),
+  bonusNote: text("bonus_note"),
+  internalNotes: text("internal_notes"),
+  companyAgreementId: int("company_agreement_id").references(()=>companyAgreements.id, {onDelete:"set null"}),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  createdById: varchar("created_by_id",{length:50}),
+},(t)=>({
+  idxMember: index("idx_member_discounts_member").on(t.memberId),
+  idxPromo: index("idx_member_discounts_promo").on(t.promoRuleId),
+  idxUsed: index("idx_member_discounts_used").on(t.isUsed, t.tenantId),
+}));
+
+export const staffRates = mysqlTable("staff_rates",{
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  serviceCode: varchar("service_code",{length:50}).notNull(),
+  serviceLabel: varchar("service_label",{length:120}).notNull(),
+  amount: decimal("amount",{precision:8,scale:2}).notNull(),
+  rateType: varchar("rate_type",{length:20}).notNull().default("annual"),
+  applicableTo: varchar("applicable_to",{length:50}).default("all_staff"),
+  studioRestriction: text("studio_restriction"),
+  requiresMembership: boolean("requires_membership").default(true),
+  requiresMedicalCert: boolean("requires_medical_cert").default(true),
+  maxSessionsPerWeek: tinyint("max_sessions_per_week"),
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+},(t)=>({
+  uqCode: uniqueIndex("uq_staff_rate_code").on(t.tenantId, t.serviceCode),
+}));
+
+export type MemberDiscount = typeof memberDiscounts.$inferSelect;
+export type InsertMemberDiscount = typeof memberDiscounts.$inferInsert;
+export type CompanyAgreement = typeof companyAgreements.$inferSelect;
+export type InsertCompanyAgreement = typeof companyAgreements.$inferInsert;
+export type StaffRate = typeof staffRates.$inferSelect;
+export type InsertStaffRate = typeof staffRates.$inferInsert;
+
+
+export type InsertPromoRule = typeof promoRules.$inferInsert;
+
+export type WelfareProvider = typeof welfareProviders.$inferSelect;
+export type InsertWelfareProvider = typeof welfareProviders.$inferInsert;
+
+export type CarnetWallet = typeof carnetWallets.$inferSelect;
+export type InsertCarnetWallet = typeof carnetWallets.$inferInsert;
+
+export type CarnetSession = typeof carnetSessions.$inferSelect;
+export type InsertCarnetSession = typeof carnetSessions.$inferInsert;
+
+export type InstructorAgreement = typeof instructorAgreements.$inferSelect;
+export type InsertInstructorAgreement = typeof instructorAgreements.$inferInsert;
+
+export type AgreementMonthlyOverride = typeof agreementMonthlyOverrides.$inferSelect;
+export type InsertAgreementMonthlyOverride = typeof agreementMonthlyOverrides.$inferInsert;
+
+export const pricingRules = mysqlTable(
+  "pricing_rules", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  ruleCode: varchar("rule_code",{length:50}).notNull(),
+  ruleLabel: varchar("rule_label",{length:120}).notNull(),
+  appliesTo: varchar("applies_to",{length:50}).notNull(),
+  ruleType: varchar("rule_type",{length:30}).notNull(),
+  triggerCondition: varchar("trigger_condition",{length:50}),
+  triggerValue: decimal("trigger_value",{precision:8,scale:2}),
+  effectType: varchar("effect_type",{length:30}).notNull(),
+  effectValue: decimal("effect_value",{precision:8,scale:2}),
+  requiresAuthorization: boolean("requires_authorization").default(false),
+  authorizedBy: varchar("authorized_by",{length:50}),
+  priority: tinyint("priority").default(10),
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+},(t)=>({
+  uqCode: uniqueIndex("uq_pricing_rule_code").on(t.tenantId, t.ruleCode),
+  idxApplies: index("idx_pricing_rules_applies").on(t.tenantId, t.appliesTo, t.isActive),
+}));
+
+export type PricingRule = typeof pricingRules.$inferSelect;
+export type InsertPricingRule = typeof pricingRules.$inferInsert;
+
+export type PromoRule = typeof promoRules.$inferSelect;
+export type InsertPromoRule = typeof promoRules.$inferInsert;
