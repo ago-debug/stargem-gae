@@ -2041,31 +2041,38 @@ export default function CalendarPage() {
                                                             fontSize: "10px",
                                                             backgroundColor: evt.colorProps.backgroundColor,
                                                             borderLeftColor: evt.colorProps.borderLeftColor,
-                                                            color: "#0f172a"
+                                                            color: evt.colorProps.color
                                                         }}
                                                     >
-                                                        <div className="absolute top-1 right-1 flex flex-col items-end gap-1 z-30 max-w-[70%]">
-                                                            {evt.categoryName && (
-                                                                <div className="bg-white/80 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase truncate shadow-sm border border-black/5" style={{ color: ACTIVITY_TYPE_COLORS[(evt as any).activityType || (evt.rawPayload as any)?.activityType || "course"] || ACTIVITY_TYPE_COLORS["course"] }} title={evt.categoryName}>
-                                                                    {evt.categoryName}
+                                                        {(() => {
+                                                            const currentActType = (evt as any).activityType || (evt.rawPayload as any)?.activityType || "course";
+                                                            return (
+                                                                <div className="absolute top-1 right-1 flex flex-col items-end gap-1 z-30 max-w-[70%]">
+                                                                    {evt.categoryName && (
+                                                                        <div className="bg-white/80 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase truncate shadow-sm border border-black/5" 
+                                                                            style={currentActType === "course" ? {} : { color: ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"] }} 
+                                                                            title={evt.categoryName}>
+                                                                            {evt.categoryName}
+                                                                        </div>
+                                                                    )}
+                                                                    <span style={{
+                                                                      backgroundColor: currentActType === "course" ? "#64748b" : (ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"]),
+                                                                      color: "#ffffff",
+                                                                      borderRadius: "3px",
+                                                                      padding: "2px 5px",
+                                                                      fontSize: "8px",
+                                                                      fontWeight: "bold",
+                                                                      lineHeight: "1"
+                                                                    }} className="shadow-sm">
+                                                                      {activityBadge}
+                                                                    </span>
                                                                 </div>
-                                                            )}
-                                                            <span style={{
-                                                              backgroundColor: ACTIVITY_TYPE_COLORS[(evt as any).activityType || (evt.rawPayload as any)?.activityType || "course"] || ACTIVITY_TYPE_COLORS["course"],
-                                                              color: "#ffffff",
-                                                              borderRadius: "3px",
-                                                              padding: "2px 5px",
-                                                              fontSize: "8px",
-                                                              fontWeight: "bold",
-                                                              lineHeight: "1"
-                                                            }} className="shadow-sm">
-                                                              {activityBadge}
-                                                            </span>
-                                                        </div>
-                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full pr-[45px]">{evt.startTime} - {evt.endTime}</div>
-                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[45px] break-normal overflow-hidden">{evt.title}</div>
-                                                        {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5">{ins1}</div>}
-                                                        {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90">{ins2}</div>}
+                                                            );
+                                                        })()}
+                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full pr-[45px] text-slate-900">{evt.startTime} - {evt.endTime}</div>
+                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[45px] break-normal overflow-hidden text-slate-900">{evt.title}</div>
+                                                        {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5 text-slate-800">{ins1}</div>}
+                                                        {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90 text-slate-800">{ins2}</div>}
                                                         
                                                         <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-1 shrink-0 z-10 w-full relative">
                                                             {evt.registryKey === "studioBookings" && (
