@@ -2008,6 +2008,8 @@ export default function CalendarPage() {
                                             const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
                                             const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
 
+                                            const currentActType = (evt as any).activityType || (evt.rawPayload as any)?.activityType || "course";
+
                                             const activityBadge = ({
                                               course: "CRS",
                                               allenamenti: "ALL",
@@ -2018,7 +2020,7 @@ export default function CalendarPage() {
                                               vacanze: "VAC",
                                               campus: "CAM",
                                               affitti: "AFT",
-                                            } as Record<string, string>)[(evt as any).activityType || (evt.rawPayload as any)?.activityType || "course"] ?? "CRS";
+                                            } as Record<string, string>)[currentActType] ?? "CRS";
 
                                             return (
                                                 <div
@@ -2036,16 +2038,16 @@ export default function CalendarPage() {
                                                     <div
                                                         ref={handleCardRef} 
                                                         data-event-id={evt.eventId}
-                                                        className={`w-full min-h-full h-auto p-1.5 rounded-md border-l-[6px] shadow-sm flex flex-col justify-start items-start text-left bg-white overflow-hidden ${evt.colorProps.className || ''}`}
+                                                        className={`w-full min-h-full h-auto p-1.5 rounded-md border-l-[6px] shadow-sm flex flex-col justify-start items-start text-left bg-white overflow-hidden ${evt.colorProps.className || ''} ${currentActType !== 'course' ? 'border-r-[6px] border-dashed' : ''}`}
                                                         style={{
                                                             fontSize: "10px",
-                                                            backgroundColor: evt.colorProps.backgroundColor,
-                                                            borderLeftColor: evt.colorProps.borderLeftColor,
+                                                            backgroundColor: currentActType === "course" ? evt.colorProps.backgroundColor : `${ACTIVITY_TYPE_COLORS[currentActType] || '#1e40af'}15`,
+                                                            borderLeftColor: currentActType === "course" ? evt.colorProps.borderLeftColor : (ACTIVITY_TYPE_COLORS[currentActType] || '#1e40af'),
+                                                            borderRightColor: currentActType === "course" ? undefined : (ACTIVITY_TYPE_COLORS[currentActType] || '#1e40af'),
                                                             color: evt.colorProps.color
                                                         }}
                                                     >
                                                         {(() => {
-                                                            const currentActType = (evt as any).activityType || (evt.rawPayload as any)?.activityType || "course";
                                                             return (
                                                                 <div className="absolute top-1 right-1 flex flex-col items-end gap-1 z-30 max-w-[70%]">
                                                                     {evt.categoryName && (
