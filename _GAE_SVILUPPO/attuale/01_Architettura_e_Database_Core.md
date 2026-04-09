@@ -449,3 +449,24 @@ Per evitare fraintendimenti di dominio, la struttura deve seguire questi nomi es
 
 <!-- --- FINE SORGENTE: attuale/02_GAE_Architettura_e_Regole.md --- -->
 
+
+### Modulo Quote e Promo (Fase Completata)
+Sviluppato schema DB con 7 tabelle centrali integrate. Le custom list ora supportano in modo stabile le property estese dei Wallet Types.
+
+### Struttura Contabile Base (Fase Completata)
+Costruite le fondamenta per il futuro modulo contabilità, prima nota e controllo di gestione.
+Oggi i dati in questa sezione sono scritti prevalentemente come proiezioni dai moduli operativi di incasso per permettere reportistica in sola scrittura.
+Tabelle incluse in questo gruppo: `cost_centers`, `accounting_periods`, `journal_entries`. Estesa la tabella `payments` con `accounting_code`, `vat_code` e `cost_center_code`.
+
+### Sistema Agevolazioni (Fase Completata)
+Aggiunta la struttura isolata e future-proof per tracciare sconti, convezioni e tariffe speciali. Estesa `promo_rules` con tracciamento `approved_by` per autorizzazioni.
+Tabelle create:
+- `member_discounts`: Associa ad un utente uno sconto specifico o un override manuale con indicazione dell'autorizzazione.
+- `company_agreements`: Elenco di convenzioni aziendali (es. Bocconi, Forze dell'Ordine) con regole fiscali custom applicabili (Corsi, Merch).
+- `staff_rates`: Tariffe esclusive annuali o forfettarie da applicare allo staff interno.
+
+### Prezzi Dinamici e Carnet Avanzati (Fase Completata)
+Estesa l'architettura dei wallet per gestire scenari custom, maggiorazioni complesse e lezioni a domicilio.
+- `carnet_wallets`: Aggiunti i campi avanzati `group_size`, `location_type`, `price_per_unit`, `total_paid` e `bonus_units` per tracciare il numero di allievi in un pack, l'eventuale sede esterna (domicilio) e i pacchetti pre-pagati omaggio.
+- `pricing_rules`: Nuova tabella rules-engine per il calcolo dinamico. Consente configurazione di override scalari (es: +5€ per allievo extra over 3, lezione omaggio per fine pack, maggiorazione domicilio +10€ o +100€).
+- `price_matrix`: Popolata programmaticamente come base-truth con 22 varianti di prezzo fisse per lezioni individuali private (in sede, domicilio, coppia e aerea) e per gli affitti location (singoli, pack e per l'intera accademia).

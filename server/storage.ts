@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { eq, or, desc, sql, asc, inArray, isNull, isNotNull, and, gte, lte, sum, sql as dql, aliasedTable } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
-import { ilike, getTableColumns } from "drizzle-orm";
+import { like, getTableColumns } from "drizzle-orm";
 import {
   users,
   members,
@@ -10,13 +10,22 @@ import {
   subscriptionTypes,
   studios,
   courses,
-  workshops,
+  promoRules,
+  welfareProviders,
+  carnetWallets,
+  carnetSessions,
+  instructorAgreements,
+  agreementMonthlyOverrides,
+  pagodilTiers,
+  costCenters,
+  accountingPeriods,
+  journalEntries,
+  customListItems,
   memberships,
   medicalCertificates,
   paymentMethods,
   payments,
   enrollments,
-  workshopAttendances,
   accessLogs,
   attendances,
   countries,
@@ -122,10 +131,8 @@ import {
   vacationCategories,
   type VacationCategory,
   type InsertVacationCategory,
-  campusActivities,
   type CampusActivity,
   type InsertCampusActivity,
-  vacationStudies,
   type VacationStudy,
   type InsertVacationStudy,
   activityStatuses,
@@ -556,6 +563,36 @@ export interface IStorage {
   createStrategicEvent(event: InsertStrategicEvent): Promise<StrategicEvent>;
   updateStrategicEvent(id: number, event: Partial<InsertStrategicEvent>): Promise<StrategicEvent | undefined>;
   deleteStrategicEvent(id: number): Promise<void>;
+
+  // Quote & Promo Module
+  getPromoRules(query: any): Promise<any[]>;
+  createPromoRule(data: any): Promise<any>;
+  updatePromoRule(id: number, data: any): Promise<any>;
+  deletePromoRule(id: number): Promise<void>;
+  incrementPromoRuleUse(id: number): Promise<void>;
+  
+  getWelfareProviders(): Promise<any[]>;
+  updateWelfareProvider(id: number, data: any): Promise<any>;
+
+  getCarnetWallets(query: any): Promise<any[]>;
+  createCarnetWallet(data: any): Promise<any>;
+  useCarnetWallet(id: number, sessionData: any): Promise<{ wallet: any, session: any }>;
+  getCarnetSessions(walletId: number): Promise<any[]>;
+
+  getInstructorAgreements(query: any): Promise<any[]>;
+  createInstructorAgreement(data: any, overrides?: any[]): Promise<any>;
+  updateInstructorAgreement(id: number, data: any, overrides?: any[]): Promise<any>;
+  deleteInstructorAgreement(id: number): Promise<void>;
+  createInstructorPayment(id: number, paymentData: any): Promise<any>;
+
+  getPagodilTiers(): Promise<any[]>;
+
+  // Base Accounting
+  getCostCenters(): Promise<any[]>;
+  getAccountingPeriods(query: any): Promise<any[]>;
+  getJournalEntries(query: any): Promise<any>;
+  createJournalEntry(data: any): Promise<any>;
+
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1020,7 +1057,6 @@ export class DatabaseStorage implements IStorage {
           console.error("Failed to parse tessereMetadata for entity card fallback", e);
         }
       }
-      
       // Decode attachmentMetadata for Type/Ente Name
       if (m.attachmentMetadata) {
         try {
@@ -1032,7 +1068,6 @@ export class DatabaseStorage implements IStorage {
           console.error("Failed to parse attachmentMetadata for entity card type fallback", e);
         }
       }
-      
       return m;
     });
   }
@@ -1855,7 +1890,6 @@ export class DatabaseStorage implements IStorage {
         customListItems,
         eq(courses.categoryId, customListItems.id)
       );
-    
     if (activityType) {
       return await query
         .where(eq(courses.activityType, activityType))
@@ -1905,7 +1939,6 @@ export class DatabaseStorage implements IStorage {
       )
       .where(eq(courses.seasonId, seasonId))
       .orderBy(desc(courses.createdAt));
-      
     return await query;
   }
 
@@ -3495,6 +3528,353 @@ export class DatabaseStorage implements IStorage {
   async deleteStrategicEvent(id: number): Promise<void> {
     await db.delete(strategicEvents).where(eq(strategicEvents.id, id));
   }
+
+  // ============================================
+  // PROMO RULES
+  // ============================================
+  async getPromoRules(query: any) {
+    let conditions = [];
+    if (query.targetType) conditions.push(eq(promoRules.targetType, query.targetType));
+    if (query.search) conditions.push(like(promoRules.code, `%${query.search}%`));
+    
+    const results = await db.select().from(promoRules)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(promoRules.createdAt));
+      
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return results.map(r => ({
+      ...r,
+      isExpired: r.validTo ? new Date(r.validTo) < today : false
+    }));
+  }
+
+  async createPromoRule(data: any) {
+    const [result] = await db.insert(promoRules).values(data);
+    const [rule] = await db.select().from(promoRules).where(eq(promoRules.id, result.insertId));
+    return rule;
+  }
+
+  async updatePromoRule(id: number, data: any) {
+    await db.update(promoRules).set({...data, updatedAt: new Date()}).where(eq(promoRules.id, id));
+    const [rule] = await db.select().from(promoRules).where(eq(promoRules.id, id));
+    return rule;
+  }
+
+  async deletePromoRule(id: number) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dateStr = yesterday.toISOString().split('T')[0];
+    await db.update(promoRules).set({ validTo: dateStr }).where(eq(promoRules.id, id));
+  }
+
+  async incrementPromoRuleUse(id: number) {
+    await db.update(promoRules)
+      .set({ usedCount: sql`${promoRules.usedCount} + 1` })
+      .where(eq(promoRules.id, id));
+  }
+
+  // ============================================
+  // WELFARE PROVIDERS
+  // ============================================
+  async getWelfareProviders() {
+    return await db.select().from(welfareProviders).orderBy(asc(welfareProviders.name));
+  }
+
+  async updateWelfareProvider(id: number, data: any) {
+    await db.update(welfareProviders).set(data).where(eq(welfareProviders.id, id));
+    const [provider] = await db.select().from(welfareProviders).where(eq(welfareProviders.id, id));
+    return provider;
+  }
+
+  // ============================================
+  // CARNET WALLETS
+  // ============================================
+  async getCarnetWallets(query: any) {
+    let conditions = [];
+    if (query.active !== undefined) conditions.push(eq(carnetWallets.isActive, query.active === "true"));
+    if (query.memberId) conditions.push(eq(carnetWallets.memberId, parseInt(query.memberId)));
+    if (query.type) conditions.push(eq(carnetWallets.walletType, query.type));
+    
+    if (query.expiring) {
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + parseInt(query.expiring));
+      const ds = targetDate.toISOString().split('T')[0];
+      conditions.push(lte(carnetWallets.expiresAt, ds));
+      conditions.push(gte(carnetWallets.expiresAt, new Date().toISOString().split('T')[0]));
+    }
+
+    const customTypesListQuery = db.select({id: customLists.id}).from(customLists).where(eq(customLists.systemName, "wallet_types")).limit(1);
+
+    const results = await db.select({
+      wallet: carnetWallets,
+      member: members,
+      typeLabel: customListItems.label
+    })
+    .from(carnetWallets)
+    .leftJoin(members, eq(carnetWallets.memberId, members.id))
+    .leftJoin(customListItems, and(
+      eq(customListItems.value, carnetWallets.walletType),
+      // we handle the system name indirectly by hoping values are unique, or just safely getting it
+      isNotNull(customListItems.id) // simplistic
+    ))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(desc(carnetWallets.createdAt));
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    // De-duplicate customListItems if join multiples
+    const seen = new Set();
+    const finalResults = [];
+    for(const r of results) {
+        if(!seen.has(r.wallet.id)) {
+            seen.add(r.wallet.id);
+            const expiresAt = new Date(r.wallet.expiresAt);
+            const diffMs = expiresAt.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+            finalResults.push({
+                ...r.wallet,
+                memberName: r.member ? `${r.member.firstName} ${r.member.lastName}` : null,
+                typeLabel: r.typeLabel || r.wallet.walletType,
+                remainingUnits: r.wallet.totalUnits - r.wallet.usedUnits,
+                isExpired: diffDays < 0,
+                daysToExpiry: diffDays
+            });
+        }
+    }
+    return finalResults;
+  }
+
+  async createCarnetWallet(data: any) {
+    const purchasedAtStr = data.purchasedAt || new Date().toISOString().split('T')[0];
+    const purchasedAt = new Date(purchasedAtStr);
+    const expiresAt = new Date(purchasedAt);
+    expiresAt.setDate(expiresAt.getDate() + data.expiryDays);
+    const expiresAtStr = expiresAt.toISOString().split('T')[0];
+    
+    const [result] = await db.insert(carnetWallets).values({
+        ...data,
+        purchasedAt: purchasedAtStr,
+        expiresAt: expiresAtStr,
+        usedUnits: 0,
+        isActive: true
+    });
+    const [wallet] = await db.select().from(carnetWallets).where(eq(carnetWallets.id, result.insertId));
+    return wallet;
+  }
+
+  async useCarnetWallet(id: number, sessionData: any) {
+    const [wallet] = await db.select().from(carnetWallets).where(eq(carnetWallets.id, id));
+    if (!wallet || !wallet.isActive || wallet.usedUnits >= wallet.totalUnits) {
+        throw new Error("Wallet non attivo o esaurito.");
+    }
+    
+    const [maxSess] = await db.select({ max: sql<number>`MAX(session_number)` })
+        .from(carnetSessions)
+        .where(eq(carnetSessions.walletId, id));
+    const nextSession = (maxSess?.max || 0) + 1;
+    
+    const [res] = await db.insert(carnetSessions).values({
+        walletId: id,
+        sessionNumber: nextSession,
+        sessionDate: sessionData.sessionDate,
+        sessionTimeStart: sessionData.sessionTimeStart,
+        sessionTimeEnd: sessionData.sessionTimeEnd,
+        instructorId: sessionData.instructorId,
+        notes: sessionData.notes
+    });
+    
+    const newUsed = wallet.usedUnits + 1;
+    const isActive = newUsed < wallet.totalUnits;
+    
+    await db.update(carnetWallets)
+        .set({ usedUnits: newUsed, isActive, updatedAt: new Date() })
+        .where(eq(carnetWallets.id, id));
+        
+    const [updatedWallet] = await db.select().from(carnetWallets).where(eq(carnetWallets.id, id));
+    const [session] = await db.select().from(carnetSessions).where(eq(carnetSessions.id, res.insertId));
+    
+    return { wallet: updatedWallet, session };
+  }
+
+  async getCarnetSessions(walletId: number) {
+    const results = await db.select({
+      session: carnetSessions,
+      instructor: members
+    })
+    .from(carnetSessions)
+    .leftJoin(members, eq(carnetSessions.instructorId, members.id))
+    .where(eq(carnetSessions.walletId, walletId))
+    .orderBy(asc(carnetSessions.sessionNumber));
+    
+    return results.map(r => ({
+      ...r.session,
+      instructorName: r.instructor ? `${r.instructor.firstName} ${r.instructor.lastName}` : null
+    }));
+  }
+
+  // ============================================
+  // INSTRUCTOR AGREEMENTS
+  // ============================================
+  async getInstructorAgreements(query: any) {
+    let conditions = [];
+    if (query.active !== undefined) conditions.push(eq(instructorAgreements.isActive, query.active === "true"));
+    if (query.seasonId) conditions.push(eq(instructorAgreements.seasonId, parseInt(query.seasonId)));
+    
+    const results = await db.select({
+      agr: instructorAgreements,
+      member: members,
+      studio: studios
+    })
+    .from(instructorAgreements)
+    .leftJoin(members, eq(instructorAgreements.memberId, members.id))
+    .leftJoin(studios, eq(instructorAgreements.studioId, studios.id))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(desc(instructorAgreements.createdAt));
+    
+    const agrs = results.map(r => ({
+      ...r.agr,
+      memberName: r.member ? `${r.member.firstName} ${r.member.lastName}` : null,
+      studioName: r.studio?.name || null,
+      overrides: []
+    }));
+    
+    if (agrs.length > 0) {
+        const ids = agrs.map(a => a.id);
+        const ovs = await db.select().from(agreementMonthlyOverrides).where(inArray(agreementMonthlyOverrides.agreementId, ids));
+        for (const a of agrs) {
+            a.overrides = (ovs as any[]).filter(o => o.agreementId === a.id);
+        }
+    }
+    return agrs;
+  }
+
+  async createInstructorAgreement(data: any, overrides?: any[]) {
+    const [res] = await db.insert(instructorAgreements).values(data);
+    const id = res.insertId;
+    if (data.agreementType === "variable_monthly" && overrides && overrides.length > 0) {
+        await db.insert(agreementMonthlyOverrides).values(
+            overrides.map(o => ({ ...o, agreementId: id }))
+        );
+    }
+    const [agr] = await db.select().from(instructorAgreements).where(eq(instructorAgreements.id, id));
+    return agr;
+  }
+
+  async updateInstructorAgreement(id: number, data: any, overrides?: any[]) {
+    await db.update(instructorAgreements).set({...data, updatedAt: new Date()}).where(eq(instructorAgreements.id, id));
+    if (data.agreementType === "variable_monthly" && overrides) {
+        await db.delete(agreementMonthlyOverrides).where(eq(agreementMonthlyOverrides.agreementId, id));
+        if (overrides.length > 0) {
+            await db.insert(agreementMonthlyOverrides).values(
+                overrides.map(o => ({ ...o, agreementId: id }))
+            );
+        }
+    }
+    const [agr] = await db.select().from(instructorAgreements).where(eq(instructorAgreements.id, id));
+    return agr;
+  }
+
+  async deleteInstructorAgreement(id: number) {
+    await db.update(instructorAgreements).set({ isActive: false }).where(eq(instructorAgreements.id, id));
+  }
+
+  async createInstructorPayment(id: number, paymentData: any) {
+    const [agr] = await db.select().from(instructorAgreements).where(eq(instructorAgreements.id, id));
+    if (!agr) throw new Error("Accordo non trovato");
+    const [mem] = await db.select().from(members).where(eq(members.id, agr.memberId));
+    
+    const descStr = `Accordo ${mem ? mem.lastName : ''} - ${paymentData.month}/${paymentData.year}`;
+    const [payRes] = await db.insert(payments).values({
+      tenantId: agr.tenantId,
+      memberId: agr.memberId,
+      amount: paymentData.amount,
+      paymentDate: new Date().toISOString().split('T')[0],
+      paymentMethodId: 1,
+      type: "accordo_maestro",
+      status: "COMPLETED",
+      description: descStr,
+      costCenterCode: "ACCORDI",
+      receiptNumber: `ACC-${paymentData.month}${paymentData.year}-${id}`
+    });
+    
+    let creditAcc = "1000-Cassa";
+    if (paymentData.paymentMode === "bonifico" || paymentData.paymentMode === "pos") creditAcc = "1010-Banca";
+    if (paymentData.paymentMode === "fattura") creditAcc = "2010-DebitiVsFornitori";
+    
+    const [jeRes] = await db.insert(journalEntries).values({
+        tenantId: agr.tenantId,
+        paymentId: payRes.insertId,
+        entryDate: new Date().toISOString().split('T')[0],
+        description: descStr,
+        debitAccount: "6010-CostiMaestri",
+        creditAccount: creditAcc,
+        amount: paymentData.amount,
+        costCenterId: undefined,
+        notes: paymentData.notes,
+        isAuto: true
+    });
+    return payRes.insertId;
+  }
+
+  // ============================================
+  // PAGODIL TIERS
+  // ============================================
+  async getPagodilTiers() {
+    return await db.select().from(pagodilTiers).where(eq(pagodilTiers.isActive, true)).orderBy(asc(pagodilTiers.rangeMin));
+  }
+
+  // ============================================
+  // BASE ACCOUNTING
+  // ============================================
+  async getCostCenters() {
+    return await db.select().from(costCenters).where(eq(costCenters.isActive, true));
+  }
+  
+  async getAccountingPeriods(query: any) {
+    let conds = [];
+    if (query.year) conds.push(eq(accountingPeriods.year, parseInt(query.year)));
+    if (query.isClosed !== undefined) conds.push(eq(accountingPeriods.isClosed, query.isClosed === "true"));
+    return await db.select().from(accountingPeriods)
+      .where(conds.length > 0 ? and(...conds) : undefined)
+      .orderBy(desc(accountingPeriods.year), desc(accountingPeriods.month));
+  }
+  
+  async getJournalEntries(query: any) {
+    let conds = [];
+    if (query.periodId) conds.push(eq(journalEntries.periodId, parseInt(query.periodId)));
+    if (query.costCenterId) conds.push(eq(journalEntries.costCenterId, parseInt(query.costCenterId)));
+    
+    const limit = query.limit ? parseInt(query.limit) : 50;
+    const page = query.page ? parseInt(query.page) : 1;
+    const offset = (page - 1) * limit;
+    
+    const results = await db.select({
+      je: journalEntries,
+      pay: payments,
+      ap: accountingPeriods
+    })
+    .from(journalEntries)
+    .leftJoin(payments, eq(journalEntries.paymentId, payments.id))
+    .leftJoin(accountingPeriods, eq(journalEntries.periodId, accountingPeriods.id))
+    .where(conds.length > 0 ? and(...conds) : undefined)
+    .orderBy(desc(journalEntries.entryDate))
+    .limit(limit).offset(offset);
+    
+    return results.map(r => ({
+      ...r.je,
+      paymentReceipt: r.pay?.receiptNumber || null,
+      periodLabel: r.ap?.label || null
+    }));
+  }
+
+  async createJournalEntry(data: any) {
+    const [res] = await db.insert(journalEntries).values({...data, isAuto: false});
+    const [je] = await db.select().from(journalEntries).where(eq(journalEntries.id, res.insertId));
+    return je;
+  }
+
 }
 
 export const storage = new DatabaseStorage();

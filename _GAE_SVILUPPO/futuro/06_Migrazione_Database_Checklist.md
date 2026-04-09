@@ -134,3 +134,8 @@ La transizione da un modello all'altro non è un'operazione banale, è un trapia
 
 <!-- --- FINE SORGENTE: futuro/13_GAE_Piano_Migrazione_DB.md --- -->
 
+- [x] Migrazione dati Silos -> courses completata (13 record).
+- [x] Drop 13 Tabelle Obsolete confermato.
+- [x] Creazione Modulo Quote e Promo e Struttura Contabile Base (10 Tabelle totali incluse `cost_centers`, `accounting_periods`, `journal_entries`).
+- [x] Popolamento Seed iniziale (custom_lists, welfare_providers, pagodil_tiers, centri di costo ed esercizi fiscali).
+- [x] Estensione tabella `payments` per Contabilità.

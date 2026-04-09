@@ -46,6 +46,7 @@ import IscrizioniPagamenti from "@/pages/iscrizioni-pagamenti";
 import PriceLists from "@/pages/listini";
 import ListiniHome from "@/pages/listini-home";
 import QuoteListini from "@/pages/quote-listini";
+import QuotePromo from "@/pages/quote-promo";
 import Attivita from "@/pages/attivita";
 import IscrittiPerAttivita from "@/pages/iscritti_per_attivita";
 import Elenchi from "@/pages/elenchi";
@@ -195,7 +196,8 @@ function Router() {
       <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
       <ProtectedRoute path="/categorie-eventi-esterni" component={BookingServiceCategories} />
       <ProtectedRoute path="/categorie-merchandising" component={MerchandisingCategories} />
-      <ProtectedRoute path="/promo-sconti" component={StubPromoSconti} />
+      <Route path="/promo-sconti"><Redirect to="/quote-promo" /></Route>
+      <ProtectedRoute path="/quote-promo" component={QuotePromo} />
       <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
       <ProtectedRoute path="/scheda-workshop" component={SchedaWorkshop} />
       <ProtectedRoute path="/scheda-domenica" component={SchedaDomenica} />
@@ -216,9 +218,10 @@ function Router() {
       <ProtectedRoute path="/attivita/merchandising" component={StubMerchandising} />
 
       <ProtectedRoute path="/quote-listini/:activityType" component={QuoteListini} />
-      <ProtectedRoute path="/listini-old" component={ListiniHome} />
-      <ProtectedRoute path="/listini" component={PriceLists} />
-      <ProtectedRoute path="/listini-base/:activityType" component={PriceLists} />
+      <Route path="/listini-old"><Redirect to="/quote-promo" /></Route>
+      <Route path="/listini-home"><Redirect to="/quote-promo" /></Route>
+      <Route path="/listini"><Redirect to="/quote-promo" /></Route>
+      <Route path="/listini-base/:activityType"><Redirect to="/quote-promo" /></Route>
       <ProtectedRoute path="/elenchi" component={Elenchi} />
       <ProtectedRoute path="/todo-list" component={TodoList} />
       <ProtectedRoute path="/knowledge-base" component={KnowledgeBase} />

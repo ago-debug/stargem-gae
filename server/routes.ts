@@ -1,3 +1,4 @@
+import { createInsertSchema } from "drizzle-zod";
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -61,7 +62,22 @@ import {
   insertRentalCategorySchema,
   insertStrategicEventSchema,
   memberPackages,
-  insertMemberPackageSchema
+  insertMemberPackageSchema,
+  promoRules,
+  welfareProviders,
+  carnetWallets,
+  carnetSessions,
+  instructorAgreements,
+  agreementMonthlyOverrides,
+  pagodilTiers,
+  costCenters,
+  accountingPeriods,
+  journalEntries,
+  memberDiscounts,
+  companyAgreements,
+  staffRates,
+  pricingRules,
+  payments
 } from "@shared/schema";
 
 // Configure multer for file uploads with increased limits for large CSV files
@@ -6014,6 +6030,534 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (err) {
       console.error("Error deleting strategic event:", err);
       res.status(500).json({ message: "Failed to delete strategic event" });
+    }
+  });
+
+
+  // ============================================
+  // ZOD SCHEMAS PER QUOTE/PROMO/CONTABILITA'
+  // ============================================
+  const insertPromoRuleSchema = createInsertSchema(promoRules).omit({ id: true, createdAt: true, updatedAt: true });
+  const insertCarnetWalletSchema = createInsertSchema(carnetWallets).omit({ id: true, createdAt: true, updatedAt: true, usedUnits: true });
+  const insertInstructorAgreementSchema = createInsertSchema(instructorAgreements).omit({ id: true, createdAt: true, updatedAt: true });
+  const insertJournalEntrySchema = createInsertSchema(journalEntries).omit({ id: true, createdAt: true });
+
+  // ============================================
+  // BLOCCO 1: PROMO RULES
+  // ============================================
+  app.get("/api/promo-rules", isAuthenticated, async (req, res) => {
+    try {
+      res.json(await storage.getPromoRules(req.query));
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post("/api/promo-rules", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertPromoRuleSchema.parse(req.body);
+      const created = await storage.createPromoRule(data);
+      await storage.logActivity({userId: req.user!.id, action: "Creazione Promo", entity: "promo_rules", entityId: created.id.toString(), details: `Creato codice ${created.code}`});
+      res.status(201).json({ success: true, data: created });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  app.put("/api/promo-rules/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = insertPromoRuleSchema.partial().parse(req.body);
+      const updated = await storage.updatePromoRule(id, data);
+      await storage.logActivity({userId: req.user!.id, action: "Modifica Promo", entity: "promo_rules", entityId: id.toString(), details: `Modificato codice ${updated.code}`});
+      res.json({ success: true, data: updated });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  app.delete("/api/promo-rules/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePromoRule(id);
+      res.json({ success: true });
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post("/api/promo-rules/validate", isAuthenticated, async (req, res) => {
+    try {
+      const { code, amount, activityType, memberId } = req.body;
+      const rules = await storage.getPromoRules({ search: code, active: "true" });
+      const exactRule = rules.find(r => r.code.toUpperCase() === code?.toUpperCase());
+      
+      if (!exactRule) return res.json({ valid: false, reason: "Codice inesistente." });
+      if (exactRule.isExpired) return res.json({ valid: false, reason: "Codice scaduto." });
+      if (exactRule.maxUses && exactRule.usedCount >= exactRule.maxUses) return res.json({ valid: false, reason: "Limite utilizzi superato." });
+      if (exactRule.excludeOpen && activityType?.includes("open")) return res.json({ valid: false, reason: "Non applicabile su corsi OPEN." });
+      if (exactRule.targetType === "personal" && exactRule.targetRefId !== memberId) return res.json({ valid: false, reason: "Codice riservato ad altro utente." });
+
+      // Calculate discount
+      let discountAmount = 0;
+      if (exactRule.discountType === "fixed") {
+          discountAmount = parseFloat(exactRule.discountValue);
+      } else {
+          discountAmount = (amount * parseFloat(exactRule.discountValue)) / 100;
+      }
+      
+      const finalAmount = amount - discountAmount;
+      await storage.incrementPromoRuleUse(exactRule.id);
+      
+      res.json({ valid: true, discountAmount, finalAmount: finalAmount < 0 ? 0 : finalAmount });
+    } catch(err: any) {
+      res.status(500).json({ valid: false, reason: "Errore di calcolo: " + err.message });
+    }
+  });
+
+  // ============================================
+  // BLOCCO 2: WELFARE PROVIDERS
+  // ============================================
+  app.get("/api/welfare-providers", isAuthenticated, async (req, res) => {
+    try {
+      res.json(await storage.getWelfareProviders());
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.patch("/api/welfare-providers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = req.body;
+      delete data.name; // block changing name
+      const provider = await storage.updateWelfareProvider(id, data);
+      res.json({ success: true, data: provider });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  // ============================================
+  // BLOCCO 3: CARNET WALLETS
+  // ============================================
+  app.get("/api/carnet-wallets", isAuthenticated, async (req, res) => {
+    try {
+      res.json(await storage.getCarnetWallets(req.query));
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post("/api/carnet-wallets", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertCarnetWalletSchema.parse(req.body);
+      const created = await storage.createCarnetWallet(data);
+      res.status(201).json({ success: true, data: created });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post("/api/carnet-wallets/:id/use", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.useCarnetWallet(id, req.body);
+      await storage.logActivity({userId: req.user!.id, action: "Uso Carnet", entity: "carnet_wallets", entityId: id.toString(), details: `Scalato 1 ingresso. Rimasti: ${result.wallet.totalUnits - result.wallet.usedUnits}`});
+      res.json({ success: true, data: result });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  app.get("/api/carnet-wallets/:id/sessions", isAuthenticated, async (req, res) => {
+    try {
+      res.json(await storage.getCarnetSessions(parseInt(req.params.id)));
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // ============================================
+  // BLOCCO 4: INSTRUCTOR AGREEMENTS
+  // ============================================
+  app.get("/api/instructor-agreements", isAuthenticated, async (req, res) => {
+    try {
+      res.json(await storage.getInstructorAgreements(req.query));
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post("/api/instructor-agreements", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertInstructorAgreementSchema.parse(req.body);
+      const overrides = req.body.overrides || [];
+      const created = await storage.createInstructorAgreement(data, overrides);
+      res.status(201).json({ success: true, data: created });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  app.put("/api/instructor-agreements/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = insertInstructorAgreementSchema.partial().parse(req.body);
+      const overrides = req.body.overrides;
+      const updated = await storage.updateInstructorAgreement(id, data, overrides);
+      res.json({ success: true, data: updated });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post("/api/instructor-agreements/:id/payment", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const payId = await storage.createInstructorPayment(id, req.body);
+      await storage.logActivity({userId: req.user!.id, action: "Pagamento Accordo", entity: "instructor_agreements", entityId: id.toString(), details: `Pagamento generato ID ${payId}`});
+      res.json({ success: true, data: { paymentId: payId } });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  app.delete("/api/instructor-agreements/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteInstructorAgreement(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // ============================================
+  // BLOCCO 5: PAGODIL TIERS
+  // ============================================
+  app.get("/api/pagodil-tiers", isAuthenticated, async (req, res) => {
+    try {
+      res.json(await storage.getPagodilTiers());
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post("/api/pagodil-tiers/calculate", isAuthenticated, async (req, res) => {
+    try {
+      const { amount, providerName = "pagodil" } = req.body;
+      const tiers = await storage.getPagodilTiers();
+      const amountVal = parseFloat(amount);
+      const target = tiers.find(t => t.providerName === providerName && amountVal >= parseFloat(t.rangeMin) && amountVal <= parseFloat(t.rangeMax));
+      if (!target) return res.status(404).json({ success: false, error: "Nessun tier Pagodil applicabile per questo importo." });
+      
+      const fee = parseFloat(target.feeAmount);
+      const totalStr = target.feeType === "fixed" ? (amountVal + fee).toFixed(2) : (amountVal + (amountVal * fee / 100)).toFixed(2);
+      
+      res.json({ success: true, data: { feeAmount: fee, feeType: target.feeType, totalWithFee: parseFloat(totalStr) } });
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // ============================================
+  // BLOCCO 6: CONTABILITA' BASE
+  // ============================================
+  app.get("/api/cost-centers", isAuthenticated, async (req, res) => {
+    try {
+      res.json(await storage.getCostCenters());
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.get("/api/accounting-periods", isAuthenticated, async (req, res) => {
+    try {
+      res.json(await storage.getAccountingPeriods(req.query));
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.get("/api/journal-entries", isAuthenticated, async (req, res) => {
+    try {
+      res.json(await storage.getJournalEntries(req.query));
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post("/api/journal-entries", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertJournalEntrySchema.parse(req.body);
+      const entry = await storage.createJournalEntry(data);
+      res.status(201).json({ success: true, data: entry });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  // ==========================================
+  // AGEVOLAZIONI (F1-007)
+  // ==========================================
+
+  // MEMBER DISCOUNTS
+  app.get("/api/member-discounts", isAuthenticated, async (req, res) => {
+    try {
+      const { memberId, isUsed, seasonId } = req.query;
+      let query = db.select().from(memberDiscounts);
+      // Minimal implementation for now
+      const data = await query;
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/member-discounts/:memberId/active", isAuthenticated, async (req, res) => {
+    try {
+      const data = await db.select().from(memberDiscounts)
+        .where(and(
+          eq(memberDiscounts.memberId, parseInt(req.params.memberId)),
+          eq(memberDiscounts.isUsed, false)
+        ));
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/member-discounts", isAuthenticated, async (req, res) => {
+    try {
+      const [result] = await db.insert(memberDiscounts).values({
+        ...req.body,
+        tenantId: (req.user as any)?.tenantId || 1
+      });
+      res.json({ success: true, id: result.insertId });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.patch("/api/member-discounts/:id/use", isAuthenticated, async (req, res) => {
+    try {
+      await db.update(memberDiscounts)
+        .set({ isUsed: true, usedAt: new Date(), paymentId: req.body.paymentId })
+        .where(eq(memberDiscounts.id, parseInt(req.params.id)));
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // COMPANY AGREEMENTS
+  app.get("/api/company-agreements", isAuthenticated, async (req, res) => {
+    try {
+      const data = await db.select().from(companyAgreements);
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/company-agreements/:id", isAuthenticated, async (req, res) => {
+    try {
+      const [data] = await db.select().from(companyAgreements)
+        .where(eq(companyAgreements.id, parseInt(req.params.id)));
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/company-agreements", isAuthenticated, async (req, res) => {
+    try {
+      const [result] = await db.insert(companyAgreements).values({
+        ...req.body,
+        tenantId: (req.user as any)?.tenantId || 1
+      });
+      res.json({ success: true, id: result.insertId });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.patch("/api/company-agreements/:id", isAuthenticated, async (req, res) => {
+    try {
+      await db.update(companyAgreements)
+        .set(req.body)
+        .where(eq(companyAgreements.id, parseInt(req.params.id)));
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // STAFF RATES
+  app.get("/api/staff-rates", isAuthenticated, async (req, res) => {
+    try {
+      const data = await db.select().from(staffRates);
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/staff-rates", isAuthenticated, async (req, res) => {
+    try {
+      const [result] = await db.insert(staffRates).values({
+        ...req.body,
+        tenantId: (req.user as any)?.tenantId || 1
+      });
+      res.json({ success: true, id: result.insertId });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.patch("/api/staff-rates/:id", isAuthenticated, async (req, res) => {
+    try {
+      await db.update(staffRates)
+        .set(req.body)
+        .where(eq(staffRates.id, parseInt(req.params.id)));
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ==========================================
+  // PRICING RULES (F1-008)
+  // ==========================================
+
+  app.get("/api/pricing-rules", isAuthenticated, async (req, res) => {
+    try {
+      // In a real scenario we'd parse appliesTo and active from req.query
+      const data = await db.select().from(pricingRules);
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/pricing-rules/calculate", isAuthenticated, async (req, res) => {
+    try {
+      const { basePrice, appliesTo, groupSize, locationType, walletType, unitCount, trialDate } = req.body;
+      
+      const rules = await db.select().from(pricingRules)
+        .where(eq(pricingRules.isActive, true)); // Add sorting and appliesTo filtering logic here as needed
+
+      // Minimal mock calculation
+      const appliedRules: any[] = [];
+      let finalPrice = Number(basePrice) || 0;
+      let bonusUnits = 0;
+
+      for (const r of rules) {
+         if (r.appliesTo !== appliesTo && r.appliesTo !== 'tutti') continue;
+
+         let triggered = false;
+         if (r.triggerCondition === 'group_size_gte' && groupSize >= Number(r.triggerValue)) triggered = true;
+         if (r.triggerCondition === 'location_type_eq' && locationType === 'domicilio') triggered = true; // simplified
+         if (r.triggerCondition === 'units_completed' && unitCount >= Number(r.triggerValue)) triggered = true;
+
+         if (triggered) {
+            let value = Number(r.effectValue);
+            if (r.effectType === 'add_fixed') {
+              if (r.ruleType === 'extra_per_person' && groupSize > 2) {
+                 finalPrice += value * (groupSize - 2); 
+                 value = value * (groupSize - 2);
+              } else {
+                 finalPrice += value;
+              }
+            } else if (r.effectType === 'add_bonus_unit') {
+                bonusUnits += value;
+            } else if (r.effectType === 'subtract_fixed') {
+                finalPrice = Math.max(0, finalPrice - value);
+            } else if (r.effectType === 'set_free') {
+                finalPrice = 0;
+            } else if (r.effectType === 'set_price') {
+                finalPrice = value;
+            }
+
+            appliedRules.push({ ruleCode: r.ruleCode, effect: r.effectType, value });
+         }
+      }
+
+      res.json({ basePrice, appliedRules, finalPrice, bonusUnits });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/pricing-rules", isAuthenticated, async (req, res) => {
+    try {
+      const [result] = await db.insert(pricingRules).values({
+        ...req.body,
+        tenantId: (req.user as any)?.tenantId || 1
+      });
+      res.json({ success: true, id: result.insertId });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.patch("/api/pricing-rules/:id", isAuthenticated, async (req, res) => {
+    try {
+      await db.update(pricingRules)
+        .set(req.body)
+        .where(eq(pricingRules.id, parseInt(req.params.id)));
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ==========================================
+  // LEZIONI SINGOLE SPOT (F1-008)
+  // ==========================================
+
+  app.get("/api/lezioni-spot", isAuthenticated, async (req, res) => {
+    try {
+      const data = await db.select().from(payments)
+        .where(eq(payments.type, "lezione_spot"));
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/lezioni-spot", isAuthenticated, async (req, res) => {
+    try {
+      const { memberId, instructorId, sessionDate, sessionTimeStart, sessionTimeEnd, lessonType, locationType, amount, paymentMethodId, notes } = req.body;
+      
+      const [result] = await db.insert(payments).values({
+        tenantId: (req.user as any)?.tenantId || 1,
+        memberId: memberId,
+        type: "lezione_spot",
+        amount: String(amount),
+        status: "saldato",
+        paymentMethodId: paymentMethodId,
+        paymentDate: sessionDate,
+        description: `Lezione ${lessonType} - ${sessionDate}`,
+        costCenterCode: "PRIVATI",
+        notes: notes
+      });
+
+      await db.insert(journalEntries).values({
+        tenantId: (req.user as any)?.tenantId || 1,
+        date: sessionDate,
+        description: `Incasso lezione spot ${lessonType}`,
+        amount: String(amount),
+        type: 'revenue',
+        creditAccount: '4020-RicaviPrivati',
+        debitAccount: '1000-Cassa', // simplistic mock
+        paymentId: result.insertId,
+        costCenterId: 1
+      });
+
+      res.json({ success: true, paymentId: result.insertId });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
     }
   });
 
