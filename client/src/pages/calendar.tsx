@@ -2044,14 +2044,14 @@ export default function CalendarPage() {
                                                             backgroundColor: currentActType === "course" ? evt.colorProps.backgroundColor : `${ACTIVITY_TYPE_COLORS[currentActType] || '#1e40af'}10`,
                                                             borderLeftColor: currentActType === "course" ? evt.colorProps.borderLeftColor : undefined,
                                                             borderLeftWidth: currentActType === "course" ? undefined : 0,
-                                                            paddingLeft: currentActType === "course" ? undefined : "14px",
+                                                            paddingLeft: currentActType === "course" ? undefined : "18px",
                                                             color: evt.colorProps.color
                                                         }}
                                                     >
                                                         {currentActType !== 'course' && (
-                                                            <div className="absolute left-[3px] top-1.5 bottom-1.5 flex gap-[1.5px] opacity-80">
-                                                                <div className="w-0 h-full border-l-[1.5px] border-dashed" style={{ borderColor: ACTIVITY_TYPE_COLORS[currentActType] || '#1e40af' }}></div>
-                                                                <div className="w-0 h-full border-l-[1.5px] border-dashed" style={{ borderColor: ACTIVITY_TYPE_COLORS[currentActType] || '#1e40af' }}></div>
+                                                            <div className="absolute left-[2px] top-1.5 bottom-1.5 flex gap-[2px]">
+                                                                <div className="w-0 h-full border-l-[3px] border-dashed" style={{ borderColor: ACTIVITY_TYPE_COLORS[currentActType] || '#1e40af' }}></div>
+                                                                <div className="w-0 h-full border-l-[3px] border-dashed" style={{ borderColor: ACTIVITY_TYPE_COLORS[currentActType] || '#1e40af' }}></div>
                                                             </div>
                                                         )}
                                                         {(() => {
