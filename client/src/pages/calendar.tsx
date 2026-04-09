@@ -2043,20 +2043,26 @@ export default function CalendarPage() {
                                                             color: "#0f172a"
                                                         }}
                                                     >
-                                                        <div className="absolute top-2 right-2 flex flex-col items-end gap-0.5 z-30">
+                                                        <div className="absolute top-1 right-1 flex items-center justify-end gap-1.5 z-30 max-w-[70%] bg-white/80 px-1.5 py-0.5 rounded-md shadow-sm border border-black/5">
+                                                            {evt.categoryName && (
+                                                                <span className="font-bold text-[9px] uppercase truncate shrink-0" style={{ color: ACTIVITY_TYPE_COLORS[evt.activityType] || ACTIVITY_TYPE_COLORS["course"] || "#1e40af" }} title={evt.categoryName}>
+                                                                    {evt.categoryName}
+                                                                </span>
+                                                            )}
                                                             <span style={{
                                                               backgroundColor: ACTIVITY_TYPE_COLORS[evt.activityType] || ACTIVITY_TYPE_COLORS["course"] || "#1e40af",
                                                               color: "#ffffff",
                                                               borderRadius: "4px",
                                                               padding: "1px 5px",
-                                                              fontSize: "10px",
-                                                              fontWeight: "bold"
-                                                            }}>
+                                                              fontSize: "9px",
+                                                              fontWeight: "bold",
+                                                              lineHeight: "1.1"
+                                                            }} className="shrink-0 shadow-sm">
                                                               {activityBadge}
                                                             </span>
                                                         </div>
-                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-[calc(100%-40px)]">{evt.startTime} - {evt.endTime}</div>
-                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[30px] break-normal overflow-hidden">{evt.title}</div>
+                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full pr-[60px] pt-[2px]">{evt.startTime} - {evt.endTime}</div>
+                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[60px] break-normal overflow-hidden">{evt.title}</div>
                                                         {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5">{ins1}</div>}
                                                         {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90">{ins2}</div>}
                                                         
