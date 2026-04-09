@@ -858,6 +858,7 @@ export default function CalendarPage() {
 
     // Helper to get color for course
     const ACTIVITY_TYPE_COLORS: Record<string,string> = {
+      course:       "#374151",
       allenamenti:  "#1e40af",
       prenotazioni: "#7c3aed",
       workshop:     "#c2410c",
@@ -2045,12 +2046,12 @@ export default function CalendarPage() {
                                                     >
                                                         <div className="absolute top-1 right-1 flex flex-col items-end gap-1 z-30 max-w-[70%]">
                                                             {evt.categoryName && (
-                                                                <div className="bg-white/80 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase truncate shadow-sm border border-black/5" style={{ color: ACTIVITY_TYPE_COLORS[evt.activityType] || ACTIVITY_TYPE_COLORS["course"] || "#1e40af" }} title={evt.categoryName}>
+                                                                <div className="bg-white/80 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase truncate shadow-sm border border-black/5" style={{ color: ACTIVITY_TYPE_COLORS[(evt as any).activityType || (evt.rawPayload as any)?.activityType || "course"] || ACTIVITY_TYPE_COLORS["course"] }} title={evt.categoryName}>
                                                                     {evt.categoryName}
                                                                 </div>
                                                             )}
                                                             <span style={{
-                                                              backgroundColor: ACTIVITY_TYPE_COLORS[evt.activityType] || ACTIVITY_TYPE_COLORS["course"] || "#1e40af",
+                                                              backgroundColor: ACTIVITY_TYPE_COLORS[(evt as any).activityType || (evt.rawPayload as any)?.activityType || "course"] || ACTIVITY_TYPE_COLORS["course"],
                                                               color: "#ffffff",
                                                               borderRadius: "3px",
                                                               padding: "2px 5px",
