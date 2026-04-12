@@ -47,6 +47,8 @@ import PriceLists from "@/pages/listini";
 import ListiniHome from "@/pages/listini-home";
 import QuoteListini from "@/pages/quote-listini";
 import QuotePromo from "@/pages/quote-promo";
+import WebhookStatus from "@/pages/webhook-status";
+import WcMapping from "@/pages/wc-mapping";
 import Attivita from "@/pages/attivita";
 import IscrittiPerAttivita from "@/pages/iscritti_per_attivita";
 import Elenchi from "@/pages/elenchi";
@@ -198,6 +200,8 @@ function Router() {
       <ProtectedRoute path="/categorie-merchandising" component={MerchandisingCategories} />
       <Route path="/promo-sconti"><Redirect to="/quote-promo" /></Route>
       <ProtectedRoute path="/quote-promo" component={QuotePromo} />
+      <ProtectedRoute path="/webhook-status" component={WebhookStatus} />
+      <ProtectedRoute path="/wc-mapping" component={WcMapping} />
       <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
       <ProtectedRoute path="/scheda-workshop" component={SchedaWorkshop} />
       <ProtectedRoute path="/scheda-domenica" component={SchedaDomenica} />

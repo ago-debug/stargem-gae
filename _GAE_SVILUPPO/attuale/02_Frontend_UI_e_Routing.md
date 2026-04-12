@@ -501,3 +501,6 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Cour
 
 > **Aggiornamento Architetturale (Componenti Condivisi UI):**
 > - **`SeasonSelector`**: Estrae in un componente altamente riutilizzabile (`season-selector.tsx`) il selettore delle stagioni (fiscali). Tramite l'hook parametrico integrato `use-season-auto-generate`, verifica e instanzia nativamente nel database (se necessario e superato il delta mensile) la stagione fiscale successiva autonoma. Supporta il prop `seasonId` e integra nativamente avvisi per navigazioni extra-temporali e fallback su active. Obbligatorio integrarlo in moduli trans-stagionali futuri.
+> - **`PriceTag`**: Micro-componente (UI badge) che usa `usePriceFromMatrix` per mostrare nativamente a DB il prezzo e i tooltip descrittivi.
+> - **`usePriceFromMatrix` (Hook)**: Hook di interrogazione listini unificati, svincola il prezzo base dalla vista, e calcola run-time la finalPrice in base a groupSize e params.
+> - **`useCheckoutCalculator` (Hook)**: Motore di ricalcolo del carrello "a runtime" condiviso. Aggiunge items, gestisce i PromoCode e predispone il payload per la `/api/checkout/complete`.

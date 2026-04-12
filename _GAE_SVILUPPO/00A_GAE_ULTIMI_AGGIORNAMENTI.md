@@ -1,5 +1,5 @@
 # Ultimi Aggiornamenti Progetto "CourseManager"
-**Periodo di riferimento:** 23 Febbraio 2026 - 09 Aprile 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 12 Aprile 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
 
@@ -435,5 +435,8 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Avvio Refactoring Corsi:** Riorganizzazione della struttura a componente `courses.tsx` per ospitare componenti modulari riutilizzabili ed espansione dati di iscrizione (gettoni, rimborsi, log) a scomparsa, avviando il ciclo di aggiornamenti conclusi il 25 Febbraio.
 
 ---
-*Documento generato e aggiornato al 23 Marzo 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
+*Documento generato e aggiornato al 12 Aprile 2026 sulla base dello storico conversazioni con l'AI e modifiche di GIT.*
+
+### 10-12 Aprile 2026 (Completamento Webhook WooCommerce e UI Quote)
+* **[F1-PROTOCOLLO-013 / 014] Webhook WooCommerce:** Sviluppato e validato l'engine di acquisizione ordini WooCommerce. Creata API `/api/webhook/woocommerce`, con signature authentication. Architettura transazionale idempotente: gli ordini web creano automaticamente l'utente, inseriscono l'iscrizione (enrollment 'DA_CONFERMARE') e generano i master payments, inibendo duplicati.
 * **[F2-PROTOCOLLO-005] UI Modulo Quote e Promo:** Completato design multi-tab in /quote-promo, introducendo la 6a tab "Convenzioni Aziende" per gestire company_agreements e tessere istituzionali. Integrato Pricing Engine nativo per i Carnet Wallets con pre-calcolo dinamico per "Usa 1" (Group/Luogo). Aggiunta "Lezione Spot Dialog" in Carnet per incassi rapidi con rate automatici. Migliorata type-safety estesa in React Query. COMPLETATO ✅ PROSSIMI TASK: Test con operatore reale.

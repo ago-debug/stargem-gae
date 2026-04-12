@@ -68,7 +68,7 @@ export default function IscrittiPerAttivita() {
 
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({ queryKey: ["/api/courses?activityType=course"] });
   const { data: workshops, isLoading: workshopsLoading } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
-  const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?type=corsi"] });
+  const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=course"] });
   const { data: wsEnrollments, isLoading: wsEnrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/workshop-enrollments"] });
 
   const { data: bookingServices, isLoading: servLoading } = useQuery<BookingService[]>({ queryKey: ["/api/booking-services"] });
@@ -679,14 +679,23 @@ export default function IscrittiPerAttivita() {
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                      {sortActivityItems(activityEnrollments, getSortValue).map((enroll: any) => (
+                                      {sortActivityItems(activityEnrollments, getSortValue).map((enroll: any) => {
+                                        let instructorName = '-';
+                                        if (item.id === 'allenamenti') {
+                                           const n1 = enroll.courseInstructorName?.trim();
+                                           const n2 = activity.courseInstructorName?.trim();
+                                           const n3 = activity.instructorName?.trim();
+                                           instructorName = [n1, n2, n3].find(n => !!n) || '-';
+                                        }
+
+                                        return (
                                         <TableRow key={enroll.id}>
                                           <TableCell className={cn("font-medium", isActivitySorted("lastName") && "sorted-column-cell")}>{enroll.memberLastName || '-'}</TableCell>
                                           <TableCell className={cn(isActivitySorted("firstName") && "sorted-column-cell")}>{enroll.memberFirstName || '-'}</TableCell>
                                           <TableCell className={cn(isActivitySorted("email") && "sorted-column-cell")}>{enroll.memberEmail || '-'}</TableCell>
                                           <TableCell>
                                             <span className="text-xs text-muted-foreground">
-                                              {item.id === 'allenamenti' ? (enroll.courseInstructorName || activity.courseInstructorName || activity.instructorName || '-') : '-'}
+                                              {item.id === 'allenamenti' ? instructorName : '-'}
                                             </span>
                                           </TableCell>
                                           <TableCell className={cn(isActivitySorted("date") && "sorted-column-cell")}>
@@ -702,7 +711,8 @@ export default function IscrittiPerAttivita() {
                                             </Link>
                                           </TableCell>
                                         </TableRow>
-                                      ))}
+                                        );
+                                      })}
                                     </TableBody>
                                   </Table>
                                 </div>

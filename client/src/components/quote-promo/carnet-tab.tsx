@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { differenceInDays } from "date-fns";
 import type { CarnetWallet, Member } from "@shared/schema";
 import { LezioneSpotDialog } from "./lezione-spot-dialog";
+import { NewCarnetDialog } from "./new-carnet-dialog";
 
 export type ExpandedCarnet = CarnetWallet & {
    member?: Member;
@@ -137,6 +138,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
                 <SelectItem value="scadenza">In Scadenza</SelectItem>
              </SelectContent>
            </Select>
+           <NewCarnetDialog />
            <LezioneSpotDialog />
         </div>
       </div>

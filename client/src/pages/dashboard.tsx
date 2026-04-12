@@ -51,6 +51,16 @@ export default function Dashboard() {
     queryKey: ["/api/stats/recent-activity"],
   });
 
+  const { data: pendingEnrollments = [], isLoading: pendingLoading } = useQuery<any[]>({
+    queryKey: ["/api/enrollments/pending"],
+    queryFn: async () => {
+      const res = await fetch("/api/enrollments/pending");
+      if (!res.ok) throw new Error("Failed to fetch");
+      return res.json();
+    },
+    retry: 1
+  });
+
   return (
     <div className="p-6 md:p-8 space-y-8 mx-auto">
       <div>
@@ -266,6 +276,55 @@ export default function Dashboard() {
                     Vedi tutti
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-amber-200 bg-amber-50 md:col-span-3">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-amber-800 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" />
+                  Iscrizioni online da completare in sede
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-red-600 text-white font-bold px-2 py-0.5 text-sm">
+                    {pendingLoading ? "..." : pendingEnrollments.length}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {pendingLoading ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : !pendingEnrollments || pendingEnrollments.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Nessuna iscrizione in attesa
+                  </p>
+                ) : (
+                  <ul className="space-y-3 mt-2">
+                    {pendingEnrollments.map((e: any) => (
+                      <li key={e.id} className="flex flex-col sm:flex-row sm:items-center justify-between text-sm bg-white p-3 rounded-md border border-amber-100 shadow-sm gap-3">
+                        <span className="font-semibold text-slate-800 uppercase">{e.memberName}</span>
+                        <div className="flex items-center flex-wrap gap-2">
+                          {e.pendingMedicalCert &&
+                            <Badge variant="outline" className="text-amber-700 bg-amber-100 border-amber-300">
+                              Cert. Medico
+                            </Badge>
+                          }
+                          {e.pendingMembership &&
+                            <Badge variant="outline" className="text-red-700 bg-red-100 border-red-300">
+                              Quota Tessera
+                            </Badge>
+                          }
+                          {e.pendingDocuments &&
+                            <Badge variant="outline" className="text-blue-700 bg-blue-100 border-blue-300">
+                              Firme Privacy
+                            </Badge>
+                          }
+                          <Button variant="ghost" size="sm" className="h-7 text-xs text-indigo-700 font-bold ml-2 underline" onClick={() => setLocation('/quote-promo?tab=online')}>Completa ora →</Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </CardContent>
             </Card>
           </>

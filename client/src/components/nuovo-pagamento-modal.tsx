@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { getActiveActivities } from "@/config/activities";
 import type { Member, PriceList, Course, Quote, PriceListItem } from "@shared/schema";
+import { PriceTag } from "@/components/price-tag";
 
 export function NuovoPagamentoModal({
     isOpen,
@@ -1146,14 +1147,25 @@ function CartTableRow({
 
                     <div className="space-y-1">
                         <Label className="text-xs text-slate-700 truncate font-bold">Totale Quota *</Label>
-                        <Input
-                            type="number"
-                            step="0.01"
-                            className="h-9 bg-slate-50 font-bold"
-                            value={row.basePrice || ""}
-                            onChange={(e) => updateRow(row.id, 'basePrice', e.target.value)}
-                            placeholder="0"
-                        />
+                        <div className="flex items-center gap-2">
+                          <Input
+                              type="number"
+                              step="0.01"
+                              className="h-9 bg-slate-50 font-bold w-1/2"
+                              value={row.basePrice || ""}
+                              onChange={(e) => updateRow(row.id, 'basePrice', e.target.value)}
+                              placeholder="0"
+                          />
+                          {row.activityType && (
+                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap w-1/2">
+                              Suggerimento:
+                              <PriceTag
+                                category={row.activityType === 'corsi' ? 'adulti' : row.activityType}
+                                courseCount={1}
+                              />
+                            </div>
+                          )}
+                        </div>
                     </div>
                 </div>
 

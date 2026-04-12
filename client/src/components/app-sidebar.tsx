@@ -40,6 +40,8 @@ import {
   Trash2,
   ChevronRight,
   BadgePercent,
+  Radio,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { format } from "date-fns";
@@ -113,6 +115,18 @@ const accountingItems = [
     title: "Quote e Promo",
     url: "/quote-promo",
     icon: BadgePercent,
+  },
+  {
+    title: "Webhook Status",
+    url: "/webhook-status",
+    icon: Radio,
+    adminOnly: true,
+  },
+  {
+    title: "WC Mapping",
+    url: "/wc-mapping",
+    icon: ArrowLeftRight,
+    adminOnly: true,
   },
   {
     title: "Lista Pagamenti",

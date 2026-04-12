@@ -7,6 +7,7 @@ import { WelfareTab } from "@/components/quote-promo/welfare-tab";
 import { CarnetTab } from "@/components/quote-promo/carnet-tab";
 import { AccordiTab } from "@/components/quote-promo/accordi-tab";
 import { ConvenzioniTab } from "@/components/quote-promo/convenzioni-tab";
+import { OnlineTab } from "@/components/quote-promo/online-tab";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { SeasonSelector } from "@/components/season-selector";
 import { useQuery } from "@tanstack/react-query";
@@ -72,6 +73,9 @@ export default function QuotePromo() {
             <TabsTrigger value="accordi" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
               Accordi maestri
             </TabsTrigger>
+            <TabsTrigger value="online" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm">
+              Pagamenti online
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -110,6 +114,9 @@ export default function QuotePromo() {
         </TabsContent>
         <TabsContent value="accordi" className="mt-0 outline-none">
           <AccordiTab seasonId={selectedSeasonId} />
+        </TabsContent>
+        <TabsContent value="online" className="mt-0 outline-none">
+          <OnlineTab />
         </TabsContent>
       </Tabs>
       </div>

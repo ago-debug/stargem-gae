@@ -1,2 +1,0 @@
-server/seed-custom-lists.ts(34,29): error TS18048: 'provList' is possibly 'undefined'.
-server/seed-custom-lists.ts(67,29): error TS18048: 'crmList' is possibly 'undefined'.

@@ -3804,20 +3804,22 @@ export class DatabaseStorage implements IStorage {
       status: "COMPLETED",
       description: descStr,
       costCenterCode: "ACCORDI",
+      accountingCode: "6010-CostiMaestri",
+      source: "sede",
       receiptNumber: `ACC-${paymentData.month}${paymentData.year}-${id}`
     });
     
-    let creditAcc = "1000-Cassa";
-    if (paymentData.paymentMode === "bonifico" || paymentData.paymentMode === "pos") creditAcc = "1010-Banca";
-    if (paymentData.paymentMode === "fattura") creditAcc = "2010-DebitiVsFornitori";
+    let debitAcc = "1000-Cassa";
+    if (paymentData.paymentMode === "bonifico" || paymentData.paymentMode === "pos") debitAcc = "1010-Banca";
+    if (paymentData.paymentMode === "fattura") debitAcc = "2010-DebitiVsFornitori";
     
     const [jeRes] = await db.insert(journalEntries).values({
         tenantId: agr.tenantId,
         paymentId: payRes.insertId,
         entryDate: new Date().toISOString().split('T')[0],
         description: descStr,
-        debitAccount: "6010-CostiMaestri",
-        creditAccount: creditAcc,
+        debitAccount: debitAcc,
+        creditAccount: "6010-CostiMaestri",
         amount: paymentData.amount,
         costCenterId: undefined,
         notes: paymentData.notes,
