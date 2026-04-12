@@ -15,7 +15,7 @@ import { cn, parseStatusTags } from "@/lib/utils";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, Download, ArrowLeft } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Download, ArrowLeft, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
@@ -106,6 +106,11 @@ export default function ActivityManagementPage({
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string>("active");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [instructorFilter, setInstructorFilter] = useState<string>("all");
+  const [memberFilter, setMemberFilter] = useState<string>("all");
+  const [nameFilter, setNameFilter] = useState<string>("all");
 
   useEffect(() => {
     if (actionParam === "create") {
@@ -138,12 +143,21 @@ export default function ActivityManagementPage({
     queryKey: ["/api/quotes"],
   });
 
-  const { data: items, isLoading } = useQuery<ActivityItem[]>({
-    queryKey: [apiEndpoint],
-  });
-
   const { data: categories } = useQuery<{ id: number; name: string }[]>({
     queryKey: [categoryApiEndpoint],
+  });
+
+  const { data: seasons } = useQuery<Season[]>({
+    queryKey: ["/api/seasons"],
+  });
+
+  const queryUrlStr = `${apiEndpoint}${apiEndpoint.includes('?') ? '&' : '?'}seasonId=${selectedSeasonId}` +
+    (categoryFilter !== "all" ? `&categoryId=${categoryFilter}` : "") +
+    (instructorFilter !== "all" ? `&instructorId=${instructorFilter}` : "") +
+    (memberFilter !== "all" ? `&memberId=${memberFilter}` : "");
+
+  const { data: items, isLoading } = useQuery<ActivityItem[]>({
+    queryKey: [queryUrlStr],
   });
 
   const { data: instructors } = useQuery<Instructor[]>({
@@ -275,9 +289,34 @@ export default function ActivityManagementPage({
     setEquipment("");
   };
 
-  const filteredItems = items?.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const distinctCategories = Array.from(new Set(items?.map(i => i.categoryId).filter(Boolean)));
+  const distinctInstructors = Array.from(new Set(items?.map(i => i.instructorId).filter(Boolean)));
+  const distinctMembers = Array.from(new Set(items?.map(i => (i as any).memberId).filter(Boolean)));
+  const distinctNames = Array.from(new Set(items?.map(i => i.name).filter(Boolean))).sort();
+
+  const filteredItems = items?.filter((item) => {
+    const query = searchQuery.toLowerCase().trim();
+
+    if (nameFilter !== "all" && item.name !== nameFilter) {
+      return false;
+    }
+
+    if (categoryFilter !== "all" && item.categoryId?.toString() !== categoryFilter) {
+      return false;
+    }
+
+    if (instructorFilter !== "all" && item.instructorId?.toString() !== instructorFilter) {
+      return false;
+    }
+
+    if (memberFilter !== "all" && (item as any).memberId?.toString() !== memberFilter) {
+      return false;
+    }
+
+    if (!query) return true;
+
+    return item.name.toLowerCase().includes(query);
+  }) || [];
 
   const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<typeof filteredItems[0]>("sku");
 
@@ -714,16 +753,107 @@ export default function ActivityManagementPage({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder={`Cerca ${itemLabelPlural}...`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                  data-testid={`input-${testIdPrefix}-search`}
-                />
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="relative flex-1 min-w-[200px] max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder={`Cerca ${itemLabelPlural}...`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                    data-testid={`input-${testIdPrefix}-search`}
+                  />
+                </div>
+                
+                <Select value={selectedSeasonId} onValueChange={setSelectedSeasonId}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Seleziona stagione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutte le stagioni</SelectItem>
+                    {seasons?.map((s: any, idx: number) => {
+                        const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
+                        return (
+                            <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
+                                {(s as any).name || `Stagione ${s.id}`} {isActiveFallback ? '(Attiva)' : ''}
+                            </SelectItem>
+                        );
+                    })}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={nameFilter} onValueChange={setNameFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filtra per corso/genere" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti</SelectItem>
+                    {distinctNames.map((name) => (
+                      <SelectItem key={name as string} value={name as string}>
+                        {name as string}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filtra per categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutte le categorie</SelectItem>
+                    {categories?.filter(c => distinctCategories.includes(c.id)).map((category) => (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={instructorFilter} onValueChange={setInstructorFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filtra per insegnante" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti gli insegnanti</SelectItem>
+                    {instructors?.filter(i => distinctInstructors.includes(i.id)).map((instructor) => (
+                      <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                        {instructor.lastName} {instructor.firstName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {activityType === "prenotazioni" && (
+                  <div className="w-[220px]">
+                    <Combobox
+                      name="memberFilter"
+                      value={memberFilter === "all" ? "none" : memberFilter}
+                      options={[{value: "none", label: "Tutti gli allievi"}, ...membersList.filter(m => distinctMembers.includes(m.id)).map(m => ({ value: m.id.toString(), label: `${m.lastName} ${m.firstName}` }))]}
+                      placeholder="Filtra per allievo"
+                      onValueChange={(val) => setMemberFilter(val === "none" ? "all" : val)}
+                    />
+                  </div>
+                )}
+                
+                {(categoryFilter !== "all" || instructorFilter !== "all" || memberFilter !== "all" || nameFilter !== "all" || selectedSeasonId !== "active" || searchQuery) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setCategoryFilter("all");
+                      setInstructorFilter("all");
+                      setMemberFilter("all");
+                      setNameFilter("all");
+                      setSelectedSeasonId("active");
+                      setSearchQuery("");
+                    }}
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    Pulisci filtri
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>

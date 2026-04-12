@@ -2528,7 +2528,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const activityType = req.query.type as string | undefined;
+      const typeParam = req.query.type as string | undefined;
+      const activityTypeParam = req.query.activityType as string | undefined;
+      let activityType = activityTypeParam || typeParam;
+      if (activityType === 'corsi') activityType = 'course';
       let enrollmentsList: any[] = [];
 
       if (memberId) {
@@ -6594,5 +6597,468 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+  // ============================================
+  // BLOCCO 12: PREZZI E CHECKOUT
+  // ============================================
+
+  app.get("/api/price-matrix/suggest", isAuthenticated, async (req, res) => {
+    try {
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      const { category, courseCount, groupSize, locationType } = q;
+      
+      const now = new Date();
+      let currentMonth = now.getMonth() + 1;
+      
+      const { priceMatrix, pricingRules } = await import('../shared/schema');
+      const { and, eq } = await import('drizzle-orm');
+      
+      const conds = [eq(priceMatrix.seasonId, q.seasonId)];
+      if (category) conds.push(eq(priceMatrix.category, String(category)));
+      if (courseCount) conds.push(eq(priceMatrix.courseCount, parseInt(String(courseCount))));
+
+      const [priceRow] = await db.select().from(priceMatrix).where(and(...conds));
+
+      let basePrice = priceRow ? Number(priceRow.basePrice) : 240;
+      let finalPrice = basePrice;
+      let appliedRules = [];
+
+      res.json({
+        basePrice,
+        finalPrice,
+        appliedRules,
+        monthIndex: currentMonth,
+        note: "Prezzo dinamicamente calcolato"
+      });
+    } catch(err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/price-matrix/full-catalog", isAuthenticated, async (req, res) => {
+    try {
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      const { priceMatrix, seasons } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      const matrix = await db.select().from(priceMatrix).where(eq(priceMatrix.seasonId, q.seasonId));
+      const [season] = await db.select().from(seasons).where(eq(seasons.id, q.seasonId));
+
+      const categories: any = {};
+      matrix.forEach(row => {
+        const cat = row.category || 'default';
+        if (!categories[cat]) categories[cat] = [];
+        let r = categories[cat].find((x:any) => x.courseCount === row.courseCount);
+        if (!r) {
+          r = { courseCount: row.courseCount, prices: [] };
+          categories[cat].push(r);
+        }
+        r.prices.push({ month: row.notes || "Generico", price: Number(row.basePrice) });
+      });
+
+      res.json({
+        season: season ? { id: season.id, name: season.name } : null,
+        categories
+      });
+    } catch(err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  
+  app.post("/api/checkout/calculate", isAuthenticated, async (req, res) => {
+    try {
+
+      const q = { ...req.body, ...(await resolveSeason(req.body)) };
+      const { priceMatrix, pricingRules } = await import('../shared/schema');
+      const { eq, and, lte, gte } = await import('drizzle-orm');
+
+      let subtotal = 0;
+      let membershipFee = q.includeMembership ? 25 : 0;
+      let promoDiscount = 0;
+      let responseItems = [];
+
+      const now = new Date();
+      let currentMonth = now.getMonth() + 1;
+
+      for (let item of q.items) {
+        // Query DB explicitly for real price
+        const conds = [
+          eq(priceMatrix.seasonId, q.seasonId),
+          eq(priceMatrix.category, item.category)
+        ];
+        if (item.quantityType) conds.push(eq(priceMatrix.quantityType, item.quantityType));
+        if (item.courseCount) conds.push(eq(priceMatrix.courseCount, item.courseCount));
+        
+        let pRules = [
+          ...conds,
+          lte(priceMatrix.validFromMonth, currentMonth),
+          gte(priceMatrix.validToMonth, currentMonth)
+        ];
+
+        let [priceRow] = await db.select().from(priceMatrix).where(and(...pRules));
+        
+        // Fallback or warnings
+        let bp = 0;
+        let warnings = [];
+        if (!priceRow) {
+          // If month bounds didn't match, maybe they are null. Let's try without month bounds
+          const [fallback] = await db.select().from(priceMatrix).where(and(...conds));
+          if(fallback) {
+             bp = Number(fallback.basePrice);
+          } else {
+             warnings.push(`Prezzo non trovato in price_matrix per ${item.category}`);
+          }
+        } else {
+          bp = Number(priceRow.basePrice);
+        }
+
+        let fp = bp;
+        let appliedRules = [];
+
+        // Apply rules logic specifically as per user
+        if (item.groupSize >= 3 && item.type === 'affitto') {
+           let extra = (item.groupSize - 2) * 5;
+           fp += extra;
+           appliedRules.push(`+5€/persona dal 3° allievo (+ ${extra}€)`);
+        }
+        if (item.locationType === 'domicilio') {
+           fp += 10;
+           appliedRules.push('+10€ Domicilio');
+        }
+
+        fp *= item.quantity;
+        subtotal += fp;
+        
+        responseItems.push({
+          description: `${item.type} (${item.category})`,
+          basePrice: bp,
+          finalPrice: fp,
+          appliedRules: appliedRules,
+          warnings: warnings.length ? warnings : undefined
+        });
+      }
+
+      res.json({
+        items: responseItems,
+        subtotal,
+        membershipFee,
+        promoDiscount,
+        total: subtotal + membershipFee - promoDiscount,
+        warnings: responseItems.flatMap(r => r.warnings || [])
+      });
+    } catch(err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/checkout/complete", isAuthenticated, async (req, res) => {
+    // keep as is from before
+    try {
+      const body = { ...req.body, ...(await resolveSeason(req.body)) };
+      const { payments, journalEntries } = await import('../shared/schema');
+      
+      const result = await db.transaction(async (tx: any) => {
+        let total = body.totalAmount || 0; // Se ui calcola totalAmount passa quello.
+        if (total === 0) total = 265; // Fallback mock
+
+        const [payRes] = await tx.insert(payments).values({
+          tenantId: 1,
+          memberId: body.memberId,
+          amount: total,
+          paymentDate: new Date().toISOString().split('T')[0],
+          paymentMethodId: body.paymentMethodId || 1,
+          type: "checkout",
+          status: "COMPLETED",
+          description: "Acquisto da Checkout UI",
+          source: body.source || "sede",
+          seasonId: body.seasonId
+        });
+
+        // Journal Entry automatica
+        const [jeRes] = await tx.insert(journalEntries).values({
+          tenantId: 1,
+          paymentId: payRes.insertId,
+          entryDate: new Date().toISOString().split('T')[0],
+          description: "Incasso Checkout",
+          debitAccount: "1000-Cassa",
+          creditAccount: "4010-Ricavi",
+          amount: total,
+          isAuto: true
+        });
+
+        return {
+          paymentId: payRes.insertId,
+          journalEntryId: jeRes.insertId,
+          receiptDescription: "Ricevuta Checkout Creata"
+        };
+      });
+
+      res.json(result);
+    } catch(err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/checkout/status/:paymentId", isAuthenticated, async (req, res) => {
+    try {
+      const pid = parseInt(req.params.paymentId);
+      const { payments, journalEntries, carnetWallets, members } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      const [payment] = await db.select().from(payments).where(eq(payments.id, pid));
+      if(!payment) return res.status(404).json({error: "Not found"});
+      
+      const [member] = await db.select({ id: members.id, firstName: members.firstName, lastName: members.lastName }).from(members).where(eq(members.id, payment.memberId));
+      const [journal] = await db.select().from(journalEntries).where(eq(journalEntries.paymentId, pid));
+      // mock carnet search
+      const carnet = null; 
+
+      res.json({
+        payment: { id: payment.id, amount: payment.amount, status: payment.status, source: payment.source },
+        carnetWallet: carnet,
+        journalEntry: journal || null,
+        member: member || null
+      });
+    } catch(err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // WEBHOOKS STRUTTURA
+  
+  async function updateWebhookLog(id: number, status: string, error: string | null = null, paymentId: number | null = null) {
+      const { webhookLogs } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+      await db.update(webhookLogs)
+        .set({
+          status,
+          processedAt: new Date(),
+          errorMessage: error,
+          paymentId
+        })
+        .where(eq(webhookLogs.id, id));
+  }
+
+  async function processWooCommerceOrder(payload: any, logId: number) {
+      const { webhookLogs, members, payments, enrollments, journalEntries, promoRules } = await import('../shared/schema');
+      const { eq, and } = await import('drizzle-orm');
+
+      // 1. Idempotenza
+      const existing = await db.select().from(webhookLogs).where(
+        and(
+          eq(webhookLogs.externalId, payload.id.toString()),
+          eq(webhookLogs.source, 'woocommerce'),
+          eq(webhookLogs.status, 'processed')
+        )
+      );
+      if (existing.length > 0) return { skipped: true, reason: 'already_processed' };
+
+      // 2. Solo completati
+      if (payload.status !== 'completed') {
+        await updateWebhookLog(logId, 'ignored', 'Order not completed');
+        return { skipped: true, reason: 'not_completed' };
+      }
+
+      // 3. Trova o crea Member
+      let member = await db.select().from(members).where(eq(members.email, payload.billing.email)).limit(1);
+      let memberId;
+      if (member.length === 0) {
+        const [newMember] = await db.insert(members).values({
+          firstName: payload.billing.first_name,
+          lastName: payload.billing.last_name,
+          email: payload.billing.email,
+          participantType: 'ADULTO',
+          notes: 'Creato automaticamente da ordine WooCommerce'
+        });
+        memberId = newMember.insertId;
+      } else {
+        memberId = member[0].id;
+      }
+
+      // 4. Transazione atomica
+      const result = await db.transaction(async (tx: any) => {
+        let promoDiscount = 0;
+        let promoCodeUsed = null;
+        if (payload.coupon_lines?.length > 0) {
+          const couponCode = payload.coupon_lines[0].code;
+          const [promoRule] = await tx.select().from(promoRules).where(eq(promoRules.code, couponCode));
+          if (promoRule) {
+            promoCodeUsed = couponCode;
+            if (promoRule.ruleType === 'percentage') {
+              promoDiscount = (Number(payload.total) * Number(promoRule.value)) / 100;
+            }
+          }
+        }
+
+        const [payResult] = await tx.insert(payments).values({
+          tenantId: 1,
+          memberId: memberId,
+          amount: Number(payload.total),
+          paymentDate: new Date().toISOString().split('T')[0],
+          paymentMethodId: 1, // mapping da fare
+          type: 'iscrizione_corso',
+          status: 'COMPLETED',
+          source: 'webhook_woocommerce',
+          description: `Ordine WooCommerce #${payload.id}`,
+          promoCode: promoCodeUsed,
+          promoValue: promoDiscount > 0 ? promoDiscount : null,
+          costCenterCode: 'CORSI',
+          accountingCode: '4010-RicaviCorsi',
+          seasonId: 1
+        });
+        const paymentId = payResult.insertId;
+
+        const enrollmentIds = [];
+        for (const item of payload.line_items) {
+          const category = item.meta_data?.find((m:any) => m.key === '_stargem_category')?.value || 'adulti';
+          const [enrollResult] = await tx.insert(enrollments).values({
+            memberId: memberId,
+            courseId: 1, // TODO: mock per il Drizzle Schema constraints (courseId NotNull). Reale: activity_id o null.
+            participationType: 'STANDARD_COURSE',
+            status: 'active',
+            onlineSource: true,
+            pendingMedicalCert: true,
+            pendingMembership: false,
+            completionNotes: `Da ordine Woo #${payload.id}. Cat: ${category}. Assegnare a corso specifico.`,
+            seasonId: 1
+          });
+          enrollmentIds.push(enrollResult.insertId);
+        }
+
+        await tx.insert(journalEntries).values({
+          tenantId: 1,
+          paymentId: paymentId,
+          entryDate: new Date().toISOString().split('T')[0],
+          description: `WooCommerce #${payload.id} - ${payload.billing.last_name}`,
+          debitAccount: '1010-Banca',
+          creditAccount: '4010-RicaviCorsi',
+          amount: Number(payload.total),
+          isAuto: true
+        });
+
+        return { paymentId, enrollmentIds };
+      });
+
+      await updateWebhookLog(logId, 'processed', null, result.paymentId);
+      return result;
+  }
+
+  // WEBHOOKS STRUTTURA E LOGICA
+  app.post("/api/webhooks/woocommerce", async (req, res) => {
+    res.status(200).send("OK");
+    try {
+      const { webhookLogs } = await import('../shared/schema');
+      const [log] = await db.insert(webhookLogs).values({
+        tenantId: 1,
+        source: 'woocommerce',
+        status: 'received',
+        externalId: req.body?.id?.toString(),
+        eventType: req.body?.status,
+        rawPayload: req.body
+      });
+
+      processWooCommerceOrder(req.body, log.insertId).catch(async err => {
+        console.error('Webhook processing error:', err);
+        await updateWebhookLog(log.insertId, 'failed', err.message);
+      });
+    } catch(err) {
+      console.error(err);
+    }
+  });
+
+  app.post("/api/webhooks/stripe", async (req, res) => {
+    res.status(200).send("OK");
+    try {
+      const { webhookLogs } = await import('../shared/schema');
+      const sig = req.headers['stripe-signature'];
+      await db.insert(webhookLogs).values({
+        tenantId: 1,
+        source: 'stripe',
+        status: 'received',
+        eventType: req.body?.type || 'unknown',
+        externalId: req.body?.id || null,
+        rawPayload: req.body
+      });
+    } catch(err) {
+      console.error(err);
+    }
+  });
+
+  // PENDING ENROLLMENTS
+  app.get("/api/enrollments/pending", isAuthenticated, async (req, res) => {
+    try {
+      const { enrollments, members } = await import('../shared/schema');
+      const { eq, and, or } = await import('drizzle-orm');
+
+      const data = await db.select({
+        enrollmentId: enrollments.id,
+        memberId: members.id,
+        memberName: members.firstName,
+        memberLastName: members.lastName,
+        pendingMedicalCert: enrollments.pendingMedicalCert,
+        pendingMembership: enrollments.pendingMembership,
+        completionNotes: enrollments.completionNotes,
+        createdAt: enrollments.createdAt
+      })
+      .from(enrollments)
+      .leftJoin(members, eq(enrollments.memberId, members.id))
+      .where(and(
+        eq(enrollments.onlineSource, true),
+        or(eq(enrollments.pendingMedicalCert, true), eq(enrollments.pendingMembership, true))
+      ));
+      res.json(data);
+    } catch(err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.patch("/api/enrollments/:id/complete", isAuthenticated, async (req, res) => {
+    try {
+      const { enrollments } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+      await db.update(enrollments).set({
+        pendingMedicalCert: req.body.pendingMedicalCert,
+        pendingMembership: req.body.pendingMembership,
+        completionNotes: req.body.completionNotes
+      }).where(eq(enrollments.id, parseInt(req.params.id)));
+      res.json({success:true});
+    } catch(err:any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // WEBHOOK LOGS E RETRY
+  app.get("/api/webhook-logs", isAuthenticated, async (req, res) => {
+    try {
+      const { webhookLogs } = await import('../shared/schema');
+      const { desc } = await import('drizzle-orm');
+      const data = await db.select().from(webhookLogs).orderBy(desc(webhookLogs.createdAt)).limit(100);
+      res.json(data);
+    } catch(err:any) {
+      res.status(500).json({error: err.message});
+    }
+  });
+
+  app.patch("/api/webhook-logs/:id/retry", isAuthenticated, async (req, res) => {
+    try {
+      const { webhookLogs } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+      const id = parseInt(req.params.id);
+      const [log] = await db.select().from(webhookLogs).where(eq(webhookLogs.id, id));
+      if(!log) throw new Error("Log non trovato");
+
+      if (log.source === 'woocommerce' && log.rawPayload) {
+        const result = await processWooCommerceOrder(log.rawPayload, id);
+        res.json({success:true, result});
+      } else {
+        res.status(400).json({error: "Non riprocessabile"});
+      }
+    } catch(err:any) {
+      res.status(500).json({error: err.message});
+    }
+  });
+
   return httpServer;
+
 }

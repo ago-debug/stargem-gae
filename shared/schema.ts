@@ -905,6 +905,10 @@ export const enrollments = mysqlTable("enrollments", {
   notes: text("notes"),
   details: json("details").$type<string[]>().default([]),
   seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  onlineSource: boolean("online_source").default(false),
+  pendingMedicalCert: boolean("pending_medical_cert").default(false),
+  pendingMembership: boolean("pending_membership").default(false),
+  completionNotes: text("completion_notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1102,6 +1106,7 @@ export const payments = mysqlTable("payments", {
   accountingCode: varchar("accounting_code", { length: 20 }), // Codice conto es. 4010-RicaviCorsi
   vatCode: varchar("vat_code", { length: 10 }).default("ESENTE"), // Codice IVA: ESENTE|IVA22|IVA10|IVA4
   costCenterCode: varchar("cost_center_code", { length: 50 }), // Centro di costo: CORSI|AFFITTI|PRIVATI|TESSERE
+  source: varchar("source", { length: 20 }).default("sede"),
   seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdById: varchar("created_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   updatedById: varchar("updated_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
@@ -2350,6 +2355,41 @@ export type MemberDiscount = typeof memberDiscounts.$inferSelect;
 export type InsertMemberDiscount = typeof memberDiscounts.$inferInsert;
 export type CompanyAgreement = typeof companyAgreements.$inferSelect;
 export type InsertCompanyAgreement = typeof companyAgreements.$inferInsert;
+export type AttendanceLog = typeof attendanceLogs.$inferSelect;
+export type InsertAttendanceLog = typeof attendanceLogs.$inferInsert;
+
+export const webhookLogs = mysqlTable(
+  "webhook_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  source: varchar("source",{length:30}).notNull(),
+  eventType: varchar("event_type",{length:80}),
+  externalId: varchar("external_id",{length:120}),
+  rawPayload: json("raw_payload"),
+  status: varchar("status",{length:20}).notNull().default("received"),
+  processedAt: timestamp("processed_at"),
+  errorMessage: text("error_message"),
+  paymentId: int("payment_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type WebhookLog = typeof webhookLogs.$inferSelect;
+
+export const wcProductMapping = mysqlTable(
+  "wc_product_mapping", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").notNull().default(1),
+  wcProductId: int("wc_product_id"),
+  wcProductName: varchar("wc_product_name", {length:200}),
+  stargemCategory: varchar("stargem_category", {length:50}),
+  stargemCourseCount: tinyint("stargem_course_count").default(1),
+  stargemActivityType: varchar("stargem_activity_type",{length:50}),
+  notes: text("notes"),
+});
+export type WcProductMapping = typeof wcProductMapping.$inferSelect;
+
+
+
 export type StaffRate = typeof staffRates.$inferSelect;
 export type InsertStaffRate = typeof staffRates.$inferInsert;
 
@@ -2370,6 +2410,28 @@ export type InsertInstructorAgreement = typeof instructorAgreements.$inferInsert
 
 export type AgreementMonthlyOverride = typeof agreementMonthlyOverrides.$inferSelect;
 export type InsertAgreementMonthlyOverride = typeof agreementMonthlyOverrides.$inferInsert;
+
+// ============================================
+// CARNET E PREZZI DINAMICI
+// ============================================
+export const priceMatrix = mysqlTable(
+  "price_matrix", {
+  id: int("id").autoincrement().primaryKey(),
+  tenantId: int("tenant_id").default(1),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  category: varchar("category", { length: 100 }),
+  quantityType: varchar("quantity_type", { length: 50 }),
+  courseCount: int("course_count"),
+  validFromMonth: int("valid_from_month"),
+  validToMonth: int("valid_to_month"),
+  basePrice: decimal("base_price", { precision: 8, scale: 2 }),
+  maxSlots: int("max_slots"),
+  excludeFromPromo: boolean("exclude_from_promo").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export type PriceMatrix = typeof priceMatrix.$inferSelect;
+export type InsertPriceMatrix = typeof priceMatrix.$inferInsert;
 
 export const pricingRules = mysqlTable(
   "pricing_rules", {

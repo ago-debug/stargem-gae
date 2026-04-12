@@ -27,7 +27,7 @@ import { it } from "date-fns/locale";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { useCustomListValues } from "@/hooks/use-custom-list";
+import { useCustomList, useCustomListValues } from "@/hooks/use-custom-list";
 import { Combobox } from "@/components/ui/combobox";
 import type { Course, InsertCourse, Season, Category, Instructor, Studio, Attendance, Member, Quote, ActivityStatus } from "@shared/schema";
 
@@ -95,6 +95,9 @@ export default function Courses() {
   const [showBulkDuplicateDialog, setShowBulkDuplicateDialog] = useState(false);
   const [targetSeasonId, setTargetSeasonId] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [instructorFilter, setInstructorFilter] = useState<string>("all");
+  const [dayOfWeekFilter, setDayOfWeekFilter] = useState<string>("all");
+  const [nameFilter, setNameFilter] = useState<string>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [statusTags, setStatusTags] = useState<string[]>([]);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -114,7 +117,7 @@ export default function Courses() {
   const postiDisponibili = useCustomListValues("posti_disponibili");
 
   const { data: courses, isLoading } = useQuery<Course[]>({
-    queryKey: [`/api/courses?activityType=course&seasonId=${selectedSeasonId}`],
+    queryKey: [`/api/courses?activityType=course&seasonId=${selectedSeasonId}${instructorFilter !== 'all' ? `&instructorId=${instructorFilter}` : ''}${dayOfWeekFilter !== 'all' ? `&dayOfWeek=${dayOfWeekFilter}` : ''}`],
   });
 
   const editId = urlParams.get('editId') || urlParams.get('courseId');
@@ -149,9 +152,8 @@ export default function Courses() {
     queryKey: ["/api/activity-statuses"],
   });
 
-  const { data: categories } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
-  });
+  const { data: categorieList } = useCustomList("categorie");
+  const categories = categorieList?.items ? [...categorieList.items].filter(i => i.active !== false).map(i => ({ id: i.id, name: i.value })).sort((a,b)=>a.name.localeCompare(b.name, undefined, {numeric: true})) : [];
 
   const { data: instructors } = useQuery<Instructor[]>({
     queryKey: ["/api/instructors"],
@@ -334,10 +336,27 @@ export default function Courses() {
     setSelectedRecurrence("");
   };
 
+  const distinctCategories = Array.from(new Set(courses?.map(c => c.categoryId).filter(Boolean)));
+  const distinctInstructors = Array.from(new Set(courses?.map(c => c.instructorId).filter(Boolean)));
+  const distinctDays = Array.from(new Set(courses?.map(c => c.dayOfWeek).filter(Boolean)));
+  const distinctNames = Array.from(new Set(courses?.map(c => c.name).filter(Boolean))).sort();
+
   const filteredCourses = courses?.filter((course) => {
     const query = searchQuery.toLowerCase().trim();
 
+    if (nameFilter !== "all" && course.name !== nameFilter) {
+      return false;
+    }
+
     if (categoryFilter !== "all" && course.categoryId?.toString() !== categoryFilter) {
+      return false;
+    }
+
+    if (instructorFilter !== "all" && course.instructorId?.toString() !== instructorFilter) {
+      return false;
+    }
+
+    if (dayOfWeekFilter !== "all" && course.dayOfWeek !== dayOfWeekFilter) {
       return false;
     }
 
@@ -564,19 +583,61 @@ export default function Courses() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tutte le categorie</SelectItem>
-                  {categories?.map((category) => (
+                  {categories?.filter(c => distinctCategories.includes(c.id)).map((category) => (
                     <SelectItem key={category.id} value={category.id.toString()}>
                       {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {(categoryFilter !== "all" || searchQuery) && (
+              <Select value={instructorFilter} onValueChange={setInstructorFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtra per insegnante" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tutti gli insegnanti</SelectItem>
+                  {instructors?.filter(i => distinctInstructors.includes(i.id)).map((instructor) => (
+                    <SelectItem key={instructor.id} value={instructor.id.toString()}>
+                      {instructor.lastName} {instructor.firstName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={dayOfWeekFilter} onValueChange={setDayOfWeekFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtra per giorno" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tutti i giorni</SelectItem>
+                  {WEEKDAYS.filter(d => distinctDays.includes(d.id)).map((day) => (
+                    <SelectItem key={day.id} value={day.id}>
+                      {day.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={nameFilter} onValueChange={setNameFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtra per corso" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tutti i corsi</SelectItem>
+                  {distinctNames.map((name) => (
+                    <SelectItem key={name as string} value={name as string}>
+                      {name as string}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {(categoryFilter !== "all" || instructorFilter !== "all" || dayOfWeekFilter !== "all" || nameFilter !== "all" || searchQuery) && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
                     setCategoryFilter("all");
+                    setInstructorFilter("all");
+                    setDayOfWeekFilter("all");
+                    setNameFilter("all");
                     setSearchQuery("");
                   }}
                   data-testid="button-clear-filters"
