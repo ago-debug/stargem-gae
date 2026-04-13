@@ -159,6 +159,29 @@ export default function Instructors() {
 
   return (
     <div className="p-6 md:p-8 space-y-6 w-full mx-auto">
+      {import.meta.env.DEV && (
+        <div style={{
+          background: '#FEF3C7',
+          border: '2px solid #F59E0B',
+          borderRadius: 8,
+          padding: '12px 16px',
+          margin: '0 0 16px 0',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10
+        }}>
+          <span style={{fontSize: 20}}>⚠️</span>
+          <div>
+            <strong>COMPONENTE DEPRECATO</strong>
+            <div style={{fontSize: 12, color: '#92400E'}}>
+              Questa pagina è in fase di smantellamento.
+              Riferimento: F2-010 · 13/04/2026.
+              Tutti i nuovi sviluppi devono usare
+              /gemstaff invece di /staff.
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2">Staff e Insegnanti</h1>

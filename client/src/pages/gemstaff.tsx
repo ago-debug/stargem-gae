@@ -465,7 +465,18 @@ export default function GemStaff() {
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: async (data: any) => await apiRequest("POST", "/api/instructors", data),
+    mutationFn: async (data: any) => {
+       const response = await fetch("/api/instructors", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(data)
+       });
+       if (!response.ok) throw new Error(await response.text());
+       if (response.headers.get('X-Deprecation-Warning')) {
+         console.warn('⚠️ DEPRECATION:', response.headers.get('X-Deprecation-Warning'));
+       }
+       return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
       queryClient.invalidateQueries({ queryKey: [`/api/gemstaff/insegnanti${showArchive ? '?status=inattivo' : ''}`] });
@@ -479,7 +490,15 @@ export default function GemStaff() {
   const updateMutation = useMutation({
     mutationFn: async ({ instructorId, memberId, data, gemstaffData }: { instructorId?: number; memberId: number; data: any, gemstaffData: any }) => {
       if (instructorId) {
-         await apiRequest("PATCH", `/api/instructors/${instructorId}`, data);
+         const response = await fetch(`/api/instructors/${instructorId}`, {
+           method: "PATCH",
+           headers: { "Content-Type": "application/json" },
+           body: JSON.stringify(data)
+         });
+         if (!response.ok) throw new Error(await response.text());
+         if (response.headers.get('X-Deprecation-Warning')) {
+           console.warn('⚠️ DEPRECATION:', response.headers.get('X-Deprecation-Warning'));
+         }
       }
       if (memberId) {
          await apiRequest("PATCH", `/api/gemstaff/insegnanti/${memberId}`, gemstaffData);

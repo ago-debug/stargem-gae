@@ -2274,6 +2274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==== Instructors Routes ====
   app.get("/api/instructors", isAuthenticated, async (req, res) => {
+    res.setHeader('X-Deprecation-Warning', 'instructors table being removed. Use /api/members');
     try {
       const instructors = await storage.getInstructors();
       res.json(instructors);
@@ -2284,6 +2285,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/instructors", isAuthenticated, async (req, res) => {
+    console.warn('[⚠️ DEPRECATION] Scrittura su /api/instructors — tabella in smantellamento. Usare /api/members. Ref: F2-010 · 13/04/2026');
+    res.setHeader('X-Deprecation-Warning', 'instructors table being removed. Use /api/members');
     try {
       const validatedData = insertMemberSchema.parse(req.body);
       const instructor = await storage.createInstructor(validatedData);
@@ -2296,6 +2299,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/instructors/:id", isAuthenticated, async (req, res) => {
+    console.warn('[⚠️ DEPRECATION] Scrittura su /api/instructors — tabella in smantellamento. Usare /api/members. Ref: F2-010 · 13/04/2026');
+    res.setHeader('X-Deprecation-Warning', 'instructors table being removed. Use /api/members');
     try {
       const id = parseInt(req.params.id);
       const instructor = await storage.updateInstructor(id, req.body);
@@ -2308,6 +2313,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/instructors/:id", isAuthenticated, async (req, res) => {
+    console.warn('[⚠️ DEPRECATION] Scrittura su /api/instructors — tabella in smantellamento. Usare /api/members. Ref: F2-010 · 13/04/2026');
+    res.setHeader('X-Deprecation-Warning', 'instructors table being removed. Use /api/members');
     try {
       const id = parseInt(req.params.id);
       const instructorToDelete = await storage.getInstructor(id);
