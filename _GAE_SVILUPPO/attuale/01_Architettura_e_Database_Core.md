@@ -496,7 +496,8 @@ Il motore centrale è pronto. Per scalare SaaS al 100%, la roadmap prevede l'imp
    *Manca:* `marketing_campaigns`, `email_logs_history`, `automation_rules`.
    *Scope:* Invio automatico SMS per certificati scaduti o email di re-engagement dopo inattività.
 2. **Modulistica e Firma Digitale Front-Desk (Kiosk Mode):**
-   *Manca:* `member_forms_submissions` (JSON payload + firma) e UI su iPad.
+   *Attivo (Backend):* La tabella `member_forms_submissions` (JSON payload + firma) e le rotte GemPass sono state completate.
+   *Manca:* L'interfaccia UI nativa su iPad.
    *Scope:* Sostituzione cartacea per consensi Privacy, GDPR, Anamnesi Sportiva, agganciati nativamente a `member_id`.
 3. **Gestione Scorte, Buvette e POS:**
    *Manca:* `inventory_items`, `stock_movements`.

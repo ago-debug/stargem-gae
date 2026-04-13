@@ -495,6 +495,11 @@ Stato di avanzamento del cantiere "Tessere", inclusi i vincoli di sistema emersi
   - Fatto: Nulla.
   - Manca: Scrivere query SQL per mappare le vecchie `tessereMetadata` alle vere entry `memberships` storiche integrandole ai vecchi `payments`.
 
+- [x] Backfill Stagionale, Sottoscrizioni e API Pubblica Base GemAccess (F1-001/006)
+  - File toccati: `shared/schema.ts`, `server/routes.ts`, DB MySql
+  - Fatto: Completata l'estensione DB per i resoconti privacy (`member_forms_submissions`), la logica per auto-creazione utenti e deployata l'API totem pubblica `/api/public/membership-status/:code` con contestuale backfill massivo (2218 tessere orfane storiche season 25/26 sanate). Implementate le route di firma massiva (join anagrafiche) e idratazione tessera live per la scheda membro in UI.
+  - Manca: UI Tablet Scanner/Totem e Hooking React-Query.
+
 ---
 
 ## 6. Decisioni Architetturali (Archivio)
@@ -777,3 +782,16 @@ Questo blocco certifica l'entrata nel vivo della migrazione del backend e dell'o
 - [x] **Fix Modale CourseUnifiedModal (B051, B045b, B050)**: Aggiunto reset pre fetch allievo e refactoring gestione asincrona isDuplicating via useRef per prevenire race conditions.
 - [x] **Fix UI Calendario (B047b)**: Aggiornati i badge dinamici per alloggiare stili cromatici su background e border sinistro coerenti col mapping di ACTIVITY_TYPE_COLORS e sigle (IND, ALL, CRS, WS).
 - [x] **Pulizia Typings Legacy (F2-PROTOCOLLO-077)**: Sostituzione globale di tipizzazioni obsolete (es. `InsertPayment` senza `workshopEnrollmentId`, cast a `any`) garantendo esito vuoto a `npx tsc --noEmit`.
+
+---
+
+## Fase 34 - Sviluppo UI Modulo GemPass (Membership & Tesseramento)
+Questo blocco certifica la costruzione V2 dell'intera filiera operativa per tessere e documenti.
+
+- [x] **F2-001 Scaffold Modulo GemPass**: Creata interfaccia base a 4 tab e aggiunta route a Sidebar / Navigazione Generale.
+- [x] **F2-002 Tessere Attive**: Costruito il pannello Data-Grid per `GET /api/memberships` con ricerca socio, badge status temporali e color coding customizzato.
+- [x] **F2-003 & 004 Nuova Domanda (Adulto/Minore/B2B)**: Ricreato integralmente il form cartaceo digitale (Sezione A, B, C, D, E). Introdotta Lookup Automatica CF verso `GET /api/members`, Calcolo Stagione dinamica `/api/seasons/active`, calcolo prefisso card. Struttura layout asimmetrica che invoca doppi dati Tutore/Consenso in base al target "Minore". `useMutation` connessa alla POST.
+- [x] **F2-005 Documenti, Firme e Statistiche**: Creata la UI Tabellare read-only con filtri avanzati per analizzare l'Audit Trail dei moduli firmati con le diciture GDPR corrette, supportata la pipeline F1 di Mocking. Realizzati Widget Statistici connessi allo scan realtime di status per riassumere i KPIs delle Tessere Attive vs Scadute.
+- [x] **F2-006 GemPass Real-Time Data & Profilo Membro**: Raccordata l'API dati reali `/api/gempass/firme-all` nel listato Firme, abilitato il Rapido Rinnovo Tessera (Shadcn Dialog) via verb PATCH su Tab 1 e aggiornata l'impronta anagrafica di `member-dashboard.tsx` sostituendo i campi legacy con la Card unificata in sola-lettura.
+- [x] **[TESTING E2E CONGIUNTO] F1-007 / F2-007 Smoke Test Modulo**: Eseguito con successo lo script iterativo di test RESTful con validazione DB (F1) ed ispezionato il Frontend tramite Browser Subagent autonomo (F2) validando render Tabelle, Modal, e Moduli Auto-fill (sistemando un bug su ricerca JSON paginata Array CF su fetch). Modulo GemPass 100% stabile lato backend/frontend.
+- [x] **F1/F2-007 E2E Testing Modulo GemPass**: Validato l'intero set di Unit Testing asincrono e collaudo UI globale per simulare emissioni tessere, blocchi transazionali sui CF duplicati, filtri di ricerca su Tessere e Firme, navigabilità tra sidebar e dashboard membri. Modulo ufficiale completato.

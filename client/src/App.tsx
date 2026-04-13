@@ -63,6 +63,7 @@ import SchedaCampus from "@/pages/scheda-campus";
 import SchedaSaggio from "@/pages/scheda-saggio";
 import SchedaVacanzaStudio from "@/pages/scheda-vacanza-studio";
 import Planning from "@/pages/planning";
+import GemPass from "@/pages/gempass";
 import StrategicProgrammingTable from "@/pages/StrategicProgrammingTable";
 import KnowledgeBase from "@/pages/knowledge-base";
 import GestioneNote from "@/pages/gestione-note";
@@ -183,6 +184,7 @@ function Router() {
       <ProtectedRoute path="/reset-stagione" component={ResetStagione} />
       <ProtectedRoute path="/audit-logs" component={AuditLogs} />
       <ProtectedRoute path="/membro/:id" component={MemberDashboard} />
+      <ProtectedRoute path="/gempass" component={GemPass} />
       <ProtectedRoute path="/generazione-tessere" component={CardGenerator} />
       <ProtectedRoute path="/admin" component={AdminPanel} />
       <ProtectedRoute path="/copilot" component={StubCopilot} />

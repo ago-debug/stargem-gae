@@ -42,6 +42,7 @@ import {
   BadgePercent,
   Radio,
   ArrowLeftRight,
+  BadgeCheck,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { format } from "date-fns";
@@ -91,6 +92,11 @@ const registrationItems = [
     title: "Anagrafica Generale",
     url: "/anagrafica-generale",
     icon: IdCard,
+  },
+  {
+    title: "GemPass",
+    url: "/gempass",
+    icon: BadgeCheck,
   },
   {
     title: "Tessere e Certificati Medici",

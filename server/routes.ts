@@ -18,7 +18,8 @@ import { log } from "./vite";
 import { db } from "./db";
 import { sendSMS, sendEmail } from "./notifications";
 import { getUnifiedActivitiesPreview, getUnifiedActivityById, getUnifiedEnrollmentsPreview } from "./services/unifiedBridge";
-import { eq, desc, and, isNull, isNotNull } from "drizzle-orm";
+import { eq, desc, and, isNull, isNotNull, sql } from "drizzle-orm";
+import * as schema from "@shared/schema";
 import {
   insertMemberSchema,
   insertCategorySchema,
@@ -2809,6 +2810,426 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: error.message || "Failed to delete membership" });
     }
   });
+
+// ─── GEMPASS PUBLIC ROUTES ───────────────────────────────────────────────────
+app.get("/api/public/membership-status/:code", async (req, res) => {
+  try {
+    const { code } = req.params;
+    if (!code) return res.status(400).json({ error: 'Codice mancante' });
+
+    const memberships = await db
+      .select({
+        status: schema.memberships.status,
+        expiryDate: schema.memberships.expiryDate,
+        membershipType: schema.memberships.membershipType,
+        firstName: schema.members.firstName,
+        lastName: schema.members.lastName
+      })
+      .from(schema.memberships)
+      .innerJoin(schema.members, eq(schema.memberships.memberId, schema.members.id))
+      .where(
+        sql`${schema.memberships.membershipNumber} = ${code} OR ${schema.memberships.barcode} = ${code}`
+      )
+      .limit(1);
+
+    if (memberships.length === 0) {
+      return res.status(404).json({ error: 'Tessera non trovata' });
+    }
+
+    const m = memberships[0];
+    return res.json({
+      status: m.status,
+      expiryDate: m.expiryDate ? new Date(m.expiryDate).toISOString().split('T')[0] : null,
+      membershipType: m.membershipType,
+      member: `${m.firstName} ${m.lastName}`
+    });
+  } catch (error) {
+    console.error('[GemPass Public] GET error:', error);
+    return res.status(500).json({ error: 'Errore interno' });
+  }
+});
+
+// ─── GEMPASS ROUTES ──────────────────────────────────────────────────────────
+
+app.get("/api/gempass/tessere", isAuthenticated, async (req, res) => {
+  try {
+    const { status, membership_type, search } = req.query;
+    const all = await storage.getMembershipsWithMembers();
+    let result: any[] = Array.isArray(all) ? all : [];
+
+    if (status) {
+      result = result.filter((m: any) => m.status === status);
+    }
+    if (membership_type) {
+      result = result.filter((m: any) => m.membershipType === membership_type);
+    }
+    if (search) {
+      const s = String(search).toLowerCase();
+      result = result.filter((m: any) =>
+        m.membershipNumber?.toLowerCase().includes(s) ||
+        m.lastName?.toLowerCase().includes(s) ||
+        m.firstName?.toLowerCase().includes(s) ||
+        m.fiscalCode?.toLowerCase().includes(s)
+      );
+    }
+    return res.json(result);
+  } catch (error) {
+    console.error('[GemPass] GET /tessere error:', error);
+    return res.status(500).json({ error: 'Errore nel recupero tessere' });
+  }
+});
+
+app.get("/api/gempass/tessere/:id", isAuthenticated, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'ID non valido' });
+    const all = await storage.getMembershipsWithMembers();
+    const found = all.find((m: any) => m.id === id);
+    if (!found) return res.status(404).json({ error: 'Tessera non trovata' });
+    return res.json(found);
+  } catch (error) {
+    console.error('[GemPass] GET /tessere/:id error:', error);
+    return res.status(500).json({ error: 'Errore nel recupero tessera' });
+  }
+});
+
+app.post("/api/gempass/tessere", isAuthenticated, async (req, res) => {
+  try {
+    const {
+      member_id, membership_type, season_competence,
+      season_start_year, season_end_year, fee, notes
+    } = req.body;
+
+    let resolvedMemberId = member_id ? parseInt(member_id) : null;
+
+    // Se member_id è null → crea nuovo membro da anagrafica
+    if (!resolvedMemberId && req.body.anagrafica) {
+      const an = req.body.anagrafica;
+      if (!an.codiceFiscale || !an.cognome || !an.nome) {
+        return res.status(400).json({
+          error: 'Per nuovo membro: codiceFiscale, cognome e nome sono obbligatori'
+        });
+      }
+
+      // Verifica se CF già esiste
+      const existingMember = await db
+        .select()
+        .from(schema.members)
+        .where(eq(schema.members.fiscalCode, an.codiceFiscale.toUpperCase()))
+        .limit(1);
+
+      if (existingMember.length > 0) {
+        resolvedMemberId = existingMember[0].id;
+      } else {
+        // Crea nuovo membro
+        const newMember = await storage.createMember({
+          firstName: an.nome,
+          lastName: an.cognome,
+          fiscalCode: an.codiceFiscale.toUpperCase(),
+          email: an.email ?? null,
+          phone: an.cellulare ?? null,
+          dateOfBirth: an.dataNascita ? new Date(an.dataNascita) : null,
+          placeOfBirth: an.natoA ?? null,
+          participantType: 'ALLIEVO',
+        });
+        resolvedMemberId = newMember.id;
+      }
+    }
+
+    if (!resolvedMemberId) {
+      return res.status(400).json({ error: 'Impossibile determinare il membro' });
+    }
+
+    if (!season_competence) {
+      return res.status(400).json({
+        error: 'season_competence è obbligatorio'
+      });
+    }
+
+    const { generateMembershipNumber, calculateMembershipExpiry } =
+      await import('./utils/membership.js');
+
+    const membershipNumber = generateMembershipNumber(
+      season_competence, resolvedMemberId
+    );
+
+    // Verifica unicità
+    const existing = await db
+      .select()
+      .from(schema.memberships)
+      .where(eq(schema.memberships.membershipNumber, membershipNumber))
+      .limit(1);
+
+    if (existing.length > 0) {
+      return res.status(409).json({
+        error: `Tessera ${membershipNumber} già esistente per questo socio in questa stagione`
+      });
+    }
+
+    const expiryDate = calculateMembershipExpiry(season_competence);
+    const feeAmount = fee ?? (membership_type === 'minore' ? '15.00' : '25.00');
+    const today = new Date().toISOString().split('T')[0];
+
+    const insertValue = {
+        memberId: resolvedMemberId,
+        membershipNumber,
+        barcode: membershipNumber,
+        membershipType: membership_type ?? 'adulto',
+        seasonCompetence: season_competence,
+        seasonStartYear: season_start_year ?? null,
+        seasonEndYear: season_end_year ?? null,
+        issueDate: new Date(today),
+        expiryDate: new Date(expiryDate.toISOString().split('T')[0]),
+        status: 'active',
+        fee: feeAmount,
+        isRenewal: false,
+        notes: notes ?? null,
+    };
+    
+    await db
+      .insert(schema.memberships)
+      .values(insertValue);
+
+    return res.status(201).json({
+      success: true,
+      membershipNumber,
+      expiryDate: expiryDate.toISOString().split('T')[0],
+    });
+  } catch (error) {
+    console.error('[GemPass] POST /tessere error:', error);
+    return res.status(500).json({ error: 'Errore nella creazione tessera' });
+  }
+});
+
+app.patch("/api/gempass/tessere/:id/rinnova", isAuthenticated, async (req, res) => {
+  try {
+    const oldId = parseInt(req.params.id);
+    if (isNaN(oldId)) return res.status(400).json({ error: 'ID non valido' });
+
+    const { season_competence, season_start_year, season_end_year } = req.body;
+    if (!season_competence) {
+      return res.status(400).json({ error: 'season_competence obbligatorio' });
+    }
+
+    const all = await storage.getMembershipsWithMembers();
+    const oldRecord: any = all.find((m: any) => m.id === oldId);
+    if (!oldRecord) return res.status(404).json({ error: 'Tessera non trovata' });
+
+    const { generateMembershipNumber, calculateMembershipExpiry } =
+      await import('./utils/membership.js');
+
+    const newNumber = generateMembershipNumber(
+      season_competence, oldRecord.memberId
+    );
+    const newExpiry = calculateMembershipExpiry(season_competence);
+    const feeAmount = oldRecord.membershipType === 'minore' ? '15.00' : '25.00';
+    const today = new Date().toISOString().split('T')[0];
+
+    const insertValue = {
+        memberId: oldRecord.memberId,
+        membershipNumber: newNumber,
+        barcode: newNumber,
+        membershipType: oldRecord.membershipType,
+        seasonCompetence: season_competence,
+        seasonStartYear: season_start_year ?? null,
+        seasonEndYear: season_end_year ?? null,
+        issueDate: new Date(today),
+        expiryDate: new Date(newExpiry.toISOString().split('T')[0]),
+        status: 'active',
+        fee: feeAmount,
+        isRenewal: true,
+        renewedFromId: oldId,
+        previousMembershipNumber: oldRecord.membershipNumber,
+    };
+    
+    await db
+      .insert(schema.memberships)
+      .values(insertValue);
+
+    await db
+      .update(schema.memberships)
+      .set({ status: 'expired' })
+      .where(eq(schema.memberships.id, oldId));
+
+    return res.status(201).json({
+      success: true,
+      membershipNumber: newNumber,
+      expiryDate: newExpiry.toISOString().split('T')[0],
+      renewedFromId: oldId
+    });
+  } catch (error) {
+    console.error('[GemPass] PATCH /rinnova error:', error);
+    return res.status(500).json({ error: 'Errore nel rinnovo tessera' });
+  }
+});
+
+// Registra firma documento
+app.post("/api/gempass/firme", isAuthenticated, async (req, res) => {
+  try {
+    const {
+      member_id, form_type, form_version,
+      season_id, payload_data, signed_at
+    } = req.body;
+
+    if (!member_id || !form_type) {
+      return res.status(400).json({
+        error: 'member_id e form_type sono obbligatori'
+      });
+    }
+
+    // Verifica se già firmato per questa stagione
+    const existing = await db
+      .select()
+      .from(schema.memberFormsSubmissions)
+      .where(
+        and(
+          eq(schema.memberFormsSubmissions.memberId, parseInt(member_id)),
+          eq(schema.memberFormsSubmissions.formType, form_type),
+          season_id
+            ? eq(schema.memberFormsSubmissions.seasonId, parseInt(season_id))
+            : sql`1=1`
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      // Aggiorna invece di duplicare
+      await db
+        .update(schema.memberFormsSubmissions)
+        .set({
+          payloadData: payload_data ?? null,
+          signedAt: signed_at ? new Date(signed_at) : new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.memberFormsSubmissions.id, existing[0].id));
+      
+      return res.json({ success: true, action: 'updated', id: existing[0].id });
+    }
+
+    const result = await db
+      .insert(schema.memberFormsSubmissions)
+      .values({
+        memberId: parseInt(member_id),
+        formType: form_type,
+        formVersion: form_version ?? '2025-06-30',
+        seasonId: season_id ? parseInt(season_id) : null,
+        payloadData: payload_data ?? null,
+        signedAt: signed_at ? new Date(signed_at) : new Date(),
+        createdBy: (req as any).user?.id && !isNaN(parseInt((req as any).user.id)) ? parseInt((req as any).user.id) : null,
+      });
+
+    return res.status(201).json({
+      success: true,
+      action: 'created',
+      id: result[0]?.insertId ?? null
+    });
+  } catch (error: any) {
+    console.error('[GemPass] POST /firme error:', error);
+    return res.status(500).json({ error: 'Errore nel salvataggio firma: ' + (error.message || String(error)) });
+  }
+});
+
+// Recupera firme per membro (opzionalmente filtrate per stagione)
+app.get("/api/gempass/firme/:memberId", isAuthenticated, async (req, res) => {
+  try {
+    const memberId = parseInt(req.params.memberId);
+    if (isNaN(memberId)) return res.status(400).json({ error: 'ID non valido' });
+
+    const { season_id } = req.query;
+
+    const firme = await db
+      .select()
+      .from(schema.memberFormsSubmissions)
+      .where(
+        and(
+          eq(schema.memberFormsSubmissions.memberId, memberId),
+          season_id
+            ? eq(schema.memberFormsSubmissions.seasonId, parseInt(String(season_id)))
+            : sql`1=1`
+        )
+      )
+      .orderBy(schema.memberFormsSubmissions.signedAt);
+      
+    return res.json(firme);
+  } catch (error) {
+    console.error('[GemPass] GET /firme/:memberId error:', error);
+    return res.status(500).json({ error: 'Errore nel recupero firme' });
+  }
+});
+
+app.get("/api/gempass/firme-all", isAuthenticated, async (req, res) => {
+  try {
+    const { season_id, form_type } = req.query;
+
+    const conditions = [];
+    if (season_id) conditions.push(eq(schema.memberFormsSubmissions.seasonId, parseInt(season_id as string)));
+    if (form_type) conditions.push(eq(schema.memberFormsSubmissions.formType, form_type as string));
+
+    const query = db
+      .select({
+        id: schema.memberFormsSubmissions.id,
+        memberId: schema.memberFormsSubmissions.memberId,
+        seasonId: schema.memberFormsSubmissions.seasonId,
+        formType: schema.memberFormsSubmissions.formType,
+        formVersion: schema.memberFormsSubmissions.formVersion,
+        signedAt: schema.memberFormsSubmissions.signedAt,
+        payloadData: schema.memberFormsSubmissions.payloadData,
+        memberFirstName: schema.members.firstName,
+        memberLastName: schema.members.lastName
+      })
+      .from(schema.memberFormsSubmissions)
+      .leftJoin(schema.members, eq(schema.memberFormsSubmissions.memberId, schema.members.id))
+      .orderBy(desc(schema.memberFormsSubmissions.signedAt));
+
+    if (conditions.length > 0) {
+      query.where(and(...conditions));
+    }
+
+    const forms = await query;
+    return res.json(forms);
+  } catch (error) {
+    console.error('[GemPass] GET /firme-all error:', error);
+    return res.status(500).json({ error: 'Errore nel recupero totale firme' });
+  }
+});
+
+app.get("/api/gempass/membro/:memberId/tessera", isAuthenticated, async (req, res) => {
+  try {
+    const memberId = parseInt(req.params.memberId);
+    if (isNaN(memberId)) return res.status(400).json({ error: 'memberId non valido' });
+
+    const tesseraData = await db
+      .select({
+        id: schema.memberships.id,
+        membershipNumber: schema.memberships.membershipNumber,
+        membershipType: schema.memberships.membershipType,
+        seasonCompetence: schema.memberships.seasonCompetence,
+        expiryDate: schema.memberships.expiryDate,
+        status: schema.memberships.status,
+        fee: schema.memberships.fee
+      })
+      .from(schema.memberships)
+      .where(
+        and(
+          eq(schema.memberships.memberId, memberId),
+          eq(schema.memberships.status, 'active')
+        )
+      )
+      .orderBy(desc(schema.memberships.createdAt))
+      .limit(1);
+
+    if (tesseraData.length === 0) {
+      return res.status(200).json({ tessera: null });
+    }
+
+    return res.json({ tessera: tesseraData[0] });
+  } catch (error) {
+    console.error('[GemPass] GET /membro/:memberId/tessera error:', error);
+    return res.status(500).json({ error: 'Errore nel recupero tessera membro' });
+  }
+});
+
+// ─── FINE GEMPASS ROUTES ─────────────────────────────────────────────────────
 
   // ==== Medical Certificates Routes ====
   app.get("/api/medical-certificates", isAuthenticated, async (req, res) => {
