@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,6 +22,7 @@ type LoginData = z.infer<typeof loginSchema>;
 
 export default function AuthPage() {
     const { user, loginMutation } = useAuth();
+    const [, setLocation] = useLocation();
     
     // Gestione randomica delle clip di Teo e Audio
     const videos = [
@@ -72,12 +74,25 @@ export default function AuthPage() {
 
 
     if (user) {
-        // Redirect is handled by the creating component (Router)
+        if ((user as any).email_verified === false) {
+            setLocation(`/first-login?email=${encodeURIComponent((user as any).email || '')}`);
+            return null;
+        }
+        
+        setLocation((user as any).redirectTo || '/calendario-attivita');
         return null;
     }
 
     const onSubmit = (data: LoginData) => {
-        loginMutation.mutate(data);
+        loginMutation.mutate(data, {
+            onSuccess: (res: any) => {
+                if (res.email_verified === false) {
+                    setLocation(`/first-login?email=${encodeURIComponent(res.email || '')}`);
+                } else {
+                    setLocation(res.redirectTo || '/calendario-attivita');
+                }
+            }
+        });
     };
 
     return (

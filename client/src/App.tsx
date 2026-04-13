@@ -1,4 +1,4 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Redirect, useRoute } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -16,6 +16,7 @@ import { User as SelectUser } from "@shared/schema";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
+import FirstLogin from "@/pages/first-login";
 import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
 import Courses from "@/pages/courses";
@@ -64,6 +65,7 @@ import SchedaVacanzaStudio from "@/pages/scheda-vacanza-studio";
 import Planning from "@/pages/planning";
 import GemPass from "@/pages/gempass";
 import GemStaff from "@/pages/gemstaff";
+import GemStaffMe from "@/pages/gemstaff-me";
 import StrategicProgrammingTable from "@/pages/StrategicProgrammingTable";
 import KnowledgeBase from "@/pages/knowledge-base";
 import GestioneNote from "@/pages/gestione-note";
@@ -188,6 +190,7 @@ function Router() {
       <ProtectedRoute path="/membro/:id" component={MemberDashboard} />
       <ProtectedRoute path="/gempass" component={GemPass} />
       <ProtectedRoute path="/gemstaff" component={GemStaff} />
+      <ProtectedRoute path="/gemstaff/me" component={GemStaffMe} />
       <ProtectedRoute path="/generazione-tessere" component={CardGenerator} />
       <ProtectedRoute path="/admin" component={AdminPanel} />
       <ProtectedRoute path="/copilot" component={StubCopilot} />
@@ -250,12 +253,18 @@ function AppContent() {
     "--sidebar-width-icon": "3rem",
   };
 
+  const [matchFirstLogin] = useRoute("/first-login");
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  if (matchFirstLogin) {
+    return <FirstLogin />;
   }
 
   if (!user) {

@@ -189,7 +189,18 @@ export function setupAuth(app: Express) {
                 console.error("[AUTH] Failed to log login activity:", err);
             }
         }
-        res.status(200).json(req.user);
+        const userEntity = req.user as any;
+        const redirectMap: Record<string, string> = {
+            'admin': '/calendario-attivita',
+            'operator': '/calendario-attivita',
+            'insegnante': '/gemstaff/me',
+            'medico': '/medgem',
+            'client': '/area-clienti',
+            'dipendente': '/gemteam/me'
+        };
+        const redirectTo = userEntity?.role ? (redirectMap[userEntity.role] || '/calendario-attivita') : '/calendario-attivita';
+
+        res.status(200).json({ ...userEntity, redirectTo });
     });
 
     app.post("/api/logout", (req, res, next) => {
@@ -298,6 +309,44 @@ export function setupAuth(app: Express) {
             res.json(req.user);
         } else {
             res.status(401).send("Non autenticato");
+        }
+    });
+
+    app.post("/api/auth/first-login", async (req, res) => {
+        try {
+            const { email, otp, newPassword } = req.body;
+            if (!email || !otp || !newPassword) {
+                return res.status(400).json({ success: false, message: "Parametri mancanti" });
+            }
+
+            const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+            if (!user) {
+                return res.status(404).json({ success: false, message: "Utente non trovato" });
+            }
+
+            if (user.otpToken !== otp) {
+                return res.status(401).json({ success: false, message: "OTP non valido" });
+            }
+
+            if (!user.otpExpiresAt || user.otpExpiresAt < new Date()) {
+                return res.status(401).json({ success: false, message: "OTP scaduto" });
+            }
+
+            const hashedPassword = await hashPassword(newPassword);
+
+            await db.update(users)
+                .set({
+                    password: hashedPassword,
+                    emailVerified: true,
+                    otpToken: null,
+                    otpExpiresAt: null
+                })
+                .where(eq(users.email, email));
+
+            return res.json({ success: true });
+        } catch (error) {
+            console.error('[AUTH] first-login error:', error);
+            return res.status(500).json({ success: false, message: "Errore interno server" });
         }
     });
 

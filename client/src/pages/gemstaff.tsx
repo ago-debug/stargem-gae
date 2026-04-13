@@ -457,12 +457,24 @@ export default function GemStaff() {
   const [showArchive, setShowArchive] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<any>(null);
   const [complianceMemberId, setComplianceMemberId] = useState<string>("");
+  const [isCreateAccountDialogOpen, setIsCreateAccountDialogOpen] = useState(false);
+  const [createdAccountOtp, setCreatedAccountOtp] = useState<{ email: string; otp: string } | null>(null);
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInstructor, setEditingInstructor] = useState<any>(null);
   const [isPrivateLessonsAuth, setIsPrivateLessonsAuth] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  const createAccountMutation = useMutation({
+    mutationFn: async (memberId: number) => await apiRequest("POST", `/api/gemstaff/crea-account/${memberId}`),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/gemstaff/insegnanti${showArchive ? '?status=inattivo' : ''}`] });
+      setCreatedAccountOtp({ email: data.email, otp: data.tempCode });
+      setIsCreateAccountDialogOpen(false);
+    },
+    onError: (e: Error) => toast({ title: "Errore", description: e.message, variant: "destructive" })
+  });
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -1052,6 +1064,32 @@ export default function GemStaff() {
             </div>
             
             <div className="space-y-1 pt-4 border-t">
+              <p className="text-sm text-muted-foreground font-medium mb-3">Account di Sistema</p>
+              {selectedStaff?.user_id ? (
+                 <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-md text-sm flex items-center justify-between">
+                    <span className="font-medium text-emerald-800 flex items-center gap-2">
+                       <FileCheck className="w-4 h-4" /> Account attivo
+                    </span>
+                    <Badge variant="outline" className={selectedStaff.email_verified ? 'text-emerald-700 border-emerald-300' : 'text-amber-600 border-amber-300'}>
+                       {selectedStaff.email_verified ? 'Verificato' : 'Da verificare'}
+                    </Badge>
+                 </div>
+              ) : (
+                 <div className="bg-amber-50 border border-amber-200 p-3 rounded-md text-sm space-y-3">
+                    <div className="flex items-center gap-2 text-amber-800">
+                       <AlertTriangle className="w-4 h-4" />
+                       <span className="font-medium">Questo insegnante non ha ancora un account</span>
+                    </div>
+                    {isAdmin && (
+                      <Button size="sm" onClick={() => setIsCreateAccountDialogOpen(true)} className="w-full bg-amber-600 hover:bg-amber-700">
+                        Crea Account
+                      </Button>
+                    )}
+                 </div>
+              )}
+            </div>
+
+            <div className="space-y-1 pt-4 border-t">
               <p className="text-sm text-muted-foreground font-medium mb-3">Tessera GemPass</p>
               {selectedStaff?.tessera ? (
                  <div className="bg-slate-50 border p-3 rounded-md text-sm space-y-2">
@@ -1127,6 +1165,53 @@ export default function GemStaff() {
           </div>
         </SheetContent>
       </Sheet>
+
+      <Dialog open={isCreateAccountDialogOpen} onOpenChange={setIsCreateAccountDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Crea account per {selectedStaff?.firstName} {selectedStaff?.lastName}</DialogTitle>
+            <DialogDescription>
+              Verrà creato un account con email:<br/>
+              <strong>{selectedStaff?.email || "Nessuna email"}</strong><br/><br/>
+              L'OTP di accesso verrà mostrato una sola volta.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateAccountDialogOpen(false)}>Annulla</Button>
+            <Button onClick={() => selectedStaff?.id && createAccountMutation.mutate(selectedStaff.id)} disabled={createAccountMutation.isPending || !selectedStaff?.email}>
+              {createAccountMutation.isPending ? "Creazione in corso..." : "Conferma e Crea"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!createdAccountOtp} onOpenChange={(o) => (!o && setCreatedAccountOtp(null))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-green-600">
+              <FileCheck className="w-5 h-5" /> Account creato!
+            </DialogTitle>
+            <DialogDescription>
+              Comunica questi dati all'insegnante:<br/><br/>
+              Email: <strong>{createdAccountOtp?.email}</strong><br/>
+              Codice accesso temporaneo: <strong className="text-lg bg-slate-100 px-2 py-1 rounded">{createdAccountOtp?.otp}</strong><br/><br/>
+              Valido per 24 ore.<br/>
+              <span className="text-amber-600 font-bold flex items-center gap-1 mt-2">
+                 <AlertTriangle className="w-4 h-4" /> Questo codice non verrà mostrato di nuovo.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              navigator.clipboard.writeText(`Email: ${createdAccountOtp?.email}\nCodice OTP: ${createdAccountOtp?.otp}`);
+              toast({ title: "Copiato negli appunti" });
+            }}>
+              Copia OTP
+            </Button>
+            <Button onClick={() => setCreatedAccountOtp(null)}>Chiudi</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-full">
           <DialogHeader>
