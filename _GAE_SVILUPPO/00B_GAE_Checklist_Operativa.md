@@ -826,3 +826,6 @@ Questo blocco certifica la costruzione V2 dell'intera filiera operativa per tess
 - [x] Verifica finale GemStaff (F2-007 S5)
 - [x] Crash pagina bianca risolto (F2-008)
 - [x] GemStaff UI validata da PM Gaetano ✅
+- [x] Deprecation warnings backend (F1-011)
+- [x] Banner deprecazione frontend (F2-011)
+- [x] deprecation_logs tabella DB (F1-011)
