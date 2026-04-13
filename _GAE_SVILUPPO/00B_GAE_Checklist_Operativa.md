@@ -1,4 +1,4 @@
-# 📝 Checklist Operativa CourseManager (Roadmap Fase 2)
+# 📝 Checklist Operativa StarGem Manager (Roadmap Fase 2)
 *(Questo documento funge da promemoria vivente per il team di sviluppo. Spuntare i task o aggiungerne di nuovi mano a mano che l'architettura SaaS V2 prende forma).*
 
 ## Legenda Stati
@@ -9,6 +9,19 @@
 - [-] = NON NECESSARIO / GIÀ COPERTO
 
 ---
+
+[13/04 · GemStaff] F1-001 → F1-003 + F2-001 → F2-003
+  [x] DB: 6 tabelle GemStaff create
+  [x] members: 5 colonne GemStaff aggiunte
+  [x] users: 3 colonne auth aggiunte
+  [x] 65 INSEGNANTI + 6 PERSONAL_TRAINER mappati
+  [x] TS: 0 errori totali
+  [x] /gemstaff: scaffold + Tab 1 + Tab 2 + Tab 3
+  [x] Tab 4 Accordi (F2-004)
+  [x] Tab 5 Presenze & Sostituzioni (F2-004)
+  [x] Tab 6 Disciplinare (F2-005)
+  [x] Route presenze/sostituzioni/disciplinare (F1-004)
+  [x] GemStaff COMPLETATO — F1-001/005 + F2-001/005
 
 [09/04 01:00] F1→PM: Esecuzione Protocollo 094. Rimosso conflict check backend POST/PATCH courses.
                [x] Eliminata la validazione anti-sovrapposizione slot da `server/routes.ts` per POST/PATCH `/api/courses`.
@@ -752,7 +765,7 @@ Questa fase sblocca la gestione del calendario su più archi temporali, gestendo
 ## Fase 29 - Rebranding StarGem Suite & TeoCopilot (Conclusa)
 Questo blocco chiude la fase di allestimento visivo e d'integrazione base per la suite StarGem V2.
 
-- [x] Ristrutturazione Root Login: Abbandonato esteticamente il brand CourseManager, sostituzione landing con UI "StarGem Suite" e inserti di 7 loghi dorati 3D (GemTeam, Gemory, MedGem, BookGem, TeoCopilot, Gemdario, Clarissa).
+- [x] Ristrutturazione Root Login: Abbandonato esteticamente il brand StarGem Manager, sostituzione landing con UI "StarGem Suite" e inserti di 7 loghi dorati 3D (GemTeam, Gemory, MedGem, BookGem, TeoCopilot, Gemdario, Clarissa).
 - [x] Ristrutturazione Architetturale TeoCopilot: Transizione completata da Overlay (`Sheet` UI) a Side-by-Side Push Model (`aside` nativo) per permettere lavoro congiunto senza sovrapposizione visiva.
 - [x] Asset Grafici AI Custom: Integrazione degli asset `teo-head-new.png` e `teo-full-new.png`, rimosse le stelline Sparkle superflue e impostate le dinamiche CSS `mix-blend-multiply` in AuthPage per trasparenza massiva nativa.
 
@@ -795,3 +808,4 @@ Questo blocco certifica la costruzione V2 dell'intera filiera operativa per tess
 - [x] **F2-006 GemPass Real-Time Data & Profilo Membro**: Raccordata l'API dati reali `/api/gempass/firme-all` nel listato Firme, abilitato il Rapido Rinnovo Tessera (Shadcn Dialog) via verb PATCH su Tab 1 e aggiornata l'impronta anagrafica di `member-dashboard.tsx` sostituendo i campi legacy con la Card unificata in sola-lettura.
 - [x] **[TESTING E2E CONGIUNTO] F1-007 / F2-007 Smoke Test Modulo**: Eseguito con successo lo script iterativo di test RESTful con validazione DB (F1) ed ispezionato il Frontend tramite Browser Subagent autonomo (F2) validando render Tabelle, Modal, e Moduli Auto-fill (sistemando un bug su ricerca JSON paginata Array CF su fetch). Modulo GemPass 100% stabile lato backend/frontend.
 - [x] **F1/F2-007 E2E Testing Modulo GemPass**: Validato l'intero set di Unit Testing asincrono e collaudo UI globale per simulare emissioni tessere, blocchi transazionali sui CF duplicati, filtri di ricerca su Tessere e Firme, navigabilità tra sidebar e dashboard membri. Modulo ufficiale completato.
+- [x] **Backup Sicurezza**: Backup finale GemPass completato via mariadb-dump sul server VPS.

@@ -136,7 +136,7 @@ Il progetto è considerevolmente avanzato nella giornata odierna stabilizzando f
 
 <!-- --- INIZIO SORGENTE: attuale/11_GAE_Stato_Lavori_Per_Sezione.md --- -->
 
-# STATO LAVORI PER SEZIONE (Project CourseManager)
+# STATO LAVORI PER SEZIONE (Project StarGem Manager)
 **Aggiornato al:** 25 Marzo 2026
 
 Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro-area del progetto, fungendo da bussola per gli sviluppatori e la direzione tecnica sullo stato di collaudo e di priorità delle singole sezioni. 
@@ -214,7 +214,7 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 **Sintesi:** L'applicativo SAAS esterno di Email Marketing/Pipelines per le agenzie. Piano strategico studiato ma rimandato come appendice al prodotto stabile.
 * **Cosa è già stato fatto:** Scritto integralmente e blasonato come Fase Strategica 2 (`14_GAE_Strategic_Plan_Clarissa_CRM.md`). Dedotto Studio Gem come Master Unidirezionale per contatti, escludendo collisioni critiche su pagamenti e doppioni.
 * **Cosa manca:** Intero blocco del codice REST ed eventuale adapter middleware / webhook reception in Node JS o trigger DB.
-* **Rischi / Attenzioni:** Anticipare questo task causa sicura distrazione vitale dalle interfacce core urgenti o dai bug cassa di CourseManager primario.
+* **Rischi / Attenzioni:** Anticipare questo task causa sicura distrazione vitale dalle interfacce core urgenti o dai bug cassa di StarGem Manager primario.
 * **Prossimo Step Consigliato:** Disattivato. Non è una priorità.
 
 ---

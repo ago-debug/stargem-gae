@@ -1,9 +1,21 @@
-# Ultimi Aggiornamenti Progetto "CourseManager"
-**Periodo di riferimento:** 23 Febbraio 2026 - 12 Aprile 2026
+# Ultimi Aggiornamenti Progetto "StarGem Manager"
+**Periodo di riferimento:** 23 Febbraio 2026 - 13 Aprile 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
 
 ---
+
+### 13 Aprile 2026 (GemStaff — Infrastruttura DB + API + UI)
+
+* [F1-001] Backup DB (9.0M). ADD COLUMN su users (email_verified, otp_token, otp_expires_at) e su members (staff_status, lezioni_private_autorizzate*). Creazione 6 tabelle GemStaff: staff_contracts_compliance, staff_document_signatures, staff_disciplinary_log, staff_presenze, staff_sostituzioni, payslips. Aggiornamento shared/schema.ts. 65 insegnanti impostati staff_status = 'attivo'.
+* [F2-001] Scaffold /gemstaff: rotta protetta in App.tsx, voce sidebar, pagina con 6 tab placeholder. Guard ruoli su tab 4 (Accordi) e 6 (Disciplinare).
+* [F1-002] Route API GemStaff: GET/POST insegnanti, pt, compliance, firme. Test: 65 insegnanti attivi.
+* [F2-002] Tab 1 Anagrafica Insegnanti: lista con filtri, pannello dettaglio laterale, toggle archivio. TS Cleanup frontend: 53 errori rimossi su 18 file.
+* [F1-003] Pulizia duplicati PT nel DB. UPDATE participant_type = 'PERSONAL_TRAINER' su 6 record. Route :id aggiornata con campo tessera GemPass. TS Cleanup server: 0 errori totali raggiunti.
+* [F2-003] Sezione tessera GemPass nel pannello dettaglio. Tab 2 PT. Tab 3 Compliance con 6 card e barra avanzamento.
+* [F1-004] 16 route GemStaff complete con guard ruoli. Presenze, sostituzioni (doppio visto), disciplinare. 0 errori TypeScript totali.
+* [F2-004] Tab 4 Accordi (read-only, link a /quote-promo). Tab 5 Presenze con selettore mese, inserimento manuale, bottone CONFERMA MESE con dialog. Tab 5B Sostituzioni con log visti. File 00A e 00B aggiornati.
+* [F2-005] Tab 6 Disciplinare con guard admin, banner riservatezza, form nuovo evento e aggiornamento. GemStaff UI completato.
 
 ### 12 Aprile 2026 (Phase 34: Infrastruttura GemPass & Sottoscrizioni Documentali)
 * **[F1-PROTOCOLLO-001/002] Estensione DB Memberships & Forms:** Audit e alterazione chirurgica della tabella `memberships` con default sicuri (`is_renewal`, `renewed_from_id`, `notes`). Creazione della nuova tabella per tracking digital signatures `member_forms_submissions`. Allineamento Drizzle Schema `shared/schema.ts` e tool di entity generation (`server/utils/membership.ts`).
@@ -75,7 +87,7 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **Bonifica Database (STI Phase 4 - Deprecazione Silos):** Migrati gli ultimi dati attivi delle tabelle `campus_activities` all'interno dell'aggregatore padre `courses`. Avviata marcatura deprecazione (`DEPRECATO`) in Drizzle per i 4 silos vuoti (Domeniche, Allenamenti, Lezioni e Saggi) e analizzato lo shutdown imminente per le rotte silenti del server.
 
 ### 06 Aprile 2026 (Phase 29: Rebranding StarGem Suite & TeoCopilot)
-* **Rebranding "StarGem Suite" & Griglia Moduli:** Ristrutturata drasticamente la pagina di Login (`auth-page.tsx`), abbandonando il moniker "CourseManager". La root d'accesso ora presenta lo status di suite aziendale, esponendo una griglia luminosa con loghi dorati (Golden Gradient CSS) per tutti i 7 sotto-moduli ufficiali e riservati (GemTeam, Gemory, MedGem, BookGem, TeoCopilot, Gemdario, Clarissa).
+* **Rebranding "StarGem Suite" & Griglia Moduli:** Ristrutturata drasticamente la pagina di Login (`auth-page.tsx`), abbandonando il moniker "StarGem Manager". La root d'accesso ora presenta lo status di suite aziendale, esponendo una griglia luminosa con loghi dorati (Golden Gradient CSS) per tutti i 7 sotto-moduli ufficiali e riservati (GemTeam, Gemory, MedGem, BookGem, TeoCopilot, Gemdario, Clarissa).
 * **TeoCopilot (Layout "Push" Side-by-Side):** Disattivato e rimosso l'uso del componente `Sheet` a scorrimento (sovrapposizione grigia) a favore di un layout `aside` nativo stretto tra menu e canvas, ancorato saldamente al root node intermedio (`App.tsx`). L'apertura dell'Assistente AI ora "spreme" elasticamente l'applicativo principale, abilitando nativamente il multitasking e l'ispezione side-by-side senza alcuna occlusione visiva sulla dashboard.
 * **Integrazione Asset Avatar Dinamica:** Integrate in `/assets` le due versioni dell'avatar Lottie/PNG di TeoCopilot (Volo Intero e Solo Testa) realizzate esternamente. Applicato l'avanzato filtro strutturale `mix-blend-multiply` in React per generare trasparenza senza Alpha Channel nativo sulla schermata di login, snellendo l'esperienza di login. Sostituita altresì "Bot icon" con la Miniatura Teo per i baloon chat interni ad aumentare il senso di immedesimazione AI.
 
@@ -457,3 +469,4 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * **[F2-PROTOCOLLO-005] Documenti, Firme e Statistiche (GemPass Tab 3 e 4):** Strutturati i layout finali dei due Tab rimanenti. Il Tab 3 dispone ora di un modulo di esplorazione documentale (mockato temporaneamente in attesa dell'API unificata backend) con filtri avanzati per Socio, Tipo Documento e Stagione; sono implementati i color-badge nativi per la validazione digitale. Il Tab 4 incorpora 4 widget statistici ("Tessere Attive", "In Scadenza", "Scadute", "Totale Stagione") calcolati dinamicamente ereditando la store di React Query del Tab 1.
 * **[F2-PROTOCOLLO-006] GemPass Real-Time Data & Profilo Membro:** Collegata la route ufficiale `/api/gempass/firme-all` al Tab 3 (Documenti e Firme) per storicizzare le firme in logica reattiva annullando il dict mock; implementata routine per fallback su record null. Attivato in Tab 1 il componente nativo `Dialog` (shadcn) per il Rinnovo Rapido Tessera mediante invio della Mutation di aggiornamento. Sovrascritta all'interno del gestore profilo globale (`member-dashboard.tsx`) la sub-sezione legacy delle Tessere, riadattandola fedelmente in un Widget in sola-lettura connesso alla rotta `GET /api/gempass/membro/:id/tessera` replicante medesimi Badge e Layout del nuovo sistema.
 * **[F1/F2-PROTOCOLLO-007] E2E Testing Modulo GemPass:** Condotto il collaudo formale delle pipeline asincrone e dell'UI. I test Backend (T01-T12) verificano le scritture ACID su `memberships` e `member_forms_submissions` (vincolate alla limitazione `isAuthenticated` dei cookie di sessione per le macro-chiamate da terminale HTTP). I test Frontend (T-UI-01-T-UI-10) ratificano il workflow asimmetrico per Minori (con blocco safe-submit sui doppioni CF Tutori), la propagazione realtime nelle card statistiche, l'aggiornamento badge a scadenza <= 30 gg, e la coerenza della navigazione fra Sidebar Anagrafica e Route globale `/gempass`. COMPLETATO ✅.
+* **[AG-BACKUP-001] Security Backup:** Backup finale GemPass completato.

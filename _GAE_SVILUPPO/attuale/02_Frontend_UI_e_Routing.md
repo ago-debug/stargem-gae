@@ -111,7 +111,7 @@ Il backend SQL aspetta standard rigidi. Pertanto, l'implementazione visiva deve 
 > **Scopo di questo documento**
 > Questo file rappresenta la **To-Do List operativa e attiva** per l'unificazione e la pulizia dell'Interfaccia Utente (Fase 2). Qui documenteremo tutti i difetti visivi, l'UX disomogenea e progetteremo i "Micro-Componenti Universali" (come il *TimeSlotPicker* o il *PaymentModule*) necessari per smettere di clonare codice in 12 pagine diverse. Aggiungi qui le anomalie grafiche riscontrate per progettarne una soluzione strutturale trasversale.
 
-Questo documento traccia il piano operativo per risolvere il disallineamento visivo e logico presente nelle 12 pagine di erogazione attività di CourseManager (Fase 2 della strategia).
+Questo documento traccia il piano operativo per risolvere il disallineamento visivo e logico presente nelle 12 pagine di erogazione attività di StarGem Manager (Fase 2 della strategia).
 
 ## Obiettivo
 Smettere di riscrivere a mano la logica di input orario e la logica di selezione pagamenti/quote all'interno di ogni singola schermata React (`corsi.tsx`, `workshops.tsx`, ecc.). 
@@ -267,7 +267,7 @@ Per gestire l'acquisizione di nuovi clienti, l'UI si arricchirà di due nuove da
 > **Scopo di questa Appendice**
 > Questa sezione spiega tecnicamente come risolvere il problema più grande del Refactoring: *come fa la UI attuale a disegnare ancora 12 interfacce visive bellissime e diverse, se nel Database esisterà una sola tabella universale cieca?* Illustra la strategia "Forms-as-Data" (JSON Driven UI) e come le Categorie istruiranno il rendering dei componenti in React.
 
-La decisione strategica di trasformare *CourseManager* in un prodotto Software as a Service (SaaS / Multi-tenant) impone un disaccoppiamento drastico tra la Logica dei Dati (Backend) e la Presentazione (Frontend). 
+La decisione strategica di trasformare *StarGem Manager* in un prodotto Software as a Service (SaaS / Multi-tenant) impone un disaccoppiamento drastico tra la Logica dei Dati (Backend) e la Presentazione (Frontend). 
 
 Come correttamente indicato dalla dirigenza nell'Intervista 6, un database scalabile ed "agnostico" (Single Table Inheritance) non deve in alcun modo *stravolgere* o *rompere* l'interfaccia grafica attualmente in uso online dai clienti. Al contrario, deve alimentarla dinamicamente.
 
@@ -328,19 +328,19 @@ Per non stravolgere il lavoro visivo fatto finora, occorre confermare alcune log
 
 <!-- --- INIZIO SORGENTE: attuale/05_GAE_Linee_Guida_Grafiche_UI.md --- -->
 
-# Linee Guida Grafiche UI (CourseManager)
+# Linee Guida Grafiche UI (StarGem Manager)
 
 > [!IMPORTANT] 
 > **Scopo di questo documento**
-> Questo file raccoglie le decisioni sulle convenzioni cromatiche e stilistiche per lo sviluppo frontend di CourseManager. Tutte le interfacce, sia quelle attuali in refactoring che le future App Staff/Team/User, dovranno aderire a questo pattern visivo per garantire un'esperienza utente coerente. L'approccio è sempre "Ottimizzazione senza distruzione": le logiche visive introdotte qui riprendono e curano quelle già consolidate.
+> Questo file raccoglie le decisioni sulle convenzioni cromatiche e stilistiche per lo sviluppo frontend di StarGem Manager. Tutte le interfacce, sia quelle attuali in refactoring che le future App Staff/Team/User, dovranno aderire a questo pattern visivo per garantire un'esperienza utente coerente. L'approccio è sempre "Ottimizzazione senza distruzione": le logiche visive introdotte qui riprendono e curano quelle già consolidate.
 
 ## 1. Codifica Cromatica (Palette)
 
-La palette di CourseManager prevede ruoli specifici per ciascun colore, al fine di guidare l'occhio dell'utente in modo intuitivo verso le azioni corrette:
+La palette di StarGem Manager prevede ruoli specifici per ciascun colore, al fine di guidare l'occhio dell'utente in modo intuitivo verso le azioni corrette:
 
 ## 1. Codifica Cromatica (Palette Progetto)
 
-La palette di CourseManager prevede ruoli specifici per ciascun colore, al fine di guidare l'occhio dell'utente in modo intuitivo verso le azioni corrette. I colori *devono* essere richiamati tramite le variabili CSS centralizzate in `index.css` o le classi Tailwind già configurate, per garantire il perfetto switch Light/Dark mode.
+La palette di StarGem Manager prevede ruoli specifici per ciascun colore, al fine di guidare l'occhio dell'utente in modo intuitivo verso le azioni corrette. I colori *devono* essere richiamati tramite le variabili CSS centralizzate in `index.css` o le classi Tailwind già configurate, per garantire il perfetto switch Light/Dark mode.
 
 *   **Primary (Yellow/Gold):** Il colore predominante per pulsanti di azione principale, gli anelli di focus degli input (`--ring`) e gli header della sidebar (`--sidebar-primary`). È basato sul tono: `hsl(43 82% 46%)`.
 *   **Gold 3D (Elementi Premium):** Utilizzato per badge di stato importanti, bottoni di checkout o header di colonne ordinate. Classi CSS dedicate: `.gold-3d-button` e `.status-badge-gold`. Usa un gradiente lineare da `#e6b800` a `#b8860b`.
@@ -377,7 +377,7 @@ La palette di CourseManager prevede ruoli specifici per ciascun colore, al fine 
 
 # Audit Route e Stato Mappatura (Aggiornato Blocco 4)
 
-Questo documento traccia la coerenza completa del routing dell'applicazione CourseManager, distinguendo in maniera netta i **nomi ufficiali di prodotto (UI)** dagli slug tecnici e dai componenti legacy. La classificazione dello stato rispetta la seguente semantica:
+Questo documento traccia la coerenza completa del routing dell'applicazione StarGem Manager, distinguendo in maniera netta i **nomi ufficiali di prodotto (UI)** dagli slug tecnici e dai componenti legacy. La classificazione dello stato rispetta la seguente semantica:
 - **canonico — 6 tab completi**: route principale, nome e componente definitivi.
 - **legacy tollerato**: alias o route vecchia usata tecnicamente per non spaccare link/bookmark.
 - **placeholder**: pagina "in allestimento", non una 404.

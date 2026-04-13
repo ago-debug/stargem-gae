@@ -75,7 +75,7 @@ export function NewCarnetDialog() {
       type: "carnet",
       category,
       courseCount,
-      walletTypeId: walletTypeId === "" ? undefined : parseInt(walletTypeId as string),
+      walletTypeId: walletTypeId === "" ? undefined : parseInt((walletTypeId as unknown) as string, 10),
       quantity: 1,
       groupSize: parseInt(groupSize),
       locationType
@@ -122,7 +122,7 @@ export function NewCarnetDialog() {
     checkoutMutation.mutate({
       type: "carnet",
       memberId: parseInt(memberId),
-      walletTypeId: walletTypeId ? parseInt(walletTypeId as string) : null,
+      walletTypeId: walletTypeId ? parseInt((walletTypeId as unknown) as string, 10) : null,
       instructorId: instructorId ? parseInt(instructorId) : null,
       groupSize: parseInt(groupSize),
       locationType,
@@ -221,7 +221,7 @@ export function NewCarnetDialog() {
 
           <div className="space-y-2">
             <Label className="flex justify-between items-center text-xs">
-              Codice Promo <Button variant="link" size="sm" className="h-4 p-0" onClick={handleCalculatePromo}>Applica promo</Button>
+              Codice Promo <Button variant="ghost" size="sm" className="h-4 p-0" onClick={handleCalculatePromo}>Applica promo</Button>
             </Label>
             <Input placeholder="Es: STARTVER10" value={calc.promoCode} onChange={e => calc.setPromoCode(e.target.value.toUpperCase())} />
           </div>

@@ -78,7 +78,7 @@ Per far aderire l'hub Attività alla nuova tassonomia senza rompere i DB Legacy.
 
 <!-- --- INIZIO SORGENTE: attuale/09_GAE_MAPPA_GLOBALE.md --- -->
 
-# AUDIT STRUTTURALE TOTALE - CourseManager (Stato Attuale)
+# AUDIT STRUTTURALE TOTALE - StarGem Manager (Stato Attuale)
 
 Questo documento fornisce una fotografia "da satellite" dell'intero ecosistema attuale dell'applicazione, mappando database, pagine, modali e dipendenze per pianificare il consolidamento e le future unificazioni.
 

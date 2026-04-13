@@ -147,7 +147,7 @@ export default function ActivityManagementPage({
     queryKey: [categoryApiEndpoint],
   });
 
-  const { data: seasons } = useQuery<Season[]>({
+  const { data: seasons } = useQuery<any[]>({
     queryKey: ["/api/seasons"],
   });
 

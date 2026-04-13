@@ -2,11 +2,11 @@
 
 <!-- --- INIZIO SORGENTE: attuale/01_GAE_Database_Attuale.md --- -->
 
-# CourseManager Database Map (Stato Attuale)
+# StarGem Manager Database Map (Stato Attuale)
 
 > [!NOTE] 
 > **Scopo di questo documento**
-> Questo file è la **Radiografia Attuale (Fase 1)** del backend di CourseManager. Descrive fedelmente l'esatta struttura dei dati e le 73 tabelle fisiche in uso *ora* nel `shared/schema.ts` (Drizzle ORM + MySQL). Consultalo come fonte di verità quando devi interagire con il database odierno, capire dove finiscono le righe dei "11 Silos" o tracciare come si collegano utenti, incassi e ricevute della Cassa Centrale.
+> Questo file è la **Radiografia Attuale (Fase 1)** del backend di StarGem Manager. Descrive fedelmente l'esatta struttura dei dati e le 73 tabelle fisiche in uso *ora* nel `shared/schema.ts` (Drizzle ORM + MySQL). Consultalo come fonte di verità quando devi interagire con il database odierno, capire dove finiscono le righe dei "11 Silos" o tracciare come si collegano utenti, incassi e ricevute della Cassa Centrale.
 
 Questo documento illustra la struttura completa delle tabelle del database e le loro relazioni, così come definite in `shared/schema.ts`. 
 Il database utilizza un modello relazionale gestito tramite Drizzle ORM e MySQL.
@@ -18,7 +18,7 @@ Il database utilizza un modello relazionale gestito tramite Drizzle ORM e MySQL.
 ### 🔗 Documenti di Riferimento Architetturale (Da Leggere)
 Per avere la visione d'insieme prima, durante e dopo i futuri refactoring, fai affidamento ai seguenti documenti analitici stilati:
 * 🛡️ **[Progetto, Architettura e Collegamenti (Regole Auree)](02_GAE_Architettura_e_Regole.md)** -> Manuale per sviluppatori che spiega il nucleo "intoccabile" e le zone "sicure" dove espandere funzionalità oggi senza rompere nulla.
-* 🚀 **[CourseManager Future Database Map (Single Table Inheritance)](../futuro/12_GAE_Database_Futuro_STI.md)** -> Il traguardo finale. Il blueprint del nuovo "Dynamic Activities Engine" a 3 livelli unificati, senza più duplicazioni o pagamenti orfani.
+* 🚀 **[StarGem Manager Future Database Map (Single Table Inheritance)](../futuro/12_GAE_Database_Futuro_STI.md)** -> Il traguardo finale. Il blueprint del nuovo "Dynamic Activities Engine" a 3 livelli unificati, senza più duplicazioni o pagamenti orfani.
 * 🛠️ **[Piano Lavoro Migrazione DB](../futuro/13_GAE_Piano_Migrazione_DB.md)** -> La checklist operativa con fasi e tempistiche stimate per passare dall'attuale struttura a quella futura.
 
 ---
@@ -71,7 +71,7 @@ Il calcolo di quanto un operatore resta "connesso" (Tempo di Lavoro) NON viene a
 - **`seasons`**: Definizioni temporali per l'anno sportivo o accademico (es. 2025-2026).
 
 ### 6. Le Attività Didattiche e Iscrizioni (I famosi "11 Silos")
-L'erogazione delle discipline in CourseManager è attualmente frazionata su 11 gruppi di tabelle speculari, che condividono tutte la medesima struttura ma portano un nome e categorie diverse.
+L'erogazione delle discipline in StarGem Manager è attualmente frazionata su 11 gruppi di tabelle speculari, che condividono tutte la medesima struttura ma portano un nome e categorie diverse.
 Ogni blocco ha:
 1.  **Una Tabella Categoria Attività** (es. `categories`, `ws_cats`, `sun_cats`, ecc.) che definisce l'albero stilistico.
 2.  **Una Tabella Attività** (es. `courses`, `workshops`, `sunday_activities`) che ospita il singolo evento, l'insegnante, l'orario e il prezzo base.
@@ -194,7 +194,7 @@ erDiagram
 > **Scopo di questo documento**
 > Questo file è le **Sacre Norme Tecniche del Sistema**. Spiega le logiche architetturali portanti del database, definendo i confini tra il *Nucleo Intoccabile* (dove non fare refactoring improvvisati pena la rottura degli algoritmi di calcolo rate e ricevute) e il *Terreno Sicuro* (dove è facile e privo di rischi aggiungere colonne e nuove entità). Da leggere e seguire religiosamente prima di qualsiasi implementazione che tocchi schema e rotte API.
 
-*Documento di riferimento tecnico per futuri interventi strutturali su CourseManager*
+*Documento di riferimento tecnico per futuri interventi strutturali su StarGem Manager*
 ![Badge](https://img.shields.io/badge/Status-Active-brightgreen) ![Architecture](https://img.shields.io/badge/Architecture-Drizzle_ORM-blue)
 
 ### 🔗 Documenti Correlati (Da Leggere)
@@ -224,12 +224,12 @@ Prima di procedere con modifiche che impatteranno o refattorizzeranno l'architet
 ---
 
 ## A. Manifesto Architetturale e Visione Prodotto
-Ogni sviluppatore che contribuisce a CourseManager deve aderire a questi principi:
+Ogni sviluppatore che contribuisce a StarGem Manager deve aderire a questi principi:
 1. **Nessun "Cappotto su Misura":** Il gestionale risolve oggi i problemi di StarGem, ma **non** deve essere limitato dalle regole di un singolo centro. L'architettura deve rimanere modulare, scalabile, estendibile, multi-sede e multi-tenant (SaaS).
 2. **Evoluzione Controllata (Nessun Rewrite Totale):** L’obiettivo primario è portare il gestionale in produzione in tempi brevi, tutelando il lavoro svolto. Sono vietate le riscritture totali da zero o l'over-engineering prematuro. La priorità è: stabilizzare i flussi core, chiudere le falle architetturali gravi (es. Pagamenti Orfani) e accettare esplicitamente il resto come debito tecnico documentato per future iterazioni.
 3. **Sviluppo Parallelo:** Il DB e le interfacce devono poter essere toccate da più team simultaneamente. Questa cartella `_GAE_SVILUPPO` è la costituzione che garantisce la non-collisione (es. usando il Pattern Factory / Drizzle Router unificati).
 4. **Coerenza Evolutiva (Pragmatismo):** Nei nuovi task la prima domanda è: *"Cosa serve davvero per lavorare presto?"*. Le decisioni devono risolvere il blocco odierno, unificare i data-source sparsi (es. Tessere vs members), lasciando però intatti e inalterati i settori funzionanti non essenziali. Progetta per il futuro, ma implementa solo ciò che serve ora.
-5. **Modello Persone Fluido:** Non esistono tabelle isolate per "Collaboratori", "Studenti" o "Affittuari". In CourseManager un `member` o uno `user` può essere simultaneamente Tesserato, Insegnante, Staff, Esterno, tramite etichette di ruolo dinamiche.
+5. **Modello Persone Fluido:** Non esistono tabelle isolate per "Collaboratori", "Studenti" o "Affittuari". In StarGem Manager un `member` o uno `user` può essere simultaneamente Tesserato, Insegnante, Staff, Esterno, tramite etichette di ruolo dinamiche.
 
 ## B. Contesto Operativo Reale (Stato Dati e Infrastruttura)
 
@@ -286,7 +286,7 @@ La tabella `payments` è l'**Hub di interscambio** ("Junction Table") del compar
 * Modificare come i pagamenti si allacciano a sconti/iscrizioni è l'operazione più a rischio bug per l'intera parte contabile.
 
 ### C. Il Nodo "Tessere" (`memberships`) e il Checkout
-La tessera associativa in CourseManager **non** è una banale etichetta testuale, né un "Prodotto E-Commerce", ma un oggetto transazionale primario.
+La tessera associativa in StarGem Manager **non** è una banale etichetta testuale, né un "Prodotto E-Commerce", ma un oggetto transazionale primario.
 * **Priorità Assoluta:** La tessera sblocca il carrello. Niente pagamento quota, niente erogazione dell'attività. Le due cose sono asservite l'una all'altra.
 * **Vincolo Assoluto:** La `membership` deve nascere solo ed esclusivamente all'interno di un flusso coerente con un Pagamento effettivo (registrato in `payments` con la foreign key `membership_id` debitamente popolata e agganciata). Non possono esistere tessere slegate dal flusso economico.
 * **Problema Attuale (Marzo 2026) [RISOLTO!]:** Attualmente la `Maschera Input` creava tessere "orfane" dal carrello. Il salvataggio del modulo iniettava l'incasso nel Libro Mastro (`payments`), fallendo nell'agganciare tale record all'ID della nuova tessera. Il bug è stato **risolto in via definitiva** istruendo il framework transazionale a eseguire un "Incrocio ID" forte. Il Frontend ora emette `tempId: membership_fee` abbinato a un `referenceKey` fiscale. Il Backend (`routes.ts`) recupera al volo il `membershipId` nativo e salda i record assieme in parentesi atomica. Se si cancella il pagamento, la tessera ora decade propriamente a pending. Questo Matcher Multi-Persona risolve specialmente i checkout parentali (es. genitore che paga 2 tessere distinte per i 2 figli nello stesso carrello).

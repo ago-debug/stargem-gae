@@ -5,7 +5,7 @@
 # Phase 26: Migrazione Infrastruttura Server VPS IONOS
 **Data Operazioni:** 30 Marzo 2026
 
-Questo documento funge da registro storico e Post-Mortem architetturale per documentare il passaggio del progetto `CourseManager` da un dominio/server condiviso Legacy (`185.48.116.156`) al nuovo VPS indipendente IONOS (`82.165.35.145`).
+Questo documento funge da registro storico e Post-Mortem architetturale per documentare il passaggio del progetto `StarGem Manager` da un dominio/server condiviso Legacy (`185.48.116.156`) al nuovo VPS indipendente IONOS (`82.165.35.145`).
 
 ## Il Contesto
 Il sistema aveva raggiunto una maturità stabile nella gestione dei Dati (Silos Unificati) ma l'infrastruttura di rete presentava ritardi e limiti, col rischio di precludere lo scale-up verso l'Integrazione Clarissa CRM (Webhooks). 

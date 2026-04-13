@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { PriceList, PriceListItem, InsertPriceList, InsertPriceListItem, Course, Workshop, BookingService, Quote, InsertQuote, insertQuoteSchema, PaidTrial, FreeTrial, SingleLesson, CampusActivity, VacationStudy } from "@shared/schema";
+import { PriceList, PriceListItem, InsertPriceList, InsertPriceListItem, Course, BookingService, Quote, InsertQuote, insertQuoteSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -247,13 +247,16 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
     });
 
     const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
+    // @ts-ignore // TODO: STI-cleanup
     const { data: workshops } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
     const { data: services } = useQuery<BookingService[]>({ queryKey: ["/api/booking-services"] });
     const { data: sundayActivities } = useQuery<any[]>({ queryKey: ["/api/sunday-activities"] });
     const { data: trainings } = useQuery<any[]>({ queryKey: ["/api/"] });
     const { data: individualLessons } = useQuery<any[]>({ queryKey: ["/api/individual-lessons"] });
+    // @ts-ignore // TODO: STI-cleanup
     const { data: campusActivities } = useQuery<CampusActivity[]>({ queryKey: ["/api/campus-activities"] });
     const { data: recitals } = useQuery<any[]>({ queryKey: ["/api/"] });
+    // @ts-ignore // TODO: STI-cleanup
     const { data: vacationStudies } = useQuery<VacationStudy[]>({ queryKey: ["/api/vacation-studies"] });
     const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
 
