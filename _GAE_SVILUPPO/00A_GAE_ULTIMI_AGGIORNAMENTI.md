@@ -11,6 +11,8 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * [F2-001] Scaffold /gemstaff: rotta protetta in App.tsx, voce sidebar, pagina con 6 tab placeholder. Guard ruoli su tab 4 (Accordi) e 6 (Disciplinare).
 * [F1-002] Route API GemStaff: GET/POST insegnanti, pt, compliance, firme. Test: 65 insegnanti attivi.
 * [F2-002] Tab 1 Anagrafica Insegnanti: lista con filtri, pannello dettaglio laterale, toggle archivio. TS Cleanup frontend: 53 errori rimossi su 18 file.
+* [F1-009] Fix participant_type LIKE inclusivo. UPDATE 4 membri anomali → INSEGNANTE. Fix instructorName JOIN in storage.ts: instructorName ora incluso in /api/courses. Architettura calendario consolidata.
+* [F1-010] Backup finale gemstaff_CHIUSURA. Git push main. VPS verificato.
 * [F1-003] Pulizia duplicati PT nel DB. UPDATE participant_type = 'PERSONAL_TRAINER' su 6 record. Route :id aggiornata con campo tessera GemPass. TS Cleanup server: 0 errori totali raggiunti.
 * [F2-003] Sezione tessera GemPass nel pannello dettaglio. Tab 2 PT. Tab 3 Compliance con 6 card e barra avanzamento.
 * [F1-004] 16 route GemStaff complete con guard ruoli. Presenze, sostituzioni (doppio visto), disciplinare. 0 errori TypeScript totali.
@@ -19,6 +21,7 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * [F2-007 S4] Guard ruoli definitivi applicati. Tab 4 e Tab 6 nascoste per operator/segreteria. Redirect insegnante → /gemstaff/me. Filtro Stato aggiunto in Tab 1.
 * [F2-007 S5] Verifica finale GemStaff Tab 1. Guard ruoli applicati, filtri completi, /staff mantenuto attivo, instructors.tsx marcato come da deprecare.
 * [F2-008/009] Risolto crash pagina bianca (hot reload post modifiche). GemStaff validato visivamente: Tab 1 completa, modale con 3 sezioni funzionante, AMBROSIO e ARRIVABENE ora visibili. GemStaff UI completata e validata dal PM.
+* [F2-010] Rimossa pagina /staff. Redirect /staff → /gemstaff in App.tsx. Voce sidebar "Staff e Insegnanti" rimossa. instructors.tsx marcato come deprecato. /api/instructors intatto — calendario OK.
 
 ### 12 Aprile 2026 (Phase 34: Infrastruttura GemPass & Sottoscrizioni Documentali)
 * **[F1-PROTOCOLLO-001/002] Estensione DB Memberships & Forms:** Audit e alterazione chirurgica della tabella `memberships` con default sicuri (`is_renewal`, `renewed_from_id`, `notes`). Creazione della nuova tabella per tracking digital signatures `member_forms_submissions`. Allineamento Drizzle Schema `shared/schema.ts` e tool di entity generation (`server/utils/membership.ts`).

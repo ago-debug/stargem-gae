@@ -816,8 +816,13 @@ Questo blocco certifica la costruzione V2 dell'intera filiera operativa per tess
 - [x] Modale insegnante migliorato (F2-007)
 - [x] Guard ruoli definitivi (F2-007 S4)
 - [x] Filtri Tab 1 completi (F2-007 S4)
-- [ ] /staff → redirect /gemstaff (DA FARE dopo 2-3 settimane in produzione)
-- [ ] instructors.tsx deprecato (DA FARE quando CourseUnifiedModal aggiornato)
+- [x] Fix participant_type query LIKE (F1-009)
+- [x] instructorName in /api/courses (F1-009)
+- [x] Backup finale + push (F1-010)
+- [x] /staff → redirect /gemstaff (F2-010) ✅
+- [x] Voce sidebar duplicata rimossa (F2-010)
+- [x] instructors.tsx deprecato (F2-010)
+     (eliminazione fisica: sessione cleanup)
 - [x] Verifica finale GemStaff (F2-007 S5)
 - [x] Crash pagina bianca risolto (F2-008)
 - [x] GemStaff UI validata da PM Gaetano ✅
