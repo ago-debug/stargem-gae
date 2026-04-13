@@ -983,6 +983,9 @@ export const memberships = mysqlTable("memberships", {
   seasonStartYear: int("season_start_year"), // Added by refactor
   seasonEndYear: int("season_end_year"), // Added by refactor
   renewalType: varchar("renewal_type", { length: 50 }), // @deprecated - mantenuto temporaneamente per retrocompatibilità
+  isRenewal: boolean("is_renewal").notNull().default(false),
+  renewedFromId: int("renewed_from_id"),
+  notes: text("notes"),
   entityCardNumber: varchar("entity_card_number", { length: 100 }), 
   entityCardExpiryDate: date("entity_card_expiry_date"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -1009,6 +1012,9 @@ export const insertMembershipSchema = createInsertSchema(memberships).omit({
   expiryDate: z.coerce.date(), // Reverted to not optional to fix server/storage.ts
   membershipType: z.enum(["NUOVO", "RINNOVO"]).optional(),
   seasonCompetence: z.enum(["CORRENTE", "SUCCESSIVA"]).optional(),
+  isRenewal: z.boolean().optional(),
+  renewedFromId: z.number().optional().nullable(),
+  notes: z.string().optional().nullable(),
 });
 export type InsertMembership = z.infer<typeof insertMembershipSchema>;
 export type Membership = typeof memberships.$inferSelect;
@@ -2463,3 +2469,41 @@ export type InsertPricingRule = typeof pricingRules.$inferInsert;
 
 export type PromoRule = typeof promoRules.$inferSelect;
 export type InsertPromoRule = typeof promoRules.$inferInsert;
+
+// ============================================================================
+// GEMPASS: FORM SUBMISSIONS
+// ============================================================================
+
+export const memberFormsSubmissions = mysqlTable("member_forms_submissions", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id),
+  formType: varchar("form_type", { length: 50 }).notNull(),
+  formVersion: varchar("form_version", { length: 20 }).notNull().default("2025-06-30"),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  payloadData: json("payload_data"),
+  signedAt: datetime("signed_at"),
+  signedByIp: varchar("signed_by_ip", { length: 45 }),
+  signatureHash: varchar("signature_hash", { length: 255 }),
+  createdBy: int("created_by"),
+  createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: datetime("updated_at").notNull().default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`),
+});
+
+export const memberFormsSubmissionsRelations = relations(memberFormsSubmissions, ({ one }) => ({
+  member: one(members, {
+    fields: [memberFormsSubmissions.memberId],
+    references: [members.id],
+  }),
+  season: one(seasons, {
+    fields: [memberFormsSubmissions.seasonId],
+    references: [seasons.id],
+  }),
+}));
+
+export const insertMemberFormsSubmissionsSchema = createInsertSchema(memberFormsSubmissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMemberFormsSubmissions = z.infer<typeof insertMemberFormsSubmissionsSchema>;
+export type MemberFormsSubmissions = typeof memberFormsSubmissions.$inferSelect;

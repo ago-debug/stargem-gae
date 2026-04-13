@@ -22,7 +22,7 @@ import {
   Trash2, Calendar, X, Coins, RefreshCw, Edit3
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { format, differenceInDays, parseISO } from "date-fns";
 import { it } from "date-fns/locale";
 import type { Member, Attendance, Enrollment, MedicalCertificate, Membership, InsertMember, Payment, PaymentMethod } from "@shared/schema";
 
@@ -83,6 +83,11 @@ export default function MemberDashboard() {
 
   const { data: clientCategories } = useQuery<any[]>({
     queryKey: ["/api/client-categories"],
+  });
+
+  const { data: memberTessera, isLoading: tesseraLoading } = useQuery<any>({
+    queryKey: [`/api/gempass/membro/${memberId}/tessera`],
+    enabled: !!memberId && !isNewMember,
   });
 
   const { data: memberPayments } = useQuery<Payment[]>({
@@ -797,48 +802,50 @@ export default function MemberDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg text-purple-600">
                   <IdCard className="w-5 h-5" />
-                  Tessere
+                  Tessera Associativa (GemPass)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label>Numero Tessera</Label>
-                    <Input
-                      value={formData.cardNumber || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cardNumber: e.target.value }))}
-                      data-testid="input-card-number-tab"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Data Rilascio</Label>
-                    <Input
-                      type="date"
-                      value={formData.cardIssueDate || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cardIssueDate: e.target.value }))}
-                      data-testid="input-card-issue-tab"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Data Scadenza</Label>
-                    <Input
-                      type="date"
-                      value={formData.cardExpiryDate || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cardExpiryDate: e.target.value }))}
-                      data-testid="input-card-expiry-tab"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Stato</Label>
-                    <div className="h-9 flex items-center">
-                      {cardStatus ? (
-                        <Badge className={cardStatus.color}>{cardStatus.label}</Badge>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">Non impostata</span>
-                      )}
+                {tesseraLoading ? (
+                  <Skeleton className="h-32 w-full" />
+                ) : memberTessera?.tessera ? (
+                  <div className="p-6 bg-slate-50 border rounded-lg flex items-center justify-between">
+                    <div className="space-y-2">
+                       <p className="text-xl font-bold tracking-tight text-slate-800">{memberTessera.tessera.membershipNumber}</p>
+                       <div className="flex gap-2 pb-1 mt-1">
+                         <Badge variant="outline" className="uppercase bg-white">{memberTessera.tessera.membershipType}</Badge>
+                         <Badge variant="secondary" className="bg-slate-200">Stagione {memberTessera.tessera.seasonCompetence || memberTessera.tessera.seasonId}</Badge>
+                       </div>
+                       <p className="text-sm text-muted-foreground pt-2">
+                         Scadenza: <span className="font-medium text-slate-700">{memberTessera.tessera.expiryDate ? format(parseISO(memberTessera.tessera.expiryDate), 'dd/MM/yyyy') : '—'}</span>
+                       </p>
+                    </div>
+                    <div>
+                       {(() => {
+                         const diff = memberTessera.tessera.expiryDate ? differenceInDays(parseISO(memberTessera.tessera.expiryDate), new Date()) : 100;
+                         const isExpired = memberTessera.tessera.status === 'expired' || diff < 0;
+                         const isExpiring = !isExpired && diff <= 30;
+                         const isSuspended = memberTessera.tessera.status === 'suspended';
+                         
+                         if (isSuspended) return <Badge className="bg-red-800 hover:bg-red-900 border-none px-4 py-1 text-sm uppercase">SOSPESA</Badge>;
+                         if (isExpired) return <Badge className="bg-red-100 text-red-800 hover:bg-red-100 border-none px-4 py-1 text-sm uppercase">SCADUTA</Badge>;
+                         if (isExpiring) return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-none px-4 py-1 text-sm uppercase">IN SCADENZA</Badge>;
+                         return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none px-4 py-1 text-sm uppercase">ATTIVA</Badge>;
+                       })()}
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="text-center py-8 bg-slate-50 rounded-lg border border-slate-200">
+                    <p className="text-slate-600 font-medium mb-4">Nessuna tessera attiva trovata</p>
+                    <Button 
+                      onClick={() => setLocation("/gempass")} 
+                      className="bg-primary hover:bg-primary/90 text-white"
+                    >
+                      <IdCard className="w-4 h-4 mr-2" />
+                      Emetti Tessera / Vai a GemPass
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
