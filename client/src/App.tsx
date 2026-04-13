@@ -25,6 +25,8 @@ import Workshops from "@/pages/workshops";
 import Categories from "@/pages/categories";
 import Studios from "@/pages/studios";
 import Memberships from "@/pages/memberships";
+import GemTeam from "@/pages/gemteam";
+import GemTeamMe from "@/pages/gemteam-me";
 import Payments from "@/pages/payments";
 import AccessControl from "@/pages/access-control";
 import Reports from "@/pages/reports";
@@ -99,6 +101,10 @@ export function hasPermission(user: SelectUser | null, path: string) {
   if (path === "/" || path === "/dashboard") return true;
 
   if (roleNameLower === 'insegnante' && (path === "/gemstaff/me" || path === "/first-login" || path === "/forgot-password")) {
+    return true;
+  }
+
+  if (roleNameLower === 'dipendente' && (path === "/gemteam/me" || path === "/first-login" || path === "/forgot-password")) {
     return true;
   }
 
@@ -196,6 +202,8 @@ function Router() {
       <ProtectedRoute path="/gempass" component={GemPass} />
       <ProtectedRoute path="/gemstaff" component={GemStaff} />
       <ProtectedRoute path="/gemstaff/me" component={GemStaffMe} />
+      <ProtectedRoute path="/gemteam" component={GemTeam} />
+      <ProtectedRoute path="/gemteam/me" component={GemTeamMe} />
       <ProtectedRoute path="/generazione-tessere" component={CardGenerator} />
       <ProtectedRoute path="/admin" component={AdminPanel} />
       <ProtectedRoute path="/copilot" component={StubCopilot} />

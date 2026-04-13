@@ -4105,6 +4105,141 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     }
   });
 
+  // ============================================================================
+  // GEMTEAM ROUTES
+  // ============================================================================
+  
+  app.get("/api/gemteam/dipendenti", isAuthenticated, async (req, res) => {
+    try {
+      const role = (req.user as any)?.role;
+      if (role !== 'admin' && role !== 'operator') return res.status(403).json({ error: 'Non autorizzato' });
+
+      const records = await db
+        .select({
+          id: schema.teamEmployees.id,
+          memberId: schema.teamEmployees.memberId,
+          userId: schema.teamEmployees.userId,
+          team: schema.teamEmployees.team,
+          tariffaOraria: schema.teamEmployees.tariffaOraria,
+          stipendioFissoMensile: schema.teamEmployees.stipendioFissoMensile,
+          dataAssunzione: schema.teamEmployees.dataAssunzione,
+          attivo: schema.teamEmployees.attivo,
+          noteHr: schema.teamEmployees.noteHr,
+          createdAt: schema.teamEmployees.createdAt,
+          updatedAt: schema.teamEmployees.updatedAt,
+          firstName: schema.members.firstName,
+          lastName: schema.members.lastName,
+          email: schema.members.email,
+          phone: schema.members.phone,
+          photoUrl: schema.members.photoUrl
+        })
+        .from(schema.teamEmployees)
+        .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
+        .where(eq(schema.teamEmployees.attivo, true))
+        .orderBy(schema.teamEmployees.team, schema.members.lastName);
+
+      return res.json(records);
+    } catch (error) {
+      console.error('[GemTeam] GET /dipendenti error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.get("/api/gemteam/presenze/:anno/:mese", isAuthenticated, async (req, res) => {
+    try {
+      const role = (req.user as any)?.role;
+      if (role !== 'admin' && role !== 'operator') return res.status(403).json({ error: 'Non autorizzato' });
+      
+      const anno = parseInt(req.params.anno);
+      const mese = parseInt(req.params.mese);
+      if (isNaN(anno) || isNaN(mese)) return res.status(400).json({ error: 'Anno/Mese non validi' });
+
+      const startDate = new Date(anno, mese - 1, 1);
+      const endDate = new Date(anno, mese, 0, 23, 59, 59);
+
+      const records = await db
+        .select({
+          id: schema.teamAttendanceLogs.id,
+          employeeId: schema.teamAttendanceLogs.employeeId,
+          data: schema.teamAttendanceLogs.data,
+          oreLavorate: schema.teamAttendanceLogs.oreLavorate,
+          tipoAssenza: schema.teamAttendanceLogs.tipoAssenza,
+          checkIn: schema.teamAttendanceLogs.checkIn,
+          checkOut: schema.teamAttendanceLogs.checkOut,
+          note: schema.teamAttendanceLogs.note,
+          modifiedByAdmin: schema.teamAttendanceLogs.modifiedByAdmin,
+          modifiedAt: schema.teamAttendanceLogs.modifiedAt,
+          createdAt: schema.teamAttendanceLogs.createdAt,
+          firstName: schema.members.firstName,
+          lastName: schema.members.lastName
+        })
+        .from(schema.teamAttendanceLogs)
+        .innerJoin(schema.teamEmployees, eq(schema.teamEmployees.id, schema.teamAttendanceLogs.employeeId))
+        .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
+        .where(
+          and(
+            gte(schema.teamAttendanceLogs.data, startDate),
+            lte(schema.teamAttendanceLogs.data, endDate)
+          )
+        )
+        .orderBy(schema.members.lastName, schema.teamAttendanceLogs.data);
+
+      return res.json(records);
+    } catch (error) {
+      console.error('[GemTeam] GET /presenze/:anno/:mese error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.post("/api/gemteam/presenze", isAuthenticated, async (req, res) => {
+    try {
+      const role = (req.user as any)?.role;
+      if (role !== 'admin' && role !== 'operator') return res.status(403).json({ error: 'Non autorizzato' });
+
+      const { employee_id, data, ore_lavorate, tipo_assenza, note } = req.body;
+      if (!employee_id || !data) return res.status(400).json({ error: 'Campi obbligatori mancanti' });
+
+      const parsedDate = new Date(data);
+      
+      const existing = await db.select()
+        .from(schema.teamAttendanceLogs)
+        .where(
+          and(
+            eq(schema.teamAttendanceLogs.employeeId, parseInt(employee_id)),
+            eq(schema.teamAttendanceLogs.data, parsedDate)
+          )
+        ).limit(1);
+
+      if (existing.length > 0) {
+        await db.update(schema.teamAttendanceLogs)
+          .set({
+            oreLavorate: ore_lavorate ? ore_lavorate.toString() : null,
+            // @ts-ignore // TODO: STI-cleanup
+            tipoAssenza: tipo_assenza || null,
+            note: note || null,
+            modifiedByAdmin: (req.user as any)?.id,
+            modifiedAt: new Date()
+          })
+          .where(eq(schema.teamAttendanceLogs.id, existing[0].id));
+        return res.json({ success: true, action: 'updated', id: existing[0].id });
+      } else {
+        const result = await db.insert(schema.teamAttendanceLogs)
+          .values({
+            employeeId: parseInt(employee_id),
+            data: parsedDate,
+            oreLavorate: ore_lavorate ? ore_lavorate.toString() : null,
+            // @ts-ignore // TODO: STI-cleanup
+            tipoAssenza: tipo_assenza || null,
+            note: note || null
+          });
+        return res.status(201).json({ success: true, action: 'created', id: result[0]?.insertId });
+      }
+    } catch (error) {
+      console.error('[GemTeam] POST /presenze error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
   app.get("/api/medical-certificates", isAuthenticated, async (req, res) => {
     try {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;

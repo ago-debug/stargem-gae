@@ -38,6 +38,14 @@ import {
 import type { User, UserRole } from "@shared/schema";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+
+const getRoleCategory = (role?: string) => {
+  const r = (role || "").toLowerCase();
+  if (r === "insegnante" || r === "medico" || r.includes("personal") || r.includes("docente") || r === "staff / insegnante") return "staff";
+  if (r === "client" || r === "utente" || r === "pubblico" || r === "") return "utenti";
+  return "team";
+};
+
 const MENU_PATHS = [
   // SEGRETERIA OPERATIVA
   { path: "/", title: "1. Dashboard Statistiche" },
@@ -94,6 +102,7 @@ export default function UtentiPermessi() {
   const [uploadingNewUserImage, setUploadingNewUserImage] = useState(false);
   const [editUserImageBase64, setEditUserImageBase64] = useState<string | null>(null);
   const [uploadingEditUserImage, setUploadingEditUserImage] = useState(false);
+  const [userDialogContext, setUserDialogContext] = useState<'team'|'staff'|'utenti'>('team');
 
   // State for Roles
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
@@ -402,131 +411,165 @@ export default function UtentiPermessi() {
         </div>
       </div>
 
-      <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
-          <TabsTrigger value="users">
+      <Tabs defaultValue="team" className="space-y-6">
+        <TabsList className="flex flex-wrap w-full gap-2 justify-start h-auto bg-transparent p-0">
+          <TabsTrigger value="team" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background shadow-sm py-2 px-4">
+            <UserCog className="w-4 h-4 mr-2" />
+            Team
+          </TabsTrigger>
+          <TabsTrigger value="staff" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background shadow-sm py-2 px-4">
+            <UserIcon className="w-4 h-4 mr-2" />
+            Staff
+          </TabsTrigger>
+          <TabsTrigger value="utenti" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background shadow-sm py-2 px-4">
             <UserIcon className="w-4 h-4 mr-2" />
             Utenti
           </TabsTrigger>
-          <TabsTrigger value="roles">
+          <TabsTrigger value="roles" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background shadow-sm py-2 px-4">
             <ShieldCheck className="w-4 h-4 mr-2" />
-            Ruoli
+            Ruoli (Team)
           </TabsTrigger>
-          <TabsTrigger value="logs">
+          <TabsTrigger value="logs" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background shadow-sm py-2 px-4">
             <History className="w-4 h-4 mr-2" />
             Log Accessi
           </TabsTrigger>
-          <TabsTrigger value="events">
+          <TabsTrigger value="events" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-background shadow-sm py-2 px-4">
             <Activity className="w-4 h-4 mr-2" />
             Processi Svolti
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Account Utenti</h2>
-            <Button onClick={() => setIsNewUserDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Nuovo Utente
-            </Button>
-          </div>
+        {(() => {
+          const renderUsersTable = (data: User[], category: 'team' | 'staff' | 'utenti', title: string) => (
+            <TabsContent value={category} key={category}>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">{title}</h2>
+                <Button onClick={() => {
+                  setUserDialogContext(category);
+                  setIsNewUserDialogOpen(true);
+                }}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nuovo {category === 'utenti' ? 'Utente' : category === 'staff' ? 'Membro Staff' : 'Membro Team'}
+                </Button>
+              </div>
 
-          <Card>
-            <CardContent className="pt-6">
-              {usersLoading ? (
-                <div className="flex justify-center p-8">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <SortableTableHead sortKey="username" currentSort={scUser} onSort={hsUser}>Utente</SortableTableHead>
-                      <SortableTableHead sortKey="fullName" currentSort={scUser} onSort={hsUser}>Nome Completo</SortableTableHead>
-                      <SortableTableHead sortKey="phone" currentSort={scUser} onSort={hsUser}>Cellulare</SortableTableHead>
-                      <SortableTableHead sortKey="email" currentSort={scUser} onSort={hsUser}>Email</SortableTableHead>
-                      <SortableTableHead sortKey="role" currentSort={scUser} onSort={hsUser}>Ruolo</SortableTableHead>
-                      <TableHead className="text-right">Azioni</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {siUser(users || [], getSortValueUser).map((u: User) => (
-                      <TableRow key={u.id}>
-                        <TableCell className={cn("font-medium flex items-center gap-2", iscUser("username") && "sorted-column-cell")}>
-                          <div className="w-8 h-8 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center border border-slate-200">
-                            {u.profileImageUrl ? (
-                              <img src={u.profileImageUrl} alt="Avatar" className="w-full h-full object-cover" />
-                            ) : (
-                              <UserIcon className="w-4 h-4 text-primary" />
-                            )}
-                          </div>
-                          {u.username}
-                        </TableCell>
-                        <TableCell className={cn(iscUser("fullName") && "sorted-column-cell")}>
-                          {u.firstName || u.lastName ? `${u.firstName || ""} ${u.lastName || ""}` : "-"}
-                        </TableCell>
-                        <TableCell className={cn(iscUser("phone") && "sorted-column-cell")}>{u.phone || "-"}</TableCell>
-                        <TableCell className={cn(iscUser("email") && "sorted-column-cell")}>{u.email || "-"}</TableCell>
-                        <TableCell className={cn(iscUser("role") && "sorted-column-cell")}>
-                          <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${u.role === 'admin' ? 'bg-amber-100 text-amber-700 border border-amber-300' : 'bg-blue-100 text-blue-700'
-                            }`}>
-                            {u.role === 'admin' ? 'MASTER' : u.role}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title="Modifica Utente"
-                              onClick={() => {
-                                setSelectedUser(u);
-                                setEditUserImageBase64(u.profileImageUrl || null);
-                                setIsEditUserDialogOpen(true);
-                              }}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <UserProfileDialog targetUser={u}>
-                              <Button variant="ghost" size="icon" title="Modifica Foto / Telefono">
-                                <Camera className="w-4 h-4" />
-                              </Button>
-                            </UserProfileDialog>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title="Cambia Password"
-                              onClick={() => {
-                                setSelectedUser(u);
-                                setIsPasswordDialogOpen(true);
-                              }}
-                            >
-                              <Key className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              title="Elimina Utente"
-                              disabled={u.id === currentUser?.id}
-                              onClick={() => {
-                                if (confirm(`Sei sicuro di voler eliminare l'utente ${u.username}?`)) {
-                                  deleteUserMutation.mutate(u.id);
-                                }
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <Card>
+                <CardContent className="pt-6">
+                  {usersLoading ? (
+                    <div className="flex justify-center p-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <SortableTableHead sortKey="username" currentSort={scUser} onSort={hsUser}>Username</SortableTableHead>
+                          <SortableTableHead sortKey="fullName" currentSort={scUser} onSort={hsUser}>Nome Completo</SortableTableHead>
+                          <SortableTableHead sortKey="phone" currentSort={scUser} onSort={hsUser}>Cellulare</SortableTableHead>
+                          <SortableTableHead sortKey="email" currentSort={scUser} onSort={hsUser}>Email</SortableTableHead>
+                          <SortableTableHead sortKey="role" currentSort={scUser} onSort={hsUser}>Ruolo Assegnato</SortableTableHead>
+                          <TableHead className="text-right">Azioni</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {siUser(data, getSortValueUser).map((u: User) => (
+                          <TableRow key={u.id}>
+                            <TableCell className={cn("font-medium flex items-center gap-2", iscUser("username") && "sorted-column-cell")}>
+                              <div className="w-8 h-8 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center border border-slate-200 shrink-0">
+                                {u.profileImageUrl ? (
+                                  <img src={u.profileImageUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                  <UserIcon className="w-4 h-4 text-primary" />
+                                )}
+                              </div>
+                              {u.username}
+                            </TableCell>
+                            <TableCell className={cn(iscUser("fullName") && "sorted-column-cell")}>
+                              {u.firstName || u.lastName ? `${u.firstName || ""} ${u.lastName || ""}` : "-"}
+                            </TableCell>
+                            <TableCell className={cn(iscUser("phone") && "sorted-column-cell")}>{u.phone || "-"}</TableCell>
+                            <TableCell className={cn(iscUser("email") && "sorted-column-cell")}>{u.email || "-"}</TableCell>
+                            <TableCell className={cn(iscUser("role") && "sorted-column-cell")}>
+                              <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${u.role === 'admin' ? 'bg-amber-100 text-amber-700 border border-amber-300' : 'bg-blue-100 text-blue-700'}`}>
+                                {u.role === 'admin' ? 'MASTER' : (u.role || 'Nessuno')}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  title={`Modifica ${category === 'utenti' ? 'Utente' : 'Membro'}`}
+                                  onClick={() => {
+                                    setSelectedUser(u);
+                                    setEditUserImageBase64(u.profileImageUrl || null);
+                                    setUserDialogContext(category);
+                                    setIsEditUserDialogOpen(true);
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <UserProfileDialog targetUser={u}>
+                                  <Button variant="ghost" size="icon" title="Modifica Foto / Telefono / PIN">
+                                    <Camera className="w-4 h-4" />
+                                  </Button>
+                                </UserProfileDialog>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Aggiorna Password Interna"
+                                  onClick={() => {
+                                    setSelectedUser(u);
+                                    setIsPasswordDialogOpen(true);
+                                  }}
+                                >
+                                  <Key className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  title={`Elimina ${category === 'utenti' ? 'Utente' : 'Membro'} in modo irreversibile`}
+                                  disabled={u.id === currentUser?.id}
+                                  onClick={() => {
+                                    if (confirm(`Attenzione: Vuoi eliminare in modo irreversibile l'anagrafica di ${u.username} e revocarne l'accesso al sistema?`)) {
+                                      deleteUserMutation.mutate(u.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        {data.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                              Nessun account trovato in questa fascia.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          );
+
+          const teamUsers = users?.filter(u => getRoleCategory(u.role) === "team") || [];
+          const staffUsers = users?.filter(u => getRoleCategory(u.role) === "staff") || [];
+          const clientUsers = users?.filter(u => getRoleCategory(u.role) === "utenti") || [];
+
+          return (
+            <>
+              {renderUsersTable(teamUsers, 'team', 'Team e Personale Interno')}
+              {renderUsersTable(staffUsers, 'staff', 'Staff Insegnanti e Personal')}
+              {renderUsersTable(clientUsers, 'utenti', 'Pubblico e Allievi Iscritti')}
+            </>
+          );
+        })()}
 
         <TabsContent value="roles">
           <div className="flex justify-between items-center mb-4">
@@ -554,7 +597,7 @@ export default function UtentiPermessi() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {siRole(roles || [], getSortValueRole).map((r: UserRole) => (
+                    {siRole((roles || []).filter(r => getRoleCategory(r.name) === 'team'), getSortValueRole).map((r: UserRole) => (
                       <TableRow key={r.id}>
                         <TableCell className={cn("font-bold text-sm", iscRole("name") && "sorted-column-cell", r.name === 'admin' && "text-amber-600")}>
                           {r.name === 'admin' ? 'MASTER (System)' : r.name}
@@ -704,15 +747,17 @@ export default function UtentiPermessi() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="role">Ruolo</Label>
-              <Select name="role" defaultValue="operator">
+              <Label htmlFor="role">Ruolo Assegnato</Label>
+              <Select name="role" defaultValue={userDialogContext === 'staff' ? 'insegnante' : userDialogContext === 'utenti' ? 'client' : 'operator'}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleziona ruolo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {roles?.map(r => (
+                  {roles?.filter(r => getRoleCategory(r.name) === userDialogContext).map(r => (
                     <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>
                   ))}
+                  {userDialogContext === 'utenti' && <SelectItem value="client">Client</SelectItem>}
+                  {userDialogContext === 'staff' && <SelectItem value="insegnante">Insegnante</SelectItem>}
                 </SelectContent>
               </Select>
             </div>
@@ -778,8 +823,8 @@ export default function UtentiPermessi() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-role">Ruolo</Label>
-              <Select name="role" defaultValue={selectedUser?.role}>
+              <Label htmlFor="edit-role">Ruolo Assegnato</Label>
+              <Select name="role" defaultValue={selectedUser?.role || (userDialogContext === 'staff' ? 'insegnante' : userDialogContext === 'utenti' ? 'client' : 'operator')}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleziona ruolo" />
                 </SelectTrigger>
@@ -787,6 +832,9 @@ export default function UtentiPermessi() {
                   {roles?.map(r => (
                     <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>
                   ))}
+                  {/* Opzioni di fallback se la lista db è vuota */}
+                  <SelectItem value="client">Client</SelectItem>
+                  <SelectItem value="insegnante">Insegnante</SelectItem>
                 </SelectContent>
               </Select>
             </div>
