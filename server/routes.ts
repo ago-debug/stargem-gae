@@ -4201,6 +4201,9 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
 
       const parsedDate = new Date(data);
       
+      const mRep = await db.select().from(schema.teamMonthlyReports).where(and(eq(schema.teamMonthlyReports.mese, parsedDate.getMonth() + 1), eq(schema.teamMonthlyReports.anno, parsedDate.getFullYear()), eq(schema.teamMonthlyReports.locked, true))).limit(1);
+      if (mRep.length > 0) return res.status(403).json({ error: 'Questo mese è chiuso (locked)!' });
+
       const existing = await db.select()
         .from(schema.teamAttendanceLogs)
         .where(
@@ -4237,6 +4240,655 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     } catch (error) {
       console.error('[GemTeam] POST /presenze error:', error);
       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.post("/api/gemteam/checkin", isAuthenticated, async (req, res) => {
+    try {
+      const { employee_id, tipo, postazione, device } = req.body;
+      if (!employee_id || !tipo) return res.status(400).json({ error: 'Campi obbligatori mancanti' });
+      
+      const role = (req.user as any)?.role;
+      const empId = parseInt(employee_id);
+
+      const timestampNow = new Date();
+      const mRep = await db.select().from(schema.teamMonthlyReports).where(and(eq(schema.teamMonthlyReports.mese, timestampNow.getMonth() + 1), eq(schema.teamMonthlyReports.anno, timestampNow.getFullYear()), eq(schema.teamMonthlyReports.locked, true))).limit(1);
+      if (mRep.length > 0) return res.status(403).json({ error: 'Questo mese è chiuso (locked)!' });
+
+      const empTarget = await db.select()
+        .from(schema.teamEmployees)
+        .where(eq(schema.teamEmployees.id, empId))
+        .limit(1);
+        
+      if (empTarget.length === 0) return res.status(404).json({ error: 'Dipendente non trovato' });
+      
+      if (role !== 'admin' && role !== 'operator') {
+         if ((req.user as any)?.id !== empTarget[0].userId) {
+             return res.status(403).json({ error: 'Non puoi timbrare per un altro dipendente!' });
+         }
+      }
+
+      await db.insert(schema.teamCheckinEvents).values({
+         employeeId: empId,
+         timestamp: timestampNow,
+         // @ts-ignore // TODO: STI-cleanup
+         tipo: tipo,
+         postazione: postazione || null,
+         device: device || 'sys',
+         overrideAdmin: role === 'admin'
+      });
+
+      let oreCalcolate: number | null = null;
+      const d = new Date(timestampNow);
+      d.setHours(12, 0, 0, 0); // avoid tz shifts
+      const dataStr = d.toISOString().split('T')[0];
+
+      if (tipo === 'OUT') {
+         const startOfDay = new Date(timestampNow);
+         startOfDay.setHours(0,0,0,0);
+         
+         const lastIn = await db.select()
+           .from(schema.teamCheckinEvents)
+           .where(
+             and(
+               eq(schema.teamCheckinEvents.employeeId, empId),
+               eq(schema.teamCheckinEvents.tipo, 'IN'),
+               gte(schema.teamCheckinEvents.timestamp, startOfDay),
+               lte(schema.teamCheckinEvents.timestamp, timestampNow)
+             )
+           )
+           .orderBy(desc(schema.teamCheckinEvents.timestamp))
+           .limit(1);
+
+         if (lastIn.length > 0) {
+            const msDiff = timestampNow.getTime() - lastIn[0].timestamp.getTime();
+            const diffInHours = msDiff / (1000 * 60 * 60);
+            
+            const logGiorno = await db.select()
+              .from(schema.teamAttendanceLogs)
+              .where(
+                and(
+                  eq(schema.teamAttendanceLogs.employeeId, empId),
+                  eq(schema.teamAttendanceLogs.data, new Date(dataStr))
+                )
+              )
+              .limit(1);
+              
+            if (logGiorno.length === 0) {
+               oreCalcolate = diffInHours;
+               await db.insert(schema.teamAttendanceLogs).values({
+                 employeeId: empId,
+                 data: new Date(dataStr),
+                 oreLavorate: oreCalcolate.toFixed(2),
+                 checkIn: lastIn[0].timestamp,
+                 checkOut: timestampNow,
+                 note: 'Auto creato da Timbratura'
+               });
+            } else {
+               oreCalcolate = parseFloat(logGiorno[0].oreLavorate || "0") + diffInHours;
+               await db.update(schema.teamAttendanceLogs)
+                 .set({
+                   oreLavorate: oreCalcolate.toFixed(2),
+                   checkIn: logGiorno[0].checkIn ? logGiorno[0].checkIn : lastIn[0].timestamp,
+                   checkOut: timestampNow
+                 })
+                 .where(eq(schema.teamAttendanceLogs.id, logGiorno[0].id));
+            }
+         }
+      } else {
+         const logGiorno = await db.select()
+              .from(schema.teamAttendanceLogs)
+              .where(
+                and(
+                  eq(schema.teamAttendanceLogs.employeeId, empId),
+                  eq(schema.teamAttendanceLogs.data, new Date(dataStr))
+                )
+              )
+              .limit(1);
+         
+         if (logGiorno.length === 0) {
+            await db.insert(schema.teamAttendanceLogs).values({
+                 employeeId: empId,
+                 data: new Date(dataStr),
+                 checkIn: timestampNow
+            });
+         }
+      }
+
+      return res.status(201).json({ success: true, timestamp: timestampNow, ore_calcolate_out: oreCalcolate });
+    } catch (error) {
+      console.error('[GemTeam] POST /checkin error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.get("/api/gemteam/checkin/status/:employeeId", isAuthenticated, async (req, res) => {
+    try {
+      const empId = parseInt(req.params.employeeId);
+      if (isNaN(empId)) return res.status(400).json({ error: 'ID non valido' });
+
+      const lastEvt = await db.select()
+        .from(schema.teamCheckinEvents)
+        .where(eq(schema.teamCheckinEvents.employeeId, empId))
+        .orderBy(desc(schema.teamCheckinEvents.timestamp))
+        .limit(1);
+        
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const logToday = await db.select()
+        .from(schema.teamAttendanceLogs)
+        .where(
+          and(
+            eq(schema.teamAttendanceLogs.employeeId, empId),
+            gte(schema.teamAttendanceLogs.data, today),
+            lt(schema.teamAttendanceLogs.data, tomorrow)
+          )
+        )
+        .limit(1);
+        
+      const status = lastEvt.length > 0 ? lastEvt[0] : null;
+      const log = logToday.length > 0 ? logToday[0] : null;
+
+      // Se l'ultimo evento era un IN di un altro giorno, facciamo scadere il tracking odierno
+      let mappedStatus = status ? status.tipo : 'SCONOSCIUTO';
+      if (status && status.timestamp < today) {
+          mappedStatus = 'OUT'; // Auto-reset se l'ultimo IN è del giorno prima e non è stato chiuso
+      }
+
+      return res.json({
+         lastEvent: mappedStatus,
+         lastTimestamp: status ? status.timestamp : null,
+         oreOggi: log ? log.oreLavorate : 0,
+         checkInOggi: log ? log.checkIn : null,
+      });
+
+    } catch (error) {
+      console.error('[GemTeam] GET /checkin/status error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.get("/api/gemteam/checkin/oggi", isAuthenticated, async (req, res) => {
+    try {
+      const results = await db.execute(sql`
+        SELECT 
+           te.id as employeeId, 
+           m.first_name as firstName, 
+           m.last_name as lastName, 
+           m.photo_url as photoUrl,
+           tc.tipo as lastEvent, 
+           tc.timestamp as lastTimestamp,
+           al.ore_lavorate as oreOggi
+        FROM team_employees te
+        JOIN members m ON m.id = te.member_id
+        LEFT JOIN (
+           SELECT t1.employee_id, t1.tipo, t1.timestamp 
+           FROM team_checkin_events t1
+           INNER JOIN (
+              SELECT employee_id, MAX(timestamp) as max_ts
+              FROM team_checkin_events
+              WHERE timestamp >= DATE(NOW())
+              GROUP BY employee_id
+           ) t2 ON t1.employee_id = t2.employee_id AND t1.timestamp = t2.max_ts
+        ) tc ON tc.employee_id = te.id
+        LEFT JOIN team_attendance_logs al ON al.employee_id = te.id AND al.data = DATE(NOW())
+        WHERE te.attivo = 1
+        ORDER BY m.first_name ASC
+      `);
+
+      return res.json(results[0]);
+    } catch (error) {
+      console.error('[GemTeam] GET /checkin/oggi error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.get("/api/gemteam/permessi", isAuthenticated, async (req, res) => {
+    try {
+      const role = (req.user as any)?.role;
+      const currentUserMemberId = (req.user as any)?.id; 
+      
+      let employeeIdFilter = req.query.employee_id ? parseInt(req.query.employee_id as string) : null;
+      let statusFilter = req.query.status as string | null;
+
+      if (role !== 'admin' && role !== 'operator') {
+         const me = await db.select()
+           .from(schema.teamEmployees)
+           .where(eq(schema.teamEmployees.userId, currentUserMemberId))
+           .limit(1);
+         if (me.length > 0) {
+            employeeIdFilter = me[0].id;
+         } else {
+            return res.json([]);
+         }
+      }
+
+      const conditions = [];
+      if (employeeIdFilter) conditions.push(eq(schema.teamLeaveRequests.employeeId, employeeIdFilter));
+      if (statusFilter) conditions.push(eq(schema.teamLeaveRequests.status, statusFilter as any));
+
+      const query = db.select({
+         id: schema.teamLeaveRequests.id,
+         employeeId: schema.teamLeaveRequests.employeeId,
+         tipo: schema.teamLeaveRequests.tipo,
+         dataInizio: schema.teamLeaveRequests.dataInizio,
+         dataFine: schema.teamLeaveRequests.dataFine,
+         oreTotali: schema.teamLeaveRequests.oreTotali,
+         status: schema.teamLeaveRequests.status,
+         noteDipendente: schema.teamLeaveRequests.noteDipendente,
+         noteAdmin: schema.teamLeaveRequests.noteAdmin,
+         createdAt: schema.teamLeaveRequests.createdAt,
+         firstName: schema.members.firstName,
+         lastName: schema.members.lastName,
+         photoUrl: schema.members.photoUrl
+      })
+      .from(schema.teamLeaveRequests)
+      .innerJoin(schema.teamEmployees, eq(schema.teamEmployees.id, schema.teamLeaveRequests.employeeId))
+      .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId));
+
+      if (conditions.length > 0) {
+        query.where(and(...conditions));
+      }
+
+      const results = await query.orderBy(desc(schema.teamLeaveRequests.createdAt));
+      return res.json(results);
+    } catch (error) {
+       console.error('[GemTeam] GET /permessi error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.post("/api/gemteam/permessi", isAuthenticated, async (req, res) => {
+    try {
+      const { employee_id, tipo, data_inizio, data_fine, ore_totali, note_dipendente } = req.body;
+      const role = (req.user as any)?.role;
+      const userId = (req.user as any)?.id;
+      const empId = parseInt(employee_id);
+
+      if (role !== 'admin' && role !== 'operator') {
+         const empTarget = await db.select()
+          .from(schema.teamEmployees)
+          .where(eq(schema.teamEmployees.id, empId))
+          .limit(1);
+         if (empTarget.length === 0 || empTarget[0].userId !== userId) {
+            return res.status(403).json({ error: 'Azione non consentita' });
+         }
+      }
+
+      const result = await db.insert(schema.teamLeaveRequests).values({
+         employeeId: empId,
+         // @ts-ignore
+         tipo: tipo,
+         dataInizio: new Date(data_inizio),
+         dataFine: new Date(data_fine),
+         oreTotali: ore_totali ? ore_totali.toString() : null,
+         noteDipendente: note_dipendente || null,
+         status: 'pending'
+      });
+
+      return res.status(201).json({ success: true, id: result[0].insertId });
+    } catch (error) {
+       console.error('[GemTeam] POST /permessi error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.patch("/api/gemteam/permessi/:id/approva", isAuthenticated, async (req, res) => {
+    try {
+      if ((req.user as any)?.role !== 'admin' && (req.user as any)?.role !== 'operator') return res.status(403).json({ error: 'Non autorizzato' });
+      const reqId = parseInt(req.params.id);
+      const { note_admin } = req.body;
+      const adminId = (req.user as any)?.id;
+
+      const targetRow = await db.select().from(schema.teamLeaveRequests).where(eq(schema.teamLeaveRequests.id, reqId)).limit(1);
+      if (targetRow.length === 0) return res.status(404).json({ error: 'Non trovato' });
+
+      await db.update(schema.teamLeaveRequests)
+        .set({
+           status: 'approved',
+           noteAdmin: note_admin || null,
+           // @ts-ignore
+           reviewedBy: adminId.toString(),
+           updatedAt: new Date()
+        }).where(eq(schema.teamLeaveRequests.id, reqId));
+
+      const d = new Date(targetRow[0].dataInizio);
+      const end = new Date(targetRow[0].dataFine);
+      
+      let tipoAssenzaMapped = 'AI';
+      switch(targetRow[0].tipo) {
+         case 'permesso': tipoAssenzaMapped = 'PE'; break;
+         case 'ferie': tipoAssenzaMapped = 'FE'; break;
+         case 'malattia': tipoAssenzaMapped = 'ML'; break;
+         case 'maternita': tipoAssenzaMapped = 'ML'; break;
+      }
+      
+      while (d <= end) {
+         const dt = new Date(d);
+         const dayOfWeek = dt.getDay();
+         // Skip Saturday (6) and Sunday (0)
+         if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+             dt.setHours(12,0,0,0);
+             const dataStr = dt.toISOString().split('T')[0];
+             
+             await db.execute(sql`
+               INSERT INTO team_attendance_logs (employee_id, data, tipo_assenza, note, created_at)
+               VALUES (${targetRow[0].employeeId}, ${dataStr}, ${tipoAssenzaMapped}, 'Auto-inserito da Approvazione Ferie/Permessi', NOW())
+               ON DUPLICATE KEY UPDATE 
+                 tipo_assenza = VALUES(tipo_assenza),
+                 note = VALUES(note),
+                 modified_at = NOW()
+             `);
+         }
+         d.setDate(d.getDate() + 1);
+      }
+
+      return res.json({ success: true });
+    } catch (error) {
+       console.error('[GemTeam] PATCH /permessi/approva error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.patch("/api/gemteam/permessi/:id/rifiuta", isAuthenticated, async (req, res) => {
+    try {
+      if ((req.user as any)?.role !== 'admin' && (req.user as any)?.role !== 'operator') return res.status(403).json({ error: 'Non autorizzato' });
+      const reqId = parseInt(req.params.id);
+      const { note_admin } = req.body;
+      const adminId = (req.user as any)?.id;
+
+      await db.update(schema.teamLeaveRequests)
+        .set({
+           status: 'rejected',
+           noteAdmin: note_admin || null,
+           // @ts-ignore
+           reviewedBy: adminId.toString(),
+           updatedAt: new Date()
+        }).where(eq(schema.teamLeaveRequests.id, reqId));
+
+      return res.json({ success: true });
+    } catch (error) {
+       console.error('[GemTeam] PATCH /permessi/rifiuta error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.get("/api/gemteam/permessi/pending-count", isAuthenticated, async (req, res) => {
+    try {
+      const result = await db.select({ count: sql`COUNT(*)` }).from(schema.teamLeaveRequests).where(eq(schema.teamLeaveRequests.status, 'pending'));
+      return res.json({ count: Number(result[0].count) });
+    } catch (error) {
+       return res.status(500).json({ count: 0 });
+    }
+  });
+
+  app.post("/api/gemteam/report/genera/:anno/:mese", isAuthenticated, async (req, res) => {
+    try {
+       const role = (req.user as any)?.role;
+       if (role !== 'admin' && role !== 'operator') return res.status(403).json({ error: 'Non autorizzato' });
+
+       const anno = parseInt(req.params.anno);
+       const mese = parseInt(req.params.mese);
+
+       const start = new Date(anno, mese - 1, 1);
+       const end = new Date(anno, mese, 0);
+       let giorniLavorativi = 0;
+       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          if (d.getDay() !== 0 && d.getDay() !== 6) giorniLavorativi++;
+       }
+       const oreStandard = giorniLavorativi * 8;
+
+       const dTarget = await db.select().from(schema.teamEmployees).where(eq(schema.teamEmployees.attivo, true));
+
+       const stats = [];
+
+       for (const emp of dTarget) {
+          const startDate = new Date(anno, mese - 1, 1);
+          const endDate = new Date(anno, mese, 0, 23, 59, 59);
+          
+          const logs = await db.select()
+              .from(schema.teamAttendanceLogs)
+              .where(
+                 and(
+                    eq(schema.teamAttendanceLogs.employeeId, emp.id),
+                    gte(schema.teamAttendanceLogs.data, startDate),
+                    lte(schema.teamAttendanceLogs.data, endDate)
+                 )
+              );
+
+          let totOre = 0;
+          let giorniLav = 0;
+          let cnt_FE = 0, cnt_PE = 0, cnt_ML = 0, cnt_F = 0, cnt_AI = 0, cnt_AG = 0, cnt_MT = 0, cnt_IN = 0;
+          
+          for (const l of logs) {
+             if (l.oreLavorate && parseFloat(l.oreLavorate) > 0) {
+                 totOre += parseFloat(l.oreLavorate);
+                 giorniLav++;
+             }
+             switch(l.tipoAssenza) {
+                case 'FE': cnt_FE++; break;
+                case 'PE': cnt_PE++; break;
+                case 'ML': cnt_ML++; break;
+                case 'F': cnt_F++; break;
+                case 'AI': cnt_AI++; break;
+                case 'AG': cnt_AG++; break;
+                case 'MT': cnt_MT++; break;
+                case 'IN': cnt_IN++; break;
+             }
+          }
+          
+          let oreExtraPos = '0.00';
+          let oreExtraNeg = '0.00';
+          const diff = totOre - oreStandard;
+          if (diff > 0) {
+             oreExtraPos = diff.toFixed(2);
+          } else if (diff < 0) {
+             oreExtraNeg = Math.abs(diff).toFixed(2);
+          }
+
+          const q = sql`
+             INSERT INTO team_monthly_reports 
+             (employee_id, mese, anno, ore_totali, giorni_lavorati,
+              cnt_FE, cnt_PE, cnt_ML, cnt_F, cnt_AI, cnt_AG, cnt_MT, cnt_IN,
+              ore_extra_pos, ore_extra_neg, locked, created_at)
+             VALUES 
+             (${emp.id}, ${mese}, ${anno}, ${totOre.toFixed(2)}, ${giorniLav},
+              ${cnt_FE}, ${cnt_PE}, ${cnt_ML}, ${cnt_F}, ${cnt_AI}, ${cnt_AG}, ${cnt_MT}, ${cnt_IN},
+              ${oreExtraPos}, ${oreExtraNeg}, false, NOW())
+             ON DUPLICATE KEY UPDATE
+              ore_totali = VALUES(ore_totali),
+              giorni_lavorati = VALUES(giorni_lavorati),
+              cnt_FE = VALUES(cnt_FE), cnt_PE = VALUES(cnt_PE), cnt_ML = VALUES(cnt_ML), cnt_F = VALUES(cnt_F),
+              cnt_AI = VALUES(cnt_AI), cnt_AG = VALUES(cnt_AG), cnt_MT = VALUES(cnt_MT), cnt_IN = VALUES(cnt_IN),
+              ore_extra_pos = VALUES(ore_extra_pos), ore_extra_neg = VALUES(ore_extra_neg)
+          `;
+          await db.execute(q);
+          stats.push({ empId: emp.id, oreTotali: totOre.toFixed(2) });
+       }
+       return res.json({ success: true, count: dTarget.length, stats });
+
+    } catch (error) {
+       console.error('[GemTeam] POST /report/genera error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.get("/api/gemteam/report/:anno/:mese", isAuthenticated, async (req, res) => {
+    try {
+       const anno = parseInt(req.params.anno);
+       const mese = parseInt(req.params.mese);
+
+       let results = await db.execute(sql`
+          SELECT r.*, m.first_name as firstName, m.last_name as lastName
+          FROM team_monthly_reports r
+          JOIN team_employees te ON te.id = r.employee_id
+          JOIN members m ON m.id = te.member_id
+          WHERE r.anno = ${anno} AND r.mese = ${mese}
+          ORDER BY m.first_name ASC
+       `);
+
+       if ((results[0] as any[]).length === 0) {
+           const start = new Date(anno, mese - 1, 1);
+           const end = new Date(anno, mese, 0); 
+           let configLav = 0;
+           for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+              if (d.getDay() !== 0 && d.getDay() !== 6) configLav++;
+           }
+           const oreStandard = configLav * 8;
+           const dipAttivi = await db.select().from(schema.teamEmployees).where(eq(schema.teamEmployees.attivo, true));
+           if (dipAttivi.length > 0) {
+              for (const emp of dipAttivi) {
+                  const sD = new Date(anno, mese - 1, 1);
+                  const eD = new Date(anno, mese, 0, 23, 59, 59);
+                  const logs = await db.select()
+                     .from(schema.teamAttendanceLogs)
+                     .where(and(eq(schema.teamAttendanceLogs.employeeId, emp.id), gte(schema.teamAttendanceLogs.data, sD), lte(schema.teamAttendanceLogs.data, eD)));
+
+                  let tot = 0, ggLav = 0, cvFe=0,cvPe=0,cvMl=0,cvF=0,cvAi=0,cvAg=0,cvMt=0,cvIn=0;
+                  for (let i=0; i<logs.length;i++) {
+                     const l = logs[i];
+                     if (l.oreLavorate && parseFloat(l.oreLavorate)>0){ tot+=parseFloat(l.oreLavorate); ggLav++; }
+                     switch(l.tipoAssenza) {
+                        case 'FE': cvFe++; break; case 'PE': cvPe++; break; case 'ML': cvMl++; break;
+                        case 'F': cvF++; break; case 'AI': cvAi++; break; case 'AG': cvAg++; break;
+                        case 'MT': cvMt++; break; case 'IN': cvIn++; break;
+                     }
+                  }
+                  let op = '0.00', on = '0.00'; const dff = tot - oreStandard; if(dff>0) op=dff.toFixed(2); else if(dff<0) on=Math.abs(dff).toFixed(2);
+                  await db.execute(sql`INSERT INTO team_monthly_reports (employee_id, mese, anno, ore_totali, giorni_lavorati, cnt_FE, cnt_PE, cnt_ML, cnt_F, cnt_AI, cnt_AG, cnt_MT, cnt_IN, ore_extra_pos, ore_extra_neg, locked, created_at) VALUES (${emp.id}, ${mese}, ${anno}, ${tot.toFixed(2)}, ${ggLav}, ${cvFe}, ${cvPe}, ${cvMl}, ${cvF}, ${cvAi}, ${cvAg}, ${cvMt}, ${cvIn}, ${op}, ${on}, false, NOW()) ON DUPLICATE KEY UPDATE ore_totali=VALUES(ore_totali)`);
+              }
+              results = await db.execute(sql`SELECT r.*, m.first_name as firstName, m.last_name as lastName FROM team_monthly_reports r JOIN team_employees te ON te.id = r.employee_id JOIN members m ON m.id = te.member_id WHERE r.anno = ${anno} AND r.mese = ${mese} ORDER BY m.first_name ASC`);
+           }
+       }
+       
+       return res.json(results[0]);
+    } catch (error) {
+       console.error('[GemTeam] GET /report error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.get("/api/gemteam/report/:anno/:mese/export", isAuthenticated, async (req, res) => {
+    try {
+       const anno = parseInt(req.params.anno);
+       const mese = parseInt(req.params.mese);
+
+       let ExcelJS;
+       try { ExcelJS = (await import('exceljs')).default || await import('exceljs'); } 
+       catch(e) { ExcelJS = require('exceljs'); }
+
+       const workbook = new ExcelJS.Workbook();
+       const sheet = workbook.addWorksheet(`Report ${mese}-${anno}`);
+
+       const start = new Date(anno, mese - 1, 1);
+       const lastDay = new Date(anno, mese, 0).getDate();
+
+       const columns = [
+          { header: 'COGNOME', key: 'cognome', width: 20 },
+          { header: 'NOME', key: 'nome', width: 20 }
+       ];
+       for(let i=1; i<=lastDay; i++) {
+          columns.push({ header: String(i), key: `d${i}`, width: 6 });
+       }
+       columns.push(
+          { header: 'GG', key: 'gg', width: 8 },
+          { header: 'ORE', key: 'ore', width: 8 },
+          { header: 'FE', key: 'fe', width: 8 },
+          { header: 'PE', key: 'pe', width: 8 },
+          { header: 'ML', key: 'ml', width: 8 },
+          { header: 'F', key: 'f', width: 8 },
+          { header: 'AI', key: 'ai', width: 8 },
+          { header: 'AG', key: 'ag', width: 8 },
+          { header: 'MT', key: 'mt', width: 8 },
+          { header: 'IN', key: 'in', width: 8 }
+       );
+
+       sheet.columns = columns;
+
+       const repResults = await db.execute(sql`
+          SELECT r.*, m.first_name as firstName, m.last_name as lastName
+          FROM team_monthly_reports r
+          JOIN team_employees te ON te.id = r.employee_id
+          JOIN members m ON m.id = te.member_id
+          WHERE r.anno = ${anno} AND r.mese = ${mese}
+          ORDER BY m.first_name ASC
+       `);
+       const reports = repResults[0] as any[];
+
+       const dStart = new Date(anno, mese - 1, 1);
+       const dEnd = new Date(anno, mese, 0, 23, 59, 59);
+       const logsResults = await db.select()
+            .from(schema.teamAttendanceLogs)
+            .where(
+               and(
+                 gte(schema.teamAttendanceLogs.data, dStart),
+                 lte(schema.teamAttendanceLogs.data, dEnd)
+               )
+            );
+
+       for (const rep of reports) {
+           const rowData: any = {
+               cognome: rep.lastName,
+               nome: rep.firstName,
+               gg: rep.giorni_lavorati,
+               ore: rep.ore_totali,
+               fe: rep.cnt_FE,
+               pe: rep.cnt_PE,
+               ml: rep.cnt_ML,
+               f: rep.cnt_F,
+               ai: rep.cnt_AI,
+               ag: rep.cnt_AG,
+               mt: rep.cnt_MT,
+               in: rep.cnt_IN
+           };
+           
+           const empLogs = logsResults.filter(l => l.employeeId === rep.employee_id);
+           for (const l of empLogs) {
+              const dx = new Date(l.data).getDate();
+              let val = null;
+              if (l.oreLavorate && parseFloat(l.oreLavorate) > 0) val = l.oreLavorate;
+              else if (l.tipoAssenza) val = l.tipoAssenza;
+              if (val) rowData[`d${dx}`] = val;
+           }
+           sheet.addRow(rowData);
+       }
+
+       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+       res.setHeader('Content-Disposition', `attachment; filename=Presenze_GemTeam_${anno}_${mese}.xlsx`);
+       
+       await workbook.xlsx.write(res);
+       res.end();
+       
+    } catch (error) {
+       console.error('[GemTeam] GET /report/export error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.patch("/api/gemteam/report/:anno/:mese/lock", isAuthenticated, async (req, res) => {
+    try {
+       const role = (req.user as any)?.role;
+       if (role !== 'admin') return res.status(403).json({ error: 'Solo Admin puo chiudere il mese' });
+       
+       const anno = parseInt(req.params.anno);
+       const mese = parseInt(req.params.mese);
+
+       await db.update(schema.teamMonthlyReports)
+         .set({ locked: true })
+         .where(
+            and(
+              eq(schema.teamMonthlyReports.mese, mese),
+              eq(schema.teamMonthlyReports.anno, anno)
+            )
+         );
+       
+       return res.json({ success: true, locked: true });
+    } catch (error) {
+       console.error('[GemTeam] PATCH /report/lock error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
     }
   });
 
