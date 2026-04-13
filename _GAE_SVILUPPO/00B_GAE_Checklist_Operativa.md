@@ -857,4 +857,7 @@ Questo blocco certifica la costruzione V2 dell'intera filiera operativa per tess
 - [x] /gemstaff/me fix stato vuoto (F2-019)
 - [x] SMTP config in .env (F1-016)
 - [x] test-mailer.ts (F1-016)
-- [ ] SMTP da configurare con credenziali reali (PM)
+- [x] SMTP 465 SSL testato e funzionante con mail.studio-gem.it (F1-017)
+- [x] 3 template email operativi
+- [x] Push finale + backup ASSOLUTO via IONOS MariaDB
+- [x] ✅ GEMSTAFF 100% — 13/04/2026
