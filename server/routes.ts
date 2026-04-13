@@ -18,7 +18,7 @@ import { log } from "./vite";
 import { db } from "./db";
 import { sendSMS, sendEmail } from "./notifications";
 import { getUnifiedActivitiesPreview, getUnifiedActivityById, getUnifiedEnrollmentsPreview } from "./services/unifiedBridge";
-import { eq, desc, and, isNull, isNotNull, sql, gte, lte } from "drizzle-orm";
+import { eq, desc, and, isNull, isNotNull, sql, gte, lte, or, like } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import {
   insertMemberSchema,
@@ -3253,7 +3253,10 @@ app.get("/api/gemstaff/insegnanti", isAuthenticated, async (req, res) => {
       .from(schema.members)
       .where(
         and(
-          eq(schema.members.participantType, 'INSEGNANTE'),
+          or(
+            like(schema.members.participantType, '%INSEGNANTE%'),
+            like(schema.members.participantType, '%Staff%')
+          ),
           eq(schema.members.staffStatus, status as any)
         )
       );
@@ -3316,6 +3319,52 @@ app.get("/api/gemstaff/insegnanti/:id", isAuthenticated, async (req, res) => {
     });
   } catch (error) {
     console.error('[GemStaff] GET /insegnanti/:id error:', error);
+    return res.status(500).json({ error: 'Errore interno' });
+  }
+});
+
+app.patch("/api/gemstaff/insegnanti/:id", isAuthenticated, async (req, res) => {
+  try {
+    const role = (req.user as any)?.role;
+    if (role !== 'admin' && role !== 'operator') {
+      return res.status(403).json({ error: 'Non autorizzato' });
+    }
+
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'ID non valido' });
+
+    const { 
+      staffStatus, 
+      lezioniPrivateAutorizzate, 
+      lezioniPrivateAutorizzateAt, 
+      lezioniPrivateAutorizzateBy, 
+      lezioniPrivateNote 
+    } = req.body;
+    
+    const updates: any = {};
+    if (staffStatus !== undefined) updates.staffStatus = staffStatus;
+    if (lezioniPrivateAutorizzate !== undefined) updates.lezioniPrivateAutorizzate = lezioniPrivateAutorizzate;
+    if (lezioniPrivateAutorizzateAt !== undefined) updates.lezioniPrivateAutorizzateAt = lezioniPrivateAutorizzateAt ? new Date(lezioniPrivateAutorizzateAt) : null;
+    if (lezioniPrivateAutorizzateBy !== undefined) updates.lezioniPrivateAutorizzateBy = lezioniPrivateAutorizzateBy;
+    if (lezioniPrivateNote !== undefined) updates.lezioniPrivateNote = lezioniPrivateNote;
+
+    if (Object.keys(updates).length > 0) {
+      await db.update(schema.members).set(updates).where(eq(schema.members.id, id));
+    }
+
+    const updatedMember = await db
+      .select()
+      .from(schema.members)
+      .where(eq(schema.members.id, id))
+      .limit(1);
+
+    if (updatedMember.length === 0) {
+       return res.status(404).json({ error: 'Membro non trovato' });
+    }
+
+    return res.json(updatedMember[0]);
+  } catch (error) {
+    console.error('[GemStaff] PATCH /insegnanti/:id error:', error);
     return res.status(500).json({ error: 'Errore interno' });
   }
 });
@@ -3476,7 +3525,61 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   }
 });
 
-// ===== FINE GEMSTAFF ROUTES =====
+  // ── PAYSLIPS ──
+  app.get("/api/gemstaff/payslips/:memberId", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = parseInt(req.params.memberId);
+      if (isNaN(memberId)) return res.status(400).json({ error: 'ID non valido' });
+
+      const userReq = req.user as any;
+      if (userReq?.role !== 'admin' && parseInt(userReq?.memberId) !== memberId) {
+        return res.status(403).json({ error: 'Non autorizzato' });
+      }
+
+      const records = await db
+        .select()
+        .from(schema.payslips)
+        .where(eq(schema.payslips.memberId, memberId))
+        .orderBy(desc(schema.payslips.year), desc(schema.payslips.month));
+
+      return res.json(records);
+    } catch (error) {
+      console.error('[GemStaff] GET /payslips/:memberId error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.get("/api/gemstaff/payslips/:memberId/:month/:year", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = parseInt(req.params.memberId);
+      const month = parseInt(req.params.month);
+      const year = parseInt(req.params.year);
+      if (isNaN(memberId) || isNaN(month) || isNaN(year)) return res.status(400).json({ error: 'Parametri non validi' });
+
+      const userReq = req.user as any;
+      if (userReq?.role !== 'admin' && parseInt(userReq?.memberId) !== memberId) {
+        return res.status(403).json({ error: 'Non autorizzato' });
+      }
+
+      const records = await db
+        .select()
+        .from(schema.payslips)
+        .where(
+          and(
+            eq(schema.payslips.memberId, memberId),
+            eq(schema.payslips.month, month),
+            eq(schema.payslips.year, year)
+          )
+        )
+        .limit(1);
+
+      return res.json(records.length > 0 ? records[0] : null);
+    } catch (error) {
+      console.error('[GemStaff] GET /payslips/:memberId/:month/:year error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
 
   // ── PRESENZE ──
   app.get("/api/gemstaff/presenze/:month/:year", isAuthenticated, async (req, res) => {

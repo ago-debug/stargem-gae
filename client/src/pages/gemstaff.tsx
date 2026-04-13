@@ -1,5 +1,5 @@
-import { useState, useEffect, Fragment } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect, Fragment, useMemo } from "react";
+import { useLocation, Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,8 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Briefcase, FileCheck, Landmark, CalendarClock, ShieldAlert, Lock, Search } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Users, Briefcase, FileCheck, Landmark, CalendarClock, ShieldAlert, Lock, Search, AlertTriangle, Edit, Trash2, Plus } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,10 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
-function CompliancePanel({ memberId, complianceData, isAdminOrDirezione }: { memberId: string, complianceData: any, isAdminOrDirezione: boolean }) {
+import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { cn } from "@/lib/utils";
+
+function CompliancePanel({ memberId, complianceData, isAdmin }: { memberId: string, complianceData: any, isAdmin: boolean }) {
    const queryClient = useQueryClient();
    const { toast } = useToast();
 
@@ -88,7 +92,7 @@ function CompliancePanel({ memberId, complianceData, isAdminOrDirezione }: { mem
                         {isExpiring && !isExpired && <span className="ml-2 text-amber-600">(In Scadenza)</span>}
                       </div>
                    )}
-                   {isAdminOrDirezione && (
+                   {isAdmin && (
                       <div className="pt-2">
                         <Button 
                           variant="outline" size="sm" className="w-full text-xs" 
@@ -108,17 +112,19 @@ function CompliancePanel({ memberId, complianceData, isAdminOrDirezione }: { mem
    )
 }
 
-function PresenzeTab({ isAdminOrDirezione }: { isAdminOrDirezione: boolean }) {
+function PresenzeTab({ isAdmin }: { isAdmin: boolean }) {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [subTab, setSubTab] = useState("presenze");
 
   const { data: presenzeList = [] } = useQuery<any[]>({
     queryKey: ["/api/gemstaff/presenze", month, year],
+    queryFn: async () => await apiRequest("GET", `/api/gemstaff/presenze/${month}/${year}`)
   });
 
   const { data: sostituzioniList = [] } = useQuery<any[]>({
-    queryKey: ["/api/gemstaff/sostituzioni", month, year]
+    queryKey: ["/api/gemstaff/sostituzioni", month, year],
+    queryFn: async () => await apiRequest("GET", `/api/gemstaff/sostituzioni/${month}/${year}`)
   });
 
   const queryClient = useQueryClient();
@@ -171,7 +177,7 @@ function PresenzeTab({ isAdminOrDirezione }: { isAdminOrDirezione: boolean }) {
          <TabsContent value="presenze" className="space-y-4">
            <div className="flex items-center justify-between">
              <Button variant="outline">Aggiungi presenza manuale</Button>
-             {isAdminOrDirezione && (
+             {isAdmin && (
                <Button onClick={handleConfermaMese} className="bg-emerald-600 hover:bg-emerald-700">CONFERMA MESE</Button>
              )}
            </div>
@@ -189,7 +195,7 @@ function PresenzeTab({ isAdminOrDirezione }: { isAdminOrDirezione: boolean }) {
                       <TableRow><TableCell colSpan={3} className="text-center py-6 text-muted-foreground">Nessuna presenza trovata per questo mese.</TableCell></TableRow>
                    ) : presenzeList.map((p) => (
                       <TableRow key={p.id}>
-                        <TableCell className="font-semibold">{p.nome}</TableCell>
+                        <TableCell className="font-semibold">{p.firstName} {p.lastName}</TableCell>
                         <TableCell>{p.ore_totali}</TableCell>
                         <TableCell>
                           <Badge className={p.status === 'CONFERMATO' ? 'bg-emerald-500' : 'bg-slate-400'}>{p.status || 'BOZZA'}</Badge>
@@ -251,6 +257,7 @@ function DisciplinareTab({ staffList }: { staffList: any[] }) {
   const { data: eventiList = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/gemstaff/disciplinare", memberId],
     enabled: !!memberId,
+    queryFn: async () => await apiRequest("GET", `/api/gemstaff/disciplinare/${memberId}`)
   });
 
   const [isNuovoOpen, setIsNuovoOpen] = useState(false);
@@ -308,7 +315,7 @@ function DisciplinareTab({ staffList }: { staffList: any[] }) {
              <Select value={memberId} onValueChange={setMemberId}>
                <SelectTrigger className="mt-2 bg-white"><SelectValue placeholder="Scegli..."/></SelectTrigger>
                <SelectContent>
-                 {staffList.map(s => <SelectItem key={s.id || s.nome} value={s.id?.toString() || s.nome}>{s.nome}</SelectItem>)}
+                 {staffList.map(s => <SelectItem key={s.id || s.firstName} value={s.id?.toString() || s.firstName}>{s.firstName} {s.lastName}</SelectItem>)}
                </SelectContent>
              </Select>
           </div>
@@ -446,40 +453,185 @@ export default function GemStaff() {
   const [activeTab, setActiveTab] = useState("anagrafica");
   const [searchName, setSearchName] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [showArchive, setShowArchive] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<any>(null);
   const [complianceMemberId, setComplianceMemberId] = useState<string>("");
+  
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingInstructor, setEditingInstructor] = useState<any>(null);
+  const [isPrivateLessonsAuth, setIsPrivateLessonsAuth] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => await apiRequest("POST", "/api/instructors", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/gemstaff/insegnanti${showArchive ? '?status=inattivo' : ''}`] });
+      toast({ title: "Insegnante creato con successo" });
+      setIsFormOpen(false);
+      setEditingInstructor(null);
+    },
+    onError: (e: Error) => toast({ title: "Errore", description: e.message, variant: "destructive" })
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ instructorId, memberId, data, gemstaffData }: { instructorId?: number; memberId: number; data: any, gemstaffData: any }) => {
+      if (instructorId) {
+         await apiRequest("PATCH", `/api/instructors/${instructorId}`, data);
+      }
+      if (memberId) {
+         await apiRequest("PATCH", `/api/gemstaff/insegnanti/${memberId}`, gemstaffData);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/gemstaff/insegnanti${showArchive ? '?status=inattivo' : ''}`] });
+      toast({ title: "Insegnante aggiornato con successo" });
+      setIsFormOpen(false);
+      setEditingInstructor(null);
+    },
+    onError: (e: Error) => toast({ title: "Errore", description: e.message, variant: "destructive" })
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => await apiRequest("DELETE", `/api/instructors/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/instructors"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/gemstaff/insegnanti${showArchive ? '?status=inattivo' : ''}`] });
+      toast({ title: "Insegnante eliminato con successo" });
+    },
+    onError: (e: Error) => toast({ title: "Errore", description: e.message, variant: "destructive" })
+  });
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+      email: formData.get("email") as string || null,
+      phone: formData.get("phone") as string || null,
+      specialization: formData.get("specialization") as string || null,
+      bio: formData.get("bio") as string || null,
+      hourlyRate: formData.get("hourlyRate") ? formData.get("hourlyRate") as string : null,
+      active: formData.get("staffStatus") !== "INATTIVO",
+    };
+    
+    const gemstaffData = {
+      staffStatus: formData.get("staffStatus") as string,
+      lezioniPrivateAutorizzate: isPrivateLessonsAuth,
+      lezioniPrivateAutorizzateBy: formData.get("lezioniPrivateAutorizzateBy") as string || null,
+      lezioniPrivateAutorizzateAt: formData.get("lezioniPrivateAutorizzateAt") as string || null,
+    };
+
+    if (editingInstructor) {
+      updateMutation.mutate({ 
+         instructorId: editingInstructor.instructorId, 
+         memberId: editingInstructor.id,
+         data, 
+         gemstaffData 
+      });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
 
   const queryUrl = `/api/gemstaff/insegnanti${showArchive ? '?status=inattivo' : ''}`;
-  const { data: staffList = [], isLoading } = useQuery<any[]>({
+  const { data: staffListQuery = [], isLoading: isLoadingGs } = useQuery<any[]>({
      queryKey: [queryUrl],
+     queryFn: async () => await apiRequest("GET", queryUrl)
   });
+
+  const { data: instructorsList = [], isLoading: isLoadingInst } = useQuery<any[]>({
+    queryKey: ["/api/instructors"],
+    queryFn: async () => await apiRequest("GET", "/api/instructors")
+  });
+
+  const { data: courses = [] } = useQuery<any[]>({
+    queryKey: ["/api/courses"],
+    queryFn: async () => await apiRequest("GET", "/api/courses")
+  });
+
+  const isLoading = isLoadingGs || isLoadingInst;
 
   const { data: ptList = [], isLoading: isLoadingPt } = useQuery<any[]>({
      queryKey: ["/api/gemstaff/pt"],
+     queryFn: async () => await apiRequest("GET", "/api/gemstaff/pt")
   });
 
   const { data: complianceData } = useQuery<any>({
      queryKey: ["/api/gemstaff/compliance", complianceMemberId],
-     enabled: !!complianceMemberId
+     enabled: !!complianceMemberId,
+     queryFn: async () => await apiRequest("GET", `/api/gemstaff/compliance/${complianceMemberId}`)
   });
 
-  const filteredStaff = staffList.filter((s) => {
-     const matchName = searchName === "" || s.nome?.toLowerCase().includes(searchName.toLowerCase());
-     const matchCat = categoryFilter === "all" || s.corsi?.includes(categoryFilter);
-     return matchName && matchCat;
+  const staffList = useMemo(() => {
+    return staffListQuery.map((g: any) => {
+      const instr = instructorsList.find((i: any) => i.firstName === g.firstName && i.lastName === g.lastName);
+      return {
+        ...g,
+        id: g.id,
+        instructorId: instr?.id,
+        specialization: instr?.specialization,
+        hourlyRate: instr?.hourlyRate,
+        email: g.email || instr?.email,
+        phone: g.phone || instr?.phone,
+      };
+    });
+  }, [staffListQuery, instructorsList]);
+
+  const filteredStaffRaw = staffList.filter((s) => {
+     const fullName = `${s.firstName || ''} ${s.lastName || ''}`.toLowerCase();
+     const matchName = searchName === "" || fullName.includes(searchName.toLowerCase());
+     const matchCat = categoryFilter === "all" || s.specialization?.includes(categoryFilter) || s.corsi?.includes(categoryFilter);
+     
+     const sStatus = s.staff_status || "ATTIVO";
+     const matchStatus = statusFilter === "all" || 
+                         (statusFilter === "active" && sStatus !== "INATTIVO") || 
+                         (statusFilter === "inactive" && sStatus === "INATTIVO");
+
+     return matchName && matchCat && matchStatus;
   });
 
-  const roleNameLower = user?.role?.toLowerCase() || "";
-  const isAdminOrDirezione = ["admin", "amministratore totale", "super admin", "master", "direzione"].includes(roleNameLower);
+  const getInstructorCourses = (instructorId: number) => {
+    if (!courses || !instructorId) return [];
+    return courses.filter(
+      (course: any) =>
+        course.instructorId === instructorId ||
+        course.secondaryInstructor1Id === instructorId
+    );
+  };
+
+  const getSortValue = (staff: any, key: string) => {
+    switch (key) {
+      case "lastName": return staff.lastName || "";
+      case "firstName": return staff.firstName || "";
+      case "specialization": return staff.specialization || "";
+      case "courses": return getInstructorCourses(staff.instructorId).length;
+      case "email": return staff.email || "";
+      case "phone": return staff.phone || "";
+      case "hourlyRate": return Number(staff.hourlyRate) || 0;
+      case "status": return staff.staffStatus === "attivo";
+      default: return null;
+    }
+  };
+
+  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
+  const filteredStaff = sortItems(filteredStaffRaw, getSortValue);
+
+  const userRole = user?.role?.toLowerCase() || "";
+  const isAdmin = ['admin', 'direzione', 'master', 'amministratore totale', 'super admin'].includes(userRole);
+  const isOperator = ['operator', 'segreteria'].includes(userRole) || isAdmin;
 
   useEffect(() => {
-    if (roleNameLower === "insegnante") {
+    if (userRole === "insegnante") {
       setLocation("/gemstaff/me");
     }
-  }, [roleNameLower, setLocation]);
+  }, [userRole, setLocation]);
 
-  if (roleNameLower === "insegnante") {
+  if (userRole === "insegnante") {
     return null; // Evita flickering durante il redirect
   }
 
@@ -508,41 +660,40 @@ export default function GemStaff() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full justify-start overflow-auto">
-          <TabsTrigger value="anagrafica" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            <span className="hidden sm:inline">Anagrafica Insegnanti</span>
-          </TabsTrigger>
-          <TabsTrigger value="pt" className="flex items-center gap-2">
-            <Briefcase className="w-4 h-4" />
-            <span className="hidden sm:inline">Personal Trainer</span>
-          </TabsTrigger>
-          <TabsTrigger value="compliance" className="flex items-center gap-2">
-            <FileCheck className="w-4 h-4" />
-            <span className="hidden sm:inline">Compliance Documenti</span>
-          </TabsTrigger>
+          {isOperator && (
+            <>
+              <TabsTrigger value="anagrafica" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Anagrafica Insegnanti</span>
+              </TabsTrigger>
+              <TabsTrigger value="pt" className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4" />
+                <span className="hidden sm:inline">Personal Trainer</span>
+              </TabsTrigger>
+              <TabsTrigger value="compliance" className="flex items-center gap-2">
+                <FileCheck className="w-4 h-4" />
+                <span className="hidden sm:inline">Compliance Documenti</span>
+              </TabsTrigger>
+              <TabsTrigger value="presenze" className="flex items-center gap-2">
+                <CalendarClock className="w-4 h-4" />
+                <span className="hidden sm:inline">Presenze & Sostituzioni</span>
+              </TabsTrigger>
+            </>
+          )}
           
-          <TabsTrigger 
-            value="accordi" 
-            disabled={!isAdminOrDirezione}
-            className="flex items-center gap-2 disabled:opacity-50"
-          >
-            {isAdminOrDirezione ? <Landmark className="w-4 h-4" /> : <Lock className="w-4 h-4 text-slate-400" />}
-            <span className="hidden sm:inline">Accordi Economici</span>
-          </TabsTrigger>
-          
-          <TabsTrigger value="presenze" className="flex items-center gap-2">
-            <CalendarClock className="w-4 h-4" />
-            <span className="hidden sm:inline">Presenze & Sostituzioni</span>
-          </TabsTrigger>
-          
-          <TabsTrigger 
-            value="disciplinare" 
-            disabled={!isAdminOrDirezione}
-            className="flex items-center gap-2 disabled:opacity-50"
-          >
-            {isAdminOrDirezione ? <ShieldAlert className="w-4 h-4" /> : <Lock className="w-4 h-4 text-slate-400" />}
-            <span className="hidden sm:inline">Storico Disciplinare</span>
-          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="accordi" className="flex items-center gap-2">
+              <Landmark className="w-4 h-4" />
+              <span className="hidden sm:inline">Accordi Economici</span>
+            </TabsTrigger>
+          )}
+
+          {isAdmin && (
+            <TabsTrigger value="disciplinare" className="flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4" />
+              <span className="hidden sm:inline">Storico Disciplinare</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="anagrafica" className="mt-4">
@@ -572,54 +723,153 @@ export default function GemStaff() {
                    </SelectContent>
                  </Select>
                </div>
-               <div className="flex items-center gap-2 h-10 px-2">
-                 <Switch id="archive" checked={showArchive} onCheckedChange={setShowArchive} />
-                 <Label htmlFor="archive" className="text-sm font-medium cursor-pointer">Mostra archivio</Label>
+               <div className="w-full sm:w-[150px]">
+                 <Select value={statusFilter} onValueChange={setStatusFilter}>
+                   <SelectTrigger className="bg-white">
+                     <SelectValue placeholder="Stato" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="all">Tutti</SelectItem>
+                     <SelectItem value="active">Attivo</SelectItem>
+                     <SelectItem value="inactive">Inattivo</SelectItem>
+                   </SelectContent>
+                 </Select>
                </div>
-            </div>
+                <div className="flex items-center gap-2 h-10 px-2">
+                  <Switch id="archive" checked={showArchive} onCheckedChange={setShowArchive} />
+                  <Label htmlFor="archive" className="text-sm font-medium cursor-pointer">Mostra archivio</Label>
+                </div>
+                {isAdmin && (
+                  <Button
+                    onClick={() => {
+                      setEditingInstructor(null);
+                      setIsPrivateLessonsAuth(false);
+                      setIsFormOpen(true);
+                    }}
+                    className="ml-auto"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nuovo Insegnante
+                  </Button>
+                )}
+             </div>
 
             <div className="border rounded-md bg-white overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Categoria/Corsi</TableHead>
-                    <TableHead>Cellulare</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Stato</TableHead>
+                    <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
+                    <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
+                    <SortableTableHead sortKey="specialization" currentSort={sortConfig} onSort={handleSort}>Specializzazione</SortableTableHead>
+                    <SortableTableHead sortKey="courses" currentSort={sortConfig} onSort={handleSort}>Corsi Assegnati</SortableTableHead>
+                    <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
+                    <SortableTableHead sortKey="phone" currentSort={sortConfig} onSort={handleSort}>Telefono</SortableTableHead>
+                    {isAdmin && <SortableTableHead sortKey="hourlyRate" currentSort={sortConfig} onSort={handleSort}>Tariffa Oraria</SortableTableHead>}
+                    <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Staff Status</SortableTableHead>
+                    {isAdmin && <TableHead className="text-right">Azioni</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
                     Array.from({ length: 3 }).map((_, i) => (
                        <TableRow key={i}>
-                          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                          {isAdmin && <TableCell><Skeleton className="h-4 w-12" /></TableCell>}
                           <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                          {isAdmin && <TableCell><Skeleton className="h-6 w-12" /></TableCell>}
                        </TableRow>
                     ))
                   ) : filteredStaff.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                      <TableCell colSpan={isAdmin ? 9 : 7} className="h-24 text-center text-muted-foreground">
                          Nessun insegnante trovato.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredStaff.map((s) => (
-                       <TableRow key={s.id || s.nome} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedStaff(s)}>
-                         <TableCell className="font-semibold">{s.nome}</TableCell>
-                         <TableCell>{s.corsi || '—'}</TableCell>
-                         <TableCell>{s.cellulare || '—'}</TableCell>
-                         <TableCell>{s.email || '—'}</TableCell>
-                         <TableCell>
+                    filteredStaff.map((s) => {
+                       const assignedCourses = getInstructorCourses(s.instructorId);
+                       return (
+                       <TableRow key={s.id || s.firstName} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedStaff(s)}>
+                         <TableCell className={cn("font-medium", isSortedColumn("lastName") && "sorted-column-cell")}>{s.lastName}</TableCell>
+                         <TableCell className={cn("font-medium", isSortedColumn("firstName") && "sorted-column-cell")}>{s.firstName}</TableCell>
+                         <TableCell className={cn(isSortedColumn("specialization") && "sorted-column-cell")}>{s.specialization || '—'}</TableCell>
+                         <TableCell className={cn(isSortedColumn("courses") && "sorted-column-cell")}>
+                           <div className="flex flex-wrap gap-1">
+                             {assignedCourses.length === 0 ? (
+                               <span className="text-sm text-muted-foreground">Nessun corso</span>
+                             ) : assignedCourses.length <= 2 ? (
+                               assignedCourses.map((c: any) => (
+                                 <Link key={c.id} href={`/corsi?courseId=${c.id}`}>
+                                   <Badge variant="outline" className="text-xs cursor-pointer hover-elevate">{c.name}</Badge>
+                                 </Link>
+                               ))
+                             ) : (
+                               <>
+                                 {assignedCourses.slice(0, 2).map((c: any) => (
+                                   <Link key={c.id} href={`/corsi?courseId=${c.id}`}>
+                                     <Badge variant="outline" className="text-xs cursor-pointer hover-elevate">{c.name}</Badge>
+                                   </Link>
+                                 ))}
+                                 <Badge variant="secondary" className="text-xs">+{assignedCourses.length - 2} altri</Badge>
+                               </>
+                             )}
+                           </div>
+                         </TableCell>
+                         <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>
+                           {s.email ? s.email : (
+                             <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
+                               <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
+                               <span>Manca Dato</span>
+                             </div>
+                           )}
+                         </TableCell>
+                         <TableCell className={cn(isSortedColumn("phone") && "sorted-column-cell")}>
+                           {s.phone ? s.phone : (
+                             <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
+                               <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
+                               <span>Manca Dato</span>
+                             </div>
+                           )}
+                         </TableCell>
+                         {isAdmin && (
+                           <TableCell className={cn(isSortedColumn("hourlyRate") && "sorted-column-cell")}>
+                             {s.hourlyRate ? `€${s.hourlyRate}/h` : "—"}
+                           </TableCell>
+                         )}
+                         <TableCell className={cn(isSortedColumn("status") && "sorted-column-cell")}>
                            <Badge className={s.staff_status === 'INATTIVO' ? 'bg-slate-400' : 'bg-emerald-500'}>
                              {s.staff_status || 'ATTIVO'}
                            </Badge>
                          </TableCell>
+                         {isAdmin && (
+                           <TableCell className="text-right">
+                             <div className="flex items-center justify-end gap-2">
+                               <Button variant="ghost" size="icon" onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  setEditingInstructor(s);
+                                  setIsPrivateLessonsAuth(s.lezioniPrivateAutorizzate === true);
+                                  setIsFormOpen(true);
+                               }}>
+                                 <Edit className="w-4 h-4" />
+                               </Button>
+                               <Button variant="ghost" size="icon" onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  if (confirm(`Sei sicuro di voler eliminare ${s.firstName} ${s.lastName}? Questa azione non può essere annullata.`)) {
+                                    if(s.instructorId) deleteMutation.mutate(s.instructorId);
+                                  }
+                               }}>
+                                 <Trash2 className="w-4 h-4 text-red-500" />
+                               </Button>
+                             </div>
+                           </TableCell>
+                         )}
                        </TableRow>
-                    ))
+                    )})
                   )}
                 </TableBody>
               </Table>
@@ -652,10 +902,10 @@ export default function GemStaff() {
                 </TableHeader>
                 <TableBody>
                    {ptList.map((pt) => (
-                      <TableRow key={pt.id || pt.nome} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedStaff(pt)}>
-                         <TableCell className="font-semibold">{pt.nome}</TableCell>
-                         <TableCell>{pt.ruolo || 'PT'}</TableCell>
-                         <TableCell>{pt.cellulare || '—'}</TableCell>
+                      <TableRow key={pt.id || pt.firstName} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedStaff(pt)}>
+                         <TableCell className="font-semibold">{pt.firstName} {pt.lastName}</TableCell>
+                         <TableCell>{pt.specializzazione || 'Personal Trainer'}</TableCell>
+                         <TableCell>{pt.phone || '—'}</TableCell>
                          <TableCell>{pt.email || '—'}</TableCell>
                          <TableCell>
                            <Badge className={pt.staff_status === 'INATTIVO' ? 'bg-slate-400' : 'bg-emerald-500'}>
@@ -679,17 +929,17 @@ export default function GemStaff() {
                </SelectTrigger>
                <SelectContent>
                  {staffList.map((s) => (
-                   <SelectItem key={s.id || s.nome} value={s.id?.toString() || s.nome}>{s.nome}</SelectItem>
+                   <SelectItem key={s.id || s.firstName} value={s.id?.toString() || s.firstName}>{s.firstName} {s.lastName}</SelectItem>
                  ))}
-                 {ptList.map((pt) => (
-                   <SelectItem key={`pt-${pt.id || pt.nome}`} value={pt.id?.toString() || pt.nome}>{pt.nome} (PT)</SelectItem>
+                 {ptList.map(pt => (
+                   <SelectItem key={`pt-${pt.id || pt.firstName}`} value={pt.id?.toString() || pt.firstName}>{pt.firstName} {pt.lastName} (PT)</SelectItem>
                  ))}
                </SelectContent>
              </Select>
           </div>
 
           {complianceMemberId ? (
-             <CompliancePanel memberId={complianceMemberId} complianceData={complianceData} isAdminOrDirezione={isAdminOrDirezione} />
+             <CompliancePanel memberId={complianceMemberId} complianceData={complianceData} isAdmin={isAdmin} />
           ) : (
              <Alert className="text-muted-foreground w-full py-8 text-center border-dashed">
                <FileCheck className="w-8 h-8 mx-auto mb-2 opacity-30" />
@@ -699,7 +949,7 @@ export default function GemStaff() {
         </TabsContent>
 
         <TabsContent value="accordi" className="mt-4">
-          {isAdminOrDirezione ? (
+          {isAdmin ? (
              <div className="border rounded-md bg-white overflow-hidden">
                 <Table>
                   <TableHeader>
@@ -714,7 +964,7 @@ export default function GemStaff() {
                   <TableBody>
                      {staffList.map((s) => (
                         <TableRow key={s.id}>
-                           <TableCell className="font-semibold">{s.nome}</TableCell>
+                           <TableCell className="font-semibold">{s.firstName} {s.lastName}</TableCell>
                            <TableCell>{s.corsi || '—'}</TableCell>
                            <TableCell>
                              {s.tariffa_base ? `€${s.tariffa_base}/h` : '—'}
@@ -747,11 +997,11 @@ export default function GemStaff() {
         </TabsContent>
 
         <TabsContent value="presenze" className="mt-4">
-          <PresenzeTab isAdminOrDirezione={isAdminOrDirezione} />
+          <PresenzeTab isAdmin={isAdmin} />
         </TabsContent>
 
         <TabsContent value="disciplinare" className="mt-4">
-          {isAdminOrDirezione ? (
+          {isAdmin ? (
              <DisciplinareTab staffList={staffList} />
           ) : (
              <Alert variant="destructive" className="mt-4">
@@ -769,17 +1019,17 @@ export default function GemStaff() {
         <SheetContent className="sm:max-w-md overflow-y-auto w-full">
           <SheetHeader>
             <SheetTitle className="text-xl flex items-center justify-between mt-4">
-               <span>{selectedStaff?.nome}</span>
+               <span>{selectedStaff?.firstName} {selectedStaff?.lastName}</span>
                <Badge className={selectedStaff?.staff_status === 'INATTIVO' ? 'bg-slate-400' : 'bg-emerald-500'}>
                   {selectedStaff?.staff_status || 'ATTIVO'}
                </Badge>
             </SheetTitle>
           </SheetHeader>
-          <div className="py-6 space-y-6">
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground font-medium">Contatti</p>
-              <p className="text-sm">Cellulare: {selectedStaff?.cellulare || '—'}</p>
-              <p className="text-sm">Email: {selectedStaff?.email || '—'}</p>
+          <div className="mt-8 space-y-6">
+            <div>
+              <Label className="text-muted-foreground text-xs uppercase tracking-wider">Contatti</Label>
+              <p className="text-sm mt-1">{selectedStaff?.email || 'Nessuna email registrata'}</p>
+              <p className="text-sm">Cellulare: {selectedStaff?.phone || '—'}</p>
             </div>
             
             <div className="space-y-1 pt-4 border-t">
@@ -843,7 +1093,7 @@ export default function GemStaff() {
               </div>
             </div>
 
-            {isAdminOrDirezione && (
+            {isAdmin && (
               <div className="space-y-1 pt-4 border-t">
                 <p className="text-sm text-muted-foreground font-medium mb-3">Firme e Accordi</p>
                 <div className="flex items-center gap-2 p-3 bg-slate-50 border rounded-md">
@@ -858,6 +1108,114 @@ export default function GemStaff() {
           </div>
         </SheetContent>
       </Sheet>
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-full">
+          <DialogHeader>
+            <DialogTitle>{editingInstructor ? "Modifica Insegnante" : "Nuovo Insegnante"}</DialogTitle>
+            <DialogDescription>
+              Inserisci i dati dell'insegnante e verifica la compliance
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleFormSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Dati Anagrafici</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Nome *</Label>
+                  <Input id="firstName" name="firstName" defaultValue={editingInstructor?.firstName} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Cognome *</Label>
+                  <Input id="lastName" name="lastName" defaultValue={editingInstructor?.lastName} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" name="email" type="email" defaultValue={editingInstructor?.email} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Telefono</Label>
+                  <Input id="phone" name="phone" defaultValue={editingInstructor?.phone} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="specialization">Specializzazione</Label>
+                  <Input id="specialization" name="specialization" defaultValue={editingInstructor?.specialization} placeholder="Es: Danza, Fitness..." />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hourlyRate">Tariffa Oraria (€)</Label>
+                  <Input id="hourlyRate" name="hourlyRate" type="number" step="0.01" min="0" defaultValue={editingInstructor?.hourlyRate} />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="bio">Biografia</Label>
+                  <Textarea id="bio" name="bio" rows={3} defaultValue={editingInstructor?.bio} />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">GemStaff</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="staffStatus">Staff Status</Label>
+                  <Select name="staffStatus" defaultValue={editingInstructor?.staff_status || "ATTIVO"}>
+                    <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ATTIVO">Attivo</SelectItem>
+                      <SelectItem value="INATTIVO">Inattivo / Archivio</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-4">
+                   <div className="flex items-center gap-2 mt-8">
+                     <Switch 
+                       id="lezioniPrivateAutorizzate" 
+                       name="lezioniPrivateAutorizzate" 
+                       checked={isPrivateLessonsAuth} 
+                       onCheckedChange={setIsPrivateLessonsAuth} 
+                     />
+                     <Label htmlFor="lezioniPrivateAutorizzate" className="cursor-pointer">Autorizzazione Lezioni Private</Label>
+                   </div>
+                </div>
+              </div>
+              
+              {isPrivateLessonsAuth && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 border rounded-md">
+                   <div className="space-y-2">
+                      <Label htmlFor="lezioniPrivateAutorizzateBy">Autorizzato da</Label>
+                      <Input id="lezioniPrivateAutorizzateBy" name="lezioniPrivateAutorizzateBy" defaultValue={editingInstructor?.lezioni_private_autorizzate_by} />
+                   </div>
+                   <div className="space-y-2">
+                      <Label htmlFor="lezioniPrivateAutorizzateAt">Data autorizzazione</Label>
+                      <Input type="date" id="lezioniPrivateAutorizzateAt" name="lezioniPrivateAutorizzateAt" defaultValue={editingInstructor?.lezioni_private_autorizzate_at ? new Date(editingInstructor.lezioni_private_autorizzate_at).toISOString().split('T')[0] : ''} />
+                   </div>
+                </div>
+              )}
+            </div>
+
+            {editingInstructor && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Compliance</h3>
+              <div className="bg-slate-50 p-4 border rounded-md flex justify-between items-center gap-4 flex-wrap">
+                 <div className="flex items-center gap-4 text-sm font-medium">
+                    <span>CI: {editingInstructor?.documenti?.carta_identita?.presente ? '✓' : '✗'}</span>
+                    <span>CF: {editingInstructor?.documenti?.codice_fiscale?.presente ? '✓' : '✗'}</span>
+                    <span>Diploma: {editingInstructor?.documenti?.diploma_tesserino?.presente ? '✓' : '✗'}</span>
+                 </div>
+                 <Button type="button" variant="link" onClick={() => { setIsFormOpen(false); setActiveTab("compliance"); setComplianceMemberId(editingInstructor.id?.toString()); }} className="px-0">
+                    Gestisci documenti &rarr;
+                 </Button>
+              </div>
+            </div>
+            )}
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>Annulla</Button>
+              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                 {editingInstructor ? "Salva Modifiche" : "Crea Insegnante"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

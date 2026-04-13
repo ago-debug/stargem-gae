@@ -346,12 +346,12 @@ export interface IStorage {
   deleteStudio(id: number): Promise<void>;
 
   // Courses
-  getCourses(activityType?: string): Promise<(Course & { categoryName?: string | null })[]>;
+  getCourses(activityType?: string): Promise<(Course & { categoryName?: string | null; instructorName?: string | null })[]>;
   getCourse(id: number): Promise<Course | undefined>;
   createCourse(course: InsertCourse): Promise<Course>;
   updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course>;
   deleteCourse(id: number): Promise<void>;
-  getCoursesBySeason(seasonId: number): Promise<(Course & { categoryName?: string | null })[]>;
+  getCoursesBySeason(seasonId: number): Promise<(Course & { categoryName?: string | null; instructorName?: string | null })[]>;
 
   // Activity Statuses
   getActivityStatuses(): Promise<ActivityStatus[]>;
@@ -1887,23 +1887,38 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Courses ====
-  async getCourses(activityType?: string): Promise<(Course & { categoryName?: string | null })[]> {
+  async getCourses(activityType?: string): Promise<(Course & { categoryName?: string | null; instructorName?: string | null })[]> {
+    const instructorMembers = aliasedTable(members, 'instructorMembers');
     const query = db
       .select({
         ...getTableColumns(courses),
         categoryName: customListItems.value,
+        instructorFirstName: instructorMembers.firstName,
+        instructorLastName: instructorMembers.lastName,
       })
       .from(courses)
       .leftJoin(
         customListItems,
         eq(courses.categoryId, customListItems.id)
+      )
+      .leftJoin(
+        instructorMembers,
+        eq(courses.instructorId, instructorMembers.id)
       );
+
+    let result;
     if (activityType) {
-      return await query
+      result = await query
         .where(eq(courses.activityType, activityType))
         .orderBy(desc(courses.createdAt));
+    } else {
+      result = await query.orderBy(desc(courses.createdAt));
     }
-    return await query.orderBy(desc(courses.createdAt));
+
+    return result.map(row => ({
+      ...row,
+      instructorName: row.instructorFirstName ? `${row.instructorLastName} ${row.instructorFirstName}` : null
+    }));
   }
 
   async getCourse(id: number): Promise<Course | undefined> {
@@ -1934,20 +1949,32 @@ export class DatabaseStorage implements IStorage {
     return fetched!;
   }
 
-  async getCoursesBySeason(seasonId: number): Promise<(Course & { categoryName?: string | null })[]> {
+  async getCoursesBySeason(seasonId: number): Promise<(Course & { categoryName?: string | null; instructorName?: string | null })[]> {
+    const instructorMembers = aliasedTable(members, 'instructorMembers');
     const query = db
       .select({
         ...getTableColumns(courses),
         categoryName: customListItems.value,
+        instructorFirstName: instructorMembers.firstName,
+        instructorLastName: instructorMembers.lastName,
       })
       .from(courses)
       .leftJoin(
         customListItems,
         eq(courses.categoryId, customListItems.id)
       )
+      .leftJoin(
+        instructorMembers,
+        eq(courses.instructorId, instructorMembers.id)
+      )
       .where(eq(courses.seasonId, seasonId))
       .orderBy(desc(courses.createdAt));
-    return await query;
+      
+    const result = await query;
+    return result.map(row => ({
+      ...row,
+      instructorName: row.instructorFirstName ? `${row.instructorLastName} ${row.instructorFirstName}` : null
+    }));
   }
 
   async updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course> {
