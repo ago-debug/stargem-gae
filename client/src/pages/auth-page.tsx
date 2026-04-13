@@ -110,7 +110,7 @@ export default function AuthPage() {
                     <div className="space-y-1">
                         <CardTitle className="text-2xl font-extrabold tracking-tight text-slate-900">La suite di StarGem</CardTitle>
                         <CardDescription className="text-sm font-medium text-slate-500">
-                            Il tuo gestionale per il movimento.
+                            The integrated platform for your activities.
                         </CardDescription>
                     </div>
                 </CardHeader>
@@ -157,7 +157,7 @@ export default function AuthPage() {
                                 className="w-full h-11 text-md font-bold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
                                 disabled={loginMutation.isPending}
                             >
-                                {loginMutation.isPending ? "Accesso in corso..." : "Accedi al Gestionale"}
+                                {loginMutation.isPending ? "Accesso in corso..." : "Accedi"}
                             </Button>
                         </form>
                     </Form>
@@ -194,7 +194,7 @@ export default function AuthPage() {
             <div className="mt-16 z-10 w-full max-w-5xl px-4 flex flex-col items-center animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
                 <div className="flex items-center gap-4 mb-8 w-full max-w-2xl">
                     <div className="h-px bg-slate-200 flex-1"></div>
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Questo gestionale contiene</p>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Questa piattaforma contiene</p>
                     <div className="h-px bg-slate-200 flex-1"></div>
                 </div>
 
@@ -209,7 +209,7 @@ export default function AuthPage() {
                         { name: "GemStaff", icon: BriefcaseBusiness, desc: "Staff Manager" },
                         { name: "TeoCopilot", icon: Sparkles, desc: "AI Aziendale" }
                     ].map((mod, idx) => (
-                        <div key={idx} className="flex flex-col items-center justify-center p-4 bg-white/80 backdrop-blur-md rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-w-[120px] max-w-[140px] flex-1 group">
+                        <div key={idx} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="cursor-pointer flex flex-col items-center justify-center p-4 bg-white/80 backdrop-blur-md rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-w-[120px] max-w-[140px] flex-1 group">
                             
                             {/* Icona 3D Dorata */}
                             <div className="relative w-16 h-16 rounded-[20px] bg-gradient-to-br from-yellow-100 via-amber-400 to-yellow-600 shadow-[inset_0_2px_4px_rgba(255,255,255,0.7),inset_0_-4px_6px_rgba(180,100,0,0.5),0_10px_20px_rgba(245,158,11,0.3)] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300 transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
