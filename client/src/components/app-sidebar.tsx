@@ -204,6 +204,11 @@ const teachingItems = [
 // 4. RISORSE UMANE & TEAM
 const secretariatItems = [
   {
+    title: "GemStaff",
+    url: "/gemstaff",
+    icon: BadgeCheck,
+  },
+  {
     title: "Staff e Insegnanti",
     url: "/staff",
     icon: Briefcase,

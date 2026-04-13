@@ -128,7 +128,7 @@ export default function GemPass() {
   });
 
   // Calculate form seasons for Tab 2
-  const formSeasons = [];
+  const formSeasons: any[] = [];
   let s1Code = '2526';
   let s2Code = '2627';
   let endYear1 = 2026;

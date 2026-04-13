@@ -186,7 +186,7 @@ export default function WebhookStatus() {
                                     </Button>
                                 )}
                                 {log.status === "processed" && (log.paymentId || log.enrollmentId) && (
-                                   <Button size="sm" variant="link" className="h-8 text-indigo-600 p-0 hover:underline" onClick={() => setLocation('/pagamenti')}>
+                                   <Button size="sm" variant="ghost" className="h-8 text-indigo-600 p-0 hover:underline" onClick={() => setLocation('/pagamenti')}>
                                       → Pagamento #{log.paymentId || log.enrollmentId}
                                    </Button>
                                 )}

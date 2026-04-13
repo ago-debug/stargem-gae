@@ -49,6 +49,9 @@ export const users = mysqlTable("users", {
   lastSeenAt: timestamp("last_seen_at"),
   currentSessionStart: timestamp("current_session_start"),
   lastSessionDuration: int("last_session_duration").default(0),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  otpToken: varchar("otp_token", { length: 10 }),
+  otpExpiresAt: datetime("otp_expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -818,6 +821,13 @@ export const members = mysqlTable("members", {
   crmProfileOverride: boolean("crm_profile_override").default(false),
   crmProfileReason: varchar("crm_profile_reason", { length: 255 }),
 
+  // GemStaff fields
+  staffStatus: mysqlEnum("staff_status", ["attivo", "inattivo", "archivio"]).notNull().default("attivo"),
+  lezioniPrivateAutorizzate: boolean("lezioni_private_autorizzate").notNull().default(false),
+  lezioniPrivateAutorizzateAt: datetime("lezioni_private_autorizzate_at"),
+  lezioniPrivateAutorizzateBy: varchar("lezioni_private_autorizzate_by", { length: 100 }),
+  lezioniPrivateNote: text("lezioni_private_note"),
+
   active: boolean("active").default(true),
   createdBy: varchar("created_by", { length: 255 }),
   updatedBy: varchar("updated_by", { length: 255 }),
@@ -863,6 +873,99 @@ export const insertMemberSchema = createInsertSchema(members, {
 });
 export type InsertMember = z.infer<typeof insertMemberSchema>;
 export type Member = typeof members.$inferSelect;
+
+// ============================================================================
+// GEMSTAFF TABLES
+// ============================================================================
+
+export const staffContractsCompliance = mysqlTable("staff_contracts_compliance", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  docType: mysqlEnum("doc_type", ["diploma_tesserino", "carta_identita", "codice_fiscale", "permesso_soggiorno", "foto_id", "video_promo"]).notNull(),
+  docValue: text("doc_value"),
+  hasDoc: boolean("has_doc").notNull().default(false),
+  expiresAt: date("expires_at"),
+  notes: text("notes"),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+}, (table) => [
+  index("idx_member_doc").on(table.memberId, table.docType)
+]);
+
+export const staffDocumentSignatures = mysqlTable("staff_document_signatures", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  docType: mysqlEnum("doc_type", ["regolamento_staff", "codice_disciplinare_staff"]).notNull(),
+  docVersion: varchar("doc_version", { length: 10 }).notNull(),
+  signedAt: datetime("signed_at").notNull(),
+  signedBy: varchar("signed_by", { length: 100 }).notNull(),
+  method: mysqlEnum("method", ["manual", "kiosk"]).notNull().default("manual"),
+  notes: text("notes"),
+}, (table) => [
+  uniqueIndex("uk_member_doc_ver").on(table.memberId, table.docType, table.docVersion)
+]);
+
+export const staffDisciplinaryLog = mysqlTable("staff_disciplinary_log", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  eventType: mysqlEnum("event_type", ["richiamo_verbale", "ammonizione_scritta", "sospensione", "interruzione_rapporto"]).notNull(),
+  eventDate: date("event_date").notNull(),
+  description: text("description").notNull(),
+  staffResponse: text("staff_response"),
+  staffResponseAt: date("staff_response_at"),
+  decision: text("decision"),
+  resolvedAt: date("resolved_at"),
+  createdBy: varchar("created_by", { length: 100 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const staffPresenze = mysqlTable("staff_presenze", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  courseId: int("course_id").references(() => courses.id, { onDelete: "set null" }),
+  date: date("date").notNull(),
+  hours: decimal("hours", { precision: 4, scale: 2 }).notNull().default("1.00"),
+  source: mysqlEnum("source", ["auto", "manual"]).notNull().default("auto"),
+  status: mysqlEnum("status", ["bozza", "confermato"]).notNull().default("bozza"),
+  confirmedBy: varchar("confirmed_by", { length: 100 }),
+  confirmedAt: datetime("confirmed_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const staffSostituzioni = mysqlTable("staff_sostituzioni", {
+  id: int("id").primaryKey().autoincrement(),
+  absentMemberId: int("absent_member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  substituteMemberId: int("substitute_member_id").references(() => members.id, { onDelete: "set null" }),
+  courseId: int("course_id").references(() => courses.id, { onDelete: "set null" }),
+  absenceDate: date("absence_date").notNull(),
+  lessonDescription: varchar("lesson_description", { length: 255 }),
+  paymentTo: mysqlEnum("payment_to", ["assente", "sostituto", "nessuno"]).notNull().default("sostituto"),
+  amountOverride: decimal("amount_override", { precision: 8, scale: 2 }),
+  notes: text("notes"),
+  vistoSegreteria: boolean("visto_segreteria").notNull().default(false),
+  vistoElisa: boolean("visto_elisa").notNull().default(false),
+  createdBy: varchar("created_by", { length: 100 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const payslips = mysqlTable("payslips", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  month: tinyint("month").notNull(),
+  year: smallint("year").notNull(),
+  hoursTaught: decimal("hours_taught", { precision: 6, scale: 2 }).notNull().default("0.00"),
+  rate: decimal("rate", { precision: 8, scale: 2 }),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  status: mysqlEnum("status", ["bozza", "confermato", "pagato"]).notNull().default("bozza"),
+  notes: text("notes"),
+  confirmedBy: varchar("confirmed_by", { length: 100 }),
+  confirmedAt: datetime("confirmed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("uk_member_mese_anno").on(table.memberId, table.month, table.year)
+]);
+
+// ============================================================================
 
 // Member Relationships (relazioni tra partecipanti - genitori/figli/tutori)
 export const memberRelationships = mysqlTable("member_relationships", {
@@ -2361,8 +2464,8 @@ export type MemberDiscount = typeof memberDiscounts.$inferSelect;
 export type InsertMemberDiscount = typeof memberDiscounts.$inferInsert;
 export type CompanyAgreement = typeof companyAgreements.$inferSelect;
 export type InsertCompanyAgreement = typeof companyAgreements.$inferInsert;
-export type AttendanceLog = typeof attendanceLogs.$inferSelect;
-export type InsertAttendanceLog = typeof attendanceLogs.$inferInsert;
+export type AttendanceLog = typeof attendances.$inferSelect;
+export type InsertAttendanceLog = typeof attendances.$inferInsert;
 
 export const webhookLogs = mysqlTable(
   "webhook_logs", {
@@ -2468,7 +2571,6 @@ export type PricingRule = typeof pricingRules.$inferSelect;
 export type InsertPricingRule = typeof pricingRules.$inferInsert;
 
 export type PromoRule = typeof promoRules.$inferSelect;
-export type InsertPromoRule = typeof promoRules.$inferInsert;
 
 // ============================================================================
 // GEMPASS: FORM SUBMISSIONS

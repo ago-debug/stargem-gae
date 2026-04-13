@@ -20,7 +20,7 @@ import { SortableTableHead, useSortableTable } from "@/components/sortable-table
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { CampusActivity, Member, Enrollment, Payment, Attendance } from "@shared/schema";
+import type { Member, Enrollment, Payment, Attendance } from "@shared/schema";
 import { buildEnrolledMembersData } from "@/lib/enrollments";
 
 export default function SchedaCampus() {

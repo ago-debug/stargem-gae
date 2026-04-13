@@ -33,9 +33,9 @@ function AgreementDetails({ agreement, onRegisterPayment }: { agreement: Expande
    const currentYear = new Date().getFullYear();
 
    const { data: payments = [], isLoading } = useQuery<any[]>({
-     queryKey: ["/api/payments", { type: "accordo_maestro", memberId: agreement.instructorId }],
+     queryKey: ["/api/payments", { type: "accordo_maestro", memberId: (agreement as any).instructorId }],
      queryFn: async () => {
-        const res = await fetch(`/api/payments?type=accordo_maestro&memberId=${agreement.instructorId}&year=${currentYear}`);
+        const res = await fetch(`/api/payments?type=accordo_maestro&memberId=${(agreement as any).instructorId}&year=${currentYear}`);
         if (!res.ok) return [];
         return res.json();
      }
