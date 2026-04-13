@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
+import rateLimit from "express-rate-limit";
 import MySQLStoreFactory from "express-mysql-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
@@ -65,7 +66,7 @@ export function setupAuth(app: Express) {
         store: sessionStore,
         cookie: {
             httpOnly: true,
-            secure: false, // Changed to false to allow testing on http://localhost:5001
+            secure: process.env.NODE_ENV === "production", // Secure in production, false for local
             maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
         },
     };
@@ -74,6 +75,26 @@ export function setupAuth(app: Express) {
     app.use(session(sessionSettings));
     app.use(passport.initialize());
     app.use(passport.session());
+
+    // --- SECURITY SHIELDS (BRUTE FORCE PROTECTION) ---
+    // Limita l'endpoint /api/login a 10 tentativi ogni 15 minuti per IP
+    const loginLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000, 
+        max: 10, 
+        message: { error: 'Troppi tentativi falliti. Riprova tra 15 minuti.' },
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+
+    // Limita registrazioni e recupero password (max 5 richieste all'ora)
+    const sensitiveActionLimiter = rateLimit({
+        windowMs: 60 * 60 * 1000, 
+        max: 5, 
+        message: { error: 'Hai superato il limite per questa azione. Riprova tra 1 ora.' },
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+
 
     // --- AUTO-LOGIN MIDDLEWARE FOR LOCAL DEVELOPMENT ---
     app.use(async (req, res, next) => {
@@ -176,7 +197,7 @@ export function setupAuth(app: Express) {
         }
     });
 
-    app.post("/api/login", passport.authenticate("local"), async (req, res) => {
+    app.post("/api/login", loginLimiter, passport.authenticate("local"), async (req, res) => {
         if (req.user) {
             try {
                 await storage.logActivity({
@@ -267,7 +288,7 @@ export function setupAuth(app: Express) {
         });
     });
 
-    app.post("/api/register", async (req, res) => {
+    app.post("/api/register", sensitiveActionLimiter, async (req, res) => {
         try {
             const { username, password } = req.body;
             if (!username || !password) {
@@ -312,7 +333,7 @@ export function setupAuth(app: Express) {
         }
     });
 
-    app.post("/api/auth/first-login", async (req, res) => {
+    app.post("/api/auth/first-login", loginLimiter, async (req, res) => {
         try {
             const { email, otp, newPassword } = req.body;
             if (!email || !otp || !newPassword) {
@@ -369,7 +390,7 @@ export function setupAuth(app: Express) {
         }
     });
 
-    app.post("/api/auth/forgot-password", async (req, res) => {
+    app.post("/api/auth/forgot-password", sensitiveActionLimiter, async (req, res) => {
         try {
             const { email } = req.body;
             if (!email) {
