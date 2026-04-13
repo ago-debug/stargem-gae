@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download } from "lucide-react";
+import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download, Plus } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -161,6 +161,36 @@ export default function GemTeam() {
   const [selectedSheetDip, setSelectedSheetDip] = useState<GemTeamMember | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  // Tab Dashboard Checkins (Live)
+  const { data: todayCheckinsData = [], isLoading: isLoadingCheckins } = useQuery<any[]>({
+    queryKey: ['/api/gemteam/checkin/oggi'],
+    refetchInterval: 60000, // Refresh automatico ogni 60 secondi
+    queryFn: async () => {
+      // MOCK data
+      return [
+        { memberId: dipendenti.find(d => d.nome === 'Alexandra')?.id || 1, stato: "IN", lastEvent: "Entrato 08:30", oreOggi: null },
+        { memberId: dipendenti.find(d => d.nome === 'Giuditta')?.id || 2, stato: "IN", lastEvent: "Entrato 09:15", oreOggi: null },
+        { memberId: dipendenti.find(d => d.nome === 'Gaetano')?.id || 13, stato: "OUT", lastEvent: "Uscito 18:30", oreOggi: "8.5" },
+        { memberId: dipendenti.find(d => d.nome === 'Stefano')?.id || 14, stato: "ASSENTE", lastEvent: "Assente (PE)", oreOggi: null },
+      ];
+    }
+  });
+
+  const checkInStats = useMemo(() => {
+    let inSede = 0; let usciti = 0; let attesi = 0; let assenti = 0;
+    dipendenti.forEach(dip => {
+      const chk = todayCheckinsData.find(c => c.memberId === dip.id);
+      if (chk) {
+        if (chk.stato === "IN") inSede++;
+        else if (chk.stato === "OUT") usciti++;
+        else if (chk.stato === "ASSENTE") assenti++;
+      } else {
+        attesi++;
+      }
+    });
+    return { inSede, usciti, attesi, assenti };
+  }, [todayCheckinsData, dipendenti]);
+
   const filteredDipendenti = useMemo(() => {
     return dipendenti.filter(d => {
       const matchText = (d.nome + " " + d.cognome).toLowerCase().includes(searchTerm.toLowerCase());
@@ -234,6 +264,34 @@ export default function GemTeam() {
     presenzeMutation.mutate({employee_id: dipId, day, value });
   };
 
+  // Tab Report State
+  const [reportSelectedMonthYear, setReportSelectedMonthYear] = useState("04-2026");
+  const [reportMeseRaw, reportAnnoRaw] = reportSelectedMonthYear.split("-");
+  
+  const { data: reportData = [], isLoading: isLoadingReport, refetch: refetchReport } = useQuery<any[]>({
+    queryKey: ['/api/gemteam/report', reportAnnoRaw, reportMeseRaw],
+    enabled: false // generato on-demand
+  });
+
+  const { data: reportLocked = false } = useQuery<boolean>({
+    queryKey: ['/api/gemteam/report/lock', reportAnnoRaw, reportMeseRaw],
+  });
+
+  const reportMutation = useMutation({
+    mutationFn: async () => {
+      // Simuliamo la chiamata POST per la generazione dato che l'endpoint potrebbe calcolare in realtime
+      await apiRequest("POST", `/api/gemteam/report/genera/${reportAnnoRaw}/${reportMeseRaw}`);
+    },
+    onSuccess: () => refetchReport()
+  });
+
+  const lockMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("PATCH", `/api/gemteam/report/lock/${reportAnnoRaw}/${reportMeseRaw}`, { locked: true });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/gemteam/report/lock', reportAnnoRaw, reportMeseRaw] })
+  });
+
   // Auth Guard
   const userRole = (user as any)?.role?.toLowerCase() || "";
   if (userRole === "dipendente") {
@@ -299,13 +357,95 @@ export default function GemTeam() {
         </TabsList>
 
         <TabsContent value="dashboard">
-          <Card className="border-dashed border-2 shadow-none bg-slate-50/50">
-            <CardContent className="flex flex-col items-center justify-center h-64 text-center">
-              <Home className="w-12 h-12 text-slate-300 mb-4" />
-              <h3 className="text-xl font-bold text-slate-700">Dashboard Team</h3>
-              <p className="text-slate-500 mt-2">Modulo in costruzione.</p>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <span className="relative flex h-3 w-3 mr-1">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+              Presenze Oggi (Live)
+            </h2>
+            
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="bg-emerald-50 border-emerald-200 shadow-sm">
+                <CardContent className="p-4 flex flex-col items-center text-center">
+                  <span className="text-3xl font-black text-emerald-600 mb-1">{checkInStats.inSede}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">In Sede</span>
+                </CardContent>
+              </Card>
+              <Card className="bg-slate-100 border-slate-200 shadow-sm">
+                <CardContent className="p-4 flex flex-col items-center text-center">
+                  <span className="text-3xl font-black text-slate-500 mb-1">{checkInStats.usciti}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Usciti</span>
+                </CardContent>
+              </Card>
+              <Card className="bg-lime-50 (or yellow) border-yellow-200 shadow-sm">
+                <CardContent className="p-4 flex flex-col items-center text-center">
+                  <span className="text-3xl font-black text-yellow-600 mb-1">{checkInStats.attesi}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-800">Non Pervenuti</span>
+                </CardContent>
+              </Card>
+              <Card className="bg-rose-50 border-rose-200 shadow-sm">
+                <CardContent className="p-4 flex flex-col items-center text-center">
+                  <span className="text-3xl font-black text-rose-600 mb-1">{checkInStats.assenti}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-rose-800">Assenti</span>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* List */}
+            <Card className="border-slate-200 shadow-sm bg-white overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm whitespace-nowrap">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    <tr>
+                      <th className="p-4">Dipendente</th>
+                      <th className="p-4">Stato Live</th>
+                      <th className="p-4">Ultimo Evento</th>
+                      <th className="p-4 text-right">Ore Lavorate (Oggi)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {dipendenti.length === 0 && isLoadingDipendenti && (
+                      <tr><td colSpan={4} className="p-8 text-center text-slate-500">Caricamento dipendenti...</td></tr>
+                    )}
+                    {dipendenti.map(dip => {
+                      const chk = todayCheckinsData.find(c => c.memberId === dip.id);
+                      const stato = chk?.stato || "ATTESO";
+                      const lastEvent = chk?.lastEvent || "Nessun log oggi";
+                      const ore = chk?.oreOggi ? `${chk.oreOggi}h` : "—";
+                      
+                      const statoColors: Record<string, string> = {
+                        "IN": "bg-emerald-100 text-emerald-800 border-emerald-200",
+                        "OUT": "bg-slate-100 text-slate-700 border-slate-200",
+                        "ATTESO": "bg-yellow-100 text-yellow-800 border-yellow-200",
+                        "ASSENTE": "bg-rose-100 text-rose-800 border-rose-200"
+                      };
+                      const statoLabel = stato === "IN" ? "🟢 IN SEDE" : stato === "OUT" ? "⚪ USCITO" : stato === "ASSENTE" ? "🔴 ASSENTE" : "🟡 ATTESO";
+
+                      return (
+                        <tr key={dip.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 font-bold text-slate-800 flex items-center gap-3">
+                            <Avatar className={`w-8 h-8 border ring-1 ring-offset-1 ${dip.team === 'segreteria' ? 'ring-pink-100' : 'ring-slate-100'}`}>
+                              {dip.photo_url ? <AvatarImage src={dip.photo_url} /> : null}
+                              <AvatarFallback className={`text-[10px] ${TEAM_COLORS[dip.team]}`}>{dip.nome.charAt(0)}{dip.cognome.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            {dip.nome} {dip.cognome}
+                          </td>
+                          <td className="p-4">
+                            <Badge variant="outline" className={`${statoColors[stato]} font-bold`}>{statoLabel}</Badge>
+                          </td>
+                          <td className="p-4 text-slate-500 font-medium">{lastEvent}</td>
+                          <td className="p-4 text-right font-bold text-slate-700">{ore}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="dipendenti">
@@ -870,21 +1010,250 @@ export default function GemTeam() {
         </TabsContent>
 
         <TabsContent value="diario">
-          <Card className="border-dashed border-2 shadow-none bg-slate-50/50">
-            <CardContent className="flex flex-col items-center justify-center h-64 text-center">
-              <PenTool className="w-12 h-12 text-slate-300 mb-4" />
-              <h3 className="text-xl font-bold text-slate-700">Diario di Bordo</h3>
-              <p className="text-slate-500 mt-2">Modulo in costruzione.</p>
+          <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+            <CardContent className="p-0 sm:p-6 space-y-6">
+              
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 p-4 lg:p-0">
+                <div>
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                    <PenTool className="w-5 h-5 text-primary" /> Diario Orario
+                  </h3>
+                  <p className="text-sm text-slate-500">Log operatività e mansioni giornaliere.</p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                  <Select defaultValue="oggi">
+                    <SelectTrigger className="w-full sm:w-32 font-semibold bg-white border-slate-300 shadow-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="oggi">Oggi</SelectItem>
+                      <SelectItem value="ieri">Ieri</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                    <SelectTrigger className="w-full sm:w-48 font-semibold bg-white border-slate-300 shadow-sm">
+                      <SelectValue placeholder="Dipendente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MOCK_EMPLOYEES.map(emp => (
+                        <SelectItem key={emp} value={emp}>{emp}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="w-full border rounded-xl shadow-inner bg-slate-50 overflow-x-auto scrollbar-thin">
+                <table className="w-full text-left text-sm whitespace-nowrap border-collapse min-w-[700px]">
+                  <thead className="bg-slate-200 border-b border-slate-300 text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    <tr>
+                      <th className="p-3 w-40">Fascia Oraria</th>
+                      <th className="p-3 w-40">Postazione</th>
+                      <th className="p-3">Attività Svolta (Dettaglio)</th>
+                      <th className="p-3 w-20 text-center">Qtà</th>
+                      <th className="p-3 w-28 text-center">Minuti</th>
+                      <th className="p-3 w-20 text-center">Visto</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {/* Mocked Rows for UI Prototyping */}
+                    <tr className="hover:bg-slate-50 transition-colors group">
+                      <td className="p-3 text-slate-600 font-medium tracking-tight">08:30 – 09:30</td>
+                      <td className="p-3"><Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200 font-bold">RECEPTION</Badge></td>
+                      <td className="p-3 text-slate-600 truncate max-w-[200px] sm:max-w-xs">Accoglienza front desk / incassi</td>
+                      <td className="p-3 text-center text-slate-600 font-bold">12</td>
+                      <td className="p-3 text-center font-bold text-slate-800">60</td>
+                      <td className="p-3 text-center">
+                        <input type="checkbox" defaultChecked={true} className="w-5 h-5 accent-primary cursor-pointer rounded border-slate-300 pointer-events-none" />
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50 transition-colors group">
+                      <td className="p-3 text-slate-600 font-medium tracking-tight">09:30 – 10:30</td>
+                      <td className="p-3"><Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 font-bold">UFFICIO</Badge></td>
+                      <td className="p-3 text-slate-600 truncate max-w-[200px] sm:max-w-xs">Data entry anagrafiche / chiamate back</td>
+                      <td className="p-3 text-center text-slate-600 font-bold">5</td>
+                      <td className="p-3 text-center font-bold text-slate-800">60</td>
+                      <td className="p-3 text-center">
+                        <input type="checkbox" defaultChecked={true} className="w-5 h-5 accent-primary cursor-pointer rounded border-slate-300 pointer-events-none" />
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50 transition-colors group">
+                      <td className="p-3 text-slate-600 font-medium tracking-tight">10:30 – 11:30</td>
+                      <td className="p-3"><Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200 font-bold">RECEPTION</Badge></td>
+                      <td className="p-3 text-slate-600 truncate max-w-[200px] sm:max-w-xs">Supporto cassa / assistenza iscritti</td>
+                      <td className="p-3 text-center text-slate-600 font-bold">—</td>
+                      <td className="p-3 text-center font-bold text-slate-800">60</td>
+                      <td className="p-3 text-center">
+                        <input type="checkbox" defaultChecked={false} className="w-5 h-5 border-slate-300 pointer-events-none" />
+                      </td>
+                    </tr>
+
+                    {/* Inline Form Mock per Aggiunta */}
+                    <tr className="bg-slate-100 border-t-2 border-slate-200">
+                      <td className="p-2">
+                        <Input placeholder="Ora..." defaultValue="11:30 - 12:30" className="h-8 text-xs bg-white" />
+                      </td>
+                      <td className="p-2">
+                        <Select defaultValue="AMM">
+                          <SelectTrigger className="h-8 text-[11px] bg-white font-bold text-slate-600 border-dashed">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="RECEPTION">RECEPTION</SelectItem>
+                            <SelectItem value="UFFICIO">UFFICIO</SelectItem>
+                            <SelectItem value="AMM">AMM.ZIONE</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="p-2">
+                        <Input placeholder="Es: Fatturazione passive..." className="h-8 text-xs bg-white" />
+                      </td>
+                      <td className="p-2">
+                        <Input type="number" placeholder="Qta" className="h-8 text-xs bg-white text-center w-full min-w-[50px]" />
+                      </td>
+                      <td className="p-2">
+                        <Input type="number" placeholder="Min" defaultValue={60} className="h-8 text-xs font-bold text-center bg-white w-full min-w-[60px]" />
+                      </td>
+                      <td className="p-2 text-center">
+                        <Button size="sm" className="h-8 w-full gap-1 font-bold text-[11px]">
+                          <Plus className="w-3 h-3" /> Add
+                        </Button>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-slate-800 text-white font-bold border-t-4 border-slate-900 border-solid drop-shadow-md h-12">
+                      <td colSpan={4} className="p-3 text-right uppercase tracking-widest text-[11px] opacity-90">Totale Turno (Minuti):</td>
+                      <td className="p-3 text-center text-emerald-400 text-xl tabular-nums">180</td>
+                      <td className="p-3 text-center text-slate-400 text-[10px]">3.0h</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="report">
-          <Card className="border-dashed border-2 shadow-none bg-slate-50/50">
-            <CardContent className="flex flex-col items-center justify-center h-64 text-center">
-              <PieChart className="w-12 h-12 text-slate-300 mb-4" />
-              <h3 className="text-xl font-bold text-slate-700">Report e Buste Paga</h3>
-              <p className="text-slate-500 mt-2">Modulo in costruzione.</p>
+          <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+            <CardContent className="p-0 sm:p-6 space-y-6">
+              
+              {/* Header Report */}
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 p-4 lg:p-0">
+                <div>
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                    <ClipboardList className="w-5 h-5 text-primary" /> Report Mensile
+                    {reportLocked && <Badge variant="destructive" className="ml-2 font-bold tracking-widest"><ShieldCheck className="w-3 h-3 mr-1"/> BLOCCATO</Badge>}
+                  </h3>
+                  <p className="text-sm text-slate-500">Riepilogo ore, giorni lavorati e causali mensili.</p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <Select value={reportSelectedMonthYear} onValueChange={setReportSelectedMonthYear}>
+                    <SelectTrigger className="w-40 font-semibold bg-white border-slate-300">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="04-2026">Aprile 2026</SelectItem>
+                      <SelectItem value="05-2026">Maggio 2026</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button 
+                    onClick={() => reportMutation.mutate()} 
+                    disabled={reportMutation.isPending || reportLocked}
+                    className="gap-2 font-bold bg-primary hover:bg-primary/90 text-white shadow-sm"
+                  >
+                    {reportMutation.isPending ? <div className="w-4 h-4 border-2 border-white/30 border-t-transparent rounded-full animate-spin" /> : <PieChart className="w-4 h-4" />}
+                    Genera Report
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={() => window.open(`/api/gemteam/report/${reportAnnoRaw}/${reportMeseRaw}/export`, '_blank')}
+                    disabled={reportData.length === 0}
+                    className="gap-2 font-bold"
+                  >
+                    <Download className="w-4 h-4" /> Esporta .xlsx
+                  </Button>
+
+                  {isAllowed && !reportLocked && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" className="gap-2 font-bold shadow-sm">
+                          <ShieldCheck className="w-4 h-4" /> Blocca mese
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Sei sicuro di voler bloccare il mese?</AlertDialogTitle>
+                          <AlertDialogDescription className="text-slate-600">
+                            Attenzione: dopo il blocco il mese non sarà più modificabile e i totali verranno congelati per le buste paga.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annulla</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => lockMutation.mutate()} className="bg-red-600 hover:bg-red-700">Conferma Blocco</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
+              </div>
+
+              {/* Tabella Risultati */}
+              <div className="w-full border rounded-xl shadow-inner bg-slate-50 overflow-x-auto min-h-[300px]">
+                {reportData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-12 text-slate-400 h-full">
+                    <PieChart className="w-12 h-12 mb-4 opacity-20" />
+                    <p className="font-medium">Nessun report generato per {reportMeseRaw}/{reportAnnoRaw}</p>
+                    <p className="text-sm">Premi "Genera Report" per estrarre i dati.</p>
+                  </div>
+                ) : (
+                  <table className="w-full text-left text-sm whitespace-nowrap border-collapse min-w-[700px]">
+                    <thead className="bg-slate-200 border-b border-slate-300 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                      <tr>
+                        <th className="p-3 pl-4">Dipendente / Team</th>
+                        <th className="p-3 text-center w-20">Ore Tot</th>
+                        <th className="p-3 text-center w-20">GG Lav</th>
+                        <th className="p-3 text-center w-16 text-sky-700">FE</th>
+                        <th className="p-3 text-center w-16 text-yellow-700">PE</th>
+                        <th className="p-3 text-center w-16 text-orange-700">ML</th>
+                        <th className="p-3 text-center w-16 text-purple-700">F</th>
+                        <th className="p-3 text-center w-16 text-red-700">AI</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                      {reportData.map((row: any) => (
+                        <tr key={row.employee_id} className="hover:bg-slate-50 transition-colors">
+                          <td className="p-3 pl-4 font-bold text-slate-800">{row.nome} {row.cognome}</td>
+                          <td className="p-3 text-center font-black text-slate-700 text-lg">{row.oreTotali}</td>
+                          <td className="p-3 text-center font-bold text-slate-500">{row.giorniLavorati}</td>
+                          <td className="p-3 text-center text-sky-600 font-semibold">{row.FE || 0}</td>
+                          <td className="p-3 text-center text-yellow-600 font-semibold">{row.PE || 0}</td>
+                          <td className="p-3 text-center text-orange-600 font-semibold">{row.ML || 0}</td>
+                          <td className="p-3 text-center text-purple-600 font-semibold">{row.F || 0}</td>
+                          <td className="p-3 text-center text-red-600 font-semibold">{row.AI || 0}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-slate-800 text-white font-bold h-12">
+                        <td className="p-3 pl-4 text-right uppercase tracking-widest text-[11px] opacity-90">Totale Globale:</td>
+                        <td className="p-3 text-center text-emerald-400 text-xl tabular-nums">{reportData.reduce((acc: number, cur: any) => acc + (cur.oreTotali || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.giorniLavorati || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.FE || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.PE || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.ML || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.F || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.AI || 0), 0)}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

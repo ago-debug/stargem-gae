@@ -312,6 +312,12 @@ export function AppSidebar() {
   const filteredConfig = configItems.filter(item => hasPermission(user, item.url));
   const filteredAdminItems = adminItems.filter(item => hasPermission(user, item.url));
 
+  const { data: pendingPermessiCount = 0 } = useQuery<number>({
+    queryKey: ['/api/gemteam/permessi/pending-count'],
+    refetchInterval: 60000,
+    enabled: ["admin", "master", "operator"].includes(user?.role?.toLowerCase() || ""),
+  });
+
   return (
     <Sidebar>
       <SidebarHeader className={`border-b border-sidebar-border flex flex-col items-center justify-center overflow-hidden ${isInsegnante ? 'p-4 h-auto' : 'p-0 h-10'}`}>
@@ -493,7 +499,14 @@ export function AppSidebar() {
                       >
                         <Link href={item.url}>
                           <item.icon className="w-4 h-4" />
-                          <span>{item.title}</span>
+                          <span className="flex-1 flex items-center justify-between">
+                            {item.title}
+                            {item.title === "GemTeam" && pendingPermessiCount > 0 && (
+                              <Badge variant="destructive" className="ml-auto flex shrink-0 items-center justify-center rounded-full px-1.5 py-0 text-[10px] h-4 min-w-[20px]">
+                                {pendingPermessiCount}
+                              </Badge>
+                            )}
+                          </span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
