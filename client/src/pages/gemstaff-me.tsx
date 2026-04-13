@@ -9,12 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileCheck, Mail, Calendar as CalendarIcon, Info, MailWarning, Phone, Banknote, Clock } from "lucide-react";
+import { FileCheck, Mail, Calendar as CalendarIcon, Info, Phone, Banknote, Clock, Wrench, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
 export default function GemStaffMe() {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString());
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
@@ -64,18 +64,21 @@ export default function GemStaffMe() {
   if (isMeError || !meData) {
     return (
       <div className="p-8 max-w-3xl mx-auto mt-12">
-        <Alert variant="destructive" className="bg-red-50 border-red-200">
-          <MailWarning className="h-5 w-5 text-red-600" />
-          <AlertTitle className="text-red-800 text-lg">Profilo non trovato</AlertTitle>
-          <AlertDescription className="text-red-700 mt-2">
-            Non siamo riusciti a localizzare il tuo profilo insegnante. Contatta la segreteria per risolvere il problema.
-            <div className="mt-4">
-              <Button onClick={() => window.location.href = "mailto:segreteria@studiogem.it"} variant="outline" className="bg-white">
-                Contatta la segreteria
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
+        <Card className="bg-slate-50 border-slate-200 shadow-sm text-center py-10 px-6">
+          <div className="flex justify-center mb-6">
+             <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center">
+                <Wrench className="w-8 h-8 text-slate-500" />
+             </div>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">Profilo in configurazione</h2>
+          <p className="text-slate-600 mb-6 max-w-md mx-auto">
+            I tuoi dati saranno disponibili a breve. La segreteria sta completando il tuo profilo.<br/><br/>
+            Per assistenza: <a href="mailto:info@studio-gem.it" className="text-primary hover:underline font-semibold">info@studio-gem.it</a>
+          </p>
+          <Button onClick={() => logoutMutation.mutate()} variant="outline" className="bg-white hover:bg-slate-100 flex items-center gap-2 mx-auto">
+            <LogOut className="w-4 h-4" /> Torna al login
+          </Button>
+        </Card>
       </div>
     );
   }
@@ -166,9 +169,9 @@ export default function GemStaffMe() {
               </div>
             </div>
             <div className="pt-4 border-t">
-              <Button variant="outline" className="w-full sm:w-auto" asChild>
-                <a href="mailto:segreteria@studiogem.it">
-                  <Mail className="w-4 h-4 mr-2" /> Contatta la segreteria
+              <Button variant="outline" className="w-full sm:w-auto text-primary hover:bg-primary/5" asChild>
+                <a href="mailto:info@studio-gem.it">
+                  <Mail className="w-4 h-4 mr-2" /> Hai bisogno di aiuto? Contatta la segreteria &rarr;
                 </a>
               </Button>
             </div>

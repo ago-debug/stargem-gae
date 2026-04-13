@@ -273,6 +273,7 @@ import { useActiveUsers } from "@/hooks/use-active-users";
 export function AppSidebar() {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
+  const isInsegnante = (user as any)?.role === 'insegnante';
 
   const { data: latestActivity } = useQuery<{
     action: string;
@@ -307,18 +308,56 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="p-0 border-b border-sidebar-border flex items-center justify-center h-10 overflow-hidden">
-        <Link href="/" className="cursor-pointer block flex items-center justify-center h-full">
+      <SidebarHeader className={`border-b border-sidebar-border flex flex-col items-center justify-center overflow-hidden ${isInsegnante ? 'p-4 h-auto' : 'p-0 h-10'}`}>
+        <Link href="/" className="cursor-pointer block flex items-center justify-center">
           <img
             src="/logo_stargem.png"
             alt="StarGem"
             className="h-16 w-auto object-contain mix-blend-multiply hover:opacity-90 transition-transform scale-125"
           />
         </Link>
+        {isInsegnante && user && (
+          <div className="flex flex-col items-center mt-4">
+            <span className="font-bold text-slate-800">Ciao {user.firstName || user.username} 👋</span>
+            <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded mt-1 shadow-sm border border-amber-200">STAFF</span>
+          </div>
+        )}
       </SidebarHeader>
 
       <SidebarContent>
-        {filteredRegistration.length > 0 && (
+        {isInsegnante ? (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">SEZIONE PERSONALE</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={location === '/gemstaff/me'}>
+                    <Link href="/gemstaff/me">
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span>La mia area</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={location === '/forgot-password'}>
+                    <Link href="/forgot-password">
+                      <Settings className="w-4 h-4" />
+                      <span>Cambia password</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => logoutMutation.mutate()}>
+                    <LogOut className="w-4 h-4 text-red-500" />
+                    <span className="text-red-500">Logout</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : (
+          <>
+            {filteredRegistration.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">SEGRETERIA OPERATIVA</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -521,13 +560,15 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+          </>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 pt-0 border-t border-sidebar-border">
 
 
         {/* ACTIVE USERS ACCORDION/LIST */}
-        {(() => {
+        {!isInsegnante && (() => {
           const { data: usersInfo = [] } = useActiveUsers();
           if (usersInfo.length === 0) return null;
           
@@ -642,7 +683,7 @@ export function AppSidebar() {
 
         {user && (
           <div className="mt-2 bg-slate-50 border border-sidebar-border rounded-lg shadow-sm overflow-hidden flex-shrink-0">
-            {latestActivity && (
+            {!isInsegnante && latestActivity && (
               <div className="px-3 pt-2 pb-1.5 text-[9px] text-muted-foreground/80 leading-tight space-y-1 select-none bg-white/50 border-b border-sidebar-border/50">
                 <p className="flex justify-between items-center text-[8.5px]">
                   <span className="opacity-80">Aggiornato:</span>
