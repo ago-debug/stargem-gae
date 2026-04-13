@@ -581,6 +581,11 @@ Queste check list documentano i cambi di policy applicati in `_GAE_SVILUPPO`:
   - Fatto: Unificata la naming in UI per "Eventi Esterni", "Commenti Team", e "StarGem Copilot". Fissato "Merchandising" ovunque. Riscritto completamente l'Audit Route catalogando il routing in 5 gruppi logici netti tra Componente Ufficiale vs URL Legacy vs Placeholder, separati dal 404 reale.
   - Rifinitura Finale (5.1): Rafforzato l'Audit come Documento di Prodotto elevando le "Note Chiare" a descrizioni esplicite del legame Nome UX - Debito Tecnico, in particolare per il binomio Affitti/Sale, Affitto Studio Medico e Eventi Esterni/BookingServices. Ribadita la vera e propria ufficialità di "Merchandising" come attività padre.
   - Manca: Fase successiva decisa dall'utente.
+  
+- [x] Policy Ibridi: "Teoria dei Due Cappelli"
+  - File toccati: `_GAE_SVILUPPO/attuale/00B_GAE_Checklist_Operativa.md`
+  - Fatto: Istituita policy gestionale per Insegnanti che fanno anche segreteria/amministrazione (es. operano sia nel tab Staff che nel tab Team). È vietata l'assegnazione di ruoli admin a profili Insegnante per mantenere Audit log finanziari separati da quelli didattici. Si creano fisicamente due account separati ("due cappelli"): uno da Insegnante per gli allievi, uno da Team per le transazioni.
+  - Manca: Nulla. Policy in vigore permanente da oggi.
 
 ---
 

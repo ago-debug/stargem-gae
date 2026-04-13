@@ -43,6 +43,7 @@ import {
   Radio,
   ArrowLeftRight,
   BadgeCheck,
+  Users2,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { format } from "date-fns";
@@ -207,6 +208,11 @@ const secretariatItems = [
     title: "GemStaff",
     url: "/gemstaff",
     icon: BadgeCheck,
+  },
+  {
+    title: "GemTeam",
+    url: "/gemteam",
+    icon: Users2,
   },
   {
     title: "Gestione Note",

@@ -1,0 +1,895 @@
+import { useState, useMemo } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+// Mock data
+// Tipizzazioni mock fallback (le rimpiazzeremo logicamente runtime con API format)
+interface GemTeamMember {
+  id: number;
+  nome: string;
+  cognome: string;
+  team: string;
+  ruolo: string;
+  attivo: boolean;
+  tariffa: number | null;
+  fisso: boolean;
+  email?: string;
+  phone?: string;
+  photo_url?: string;
+}
+
+const TEAM_COLORS: Record<string, string> = {
+  'segreteria': 'bg-pink-100 text-pink-700',
+  'ass_manutenzione': 'bg-orange-100 text-orange-700',
+  'ufficio': 'bg-blue-100 text-blue-700',
+  'amministrazione': 'bg-purple-100 text-purple-700'
+};
+
+const TEAM_LABELS: Record<string, string> = {
+  'segreteria': 'Segreteria',
+  'ass_manutenzione': 'Manutenzione',
+  'ufficio': 'Ufficio',
+  'amministrazione': 'Amministrazione'
+};
+
+const WEEKS = ["A", "B", "C", "D", "E"];
+const DAYS = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
+
+const TIME_SLOTS = Array.from({length: 31}, (_, i) => {
+  const totalMinutes = 8 * 60 + 30 + (i * 30);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+});
+
+const SHIFT_COLORS: Record<string, string> = {
+  "RECEPTION": "bg-blue-100 text-blue-800 border-blue-200",
+  "PAUSA": "bg-slate-100 text-slate-600 border-slate-200",
+  "RIPOSO": "bg-slate-300 text-slate-800 border-slate-400 font-bold",
+  "UFFICIO": "bg-indigo-100 text-indigo-800 border-indigo-200",
+  "AMM.ZIONE": "bg-purple-100 text-purple-800 border-purple-200",
+  "PRIMO": "bg-teal-100 text-teal-800 border-teal-200",
+  "SECONDO": "bg-teal-100 text-teal-800 border-teal-200",
+  "RIUNIONE": "bg-amber-100 text-amber-800 border-amber-200",
+  "STUDIO_1": "bg-cyan-100 text-cyan-800 border-cyan-200",
+  "STUDIO_2": "bg-cyan-100 text-cyan-800 border-cyan-200",
+  "MALATTIA": "bg-red-100 text-red-800 border-red-200",
+  "PERMESSO": "bg-orange-100 text-orange-800 border-orange-200",
+};
+
+const getMockShift = (emp: string, week: string, day: string, time: string) => {
+  if (!week) return null;
+  if (emp === "Alexandra") {
+    if (week === "A" || week === "B") {
+      if (day === "Lunedì" && time >= "08:30" && time <= "14:00") return time === "11:30" ? "PAUSA" : "RECEPTION";
+      if (day === "Mercoledì" && time >= "15:00" && time <= "21:30") return time === "19:00" ? "PAUSA" : "PRIMO";
+      if (day === "Giovedì" && time >= "09:00" && time <= "15:30") return time === "13:00" ? "PAUSA" : "AMM.ZIONE";
+    }
+  }
+  if (emp === "Giuditta") {
+    if (week === "A" || week === "C") {
+      if (day === "Martedì" && time >= "14:00" && time <= "21:00") return time === "18:00" ? "PAUSA" : "SECONDO";
+      if (day === "Venerdì" && time >= "08:30" && time <= "15:00") return "RECEPTION";
+      if (day === "Domenica") return "RIPOSO";
+    }
+  }
+  if (emp === "Jasir") {
+    if (week === "A" || week === "D" || week === "E") {
+      if (day === "Mercoledì" && time >= "10:00" && time <= "17:00") return time === "13:30" ? "RIUNIONE" : "UFFICIO";
+      if (day === "Venerdì" && time >= "14:30" && time <= "22:00") return "SECONDO";
+      if (day === "Sabato") return "RIPOSO";
+    }
+  }
+  if (emp === "Estefany") {
+    if (day === "Lunedì" && time >= "16:00" && time <= "23:00") return "PRIMO";
+    if (day === "Giovedì" && time >= "09:00" && time <= "14:00") return "UFFICIO";
+    if (day === "Sabato" && time >= "10:00" && time <= "18:00") return time === "14:00" ? "PAUSA" : "RECEPTION";
+  }
+  return null;
+}
+
+const getWeekLabel = (offset: number) => {
+  const baseStart = new Date(2026, 3, 13); // 13 Apr 2026
+  const start = new Date(baseStart.getTime() + offset * 7 * 24 * 60 * 60 * 1000);
+  const end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000);
+  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
+  return `${start.toLocaleDateString('it-IT', options)} - ${end.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+};
+
+const PR_DAYS = ["M", "G", "V", "S", "D", "L", "M", "M", "G", "V", "S", "D", "L", "M", "M", "G", "V", "S", "D", "L", "M", "M", "G", "V", "S", "D", "L", "M", "M", "G"];
+const PRESENZE_COLORS: Record<string, string> = {
+  "FE": "bg-sky-100 text-sky-800",
+  "PE": "bg-yellow-100 text-yellow-800",
+  "ML": "bg-orange-100 text-orange-800",
+  "F": "bg-purple-100 text-purple-800",
+  "AI": "bg-red-100 text-red-800"
+};
+
+export default function GemTeam() {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [selectedWeek, setSelectedWeek] = useState("A");
+  
+  // API Calls
+  const { data: dipendentiAPI = [], isLoading: isLoadingDipendenti, isError: isErrorDipendenti } = useQuery<any[]>({
+    queryKey: ['/api/gemteam/dipendenti'],
+  });
+
+  const dipendenti: GemTeamMember[] = useMemo(() => {
+    return dipendentiAPI.map(d => ({
+      id: d.id,
+      nome: d.firstName || "Sconosciuto",
+      cognome: d.lastName || "",
+      team: d.team || "Membro",
+      ruolo: d.noteHr || "N/A",
+      attivo: d.attivo,
+      tariffa: d.tariffaOraria ? parseFloat(d.tariffaOraria) : null,
+      fisso: !!d.stipendioFissoMensile,
+      email: d.email,
+      phone: d.phone,
+      photo_url: d.photoUrl
+    }));
+  }, [dipendentiAPI]);
+
+  const MOCK_EMPLOYEES = useMemo(() => dipendenti.map(d => d.nome), [dipendenti]);
+  const [selectedEmployee, setSelectedEmployee] = useState(MOCK_EMPLOYEES[0] || "Seleziona...");
+
+  const [calWeekOffset, setCalWeekOffset] = useState(0);
+  const [programmedWeeks, setProgrammedWeeks] = useState<Record<number, string>>({});
+  const [draftTemplate, setDraftTemplate] = useState("A");
+
+  // Tab Dipendenti State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [teamFilter, setTeamFilter] = useState("tutti");
+  const [selectedSheetDip, setSelectedSheetDip] = useState<GemTeamMember | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const filteredDipendenti = useMemo(() => {
+    return dipendenti.filter(d => {
+      const matchText = (d.nome + " " + d.cognome).toLowerCase().includes(searchTerm.toLowerCase());
+      const matchTeam = teamFilter === "tutti" || d.team === teamFilter;
+      return matchText && matchTeam;
+    });
+  }, [searchTerm, teamFilter, dipendenti]);
+
+  // Tab Presenze State
+  const [selectedMonthYear, setSelectedMonthYear] = useState("04-2026");
+  const [meseRaw, annoRaw] = selectedMonthYear.split("-");
+  
+  const { data: presenzeAPI = [], isLoading: isLoadingPresenze, isFetching: isFetchingPresenze } = useQuery<any[]>({
+    queryKey: ['/api/gemteam/presenze', annoRaw, meseRaw],
+  });
+
+  const [presenzeEdited, setPresenzeEdited] = useState<Record<number, Record<number, boolean>>>({});
+  
+  // Real-time grid map calculation
+  const presenzeData = useMemo(() => {
+    const data: Record<number, Record<number, string>> = {};
+    dipendenti.forEach(dip => {
+      data[dip.id] = {};
+    });
+    
+    presenzeAPI.forEach(r => {
+      const date = new Date(r.data);
+      const dayStr = date.getDate();
+      if (!data[r.employeeId]) data[r.employeeId] = {};
+      
+      let val = "";
+      if (r.tipoAssenza) {
+        val = r.tipoAssenza;
+      } else if (r.oreLavorate !== null && r.oreLavorate !== undefined) {
+        val = r.oreLavorate.toString();
+      }
+      data[r.employeeId][dayStr] = val;
+    });
+    return data;
+  }, [presenzeAPI, dipendenti]);
+
+  const presenzeMutation = useMutation({
+    mutationFn: async ({ employee_id, day, value }: any) => {
+      let ore_lavorate = null;
+      let tipo_assenza = null;
+      
+      const parsed = parseFloat(value);
+      if (!isNaN(parsed)) {
+        ore_lavorate = parsed;
+      } else if (value && ["FE", "PE", "ML", "F", "AI"].includes(value)) {
+        tipo_assenza = value;
+      }
+      
+      const dbDate = `${annoRaw}-${meseRaw}-${String(day).padStart(2, '0')}`;
+      
+      await apiRequest("POST", "/api/gemteam/presenze", {
+        employee_id,
+        data: dbDate,
+        ore_lavorate,
+        tipo_assenza,
+        note: null
+      });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/gemteam/presenze', annoRaw, meseRaw] });
+      setPresenzeEdited(prev => ({...prev, [variables.employee_id]: {...(prev[variables.employee_id]||{}), [variables.day]: true}}));
+    }
+  });
+
+  const updatePresenza = (dipId: number, day: number, value: string) => {
+    presenzeMutation.mutate({employee_id: dipId, day, value });
+  };
+
+  // Auth Guard
+  const userRole = (user as any)?.role?.toLowerCase() || "";
+  if (userRole === "dipendente") {
+    setLocation("/gemteam/me");
+    return null;
+  }
+
+  // Se l'utente non è admin, operator o master, non consentiamo di base
+  const isAllowed = ["admin", "operator", "master"].includes(userRole);
+  if (!isAllowed) {
+    return (
+      <div className="p-8 text-center text-slate-500">
+        Non hai i permessi per visualizzare questa pagina.
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 md:p-8 space-y-8 w-full max-w-7xl mx-auto animate-in fade-in zoom-in-95 duration-500">
+      
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b pb-6 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Users2 className="w-8 h-8 text-primary" />
+            GemTeam
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs mt-1">
+              TEAM MANAGER
+            </Badge>
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Gestione risorse umane, turni e stipendi
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1 text-sm shadow-sm">
+            <Users2 className="w-4 h-4 mr-1.5" /> 14 Dipendenti
+          </Badge>
+        </div>
+      </div>
+
+      {/* TABS */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-flow-auto grid-cols-3 md:grid-cols-6 h-auto p-1.5 gap-1.5 bg-slate-100 rounded-xl mb-8">
+          <TabsTrigger value="dashboard" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+            <Home className="w-4 h-4 mr-2" /> Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="dipendenti" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+            <Users2 className="w-4 h-4 mr-2" /> Dipendenti
+          </TabsTrigger>
+          <TabsTrigger value="turni" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+            <ShieldCheck className="w-4 h-4 mr-2" /> Turni
+          </TabsTrigger>
+          <TabsTrigger value="presenze" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+            <ClipboardList className="w-4 h-4 mr-2" /> Presenze
+          </TabsTrigger>
+          <TabsTrigger value="diario" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+            <PenTool className="w-4 h-4 mr-2" /> Diario
+          </TabsTrigger>
+          <TabsTrigger value="report" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+            <PieChart className="w-4 h-4 mr-2" /> Report
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="dashboard">
+          <Card className="border-dashed border-2 shadow-none bg-slate-50/50">
+            <CardContent className="flex flex-col items-center justify-center h-64 text-center">
+              <Home className="w-12 h-12 text-slate-300 mb-4" />
+              <h3 className="text-xl font-bold text-slate-700">Dashboard Team</h3>
+              <p className="text-slate-500 mt-2">Modulo in costruzione.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="dipendenti">
+          <div className="space-y-6">
+            {/* Filtri */}
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Cerca dipendente..."
+                  className="pl-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <ToggleGroup type="single" value={teamFilter} onValueChange={(val) => {if(val) setTeamFilter(val)}} className="bg-white border rounded-lg p-1 overflow-x-auto w-full justify-start md:w-auto">
+                <ToggleGroupItem value="tutti" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-slate-800 data-[state=on]:text-white">Tutti</ToggleGroupItem>
+                <ToggleGroupItem value="segreteria" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-pink-100 data-[state=on]:text-pink-800">Segreteria</ToggleGroupItem>
+                <ToggleGroupItem value="ass_manutenzione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-orange-100 data-[state=on]:text-orange-800">Manutenzione</ToggleGroupItem>
+                <ToggleGroupItem value="ufficio" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800">Ufficio</ToggleGroupItem>
+                <ToggleGroupItem value="amministrazione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-purple-100 data-[state=on]:text-purple-800">Amministrazione</ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
+            {/* Griglia Dipendenti */}
+            {isLoadingDipendenti ? (
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                 {[1,2,3,4,5,6].map(sk => <Skeleton key={sk} className="h-48 rounded-xl" />)}
+               </div>
+            ) : isErrorDipendenti ? (
+               <div className="col-span-full py-12 text-center bg-red-50 border border-red-200 rounded-xl text-red-600 font-semibold">
+                  Errore di connessione al database Team.
+               </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredDipendenti.map(dip => (
+                  <Card 
+                    key={dip.id} 
+                    className="hover:shadow-md transition-shadow cursor-pointer border-slate-200"
+                    onClick={() => {
+                      setSelectedSheetDip(dip);
+                      setIsSheetOpen(true);
+                    }}
+                  >
+                    <CardContent className="p-5 flex flex-col items-center text-center relative">
+                      {/* Badge Attivo */}
+                      {dip.attivo && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-green-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                          ATTIVO
+                        </div>
+                      )}
+                      
+                      <Avatar className={`w-16 h-16 mb-3 border-2 border-white shadow-sm ring-2 ${dip.team === 'segreteria' ? 'ring-pink-100' : dip.team === 'ass_manutenzione' ? 'ring-orange-100' : dip.team === 'ufficio' ? 'ring-blue-100' : 'ring-purple-100'}`}>
+                        {dip.photo_url ? (
+                          <AvatarImage src={dip.photo_url} alt={dip.nome} className="object-cover" />
+                        ) : null}
+                        <AvatarFallback className={`text-lg font-bold ${TEAM_COLORS[dip.team]}`}>
+                          {dip.nome.charAt(0)}{dip.cognome.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <h3 className="font-bold text-slate-800 truncate w-full px-2">{dip.nome} {dip.cognome}</h3>
+                      <Badge variant="secondary" className={`mt-1 mb-3 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[dip.team]}`}>
+                        {TEAM_LABELS[dip.team] || dip.team}
+                      </Badge>
+                      
+                      <div className="w-full bg-slate-50 rounded-lg p-2 mt-auto border border-slate-100">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-500 font-medium truncate pr-2">{dip.ruolo}</span>
+                          <span className="font-bold text-slate-700 bg-white px-1.5 py-0.5 rounded border shadow-sm shrink-0">
+                            {dip.fisso ? "Fisso" : dip.tariffa ? `€${dip.tariffa}/h` : "—"}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {filteredDipendenti.length === 0 && (
+                  <div className="col-span-full py-12 text-center bg-slate-50 border-dashed border-2 rounded-xl text-slate-400">
+                    <Users2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    Nessun dipendente trovato per i filtri correnti.
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Sheet Pannello Laterale */}
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+                {selectedSheetDip && (
+                  <>
+                    <SheetHeader className="text-left pb-6 border-b border-slate-100">
+                      <div className="flex items-center gap-4 mb-2">
+                        <Avatar className={`w-14 h-14 border mb-0 border-white shadow-sm ring-2 ${selectedSheetDip.team === 'segreteria' ? 'ring-pink-100' : selectedSheetDip.team === 'ass_manutenzione' ? 'ring-orange-100' : selectedSheetDip.team === 'ufficio' ? 'ring-blue-100' : 'ring-purple-100'}`}>
+                          {selectedSheetDip.photo_url ? (
+                            <AvatarImage src={selectedSheetDip.photo_url} alt={selectedSheetDip.nome} className="object-cover" />
+                          ) : null}
+                          <AvatarFallback className={`text-xl font-bold ${TEAM_COLORS[selectedSheetDip.team]}`}>
+                            {selectedSheetDip.nome.charAt(0)}{selectedSheetDip.cognome.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <SheetTitle className="text-2xl text-slate-800 m-0 p-0 leading-none">
+                            {selectedSheetDip.nome} {selectedSheetDip.cognome}
+                          </SheetTitle>
+                          <Badge variant="secondary" className={`mt-2 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[selectedSheetDip.team]}`}>
+                            {TEAM_LABELS[selectedSheetDip.team]}
+                          </Badge>
+                        </div>
+                      </div>
+                      <SheetDescription className="pt-2 text-slate-500">
+                        {selectedSheetDip.ruolo} • {selectedSheetDip.fisso ? "Compenso Fisso" : selectedSheetDip.tariffa ? `Tariffa Oraria: €${selectedSheetDip.tariffa}` : "—"}
+                      </SheetDescription>
+                    </SheetHeader>
+                    
+                    <div className="py-6 space-y-8">
+                      {/* ANAGRAFICA */}
+                      <section>
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                          <UserPlus className="w-4 h-4" /> Anagrafica e Recapiti
+                        </h4>
+                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
+                          <div className="flex items-center gap-3 text-sm text-slate-600">
+                            <Mail className="w-4 h-4 text-slate-400" />
+                            <span>{selectedSheetDip.email || "—"}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-slate-600">
+                            <Phone className="w-4 h-4 text-slate-400" />
+                            <span>{selectedSheetDip.phone || "—"}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-slate-600">
+                            <MapPin className="w-4 h-4 text-slate-400" />
+                            <span>—</span>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* TURNO OGGI */}
+                      <section>
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                          <ClipboardList className="w-4 h-4" /> Turno Oggi
+                        </h4>
+                        <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100 border-dashed text-center">
+                          <p className="text-sm text-blue-700 font-medium">Dato disponibile dopo F1-003.</p>
+                        </div>
+                      </section>
+                      
+                      {/* PRESENZE MESE */}
+                      <section>
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                          <ShieldCheck className="w-4 h-4" /> Presenze Mese
+                        </h4>
+                        <div className="bg-slate-50 rounded-xl p-6 border border-slate-200 border-dashed text-center">
+                          <p className="text-sm text-slate-500 font-medium">Integrazione in corso.</p>
+                        </div>
+                      </section>
+                      
+                      {/* DOCUMENTI */}
+                      <section>
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                          <PenTool className="w-4 h-4" /> Documenti
+                        </h4>
+                        <div className="bg-slate-50 rounded-xl p-6 border border-slate-200 border-dashed text-center">
+                          <p className="text-sm text-slate-500 font-medium">Fascicolo digitale vuoto.</p>
+                        </div>
+                      </section>
+                      
+                      {/* ACTION BUTTON */}
+                      <div className="pt-4 border-t border-slate-100">
+                        <Button variant="outline" className="w-full h-11 border-blue-200 text-blue-700 hover:bg-blue-50 font-bold bg-white shadow-sm">
+                          <ShieldCheck className="w-4 h-4 mr-2" /> Crea Account di Sistema
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </SheetContent>
+            </Sheet>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="turni">
+          <Card className="border-slate-200 shadow-sm overflow-hidden">
+            <CardContent className="p-0 sm:p-6 space-y-6 bg-slate-50">
+              
+              {/* Toolbar */}
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-transparent lg:border-slate-200 pb-0 lg:pb-4 p-4 lg:p-0">
+                <div className="flex items-center gap-4 w-full lg:w-auto">
+                  <div className="w-full sm:w-64">
+                    <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                      <SelectTrigger className="font-semibold bg-white border-slate-300 shadow-sm w-full">
+                        <SelectValue placeholder="Seleziona dipendente" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MOCK_EMPLOYEES.map(emp => (
+                          <SelectItem key={emp} value={emp}>{emp}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="hidden sm:flex text-sm shrink-0 items-center gap-2">
+                    <span className="text-slate-500">Squadra: </span>
+                    <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-white shadow-sm border-slate-300 text-slate-700">
+                      {selectedEmployee === 'Jasir' || selectedEmployee === 'Giuditta' ? 'Operator / Co-Admin' : 'Personale Operativo'}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 bg-white p-1.5 rounded-lg border border-slate-300 shadow-sm w-full sm:w-auto overflow-x-auto">
+                  <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest pl-2 shrink-0">Settimana</span>
+                  <ToggleGroup type="single" value={selectedWeek} onValueChange={(val) => {if(val) setSelectedWeek(val)}} className="gap-1 shrink-0">
+                    {WEEKS.map(w => (
+                      <ToggleGroupItem key={w} value={w} className="w-8 h-8 rounded-md data-[state=on]:bg-primary data-[state=on]:text-primary-foreground font-bold shadow-sm transition-all hover:bg-slate-100">
+                        {w}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </div>
+              </div>
+
+              {/* Grid Area */}
+              <div className="mx-0 sm:mx-0 border-y sm:border rounded-none sm:rounded-xl shadow-inner scrollbar-thin overflow-auto max-h-[65vh] bg-slate-50/50">
+                <table className="w-full border-collapse text-sm min-w-[800px] table-fixed">
+                  <thead className="sticky top-0 z-20 shadow-sm">
+                    <tr>
+                      <th className="bg-slate-200 border-slate-300 border px-1 py-3 w-[60px] sm:w-[80px] text-[10px] sm:text-xs uppercase text-slate-600 tracking-wider">Ora</th>
+                      {DAYS.map(day => (
+                        <th key={day} className="bg-slate-200 border-slate-300 border p-2 w-auto font-semibold text-slate-700">
+                          {day}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {TIME_SLOTS.map(time => (
+                      <tr key={time} className="hover:bg-blue-50/50 transition-colors group">
+                        <td className="border border-slate-200 p-1 sm:p-2 text-center text-[10px] sm:text-xs font-bold text-slate-500 bg-white sticky left-0 z-10 shadow-[1px_0_0_0_#e2e8f0]">
+                          {time}
+                        </td>
+                        {DAYS.map(day => {
+                          const shift = getMockShift(selectedEmployee, selectedWeek, day, time);
+                          return (
+                            <td key={`${day}-${time}`} className="border border-slate-200 p-1 sm:p-1.5 relative group-hover:border-slate-300 transition-colors bg-white">
+                              {shift && (
+                                <div className={`text-[9px] sm:text-[10px] font-bold px-1 py-1.5 sm:px-2 sm:py-2 rounded-md border text-center shadow-sm whitespace-nowrap overflow-hidden text-ellipsis transition-all ${SHIFT_COLORS[shift] || 'bg-slate-100 text-slate-800'}`} title={shift}>
+                                  {shift}
+                                </div>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Legenda rapida */}
+              <div className="flex flex-wrap gap-1.5 pt-2 px-4 pb-4 sm:p-0">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center mr-2">Legenda Postazioni</span>
+                {Object.entries(SHIFT_COLORS).map(([name, classes]) => (
+                  <Badge key={name} variant="outline" className={`text-[9px] px-1.5 py-0.5 border ${classes} opacity-90 shadow-sm`}>
+                    {name}
+                  </Badge>
+                ))}
+              </div>
+
+            </CardContent>
+          </Card>
+
+          {/* SEPARATORE */}
+          <div className="my-8 border-t border-slate-200" />
+
+          {/* CALENDARIO REALE */}
+          <Card className="border-slate-200 shadow-sm overflow-hidden">
+            <CardContent className="p-4 sm:p-6 space-y-6 bg-slate-50">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-transparent lg:border-slate-200 pb-0 lg:pb-4 p-4 lg:p-0">
+                <div>
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                    <CalendarDays className="w-5 h-5 text-primary" /> Programmazione Calendario
+                  </h3>
+                  <p className="text-sm text-slate-500">Programma i turni applicando la settimana tipo.</p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+                  {/* Navigatore Settimana */}
+                  <div className="flex items-center bg-white border border-slate-300 shadow-sm rounded-lg p-1 w-full sm:w-auto justify-between">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-100" onClick={() => setCalWeekOffset(o => o - 1)}>
+                      <ChevronLeft className="w-4 h-4 text-slate-600" />
+                    </Button>
+                    <div className="px-3 text-xs sm:text-sm font-semibold min-w-[150px] text-center text-slate-800">
+                      Settimana {getWeekLabel(calWeekOffset)}
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-100" onClick={() => setCalWeekOffset(o => o + 1)}>
+                      <ChevronRight className="w-4 h-4 text-slate-600" />
+                    </Button>
+                  </div>
+                  
+                  {programmedWeeks[calWeekOffset] && (
+                     <div className="hidden lg:flex items-center gap-2 text-xs font-bold px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg">
+                       <CheckCircle2 className="w-4 h-4" /> Tipo {programmedWeeks[calWeekOffset]} Applicato
+                     </div>
+                  )}
+                </div>
+              </div>
+
+              {/* GRIGLIA PROGRAMMATA O STATO VUOTO */}
+              {programmedWeeks[calWeekOffset] ? (
+                <div className="mx-0 sm:mx-0 border-y sm:border rounded-none sm:rounded-xl shadow-inner scrollbar-thin overflow-auto max-h-[65vh] bg-white">
+                  <table className="w-full border-collapse text-sm min-w-[800px] table-fixed">
+                    <thead className="sticky top-0 z-20 shadow-sm">
+                      <tr>
+                        <th className="bg-slate-100 border-slate-300 border px-1 py-3 w-[60px] sm:w-[80px] text-[10px] sm:text-xs uppercase text-slate-600 tracking-wider">Ora</th>
+                        {DAYS.map(day => (
+                          <th key={day} className="bg-slate-100 border-slate-300 border p-2 w-auto font-semibold text-slate-800">
+                            {day}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {TIME_SLOTS.map(time => (
+                        <tr key={time} className="hover:bg-blue-50/50 transition-colors group">
+                          <td className="border border-slate-200 p-1 sm:p-2 text-center text-[10px] sm:text-xs font-bold text-slate-500 bg-white sticky left-0 z-10 shadow-[1px_0_0_0_#e2e8f0]">
+                            {time}
+                          </td>
+                          {DAYS.map(day => {
+                            const calTemplate = programmedWeeks[calWeekOffset];
+                            const shift = getMockShift(selectedEmployee, calTemplate, day, time);
+                            return (
+                              <td key={`${day}-${time}`} className="border border-slate-200 p-1 sm:p-1.5 relative group-hover:border-slate-300 transition-colors bg-white">
+                                {shift && (
+                                  <div className={`text-[9px] sm:text-[10px] font-bold px-1 py-1.5 sm:px-2 sm:py-2 rounded-md border text-center shadow-sm whitespace-nowrap overflow-hidden text-ellipsis transition-all ${SHIFT_COLORS[shift] || 'bg-slate-100 text-slate-800'}`} title={shift}>
+                                    {shift}
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8 py-16 bg-white border-dashed border-2 border-slate-200 rounded-xl shadow-sm text-center">
+                  <CalendarDays className="w-16 h-16 text-slate-300 mb-4" />
+                  <h4 className="text-xl font-bold text-slate-700">Nessun turno assegnato per questa settimana.</h4>
+                  <p className="text-slate-500 max-w-md mx-auto mt-2 mb-6">
+                    Questa settimana non ha ancora una programmazione base. Clicca qui sotto per importare una Settimana Tipo.
+                  </p>
+                  
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" className="font-semibold text-primary hover:bg-blue-50 text-sm shadow-sm border border-transparent hover:border-blue-100">
+                        Applica template &rarr;
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Applica Template alla Settimana</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Scegli quale template applicare per popolare il calendario. Questo sovrascriverà eventuali eccezioni già approvate per questa settimana.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <div className="py-4">
+                        <Select value={draftTemplate} onValueChange={setDraftTemplate}>
+                          <SelectTrigger className="w-full h-10">
+                            <SelectValue placeholder="Seleziona un preset" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {WEEKS.map(w => <SelectItem key={w} value={w}>Settimana Tipo {w}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annulla</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => {
+                          setProgrammedWeeks(prev => ({...prev, [calWeekOffset]: draftTemplate}));
+                        }} className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 px-8 rounded-md">
+                          Applica Ora
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="presenze">
+          <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+            <CardContent className="p-0 sm:p-6 space-y-6">
+              
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 p-4 lg:p-0">
+                <div>
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                    <ClipboardList className="w-5 h-5 text-primary" /> Foglio Presenze
+                  </h3>
+                  <p className="text-sm text-slate-500">Compilazione e verifica scostamenti orari.</p>
+                </div>
+
+                <div className="flex items-center gap-4 w-full sm:w-auto">
+                  {isFetchingPresenze && <span className="text-xs text-blue-500 font-bold animate-pulse">Aggiornamento...</span>}
+                  <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
+                    <SelectTrigger className="w-40 font-semibold bg-white border-slate-300 shadow-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="04-2026">Aprile 2026</SelectItem>
+                      <SelectItem value="05-2026">Maggio 2026</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button variant="outline" className="shadow-sm border-slate-300 bg-white">
+                    <Download className="w-4 h-4 mr-2" /> Esporta
+                  </Button>
+                </div>
+              </div>
+
+              {isLoadingPresenze ? (
+                <div className="p-12 flex flex-col items-center border border-slate-200 rounded-xl bg-slate-50 space-y-4">
+                  <div className="animate-spin w-8 h-8 rounded-full border-4 border-slate-300 border-t-primary" />
+                  <span className="text-slate-500 font-semibold">Caricamento presenze mese {meseRaw}/{annoRaw}...</span>
+                </div>
+              ) : (
+                <div className="w-full border rounded-xl overflow-x-auto shadow-inner bg-slate-50 scrollbar-thin relative">
+                  <table className="w-full text-xs text-center border-collapse">
+                    <thead className="bg-slate-200 border-b border-slate-300 sticky top-0 z-10 text-[10px] text-slate-600 font-bold uppercase tracking-widest hidden sm:table-header-group">
+                      <tr>
+                        <th className="sticky left-0 bg-slate-200 p-2 text-left min-w-[150px] border-r border-slate-300 shadow-[1px_0_0_0_#cbd5e1] z-20">Dipendente</th>
+                        {Array.from({length: 30}, (_, i) => {
+                          const day = i + 1;
+                          const l = PR_DAYS[i];
+                          const isWeekend = l === "S" || l === "D";
+                          return (
+                            <th key={day} className={`p-1 border border-slate-300 w-[36px] min-w-[36px] max-w-[36px] ${isWeekend ? 'bg-slate-300 text-slate-500' : 'text-slate-700'}`}>
+                              <div className="flex flex-col items-center">
+                                <span className="text-[11px] mb-0.5">{day}</span>
+                                <span className="text-[9px] opacity-70 font-medium">{l}</span>
+                              </div>
+                            </th>
+                          );
+                        })}
+                        <th className="p-2 border border-slate-300 bg-slate-800 text-white min-w-[50px] sticky right-0 shadow-[-1px_0_0_0_#1e293b] z-20">TOT</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dipendenti.map(dip => {
+                        // Sum hours (only parse numbers)
+                        let tot = 0;
+                        for (let d = 1; d <= 30; d++) {
+                          const val = presenzeData[dip.id]?.[d];
+                          const parsed = parseFloat(val);
+                          if (!isNaN(parsed)) tot += parsed;
+                        }
+
+                        return (
+                          <tr key={dip.id} className="hover:bg-blue-50/40 relative group border-b border-slate-200">
+                            <td className="sticky left-0 bg-white border-r border-slate-200 p-2 text-left font-semibold text-slate-700 whitespace-nowrap shadow-[1px_0_0_0_#e2e8f0] z-10 group-hover:bg-blue-50/40 flex items-center justify-between">
+                              <span>{dip.nome} {dip.cognome.charAt(0)}.</span>
+                              <div className={`w-2 h-2 rounded-full ml-2 ${TEAM_COLORS[dip.team]?.split(' ')[0]}`} />
+                            </td>
+                            {Array.from({length: 30}, (_, i) => {
+                              const day = i + 1;
+                              const l = PR_DAYS[i];
+                              const isWeekend = l === "S" || l === "D";
+                              const val = presenzeData[dip.id]?.[day] || "";
+                              const isEdited = presenzeEdited[dip.id]?.[day];
+                              
+                              const badgeColor = PRESENZE_COLORS[val] || (val ? 'bg-white font-bold' : (isWeekend ? 'bg-slate-100' : 'bg-slate-50'));
+
+                              return (
+                                <td key={day} className={`border border-slate-100 ${isWeekend ? 'bg-slate-100' : 'bg-white'}`}>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <div className={`w-full h-8 flex items-center justify-center cursor-pointer relative hover:ring-1 hover:ring-inset hover:ring-blue-400 hover:z-10 transition-all ${badgeColor}`}>
+                                        {isEdited && <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-orange-500 rounded-full" />}
+                                        <span className="text-[10px]">{val}</span>
+                                      </div>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-48 p-3 shadow-xl" align="center">
+                                      <h4 className="text-xs font-bold text-slate-500 mb-2 uppercase">{dip.nome} — Giorno {day} ({l})</h4>
+                                      <div className="grid grid-cols-3 gap-1.5 mb-3">
+                                        <Button variant="outline" size="sm" className="h-7 text-[10px] bg-sky-50 hover:bg-sky-100" onClick={() => updatePresenza(dip.id, day, 'FE')}>FE</Button>
+                                        <Button variant="outline" size="sm" className="h-7 text-[10px] bg-yellow-50 hover:bg-yellow-100" onClick={() => updatePresenza(dip.id, day, 'PE')}>PE</Button>
+                                        <Button variant="outline" size="sm" className="h-7 text-[10px] bg-orange-50 hover:bg-orange-100" onClick={() => updatePresenza(dip.id, day, 'ML')}>ML</Button>
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <Input 
+                                          type="number" 
+                                          step="0.5" 
+                                          placeholder="Ore" 
+                                          defaultValue={parseFloat(val) ? val : ""} 
+                                          className="h-8 text-sm"
+                                          onBlur={(e) => updatePresenza(dip.id, day, e.target.value)}
+                                        />
+                                        <Button variant="destructive" size="icon" className="h-8 w-8 shrink-0" onClick={() => updatePresenza(dip.id, day, '')}>
+                                          x
+                                        </Button>
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
+                                </td>
+                              );
+                            })}
+                            <td className="sticky right-0 bg-slate-50 border-l border-slate-300 font-bold p-1 shadow-[-1px_0_0_0_#cbd5e1] z-10 text-slate-800 tabular-nums">
+                              {tot > 0 ? tot : "-"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-slate-800 text-white font-bold h-10 border-t-2 border-slate-900 sticky bottom-0 z-20 shadow-[0_-2px_4px_rgba(0,0,0,0.1)]">
+                        <td className="sticky left-0 bg-slate-800 p-2 text-right uppercase text-[10px] tracking-widest shadow-[1px_0_0_0_#1e293b] border-r border-slate-700 z-30 ring-1 ring-slate-800">
+                          Totale Ore Giorno
+                        </td>
+                        {Array.from({length: 30}, (_, i) => {
+                          const day = i + 1;
+                          let colSum = 0;
+                          dipendenti.forEach(dip => {
+                            const val = presenzeData[dip.id]?.[day];
+                            const parsed = parseFloat(val);
+                            if (!isNaN(parsed)) colSum += parsed;
+                          });
+                          return (
+                            <td key={day} className="text-[10px] border border-slate-700 tabular-nums">
+                              {colSum > 0 ? colSum : ""}
+                            </td>
+                          );
+                        })}
+                        <td className="sticky right-0 bg-slate-900 border-l border-slate-700 shadow-[-1px_0_0_0_#0f172a] z-30 ring-1 ring-slate-900">
+                          {dipendenti.reduce((acc, dip) => {
+                            for (let d = 1; d <= 30; d++) {
+                              const val = presenzeData[dip.id]?.[d];
+                              const parsed = parseFloat(val);
+                              if (!isNaN(parsed)) acc += parsed;
+                            }
+                            return acc;
+                          }, 0)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2 pt-2 px-4 shadow-none">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center mr-2">Legenda Assenze</span>
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-sky-100 text-sky-800">FE - Ferie</Badge>
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-yellow-100 text-yellow-800">PE - Permesso</Badge>
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-orange-100 text-orange-800">ML - Malattia</Badge>
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-purple-100 text-purple-800">F - Festività</Badge>
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-red-100 text-red-800">AI - Ass. Ingiustificata</Badge>
+              </div>
+
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="diario">
+          <Card className="border-dashed border-2 shadow-none bg-slate-50/50">
+            <CardContent className="flex flex-col items-center justify-center h-64 text-center">
+              <PenTool className="w-12 h-12 text-slate-300 mb-4" />
+              <h3 className="text-xl font-bold text-slate-700">Diario di Bordo</h3>
+              <p className="text-slate-500 mt-2">Modulo in costruzione.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="report">
+          <Card className="border-dashed border-2 shadow-none bg-slate-50/50">
+            <CardContent className="flex flex-col items-center justify-center h-64 text-center">
+              <PieChart className="w-12 h-12 text-slate-300 mb-4" />
+              <h3 className="text-xl font-bold text-slate-700">Report e Buste Paga</h3>
+              <p className="text-slate-500 mt-2">Modulo in costruzione.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+      </Tabs>
+    </div>
+  );
+}

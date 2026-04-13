@@ -15,8 +15,8 @@ La suite consta potenzialmente di 22 moduli, di cui quelli principali sono già 
 | **3** | **BookGem (Booking)** | Prenotazioni, affitti spazi e sale. | **Esistente:** `studios`, `studio_bookings`. | ✅ Operativo |
 | **4** | **MedGem (Medico)** | Pannello idoneità sportive e blocco prenotazioni. | **Esistente:** `medical_certificates` intrecciata a `members`. | ✅ Stabile |
 | **5** | **Clarissa (CRM & IA)** | Marketing automation. Manda comunicazioni su trigger. | **Futuro:** `marketing_campaigns`, `automation_rules`, `email_logs`. | ⬜ Da Progettare |
-| **6** | **GemStaff (Burocrazia)** | Contrattualistica docenti, marketing HR. | **Esistente:** `staff_rates`. **Futuro:** `staff_contracts_compliance`. | ⬜ In Attivazione |
-| **7** | **GemTeam (HR Operativo)** | Tracking lavorativo, monitoraggio ore collaboratori. | **Esistente:** `users`. **Futuro:** `staff_shifts`, `payslips`. | ⬜ Da Progettare |
+| **6** | **GemStaff (Burocrazia)** | Contrattualistica docenti, marketing HR. | **Esistente:** `staff_rates`, `staff_contracts_compliance`. | ✅ In Attivazione |
+| **7** | **GemTeam (HR Operativo)** | Tracking lavorativo, monitoraggio ore collaboratori. | **Esistente:** `users`, `staff_presenze`, `payslips`. | ✅ In Attivazione |
 | **8** | **Gemory (Project Mgr)** | Comunicazione p2p tra segretari. Post-it, compiti. | **Esistente:** `todos`, `team_notes`, `team_comments`. | ✅ Operativo |
 | **9** | **TeoCopilot (AI Bot)** | Assistenza AI per operazioni e query read-only. | **Esistente:** Lettura read-only e Tooltip UI. | ✅ Operativo |
 | **10** | **Contabilità & Cassa** | Libro mastro, quote, sconti e convenzioni. | **Esistente:** `payments`, `quotes`, `cost_centers`, `carnet_wallets`. | ⏳ In Lavorazione |
@@ -69,11 +69,13 @@ I volumi di records presenti al termine delle bonifiche e mock dei dati sono i s
 
 Lo schema relazionale è pronto ad accogliere i prossimi blocchi senza causare deadlock o frammentare la logica STI. Di seguito le istruzioni esatte per l'implementazione DB dei 4 blocchi mancanti:
 
-### 4.1. GemStaff (Motore HR e Tracciamento)
-Evitare di incrociare lo stipendio degli insegnanti con l'orario di reception. Saranno necessari:
+### 4.1. GemStaff e GemTeam (Motore HR e Tracciamento)
+Evitare di incrociare lo stipendio degli insegnanti con l'orario di reception. Le seguenti tabelle sono ora attive a sistema:
 - **`payslips`** (Busta Paga/Cedolino mensile per i docenti basato su erogazione).
-- **`staff_shifts`** (Gestione ore dei dipendenti che non erogano fitness, es. pulizie, administration).
-- **`staff_contracts_compliance`** (Checklist documenti DURC, scadenze, sicurezza).
+- **`staff_presenze`** e **`staff_sostituzioni`** (Gestione ore dei dipendenti, check-in, tracking sostituzioni e timbrature).
+- **`staff_contracts_compliance`** e **`staff_document_signatures`** (Checklist documenti DURC, firme elettroniche, scadenze, sicurezza).
+- **`staff_disciplinary_log`** (Registro anomalie e note HR per lo staff protetto da admin).
+- **Segmentazione Ruoli:** Il flusso utenti in UI è stato blindato su 3 compartimenti: `Team` (Admin), `Staff` (Insegnanti), `Utenti` (Clienti), impedendo assegnazioni amministrative involontarie agli insegnanti (Policy Due Cappelli).
 
 ### 4.2. Kiosk Segreteria (Firma Modulistica Mobile)
 La tabella **`member_forms_submissions`** dovrà accogliere flussi dinamici di firma in loco.

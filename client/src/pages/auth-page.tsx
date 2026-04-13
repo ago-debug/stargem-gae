@@ -81,6 +81,16 @@ export default function AuthPage() {
             return null;
         }
         
+        if ((user as any).role?.toLowerCase() === 'dipendente') {
+            setLocation('/gemteam/me');
+            return null;
+        }
+
+        if ((user as any).role?.toLowerCase() === 'insegnante') {
+            setLocation('/gemstaff/me');
+            return null;
+        }
+
         setLocation((user as any).redirectTo || '/calendario-attivita');
         return null;
     }

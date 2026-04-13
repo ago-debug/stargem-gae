@@ -73,7 +73,7 @@ Questa astrazione strategica permette agli sviluppatori di ragionare per "compar
 | **Chat e Task Condivisi** | `/todo-list` | 🟡 **Comunicazioni Team** | `todos`, `team_comments`, `notes`, `messages` | Lavagna interna operativa (Fusi i vecchi sottomenu Todo, Log e Post-It in un'unica dashboard di raccordo team per snellire). |
 | **Manuali e Linee Guida**| `/knowledge-base`| 🟡 **Knowledge Base** | Tabella wiki | Modulo attivo. Manuali d'uso con Matrix Ruoli ufficiale (Chi vede cosa). |
 | **Importazione Dati** | `/importa` | 🟡 **Importa CSV** | Scrittura massiva + `import_configs` | Importazione di massa di DB legacy e mapping CSV. |
-| **Utenti System / Permessi** | `/utenti-permessi` | 🟡 **Utenti e Permessi** | `users`, `user_roles` | Gestione Sicurezza e Ruoli con accesso granulare alla Sidebar (30 viste). |
+| **Utenti System / Permessi** | `/utenti-permessi` | 🟡 **Utenti e Permessi** | `users`, `user_roles` | Gestione Sicurezza blindata in 3 Tab navigativi (Team, Staff, Utenti). Ruoli asimmetrici e policy "Due Cappelli" prevengono privilege escalation ad account docenti. |
 | **Admin Panel Global** | `/admin` | 🟡 **Pannello Admin Global** | `system_configs`, `knowledge`, `user_activity_logs` | Settaggi globali, tooltips base, audit del gestionale e svuotamento/Reset della Stagione Logica (`seasons`). |
 | **AI Layer & Assistant** | `/copilot` | 🟡 **StarGem Copilot** | `N/D` | Modulo di interazione AI (posizionato sotto il blocco Admin). |
 
@@ -461,7 +461,7 @@ Questo documento traccia la coerenza completa del routing dell'applicazione Star
 | Pannello Admin Globale | `/admin` | `AdminPanel` | canonico — 6 tab completi | Impostazioni applicative core |
 | Elenchi Custom | `/elenchi` | `Elenchi` | canonico — 6 tab completi | Lookup tables customizzabili |
 | Importazione Dati | `/importa` | `ImportData` | canonico — 6 tab completi | Batch uploader da CSV |
-| Utenti e Permessi | `/utenti-permessi` | `UtentiPermessi` | canonico — 6 tab completi | Controllo accessi dipendenti |
+| Utenti e Permessi | `/utenti-permessi` | `UtentiPermessi` | canonico — 6 tab completi | Controllo accessi segmentato su 3 rami indipendenti (Team/Staff/Utenti) |
 | Storico Eliminazioni | `/audit-logs` | `AuditLogs` | canonico — 6 tab completi | Soft-delete recycle bin |
 | Reset Stagione | `/reset-stagione` | `ResetStagione` | canonico — 6 tab completi | Svuotamento anno accademico |
 | StarGem Copilot | `/copilot` | `StubCopilot` (Wrapper) | placeholder | Modulo assistente virtuale AI integrato |

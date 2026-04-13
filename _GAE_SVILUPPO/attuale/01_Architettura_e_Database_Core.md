@@ -27,8 +27,8 @@ Per avere la visione d'insieme prima, durante e dopo i futuri refactoring, fai a
 
 L'attuale architettura Drizzle ORM / MySQL conta ben **72 tabelle fisiche**. Per renderne comprensibile la gestione, l'intero database è stato astratto in **8 macro-aree logiche** (Autenticazione, Configurazione, Località, Comunicazioni, Anagrafica, Attività, Servizi Extra, Finanza). Seguono i blocchi dettagliati:
 ### 1. Autenticazione & Utenti (Authentication & Users)
-- **`users`**: La tabella base degli account per lo staff e gli operatori.
-- **`user_roles`**: Ruoli generici e permessi scritti in JSON per gli utenti.
+- **`users`**: La tabella base degli account per lo schema logico e l'ingresso sistema.
+- **`user_roles`**: Ruoli rigidi su 3 tier (`team`, `staff`, `utenti`) per segmentare i permessi in UI e impedire privilege escalation.
 - **`sessions`**: Tabella Drizzle originale per jwt o vecchie gestioni sessione.
 - **`express_sessions`**: Nuova tabella persistente generata da `express-mysql-session` per il mantenimento in vita dei login oltre il riavvio del processo Node.js.
 
@@ -92,6 +92,14 @@ I modelli parificati dei suddetti "11 silos" sono:
 12. **[NEW] Tabelle Ombra STI** (`activities_unified`, `enrollments_unified`) - *Strato Data-Pump attualmente in sola lettura (Bridge API)*
 
 *(Nota: Esistono anche le tabelle `attendances` e `ws_attendances` per tracciare le presenze, manualmente o tramite codice a barre).*
+
+### 6-bis. Il Modulo HR "GemStaff" (Tabelle aggiuntive)
+Creato l'ecosistema GemStaff per separare il lavoro didattico da quello amministrativo:
+- **`staff_contracts_compliance`**: Scadenze legali, DURC, sicurezza per i contratti Staff.
+- **`staff_document_signatures`**: Firme, storico dei consensi apposti su documenti HR.
+- **`staff_disciplinary_log`**: Tracciamento assenze e procedimenti interni visibili solo al Team.
+- **`staff_presenze` & `staff_sostituzioni`**: Log massivi timbrature, sostituzioni d'emergenza docenti.
+- **`payslips`**: Cedolini stipendi, note di retribuzione generate dal tracking HR.
 
 ### 7. Tesseramenti & Servizi Extra (Bookings)
 - **`booking_service_categories`** -> **`booking_services`**: Dizionario e Categorie Attività degli elementi extra-didattici prenotabili (come "Affitto Sala Medica" o "Personal Trainer").
@@ -502,9 +510,9 @@ Il motore centrale è pronto. Per scalare SaaS al 100%, la roadmap prevede l'imp
 3. **Gestione Scorte, Buvette e POS:**
    *Manca:* `inventory_items`, `stock_movements`.
    *Scope:* Vendita prodotti fisici (Gatorade, magliette) scalando quantità scorte, agganciabile al Borsellino Elettronico del membro.
-4. **GemStaff (Motore HR e Conformità Collaboratori):**
-   *Manca:* `staff_shifts`, `payslips`, `staff_contracts_compliance`.
-   *Scope:* Trasformare la mera anagrafica collaboratori in un motore digitale integrato. Automatizzerà la conformità burocratica (es. controllo durc, scadenze contratti sportivi), calcolo cedolini presenze live e marketing/reclutamento risorse umane dell'accademia.
+4. **GemStaff (Motore HR e Conformità Collaboratori - Completato):**
+   *Attivo:* `staff_shifts`, `payslips`, `staff_contracts_compliance`, `staff_presenze`. UI in espansione.
+   *Scope:* Trasformare la mera anagrafica collaboratori in un motore digitale integrato. Automa le scadenze legali, presidiare la presenza temporale del team (sostituzioni, tracking check-in presenze) in modo disgiunto dalle ore Reception vs Insegnante (Policy dei Due Cappelli).
 5. **L'Area Personale Cliente (Self-Service Mobile):**
    *Manca:* Modulo Client-Facing (App/Web).
    *Scope:* Il cliente si autentica, paga una `quote` arretrata con Stripe e si prenota autonomamente un posto in un `course`.
