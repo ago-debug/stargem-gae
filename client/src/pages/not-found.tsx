@@ -27,7 +27,7 @@ export default function NotFound() {
             Modulo in Sviluppo
           </h1>
           <p className="text-slate-500 mb-8 max-w-[280px] mx-auto leading-relaxed">
-            Quest'area del portale è in costruzione. Sarà attivata con la <strong className="text-primary font-semibold">Fase 28</strong> del progetto StarGem CourseManager.
+            Quest'area del portale è in costruzione. Sarà attivata con la <strong className="text-primary font-semibold">Fase 28</strong> del progetto StarGem Manager.
           </p>
           
           <div className="flex flex-col items-center gap-3">

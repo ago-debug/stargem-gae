@@ -1,4 +1,4 @@
-// Extract of shared date utility functions for CourseManager
+// Extract of shared date utility functions for StarGem Manager
 
 export const isItalianHoliday = (date: Date): string | null => {
     const d = date.getDate();
