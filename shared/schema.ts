@@ -489,30 +489,6 @@ export type SubscriptionType = typeof subscriptionTypes.$inferSelect;
 export type InsertInstructor = Partial<InsertMember>;
 export type Instructor = Member;
 
-// Instructor Rates (per course type or category)
-export const instructorRates = mysqlTable("instr_rates", {
-  id: int("id").primaryKey().autoincrement(),
-  instructorId: int("instructor_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  categoryId: int("category_id"),
-  rateType: varchar("rate_type", { length: 50 }).notNull(), // 'hourly', 'per_lesson', 'fixed'
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const instructorRatesRelations = relations(instructorRates, ({ one }) => ({
-  instructor: one(members, {
-    fields: [instructorRates.instructorId],
-    references: [members.id],
-  }),
-}));
-
-export const insertInstructorRateSchema = createInsertSchema(instructorRates).omit({
-  id: true,
-  createdAt: true,
-});
-export type InsertInstructorRate = z.infer<typeof insertInstructorRateSchema>;
-export type InstructorRate = typeof instructorRates.$inferSelect;
-
 // Activity Statuses (Stati attività)
 export const activityStatuses = mysqlTable("act_statuses", {
   id: int("id").primaryKey().autoincrement(),
@@ -716,6 +692,7 @@ export type Course = typeof courses.$inferSelect;
 // Members (iscritti)
 export const members = mysqlTable("members", {
   id: int("id").primaryKey().autoincrement(),
+  userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }).notNull(),
   fiscalCode: varchar("fiscal_code", { length: 16 }), // Codice fiscale

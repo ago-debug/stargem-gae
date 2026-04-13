@@ -3240,6 +3240,171 @@ app.get("/api/gempass/membro/:memberId/tessera", isAuthenticated, async (req, re
 
 // ===== GEMSTAFF ROUTES =====
 
+app.post("/api/gemstaff/crea-account/:memberId", isAuthenticated, async (req, res) => {
+  try {
+    const userRole = (req.user as any)?.role?.toLowerCase();
+    const isAdmin = userRole === 'admin' || userRole === 'direzione' || userRole === 'super admin' || userRole === 'master' || userRole === 'amministratore totale';
+
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Non autorizzato. Solo admin.' });
+    }
+
+    const memberId = parseInt(req.params.memberId);
+    if (isNaN(memberId)) return res.status(400).json({ error: 'ID non valido' });
+
+    const { eq, and, like } = await import('drizzle-orm');
+    
+    // 1. Leggi member
+    const [member] = await db.select().from(schema.members)
+      .where(
+        and(
+          eq(schema.members.id, memberId),
+          like(schema.members.participantType, '%INSEGNANTE%')
+        )
+      ).limit(1);
+
+    if (!member) {
+      return res.status(404).json({ error: 'Insegnante non trovato' });
+    }
+    if (!member.email) {
+      return res.status(400).json({ error: "L'insegnante non ha un indirizzo email" });
+    }
+
+    // 2. Verifica che non esista già un account
+    const [existingUser] = await db.select().from(schema.users)
+      .where(eq(schema.users.email, member.email)).limit(1);
+      
+    if (existingUser) {
+      return res.status(409).json({ error: 'Account già esistente per questa email' });
+    }
+
+    // 3. Genera OTP temporaneo (6 cifre)
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // +24h
+
+    // 4. Hash password e Crea user
+    const { hashPassword } = await import("./auth");
+    const hashedPassword = await hashPassword(otp);
+
+    // Schema users usa id string UUID generato lato app
+    const { randomUUID } = await import('crypto');
+    const newUserId = randomUUID();
+    
+    await db.insert(schema.users).values({
+      id: newUserId,
+      email: member.email,
+      username: member.email,
+      role: 'insegnante',
+      firstName: member.firstName,
+      lastName: member.lastName,
+      password: hashedPassword,
+      emailVerified: false,
+      otpToken: otp,
+      otpExpiresAt: otpExpires
+    });
+
+    // 5. Collega member a user
+    await db.update(schema.members)
+      .set({ userId: newUserId })
+      .where(eq(schema.members.id, memberId));
+
+    // 6. Log attività
+    await storage.logActivity({
+      userId: (req.user as any).id,
+      action: "CREATE",
+      entityType: "users",
+      entityId: newUserId,
+      details: { role: 'insegnante', memberId: memberId }
+    });
+
+    // 7. Restituisce
+    return res.json({
+      success: true,
+      userId: newUserId,
+      email: member.email,
+      tempCode: otp,
+      message: "Account creato. Credenziali da comunicare all'insegnante."
+    });
+  } catch (error) {
+    console.error('[GemStaff] /crea-account error:', error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
+
+app.get("/api/gemstaff/me", isAuthenticated, async (req, res) => {
+  try {
+    const userRole = (req.user as any)?.role?.toLowerCase();
+    const userEmail = (req.user as any)?.email;
+    const isAllowed = userRole === 'insegnante' || userRole === 'admin' || userRole === 'direzione' || userRole === 'super admin' || userRole === 'master' || userRole === 'amministratore totale';
+
+    if (!isAllowed) {
+      return res.status(403).json({ error: 'Non autorizzato' });
+    }
+
+    if (!userEmail) {
+      return res.status(404).json({ error: 'Profilo insegnante non trovato. Contatta la segreteria.' });
+    }
+
+    const { eq, and, or, like, sql } = await import('drizzle-orm');
+    
+    const [member] = await db.select()
+      .from(schema.members)
+      .where(
+        and(
+          eq(schema.members.email, userEmail),
+          or(
+            like(schema.members.participantType, '%INSEGNANTE%'),
+            like(schema.members.participantType, '%Staff%')
+          )
+        )
+      ).limit(1);
+
+    if (!member) {
+      return res.status(404).json({ error: 'Profilo insegnante non trovato. Contatta la segreteria.' });
+    }
+
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    const [presenze, compliance, payslips, memberships] = await Promise.all([
+      db.select()
+        .from(schema.staffPresenze)
+        .where(and(
+          eq(schema.staffPresenze.memberId, member.id),
+          sql`MONTH(${schema.staffPresenze.date}) = ${currentMonth}`,
+          sql`YEAR(${schema.staffPresenze.date}) = ${currentYear}`
+        )),
+      db.select()
+        .from(schema.staffContractsCompliance)
+        .where(eq(schema.staffContractsCompliance.memberId, member.id)),
+      db.select()
+        .from(schema.payslips)
+        .where(and(
+          eq(schema.payslips.memberId, member.id),
+          eq(schema.payslips.month, currentMonth),
+          eq(schema.payslips.year, currentYear)
+        )),
+      db.select()
+        .from(schema.memberships)
+        .where(eq(schema.memberships.memberId, member.id))
+    ]);
+
+    return res.json({
+      ...member,
+      presenze,
+      compliance,
+      payslips,
+      memberships
+    });
+  } catch (error) {
+    console.error('[GemStaff] GET /me error:', error);
+    return res.status(500).json({ error: 'Errore interno' });
+  }
+});
+
+
 app.get("/api/gemstaff/insegnanti", isAuthenticated, async (req, res) => {
   try {
     const status = (req.query.status as string) || 'attivo';

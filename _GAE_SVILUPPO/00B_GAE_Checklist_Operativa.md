@@ -826,6 +826,22 @@ Questo blocco certifica la costruzione V2 dell'intera filiera operativa per tess
 - [x] Verifica finale GemStaff (F2-007 S5)
 - [x] Crash pagina bianca risolto (F2-008)
 - [x] GemStaff UI validata da PM Gaetano ✅
+- [x] deprecation_logs verificata (F1-012)
+- [x] instr_rates droppata (F1-012)
+- [x] schema.ts pulito (F1-012)
+- [x] /api/gemstaff/me aggiunta (F1-012)
+
 - [x] Deprecation warnings backend (F1-011)
 - [x] Banner deprecazione frontend (F2-011)
 - [x] deprecation_logs tabella DB (F1-011)
+- [x] POST /api/gemstaff/crea-account (F1-013)
+- [x] Login hub redirectTo per ruolo (F1-013)
+- [x] POST /api/auth/first-login (F1-013)
+- [x] /gemstaff/me creata (F2-012)
+- [x] Redirect login insegnante (F2-012)
+- [x] instructors.tsx eliminato (F2-012)
+- [x] UI crea account insegnante (F2-013)
+- [x] Login hub redirectTo (F2-013)
+- [x] Pagina /first-login (F2-013)
+- [x] Test finale /first-login + /gemstaff/me
+- [x] ✅ GEMSTAFF F2 CHIUSA — 13/04/2026

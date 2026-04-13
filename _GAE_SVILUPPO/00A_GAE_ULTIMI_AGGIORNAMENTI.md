@@ -23,6 +23,11 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * [F2-008/009] Risolto crash pagina bianca (hot reload post modifiche). GemStaff validato visivamente: Tab 1 completa, modale con 3 sezioni funzionante, AMBROSIO e ARRIVABENE ora visibili. GemStaff UI completata e validata dal PM.
 * [F2-010] Rimossa pagina /staff. Redirect /staff → /gemstaff in App.tsx. Voce sidebar "Staff e Insegnanti" rimossa. instructors.tsx marcato come deprecato. /api/instructors intatto — calendario OK.
 * [F1-011 / F2-011] Deprecation warnings attivi. console.warn + X-Deprecation-Warning header sulle route POST/PATCH /api/instructors. Banner giallo visibile in DEV su instructors.tsx. Tabella deprecation_logs creata nel DB. Trigger su INSERT insegnanti per audit trail.
+* [F2-012] Creata pagina /gemstaff/me con 4 sezioni (dati, presenze, documenti, cedolino). Redirect post-login per ruolo insegnante. instructors.tsx eliminato fisicamente.
+* [F1-012] Ricognizione: deprecation_logs, instr_rates. DROP instr_rates se vuota. Schema Drizzle aggiornato. Route GET /api/gemstaff/me aggiunta. CourseUnifiedModal verificato OK.
+* [F1-013] Route crea account insegnante con OTP. Login hub con redirectTo per ruolo. Route primo login con cambio password.
+* [F2-013] Pulsante "Crea Account" nel pannello dettaglio insegnante con dialog OTP. Login hub redirectTo per ruolo. Pagina /first-login per primo accesso insegnanti.
+* [F2-014] Test visivo finale superato. /first-login attiva. /gemstaff/me attiva. Chat GemStaff F2 CHIUSA DEFINITIVAMENTE.
 
 ### 12 Aprile 2026 (Phase 34: Infrastruttura GemPass & Sottoscrizioni Documentali)
 * **[F1-PROTOCOLLO-001/002] Estensione DB Memberships & Forms:** Audit e alterazione chirurgica della tabella `memberships` con default sicuri (`is_renewal`, `renewed_from_id`, `notes`). Creazione della nuova tabella per tracking digital signatures `member_forms_submissions`. Allineamento Drizzle Schema `shared/schema.ts` e tool di entity generation (`server/utils/membership.ts`).
