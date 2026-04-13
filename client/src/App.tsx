@@ -17,6 +17,7 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
 import FirstLogin from "@/pages/first-login";
+import ForgotPassword from "@/pages/forgot-password";
 import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
 import Courses from "@/pages/courses";
@@ -96,6 +97,10 @@ export function hasPermission(user: SelectUser | null, path: string) {
   if (roleNameLower === 'admin' || roleNameLower === 'admministratore totale' || roleNameLower === 'super admin' || roleNameLower === 'master') return true;
   
   if (path === "/" || path === "/dashboard") return true;
+
+  if (roleNameLower === 'insegnante' && (path === "/gemstaff/me" || path === "/first-login" || path === "/forgot-password")) {
+    return true;
+  }
 
   const perms = (user as any).permissions || {};
   if (perms["*"] === "write" || perms["*"] === "read") return true;
@@ -246,6 +251,7 @@ function Router() {
 function AppContent() {
   const { user, isLoading } = useAuth();
   const isMobile = useIsMobile();
+  const isInsegnante = (user as any)?.role === 'insegnante';
 
   // Custom sidebar width
   const style = {
@@ -254,6 +260,7 @@ function AppContent() {
   };
 
   const [matchFirstLogin] = useRoute("/first-login");
+  const [matchForgotPassword] = useRoute("/forgot-password");
 
   if (isLoading) {
     return (
@@ -265,6 +272,10 @@ function AppContent() {
 
   if (matchFirstLogin) {
     return <FirstLogin />;
+  }
+
+  if (matchForgotPassword) {
+    return <ForgotPassword />;
   }
 
   if (!user) {
@@ -279,7 +290,7 @@ function AppContent() {
           <header className="flex items-center justify-between h-10 px-4 border-b border-border bg-background flex-shrink-0 z-20">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <div className="flex items-center gap-6 h-full">
-              <ActiveUserAvatars />
+              {!isInsegnante && <ActiveUserAvatars />}
               <div className="flex items-center gap-4">
                 <div 
                    title="Apri TeoCopilot (Ctrl+Space)" 
@@ -291,9 +302,13 @@ function AppContent() {
                       <AvatarFallback className="bg-primary text-white"><Bot className="w-4 h-4" /></AvatarFallback>
                    </Avatar>
                 </div>
-                <PageNotesIndicator />
-                <TodoNotification />
-                <NotificationCenter />
+                {!isInsegnante && (
+                  <>
+                    <PageNotesIndicator />
+                    <TodoNotification />
+                    <NotificationCenter />
+                  </>
+                )}
               </div>
             </div>
           </header>

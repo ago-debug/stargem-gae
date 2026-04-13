@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { insertUserSchema } from "@shared/schema";
 import { Users, Kanban, Stethoscope, Building, Sparkles, CalendarDays, Megaphone, Volume2, VolumeX, BriefcaseBusiness } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Link } from "wouter";
 const logoStarGem = "/logo_stargem.png";
 
 const loginSchema = z.object({
@@ -35,6 +36,7 @@ export default function AuthPage() {
     ];
     const [teoVideo, setTeoVideo] = useState(videos[0]); // Default 1
     const [isMuted, setIsMuted] = useState(true);
+    const [highlightForm, setHighlightForm] = useState(false);
 
     useEffect(() => {
         // Al refresh/load, scegliamo random
@@ -112,7 +114,17 @@ export default function AuthPage() {
 
             {/* Wrapper principale Unificato Form + Animazione */}
             <div className="relative w-full max-w-4xl mx-4 z-10 animate-in fade-in zoom-in-95 duration-500 mt-10">
-                <Card className="w-full shadow-2xl border-none bg-white/90 backdrop-blur-sm relative z-30 flex flex-col lg:flex-row !overflow-visible items-center rounded-xl">
+                {new URLSearchParams(window.location.search).get('hint') === 'staff' && (
+                    <div className="bg-amber-50 text-amber-800 text-sm font-medium p-4 rounded-xl mb-4 border border-amber-200 shadow-sm flex items-center justify-center text-center gap-2">
+                        <span>Sei un insegnante di Studio Gem? Se è il tuo primo accesso &rarr;</span>
+                        <Link href="/first-login" className="font-bold underline text-amber-700 hover:text-amber-900">
+                          Clicca qui per impostare la password
+                        </Link>
+                    </div>
+                )}
+                
+                <Card className={`w-full shadow-2xl border-none bg-white/90 backdrop-blur-sm relative z-30 flex flex-col lg:flex-row !overflow-visible items-center rounded-xl ${highlightForm ? 'ring-4 ring-amber-400 shadow-amber-200/50 transition-all duration-300' : 'transition-all duration-300'}`}>
+                    
                     
                     {/* COLONNA SINISTRA: IL FORM DI LOGIN */}
                     <div className="flex-1 w-full max-w-md mx-auto py-2">
@@ -137,10 +149,11 @@ export default function AuthPage() {
                                 name="username"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-slate-700 font-semibold text-xs uppercase tracking-wider">Username</FormLabel>
+                                        <FormLabel className="text-slate-700 font-semibold text-xs uppercase tracking-wider">EMAIL O USERNAME</FormLabel>
                                         <FormControl>
                                             <Input 
                                                 autoComplete="username" 
+                                                placeholder="Email o username"
                                                 className="h-11 bg-slate-50/50 border-slate-200 focus:bg-white transition-all shadow-sm" 
                                                 {...field} 
                                             />
@@ -174,6 +187,11 @@ export default function AuthPage() {
                             >
                                 {loginMutation.isPending ? "Accesso in corso..." : "Accedi"}
                             </Button>
+                            <div className="text-center mt-2">
+                                <a href="/forgot-password" style={{ fontSize: "12px", color: "#F59E0B" }} className="hover:underline font-medium">
+                                    Password dimenticata?
+                                </a>
+                            </div>
                         </form>
                     </Form>
                 </CardContent>
@@ -221,10 +239,16 @@ export default function AuthPage() {
                         { name: "BookGem", icon: Building, desc: "Aule & Booking" },
                         { name: "MedGem", icon: Stethoscope, desc: "Studio Medico" },
                         { name: "Clarissa", icon: Megaphone, desc: "CRM & Marketing" },
-                        { name: "GemStaff", icon: BriefcaseBusiness, desc: "Staff Manager" },
+                        { name: "GemStaff", icon: BriefcaseBusiness, desc: "Staff Manager", hint: "staff", subLabel: "Accesso Insegnanti →" },
                         { name: "TeoCopilot", icon: Sparkles, desc: "AI Aziendale" }
                     ].map((mod, idx) => (
-                        <div key={idx} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="cursor-pointer flex flex-col items-center justify-center p-4 bg-white/80 backdrop-blur-md rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-w-[120px] max-w-[140px] flex-1 group">
+                        <div key={idx} onClick={() => {
+                            if (mod.hint === 'staff') {
+                                setLocation('/first-login');
+                            } else {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                        }} className="cursor-pointer flex flex-col items-center justify-center p-4 bg-white/80 backdrop-blur-md rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-w-[120px] max-w-[140px] flex-1 group">
                             
                             {/* Icona 3D Dorata */}
                             <div className="relative w-16 h-16 rounded-[20px] bg-gradient-to-br from-yellow-100 via-amber-400 to-yellow-600 shadow-[inset_0_2px_4px_rgba(255,255,255,0.7),inset_0_-4px_6px_rgba(180,100,0,0.5),0_10px_20px_rgba(245,158,11,0.3)] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300 transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
@@ -240,6 +264,11 @@ export default function AuthPage() {
 
                             <span className="font-extrabold text-slate-800 text-[15px]">{mod.name}</span>
                             <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold text-center mt-1 leading-tight">{mod.desc}</span>
+                            {(mod as any).subLabel && (
+                               <span style={{ color: '#F59E0B', fontSize: 9, fontStyle: 'italic' }} className="mt-1 font-bold">
+                                 {(mod as any).subLabel}
+                               </span>
+                            )}
                         </div>
                     ))}
                 </div>

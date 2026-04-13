@@ -32,7 +32,7 @@ export default function FirstLogin() {
 
   const confirmMutation = useMutation({
     mutationFn: async () => {
-      const payload = { email, tempCode: otp, newPassword: password };
+      const payload = { email, otp, newPassword: password };
       return await apiRequest("POST", "/api/auth/first-login", payload);
     },
     onSuccess: (data: any) => {
@@ -98,7 +98,7 @@ export default function FirstLogin() {
                      <Lock className="w-8 h-8 text-amber-600" />
                   </div>
               </div>
-              <CardTitle className="text-2xl font-extrabold tracking-tight text-slate-900">Benvenuto in StarGem</CardTitle>
+              <CardTitle className="text-2xl font-extrabold tracking-tight text-slate-900">Primo accesso — Imposta la tua password</CardTitle>
               <CardDescription className="text-sm font-medium text-slate-500">
                  Imposta la tua password personale per continuare
               </CardDescription>
@@ -106,7 +106,7 @@ export default function FirstLogin() {
            <CardContent>
              <form onSubmit={handleSubmit} className="space-y-4">
                <div className="space-y-2">
-                  <Label>Email Account</Label>
+                  <Label>La tua email</Label>
                   <Input 
                     type="email" 
                     value={email} 
@@ -118,7 +118,7 @@ export default function FirstLogin() {
                </div>
                
                <div className="space-y-2">
-                  <Label>Codice Accesso Temporaneo (OTP)</Label>
+                  <Label>Codice OTP (ricevuto dalla segreteria)</Label>
                   <Input 
                     type="text" 
                     value={otp} 
@@ -128,10 +128,11 @@ export default function FirstLogin() {
                     maxLength={10}
                     required
                   />
+                  <p className="text-xs text-slate-500 italic mt-1">Il codice OTP ti è stato comunicato dalla segreteria. È valido 24 ore.</p>
                </div>
 
                <div className="space-y-2 pt-2 border-t">
-                  <Label>Nuova Password</Label>
+                  <Label>Scegli una nuova password</Label>
                   <Input 
                     type="password" 
                     value={password} 
@@ -143,7 +144,7 @@ export default function FirstLogin() {
                </div>
 
                <div className="space-y-2">
-                  <Label>Conferma Nuova Password</Label>
+                  <Label>Conferma password</Label>
                   <Input 
                     type="password" 
                     value={confirmPassword} 
@@ -162,6 +163,21 @@ export default function FirstLogin() {
                  {confirmMutation.isPending ? "Salvataggio..." : "Imposta Password"}
                </Button>
              </form>
+             
+             <div className="mt-6 flex items-center justify-center space-x-2 text-slate-400">
+               <span className="h-px w-full bg-slate-200"></span>
+               <span className="text-xs uppercase tracking-wider whitespace-nowrap">OPPURE</span>
+               <span className="h-px w-full bg-slate-200"></span>
+             </div>
+             
+             <div className="mt-6 flex flex-col items-center justify-center space-y-4">
+                <a href="mailto:info@studio-gem.it" className="text-sm font-semibold text-primary hover:underline flex items-center gap-2">
+                   Non hai ancora il codice? &rarr; Contatta la segreteria
+                </a>
+                <a href="/" className="text-sm font-medium text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                   &larr; Torna al login
+                </a>
+             </div>
            </CardContent>
         </Card>
       </div>

@@ -3317,6 +3317,14 @@ app.post("/api/gemstaff/crea-account/:memberId", isAuthenticated, async (req, re
       details: { role: 'insegnante', memberId: memberId }
     });
 
+    // Invia email di benvenuto
+    try {
+      const { sendWelcomeEmail } = await import("./utils/mailer");
+      await sendWelcomeEmail(member.email, member.firstName || member.email, otp);
+    } catch(e) {
+      console.warn('[MAILER] Email non inviata:', e);
+    }
+
     // 7. Restituisce
     return res.json({
       success: true,
@@ -3336,23 +3344,30 @@ app.get("/api/gemstaff/me", isAuthenticated, async (req, res) => {
   try {
     const userRole = (req.user as any)?.role?.toLowerCase();
     const userEmail = (req.user as any)?.email;
+    const userId = (req.user as any)?.id;
     const isAllowed = userRole === 'insegnante' || userRole === 'admin' || userRole === 'direzione' || userRole === 'super admin' || userRole === 'master' || userRole === 'amministratore totale';
 
     if (!isAllowed) {
       return res.status(403).json({ error: 'Non autorizzato' });
     }
 
-    if (!userEmail) {
-      return res.status(404).json({ error: 'Profilo insegnante non trovato. Contatta la segreteria.' });
+    if (!userEmail && !userId) {
+      return res.status(404).json({ error: 'Profilo insegnante non associato ad alcun account.' });
     }
 
     const { eq, and, or, like, sql } = await import('drizzle-orm');
     
+    // Priorità 1: user_id esatto
+    // Priorità 2: email match
+    const accountFilter = [];
+    if (userId) accountFilter.push(eq(schema.members.userId, userId));
+    if (userEmail) accountFilter.push(eq(schema.members.email, userEmail));
+
     const [member] = await db.select()
       .from(schema.members)
       .where(
         and(
-          eq(schema.members.email, userEmail),
+          or(...accountFilter),
           or(
             like(schema.members.participantType, '%INSEGNANTE%'),
             like(schema.members.participantType, '%Staff%')

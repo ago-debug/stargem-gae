@@ -28,7 +28,11 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * [F1-013] Route crea account insegnante con OTP. Login hub con redirectTo per ruolo. Route primo login con cambio password.
 * [F2-013] Pulsante "Crea Account" nel pannello dettaglio insegnante con dialog OTP. Login hub redirectTo per ruolo. Pagina /first-login per primo accesso insegnanti.
 * [F2-014] Test visivo finale superato. /first-login attiva. /gemstaff/me attiva. Chat GemStaff F2 CHIUSA DEFINITIVAMENTE.
+* [F2-018] Pagina /forgot-password creata. Link "Password dimenticata?" nel login. /first-login migliorato con link utili.
+* [F2-019] Sidebar ridotta per ruolo insegnante. Solo menu personale: area, password, logout. /gemstaff/me: sostituito alert rosso con card "Profilo in configurazione".
 * [F1-014] Backup definitivo gemstaff_DEFINITIVO. Git push finale chat GemStaff. VPS verificato. Chat GemStaff CHIUSA.
+* [F1-015] Verifica account gaechacha. Fix lookup first-login per email O username. Route POST /api/auth/forgot-password. Mailer utility con template welcome + reset. Invio email automatico su crea-account e forgot-password (richiede config SMTP in .env).
+* [F1-016] Variabili SMTP aggiunte a .env e .env.example. Script test-mailer.ts creato. Email automatiche pronte — in attesa config SMTP. Istruzioni: SMTP_USER + SMTP_PASS in .env.
 
 ### 12 Aprile 2026 (Phase 34: Infrastruttura GemPass & Sottoscrizioni Documentali)
 * **[F1-PROTOCOLLO-001/002] Estensione DB Memberships & Forms:** Audit e alterazione chirurgica della tabella `memberships` con default sicuri (`is_renewal`, `renewed_from_id`, `notes`). Creazione della nuova tabella per tracking digital signatures `member_forms_submissions`. Allineamento Drizzle Schema `shared/schema.ts` e tool di entity generation (`server/utils/membership.ts`).

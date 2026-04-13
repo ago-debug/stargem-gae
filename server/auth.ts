@@ -9,7 +9,7 @@ import { storage } from "./storage";
 import { User as DbUser } from "@shared/schema";
 import { pool, db } from "./db";
 import { users } from "@shared/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, or } from "drizzle-orm";
 
 declare global {
     namespace Express {
@@ -319,7 +319,13 @@ export function setupAuth(app: Express) {
                 return res.status(400).json({ success: false, message: "Parametri mancanti" });
             }
 
-            const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+            const [user] = await db.select().from(users).where(
+                or(
+                    eq(users.email, email),
+                    eq(users.username, email)
+                )
+            ).limit(1);
+
             if (!user) {
                 return res.status(404).json({ success: false, message: "Utente non trovato" });
             }
@@ -341,11 +347,82 @@ export function setupAuth(app: Express) {
                     otpToken: null,
                     otpExpiresAt: null
                 })
-                .where(eq(users.email, email));
+                .where(eq(users.id, user.id));
+
+            // Email conferma attivazione
+            try {
+                if (user.email) {
+                    const { sendActivationConfirmEmail } = await import("./utils/mailer");
+                    await sendActivationConfirmEmail(
+                        user.email,
+                        user.firstName || 'Insegnante'
+                    );
+                }
+            } catch(e) {
+                console.warn('[MAILER] Conferma non inviata:', e);
+            }
 
             return res.json({ success: true });
         } catch (error) {
             console.error('[AUTH] first-login error:', error);
+            return res.status(500).json({ success: false, message: "Errore interno server" });
+        }
+    });
+
+    app.post("/api/auth/forgot-password", async (req, res) => {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({ success: false, message: "Email richiesta" });
+            }
+
+            const [user] = await db.select().from(users).where(
+                or(
+                    eq(users.email, email),
+                    eq(users.username, email)
+                )
+            ).limit(1);
+
+            if (!user || !user.email) {
+                // Sicurezza: non rivelare se l'email esiste
+                return res.json({ success: true, message: "Se l'email è registrata, riceverai le istruzioni." });
+            }
+
+            // Genera nuovo OTP
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            const otpExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // +24h
+
+            await db.update(users)
+                .set({
+                    otpToken: otp,
+                    otpExpiresAt: otpExpiresAt,
+                    emailVerified: false // forza a tornare su first-login
+                })
+                .where(eq(users.id, user.id));
+
+            await storage.logActivity({
+                userId: user.id,
+                action: "FORGOT_PASSWORD",
+                entityType: "users",
+                entityId: user.id,
+                details: {}
+            });
+
+            // Invio email (se nodemailer configurato)
+            try {
+                const { sendResetPasswordEmail } = await import("./utils/mailer");
+                await sendResetPasswordEmail(user.email, user.firstName || user.username, otp);
+            } catch (mailError) {
+                console.warn('[MAILER] Email non inviata:', mailError);
+            }
+
+            return res.json({ 
+                success: true, 
+                resetCode: otp, // For debug/UI if email fails
+                message: "Codice reset generato" 
+            });
+        } catch (error) {
+            console.error('[AUTH] forgot-password error:', error);
             return res.status(500).json({ success: false, message: "Errore interno server" });
         }
     });

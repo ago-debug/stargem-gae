@@ -845,3 +845,16 @@ Questo blocco certifica la costruzione V2 dell'intera filiera operativa per tess
 - [x] Pagina /first-login (F2-013)
 - [x] Test finale /first-login + /gemstaff/me
 - [x] ✅ GEMSTAFF F2 CHIUSA — 13/04/2026
+- [x] /forgot-password (F2-018)
+- [x] Link password dimenticata in login (F2-018)
+- [x] Backup definitivo + push finale (F1-014)
+- [x] ✅ GEMSTAFF COMPLETATO AL 100% — 13/04/2026
+- [x] Fix first-login lookup (F1-015)
+- [x] Route forgot-password (F1-015)
+- [x] Mailer utility (F1-015)
+- [x] Email automatica crea-account (F1-015)
+- [x] Sidebar insegnante ridotta (F2-019)
+- [x] /gemstaff/me fix stato vuoto (F2-019)
+- [x] SMTP config in .env (F1-016)
+- [x] test-mailer.ts (F1-016)
+- [ ] SMTP da configurare con credenziali reali (PM)

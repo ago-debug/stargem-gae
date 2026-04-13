@@ -13,6 +13,11 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
 
+  if ((user as any)?.role === 'insegnante') {
+    setLocation('/gemstaff/me');
+    return null;
+  }
+
   interface RevenueMember {
     name: string;
     amount: number;
