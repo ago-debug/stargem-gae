@@ -16,6 +16,9 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 * [F1-004] 16 route GemStaff complete con guard ruoli. Presenze, sostituzioni (doppio visto), disciplinare. 0 errori TypeScript totali.
 * [F2-004] Tab 4 Accordi (read-only, link a /quote-promo). Tab 5 Presenze con selettore mese, inserimento manuale, bottone CONFERMA MESE con dialog. Tab 5B Sostituzioni con log visti. File 00A e 00B aggiornati.
 * [F2-005] Tab 6 Disciplinare con guard admin, banner riservatezza, form nuovo evento e aggiornamento. GemStaff UI completato.
+* [F2-007 S4] Guard ruoli definitivi applicati. Tab 4 e Tab 6 nascoste per operator/segreteria. Redirect insegnante → /gemstaff/me. Filtro Stato aggiunto in Tab 1.
+* [F2-007 S5] Verifica finale GemStaff Tab 1. Guard ruoli applicati, filtri completi, /staff mantenuto attivo, instructors.tsx marcato come da deprecare.
+* [F2-008/009] Risolto crash pagina bianca (hot reload post modifiche). GemStaff validato visivamente: Tab 1 completa, modale con 3 sezioni funzionante, AMBROSIO e ARRIVABENE ora visibili. GemStaff UI completata e validata dal PM.
 
 ### 12 Aprile 2026 (Phase 34: Infrastruttura GemPass & Sottoscrizioni Documentali)
 * **[F1-PROTOCOLLO-001/002] Estensione DB Memberships & Forms:** Audit e alterazione chirurgica della tabella `memberships` con default sicuri (`is_renewal`, `renewed_from_id`, `notes`). Creazione della nuova tabella per tracking digital signatures `member_forms_submissions`. Allineamento Drizzle Schema `shared/schema.ts` e tool di entity generation (`server/utils/membership.ts`).

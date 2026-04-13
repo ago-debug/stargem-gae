@@ -1,3 +1,7 @@
+// ⚠️ DA DEPRECARE — in fusione con GemStaff
+// NON eliminare finché /gemstaff Tab 1 non è
+// validata in produzione da PM Gaetano.
+// Ref: F2-007 · Data: 13/04/2026
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";

@@ -809,3 +809,15 @@ Questo blocco certifica la costruzione V2 dell'intera filiera operativa per tess
 - [x] **[TESTING E2E CONGIUNTO] F1-007 / F2-007 Smoke Test Modulo**: Eseguito con successo lo script iterativo di test RESTful con validazione DB (F1) ed ispezionato il Frontend tramite Browser Subagent autonomo (F2) validando render Tabelle, Modal, e Moduli Auto-fill (sistemando un bug su ricerca JSON paginata Array CF su fetch). Modulo GemPass 100% stabile lato backend/frontend.
 - [x] **F1/F2-007 E2E Testing Modulo GemPass**: Validato l'intero set di Unit Testing asincrono e collaudo UI globale per simulare emissioni tessere, blocchi transazionali sui CF duplicati, filtri di ricerca su Tessere e Firme, navigabilità tra sidebar e dashboard membri. Modulo ufficiale completato.
 - [x] **Backup Sicurezza**: Backup finale GemPass completato via mariadb-dump sul server VPS.
+
+## Fase 35 - GemStaff
+- [x] Fix field mapping (F2-007)
+- [x] Tab 1 tabella completa con sort + CRUD (F2-007)
+- [x] Modale insegnante migliorato (F2-007)
+- [x] Guard ruoli definitivi (F2-007 S4)
+- [x] Filtri Tab 1 completi (F2-007 S4)
+- [ ] /staff → redirect /gemstaff (DA FARE dopo 2-3 settimane in produzione)
+- [ ] instructors.tsx deprecato (DA FARE quando CourseUnifiedModal aggiornato)
+- [x] Verifica finale GemStaff (F2-007 S5)
+- [x] Crash pagina bianca risolto (F2-008)
+- [x] GemStaff UI validata da PM Gaetano ✅
