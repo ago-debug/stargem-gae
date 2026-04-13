@@ -209,11 +209,6 @@ const secretariatItems = [
     icon: BadgeCheck,
   },
   {
-    title: "Staff e Insegnanti",
-    url: "/staff",
-    icon: Briefcase,
-  },
-  {
     title: "Gestione Note",
     url: "/inserisci-nota",
     icon: StickyNote,

@@ -21,7 +21,6 @@ import Members from "@/pages/members";
 import Courses from "@/pages/courses";
 import Workshops from "@/pages/workshops";
 import Categories from "@/pages/categories";
-import Instructors from "@/pages/instructors";
 import Studios from "@/pages/studios";
 import Memberships from "@/pages/memberships";
 import Payments from "@/pages/payments";
@@ -173,7 +172,9 @@ function Router() {
       <ProtectedRoute path="/planning" component={Planning} />
       <ProtectedRoute path="/programmazione-date" component={StrategicProgrammingTable} />
       <ProtectedRoute path="/attivita-a-lista" component={StubAttivitaLista} />
-      <ProtectedRoute path="/staff" component={Instructors} />
+      <Route path="/staff">
+        <Redirect to="/gemstaff" />
+      </Route>
       <ProtectedRoute path="/studios" component={Studios} />
       <ProtectedRoute path="/affitto-studio" component={StubAffittoStudio} />
       <ProtectedRoute path="/tessere-certificati" component={Memberships} />
