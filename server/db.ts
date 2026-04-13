@@ -8,12 +8,29 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+let poolConfig: any;
+const uriMatch = process.env.DATABASE_URL.match(/^mysql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)$/);
+if (uriMatch) {
+  poolConfig = {
+    user: decodeURIComponent(uriMatch[1]),
+    password: decodeURIComponent(uriMatch[2]),
+    host: uriMatch[3],
+    port: parseInt(uriMatch[4], 10),
+    database: uriMatch[5],
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  };
+} else {
+  poolConfig = {
+    uri: process.env.DATABASE_URL,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  };
+}
+
 // Create the connection pool
-export const pool = mysql.createPool({
-  uri: process.env.DATABASE_URL,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+export const pool = mysql.createPool(poolConfig);
 
 export const db = drizzle(pool, { schema, mode: 'default' });
