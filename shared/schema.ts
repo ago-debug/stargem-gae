@@ -2850,3 +2850,70 @@ export const teamEmployeeActivityLog = mysqlTable("team_employee_activity_log", 
   index("idx_created").on(t.createdAt),
 ]);
 
+
+// ============================================================================
+// GEMCHAT E GEMPORTAL
+// ============================================================================
+
+export const gemConversations = mysqlTable("gem_conversations", {
+  id: int("id").autoincrement().primaryKey(),
+  channel: mysqlEnum("channel", ["member", "staff"]).notNull(),
+  participantId: int("participant_id").notNull().references(() => members.id),
+  participantUserId: varchar("participant_user_id", { length: 255 }),
+  status: mysqlEnum("status", ["bot", "human", "closed"]).default("bot"),
+  assignedTo: varchar("assigned_to", { length: 255 }),
+  botContext: json("bot_context"),
+  lastMessageAt: datetime("last_message_at"),
+  unreadTeam: int("unread_team").default(0),
+  unreadParticipant: int("unread_participant").default(0),
+  createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: datetime("updated_at").default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
+}, (table) => ({
+  channelIdx: index("idx_channel").on(table.channel),
+  participantIdIdx: index("idx_participant_id").on(table.participantId),
+  statusIdx: index("idx_status").on(table.status),
+  lastMessageAtIdx: index("idx_last_message_at").on(table.lastMessageAt),
+  assignedToIdx: index("idx_assigned_to").on(table.assignedTo)
+}));
+
+export const gemMessages = mysqlTable("gem_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  conversationId: int("conversation_id").notNull().references(() => gemConversations.id, { onDelete: "cascade" }),
+  senderType: mysqlEnum("sender_type", ["member", "staff", "team", "bot"]).notNull(),
+  senderId: varchar("sender_id", { length: 255 }), // Logical ref -> users.id if team
+  content: text("content").notNull(),
+  attachmentUrl: varchar("attachment_url", { length: 500 }),
+  attachmentName: varchar("attachment_name", { length: 255 }),
+  attachmentSize: int("attachment_size"),
+  quickLinkType: mysqlEnum("quick_link_type", ["corso", "tessera", "pagamento"]),
+  quickLinkId: int("quick_link_id"),
+  isRead: tinyint("is_read").default(0),
+  createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`)
+}, (table) => ({
+  conversationIdIdx: index("idx_conversation_id").on(table.conversationId),
+  senderTypeIdx: index("idx_sender_type").on(table.senderType),
+  isReadIdx: index("idx_is_read").on(table.isRead),
+  createdAtIdx: index("idx_created_at").on(table.createdAt)
+}));
+
+
+export const memberUploads = mysqlTable("member_uploads", {
+  id: int("id").autoincrement().primaryKey(),
+  memberId: int("member_id").notNull().references(() => members.id),
+  documentType: mysqlEnum("document_type", ["certificato_medico", "documento_identita", "altro"]).notNull(),
+  filename: varchar("filename", { length: 255 }).notNull(),
+  fileUrl: varchar("file_url", { length: 500 }).notNull(),
+  fileSize: int("file_size"),
+  mimeType: varchar("mime_type", { length: 100 }),
+  uploadedAt: datetime("uploaded_at").default(sql`CURRENT_TIMESTAMP`),
+  verifiedBy: varchar("verified_by", { length: 255 }),
+  verifiedAt: datetime("verified_at"),
+  notes: text("notes"),
+  seasonId: int("season_id").references(() => seasons.id)
+}, (table) => ({
+  memberIdIdx: index("idx_member_id").on(table.memberId),
+  documentTypeIdx: index("idx_document_type").on(table.documentType),
+  verifiedByIdx: index("idx_verified_by").on(table.verifiedBy),
+  seasonIdIdx: index("idx_season_id").on(table.seasonId)
+}));
+
