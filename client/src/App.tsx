@@ -69,6 +69,7 @@ import Planning from "@/pages/planning";
 import GemPass from "@/pages/gempass";
 import GemStaff from "@/pages/gemstaff";
 import GemStaffMe from "@/pages/gemstaff-me";
+import AreaTesserati from "@/pages/area-tesserati";
 import StrategicProgrammingTable from "@/pages/StrategicProgrammingTable";
 import KnowledgeBase from "@/pages/knowledge-base";
 import GestioneNote from "@/pages/gestione-note";
@@ -205,6 +206,7 @@ function Router() {
       <ProtectedRoute path="/gemstaff/me" component={GemStaffMe} />
       <ProtectedRoute path="/gemteam" component={GemTeam} />
       <ProtectedRoute path="/gemteam/me" component={GemTeamMe} />
+      <ProtectedRoute path="/area-tesserati" component={AreaTesserati} />
       <ProtectedRoute path="/generazione-tessere" component={CardGenerator} />
       <ProtectedRoute path="/admin" component={AdminPanel} />
       <ProtectedRoute path="/copilot" component={StubCopilot} />
@@ -258,7 +260,7 @@ function Router() {
 }
 
 function AppContent() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logoutMutation } = useAuth();
   const isMobile = useIsMobile();
   const isInsegnante = (user as any)?.role === 'insegnante';
 
@@ -289,6 +291,29 @@ function AppContent() {
 
   if (!user) {
     return <AuthPage />;
+  }
+
+  const isClient = user?.role?.toLowerCase() === 'client';
+
+  if (isClient) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <header className="flex items-center justify-between h-14 px-6 border-b bg-white shadow-sm">
+          <img src={logoStarGem} alt="Studio Gem" className="h-8" />
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-muted-foreground">
+              {user.firstName || user.username}
+            </span>
+            <Button variant="ghost" size="sm" onClick={() => logoutMutation.mutate()}>
+              Esci
+            </Button>
+          </div>
+        </header>
+        <main className="flex-1 bg-slate-50">
+          <Router />
+        </main>
+      </div>
+    );
   }
 
   return (
