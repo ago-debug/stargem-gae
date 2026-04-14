@@ -1,0 +1,571 @@
+--- STEP 1 ---
+[
+  {
+    "Field": "id",
+    "Type": "varchar(255)",
+    "Null": "NO",
+    "Key": "PRI",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "email",
+    "Type": "varchar(255)",
+    "Null": "YES",
+    "Key": "UNI",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "first_name",
+    "Type": "varchar(100)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "last_name",
+    "Type": "varchar(100)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "profile_image_url",
+    "Type": "longtext",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "created_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": "current_timestamp()",
+    "Extra": ""
+  },
+  {
+    "Field": "updated_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": "current_timestamp()",
+    "Extra": ""
+  },
+  {
+    "Field": "username",
+    "Type": "varchar(255)",
+    "Null": "YES",
+    "Key": "UNI",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "password",
+    "Type": "varchar(255)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "role",
+    "Type": "varchar(50)",
+    "Null": "NO",
+    "Key": "",
+    "Default": "operator",
+    "Extra": ""
+  },
+  {
+    "Field": "phone",
+    "Type": "varchar(50)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "last_seen_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "current_session_start",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "last_session_duration",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": "0",
+    "Extra": ""
+  },
+  {
+    "Field": "email_verified",
+    "Type": "tinyint(1)",
+    "Null": "NO",
+    "Key": "",
+    "Default": "0",
+    "Extra": ""
+  },
+  {
+    "Field": "otp_token",
+    "Type": "varchar(10)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "otp_expires_at",
+    "Type": "datetime",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  }
+]
+--- STEP 2 ---
+[
+  {
+    "id": "admin-id",
+    "username": "admin",
+    "email": null,
+    "role": "admin",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-02-15 21:41:52"
+  },
+  {
+    "id": "db4a4439-caeb-4ee5-83b8-382d30b1d65e",
+    "username": "botAI",
+    "email": "",
+    "role": "admin",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-04-04 23:34:38"
+  },
+  {
+    "id": "dd568623-df12-4b19-a76e-4875e8ec84bd",
+    "username": "Santo",
+    "email": "amministrazione@studio-gem.it",
+    "role": "Direttivo",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-04-04 12:05:21"
+  },
+  {
+    "id": "faaf36de-3d6c-429c-92ae-d2e38dccb715",
+    "username": "gae71@mac.com",
+    "email": "gae71@mac.com",
+    "role": "insegnante",
+    "email_verified": 1,
+    "ha_otp": 0,
+    "created_at": "2026-04-13 15:26:43"
+  },
+  {
+    "id": "2ca8dee4-b0a6-4162-baf7-748a3a4fcbb2",
+    "username": "Alexandra",
+    "email": "alexandra@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-03-02 10:09:04"
+  },
+  {
+    "id": "d53438b8-3789-11f1-9289-02018e0774a6",
+    "username": "Diego",
+    "email": "diego@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-04-13 22:40:55"
+  },
+  {
+    "id": "a5925172-d5fd-4c48-8b65-53958e218e93",
+    "username": "Estefany",
+    "email": "Estefany@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-03-16 18:09:46"
+  },
+  {
+    "id": "6ca54efa-44d3-40cd-b2b4-7d3726b4a361",
+    "username": "Giuditta",
+    "email": "Giuditta@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-03-16 18:07:59"
+  },
+  {
+    "id": "4eb4c805-2db1-4c22-a329-66538b8a5ccc",
+    "username": "Jasir",
+    "email": "jasir@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-04-04 11:59:16"
+  },
+  {
+    "id": "305776d0-45d0-44b3-ba92-f52dcc92e236",
+    "username": "Joel",
+    "email": "Joel@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-03-16 18:09:11"
+  },
+  {
+    "id": "5435e479-b2ed-4de9-be93-1ba630fba902",
+    "username": "Kevin",
+    "email": "kevin@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-04-04 11:57:10"
+  },
+  {
+    "id": "5dc7fcb5-22d4-4e74-a473-74f5e37a30c1",
+    "username": "Massi",
+    "email": "massimiliano@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-04-04 11:52:55"
+  },
+  {
+    "id": "32574a55-0363-4986-ac82-b4c2dadcb818",
+    "username": "Nura",
+    "email": "nura@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-03-16 18:08:34"
+  },
+  {
+    "id": "c564c984-4db3-4b47-bf85-a1d4d526cb43",
+    "username": "Sara",
+    "email": "sara@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-04-04 11:54:40"
+  },
+  {
+    "id": "e4000709-fd0a-479d-af2b-84cc1fbd561f",
+    "username": "Stefano",
+    "email": "stefano@studio-gem.it",
+    "role": "operator",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-04-04 12:01:32"
+  },
+  {
+    "id": "7619065e-9f78-4d28-8430-21e04bf3fba8",
+    "username": "ago",
+    "email": "ago@agogo.it",
+    "role": "Super Admin",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-02-15 21:54:38"
+  },
+  {
+    "id": "ee4c5ccb-0f9f-4ffd-bf84-ca9724fb0b2f",
+    "username": "Elisa",
+    "email": "elisa@studio-gem.it",
+    "role": "Super Admin",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-02-23 09:44:07"
+  },
+  {
+    "id": "1db5007f-054e-4f0d-b47d-df95e6829d01",
+    "username": "Gaetano",
+    "email": "gaetano@studio-gem.it",
+    "role": "Super Admin",
+    "email_verified": 0,
+    "ha_otp": 0,
+    "created_at": "2026-02-23 09:42:43"
+  }
+]
+--- STEP 3 ---
+[
+  {
+    "role": "operator",
+    "totale": 11,
+    "con_email": "11",
+    "verificati": "0"
+  },
+  {
+    "role": "Super Admin",
+    "totale": 3,
+    "con_email": "3",
+    "verificati": "0"
+  },
+  {
+    "role": "admin",
+    "totale": 2,
+    "con_email": "1",
+    "verificati": "0"
+  },
+  {
+    "role": "insegnante",
+    "totale": 1,
+    "con_email": "1",
+    "verificati": "1"
+  },
+  {
+    "role": "Direttivo",
+    "totale": 1,
+    "con_email": "1",
+    "verificati": "0"
+  }
+]
+--- STEP 4 ---
+[
+  {
+    "id": 6,
+    "name": "Back-Office",
+    "description": "Segreteria Avanzata e Cassa.",
+    "permissions_preview": "{\"/dashboard\":\"write\",\"/maschera-input\":\"write\",\"/anagrafica-generale\":\"write\",\"/tessere-certificati\":\"write\",\"/generazi"
+  },
+  {
+    "id": 5,
+    "name": "Direttivo",
+    "description": "Manager e Direzione. Vede amministrazione, planning e staff.",
+    "permissions_preview": "{\"/dashboard\":\"write\",\"/maschera-input\":\"write\",\"/anagrafica-generale\":\"write\",\"/tessere-certificati\":\"write\",\"/generazi"
+  },
+  {
+    "id": 7,
+    "name": "Front-Desk",
+    "description": "Reception Base e Controllo Accessi.",
+    "permissions_preview": "{\"/accessi\":\"write\",\"/maschera-input\":\"write\",\"/calendario-attivita\":\"write\",\"/inserisci-nota\":\"write\",\"/todo-list\":\"wri"
+  },
+  {
+    "id": 8,
+    "name": "Staff / Insegnante",
+    "description": "Ruolo consultivo limitato per docenti.",
+    "permissions_preview": "{\"/calendario-attivita\":\"write\",\"/iscritti_per_attivita\":\"write\",\"/inserisci-nota\":\"write\",\"/knowledge-base\":\"write\"}"
+  },
+  {
+    "id": 4,
+    "name": "Super Admin",
+    "description": "Amministratore Totale. 100% dei poteri.",
+    "permissions_preview": "{\"*\":\"write\"}"
+  }
+]
+--- STEP 5 ---
+[
+  {
+    "id": "admin-id",
+    "username": "admin",
+    "email": null,
+    "role": "admin",
+    "member_id": null,
+    "first_name": null,
+    "last_name": null,
+    "participant_type": null,
+    "staff_status": null
+  },
+  {
+    "id": "db4a4439-caeb-4ee5-83b8-382d30b1d65e",
+    "username": "botAI",
+    "email": "",
+    "role": "admin",
+    "member_id": null,
+    "first_name": null,
+    "last_name": null,
+    "participant_type": null,
+    "staff_status": null
+  },
+  {
+    "id": "dd568623-df12-4b19-a76e-4875e8ec84bd",
+    "username": "Santo",
+    "email": "amministrazione@studio-gem.it",
+    "role": "Direttivo",
+    "member_id": 3419,
+    "first_name": "SANTO",
+    "last_name": "MANTICE",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "faaf36de-3d6c-429c-92ae-d2e38dccb715",
+    "username": "gae71@mac.com",
+    "email": "gae71@mac.com",
+    "role": "insegnante",
+    "member_id": 9555,
+    "first_name": "cavallo",
+    "last_name": "pazzo",
+    "participant_type": "INSEGNANTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "2ca8dee4-b0a6-4162-baf7-748a3a4fcbb2",
+    "username": "Alexandra",
+    "email": "alexandra@studio-gem.it",
+    "role": "operator",
+    "member_id": 9556,
+    "first_name": "ALEXANDRA",
+    "last_name": "MALDONADO",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "d53438b8-3789-11f1-9289-02018e0774a6",
+    "username": "Diego",
+    "email": "diego@studio-gem.it",
+    "role": "operator",
+    "member_id": 9562,
+    "first_name": "DIEGO",
+    "last_name": "CANDELARIO",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "a5925172-d5fd-4c48-8b65-53958e218e93",
+    "username": "Estefany",
+    "email": "Estefany@studio-gem.it",
+    "role": "operator",
+    "member_id": 9558,
+    "first_name": "ESTEFANY",
+    "last_name": "SEGURA",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "6ca54efa-44d3-40cd-b2b4-7d3726b4a361",
+    "username": "Giuditta",
+    "email": "Giuditta@studio-gem.it",
+    "role": "operator",
+    "member_id": 9557,
+    "first_name": "GIUDITTA",
+    "last_name": "FUMAGALLI",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "4eb4c805-2db1-4c22-a329-66538b8a5ccc",
+    "username": "Jasir",
+    "email": "jasir@studio-gem.it",
+    "role": "operator",
+    "member_id": 9560,
+    "first_name": "JASIR",
+    "last_name": "BLANCO",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "305776d0-45d0-44b3-ba92-f52dcc92e236",
+    "username": "Joel",
+    "email": "Joel@studio-gem.it",
+    "role": "operator",
+    "member_id": 9325,
+    "first_name": "JOEL",
+    "last_name": "VILLON",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "5435e479-b2ed-4de9-be93-1ba630fba902",
+    "username": "Kevin",
+    "email": "kevin@studio-gem.it",
+    "role": "operator",
+    "member_id": 4687,
+    "first_name": "KEVIN",
+    "last_name": "BONILLA",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "5dc7fcb5-22d4-4e74-a473-74f5e37a30c1",
+    "username": "Massi",
+    "email": "massimiliano@studio-gem.it",
+    "role": "operator",
+    "member_id": 847,
+    "first_name": "MASSIMILIANO VALENTINO",
+    "last_name": "NEMBRI",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "32574a55-0363-4986-ac82-b4c2dadcb818",
+    "username": "Nura",
+    "email": "nura@studio-gem.it",
+    "role": "operator",
+    "member_id": 9559,
+    "first_name": "NURA",
+    "last_name": "HANI",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "c564c984-4db3-4b47-bf85-a1d4d526cb43",
+    "username": "Sara",
+    "email": "sara@studio-gem.it",
+    "role": "operator",
+    "member_id": 9561,
+    "first_name": "SARA",
+    "last_name": "JANNELLI",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "e4000709-fd0a-479d-af2b-84cc1fbd561f",
+    "username": "Stefano",
+    "email": "stefano@studio-gem.it",
+    "role": "operator",
+    "member_id": 9122,
+    "first_name": "STEFANO",
+    "last_name": "SARACCHI",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "7619065e-9f78-4d28-8430-21e04bf3fba8",
+    "username": "ago",
+    "email": "ago@agogo.it",
+    "role": "Super Admin",
+    "member_id": null,
+    "first_name": null,
+    "last_name": null,
+    "participant_type": null,
+    "staff_status": null
+  },
+  {
+    "id": "ee4c5ccb-0f9f-4ffd-bf84-ca9724fb0b2f",
+    "username": "Elisa",
+    "email": "elisa@studio-gem.it",
+    "role": "Super Admin",
+    "member_id": 2488,
+    "first_name": "ELISA",
+    "last_name": "ARRIVABENE",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  },
+  {
+    "id": "1db5007f-054e-4f0d-b47d-df95e6829d01",
+    "username": "Gaetano",
+    "email": "gaetano@studio-gem.it",
+    "role": "Super Admin",
+    "member_id": 2490,
+    "first_name": "GAETANO",
+    "last_name": "AMBROSIO",
+    "participant_type": "DIPENDENTE",
+    "staff_status": "attivo"
+  }
+]

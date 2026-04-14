@@ -4892,6 +4892,94 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     }
   });
 
+  app.post("/api/gemteam/diario", isAuthenticated, async (req, res) => {
+    try {
+      const { employee_id, data, ora_slot, postazione, activity_type_id, attivita_libera, quantita, minuti, note, shift_id } = req.body;
+      const parsedDate = new Date(data);
+      const mRep = await db.select().from(schema.teamMonthlyReports).where(and(eq(schema.teamMonthlyReports.mese, parsedDate.getMonth() + 1), eq(schema.teamMonthlyReports.anno, parsedDate.getFullYear()), eq(schema.teamMonthlyReports.locked, true))).limit(1);
+      if (mRep.length > 0) return res.status(403).json({ error: 'Questo mese è chiuso (locked)!' });
+
+      const result = await db.insert(schema.teamShiftDiaryEntries).values({
+        employeeId: employee_id,
+        // @ts-ignore
+        data: parsedDate,
+        oraSlot: ora_slot,
+        postazione: postazione || null,
+        activityTypeId: activity_type_id || null,
+        attivitaLibera: attivita_libera || null,
+        quantita: quantita || null,
+        minuti: minuti || null,
+        note: note || null,
+        shiftId: shift_id || null,
+        okFlag: false
+      });
+
+      return res.status(201).json({ id: result[0].insertId, success: true });
+    } catch (error) {
+       console.error('[GemTeam] POST /diario error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.get("/api/gemteam/diario/:employee_id/:data", isAuthenticated, async (req, res) => {
+    try {
+      const empId = parseInt(req.params.employee_id);
+      const parsedDate = new Date(req.params.data);
+      
+      const records = await db.select({
+         entry: schema.teamShiftDiaryEntries,
+         activityLabel: schema.teamActivityTypes.label
+      })
+      .from(schema.teamShiftDiaryEntries)
+      .leftJoin(schema.teamActivityTypes, eq(schema.teamShiftDiaryEntries.activityTypeId, schema.teamActivityTypes.id))
+      .where(and(eq(schema.teamShiftDiaryEntries.employeeId, empId), eq(schema.teamShiftDiaryEntries.data, parsedDate)))
+      .orderBy(schema.teamShiftDiaryEntries.oraSlot);
+
+      return res.json(records);
+    } catch (error) {
+       console.error('[GemTeam] GET /diario error:', error);
+       return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.patch("/api/gemteam/diario/:id/ok", isAuthenticated, async (req, res) => {
+    try {
+      if ((req.user as any)?.role !== 'admin' && (req.user as any)?.role !== 'operator') return res.status(403).json({ error: 'Solo Admin/Operator' });
+      const recordId = parseInt(req.params.id);
+      
+      const targetQuery = await db.select().from(schema.teamShiftDiaryEntries).where(eq(schema.teamShiftDiaryEntries.id, recordId));
+      if (targetQuery.length === 0) return res.status(404).json({ error: 'Not found' });
+      
+      const parsedDate = new Date(targetQuery[0].data);
+      const mRep = await db.select().from(schema.teamMonthlyReports).where(and(eq(schema.teamMonthlyReports.mese, parsedDate.getMonth() + 1), eq(schema.teamMonthlyReports.anno, parsedDate.getFullYear()), eq(schema.teamMonthlyReports.locked, true))).limit(1);
+      if (mRep.length > 0) return res.status(403).json({ error: 'Questo mese è chiuso (locked)!' });
+
+      await db.update(schema.teamShiftDiaryEntries).set({ okFlag: true }).where(eq(schema.teamShiftDiaryEntries.id, recordId));
+      return res.json({ success: true });
+    } catch(err) {
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.delete("/api/gemteam/diario/:id", isAuthenticated, async (req, res) => {
+    try {
+      if ((req.user as any)?.role !== 'admin' && (req.user as any)?.role !== 'operator') return res.status(403).json({ error: 'Solo Admin/Operator' });
+      const recordId = parseInt(req.params.id);
+      
+      const targetQuery = await db.select().from(schema.teamShiftDiaryEntries).where(eq(schema.teamShiftDiaryEntries.id, recordId));
+      if (targetQuery.length === 0) return res.status(404).json({ error: 'Not found' });
+      
+      const parsedDate = new Date(targetQuery[0].data);
+      const mRep = await db.select().from(schema.teamMonthlyReports).where(and(eq(schema.teamMonthlyReports.mese, parsedDate.getMonth() + 1), eq(schema.teamMonthlyReports.anno, parsedDate.getFullYear()), eq(schema.teamMonthlyReports.locked, true))).limit(1);
+      if (mRep.length > 0) return res.status(403).json({ error: 'Questo mese è chiuso (locked)!' });
+
+      await db.delete(schema.teamShiftDiaryEntries).where(eq(schema.teamShiftDiaryEntries.id, recordId));
+      return res.json({ success: true });
+    } catch(err) {
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
   app.get("/api/medical-certificates", isAuthenticated, async (req, res) => {
     try {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
