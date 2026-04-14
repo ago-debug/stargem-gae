@@ -4,6 +4,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import fs from 'fs';
+import path from 'path';
 
 // Ensure crypto is available globally for dependencies that expect browser-like crypto
 if (typeof globalThis.crypto === 'undefined') {
@@ -30,6 +31,7 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // GLOBAL DEBUG LOG
 app.use((req, res, next) => {
