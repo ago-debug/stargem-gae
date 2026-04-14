@@ -216,7 +216,7 @@ export function setupAuth(app: Express) {
             'operator': '/calendario-attivita',
             'insegnante': '/gemstaff/me',
             'medico': '/medgem',
-            'client': '/area-clienti',
+            'client': '/area-tesserati',
             'dipendente': '/gemteam/me'
         };
         const redirectTo = userEntity?.role ? (redirectMap[userEntity.role] || '/calendario-attivita') : '/calendario-attivita';
@@ -388,7 +388,7 @@ export function setupAuth(app: Express) {
               'insegnante':   '/gemstaff/me',
               'dipendente':   '/gemteam/me',
               'medico':       '/medgem',
-              'client':       '/area-riservata',
+              'client':       '/area-tesserati',
             };
             const role = updatedUser?.role || '';
             const redirectTo = redirectMap[role.toLowerCase()] || '/calendario-attivita';
