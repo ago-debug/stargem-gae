@@ -383,7 +383,21 @@ export function setupAuth(app: Express) {
                 console.warn('[MAILER] Conferma non inviata:', e);
             }
 
-            return res.json({ success: true });
+            const updatedUser = await storage.getUser(user.id);
+            const redirectMap: Record<string, string> = {
+              'insegnante':   '/gemstaff/me',
+              'dipendente':   '/gemteam/me',
+              'medico':       '/medgem',
+              'client':       '/area-riservata',
+            };
+            const role = updatedUser?.role || '';
+            const redirectTo = redirectMap[role.toLowerCase()] || '/calendario-attivita';
+
+            return res.json({
+              success: true,
+              redirectTo,
+              user: updatedUser
+            });
         } catch (error) {
             console.error('[AUTH] first-login error:', error);
             return res.status(500).json({ success: false, message: "Errore interno server" });
