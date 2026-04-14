@@ -110,6 +110,10 @@ export function hasPermission(user: SelectUser | null, path: string) {
     return true;
   }
 
+  if (roleNameLower === 'client' && (path === '/area-tesserati' || path === '/first-login' || path === '/forgot-password')) {
+    return true;
+  }
+
   const perms = (user as any).permissions || {};
   if (perms["*"] === "write" || perms["*"] === "read") return true;
 
