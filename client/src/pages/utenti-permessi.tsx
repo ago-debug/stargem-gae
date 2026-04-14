@@ -41,7 +41,7 @@ import { it } from "date-fns/locale";
 
 const getRoleCategory = (role?: string) => {
   const r = (role || "").toLowerCase();
-  if (r === "insegnante" || r === "medico" || r.includes("personal") || r.includes("docente") || r === "staff / insegnante") return "staff";
+  if (r === "insegnante" || r === "medico" || r.includes("personal") || r.includes("docente")) return "staff";
   if (r === "client" || r === "utente" || r === "pubblico" || r === "") return "utenti";
   return "team";
 };

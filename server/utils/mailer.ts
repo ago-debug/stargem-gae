@@ -50,7 +50,7 @@ export async function sendResetPasswordEmail(
   await transporter.sendMail({
     from: process.env.SMTP_FROM || '"Studio Gem" <test@studio-gem.it>',
     to,
-    subject: 'StarGem — Reset Password',
+    subject: 'Reset password Studio Gem',
     html: `
       <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto">
         <h2 style="color:#F59E0B">Reset password, ${nome}</h2>
@@ -60,7 +60,7 @@ export async function sendResetPasswordEmail(
             <span style="font-size:24px;font-weight:bold;color:#D97706">${otp}</span>
           </p>
           <p style="color:#92400E;font-size:12px">
-            Valido per 24 ore. Se non hai richiesto il reset, ignora questa email.
+            Valido per 30 minuti. Se non hai richiesto il reset, ignora questa email.
           </p>
         </div>
         <a href="https://stargem.studio-gem.it/first-login" style="background:#F59E0B;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">
