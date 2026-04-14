@@ -71,6 +71,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SharedActivityLog } from "@/components/shared-activity-log";
 import { getActiveActivities } from "@/config/activities";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StarGemCopilot } from "@/components/star-gem-copilot";
 import { useCopilot } from "@/hooks/use-copilot";
