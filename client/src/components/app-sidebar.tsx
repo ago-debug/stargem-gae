@@ -738,7 +738,19 @@ export function AppSidebar() {
                         : user.username}
                     </p>
                     <p className="text-[8px] text-muted-foreground truncate uppercase tracking-widest font-bold">
-                      {user.role === 'admin' ? 'MASTER' : user.role}
+                      {(() => {
+                        switch (user.role?.toLowerCase()) {
+                          case 'admin': return 'MASTER';
+                          case 'super admin': return 'SUPER ADMIN';
+                          case 'operator': return 'OPERATORE';
+                          case 'direttivo': return 'DIRETTIVO';
+                          case 'back-office': return 'BACK OFFICE';
+                          case 'front-desk': return 'FRONT DESK';
+                          case 'insegnante': return 'INSEGNANTE';
+                          case 'dipendente': return 'DIPENDENTE';
+                          default: return user.role?.toUpperCase() || 'SCONOSCIUTO';
+                        }
+                      })()}
                     </p>
                   </div>
                 </div>

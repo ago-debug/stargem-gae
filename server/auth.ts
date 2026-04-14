@@ -406,12 +406,12 @@ export function setupAuth(app: Express) {
 
             if (!user || !user.email) {
                 // Sicurezza: non rivelare se l'email esiste
-                return res.json({ success: true, message: "Se l'email è registrata, riceverai le istruzioni." });
+                return res.json({ success: true, message: "Se l'email è valida, a breve riceverai le istruzioni per il reset." });
             }
 
             // Genera nuovo OTP
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
-            const otpExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // +24h
+            const otpExpiresAt = new Date(Date.now() + 30 * 60 * 1000); // +30m
 
             await db.update(users)
                 .set({
@@ -439,8 +439,7 @@ export function setupAuth(app: Express) {
 
             return res.json({ 
                 success: true, 
-                resetCode: otp, // For debug/UI if email fails
-                message: "Codice reset generato" 
+                message: "Se l'email è valida, a breve riceverai le istruzioni per il reset." 
             });
         } catch (error) {
             console.error('[AUTH] forgot-password error:', error);

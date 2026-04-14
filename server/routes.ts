@@ -4309,7 +4309,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
               .where(
                 and(
                   eq(schema.teamAttendanceLogs.employeeId, empId),
-                  eq(schema.teamAttendanceLogs.data, new Date(dataStr))
+                  sql`DATE(${schema.teamAttendanceLogs.data}) = ${dataStr}`
                 )
               )
               .limit(1);
@@ -4341,7 +4341,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
               .where(
                 and(
                   eq(schema.teamAttendanceLogs.employeeId, empId),
-                  eq(schema.teamAttendanceLogs.data, new Date(dataStr))
+                  sql`DATE(${schema.teamAttendanceLogs.data}) = ${dataStr}`
                 )
               )
               .limit(1);
