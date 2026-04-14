@@ -18,7 +18,7 @@ import { log } from "./vite";
 import { db } from "./db";
 import { sendSMS, sendEmail } from "./notifications";
 import { getUnifiedActivitiesPreview, getUnifiedActivityById, getUnifiedEnrollmentsPreview } from "./services/unifiedBridge";
-import { eq, desc, and, isNull, isNotNull, sql, gte, lte, or, like } from "drizzle-orm";
+import { eq, desc, and, isNull, isNotNull, sql, gte, lte, lt, or, like } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import {
   insertMemberSchema,
@@ -4560,10 +4560,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       
       let tipoAssenzaMapped = 'AI';
       switch(targetRow[0].tipo) {
-         case 'permesso': tipoAssenzaMapped = 'PE'; break;
-         case 'ferie': tipoAssenzaMapped = 'FE'; break;
-         case 'malattia': tipoAssenzaMapped = 'ML'; break;
-         case 'maternita': tipoAssenzaMapped = 'ML'; break;
+         case 'PE': tipoAssenzaMapped = 'PE'; break;
+         case 'FE': tipoAssenzaMapped = 'FE'; break;
+         case 'ML': tipoAssenzaMapped = 'ML'; break;
+         case 'altro': tipoAssenzaMapped = 'AI'; break;
       }
       
       while (d <= end) {
@@ -4730,7 +4730,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
           ORDER BY m.first_name ASC
        `);
 
-       if ((results[0] as any[]).length === 0) {
+       if ((results as any)[0].length === 0) {
            const start = new Date(anno, mese - 1, 1);
            const end = new Date(anno, mese, 0); 
            let configLav = 0;
@@ -4816,7 +4816,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
           WHERE r.anno = ${anno} AND r.mese = ${mese}
           ORDER BY m.first_name ASC
        `);
-       const reports = repResults[0] as any[];
+       const reports = (repResults as any)[0] as any[];
 
        const dStart = new Date(anno, mese - 1, 1);
        const dEnd = new Date(anno, mese, 0, 23, 59, 59);
