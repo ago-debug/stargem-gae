@@ -37,14 +37,18 @@ export default function FirstLogin() {
     },
     onSuccess: (data: any) => {
       // Re-fetch user query
-      queryClient.setQueryData(["/api/user"], data);
+      if (data.user) {
+        queryClient.setQueryData(["/api/user"], data.user);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      }
       setSuccess(true);
       toast({
         title: "Password impostata con successo!",
         description: "Reindirizzamento in corso...",
       });
       setTimeout(() => {
-        setLocation(data.redirectTo || "/gemstaff/me");
+        setLocation(data.redirectTo || "/calendario-attivita");
       }, 2000);
     },
     onError: (e: Error) => {
