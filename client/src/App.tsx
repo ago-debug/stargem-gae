@@ -86,6 +86,7 @@ import RentalsCategories from "@/pages/rentals-categories";
 import MerchandisingCategories from "@/pages/merchandising-categories";
 
 import { NotificationCenter } from "@/components/notification-center";
+import { GemChatBadge } from "@/components/gem-chat-badge";
 import { TodoNotification } from "@/components/todo-notification";
 import { PageNotesIndicator } from "@/components/page-notes-indicator";
 import { PageNotesOverlay } from "@/components/page-notes-overlay";
@@ -312,6 +313,7 @@ function AppContent() {
                 </div>
                 {!isInsegnante && (
                   <>
+                    <GemChatBadge />
                     <PageNotesIndicator />
                     <TodoNotification />
                     <NotificationCenter />
