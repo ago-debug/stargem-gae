@@ -5,6 +5,54 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 15 Aprile 2026 (Chat_10_Utenti-GemPortal — Auth + GemPortal)
+
+AUTH & ACCESSI (F1-001 → F1-008 / F2-001 → F2-003):
+- user_roles: INSERT operator, admin, insegnante (rinominato da Staff/Insegnante)
+- user_roles: descrizione operator corretta (Staff → Team)
+- users: email_verified=1 per 14 utenti @studio-gem.it
+- server/auth.ts: LocalStrategy accetta email O username (getUserByEmail)
+- server/auth.ts: forgot-password anti user-enumeration fix
+- server/auth.ts: first-login restituisce user completo + redirectTo per ruolo
+- client/src/App.tsx: fix typo admministratore + permesso client /area-tesserati
+- client/src/pages/utenti-permessi.tsx: getRoleCategory cleanup
+- client/src/components/app-sidebar.tsx: label ruoli standardizzata
+- client/src/pages/first-login.tsx: fix cache sessione + redirect per ruolo
+- Deploy: script definitivo scripts/deploy-vps.sh creato
+- Regola VPS: /opt/plesk/node/24/bin/npm install prima del build
+
+GEMPORTAL (F1-009 → F1-013 / F2-010 → F2-011):
+- CREATE TABLE: gem_conversations, gem_messages, member_uploads
+- shared/schema.ts: 3 nuove entità Drizzle aggiunte
+- server/utils/aiProvider.ts: TeoBot con Claude SDK @anthropic-ai/sdk
+- ANTHROPIC_API_KEY: configurata in .env locale e VPS
+- server/routes.ts: 7 route GemChat (A-G) + 3 route Area Tesserati
+- server/index.ts: static serving /uploads
+- client/src/components/gem-chat-badge.tsx: NUOVO badge navbar 2 canali
+- client/src/pages/area-tesserati.tsx: NUOVA pagina layout client isolato
+- Redirect: tutti area-clienti/area-riservata → area-tesserati
+- Account test: martina.ricci3@example.com (member_id 2987, role=client)
+- Backup: gemportal_COMPLETO_20260415_0759.sql (11MB)
+
+Commits principali:
+  f4a8d5a fix(auth): login email o username
+  ccd20d4 fix(first-login): redirect per ruolo
+  bf6a59f feat(api): GemChat + TeoBot Claude
+  2d2d129 feat(ui): /area-tesserati
+  b250c82 feat(api): Area Tesserati profile+upload+documenti
+  1c2eab8 chore: script deploy VPS definitivo
+  72b2965 fix(auth): permesso client /area-tesserati
+
+---
+
+### 15 Aprile 2026 (Area Tesserati B2C)
+
+* Implementate 3 nuove rotte API protette in `server/routes.ts` (`GET /profile`, `POST /upload-documento`, `GET /documenti`) specifiche per l'erogazione sicura dei servizi frontend ai Tesserati.
+* Implementato `multer.diskStorage` asincrono per l'upload persistente su disco dei documenti medici e identità in directory statica.
+* Tutte le operazioni sono confinate al layer backend, rispettando in modo assoluto i silos del CRM senza toccare la UI gestionale.
+
+---
+
 ### 13 Aprile 2026 (GemStaff — Infrastruttura DB + API + UI)
 
 * [F1-001] Backup DB (9.0M). ADD COLUMN su users (email_verified, otp_token, otp_expires_at) e su members (staff_status, lezioni_private_autorizzate*). Creazione 6 tabelle GemStaff: staff_contracts_compliance, staff_document_signatures, staff_disciplinary_log, staff_presenze, staff_sostituzioni, payslips. Aggiornamento shared/schema.ts. 65 insegnanti impostati staff_status = 'attivo'.

@@ -10,6 +10,25 @@
 
 ---
 
+[15/04 · Chat_10_Utenti-GemPortal] F1-001→013 + F2-001→011
+  [x] AUTH: user_roles allineati (7 ruoli)
+  [x] AUTH: login email O username
+  [x] AUTH: forgot-password anti user-enumeration
+  [x] AUTH: first-login redirect per ruolo
+  [x] AUTH: email_verified 14 staff @studio-gem.it
+  [x] GEMPORTAL: 3 tabelle create (gem_conversations,
+      gem_messages, member_uploads)
+  [x] GEMPORTAL: TeoBot Claude SDK attivo
+  [x] GEMPORTAL: 7 route GemChat (A-G)
+  [x] GEMPORTAL: badge navbar GemChatBadge
+  [x] GEMPORTAL: /area-tesserati live in produzione
+  [x] GEMPORTAL: Martina Ricci test verificato ✅
+  [x] DEPLOY: script deploy-vps.sh definitivo
+  [ ] F1-014: onboarding flows (self-service,
+      segreteria, WooCommerce) — PENDENTE
+  [ ] F2-012: pagina /registrati — PENDENTE
+  [ ] Import dati reali da Excel/AthenaPortal — PENDENTE
+
 [13/04 · GemStaff] F1-001 → F1-003 + F2-001 → F2-003
   [x] DB: 6 tabelle GemStaff create
   [x] members: 5 colonne GemStaff aggiunte
