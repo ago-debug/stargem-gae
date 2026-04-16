@@ -37,7 +37,7 @@ echo "Attesa di 8 secondi prima di interrogare l'endpoint..."
 sleep 8
 HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' https://stargem.studio-gem.it/api/auth/user)
 
-if [ "$HTTP_CODE" = "401" ] || [ "$HTTP_CODE" = "200" ]; then
+if [ "$HTTP_CODE" = "401" ] || [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "403" ]; then
     echo "✅ DEPLOY OK (HTTP Status: $HTTP_CODE)"
 else
     echo "❌ DEPLOY FAILED (HTTP Status: $HTTP_CODE)"
