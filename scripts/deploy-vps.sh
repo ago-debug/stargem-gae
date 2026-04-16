@@ -17,6 +17,7 @@ rsync -avz --delete \
   --exclude 'temp_import' \
   --exclude '.gemini' \
   --exclude '.agents' \
+  --exclude '.node-version' \
   --exclude 'tmp' \
   --no-perms --no-owner --no-group \
   ./ "$VPS_USER:$VPS_PATH/"
