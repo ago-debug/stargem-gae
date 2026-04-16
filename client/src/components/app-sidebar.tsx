@@ -78,6 +78,9 @@ import { useCopilot } from "@/hooks/use-copilot";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 
+declare const __APP_VERSION__: string;
+declare const __BUILD_DATE__: string;
+
 // 1. SEGRETERIA OPERATIVA
 const registrationItems = [
   {
@@ -711,10 +714,13 @@ export function AppSidebar() {
                 </p>
                 <p className="flex justify-between items-center text-[8.5px]">
                   <span className="opacity-80">Da/Azione:</span>
-                  <span className="font-medium text-slate-600 truncate max-w-[100px] text-right" title={`Di: ${latestActivity.user?.username} / Sys: v2.2.27`}>
-                    {latestActivity.user?.firstName || latestActivity.user?.username || "Sys"} (v2.2.27)
+                  <span className="font-medium text-slate-600 truncate max-w-[100px] text-right" title={`Di: ${latestActivity.user?.username} / Sys: v${__APP_VERSION__}`}>
+                    {latestActivity.user?.firstName || latestActivity.user?.username || "Sys"} (v{__APP_VERSION__})
                   </span>
                 </p>
+                <div className="text-[8.5px] text-slate-400 font-mono mt-1.5 w-full text-right opacity-80" title="Data ultima build">
+                  Aggiornato: {new Intl.DateTimeFormat('it-IT', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(__BUILD_DATE__))}
+                </div>
               </div>
             )}
 
