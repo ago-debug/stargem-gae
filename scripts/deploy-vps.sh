@@ -16,8 +16,10 @@ else
     echo "⚠️ Target $TARGET non trovato localmente. Salto SCP."
 fi
 
-echo "=== [3/5] Esecuzione npm install & build sul VPS ==="
-ssh $VPS_USER "export PATH=\"$NODE_PATH:\$PATH\" \
+echo "=== [3/5] Pulizia /dist, npm install & build sul VPS ==="
+ssh $VPS_USER "rm -rf $VPS_PATH/dist/ \\
+  && echo 'dist/ pulita'"
+ssh $VPS_USER "export PATH=\"$NODE_PATH:\\$PATH\" \\
   && cd $VPS_PATH \
   && npm install 2>&1 | tail -3 \
   && npm run build 2>&1 | tail -5"
