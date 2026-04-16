@@ -17,6 +17,7 @@ rsync -avz --delete \
   --exclude 'temp_import' \
   --exclude '.gemini' \
   --exclude '.agents' \
+  --exclude 'tmp' \
   ./ "$VPS_USER:$VPS_PATH/"
 
 echo "=== [3/6] Pulizia vecchie folder compilate (/dist) ==="
