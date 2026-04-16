@@ -714,7 +714,7 @@ export function AppSidebar() {
                 </p>
                 <p className="flex justify-between items-center text-[8.5px]">
                   <span className="opacity-80">Da/Azione:</span>
-                  <span className="font-medium text-slate-600 truncate max-w-[100px] text-right" title={`Di: ${latestActivity.user?.username} / Sys: v${__APP_VERSION__}`}>
+                  <span className="font-medium text-slate-400 opacity-80 truncate max-w-[100px] text-right" title={`Di: ${latestActivity.user?.username} / Sys: v${__APP_VERSION__}`}>
                     {latestActivity.user?.firstName || latestActivity.user?.username || "Sys"} (v{__APP_VERSION__})
                   </span>
                 </p>
