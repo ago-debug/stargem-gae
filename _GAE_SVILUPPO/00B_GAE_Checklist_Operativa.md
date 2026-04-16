@@ -24,10 +24,11 @@
   [x] GEMPORTAL: /area-tesserati live in produzione
   [x] GEMPORTAL: Martina Ricci test verificato ✅
   [x] DEPLOY: script deploy-vps.sh definitivo
-  [ ] F1-014: onboarding flows (self-service,
-      segreteria, WooCommerce) — PENDENTE
-  [ ] F2-012: pagina /registrati — PENDENTE
-  [ ] Import dati reali da Excel/AthenaPortal — PENDENTE
+  [x] F1-014: onboarding flows (self-service, segreteria, WooCommerce)
+  [x] F2-012: pagina /registrati e flussi login B2C
+  [x] Import dati reali da Excel/AthenaPortal (Scripting + Deduplicazione 9.400 membri)
+  [x] Tuning DB schema.ts x GDPR e Tutori Minori
+  [x] Ricalibratura filtri API per Age checking dinamico e season default
 
 [13/04 · GemStaff] F1-001 → F1-003 + F2-001 → F2-003
   [x] DB: 6 tabelle GemStaff create
@@ -885,3 +886,13 @@ Questo blocco certifica la costruzione V2 dell'intera filiera operativa per tess
 - [x] 3 template email operativi
 - [x] Push finale + backup ASSOLUTO via IONOS MariaDB
 - [x] ✅ GEMSTAFF 100% — 13/04/2026
+
+[16/04 · Data Integrity DB & GemPortal Schema] F1-016 → F1-022
+  [x] Import scripts (Passata 1+2) Athena/Excel -> MySQL
+  [x] Ampliamento Schema DB (GDPR, Tutori Privacy, Nationality)
+  [x] Tool Deduplicazione Anagrafica (validate_cf.ts / CF check italiano)
+  [x] Pulizia Massiva DB (Ghost, omonimie non reali, ~530 scarti eliminati)
+  [x] Consolidamento Members (9.400 iscritti univoci puliti)
+  [x] Refactor Filtro is_minor in storage.ts (Timestamp diff anziché flag statico)
+  [x] Creazione ENUM enrollment_status e assegnazione stagionale default
+  [x] VPS Deploy Nginx Node.js (OK Compile, OK Execution)

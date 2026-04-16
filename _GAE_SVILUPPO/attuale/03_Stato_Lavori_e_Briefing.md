@@ -137,7 +137,7 @@ Il progetto è considerevolmente avanzato nella giornata odierna stabilizzando f
 <!-- --- INIZIO SORGENTE: attuale/11_GAE_Stato_Lavori_Per_Sezione.md --- -->
 
 # STATO LAVORI PER SEZIONE (Project StarGem Manager)
-**Aggiornato al:** 25 Marzo 2026
+**Aggiornato al:** 15 Aprile 2026
 
 Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro-area del progetto, fungendo da bussola per gli sviluppatori e la direzione tecnica sullo stato di collaudo e di priorità delle singole sezioni. 
 
@@ -254,4 +254,14 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 
 **Stato Infrastruttura Logica (Post Phase 33):**
 Il backend è saldamente radicato sulle entità unificate `courses` e `enrollments`. Il workflow di duplicazione corsi è ora stabile end-to-end. Il conflict check orario è stato rimosso intenzionalmente dal backend; la UI di copia è completamente guidata (banner + campi rossi) per prevenire errori operativi.
+
+---
+
+## 10. Area Tesserati B2C (Nuovo)
+**Stato Attuale:** 🟡 IN CORSO / BACKEND COMPLETATO
+**Sintesi:** Infrastruttura protetta e selettiva creata per permettere ai membri di consultare anagrafica autonoma, pagamenti, corsi e di inviare documenti.
+* **Cosa è già stato fatto:** Implementate 3 nuove API sul backend (`GET /api/area-tesserati/profile`, `POST /api/area-tesserati/upload-documento`, `GET /api/area-tesserati/documenti`) protette e ristrette al ruolo `client`. Setup storage disco tramite Multer.
+* **Cosa manca:** Realizzazione frontend React UI dedicato alla visualizzazione lato tesserato.
+* **Rischi / Attenzioni:** Manutenzione e pulizia periodica della cartella `/uploads`. Assicurarsi che i JWT del client restino assolutamente isolati.
+* **Prossimo Step Consigliato:** Sviluppare interfacce UI "Area Tesserati" che consumino gli endpoint appena realizzati.
 

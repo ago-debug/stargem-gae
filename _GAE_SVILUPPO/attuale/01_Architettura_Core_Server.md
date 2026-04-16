@@ -1,3 +1,95 @@
+# Master Document: Architettura e Database StarGem Manager (Stato Attuale)
+
+Questo documento rappresenta la mappa completa ed esaustiva di tutte le sezioni del gestionale. Sostituisce i precedenti file frammentati di analisi strutturale e funge da *Source of Truth* (SOT) per l'architettura dati dopo la migrazione a Single Table Inheritance (STI).
+
+---
+
+## PARTE 1: La Suite StarGem (Mappatura Applicativa)
+
+La suite consta potenzialmente di 22 moduli, di cui quelli principali sono già tracciati a database.
+
+| # | Sezione / Modulo (Suite) | Scopo Operativo | Architettura DB (Attuale / Futura) | Checklist |
+| :---: | :--- | :--- | :--- | :--- |
+| **1** | **Core Anagrafica** | Il nucleo centrale per tutti i profili (genitori e figli). | **Esistente:** `members`, `member_relationships`, `cli_cats`. | ✅ Stabile |
+| **2** | **Gemdario (Calendario)** | Erogazione dei corsi, iscrizioni e presenze (Motore STI). | **Esistente:** `courses`, `enrollments`. | ✅ Operativo |
+| **3** | **BookGem (Booking)** | Prenotazioni, affitti spazi e sale. | **Esistente:** `studios`, `studio_bookings`. | ✅ Operativo |
+| **4** | **MedGem (Medico)** | Pannello idoneità sportive e blocco prenotazioni. | **Esistente:** `medical_certificates` intrecciata a `members`. | ✅ Stabile |
+| **5** | **Clarissa (CRM & IA)** | Marketing automation. Manda comunicazioni su trigger. | **Futuro:** `marketing_campaigns`, `automation_rules`, `email_logs`. | ⬜ Da Progettare |
+| **6** | **GemStaff (Burocrazia)** | Contrattualistica docenti, marketing HR. | **Esistente:** `staff_rates`, `staff_contracts_compliance`. | ✅ In Attivazione |
+| **7** | **GemTeam (HR Operativo)** | Tracking lavorativo, monitoraggio ore collaboratori. | **Esistente:** `users`, `staff_presenze`, `payslips`. | ✅ In Attivazione |
+| **8** | **Gemory (Project Mgr)** | Comunicazione p2p tra segretari. Post-it, compiti. | **Esistente:** `todos`, `team_notes`, `team_comments`. | ✅ Operativo |
+| **9** | **TeoCopilot (AI Bot)** | Assistenza AI per operazioni e query read-only. | **Esistente:** Lettura read-only e Tooltip UI. | ✅ Operativo |
+| **10** | **Contabilità & Cassa** | Libro mastro, quote, sconti e convenzioni. | **Esistente:** `payments`, `quotes`, `cost_centers`, `carnet_wallets`. | ⏳ In Lavorazione |
+| **11** | **Kiosk: Firma Digitale** | Tablet front-desk per far firmare documenti legali. | **Futuro:** `member_forms_submissions` (payload JSON). | ⬜ Da Sviluppare |
+| **12** | **Buvette, Scorte & POS** | Venditorio fisico: integratori, acqua, merchandising. | **Futuro:** `inventory_items` (Magazzino), `stock_movements`. | ⬜ Da Valutare |
+| **13** | **Tornelli & Check-In** | Ingressi fisici automatizzati. | **Esistente:** `access_logs`, `memberships` (Tessere). | ⬜ Da Definire |
+| **14** | **Area Clienti (Self)** | Portale Web Mobile User-Facing (Lato Cliente) | **Futuro:** Dashboard per auto-prenotazione e pagamento Stripe. | ⬜ Futuro |
+| **15** | **SysAdmin & Log** | Core di configurazione liste dinamiche. | **Esistente:** `custom_lists`, `system_configs`, `user_activity_logs`. | ✅ Stabile |
+
+> *Nota: sono presenti ulteriori 7 sottomoduli potenziali (ex-GSheet) per "Cassa", "Gruppi Agonistici", "Facility", "Leads/Open Day", "Costumeria", "Programmazione" e "Sponsor B2B" non ancora architettati pesantemente nel DB.*
+
+---
+
+## PARTE 2: Dimensionamento Corrente (Fotografia in Real-Time)
+
+I volumi di records presenti al termine delle bonifiche e mock dei dati sono i seguenti:
+
+| Entità / Modulo | Tabella Fisica DB | Ruolo e Funzione | Totale Record |
+| :--- | :--- | :--- | :---: |
+| **Membri e Anagrafiche** | `members` | Profilo centrale di iscritti e staff. | **9.504** |
+| **Corsi e Attività STI** | `courses` | Classi, Workshop e Campus fusi. | **421** |
+| **Iscrizioni (Enrollments)**| `enrollments` | Aggancio allievo (`member`) e classe (`course`). | **13** |
+| **Pagamenti (Mastro)** | `payments` | Registratore globale per ogni transazione economica| **30** |
+| **Regole e Promo** | `promo_rules` | Codici promozionali, sconti Black Friday. | **50** |
+| **Aule / Spazi Fisici** | `studios` | Le sale della struttura (es. Sala 1). | **13** |
+| **Accordi Insegnanti** | `instructor_agreements`| Relazione tra docenti, % paga e stagione. | **9** |
+
+---
+
+## PARTE 3: Struttura Dettagliata delle Tabelle Base
+
+### A. Modulo Anagrafica (Members)
+- **`members`**: Custodisce studenti, allievi e docenti (`participantType='INSEGNANTE'`). PK: `id`.
+- **`member_relationships`**: Legacy famigliari/minorenni.
+- **`users`** e **`user_roles`**: Gli account staff.
+
+### B. Modulo Erogativo STI (Attività/Corsi)
+- **`categories`** / **`custom_lists`**: Gestite interamente via UI (vocabolari, livelli, stili).
+- **`courses`**: Motore erogativo unitario. Un corso stagionale, uno spot, un campus sono archiviati qui.
+- **`enrollments`**: Ponte associativo (many-to-many) tra persona e record in `courses`.
+- **`studios`** e **`seasons`**: Definiscono lo spazio e il partizionamento temporale.
+
+### C. Modulo Cassa Cost-Centers e Quote
+- La tabella universale è **`payments`**. Ė tassativo appoggiarsi su di essa per qualsiasi incasso futuro per non rompere i report di "Controllo di Gestione" (`cost_centers` e `journal_entries`).
+- Estensioni per Engine Sconti: `company_agreements`, `staff_rates`, `pricing_rules`. Esiste un motore di ricarica per logiche massive asincrone.
+
+---
+
+## PARTE 4: Integrazioni Architetturali Future (La Roadmap Tecnica)
+
+Lo schema relazionale è pronto ad accogliere i prossimi blocchi senza causare deadlock o frammentare la logica STI. Di seguito le istruzioni esatte per l'implementazione DB dei 4 blocchi mancanti:
+
+### 4.1. GemStaff e GemTeam (Motore HR e Tracciamento)
+Evitare di incrociare lo stipendio degli insegnanti con l'orario di reception. Le seguenti tabelle sono ora attive a sistema:
+- **`payslips`** (Busta Paga/Cedolino mensile per i docenti basato su erogazione).
+- **`staff_presenze`** e **`staff_sostituzioni`** (Gestione ore dei dipendenti, check-in, tracking sostituzioni e timbrature).
+- **`staff_contracts_compliance`** e **`staff_document_signatures`** (Checklist documenti DURC, firme elettroniche, scadenze, sicurezza).
+- **`staff_disciplinary_log`** (Registro anomalie e note HR per lo staff protetto da admin).
+- **Segmentazione Ruoli:** Il flusso utenti in UI è stato blindato su 3 compartimenti: `Team` (Admin), `Staff` (Insegnanti), `Utenti` (Clienti), impedendo assegnazioni amministrative involontarie agli insegnanti (Policy Due Cappelli).
+
+### 4.2. Kiosk Segreteria (Firma Modulistica Mobile)
+La tabella **`member_forms_submissions`** dovrà accogliere flussi dinamici di firma in loco.
+Eviteremo colonne Boolean fisse, favorendo uno store flessibile di flag.
+Campi futuri previsti: `member_id`, `form_type` (es. "*GDPR*"), `payload_data` (JSON flessibile), `signed_at`.
+
+### 4.3. Buvette e POS Rapido (Micro-Economy)
+Se un allievo acquista merchandising/acqua, deve scattare l'integrazione magazzino:
+Campi futuri previsti: **`inventory_items`** (SKU prodotti fisici) e **`stock_movements`** (scarichi di cassa che innescano comunque una entry dentro la master table `payments`).
+
+### 4.4. Automazioni Marketing
+Campi futuri: **`automation_rules`** con intercettori cron per scadenza Idoneità (Medical) verso mail automatizzate; tracciatura via **`email_logs_history`**.
+
+
 
 
 <!-- --- INIZIO SORGENTE: attuale/01_GAE_Database_Attuale.md --- -->
@@ -516,3 +608,58 @@ Il motore centrale è pronto. Per scalare SaaS al 100%, la roadmap prevede l'imp
 5. **L'Area Personale Cliente (Self-Service Mobile):**
    *Manca:* Modulo Client-Facing (App/Web).
    *Scope:* Il cliente si autentica, paga una `quote` arretrata con Stripe e si prenota autonomamente un posto in un `course`.
+
+
+
+
+<!-- --- INIZIO SORGENTE: futuro/16_GAE_Phase26_Migrazione_VPS.md --- -->
+
+# Phase 26: Migrazione Infrastruttura Server VPS IONOS
+**Data Operazioni:** 30 Marzo 2026
+
+Questo documento funge da registro storico e Post-Mortem architetturale per documentare il passaggio del progetto `StarGem Manager` da un dominio/server condiviso Legacy (`185.48.116.156`) al nuovo VPS indipendente IONOS (`82.165.35.145`).
+
+## Il Contesto
+Il sistema aveva raggiunto una maturità stabile nella gestione dei Dati (Silos Unificati) ma l'infrastruttura di rete presentava ritardi e limiti, col rischio di precludere lo scale-up verso l'Integrazione Clarissa CRM (Webhooks). 
+Si è deciso di migrare tutto il layer di produzione su un server Ubuntu 24.04 dedicato.
+
+## Gli Eventi Cronologici e Soluzioni Adottate
+
+### 1. Duplicazione Database (Da Plesk Legacy a VPS)
+* **Criticità Iniziale:** L'utente locale sviluppatore macOS (`Gaetano`) aveva accesso al DB `sg_gae` ma non i privilegi di `root` per crearne cloni sistemistici sul server vecchio mascherato.
+* **Azione:** Aggirata la burocrazia Plesk creando in autonomia il DB `stargem_v2` sul nuovo VPS IONOS, ed importandovi 86 tabelle storiche consolidate.
+
+### 2. Sblocco del Local Development (Problema ECONNREFUSED)
+Dopo l'allestimento di `stargem_v2` sul nuovo IP, il dev server di Vite/NodeJS locale sul Mac andava in crash tentando di connettersi a `82.165.35.145:3306`.
+* **Causa:** Nativi blocchi Firewall in ingresso. Il server MariaDB sul VPS accettava solo connessioni da `localhost`.
+* **La Soluzione (Tunnel SSH Auto-Reconnect):** 
+Invece di bucare il firewall esponendo il core dei pagamenti a script kid/botnet mondiali, abbiamo implementato un **"Ponte SSH" (Port Forwarding)** persistente.
+Tramite lo script creato in `scripts/tunnel-db.sh` usando un ciclo infinito (while-true) unito ai pragrametri `-o ServerAliveInterval=60`, la pipe garantisce una reconnessione automatica locale al database remoto se la route decade o viene silenziata per inattività.
+
+* **Esito:** Connessione trasparente in 5 millisecondi e nessuna istruzione SQL dovuta transitare via internet in chiaro.
+
+### 3. Propagazione DNS In-Flight
+Cambiato il "Record A" sul vecchio Plesk per dirottare il traffico pubblico sul dominio `stargem.studio-gem.it` all'IP `82.165.35.145`.
+L'audit `nslookup stargem.studio-gem.it 8.8.8.8` ha evidenziato in serata un corposo ritardo di propagazione mondiale (visti i DNS cached TTL fino a 19 ore da provider legacy).
+* **Policy decisa:** Trattenuto e procrastinato lo "Step SSL" Let's Encrypt per evitare blocchi AuthZ causa mismatch di risoluzione da parte dell'Authority.
+
+### 4. Estrazione Baseline Backup (Fase di Sicurezza)
+Una volta appurato che l'architettura `stargem_v2` è integra e funzionante al 100%, è stato estratto in tempo reale un dump formale dell'intero DB di produzione (peso: `7.1 MB`, oltre `28.800` record/istruzioni) tramite comando remote `mysqldump` in SSH. 
+Questo snapshot locale risiede volutamente all'interno della directory sicura `./backups` (tracciata in `.gitignore` contro fughe di dati sul cloud Github). Costituirà l'ancora di salvezza ufficiale pre-avvio dell'inserimento massivo clienti di StudioGem.
+
+## Schema dell'Ambiente Odierno Definitivo
+* **VPS Host:** `82.165.35.145`
+* **Node Environment:** 25.8.2 (`pm2` process name: `stargem` in ascolto su porta tcp: `5001`)
+* **Reverse Proxy:** Nginx passante le connessioni client root (80/443) verso localhost:5001.
+* **Database App:** `stargem_v2` via `gaetano_admin` (MariaDB su porta 3306 chiusa all'esterno).
+* **Repository Git:** Tracciato ed in allineamento. `tunnel-db.sh` e `.env` regolarmente protetti in `.gitignore` contro leak accidentali.
+
+## Check futuri da intraprendere
+Quando il DNS sarà 100% stabile:
+1. Chiudere l'account/database vecchio per prevenire split-brain.
+2. Certificare Let's Encrypt al perimetro HTTPS.
+3. Testare le performance di read/write simultanee dal dev locale appoggiato in SSH, tenendo conto di eventuali ping spike.
+
+
+<!-- --- FINE SORGENTE: futuro/16_GAE_Phase26_Migrazione_VPS.md --- -->
+

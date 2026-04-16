@@ -1,0 +1,256 @@
+=== PROBLEMA 1: CF con errore ultima lettera ===
+[
+  {
+    "id_vecchio": 9229,
+    "id_nuovo": 9568,
+    "cf1": "TRTKTY71C66I690D",
+    "cf2": "TRTKTY71C66I690O",
+    "first_name": "KATTY",
+    "last_name": "TRIPODI",
+    "phone": "3405207560",
+    "data1": "2026-02-24T11:19:23.000Z",
+    "data2": "2026-04-16T08:52:27.000Z"
+  },
+  {
+    "id_vecchio": 9370,
+    "id_nuovo": 9569,
+    "cf1": "BRZMDL99P55A345T",
+    "cf2": "BRZMDL99P55A345P",
+    "first_name": "MADDALENA",
+    "last_name": "BROZZI",
+    "phone": "3807530761",
+    "data1": "2026-02-24T11:19:23.000Z",
+    "data2": "2026-04-16T08:52:34.000Z"
+  }
+]
+
+=== PROBLEMA 2: Stessa email, stesso CF ===
+[]
+
+=== PROBLEMA 3a: Cognome e Nome uniti (first_name con spazio) ===
+[
+  {
+    "id": 8,
+    "first_name": "DEBORAH MARIA",
+    "last_name": "MANONI",
+    "fiscal_code": "MNNDRH99P69I829X"
+  },
+  {
+    "id": 11,
+    "first_name": "GIULIA MARIA CHARLOTTE",
+    "last_name": "ESPOSITO",
+    "fiscal_code": "SPSGMR14C60F205P"
+  },
+  {
+    "id": 36,
+    "first_name": "GIULIANA SOFIA",
+    "last_name": "GALLI",
+    "fiscal_code": "GLLGNS41D42F205T"
+  },
+  {
+    "id": 39,
+    "first_name": "CLOTILDE PAOLA",
+    "last_name": "CALO'",
+    "fiscal_code": "CLACTL12T67Z133O"
+  },
+  {
+    "id": 43,
+    "first_name": "ANDREE JHEYSON",
+    "last_name": "ROJAS",
+    "fiscal_code": "RJSNRJ92T03Z611O"
+  },
+  {
+    "id": 50,
+    "first_name": "CLAUDIA ANNA",
+    "last_name": "FERRARIS",
+    "fiscal_code": "FRRCDN00M62F205J"
+  },
+  {
+    "id": 54,
+    "first_name": "SARA ALYSON",
+    "last_name": "MEDAGLIA",
+    "fiscal_code": "MDGSLY19R48F205P"
+  },
+  {
+    "id": 58,
+    "first_name": "FLORA ALESSIA",
+    "last_name": "GALANTE",
+    "fiscal_code": "GLNFRL18E57F205C"
+  },
+  {
+    "id": 64,
+    "first_name": "JOHN BRUNO",
+    "last_name": "BRUNELLO",
+    "fiscal_code": "BRNJNB67B20F205L"
+  },
+  {
+    "id": 72,
+    "first_name": "FRANCESCA ROMANA",
+    "last_name": "SABATINI",
+    "fiscal_code": "SBTFNC71R66H501R"
+  },
+  {
+    "id": 75,
+    "first_name": "MARIA CHIARA",
+    "last_name": "ZANGARI",
+    "fiscal_code": "ZNGMCH91T53F205Q"
+  },
+  {
+    "id": 85,
+    "first_name": "MATILDE LAURA",
+    "last_name": "BELOTTI",
+    "fiscal_code": "BLTMLD15S65F205Z"
+  },
+  {
+    "id": 86,
+    "first_name": "CLELIA ALESSANDRA",
+    "last_name": "REZZONICO",
+    "fiscal_code": "RZZCLL74R52F205F"
+  },
+  {
+    "id": 87,
+    "first_name": "CHIARA MARIA",
+    "last_name": "VISMARA",
+    "fiscal_code": "VSMCRM84B66F205F"
+  },
+  {
+    "id": 90,
+    "first_name": "MARIA ADELAIDE",
+    "last_name": "MARCHESONI",
+    "fiscal_code": "MRCMDL58T66M109D"
+  },
+  {
+    "id": 112,
+    "first_name": "ELENA SOPHIE",
+    "last_name": "MOLINARI",
+    "fiscal_code": "MLNLSP04C65Z126C"
+  },
+  {
+    "id": 118,
+    "first_name": "ELENA FEDERICA",
+    "last_name": "FERRARIO",
+    "fiscal_code": "FRRLFD13A61F205U"
+  },
+  {
+    "id": 133,
+    "first_name": "MARIA CAROLINA",
+    "last_name": "SALVADORI",
+    "fiscal_code": "SLVMCR88B58G702Q"
+  },
+  {
+    "id": 136,
+    "first_name": "ANNA CARMELA",
+    "last_name": "MONTAGNESE",
+    "fiscal_code": "MNTNCR55B44E479W"
+  },
+  {
+    "id": 144,
+    "first_name": "MARIA ANDREA",
+    "last_name": "CAICEDO",
+    "fiscal_code": "CCDMND95P47Z604S"
+  }
+]
+
+=== PROBLEMA 3b: Cognome e Nome uniti (last_name con spazio) ===
+[
+  {
+    "id": 10,
+    "first_name": "ANNA",
+    "last_name": "DI NEPI"
+  },
+  {
+    "id": 18,
+    "first_name": "SILVIA",
+    "last_name": "DE RITIS"
+  },
+  {
+    "id": 42,
+    "first_name": "MICHELE",
+    "last_name": "DI FONZO"
+  },
+  {
+    "id": 52,
+    "first_name": "GIOELE",
+    "last_name": "DE MARINIS"
+  },
+  {
+    "id": 60,
+    "first_name": "ALICE",
+    "last_name": "DI ROCCO"
+  },
+  {
+    "id": 69,
+    "first_name": "WALTER",
+    "last_name": "DI CARO"
+  },
+  {
+    "id": 71,
+    "first_name": "MIA",
+    "last_name": "DI AGOSTINO"
+  },
+  {
+    "id": 80,
+    "first_name": "LUISA",
+    "last_name": "DE RUBERTIS"
+  },
+  {
+    "id": 84,
+    "first_name": "LAURA",
+    "last_name": "DI BENEDETTO"
+  },
+  {
+    "id": 89,
+    "first_name": "ASIA",
+    "last_name": "DE PALMA"
+  },
+  {
+    "id": 91,
+    "first_name": "ELISA",
+    "last_name": "MUTHUKUDA ARACHCHIGE"
+  },
+  {
+    "id": 102,
+    "first_name": "GINEVRA",
+    "last_name": "PONCHIO BISO"
+  },
+  {
+    "id": 120,
+    "first_name": "MATILDE",
+    "last_name": "DI MARTINO"
+  },
+  {
+    "id": 126,
+    "first_name": "OLIVIA",
+    "last_name": "PICHLER ORDINAS"
+  },
+  {
+    "id": 135,
+    "first_name": "GERALDINE MARYANN",
+    "last_name": "CORZO ROCA"
+  },
+  {
+    "id": 142,
+    "first_name": "ANTHONY",
+    "last_name": "MURILLO ZEA"
+  },
+  {
+    "id": 198,
+    "first_name": "GAETANO",
+    "last_name": "DI PALMA"
+  },
+  {
+    "id": 213,
+    "first_name": "BEATRICE",
+    "last_name": "DE DONNO"
+  },
+  {
+    "id": 230,
+    "first_name": "LAILA",
+    "last_name": "NOVAES SANTOS"
+  },
+  {
+    "id": 247,
+    "first_name": "VIOLA",
+    "last_name": "DE PEVERELLI"
+  }
+]
