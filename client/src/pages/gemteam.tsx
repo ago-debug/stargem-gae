@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download, Plus } from "lucide-react";
+import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download, Plus, Activity } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -31,6 +31,9 @@ interface GemTeamMember {
   email?: string;
   phone?: string;
   photo_url?: string;
+  last_seen_at?: string | null;
+  current_session_start?: string | null;
+  last_session_duration?: number | null;
 }
 
 const TEAM_COLORS: Record<string, string> = {
@@ -144,7 +147,10 @@ export default function GemTeam() {
       fisso: !!d.stipendioFissoMensile,
       email: d.email,
       phone: d.phone,
-      photo_url: d.photoUrl
+      photo_url: d.photoUrl,
+      last_seen_at: d.lastSeenAt,
+      current_session_start: d.currentSessionStart,
+      last_session_duration: d.lastSessionDuration
     }));
   }, [dipendentiAPI]);
 
@@ -582,6 +588,61 @@ export default function GemTeam() {
                             <MapPin className="w-4 h-4 text-slate-400" />
                             <span>—</span>
                           </div>
+                        </div>
+                      </section>
+
+                      {/* ATTIVITÀ RECENTE */}
+                      <section>
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                          <Activity className="w-4 h-4" /> Attività Recente
+                        </h4>
+                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col gap-3">
+                          {(() => {
+                            const now = new Date().getTime();
+                            const lastSeenAt = selectedSheetDip.last_seen_at;
+                            const diffMins = lastSeenAt ? Math.round((now - new Date(lastSeenAt).getTime()) / 60000) : null;
+                            
+                            let statoBadge = <Badge variant="outline" className="bg-slate-200 text-slate-500 border-slate-300 font-bold">OFFLINE</Badge>;
+                            if (diffMins !== null) {
+                              if (diffMins <= 5) statoBadge = <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 font-bold"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block"></span>ONLINE</Badge>;
+                              else if (diffMins <= 480) statoBadge = <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-bold">ATTIVO OGGI</Badge>;
+                            }
+
+                            let workedMins = 0;
+                            if (diffMins !== null && diffMins > 20) {
+                              workedMins = selectedSheetDip.last_session_duration ?? 0;
+                            } else if (selectedSheetDip.current_session_start) {
+                              const startT = new Date(selectedSheetDip.current_session_start).getTime();
+                              const sessionMins = Math.round((now - startT) / 60000);
+                              workedMins = (selectedSheetDip.last_session_duration ?? 0) + sessionMins;
+                            } else {
+                              workedMins = selectedSheetDip.last_session_duration ?? 0;
+                            }
+
+                            let durStr = "—";
+                            if (workedMins > 0) {
+                              durStr = workedMins > 60 ? `${Math.floor(workedMins / 60)}h ${workedMins % 60}m` : `${workedMins}m`;
+                            }
+
+                            const lastSeenStr = lastSeenAt ? new Intl.DateTimeFormat('it-IT', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lastSeenAt)) : "Mai";
+
+                            return (
+                              <>
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-slate-500">Stato:</span>
+                                  {statoBadge}
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-slate-500">Ultima Sessione:</span>
+                                  <span className="font-semibold text-slate-700">{lastSeenStr}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-slate-500">Tempo Sessione Lavoro:</span>
+                                  <span className="font-semibold text-slate-700">{durStr}</span>
+                                </div>
+                              </>
+                            );
+                          })()}
                         </div>
                       </section>
 

@@ -4129,10 +4129,14 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
           lastName: schema.members.lastName,
           email: schema.members.email,
           phone: schema.members.phone,
-          photoUrl: schema.members.photoUrl
+          photoUrl: schema.members.photoUrl,
+          lastSeenAt: schema.users.lastSeenAt,
+          currentSessionStart: schema.users.currentSessionStart,
+          lastSessionDuration: schema.users.lastSessionDuration
         })
         .from(schema.teamEmployees)
         .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
+        .leftJoin(schema.users, eq(schema.users.id, schema.teamEmployees.userId))
         .where(eq(schema.teamEmployees.attivo, true))
         .orderBy(schema.teamEmployees.team, schema.members.lastName);
 

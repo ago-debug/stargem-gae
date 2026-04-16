@@ -592,7 +592,17 @@ export function AppSidebar() {
 
         {/* ACTIVE USERS ACCORDION/LIST */}
         {!isInsegnante && (() => {
-          const { data: usersInfo = [] } = useActiveUsers();
+          const { data: usersInfoRaw = [] } = useActiveUsers();
+          const validRoles = ['admin','operator','Super Admin','dipendente','insegnante','Direttivo','Front-Desk','Back-Office'];
+          const usersInfo = usersInfoRaw.filter((u: any) => 
+            validRoles.includes(u.role) && 
+            u.role !== 'client' &&
+            u.username !== 'botAI' && 
+            u.username !== 'cavallo' &&
+            !(u.email || '').includes('test') &&
+            !(u.email || '').includes('example.com')
+          );
+
           if (usersInfo.length === 0) return null;
           
           return (
@@ -663,34 +673,36 @@ export function AppSidebar() {
                       {(() => {
                         const isOffline = !isOnline && !isAway;
                         let text = "";
+                        let workedMins = 0;
                         
-                        if (isOffline) {
-                          const dateStr = u.lastSeenAt ? format(new Date(u.lastSeenAt), "dd/MM HH:mm") : "";
-                          let workedMins = 0;
-                          
-                          if (u.lastSessionDuration != null && u.lastSessionDuration > 0) {
-                            workedMins = u.lastSessionDuration;
-                          } else if (u.currentSessionStart && u.lastSeenAt) {
-                            const startT = new Date(u.currentSessionStart).getTime();
-                            const endT = new Date(u.lastSeenAt).getTime();
-                            if (endT > startT) workedMins = Math.round((endT - startT) / 60000);
-                          }
-                          
-                          let durStr = "";
-                          if (workedMins > 0) {
-                            durStr = workedMins > 60 ? ` (lavoro: ${Math.floor(workedMins / 60)}h ${workedMins % 60}m)` : ` (lavoro: ${workedMins}m)`;
-                          }
-                          text = `Uscito ${dateStr}${durStr}`;
+                        if (diffMins > 20) {
+                          // Utente inattivo — usa solo lastSessionDuration
+                          workedMins = u.lastSessionDuration ?? 0;
                         } else if (u.currentSessionStart) {
+                          // Utente attivo — sessione corrente + sessioni precedenti
                           const startT = new Date(u.currentSessionStart).getTime();
                           const sessionMins = Math.round((now - startT) / 60000);
-                          const durStr = sessionMins > 60 ? `${Math.floor(sessionMins / 60)}h ${sessionMins % 60}m` : `${sessionMins}m`;
+                          workedMins = (u.lastSessionDuration ?? 0) + sessionMins;
+                        } else {
+                          workedMins = u.lastSessionDuration ?? 0;
+                        }
+
+                        let durStr = "";
+                        if (workedMins > 0) {
+                          durStr = workedMins > 60 ? `(lavoro: ${Math.floor(workedMins / 60)}h ${workedMins % 60}m)` : `(lavoro: ${workedMins}m)`;
+                        }
+
+                        if (isOffline) {
+                          const dateStr = u.lastSeenAt ? format(new Date(u.lastSeenAt), "dd/MM HH:mm") : "";
+                          text = `Uscito ${dateStr}${durStr ? ` ${durStr}` : ""}`;
+                        } else if (u.currentSessionStart) {
                           const timeStr = new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-                          text = `${timeStr} (lavoro: ${durStr})`;
+                          const durStrOnly = workedMins > 60 ? `${Math.floor(workedMins / 60)}h ${workedMins % 60}m` : `${workedMins}m`;
+                          text = `${timeStr} (lavoro: ${durStrOnly})`;
                         }
 
                         return (
-                          <span className={`text-[9px] shrink-0 ${isOnline ? "text-slate-400" : isAway ? "text-slate-400" : "text-slate-400"}`}>
+                          <span className="text-[9px] shrink-0 text-slate-400">
                             {text}
                           </span>
                         );
