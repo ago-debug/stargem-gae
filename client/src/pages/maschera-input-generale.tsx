@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X, Camera, Edit, Trash2, Copy, RefreshCw, Settings2, ShieldAlert, Info } from "lucide-react";
+import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X, Camera, Edit, Trash2, Copy, RefreshCw, Settings2, ShieldAlert, Info, UserPlus } from "lucide-react";
+import { useCFCheck, useEmailCheck, usePhoneCheck } from "@/hooks/useFieldConflictCheck";
+import { ConflictBadge } from "@/components/conflict-badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
@@ -1670,6 +1672,14 @@ export default function MascheraInputGenerale() {
 
   const etaMember = parseInt(formData.eta) || 0;
   const isMinor = etaMember > 0 && etaMember < 18;
+
+  const cfCheck = useCFCheck(formData.codiceFiscale, selectedMemberId || undefined);
+  const emailCheck = useEmailCheck(formData.email, isMinor, selectedMemberId || undefined);
+  const phoneCheck = usePhoneCheck(formData.telefono, isMinor, selectedMemberId || undefined);
+
+  const hasConflicts = (cfCheck.available === false) || 
+                       (emailCheck.available === false && !isMinor) || 
+                       (phoneCheck.available === false && !isMinor);
   const hasParentData = !!(
     (formData.nomeGen1?.trim() && formData.cognomeGen1?.trim() && formData.cfGen1?.trim()) ||
     (formData.nomeGen2?.trim() && formData.cognomeGen2?.trim() && formData.cfGen2?.trim())
@@ -1951,8 +1961,8 @@ export default function MascheraInputGenerale() {
                 size="sm"
                 className={`text-xs h-8 ${Object.keys(dirtyFields).length > 0 && isFormValid ? 'gold-3d-button' : 'bg-background'} `}
                 data-testid="button-salva"
-                disabled={!isFormValid || saveMutation.isPending || Object.keys(dirtyFields).length === 0}
-                title={!isFormValid ? (hasOrphanPayments ? "Errore: Ci sono pagamenti orfani (senza attività). Correggi prima di salvare." : "Compila tutti i campi obbligatori (*) per salvare") : Object.keys(dirtyFields).length === 0 ? "Nessuna modifica da salvare" : ""}
+                disabled={!isFormValid || saveMutation.isPending || Object.keys(dirtyFields).length === 0 || hasConflicts}
+                title={hasConflicts ? "Risolvi i conflitti prima di salvare" : (!isFormValid ? (hasOrphanPayments ? "Errore: Ci sono pagamenti orfani (senza attività). Correggi prima di salvare." : "Compila tutti i campi obbligatori (*) per salvare") : Object.keys(dirtyFields).length === 0 ? "Nessuna modifica da salvare" : "")}
                 onClick={handleSave}
               >
                 <Save className={`w-3 h-3 mr-1 sidebar-icon-gold ${saveMutation.isPending ? 'animate-spin' : ''} `} />
@@ -2904,6 +2914,7 @@ export default function MascheraInputGenerale() {
                         className={getInputClassName("codiceFiscale", true)}
                       />
                       {renderMancaDato(formData.codiceFiscale)}
+                      <ConflictBadge result={cfCheck} type="cf" />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -2938,6 +2949,7 @@ export default function MascheraInputGenerale() {
                         className={`${getInputClassName("telefono", true)} ${verificaStato.telefono ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
                       />
                       {renderMancaDato(formData.telefono)}
+                      <ConflictBadge result={phoneCheck} type="telefono" />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -2973,6 +2985,7 @@ export default function MascheraInputGenerale() {
                         className={`${getInputClassName("email", true)} ${verificaStato.email ? "bg-green-100 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""}`}
                       />
                       {renderMancaDato(formData.email)}
+                      <ConflictBadge result={emailCheck} type="email" />
                     </div>
                   </div>
                 </div>

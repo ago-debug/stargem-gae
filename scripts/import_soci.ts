@@ -257,8 +257,25 @@ async function run() {
             if (!m.tutor2Email && row['Email Tutore 2']) track('tutor2Email', row['Email Tutore 2']);
             if (!m.nationality && row['Cittadinanza']) track('nationality', row['Cittadinanza']);
             if (!m.region && row['Regione']) track('region', row['Regione']);
-            if (!m.consentImage && row['Cons. Immag.']) track('consentImage', row['Cons. Immag.'] === 'Sì' || row['Cons. Immag.'] === 'Si' || row['Cons. Immag.'] === '1' || row['Cons. Immag.'] === 1);
-            if (!m.consentMarketing && row['Consenso Invio']) track('consentMarketing', row['Consenso Invio'] === 'Sì' || row['Consenso Invio'] === 'Si' || row['Consenso Invio'] === '1' || row['Consenso Invio'] === 1);
+            
+            // Consensi (si aggiornano SEMPRE, sovrascrivendo)
+            if (row['Cons. Immag.'] !== undefined) track('consentImage', row['Cons. Immag.'] === 'Sì' || row['Cons. Immag.'] === 'Si' || row['Cons. Immag.'] === '1' || row['Cons. Immag.'] === 1);
+            if (row['Consenso Invio'] !== undefined) track('consentMarketing', row['Consenso Invio'] === 'Sì' || row['Consenso Invio'] === 'Si' || row['Consenso Invio'] === '1' || row['Consenso Invio'] === 1);
+            if (row['News'] !== undefined || row['Con. Invio mail 2'] !== undefined) track('consentNewsletter', (row['News'] === 'Sì' || row['News'] === 'Si' || row['Con. Invio mail 2'] === 'Sì') ? 1 : 0);
+
+            // 13 Campi Nuovi (F1-002b)
+            if (!m.birthNation && row['Nazione Nasc.']) track('birthNation', row['Nazione Nasc.'].trim());
+            if (!m.secondaryEmail && row['E-Mail 2']) track('secondaryEmail', row['E-Mail 2'].trim().toLowerCase());
+            if (!m.profession && row['Professione']) track('profession', row['Professione'].trim());
+            if (!m.documentType && row['Documento']) track('documentType', row['Documento'].trim());
+            if (!m.documentExpiry && row['Scadenza Documento'] && parseExcelDate(row['Scadenza Documento'])) track('documentExpiry', new Date(parseExcelDate(row['Scadenza Documento'])!));
+            if (!m.privacyDate && row['Data privacy'] && parseExcelDate(row['Data privacy'])) track('privacyDate', new Date(parseExcelDate(row['Data privacy'])!));
+            if (!m.adminNotes && row['Note Aministrative']) track('adminNotes', row['Note Aministrative'].trim());
+            if (!m.healthNotes && row['Note Sanitarie / Alimentari']) track('healthNotes', row['Note Sanitarie / Alimentari'].trim());
+            if (!m.foodAlerts && row['Segnalaz. Alim. Sanit.']) track('foodAlerts', row['Segnalaz. Alim. Sanit.'].trim());
+            if (!m.tags && row['Tags']) track('tags', row['Tags'].trim());
+            if (!m.residencePermit && row['Permesso Soggiorno']) track('residencePermit', row['Permesso Soggiorno'].trim());
+            if (!m.residencePermitExpiry && row['Scadenza Permesso Sog.'] && parseExcelDate(row['Scadenza Permesso Sog.'])) track('residencePermitExpiry', new Date(parseExcelDate(row['Scadenza Permesso Sog.'])!));
 
             if (Object.keys(updates).length > 0) {
               if (emptyFieldsFilled) countEmptyFieldsFilled++;
@@ -295,7 +312,21 @@ async function run() {
               nationality: row['Cittadinanza'] || null,
               region: row['Regione'] || null,
               consentImage: row['Cons. Immag.'] === 'Sì' || row['Cons. Immag.'] === 'Si' || row['Cons. Immag.'] === '1' || row['Cons. Immag.'] === 1,
-              consentMarketing: row['Consenso Invio'] === 'Sì' || row['Consenso Invio'] === 'Si' || row['Consenso Invio'] === '1' || row['Consenso Invio'] === 1
+              consentMarketing: row['Consenso Invio'] === 'Sì' || row['Consenso Invio'] === 'Si' || row['Consenso Invio'] === '1' || row['Consenso Invio'] === 1,
+              consentNewsletter: (row['News'] === 'Sì' || row['News'] === 'Si' || row['Con. Invio mail 2'] === 'Sì') ? 1 : 0,
+
+              birthNation: row['Nazione Nasc.']?.trim() || null,
+              secondaryEmail: row['E-Mail 2']?.trim()?.toLowerCase() || null,
+              profession: row['Professione']?.trim() || null,
+              documentType: row['Documento']?.trim() || null,
+              documentExpiry: row['Scadenza Documento'] && parseExcelDate(row['Scadenza Documento']) ? new Date(parseExcelDate(row['Scadenza Documento'])!) : null,
+              privacyDate: row['Data privacy'] && parseExcelDate(row['Data privacy']) ? new Date(parseExcelDate(row['Data privacy'])!) : null,
+              adminNotes: row['Note Aministrative']?.trim() || null,
+              healthNotes: row['Note Sanitarie / Alimentari']?.trim() || null,
+              foodAlerts: row['Segnalaz. Alim. Sanit.']?.trim() || null,
+              tags: row['Tags']?.trim() || null,
+              residencePermit: row['Permesso Soggiorno']?.trim() || null,
+              residencePermitExpiry: row['Scadenza Permesso Sog.'] && parseExcelDate(row['Scadenza Permesso Sog.']) ? new Date(parseExcelDate(row['Scadenza Permesso Sog.'])!) : null
             };
             if (!dryRun) {
               await db.insert(members).values(insertData);

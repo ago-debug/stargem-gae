@@ -24,6 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
 import type { Member, InsertMember, Attendance } from "@shared/schema";
+import { DuplicateMergeModal } from "@/components/duplicate-merge-modal";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -70,7 +71,8 @@ export default function Members() {
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
   const [mergeCandidates, setMergeCandidates] = useState<any[]>([]);
   const [isMergeDialogOpen, setIsMergeDialogOpen] = useState(false);
-  const [primaryMemberId, setPrimaryMemberId] = useState<number | null>(null);
+  const [manualMergeMember1, setManualMergeMember1] = useState<any>(null);
+  const [manualMergeMember2, setManualMergeMember2] = useState<any>(null);
   const [showParentFields, setShowParentFields] = useState(false);
   const [hasMedicalCert, setHasMedicalCert] = useState(false);
   const [isEnrollmentDialogOpen, setIsEnrollmentDialogOpen] = useState(false);
@@ -173,6 +175,12 @@ export default function Members() {
   const { data: duplicateClusters } = useQuery<any[]>({
     queryKey: ["/api/members/duplicates"],
     staleTime: 300000,
+  });
+
+  const { data: counts } = useQuery({
+    queryKey: ['/api/members/counts-by-type'],
+    queryFn: () => fetch('/api/members/counts-by-type').then(r => r.json()),
+    staleTime: 30000,
   });
 
   const membersRaw = membersData?.members || [];
@@ -279,32 +287,7 @@ export default function Members() {
     },
   });
 
-  const mergeMutation = useMutation({
-    mutationFn: async (data: { primaryId: number; secondaryIds: number[] }) => {
-      const res = await fetch("/api/members/merge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to merge members");
-      }
-      return res.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/members/total"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
-      toast({ title: "Successo", description: data.message });
-      setIsMergeDialogOpen(false);
-      setSelectedMembers([]);
-      setPrimaryMemberId(null);
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
-    },
-  });
+  // mergeMutation in members.tsx was deleted since DuplicateMergeModal handles it internally now.
 
   const addEnrollmentMutation = useMutation({
     mutationFn: async (data: { memberId: number; courseId: number }) => {
@@ -827,7 +810,7 @@ export default function Members() {
           </div>
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-1">Anagrafica Generale</h1>
-            <p className="text-sm font-medium text-slate-500">Gestisci clienti, istruttori e staff con ricerca avanzata e filtri multidimensionali</p>
+            <p className="text-sm font-medium text-slate-500">Gestisci partecipanti, staff e team con ricerca avanzata e filtri multidimensionali</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap relative z-10">
@@ -886,9 +869,23 @@ export default function Members() {
             <Button
               variant="default"
               className="bg-purple-600 hover:bg-purple-700"
-              onClick={() => {
-                setMergeCandidates(members.filter(m => selectedMembers.includes(m.id)));
+              onClick={async () => {
+                if (selectedMembers.length !== 2) {
+                  toast({ title: "Attenzione", description: "Esattamente due anagrafiche devono essere selezionate per il merge visivo.", variant: "destructive" });
+                  return;
+                }
                 setIsMergeDialogOpen(true);
+                try {
+                  const m1Req = await fetch(`/api/members/${selectedMembers[0]}`);
+                  const m1 = await m1Req.json();
+                  const m2Req = await fetch(`/api/members/${selectedMembers[1]}`);
+                  const m2 = await m2Req.json();
+                  setManualMergeMember1(m1);
+                  setManualMergeMember2(m2);
+                } catch (e) {
+                  toast({ title: "Errore", description: "Impossibile recuperare i dati dei membri.", variant: "destructive" });
+                  setIsMergeDialogOpen(false);
+                }
               }}
               disabled={!canWrite}
             >
@@ -937,9 +934,29 @@ export default function Members() {
                     <span className="animate-pulse">Calcolo...</span>
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-sm px-3 py-1.5 h-10 bg-muted/50 text-muted-foreground">
-                    N. {totalMembers} Record Trovati
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-sm px-3 py-1.5 h-10 bg-muted/50 text-muted-foreground">
+                      N. {totalMembers} Record Trovati
+                    </Badge>
+                    {counts && (
+                      <div className="flex gap-2">
+                        <span style={{ background: 'var(--color-background-info)', color: 'var(--color-text-info)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }}>
+                          Partecipanti: {counts.partecipanti?.toLocaleString('it') ?? 0}
+                        </span>
+                        <span style={{ background: 'var(--color-background-success)', color: 'var(--color-text-success)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }}>
+                          Staff: {counts.staff?.toLocaleString('it') ?? 0}
+                        </span>
+                        <span style={{ background: 'var(--color-background-warning)', color: 'var(--color-text-warning)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }}>
+                          Team: {counts.team?.toLocaleString('it') ?? 0}
+                        </span>
+                        {counts.medici > 0 && (
+                          <span style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }}>
+                            Medici: {counts.medici?.toLocaleString('it') ?? 0}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -2381,62 +2398,20 @@ export default function Members() {
         </DialogContent>
       </Dialog>
 
-      {/* Merge Duplicates Dialog */}
-      <Dialog open={isMergeDialogOpen} onOpenChange={setIsMergeDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Unisci Anagrafiche Duplicate</DialogTitle>
-            <DialogDescription>
-              Seleziona quale sarà il contatto <strong>Master</strong>. Tutti gli acquisti e iscrizioni degli altri contatti selezionati saranno spostati su questo e i contatti secondari verranno <strong>eliminati definitivamente</strong>.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <Label>Scegli il contatto Master:</Label>
-            <div className="space-y-2 border rounded-md p-3 max-h-60 overflow-y-auto">
-              {mergeCandidates.map(member => (
-                <div key={member.id} className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    id={`primary-${member.id}`}
-                    name="primaryMember"
-                    value={member.id}
-                    checked={primaryMemberId === member.id}
-                    onChange={() => setPrimaryMemberId(member.id)}
-                    className="w-4 h-4"
-                  />
-                  <Label htmlFor={`primary-${member.id}`} className="cursor-pointer font-normal">
-                    {member.lastName} {member.firstName} <br />
-                    <span className="text-xs text-muted-foreground mr-2">CF: {member.fiscalCode || '-'}</span>
-                    <span className="text-xs text-muted-foreground">Email: {member.email || '-'}</span>
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsMergeDialogOpen(false)}>
-              Annulla
-            </Button>
-            <Button
-              variant="default"
-              className="bg-purple-600 hover:bg-purple-700"
-              onClick={() => {
-                if (!primaryMemberId) {
-                  toast({ title: "Errore", description: "Seleziona un contatto master.", variant: "destructive" });
-                  return;
-                }
-                const secondaryIds = selectedMembers.filter(id => id !== primaryMemberId);
-                mergeMutation.mutate({ primaryId: primaryMemberId, secondaryIds });
-              }}
-              disabled={mergeMutation.isPending || !primaryMemberId}
-            >
-              Conferma Unione ({selectedMembers.length} contatti)
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Merge Duplicates Dialog replaces old dialog */}
+      {isMergeDialogOpen && (
+        <DuplicateMergeModal
+          open={isMergeDialogOpen}
+          onOpenChange={setIsMergeDialogOpen}
+          member1={manualMergeMember1}
+          member2={manualMergeMember2}
+          onMergeComplete={() => {
+            setIsMergeDialogOpen(false);
+            setSelectedMembers([]);
+            queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+          }}
+        />
+      )}
 
       {/* Enrollment Management Dialog */}
       <EnrollmentDialog
