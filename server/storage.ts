@@ -1125,8 +1125,8 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (status && status !== "all") {
-      if (status === "active") searchCondition = sql`${searchCondition} AND active = 1`;
-      else if (status === "inactive") searchCondition = sql`${searchCondition} AND active = 0`;
+      if (status === "active") searchCondition = sql`${searchCondition} AND enrollment_status = 'attivo'`;
+      else if (status === "inactive") searchCondition = sql`${searchCondition} AND enrollment_status = 'non_attivo'`;
     }
 
     if (gender && gender !== "all") {
@@ -1140,8 +1140,8 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (isMinor && isMinor !== "all") {
-      if (isMinor === "yes") searchCondition = sql`${searchCondition} AND is_minor = 1`;
-      else if (isMinor === "no") searchCondition = sql`${searchCondition} AND is_minor = 0`;
+      if (isMinor === "yes") searchCondition = sql`${searchCondition} AND date_of_birth IS NOT NULL AND TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) < 18`;
+      else if (isMinor === "no") searchCondition = sql`${searchCondition} AND (date_of_birth IS NULL OR TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= 18)`;
     }
 
     if (participantType && participantType !== "all") {
@@ -1290,6 +1290,7 @@ export class DatabaseStorage implements IStorage {
       notes: row.notes,
       photoUrl: row.photo_url,
       active: row.active,
+      enrollmentStatus: row.enrollment_status,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       createdBy: row.created_by,
