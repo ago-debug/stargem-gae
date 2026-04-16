@@ -593,15 +593,19 @@ export function AppSidebar() {
         {/* ACTIVE USERS ACCORDION/LIST */}
         {!isInsegnante && (() => {
           const { data: usersInfoRaw = [] } = useActiveUsers();
-          const validRoles = ['admin','operator','Super Admin','dipendente','insegnante','Direttivo','Front-Desk','Back-Office'];
-          const usersInfo = usersInfoRaw.filter((u: any) => 
-            validRoles.includes(u.role) && 
-            u.role !== 'client' &&
-            u.username !== 'botAI' && 
-            u.username !== 'cavallo' &&
-            !(u.email || '').includes('test') &&
-            !(u.email || '').includes('example.com')
-          );
+          const usersInfo = usersInfoRaw.filter((u: any) => {
+            // Escludi account di test noti
+            if (u.username === 'botAI') return false;
+            if (u.username === 'cavallo') return false;
+            if (u.username === 'cavallo pazzo') return false;
+            // Escludi email di test
+            if (u.email?.includes('example.com')) return false;
+            if (u.email?.includes('@test.')) return false;
+            // Escludi solo i client puri (non staff)
+            if (u.role === 'client') return false;
+            // Tutto il resto passa
+            return true;
+          });
 
           if (usersInfo.length === 0) return null;
           
