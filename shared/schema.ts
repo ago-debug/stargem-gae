@@ -787,6 +787,18 @@ export const members = mysqlTable("members", {
   address: text("address"), // Mantenuto per retrocompatibilità
   notes: text("notes"),
 
+  // Campi Tutori (GDPR e minori)
+  tutor1FiscalCode: varchar("tutor1_fiscal_code", { length: 16 }),
+  tutor1Phone: varchar("tutor1_phone", { length: 20 }),
+  tutor1Email: varchar("tutor1_email", { length: 255 }),
+  tutor2FiscalCode: varchar("tutor2_fiscal_code", { length: 16 }),
+  tutor2Phone: varchar("tutor2_phone", { length: 20 }),
+  tutor2Email: varchar("tutor2_email", { length: 255 }),
+  nationality: varchar("nationality", { length: 100 }),
+  region: varchar("region", { length: 100 }),
+  consentImage: boolean("consent_image").default(false),
+  consentMarketing: boolean("consent_marketing").default(false),
+
   // Campi Insegnanti
   specialization: text("specialization"),
   bio: text("bio"),
