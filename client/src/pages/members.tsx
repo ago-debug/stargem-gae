@@ -98,7 +98,18 @@ export default function Members() {
   const genderRef = useRef<HTMLSelectElement>(null);
   const placeOfBirthRef = useRef<HTMLInputElement>(null);
 
-  const PAGE_SIZE = 50;
+  const [pageSize, setPageSize] = useState<number>(() => {
+    const saved = localStorage.getItem('anagrafica_page_size');
+    return saved ? parseInt(saved, 10) : 50;
+  });
+
+  const handlePageSizeChange = (val: string) => {
+    const size = parseInt(val, 10);
+    setPageSize(size);
+    localStorage.setItem('anagrafica_page_size', val);
+    setCurrentPage(1);
+  };
+
   const debouncedSearch = useDebounce(searchQuery, 300);
 
   // Reset to page 1 when search or filter changes
@@ -110,18 +121,18 @@ export default function Members() {
       debouncedSearch !== "" || stagioneFilter !== "all" || statusFilter !== "all" || genderFilter !== "all" ||
       hasMedicalCertFilter !== "all" || isMinorFilter !== "all" || participantTypeFilter !== "all" ||
       hasCardFilter !== "all" || hasEntityCardFilter !== "all" || hasEmailFilter !== "all" ||
-      hasPhoneFilter !== "all" || missingFiscalCodeFilter !== "all" || issuesFilter !== "all"
+      hasPhoneFilter !== "all" || missingFiscalCodeFilter !== "all" || issuesFilter !== "all" || pageSize !== 50
     )) {
       setIsShowingAll(false);
     }
-  }, [debouncedSearch, stagioneFilter, statusFilter, genderFilter, hasMedicalCertFilter, isMinorFilter, participantTypeFilter, hasCardFilter, hasEntityCardFilter, hasEmailFilter, hasPhoneFilter, missingFiscalCodeFilter, issuesFilter]);
+  }, [debouncedSearch, stagioneFilter, statusFilter, genderFilter, hasMedicalCertFilter, isMinorFilter, participantTypeFilter, hasCardFilter, hasEntityCardFilter, hasEmailFilter, hasPhoneFilter, missingFiscalCodeFilter, issuesFilter, pageSize]);
 
   const { data: membersData, isLoading } = useQuery<{ members: Member[]; total: number }>({
-    queryKey: ["/api/members", { page: currentPage, pageSize: PAGE_SIZE, search: debouncedSearch, season: stagioneFilter, status: statusFilter, gender: genderFilter, hasMedicalCert: hasMedicalCertFilter, isMinor: isMinorFilter, participantType: participantTypeFilter, hasCard: hasCardFilter, hasEntityCard: hasEntityCardFilter, hasEmail: hasEmailFilter, hasPhone: hasPhoneFilter, missingFiscalCode: missingFiscalCodeFilter, issuesFilter }],
+    queryKey: ["/api/members", { page: currentPage, pageSize: pageSize, search: debouncedSearch, season: stagioneFilter, status: statusFilter, gender: genderFilter, hasMedicalCert: hasMedicalCertFilter, isMinor: isMinorFilter, participantType: participantTypeFilter, hasCard: hasCardFilter, hasEntityCard: hasEntityCardFilter, hasEmail: hasEmailFilter, hasPhone: hasPhoneFilter, missingFiscalCode: missingFiscalCodeFilter, issuesFilter }],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        pageSize: PAGE_SIZE.toString(),
+        pageSize: pageSize.toString(),
         search: debouncedSearch,
         season: stagioneFilter,
         status: statusFilter,
@@ -170,7 +181,8 @@ export default function Members() {
 
   const getSortValue = (member: Member, key: string) => {
     switch (key) {
-      case "lastName": return `${member.lastName} ${member.firstName}`;
+      case "lastName": return member.lastName;
+      case "firstName": return member.firstName;
       case "fiscalCode": return member.fiscalCode;
       case "email": return member.email;
       case "mobile": return member.mobile || member.phone || "";
@@ -185,7 +197,7 @@ export default function Members() {
 
   const members = sortItems(membersRaw, getSortValue);
   const totalMembers = membersData?.total || 0;
-  const totalPages = Math.ceil(totalMembers / PAGE_SIZE);
+  const totalPages = Math.ceil(totalMembers / pageSize);
 
   const { data: clientCategories } = useQuery<any[]>({
     queryKey: ["/api/client-categories"],
@@ -819,6 +831,19 @@ export default function Members() {
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap relative z-10">
+          <div className="flex items-center gap-2 mr-2">
+            <Label className="text-sm text-slate-500 hidden sm:block">Per pagina:</Label>
+            <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+              <SelectTrigger className="w-[80px] h-9">
+                <SelectValue placeholder="50" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+                <SelectItem value="200">200</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             variant="outline"
             onClick={() => setLocation("/importa")}
@@ -1110,7 +1135,8 @@ export default function Members() {
                         aria-label="Seleziona tutti"
                       />
                     </TableHead>
-                    <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome e Nome</SortableTableHead>
+                    <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
+                    <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
                     <SortableTableHead sortKey="fiscalCode" currentSort={sortConfig} onSort={handleSort}>Codice Fiscale</SortableTableHead>
                     <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
                     <SortableTableHead sortKey="mobile" currentSort={sortConfig} onSort={handleSort}>Mobile</SortableTableHead>
@@ -1144,7 +1170,7 @@ export default function Members() {
                                 className="font-bold hover:underline cursor-pointer"
                                 data-testid={`link-member-${member.id}`}
                               >
-                                {member.lastName} {member.firstName}
+                                {member.lastName}
                               </span>
                             </Link>
                             {getMissingData(member).length > 0 && (
@@ -1167,6 +1193,13 @@ export default function Members() {
                               </TooltipProvider>
                             )}
                           </div>
+                        </TableCell>
+                        <TableCell className={cn(isSortedColumn("firstName") && "sorted-column-cell")}>
+                          <Link href={`/maschera-input?memberId=${member.id}`}>
+                            <span className="hover:underline cursor-pointer font-bold">
+                              {member.firstName}
+                            </span>
+                          </Link>
                         </TableCell>
                         <TableCell className={cn("font-mono text-sm", isSortedColumn("fiscalCode") && "sorted-column-cell")}>
                           {member.fiscalCode ? member.fiscalCode : (
