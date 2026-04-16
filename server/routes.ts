@@ -1078,6 +1078,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currentSessionStart: users.currentSessionStart,
         lastSeenAt: users.lastSeenAt,
         lastSessionDuration: users.lastSessionDuration,
+        role: users.role,
+        email: users.email
       })
       .from(users)
       .orderBy(desc(users.lastSeenAt));
