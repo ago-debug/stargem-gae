@@ -16,6 +16,7 @@
     "setup": "npx tsx scripts/setup-db.ts && npm run db:push"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.89.0",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@libsql/client": "^0.17.0",
