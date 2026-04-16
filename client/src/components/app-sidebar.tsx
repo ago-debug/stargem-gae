@@ -708,17 +708,10 @@ export function AppSidebar() {
           <div className="mt-2 bg-slate-50 border border-sidebar-border rounded-lg shadow-sm overflow-hidden flex-shrink-0">
             {!isInsegnante && latestActivity && (
               <div className="px-3 pt-2 pb-1.5 text-[9px] text-muted-foreground/80 leading-tight space-y-1 select-none bg-white/50 border-b border-sidebar-border/50">
-                <p className="flex justify-between items-center text-[8.5px]">
-                  <span className="opacity-80">Aggiornato:</span>
-                  <span className="font-medium text-slate-600">{new Date(latestActivity.createdAt).toLocaleString("it-IT", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
-                </p>
-                <p className="flex justify-between items-center text-[8.5px]">
-                  <span className="opacity-80">Da/Azione:</span>
-                  <span className="font-medium text-slate-600 truncate max-w-[100px] text-right" title={`Di: ${latestActivity.user?.username} / Sys: v${__APP_VERSION__}`}>
-                    {latestActivity.user?.firstName || latestActivity.user?.username || "Sys"} (v{__APP_VERSION__})
-                  </span>
-                </p>
-                <div className="text-[8.5px] text-slate-400 font-mono mt-1.5 w-full text-right opacity-80" title="Data ultima build">
+                <div className="font-medium text-slate-600 w-full text-right truncate" title={`Di: ${latestActivity.user?.username} / Sys: v${__APP_VERSION__}`}>
+                  {latestActivity.user?.firstName || latestActivity.user?.username || "Sys"} (v{__APP_VERSION__})
+                </div>
+                <div className="text-[8.5px] text-slate-400 font-mono w-full text-right opacity-80" title="Data ultima build">
                   Aggiornato: {new Intl.DateTimeFormat('it-IT', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(__BUILD_DATE__))}
                 </div>
               </div>
