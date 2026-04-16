@@ -234,25 +234,34 @@ async function run() {
           if (existing.length > 0) {
             const m = existing[0];
             const updates: any = {};
-            if (!m.dateOfBirth && row['Data di Nascita']) updates.dateOfBirth = parseExcelDate(row['Data di Nascita']);
-            if (!m.placeOfBirth && row['Città Nasc.']) updates.placeOfBirth = row['Città Nasc.'];
-            if (!m.address && row['Indirizzo']) updates.address = row['Indirizzo'];
-            if (!m.postalCode && row['CAP']) updates.postalCode = String(row['CAP']);
-            if (!m.city && row['Citta Resid.']) updates.city = row['Citta Resid.'];
-            if (!m.province && row['Provincia']) updates.province = row['Provincia'];
-            if (!m.internalId && row['Codice']) updates.internalId = `ATH-${row['Codice']}`;
-            if (!m.tutor1FiscalCode && row['Cod.Fisc. Tutore']) updates.tutor1FiscalCode = normalizeCF(row['Cod.Fisc. Tutore']);
-            if (!m.tutor1Phone && row['Telefono Tutore']) updates.tutor1Phone = String(row['Telefono Tutore']);
-            if (!m.tutor1Email && row['Email Tutore']) updates.tutor1Email = row['Email Tutore'];
-            if (!m.tutor2FiscalCode && row['Cod.Fisc. Tutore 2']) updates.tutor2FiscalCode = normalizeCF(row['Cod.Fisc. Tutore 2']);
-            if (!m.tutor2Phone && row['Telefono Tutore 2']) updates.tutor2Phone = String(row['Telefono Tutore 2']);
-            if (!m.tutor2Email && row['Email Tutore 2']) updates.tutor2Email = row['Email Tutore 2'];
-            if (!m.nationality && row['Cittadinanza']) updates.nationality = row['Cittadinanza'];
-            if (!m.region && row['Regione']) updates.region = row['Regione'];
-            if (!m.consentImage && row['Cons. Immag.']) updates.consentImage = row['Cons. Immag.'] === 'Sì' || row['Cons. Immag.'] === 'Si' || row['Cons. Immag.'] === '1' || row['Cons. Immag.'] === 1;
-            if (!m.consentMarketing && row['Consenso Invio']) updates.consentMarketing = row['Consenso Invio'] === 'Sì' || row['Consenso Invio'] === 'Si' || row['Consenso Invio'] === '1' || row['Consenso Invio'] === 1;
+            let emptyFieldsFilled = false;
+            
+            const track = (key: string, val: any) => {
+              updates[key] = val;
+              emptyFieldsFilled = true;
+              updatedFieldsStats[key] = (updatedFieldsStats[key] || 0) + 1;
+            };
+
+            if (!m.dateOfBirth && row['Data di Nascita']) track('dateOfBirth', parseExcelDate(row['Data di Nascita']));
+            if (!m.placeOfBirth && row['Città Nasc.']) track('placeOfBirth', row['Città Nasc.']);
+            if (!m.address && row['Indirizzo']) track('address', row['Indirizzo']);
+            if (!m.postalCode && row['CAP']) track('postalCode', String(row['CAP']));
+            if (!m.city && row['Citta Resid.']) track('city', row['Citta Resid.']);
+            if (!m.province && row['Provincia']) track('province', row['Provincia']);
+            if (!m.internalId && row['Codice']) track('internalId', `ATH-${row['Codice']}`);
+            if (!m.tutor1FiscalCode && row['Cod.Fisc. Tutore']) track('tutor1FiscalCode', normalizeCF(row['Cod.Fisc. Tutore']));
+            if (!m.tutor1Phone && row['Telefono Tutore']) track('tutor1Phone', String(row['Telefono Tutore']));
+            if (!m.tutor1Email && row['Email Tutore']) track('tutor1Email', row['Email Tutore']);
+            if (!m.tutor2FiscalCode && row['Cod.Fisc. Tutore 2']) track('tutor2FiscalCode', normalizeCF(row['Cod.Fisc. Tutore 2']));
+            if (!m.tutor2Phone && row['Telefono Tutore 2']) track('tutor2Phone', String(row['Telefono Tutore 2']));
+            if (!m.tutor2Email && row['Email Tutore 2']) track('tutor2Email', row['Email Tutore 2']);
+            if (!m.nationality && row['Cittadinanza']) track('nationality', row['Cittadinanza']);
+            if (!m.region && row['Regione']) track('region', row['Regione']);
+            if (!m.consentImage && row['Cons. Immag.']) track('consentImage', row['Cons. Immag.'] === 'Sì' || row['Cons. Immag.'] === 'Si' || row['Cons. Immag.'] === '1' || row['Cons. Immag.'] === 1);
+            if (!m.consentMarketing && row['Consenso Invio']) track('consentMarketing', row['Consenso Invio'] === 'Sì' || row['Consenso Invio'] === 'Si' || row['Consenso Invio'] === '1' || row['Consenso Invio'] === 1);
 
             if (Object.keys(updates).length > 0) {
+              if (emptyFieldsFilled) countEmptyFieldsFilled++;
               if (!dryRun) {
                 await db.update(members).set(updates).where(eq(members.id, m.id));
               }
