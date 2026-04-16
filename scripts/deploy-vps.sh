@@ -18,10 +18,11 @@ rsync -avz --delete \
   --exclude '.gemini' \
   --exclude '.agents' \
   --exclude 'tmp' \
+  --no-perms --no-owner --no-group \
   ./ "$VPS_USER:$VPS_PATH/"
 
 echo "=== [3/6] Pulizia vecchie folder compilate (/dist) ==="
-ssh $VPS_USER "rm -rf $VPS_PATH/dist/ && echo 'Vecchia dist/ rimossa'"
+ssh $VPS_USER "rm -rf $VPS_PATH/dist/ && chmod 755 $VPS_PATH && echo 'Vecchia dist/ rimossa e permessi fixati'"
 
 echo "=== [4/6] Ricompilazione e build locale su VPS ==="
 ssh $VPS_USER "export PATH=\"$NODE_PATH:\$PATH\" \\
