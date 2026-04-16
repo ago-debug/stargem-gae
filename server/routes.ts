@@ -5,6 +5,8 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated, isExternalDeploy } from "./auth";
 import multer from "multer";
 import Papa from "papaparse";
+import * as XLSX from "xlsx";
+import path from "path";
 import { readSpreadsheet } from "./google-sheets";
 import {
   getGoogleCalendarClient,
@@ -18,7 +20,8 @@ import { log } from "./vite";
 import { db } from "./db";
 import { sendSMS, sendEmail } from "./notifications";
 import { getUnifiedActivitiesPreview, getUnifiedActivityById, getUnifiedEnrollmentsPreview } from "./services/unifiedBridge";
-import { eq, desc, and, isNull, isNotNull, sql, gte, lte, lt, or, like } from "drizzle-orm";
+import { eq, desc, and, isNull, isNotNull, sql, gte, lte, lt, or, like, ne } from "drizzle-orm";
+import { differenceInYears } from "date-fns";
 import * as schema from "@shared/schema";
 import { gemConversations, gemMessages, memberUploads, insertMemberSchema,
   insertCategorySchema,
@@ -1251,6 +1254,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // --- Route contatori per tipo ---
+  app.get('/api/members/counts-by-type', isAuthenticated, async (req, res) => {
+    try {
+      const result = await db.execute(sql`
+        SELECT
+          -- Partecipanti = soci (NULL o SOCIO)
+          SUM(CASE WHEN participant_type IS NULL
+            OR participant_type = 'SOCIO'
+            THEN 1 ELSE 0 END) AS partecipanti,
+          -- Staff = insegnanti + personal trainer
+          SUM(CASE WHEN participant_type IN (
+            'INSEGNANTE','PERSONAL_TRAINER')
+            THEN 1 ELSE 0 END) AS staff,
+          -- Team = dipendenti
+          SUM(CASE WHEN participant_type =
+            'DIPENDENTE'
+            THEN 1 ELSE 0 END) AS team,
+          -- Medici
+          SUM(CASE WHEN participant_type
+            LIKE '%MEDIC%'
+            THEN 1 ELSE 0 END) AS medici,
+          -- Totale generale
+          COUNT(*) AS totale
+        FROM members WHERE active = 1
+      `);
+      res.json((result[0] as unknown as any[])[0] || {
+        partecipanti: 0, staff: 0,
+        team: 0, medici: 0, totale: 0
+      });
+    } catch (e) {
+      res.status(500).json({ error: String(e) });
+    }
+  });
+
   app.get("/api/members", isAuthenticated, checkPermission("/anagrafica_a_lista", "read"), async (req, res) => {
     try {
       const page = parseInt(req.query.page as string) || 1;
@@ -1299,21 +1336,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/members/merge", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
     try {
-      const { primaryId, secondaryIds } = req.body;
+      const { winnerId, loserId, fieldOverrides } = req.body;
 
-      if (!primaryId || !secondaryIds || !Array.isArray(secondaryIds) || secondaryIds.length === 0) {
+      if (!winnerId || !loserId) {
         return res.status(400).json({ message: "Parametri di fusione non validi" });
       }
 
-      await storage.mergeMembers(primaryId, secondaryIds);
-      await logUserActivity(req, "MERGE", "members", primaryId.toString(), {
-        action: `Uniti ${secondaryIds.length} profili duplicati nel profilo principale`
+      await storage.mergeMembersAdvanced(winnerId, loserId, fieldOverrides || {});
+      await logUserActivity(req, "MERGE", "members", winnerId.toString(), {
+        action: `Uniti ID ${loserId} nel profilo principale ${winnerId}`
       });
 
-      res.json({ success: true, message: "Anagrafiche unite con successo" });
-    } catch (error) {
+      res.json({ success: true, message: "Anagrafiche unite con successo", winnerId });
+    } catch (error: any) {
       console.error("[API Error] Failed to merge members:", error);
-      res.status(500).json({ message: "Errore durante l'unione dei contatti" });
+      res.status(500).json({ message: error.message || "Errore durante l'unione dei contatti" });
+    }
+  });
+
+  app.post("/api/members/not-duplicate", isAuthenticated, checkPermission("/anagrafica_a_lista", "write"), async (req, res) => {
+    try {
+      const { id1, id2 } = req.body;
+      if (!id1 || !id2) return res.status(400).json({ message: "Missing pairs" });
+      
+      const operator = req.user?.username || 'system';
+      await storage.excludeDuplicatePair(id1, id2, operator);
+
+      res.json({ success: true, message: "Coppia esclusa." });
+    } catch (e: any) {
+      console.error("Not duplicate exclusion failed:", e);
+      res.status(500).json({ message: "Errore durante l'esclusione." });
     }
   });
 
@@ -1357,6 +1409,290 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  function isMinorAge(dob: string | Date | null): boolean {
+    if (!dob) return false;
+    const age = differenceInYears(new Date(), new Date(dob));
+    return age < 18;
+  }
+
+  async function checkCF(cf: string, excludeId?: number) {
+    const existing = await db.select()
+      .from(schema.members)
+      .where(
+        and(
+          eq(schema.members.fiscalCode, cf.toUpperCase()),
+          ne(schema.members.id, excludeId || 0),
+          eq(schema.members.active, true)
+        )
+      ).limit(1);
+
+    if (existing.length === 0) {
+      return { available: true };
+    }
+    return {
+      available: false,
+      conflict: {
+        id: existing[0].id,
+        name: existing[0].firstName + ' ' + existing[0].lastName,
+        email: existing[0].email || null,
+        phone: existing[0].phone || null,
+        fiscalCode: existing[0].fiscalCode,
+        membershipNumber: null 
+      }
+    };
+  }
+
+  async function checkEmail(email: string, isMinorParam: string | boolean, excludeId?: number) {
+    const existing = await db.select()
+      .from(schema.members)
+      .where(
+        and(
+          eq(schema.members.email, email.toLowerCase()),
+          ne(schema.members.id, excludeId || 0),
+          eq(schema.members.active, true)
+        )
+      );
+
+    if (existing.length === 0) {
+      return { available: true };
+    }
+
+    if (isMinorParam === '1' || isMinorParam === true) {
+      return {
+        available: true,
+        warning: 'email_famiglia',
+        conflicts: existing.map(m => ({
+          id: m.id,
+          name: m.firstName + ' ' + m.lastName,
+          isMinor: m.isMinor
+        }))
+      };
+    }
+
+    return {
+      available: false,
+      conflict: {
+        id: existing[0].id,
+        name: existing[0].firstName + ' ' + existing[0].lastName,
+        email: existing[0].email,
+        fiscalCode: existing[0].fiscalCode || null
+      }
+    };
+  }
+
+  async function checkPhone(phone: string, isMinorParam: string | boolean, excludeId?: number) {
+    const normalized = phone.replace(/\s/g, '').replace(/^(\+39|0039)/, '');
+    
+    // Fetch potential matches containing the normalized digits
+    const existingRaw = await db.select()
+      .from(schema.members)
+      .where(
+        and(
+          or(
+            like(schema.members.phone, `%${normalized}%`),
+            like(schema.members.mobile, `%${normalized}%`)
+          ),
+          ne(schema.members.id, excludeId || 0),
+          eq(schema.members.active, true)
+        )
+      );
+
+    const existing = existingRaw.filter(m => {
+       const mPhone = (m.phone || '').replace(/\s/g, '').replace(/^(\+39|0039)/, '');
+       const mMobile = (m.mobile || '').replace(/\s/g, '').replace(/^(\+39|0039)/, '');
+       return (mPhone && mPhone === normalized) || (mMobile && mMobile === normalized);
+    });
+
+    if (existing.length === 0) {
+      return { available: true };
+    }
+
+    if (isMinorParam === '1' || isMinorParam === true) {
+      return {
+        available: true,
+        warning: 'telefono_famiglia',
+        conflicts: existing.map(m => ({
+          id: m.id,
+          name: m.firstName + ' ' + m.lastName,
+          isMinor: m.isMinor
+        }))
+      };
+    }
+
+    return {
+      available: false,
+      conflict: {
+        id: existing[0].id,
+        name: existing[0].firstName + ' ' + existing[0].lastName,
+        phone: existing[0].phone || existing[0].mobile,
+        fiscalCode: existing[0].fiscalCode || null
+      }
+    };
+  }
+
+  app.get("/api/members/check-cf", isAuthenticated, async (req, res) => {
+    try {
+      const { cf, excludeId } = req.query;
+      if (!cf || typeof cf !== 'string') return res.json({ available: true });
+      const result = await checkCF(cf, excludeId ? parseInt(excludeId as string) : undefined);
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ available: true });
+    }
+  });
+
+  app.get("/api/members/check-email", isAuthenticated, async (req, res) => {
+    try {
+      const { email, isMinor, excludeId } = req.query;
+      if (!email || typeof email !== 'string') return res.json({ available: true });
+      const result = await checkEmail(email, isMinor as string, excludeId ? parseInt(excludeId as string) : undefined);
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ available: true });
+    }
+  });
+
+  app.get("/api/members/check-phone", isAuthenticated, async (req, res) => {
+    try {
+      const { phone, isMinor, excludeId } = req.query;
+      if (!phone || typeof phone !== 'string') return res.json({ available: true });
+      const result = await checkPhone(phone, isMinor as string, excludeId ? parseInt(excludeId as string) : undefined);
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ available: true });
+    }
+  });
+
+  app.get("/api/members/export-csv", isAuthenticated, checkPermission("/anagrafica_a_lista", "read"), async (req, res) => {
+    try {
+      const sep = req.query.sep === 'comma' ? ',' : ';';
+      
+      const activeMembers = await db.select()
+        .from(schema.members)
+        .where(eq(schema.members.active, true))
+        .orderBy(schema.members.lastName, schema.members.firstName);
+
+      const header = [
+        "id", "fiscal_code", "last_name", "first_name",
+        "gender", "date_of_birth", "place_of_birth",
+        "birth_province", "birth_nation",
+        "email", "secondary_email", "phone", "mobile",
+        "street_address", "city", "province", "postal_code",
+        "country", "region", "nationality",
+        "is_minor", "mother_first_name", "mother_last_name",
+        "mother_fiscal_code", "mother_email", "mother_phone",
+        "tutor1_fiscal_code", "tutor1_phone", "tutor1_email",
+        "tutor2_fiscal_code", "tutor2_phone", "tutor2_email",
+        "has_medical_certificate", "medical_certificate_expiry",
+        "privacy_accepted", "privacy_date", "consent_image",
+        "consent_marketing", "consent_newsletter",
+        "document_type", "document_expiry",
+        "enrollment_status", "season", "participant_type",
+        "internal_id", "insertion_date",
+        "health_notes", "food_alerts", "tags", "profession",
+        "admin_notes", "notes",
+        "residence_permit", "residence_permit_expiry",
+        "active", "created_at"
+      ];
+
+      const toCsvField = (val: any) => {
+        if (val === null || val === undefined) return '""';
+        let str = String(val);
+        if (val instanceof Date) str = val.toISOString().split('T')[0];
+        if (typeof val === 'boolean') str = val ? "1" : "0";
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
+      const rows = activeMembers.map(m => [
+        m.id, m.fiscalCode, m.lastName, m.firstName,
+        m.gender, m.dateOfBirth, m.placeOfBirth,
+        m.birthProvince, m.birthNation,
+        m.email, m.secondaryEmail, m.phone, m.mobile,
+        m.streetAddress, m.city, m.province, m.postalCode,
+        m.country, m.region, m.nationality,
+        m.isMinor, m.motherFirstName, m.motherLastName,
+        m.motherFiscalCode, m.motherEmail, m.motherPhone,
+        m.tutor1FiscalCode, m.tutor1Phone, m.tutor1Email,
+        m.tutor2FiscalCode, m.tutor2Phone, m.tutor2Email,
+        m.hasMedicalCertificate, m.medicalCertificateExpiry,
+        m.privacyAccepted, m.privacyDate, m.consentImage,
+        m.consentMarketing, m.consentNewsletter,
+        m.documentType, m.documentExpiry,
+        m.enrollmentStatus, m.season, m.participantType,
+        m.internalId, m.insertionDate,
+        m.healthNotes, m.foodAlerts, m.tags, m.profession,
+        m.adminNotes, m.notes,
+        m.residencePermit, m.residencePermitExpiry,
+        m.active, m.createdAt
+      ].map(toCsvField).join(sep));
+
+      const csvContent = [header.join(sep), ...rows].join("\n");
+      const bom = "\uFEFF";
+      const dateStr = new Date().toISOString().split('T')[0];
+      
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="members_${dateStr}.csv"`);
+      res.send(bom + csvContent);
+    } catch (e) {
+      console.error('Error generating CSV:', e);
+      res.status(500).send("Error generating CSV");
+    }
+  });
+
+  app.get("/api/members/export-csv-light", isAuthenticated, checkPermission("/anagrafica_a_lista", "read"), async (req, res) => {
+    try {
+      const sep = req.query.sep === 'comma' ? ',' : ';';
+      
+      const activeMembers = await db.select()
+        .from(schema.members)
+        .where(eq(schema.members.active, true))
+        .orderBy(schema.members.lastName, schema.members.firstName);
+
+      const header = [
+        "ID", "Codice Fiscale", "Cognome", "Nome", "Sesso",
+        "Data Nascita", "Luogo Nascita", "Email", "Telefono",
+        "Cellulare", "Indirizzo", "Città", "Provincia", "CAP",
+        "Nazionalità", "Minore",
+        "Nome Tutore 1", "CF Tutore 1", "Tel Tutore 1",
+        "N. Tessera", "Scad. Tessera",
+        "Scad. Cert. Medico", "Consenso Immagine",
+        "Stato Iscrizione", "Note"
+      ];
+
+      const toCsvField = (val: any) => {
+        if (val === null || val === undefined) return '""';
+        let str = String(val);
+        if (val instanceof Date) str = val.toISOString().split('T')[0];
+        if (typeof val === 'boolean') str = val ? "Sì" : "No";
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
+      const rows = activeMembers.map(m => [
+        m.id, m.fiscalCode, m.lastName, m.firstName, m.gender,
+        m.dateOfBirth, m.placeOfBirth, m.email, m.phone,
+        m.mobile, m.streetAddress, m.city, m.province, m.postalCode,
+        m.nationality, m.isMinor,
+        m.motherFirstName ? `${m.motherFirstName} ${m.motherLastName || ''}`.trim() : (m.tutor1Email ? "Tutore 1" : ""), 
+        m.motherFiscalCode || m.tutor1FiscalCode, 
+        m.motherPhone || m.tutor1Phone,
+        m.cardNumber, m.cardExpiryDate,
+        m.medicalCertificateExpiry, m.consentImage,
+        m.enrollmentStatus, m.notes
+      ].map(toCsvField).join(sep));
+
+      const csvContent = [header.join(sep), ...rows].join("\n");
+      const bom = "\uFEFF";
+      const dateStr = new Date().toISOString().split('T')[0];
+      
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="members_light_${dateStr}.csv"`);
+      res.send(bom + csvContent);
+    } catch (e) {
+      console.error('Error generating CSV (light):', e);
+      res.status(500).send("Error generating CSV");
+    }
+  });
+
   app.get("/api/members/:id", isAuthenticated, checkPermission("/membro", "read"), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -1392,6 +1728,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Normalize fiscal code to uppercase
       if (normalizedData.fiscalCode) {
         normalizedData.fiscalCode = normalizedData.fiscalCode.toUpperCase().trim();
+      }
+
+      // Validazione Server-Side Duplicati (CF, Email, Telefono)
+      if (normalizedData.fiscalCode) {
+        const cfConflict = await checkCF(normalizedData.fiscalCode);
+        if (!cfConflict.available) {
+          return res.status(409).json({
+            error: 'CF_DUPLICATO',
+            message: 'Codice fiscale già presente',
+            conflict: cfConflict.conflict
+          });
+        }
+      }
+
+      if (normalizedData.email && !isMinorAge(normalizedData.dateOfBirth)) {
+        const emailConflict = await checkEmail(normalizedData.email, false);
+        if (!emailConflict.available) {
+          return res.status(409).json({
+            error: 'EMAIL_DUPLICATA',
+            message: 'Email già associata ad altro socio',
+            conflict: emailConflict.conflict
+          });
+        }
+      }
+
+      const phoneToCheck = normalizedData.mobile || normalizedData.phone;
+      if (phoneToCheck && !isMinorAge(normalizedData.dateOfBirth)) {
+        const phoneConflict = await checkPhone(phoneToCheck, false);
+        if (!phoneConflict.available) {
+          return res.status(409).json({
+            error: 'TELEFONO_DUPLICATO',
+            message: 'Telefono già associato ad altro socio',
+            conflict: phoneConflict.conflict
+          });
+        }
       }
 
       // Check for duplicate fiscal code
@@ -1475,6 +1846,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Normalize fiscal code to uppercase
       if (normalizedData.fiscalCode) {
         normalizedData.fiscalCode = normalizedData.fiscalCode.toUpperCase().trim();
+      }
+
+      // Validazione Server-Side Duplicati (CF, Email, Telefono)
+      if (normalizedData.fiscalCode) {
+        const cfConflict = await checkCF(normalizedData.fiscalCode, id); // pass ID for PATCH
+        if (!cfConflict.available) {
+          return res.status(409).json({
+            error: 'CF_DUPLICATO',
+            message: 'Codice fiscale già presente',
+            conflict: cfConflict.conflict
+          });
+        }
+      }
+
+      if (normalizedData.email && !isMinorAge(normalizedData.dateOfBirth)) {
+        const emailConflict = await checkEmail(normalizedData.email, false, id);
+        if (!emailConflict.available) {
+          return res.status(409).json({
+            error: 'EMAIL_DUPLICATA',
+            message: 'Email già associata ad altro socio',
+            conflict: emailConflict.conflict
+          });
+        }
+      }
+
+      const patchPhoneToCheck = normalizedData.mobile || normalizedData.phone;
+      if (patchPhoneToCheck && !isMinorAge(normalizedData.dateOfBirth)) {
+        const phoneConflict = await checkPhone(patchPhoneToCheck, false, id);
+        if (!phoneConflict.available) {
+          return res.status(409).json({
+            error: 'TELEFONO_DUPLICATO',
+            message: 'Telefono già associato ad altro socio',
+            conflict: phoneConflict.conflict
+          });
+        }
       }
 
       // Comprehensive duplicate check (Name, Email, Phone, Fiscal Code)
@@ -5690,110 +6096,156 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       }
 
       const { type } = req.body;
-      if (!type || !['members', 'courses', 'instructors'].includes(type)) {
+      if (!type || !['members', 'payments', 'enrollments', 'memberships', 'accounting'].includes(type)) {
         return res.status(400).json({ message: "Invalid import type" });
       }
 
-      const fileContent = req.file.buffer.toString('utf-8');
+      const fileExt = path.extname(req.file.originalname).toLowerCase();
+      let fileContent: string;
+
+      if (fileExt === '.xlsx' || fileExt === '.xls') {
+        const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        fileContent = XLSX.utils.sheet_to_csv(ws);
+      } else {
+        fileContent = req.file.buffer.toString('utf-8');
+      }
+
+      const detectSeparator = (firstLine: string): string => {
+        const commas = (firstLine.match(/,/g) || []).length;
+        const semis = (firstLine.match(/;/g) || []).length;
+        return semis >= commas ? ';' : ',';
+      };
+
+      const firstLine = fileContent.split('\n')[0] || '';
+      const detectedSep = detectSeparator(firstLine);
+
+      const normalizeHeader = (header: string): string => {
+        const h = header.trim().toLowerCase();
+        const map: Record<string, string> = {
+          'an_cod_fiscale': 'fiscalcode',
+          'an_nome': 'firstname',
+          'an_cognome': 'lastname',
+          'an_sesso': 'gender',
+          'an_telefono': 'phone',
+          'an_email': 'email',
+          'an_id_anagrafica': 'internalid',
+          'an_data_inserimento': 'insertiondate',
+          'an2_data_di_nascita': 'dateofbirth',
+          'an2_luogo_di_nascita': 'placeofbirth',
+          'codice fiscale': 'fiscalcode',
+          'codice_fiscale': 'fiscalcode',
+          'nome': 'firstname',
+          'cognome': 'lastname',
+          'data di nascita': 'dateofbirth',
+          'data_di_nascita': 'dateofbirth',
+          'fiscal_code': 'fiscalcode',
+          'first_name': 'firstname',
+          'last_name': 'lastname',
+          'cellulare': 'mobile'
+        };
+        return map[h] || h; 
+      };
+
       const parseResult = Papa.parse(fileContent, {
         header: true,
         skipEmptyLines: true,
-        transformHeader: (header: string) => header.trim(),
+        delimiter: detectedSep,
+        transformHeader: (header: string) => normalizeHeader(header),
       });
 
-      let imported = 0;
+      let inserted = 0;
+      let updated = 0;
       let skipped = 0;
       const errors: any[] = [];
 
-      // Bulk import for members
       if (type === 'members') {
-        const membersToImport: any[] = [];
-
         for (let i = 0; i < parseResult.data.length; i++) {
           const row: any = parseResult.data[i];
-          const memberData = {
-            firstName: row['Nome'] || row['First Name'] || row['firstName'] || "Sconosciuto",
-            lastName: row['Cognome'] || row['Last Name'] || row['lastName'] || "Sconosciuto",
-            fiscalCode: row['Codice Fiscale'] || row['Fiscal Code'] || row['fiscalCode'] || null,
-            email: row['Email'] || row['email'] || null,
-            phone: row['Telefono'] || row['Phone'] || row['phone'] || null,
-            dateOfBirth: row['Data Nascita'] || row['Date of Birth'] || row['dateOfBirth'] ? new Date(row['Data Nascita'] || row['Date of Birth'] || row['dateOfBirth']) : null,
-            address: row['Indirizzo'] || row['Address'] || row['address'] || null,
-            notes: row['Note'] || row['Notes'] || row['notes'] || null,
-            active: true,
-          };
+          const rsFirstName = row['firstname'] || row['nome'] || "Sconosciuto";
+          const rsLastName = row['lastname'] || row['cognome'] || "Sconosciuto";
+          const rsFiscalCode = row['fiscalcode'] || null;
+          const rsEmail = row['email'] || null;
+          const rsPhone = row['phone'] || row['telefono'] || null;
+          const rsMobile = row['mobile'] || row['cellulare'] || null;
+          const rsDateOfBirth = row['dateofbirth'] || row['datanascita'] ? new Date(row['dateofbirth'] || row['datanascita']) : null;
+          const rsAddress = row['address'] || row['indirizzo'] || null;
+          const rsCity = row['city'] || row['citta'] || row['città'] || null;
+          const rsCap = row['cap'] || row['postalcode'] || null;
+          const rsProvince = row['province'] || row['provincia'] || null;
+          const rsGender = row['gender'] || row['sesso'] || null;
+          const rsNotes = row['notes'] || row['note'] || null;
+          const rsPlaceOfBirth = row['placeofbirth'] || row['luogo_nascita'] || null;
 
-          membersToImport.push(memberData);
-        }
+          if (!rsFiscalCode) {
+            skipped++;
+            continue;
+          }
 
-        if (membersToImport.length > 0) {
           try {
-            const result = await storage.bulkCreateMembers(membersToImport);
-            imported = result.imported;
-            skipped += result.skipped;
+            const existingMember = await storage.getMemberByFiscalCode(rsFiscalCode.trim());
+
+            if (existingMember) {
+               const updateData: any = {};
+               if (!existingMember.email && rsEmail) updateData.email = rsEmail;
+               if (!existingMember.phone && rsPhone) updateData.phone = rsPhone;
+               if (!existingMember.mobile && rsMobile) updateData.mobile = rsMobile;
+               if (!existingMember.dateOfBirth && rsDateOfBirth && !isNaN(rsDateOfBirth.getTime())) updateData.dateOfBirth = rsDateOfBirth;
+               if (!existingMember.address && rsAddress) updateData.address = rsAddress;
+               if (!existingMember.city && rsCity) updateData.city = rsCity;
+               if (!existingMember.postalCode && rsCap) updateData.postalCode = rsCap;
+               if (!existingMember.province && rsProvince) updateData.province = rsProvince;
+               if (!existingMember.gender && rsGender) updateData.gender = rsGender;
+               if (!existingMember.placeOfBirth && rsPlaceOfBirth) updateData.placeOfBirth = rsPlaceOfBirth;
+
+               if (Object.keys(updateData).length > 0) {
+                 await db.update(schema.members)
+                   .set(updateData)
+                   .where(eq(schema.members.id, existingMember.id));
+                 updated++;
+               } else {
+                 skipped++;
+               }
+            } else {
+               if (rsEmail || rsPhone || rsMobile) {
+                  await storage.createMember({
+                     firstName: rsFirstName,
+                     lastName: rsLastName,
+                     fiscalCode: rsFiscalCode.trim(),
+                     email: rsEmail,
+                     phone: rsPhone,
+                     mobile: rsMobile,
+                     dateOfBirth: rsDateOfBirth && !isNaN(rsDateOfBirth.getTime()) ? rsDateOfBirth : null,
+                     address: rsAddress,
+                     city: rsCity,
+                     postalCode: rsCap,
+                     province: rsProvince,
+                     gender: rsGender,
+                     placeOfBirth: rsPlaceOfBirth,
+                     notes: rsNotes,
+                     active: true
+                  });
+                  inserted++;
+               } else {
+                  skipped++;
+               }
+            }
           } catch (err: any) {
-            console.error("Bulk import failed:", err);
-            throw new Error("Importazione massiva fallita: " + err.message);
+             console.error("Member import fallback error:", err);
+             errors.push({ row: i+2, message: err.message });
           }
         }
       } else {
-        // Sequential import for courses and instructors
-        for (let i = 0; i < parseResult.data.length; i++) {
-          const row: any = parseResult.data[i];
-          try {
-            if (type === 'courses') {
-              const courseData = {
-                name: row['Nome'] || row['Name'] || row['name'],
-                description: row['Descrizione'] || row['Description'] || row['description'] || null,
-                price: row['Prezzo'] || row['Price'] || row['price'] || null,
-                maxCapacity: row['Posti Max'] || row['Max Capacity'] || row['maxCapacity'] ? parseInt(row['Posti Max'] || row['Max Capacity'] || row['maxCapacity']) : null,
-                startDate: row['Data Inizio'] || row['Start Date'] || row['startDate'] || null,
-                endDate: row['Data Fine'] || row['End Date'] || row['endDate'] || null,
-                schedule: row['Orario'] || row['Schedule'] || row['schedule'] || null,
-                categoryId: null,
-                instructorId: null,
-                active: true,
-              };
-
-              if (!courseData.name) {
-                throw new Error("Nome corso è obbligatorio");
-              }
-
-              await storage.createCourse(courseData);
-              imported++;
-            } else if (type === 'instructors') {
-              const instructorData = {
-                firstName: row['Nome'] || row['First Name'] || row['firstName'],
-                lastName: row['Cognome'] || row['Last Name'] || row['lastName'],
-                email: row['Email'] || row['email'] || null,
-                phone: row['Telefono'] || row['Phone'] || row['phone'] || null,
-                specialization: row['Specializzazione'] || row['Specialization'] || row['specialization'] || null,
-                hourlyRate: row['Tariffa Oraria'] || row['Hourly Rate'] || row['hourlyRate'] || null,
-                bio: null,
-                active: true,
-              };
-
-              if (!instructorData.firstName || !instructorData.lastName) {
-                throw new Error("Cognome e Nome sono obbligatori");
-              }
-
-              await storage.createInstructor(instructorData);
-              imported++;
-            }
-          } catch (error: any) {
-            console.error("[API Error] Caught explicitly:", error);
-            skipped++;
-            errors.push({
-              row: i + 2,
-              message: error.message || "Errore sconosciuto",
-            });
-          }
-        }
+        // Placeholder for payments, enrollments, memberships, accounting
+        skipped += parseResult.data.length;
       }
 
       res.json({
-        imported,
-        skipped,
+        separator_detected: detectedSep,
+        rows_processed: parseResult.data.length,
+        inserted: inserted,
+        updated: updated,
+        skipped: skipped,
         errors: errors.slice(0, 50),
       });
     } catch (error: any) {
@@ -6815,18 +7267,18 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         return res.status(400).json({ message: "Nessun file caricato" });
       }
 
-      // Get delimiter from request body (default to comma)
-      let delimiter = req.body.delimiter || ",";
-      // Handle escaped tab character
-      if (delimiter === "\\t") delimiter = "\t";
+      const fileContent = req.file.buffer.toString('utf-8');
+      const firstLine = fileContent.split('\n')[0] || '';
+      const commas = (firstLine.match(/,/g) || []).length;
+      const semis = (firstLine.match(/;/g) || []).length;
+      const detectedSep = semis >= commas ? ';' : ',';
 
       const Papa = await import('papaparse');
-      const fileContent = req.file.buffer.toString('utf-8');
 
       const parsed = Papa.default.parse(fileContent, {
         header: false,
         skipEmptyLines: true,
-        delimiter: delimiter,
+        delimiter: detectedSep,
       });
 
       const rows = parsed.data as string[][];
@@ -6858,7 +7310,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         headers,
         sampleData,
         totalRows: rows.length - 1, // Exclude header row
-        delimiter: delimiter // Return used delimiter for confirmation
+        delimiter: detectedSep // Return used delimiter for confirmation
       });
     } catch (error: any) {
       console.error("[API Error] Caught explicitly:", error);
@@ -6878,17 +7330,18 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       const autoCreate = autoCreateRecords === 'true' || autoCreateRecords === true;
       const entity = entityType || 'members';
 
-      // Get delimiter from request body (default to comma)
-      let delimiter = req.body.delimiter || ",";
-      if (delimiter === "\\t") delimiter = "\t";
+      const fileContent = req.file.buffer.toString('utf-8');
+      const firstLine = fileContent.split('\n')[0] || '';
+      const commas = (firstLine.match(/,/g) || []).length;
+      const semis = (firstLine.match(/;/g) || []).length;
+      const detectedSep = semis >= commas ? ';' : ',';
 
       const Papa = await import('papaparse');
-      const fileContent = req.file.buffer.toString('utf-8');
 
       const parsed = Papa.default.parse(fileContent, {
         header: false,
         skipEmptyLines: true,
-        delimiter: delimiter,
+        delimiter: detectedSep,
       });
 
       const rows = parsed.data as string[][];

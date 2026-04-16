@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Camera, Save, RotateCcw, Smartphone, User, Phone, Mail, MapPin } from "lucide-react";
 import { validateFiscalCode, parseFiscalCode, getPlaceName } from "@/lib/fiscalCodeUtils";
 import type { Member, InsertMember } from "@shared/schema";
+import { useCFCheck, useEmailCheck, usePhoneCheck } from "@/hooks/useFieldConflictCheck";
+import { ConflictBadge } from "@/components/conflict-badge";
 import { useLocation, useSearch } from "wouter";
 
 export function MemberEditDialog() {
@@ -28,6 +30,9 @@ export function MemberEditDialog() {
     const [hasMedicalCert, setHasMedicalCert] = useState(false);
     const [isMinorChecked, setIsMinorChecked] = useState(false);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>("none");
+    const [cfValue, setCfValue] = useState("");
+    const [emailValue, setEmailValue] = useState("");
+    const [phoneValue, setPhoneValue] = useState("");
 
     const dateOfBirthRef = useRef<HTMLInputElement>(null);
     const genderRef = useRef<HTMLSelectElement>(null);
@@ -73,6 +78,9 @@ export function MemberEditDialog() {
             setIsMinorChecked(member.isMinor || false);
             setPhotoPreview(member.photoUrl || null);
             setSelectedCategoryId(member.categoryId?.toString() || "none");
+            setCfValue(member.fiscalCode || "");
+            setEmailValue(member.email || "");
+            setPhoneValue(member.mobile || member.phone || "");
 
             if (member.dateOfBirth) {
                 const dateStr = typeof member.dateOfBirth === 'string' ? member.dateOfBirth : new Date(member.dateOfBirth).toISOString().split('T')[0];
@@ -133,6 +141,14 @@ export function MemberEditDialog() {
             }
         }
     };
+
+    const cfCheck = useCFCheck(cfValue, member?.id);
+    const emailCheck = useEmailCheck(emailValue, isMinorChecked, member?.id);
+    const phoneCheck = usePhoneCheck(phoneValue, isMinorChecked, member?.id);
+
+    const hasConflicts = (cfCheck.available === false) || 
+                         (emailCheck.available === false && !isMinorChecked) || 
+                         (phoneCheck.available === false && !isMinorChecked);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -249,11 +265,15 @@ export function MemberEditDialog() {
                                 <Input
                                     id="fiscalCode"
                                     name="fiscalCode"
-                                    defaultValue={member?.fiscalCode || ""}
+                                    value={cfValue}
                                     className="uppercase font-mono"
-                                    onChange={(e) => handleFiscalCodeChange(e.target.value)}
+                                    onChange={(e) => {
+                                        setCfValue(e.target.value.toUpperCase());
+                                        handleFiscalCodeChange(e.target.value);
+                                    }}
                                 />
                                 {fiscalCodeError && <p className="text-[10px] text-destructive font-bold">{fiscalCodeError}</p>}
+                                <ConflictBadge result={cfCheck} type="cf" />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="dateOfBirth">Nascita</Label>
@@ -287,11 +307,13 @@ export function MemberEditDialog() {
                                 <h4 className="font-bold flex items-center gap-2"><Mail className="w-4 h-4" /> Recaliti</h4>
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
-                                    <Input id="email" name="email" type="email" defaultValue={member?.email || ""} />
+                                    <Input id="email" name="email" type="email" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} />
+                                    <ConflictBadge result={emailCheck} type="email" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="mobile">Cellulare</Label>
-                                    <Input id="mobile" name="mobile" defaultValue={member?.mobile || ""} />
+                                    <Input id="mobile" name="mobile" value={phoneValue} onChange={(e) => setPhoneValue(e.target.value)} />
+                                    <ConflictBadge result={phoneCheck} type="telefono" />
                                 </div>
                             </div>
 
@@ -458,7 +480,7 @@ export function MemberEditDialog() {
 
                         <div className="flex justify-end gap-3 pt-4">
                             <Button type="button" variant="ghost" onClick={handleClose}>Annulla</Button>
-                            <Button type="submit" disabled={updateMutation.isPending} className="min-w-[120px]">
+                            <Button type="submit" disabled={updateMutation.isPending || hasConflicts} className="min-w-[120px]">
                                 {updateMutation.isPending ? <RotateCcw className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                                 Salva
                             </Button>

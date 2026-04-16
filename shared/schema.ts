@@ -695,9 +695,10 @@ export const members = mysqlTable("members", {
   userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }).notNull(),
-  fiscalCode: varchar("fiscal_code", { length: 16 }), // Codice fiscale
+  fiscalCode: varchar('fiscal_code', { length: 16 }).unique(), // Codice fiscale
   dateOfBirth: date("date_of_birth"),
   placeOfBirth: varchar("place_of_birth", { length: 255 }), // Luogo di nascita
+  birthProvince: varchar("birth_province", { length: 2 }),
   gender: varchar("gender", { length: 1 }), // M = Maschio, F = Femmina
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }), // Telefono fisso
@@ -823,6 +824,20 @@ export const members = mysqlTable("members", {
   updatedBy: varchar("updated_by", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+
+  birthNation: varchar('birth_nation', { length: 100 }),
+  secondaryEmail: varchar('secondary_email', { length: 255 }),
+  profession: varchar('profession', { length: 100 }),
+  documentType: varchar('document_type', { length: 50 }),
+  documentExpiry: date('document_expiry'),
+  privacyDate: date('privacy_date'),
+  consentNewsletter: tinyint('consent_newsletter').default(0).notNull(),
+  adminNotes: text('admin_notes'),
+  healthNotes: text('health_notes'),
+  foodAlerts: varchar('food_alerts', { length: 255 }),
+  tags: varchar('tags', { length: 500 }),
+  residencePermit: varchar('residence_permit', { length: 100 }),
+  residencePermitExpiry: date('residence_permit_expiry'),
 });
 
 export const membersRelations = relations(members, ({ one, many }) => ({
@@ -863,6 +878,20 @@ export const insertMemberSchema = createInsertSchema(members, {
 });
 export type InsertMember = z.infer<typeof insertMemberSchema>;
 export type Member = typeof members.$inferSelect;
+
+// ============================================================================
+// DUPLICATE EXCLUSIONS
+// ============================================================================
+
+export const memberDuplicateExclusions = mysqlTable("member_duplicate_exclusions", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId1: int("member_id_1").notNull(),
+  memberId2: int("member_id_2").notNull(),
+  excludedBy: varchar("excluded_by", { length: 255 }),
+  excludedAt: timestamp("excluded_at").defaultNow(),
+}, (table) => [
+  index("idx_pair").on(table.memberId1, table.memberId2)
+]);
 
 // ============================================================================
 // GEMSTAFF TABLES

@@ -28,11 +28,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Member, Instructor, Category, Studio } from "@shared/schema";
 import { CourseSelector } from "@/components/course-selector";
 import { useMemberStore } from "@/store/useMemberStore";
+import { DuplicateMergeModal } from "@/components/duplicate-merge-modal";
 
-interface DuplicateFiscalCode {
-  fiscalCode: string;
-  members: { id: number; firstName: string; lastName: string; }[];
-}
+// Interface removed, using any because schema now returns new type
+type DuplicateFiscalCode = any;
 
 interface MemberFormData {
   firstName?: string;
@@ -669,15 +668,20 @@ export default function AnagraficaHome() {
                 <Settings className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">GSheets</span>
               </Button>
-              <Button
-                variant="default"
-                size="sm"
-                data-testid="button-export-gsheets"
-                className="hidden sm:inline-flex"
-              >
-                <Upload className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Esporta</span>
-              </Button>
+              <div className="hidden lg:flex gap-2">
+                <Button variant="default" size="sm" onClick={() => window.location.href = '/api/members/export-csv?sep=semicolon'}>
+                  <Upload className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Esporta Excel IT</span>
+                </Button>
+                <Button variant="default" size="sm" onClick={() => window.location.href = '/api/members/export-csv?sep=comma'}>
+                  <Upload className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Esporta CSV Standard</span>
+                </Button>
+                <Button variant="secondary" size="sm" onClick={() => window.location.href = '/api/members/export-csv-light?sep=semicolon'}>
+                  <Upload className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Vista Operativa</span>
+                </Button>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -1791,47 +1795,16 @@ export default function AnagraficaHome() {
       </div>
 
       {/* Duplicate Fiscal Codes Modal */}
-      <Dialog open={showDuplicatesModal} onOpenChange={setShowDuplicatesModal}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
-              Codici Fiscali Duplicati
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              I seguenti codici fiscali sono presenti in più di un membro. Clicca sul nome per visualizzare e modificare il membro.
-            </p>
-            {duplicateFiscalCodes?.map((duplicate) => (
-              <Card key={duplicate.fiscalCode} className="p-4">
-                <div className="space-y-2">
-                  <div className="font-mono text-sm font-medium bg-muted px-2 py-1 rounded inline-block">
-                    {duplicate.fiscalCode}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {duplicate.members.map((member) => (
-                      <Button
-                        key={member.id}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setShowDuplicatesModal(false);
-                          setSelectedMemberId(member.id);
-                          setLocation(`/?memberId=${member.id}`);
-                        }}
-                        data-testid={`button-duplicate-member-${member.id}`}
-                      >
-                        {member.lastName} {member.firstName}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DuplicateMergeModal 
+        open={showDuplicatesModal} 
+        onOpenChange={setShowDuplicatesModal} 
+        duplicates={duplicateFiscalCodes || []} 
+        onNavigateToMember={(id) => {
+          setShowDuplicatesModal(false);
+          setSelectedMemberId(id);
+          setLocation(`/?memberId=${id}`);
+        }} 
+      />
 
       {/* New Payment Dialog */}
       <Dialog open={showNewPaymentDialog} onOpenChange={(open) => {
