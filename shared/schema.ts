@@ -818,6 +818,7 @@ export const members = mysqlTable("members", {
   lezioniPrivateNote: text("lezioni_private_note"),
 
   active: boolean("active").default(true),
+  enrollmentStatus: mysqlEnum("enrollment_status", ["attivo", "non_attivo"]).default("non_attivo"),
   createdBy: varchar("created_by", { length: 255 }),
   updatedBy: varchar("updated_by", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),

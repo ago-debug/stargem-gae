@@ -9741,7 +9741,128 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({error: err.message});
     }
   });
+  // ==========================================
+  // AREA TESSERATI (B2C) API ROUTES
+  // ==========================================
+  const b2cPath = await import('path');
+  const b2cFs = await import('fs/promises');
+
+  // Ensure the directory exists
+  await b2cFs.mkdir(b2cPath.join(process.cwd(), 'uploads', 'members'), { recursive: true });
+
+  app.use('/uploads', express.static(b2cPath.join(process.cwd(), 'uploads')));
+
+  const memberDiskUpload = multer({
+    storage: multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, b2cPath.join(process.cwd(), 'uploads', 'members'));
+      },
+      filename: (req, file, cb) => {
+        const ext = b2cPath.extname(file.originalname);
+        const randomName = Math.round(Math.random() * 1E9);
+        cb(null, `${req.user?.id || 'unknown'}-${Date.now()}-${randomName}${ext}`);
+      }
+    }),
+    limits: { fileSize: 50 * 1024 * 1024 } // 50 MB
+  });
+
+  // ROUTE A: GET /api/area-tesserati/profile
+  app.get("/api/area-tesserati/profile", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user?.role !== "client") {
+        return res.status(403).json({ error: "Solo i tesserati possono accedere a quest'area" });
+      }
+      
+      const [member] = await db.select().from(members).where(eq(members.userId, req.user.id));
+      if (!member) {
+        return res.status(404).json({ error: "Profilo tesserato non trovato" });
+      }
+      
+      const memberEnrollments = await db.select({
+        enrollment: enrollments,
+        course: courses,
+        season: schema.seasons
+      })
+      .from(enrollments)
+      .leftJoin(courses, eq(enrollments.courseId, courses.id))
+      .leftJoin(schema.seasons, eq(enrollments.seasonId, schema.seasons.id))
+      .where(eq(enrollments.memberId, member.id))
+      .orderBy(desc(enrollments.createdAt));
+      
+      const recentPayments = await db.select()
+        .from(payments)
+        .where(eq(payments.memberId, member.id))
+        .orderBy(desc(payments.createdAt))
+        .limit(5);
+
+      const profileData = {
+        member,
+        user: req.user,
+        enrollments: memberEnrollments,
+        recentPayments,
+        cardInfo: {
+          cardNumber: member.cardNumber,
+          cardExpiryDate: member.cardExpiryDate,
+          hasMedicalCertificate: member.hasMedicalCertificate,
+          medicalCertificateExpiry: member.medicalCertificateExpiry
+        }
+      };
+      
+      res.json(profileData);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ROUTE B: POST /api/area-tesserati/upload-documento
+  app.post("/api/area-tesserati/upload-documento", isAuthenticated, memberDiskUpload.single("documento"), async (req, res) => {
+    try {
+      if (req.user?.role !== "client") return res.status(403).json({ error: "Non autorizzato" });
+      const [member] = await db.select().from(members).where(eq(members.userId, req.user!.id));
+      if (!member) return res.status(404).json({ error: "Non trovato" });
+      if (!req.file) return res.status(400).json({ error: "Nessun file caricato" });
+
+      const documentType = req.body.documentType as string;
+      if (!["certificato_medico", "documento_identita", "altro"].includes(documentType)) {
+        return res.status(400).json({ error: "Tipo documento non valido" });
+      }
+
+      const fileUrl = `/uploads/members/${req.file.filename}`;
+
+      const insertData = {
+        memberId: member.id,
+        documentType: documentType as any,
+        filename: req.file.filename,
+        fileUrl: fileUrl,
+        fileSize: req.file.size,
+        mimeType: req.file.mimetype,
+        uploadedAt: new Date(),
+      };
+
+      const [{ insertId }] = await db.insert(schema.memberUploads).values(insertData);
+      const [newDoc] = await db.select().from(schema.memberUploads).where(eq(schema.memberUploads.id, insertId));
+
+      res.json(newDoc);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ROUTE C: GET /api/area-tesserati/documenti
+  app.get("/api/area-tesserati/documenti", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user?.role !== "client") return res.status(403).json({ error: "Non autorizzato" });
+      const [member] = await db.select().from(members).where(eq(members.userId, req.user!.id));
+      if (!member) return res.status(404).json({ error: "Non trovato" });
+
+      const uploads = await db.select().from(schema.memberUploads).where(eq(schema.memberUploads.memberId, member.id)).orderBy(desc(schema.memberUploads.uploadedAt));
+      const forms = await db.select().from(schema.memberFormsSubmissions).where(eq(schema.memberFormsSubmissions.memberId, member.id)).orderBy(desc(schema.memberFormsSubmissions.createdAt));
+
+      res.json({ uploads, forms });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
   return httpServer;
-
 }
