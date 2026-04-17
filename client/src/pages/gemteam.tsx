@@ -210,35 +210,43 @@ export default function GemTeam() {
   const [selectedSheetDip, setSelectedSheetDip] = useState<GemTeamMember | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  function fmtMin(m?: number) {
+    if (!m || m === 0) return "—";
+    const h = Math.floor(m / 60);
+    const min = Math.round(m % 60);
+    return h > 0 ? `${h}h ${min}m` : `${min}m`;
+  }
+
   // Tab Dashboard Checkins (Live)
   const { data: todayCheckinsData = [], isLoading: isLoadingCheckins } = useQuery<any[]>({
     queryKey: ['/api/gemteam/checkin/oggi'],
     refetchInterval: 60000, // Refresh automatico ogni 60 secondi
     queryFn: async () => {
-      // MOCK data
-      return [
-        { memberId: dipendenti.find(d => d.nome === 'Alexandra')?.id || 1, stato: "IN", lastEvent: "Entrato 08:30", oreOggi: null },
-        { memberId: dipendenti.find(d => d.nome === 'Giuditta')?.id || 2, stato: "IN", lastEvent: "Entrato 09:15", oreOggi: null },
-        { memberId: dipendenti.find(d => d.nome === 'Gaetano')?.id || 13, stato: "OUT", lastEvent: "Uscito 18:30", oreOggi: "8.5" },
-        { memberId: dipendenti.find(d => d.nome === 'Stefano')?.id || 14, stato: "ASSENTE", lastEvent: "Assente (PE)", oreOggi: null },
-      ];
+      const r = await fetch('/api/gemteam/checkin/oggi');
+      return r.json();
     }
   });
 
   const checkInStats = useMemo(() => {
-    let inSede = 0; let usciti = 0; let attesi = 0; let assenti = 0;
+    let inSede = 0; let online = 0; let usciti = 0; let attesi = 0; let assenti = 0;
     dipendenti.forEach(dip => {
-      const chk = todayCheckinsData.find(c => c.memberId === dip.id);
+      const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find(c => c.employeeId === dip.id) : null;
       if (chk) {
-        if (chk.stato === "IN") inSede++;
-        else if (chk.stato === "OUT") usciti++;
-        else if (chk.stato === "ASSENTE") assenti++;
+        if (chk.lastEvent === "IN") inSede++;
+        else if (chk.lastEvent === "OUT" && chk.lastTimestamp) usciti++;
+        else if (chk.lastEvent === "ASSENTE") assenti++;
+        else attesi++;
       } else {
         attesi++;
       }
+
+      const presenceInfo = activeUsers.find((u: any) => u.id === dip.userId);
+      if (presenceInfo && presenceInfo.stato === 'online') {
+        online++;
+      }
     });
-    return { inSede, usciti, attesi, assenti };
-  }, [todayCheckinsData, dipendenti]);
+    return { inSede, online, usciti, attesi, assenti };
+  }, [todayCheckinsData, dipendenti, activeUsers]);
 
   const filteredDipendenti = useMemo(() => {
     const list = dipendenti.filter(d => {
@@ -386,22 +394,8 @@ export default function GemTeam() {
     }
   });
 
-  // Auth Guard
+  // Auth Guard rimossa: la dashboard è visibile a tutti i dipendenti senza filtro ruolo.
   const userRole = (user as any)?.role?.toLowerCase() || "";
-  if (userRole === "dipendente") {
-    setLocation("/gemteam/me");
-    return null;
-  }
-
-  // Se l'utente non è admin, operator o master, non consentiamo di base
-  const isAllowed = ["admin", "operator", "master"].includes(userRole);
-  if (!isAllowed) {
-    return (
-      <div className="p-8 text-center text-slate-500">
-        Non hai i permessi per visualizzare questa pagina.
-      </div>
-    );
-  }
 
   return (
     <div className="p-6 md:p-8 space-y-8 w-full max-w-7xl mx-auto animate-in fade-in zoom-in-95 duration-500">
@@ -461,11 +455,17 @@ export default function GemTeam() {
             </h2>
             
             {/* KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 xl:grid-cols-5 gap-4">
               <Card className="bg-emerald-50 border-emerald-200 shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <span className="text-3xl font-black text-emerald-600 mb-1">{checkInStats.inSede}</span>
                   <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">In Sede</span>
+                </CardContent>
+              </Card>
+              <Card className="bg-blue-50 border-blue-200 shadow-sm">
+                <CardContent className="p-4 flex flex-col items-center text-center">
+                  <span className="text-3xl font-black text-blue-600 mb-1">{checkInStats.online}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-blue-800">Online</span>
                 </CardContent>
               </Card>
               <Card className="bg-slate-100 border-slate-200 shadow-sm">
@@ -474,7 +474,7 @@ export default function GemTeam() {
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Usciti</span>
                 </CardContent>
               </Card>
-              <Card className="bg-lime-50 (or yellow) border-yellow-200 shadow-sm">
+              <Card className="bg-yellow-50 border-yellow-200 shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <span className="text-3xl font-black text-yellow-600 mb-1">{checkInStats.attesi}</span>
                   <span className="text-xs font-bold uppercase tracking-wider text-yellow-800">Non Pervenuti</span>
@@ -494,21 +494,25 @@ export default function GemTeam() {
                 <table className="w-full text-left text-sm whitespace-nowrap">
                   <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                     <tr>
-                      <th className="p-4">Dipendente</th>
-                      <th className="p-4">Stato Live</th>
-                      <th className="p-4">Ultimo Evento</th>
-                      <th className="p-4 text-right">Ore Lavorate (Oggi)</th>
+                      <th className="p-4 font-bold">DIPENDENTE</th>
+                      <th className="p-4 font-bold">SEDE</th>
+                      <th className="p-4 font-bold">ONLINE</th>
+                      <th className="p-4 text-right font-bold">ORE SEDE</th>
+                      <th className="p-4 text-right font-bold">ORE ONLINE</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {dipendenti.length === 0 && isLoadingDipendenti && (
-                      <tr><td colSpan={4} className="p-8 text-center text-slate-500">Caricamento dipendenti...</td></tr>
+                      <tr><td colSpan={5} className="p-8 text-center text-slate-500">Caricamento dipendenti...</td></tr>
                     )}
                     {dipendenti.map(dip => {
-                      const chk = todayCheckinsData.find(c => c.memberId === dip.id);
-                      const stato = chk?.stato || "ATTESO";
-                      const lastEvent = chk?.lastEvent || "Nessun log oggi";
-                      const ore = chk?.oreOggi ? fmtOre(Number(chk.oreOggi)) : "—";
+                      const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find(c => c.employeeId === dip.id) : null;
+                      const stato = chk?.lastEvent || "ATTESO";
+                      const oreSede = chk && chk.oreOggi > 0 ? fmtOre(Number(chk.oreOggi)) : "—";
+
+                      const presenceInfo = activeUsers.find((u: any) => u.id === dip.userId);
+                      const isOnline = presenceInfo && presenceInfo.stato === 'online';
+                      const oreOnline = presenceInfo?.lavoroOggiMinuti ? fmtMin(presenceInfo.lavoroOggiMinuti) : "—";
                       
                       const statoColors: Record<string, string> = {
                         "IN": "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -516,7 +520,7 @@ export default function GemTeam() {
                         "ATTESO": "bg-yellow-100 text-yellow-800 border-yellow-200",
                         "ASSENTE": "bg-rose-100 text-rose-800 border-rose-200"
                       };
-                      const statoLabel = stato === "IN" ? "🟢 IN SEDE" : stato === "OUT" ? "⚪ USCITO" : stato === "ASSENTE" ? "🔴 ASSENTE" : "🟡 ATTESO";
+                      const statoLabel = stato === "IN" ? "🟢 IN SEDE" : (stato === "OUT" && chk?.lastTimestamp) ? "⚪ USCITO" : (stato === "ASSENTE") ? "🔴 ASSENTE" : "🟡 ATTESO";
 
                       return (
                         <tr key={dip.id} className="hover:bg-slate-50/50 transition-colors">
@@ -528,10 +532,22 @@ export default function GemTeam() {
                             {dip.cognome} {dip.nome}
                           </td>
                           <td className="p-4">
-                            <Badge variant="outline" className={`${statoColors[stato]} font-bold`}>{statoLabel}</Badge>
+                            <Badge variant="outline" className={`${statoColors[stato] || statoColors["ATTESO"]} font-bold shadow-sm`}>{statoLabel}</Badge>
                           </td>
-                          <td className="p-4 text-slate-500 font-medium">{lastEvent}</td>
-                          <td className="p-4 text-right font-bold text-slate-700">{ore}</td>
+                          <td className="p-4">
+                            {isOnline ? (
+                               <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 font-bold shadow-sm">
+                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block"></span>
+                                 ONLINE
+                               </Badge>
+                            ) : (
+                               <Badge variant="outline" className="bg-slate-100 text-slate-500 border-transparent">
+                                 OFFLINE
+                               </Badge>
+                            )}
+                          </td>
+                          <td className="p-4 text-right font-bold text-slate-700">{oreSede}</td>
+                          <td className="p-4 text-right font-bold text-slate-700">{oreOnline}</td>
                         </tr>
                       );
                     })}
