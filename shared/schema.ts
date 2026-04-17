@@ -2652,7 +2652,7 @@ export const teamEmployees = mysqlTable("team_employees", {
   memberId: int("member_id").notNull().references(() => members.id, { onDelete: "restrict" }),
   userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   displayOrder: int("display_order").notNull().default(0),
-  team: mysqlEnum("team", ["segreteria","ass_manutenzione","ufficio","amministrazione","comunicazione"]).notNull(),
+  team: mysqlEnum("team", ["segreteria","ass_manutenzione","ufficio","amministrazione","comunicazione","direzione"]).notNull(),
   tariffaOraria: decimal("tariffa_oraria", { precision: 5, scale: 2 }),
   stipendioFissoMensile: decimal("stipendio_fisso_mensile", { precision: 8, scale: 2 }),
   dataAssunzione: date("data_assunzione"),
@@ -2683,17 +2683,17 @@ export const teamScheduledShifts = mysqlTable("team_scheduled_shifts", {
   id: int("id").primaryKey().autoincrement(),
   employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
   data: date("data").notNull(),
-  postazione: mysqlEnum("postazione", ["RECEPTION","PRIMO","SECONDO","UFFICIO","AMM.ZIONE","PAUSA","RIPOSO","RIUNIONE","STUDIO_1","STUDIO_2","MALATTIA","PERMESSO","WORKSHOP"]).notNull(),
   oraInizio: time("ora_inizio").notNull(),
   oraFine: time("ora_fine").notNull(),
-  templateId: int("template_id").references(() => teamShiftTemplates.id, { onDelete: "set null" }),
-  noteAdmin: text("note_admin"),
-  createdBy: varchar("created_by", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  postazione: varchar("postazione", { length: 50 }).notNull(),
+  note: varchar("note", { length: 255 }),
+  // templateId: int("template_id").references(() => teamShiftTemplates.id, { onDelete: "set null" }), // removed by prompt definition
+  createdByUserId: varchar("created_by_user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  modifiedByUserId: varchar("modified_by_user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 }, (t) => [
-  index("idx_data").on(t.data),
-  index("idx_employee_data").on(t.employeeId, t.data),
+  uniqueIndex("uq_shift").on(t.employeeId, t.data, t.oraInizio)
 ]);
 
 export const teamActivityTypes = mysqlTable("team_activity_types", {
@@ -2974,3 +2974,34 @@ export const memberUploads = mysqlTable("member_uploads", {
   seasonIdIdx: index("idx_season_id").on(table.seasonId)
 }));
 
+
+export const teamWeekAssignments = mysqlTable("team_week_assignments", {
+  id: int("id").primaryKey().autoincrement(),
+  weekStart: date("week_start").notNull().unique(),
+  settimana: varchar("settimana", { length: 1 }).notNull(),
+  isManualOverride: boolean("is_manual_override").notNull().default(false),
+  note: varchar("note", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const teamNotifications = mysqlTable("team_notifications", {
+  id: int("id").primaryKey().autoincrement(),
+  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
+  tipo: varchar("tipo", { length: 50 }).notNull(),
+  titolo: varchar("titolo", { length: 255 }).notNull(),
+  messaggio: text("messaggio"),
+  dataRiferimento: date("data_riferimento"),
+  letta: boolean("letta").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const teamPostazioni = mysqlTable("team_postazioni", {
+  id: int("id").primaryKey().autoincrement(),
+  nome: varchar("nome", { length: 50 }).notNull().unique(),
+  contaOre: boolean("conta_ore").notNull().default(true),
+  colore: varchar("colore", { length: 7 }).default('#888888'),
+  attiva: boolean("attiva").notNull().default(true),
+  ordine: int("ordine").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
