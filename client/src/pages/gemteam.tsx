@@ -510,10 +510,15 @@ export default function GemTeam() {
                   >
                     <CardContent className="p-5 flex flex-col items-center text-center relative">
                       {/* Badge Attivo */}
-                      {dip.attivo && (
+                      {dip.attivo ? (
                         <div className="absolute top-3 right-3 flex items-center gap-1 bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-green-200">
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                          ATTIVO
+                          IN SERVIZIO
+                        </div>
+                      ) : (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-[10px] font-bold border border-slate-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                          FUORI SERVIZIO
                         </div>
                       )}
                       
