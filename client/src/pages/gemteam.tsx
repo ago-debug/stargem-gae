@@ -33,10 +33,21 @@ interface GemTeamMember {
   phone?: string;
   photo_url?: string;
   userId?: string | null;
+  memberId?: number;
   last_seen_at?: string | null;
   current_session_start?: string | null;
   last_session_duration?: number | null;
 }
+
+const isSystemEmployee = (d: GemTeamMember): boolean => {
+  if (d.userId === '15' || d.userId === '16') return true;
+  if (d.id === 15 || d.id === 16) return true;
+  if (d.memberId === 14177 || d.memberId === 14178) return true;
+  const fullName = `${d.nome} ${d.cognome}`.toLowerCase();
+  if (fullName.includes('admin') || fullName.includes('bot ai') || fullName.includes('ai b')) return true;
+  if (d.nome === 'Admin' || d.nome === 'Bot') return true;
+  return false;
+};
 
 const TEAM_COLORS: Record<string, string> = {
   'segreteria': 'bg-pink-100 text-pink-700',
@@ -157,8 +168,9 @@ export default function GemTeam() {
     return sortedAPI.map(d => ({
       id: d.id,
       userId: d.userId,
+      memberId: d.memberId,
       nome: d.firstName || (d.username === 'admin' ? 'Admin' : d.username === 'botAI' ? 'Bot' : 'Sconosciuto'),
-      cognome: d.lastName || (d.username === 'admin' ? 'Manager' : d.username === 'botAI' ? 'AI' : ''),
+      cognome: d.lastName || (d.username === 'admin' ? 'Master' : d.username === 'botAI' ? 'AI' : ''),
       team: (d.team === 'Staff' || d.team === 'staff') ? 'collaboratori' : (d.team || 'collaboratori'),
       ruolo: (d.noteHr === 'Staff' || d.noteHr === 'staff') ? 'N/A' : (d.noteHr || "N/A"),
       attivo: d.attivo,
@@ -241,7 +253,7 @@ export default function GemTeam() {
     let inSede = 0; let online = 0; let usciti = 0; let attesi = 0; let assenti = 0;
     dipendenti.forEach(dip => {
       // Escludi admin e botAI dal conteggio presenze
-      if (dip.id === 15 || dip.id === 16) return;
+      if (isSystemEmployee(dip)) return;
 
       const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find(c => c.employeeId === dip.id) : null;
       if (chk) {
@@ -430,7 +442,7 @@ export default function GemTeam() {
         </div>
         <div className="flex gap-2">
           <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1 text-sm shadow-sm">
-            <Users2 className="w-4 h-4 mr-1.5" /> {dipendenti.length} Dipendenti
+            <Users2 className="w-4 h-4 mr-1.5" /> {dipendenti.filter(d => !isSystemEmployee(d)).length} Dipendenti
           </Badge>
         </div>
       </div>
@@ -871,9 +883,9 @@ export default function GemTeam() {
           </div>
         </TabsContent>
 
-        <TabsContent value="turni" className="w-full">
-          <div className="border-y border-slate-200 shadow-sm overflow-hidden bg-slate-50">
-            <div className="p-0 sm:p-2 space-y-6">
+        <TabsContent value="turni" className="w-full relative">
+          <div className="border-y border-slate-200 shadow-sm overflow-hidden bg-slate-50 w-full mb-8">
+            <div className="px-2 py-4 space-y-6 w-full">
               
               {/* Toolbar */}
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-200 pb-4 p-4 md:px-6">
@@ -942,7 +954,7 @@ export default function GemTeam() {
                         <th key={day} className="bg-slate-200 border-slate-300 border p-2 w-auto font-semibold text-slate-700">
                           {day}
                         </th>
-                      )) : dipendenti.filter(d => d.id !== 15 && d.id !== 16).map(dip => (
+                      )) : dipendenti.filter(d => !isSystemEmployee(d)).map(dip => (
                         <th key={dip.id} className="bg-slate-200 border-slate-300 border p-2 w-fit min-w-[100px] font-semibold text-slate-700 truncate" title={`${dip.cognome} ${dip.nome}`}>
                           {dip.cognome} {dip.nome.charAt(0)}.
                         </th>
@@ -968,7 +980,7 @@ export default function GemTeam() {
                               )}
                             </td>
                           );
-                        }) : dipendenti.filter(d => d.id !== 15 && d.id !== 16).map(dip => {
+                        }) : dipendenti.filter(d => !isSystemEmployee(d)).map(dip => {
                           const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => String(t.employeeId) === String(dip.id) && t.oraInizio === time) : null;
                           const colorClass = turniFound ? (SHIFT_COLORS[turniFound.postazione.replace('. ', '.')] || SHIFT_COLORS[turniFound.postazione] || 'bg-slate-100 text-slate-800 border-slate-200') : '';
                           return (
@@ -1004,7 +1016,7 @@ export default function GemTeam() {
           <div className="my-8 border-t border-slate-200" />
 
           {/* CALENDARIO REALE */}
-          <div className="px-6 md:px-8 max-w-7xl mx-auto py-8">
+          <div className="px-6 md:px-8 w-full mx-auto py-8">
           <Card className="border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-4 sm:p-6 space-y-6 bg-slate-50">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-transparent lg:border-slate-200 pb-0 lg:pb-4 p-4 lg:p-0">
