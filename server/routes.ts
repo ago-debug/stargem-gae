@@ -6051,8 +6051,20 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   });
 
   app.post("/api/gemteam/postazioni", isAuthenticated, isMasterGuard, async (req, res) => {
-    // Implement post creation
-    return res.json({ success: true });
+    try {
+      const { nome, contaOre, attiva, colore } = req.body;
+      if (!nome) return res.status(400).json({ error: 'Nome obbligatorio' });
+      await db.insert(schema.teamPostazioni).values({
+        nome,
+        contaOre: contaOre ?? true,
+        attiva: attiva ?? true,
+        colore: colore || 'var(--indigo-50)',
+        ordine: 99
+      });
+      return res.json({ success: true });
+    } catch(err) {
+      return res.status(500).json({ error: 'Errore' });
+    }
   });
 
   app.patch("/api/gemteam/postazioni/:id", isAuthenticated, isMasterGuard, async (req, res) => {
