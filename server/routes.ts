@@ -1188,20 +1188,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const segments = await db.select().from(userSessionSegments).where(eq(userSessionSegments.userId, u.id));
         
-        let lavoroOggiMinuti = 0;
-        let pausaOggiMinuti = 0;
-        let segmentoCorrenteInizio = null;
-        let segmentoCorrenteTipo = null;
+        // Segmenti chiusi oggi
+        const chiusiOnline = segments
+          .filter(s => s.tipo === 'online' && s.endedAt !== null && new Date(s.startedAt) >= today)
+          .reduce((sum, s) => sum + (s.durataMinuti || 0), 0);
+          
+        const chiusiPausa = segments
+          .filter(s => s.tipo === 'pausa' && s.endedAt !== null && new Date(s.startedAt) >= today)
+          .reduce((sum, s) => sum + (s.durataMinuti || 0), 0);
 
-        for (const seg of segments) {
-           if (seg.endedAt === null) {
-              segmentoCorrenteInizio = seg.startedAt;
-              segmentoCorrenteTipo = seg.tipo;
-           }
-           if (new Date(seg.startedAt) >= today) {
-              if (seg.tipo === 'online') lavoroOggiMinuti += (seg.durataMinuti || 0);
-              if (seg.tipo === 'pausa') pausaOggiMinuti += (seg.durataMinuti || 0);
-           }
+        // Segmento aperto corrente (se esiste)
+        const aperto = segments.find(s => s.endedAt === null);
+        let segmentoCorrenteInizio = aperto ? aperto.startedAt : null;
+        let segmentoCorrenteTipo = aperto ? aperto.tipo : null;
+        let segmentoLiveMinuti = 0;
+
+        if (aperto) {
+          segmentoLiveMinuti = Math.round(
+            (Date.now() - new Date(aperto.startedAt).getTime()) / 60000
+          );
+        }
+
+        let lavoroOggiMinuti = chiusiOnline;
+        let pausaOggiMinuti = chiusiPausa;
+
+        if (aperto?.tipo === 'online') {
+          lavoroOggiMinuti += segmentoLiveMinuti;
+        } else if (aperto?.tipo === 'pausa') {
+          pausaOggiMinuti += segmentoLiveMinuti;
         }
 
         return {
