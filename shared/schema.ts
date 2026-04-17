@@ -56,6 +56,20 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
+export const userSessionSegments = mysqlTable("user_session_segments", {
+  id: int("id").primaryKey().autoincrement(),
+  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  endedAt: timestamp("ended_at"),
+  tipo: mysqlEnum("tipo", ["online", "pausa"]).notNull().default("online"),
+  durataMinuti: int("durata_minuti"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_user_date").on(table.userId, table.startedAt),
+  index("idx_tipo").on(table.tipo),
+  index("idx_ended").on(table.endedAt),
+]);
+
 export const userRoles = mysqlTable("user_roles", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull().unique(),
