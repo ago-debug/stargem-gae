@@ -20,7 +20,7 @@ import { log } from "./vite";
 import { db } from "./db";
 import { sendSMS, sendEmail } from "./notifications";
 import { getUnifiedActivitiesPreview, getUnifiedActivityById, getUnifiedEnrollmentsPreview } from "./services/unifiedBridge";
-import { eq, desc, and, isNull, isNotNull, sql, gte, lte, lt, or, like, ne } from "drizzle-orm";
+import { eq, desc, asc, and, isNull, isNotNull, sql, gte, lte, lt, or, like, ne } from "drizzle-orm";
 import { differenceInYears } from "date-fns";
 import * as schema from "@shared/schema";
 import { gemConversations, gemMessages, memberUploads, insertMemberSchema,
@@ -4704,7 +4704,57 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         .where(eq(schema.teamEmployees.attivo, true))
         .orderBy(schema.teamEmployees.team, schema.members.lastName);
 
-      return res.json(records);
+      const enhancedRecords = await Promise.all(records.map(async (emp) => {
+        // Check-in fisico di oggi
+        const checkinOggi = await db
+          .select()
+          .from(schema.teamCheckinEvents)
+          .where(
+            and(
+              eq(schema.teamCheckinEvents.employeeId, emp.id),
+              eq(schema.teamCheckinEvents.tipo, 'IN'),
+              sql`DATE(${schema.teamCheckinEvents.timestamp}) = CURDATE()`
+            )
+          )
+          .orderBy(asc(schema.teamCheckinEvents.timestamp))
+          .limit(1);
+
+        // Check-out fisico di oggi
+        const checkoutOggi = await db
+          .select()
+          .from(schema.teamCheckinEvents)
+          .where(
+            and(
+              eq(schema.teamCheckinEvents.employeeId, emp.id),
+              eq(schema.teamCheckinEvents.tipo, 'OUT'),
+              sql`DATE(${schema.teamCheckinEvents.timestamp}) = CURDATE()`
+            )
+          )
+          .orderBy(desc(schema.teamCheckinEvents.timestamp))
+          .limit(1);
+
+        // Ore fisiche da attendance_logs
+        const attendanceOggi = await db
+          .select()
+          .from(schema.teamAttendanceLogs)
+          .where(
+            and(
+              eq(schema.teamAttendanceLogs.employeeId, emp.id),
+              sql`DATE(${schema.teamAttendanceLogs.data}) = CURDATE()`
+            )
+          )
+          .limit(1);
+
+        return {
+          ...emp,
+          checkInOggi: checkinOggi[0]?.timestamp ?? null,
+          checkOutOggi: checkoutOggi[0]?.timestamp ?? null,
+          oreFisicheOggi: attendanceOggi[0]?.oreLavorate ?? null,
+          inSedeOra: !!checkinOggi[0] && !checkoutOggi[0]
+        };
+      }));
+
+      return res.json(enhancedRecords);
     } catch (error) {
       console.error('[GemTeam] GET /dipendenti error:', error);
       return res.status(500).json({ error: 'Errore interno' });
