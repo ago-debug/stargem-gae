@@ -153,7 +153,7 @@ export function NewCarnetDialog() {
               <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
               <SelectContent>
                 {safeMembers.map((m: any) => (
-                  <SelectItem key={m.id} value={m.id.toString()}>{m.firstName} {m.lastName}</SelectItem>
+                  <SelectItem key={m.id} value={m.id.toString()}>{m.lastName} {m.firstName}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -177,7 +177,7 @@ export function NewCarnetDialog() {
               <SelectTrigger><SelectValue placeholder="Maestro referenziato" /></SelectTrigger>
               <SelectContent>
                 {safeInstructors.map((i: any) => (
-                  <SelectItem key={i.id} value={i.id.toString()}>{i.firstName} {i.lastName}</SelectItem>
+                  <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

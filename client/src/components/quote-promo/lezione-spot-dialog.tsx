@@ -150,7 +150,7 @@ export function LezioneSpotDialog() {
                                         >
                                             <Check className={cn("mr-2 h-4 w-4", memberId === m.id ? "opacity-100" : "opacity-0")} />
                                             <div className="flex flex-col">
-                                                <span>{m.firstName} {m.lastName}</span>
+                                                <span>{m.lastName} {m.firstName}</span>
                                                 <span className="text-xs text-muted-foreground">{m.fiscalCode || 'No CF'} - Nato: {m.dateOfBirth ? new Date(m.dateOfBirth).toLocaleDateString() : 'N/A'}</span>
                                             </div>
                                         </CommandItem>
@@ -168,7 +168,7 @@ export function LezioneSpotDialog() {
                    <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
                    <SelectContent>
                       {safeInstructors.map(i => (
-                         <SelectItem key={i.id} value={String(i.id)}>{i.firstName} {i.lastName}</SelectItem>
+                         <SelectItem key={i.id} value={String(i.id)}>{i.lastName} {i.firstName}</SelectItem>
                       ))}
                    </SelectContent>
                 </Select>

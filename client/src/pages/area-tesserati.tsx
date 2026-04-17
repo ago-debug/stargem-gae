@@ -71,7 +71,7 @@ export default function AreaTesserati() {
                   {user?.lastName?.charAt(0) || ""}
                 </div>
                 <div>
-                  <CardTitle className="text-xl text-slate-800">{user?.firstName} {user?.lastName}</CardTitle>
+                  <CardTitle className="text-xl text-slate-800">{user?.lastName} {user?.firstName}</CardTitle>
                   <p className="text-sm text-muted-foreground mt-0.5">{user?.email}</p>
                 </div>
               </div>
