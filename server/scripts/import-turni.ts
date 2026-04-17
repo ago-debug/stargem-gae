@@ -41,9 +41,17 @@ export function parseTurniXlsx(buffer: Buffer): any[] {
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
     
     if (data.length < 2) continue;
-    const headerRow = data[1] as any[];
+    let headerRowIndex = -1;
+    for (let i = 0; i < 5; i++) {
+        if (data[i] && (data[i] as any[]).includes('ALEXANDRA')) {
+           headerRowIndex = i;
+           break;
+        }
+    }
+    if (headerRowIndex === -1) continue;
+    const headerRow = data[headerRowIndex] as any[];
     
-    for (let r = 2; r < data.length; r++) {
+    for (let r = headerRowIndex + 1; r < data.length; r++) {
       const row = data[r] as any[];
       if (!row || row.length === 0) continue;
       
