@@ -4934,6 +4934,33 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     }
   });
 
+  app.patch("/api/gemteam/dipendenti/:id", isAuthenticated, async (req, res) => {
+    try {
+      const role = (req.user as any)?.role?.toLowerCase();
+      if (!['admin', 'master', 'super admin'].includes(role)) {
+        return res.status(403).json({ error: 'Non autorizzato' });
+      }
+
+      const id = parseInt(req.params.id);
+      const { team, displayOrder } = req.body;
+      
+      const toUpdate: any = {};
+      if (team !== undefined) toUpdate.team = team;
+      if (displayOrder !== undefined) toUpdate.displayOrder = displayOrder;
+      
+      if (Object.keys(toUpdate).length > 0) {
+        await db.update(schema.teamEmployees)
+          .set(toUpdate)
+          .where(eq(schema.teamEmployees.id, id));
+      }
+
+      return res.json({ ok: true, updated: id });
+    } catch (error) {
+      console.error('[GemTeam] PATCH /dipendenti/:id error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
   app.get("/api/gemteam/presenze/:anno/:mese", isAuthenticated, async (req, res) => {
     try {
       const role = (req.user as any)?.role;
