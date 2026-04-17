@@ -181,6 +181,31 @@ export default function GemTeam() {
 
   // Tab Dipendenti State
   const [searchTerm, setSearchTerm] = useState("");
+
+  const selectedEmpId = useMemo(() => {
+    const found = dipendenti.find(d => 
+      d.nome === selectedEmployee || 
+      `${d.cognome} ${d.nome}` === selectedEmployee || 
+      `${d.nome} ${d.cognome}` === selectedEmployee ||
+      d.id.toString() === selectedEmployee
+    );
+    return found?.id;
+  }, [selectedEmployee, dipendenti]);
+
+  const { data: turniData = [] } = useQuery({
+    queryKey: ['/api/gemteam/turni', selectedEmpId, selectedWeek],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedEmpId) {
+        params.append('employee_id', String(selectedEmpId));
+      }
+      params.append('settimana', selectedWeek || 'A');
+      const r = await fetch(`/api/gemteam/turni?${params}`);
+      return r.json();
+    },
+    enabled: true
+  });
+
   const [teamFilter, setTeamFilter] = useState("tutti");
   const [selectedSheetDip, setSelectedSheetDip] = useState<GemTeamMember | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -807,8 +832,9 @@ export default function GemTeam() {
                         <td className="border border-slate-200 p-1 sm:p-2 text-center text-[10px] sm:text-xs font-bold text-slate-500 bg-white sticky left-0 z-10 shadow-[1px_0_0_0_#e2e8f0]">
                           {time}
                         </td>
-                        {DAYS.map(day => {
-                          const shift = getMockShift(selectedEmployee, selectedWeek, day, time);
+                        {DAYS.map((day, idx) => {
+                          const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => t.giornoSettimana === idx && t.oraInizio === time) : null;
+                          const shift = turniFound ? `${turniFound.postazione} ${turniFound.oraInizio}→${turniFound.oraFine}` : null;
                           return (
                             <td key={`${day}-${time}`} className="border border-slate-200 p-1 sm:p-1.5 relative group-hover:border-slate-300 transition-colors bg-white">
                               {shift && (
