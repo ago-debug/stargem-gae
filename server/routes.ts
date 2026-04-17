@@ -1068,12 +1068,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Active Users list (Returns all users so frontend can render offline ones as grey)
+  // Active Users list
   app.get("/api/users/presence/active", isAuthenticated, async (req, res) => {
     try {
       const { db } = await import("./db");
       const { users } = await import("../shared/schema");
-      const { desc } = await import("drizzle-orm");
+      const { desc, gt } = await import("drizzle-orm");
 
       const allUsers = await db.select({
         id: users.id,
@@ -1088,6 +1088,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: users.email
       })
       .from(users)
+      .where(gt(users.lastSeenAt, new Date(Date.now() - 30 * 1000)))
       .orderBy(desc(users.lastSeenAt));
       
       res.json(allUsers);
