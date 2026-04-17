@@ -141,7 +141,12 @@ export default function GemTeam() {
   });
 
   const dipendenti: GemTeamMember[] = useMemo(() => {
-    const raw = dipendentiAPI.map(d => ({
+    const sortedAPI = [...dipendentiAPI].sort((a, b) =>
+      (a.lastName || '').localeCompare(b.lastName || '', 'it') ||
+      (a.firstName || '').localeCompare(b.firstName || '', 'it')
+    );
+
+    return sortedAPI.map(d => ({
       id: d.id,
       userId: d.userId,
       nome: d.firstName || (d.username === 'admin' ? 'Admin' : d.username === 'botAI' ? 'Bot' : 'Sconosciuto'),
@@ -158,11 +163,6 @@ export default function GemTeam() {
       current_session_start: d.currentSessionStart,
       last_session_duration: d.lastSessionDuration
     }));
-    
-    return raw.sort((a, b) =>
-      (a.cognome || '').localeCompare(b.cognome || '', 'it') ||
-      (a.nome || '').localeCompare(b.nome || '', 'it')
-    );
   }, [dipendentiAPI]);
 
   const MOCK_EMPLOYEES = useMemo(() => dipendenti.map(d => d.nome), [dipendenti]);
