@@ -1,3 +1,5 @@
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import { format, addDays, subDays, startOfWeek, endOfWeek, isSameDay } from "date-fns";
 import { it } from "date-fns/locale";
 import { useState, useMemo, useEffect } from "react";
@@ -13,6 +15,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -244,7 +247,63 @@ export default function GemTeam() {
     queryKey: ['/api/gemteam/postazioni'],
   });
 
-  const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !isSystemEmployee(d));
+  
+  const shiftMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const isUpdate = !!data.id;
+      const res = await fetch('/api/gemteam/turni/scheduled' + (isUpdate ? `/${data.id}` : ''), {
+        method: isUpdate ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Errore salvataggio turno');
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] })
+  });
+
+  const deleteShiftMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/gemteam/turni/scheduled/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Errore eliminazione turno');
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] })
+  });
+
+  const weekTypeMutation = useMutation({
+    mutationFn: async (settimana: string) => {
+      const res = await fetch('/api/gemteam/turni/week-assignment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weekStart: format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
+          settimana
+        })
+      });
+      if (!res.ok) throw new Error('Errore aggiornamento settimana');
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/week-assignment'] })
+  });
+  
+  const updateTeamMutation = useMutation({
+    mutationFn: async ({ id, team }: { id: number, team: string }) => {
+      const res = await fetch(`/api/gemteam/dipendenti/${id}`, { // Fallback if reorder or specific ID route missing? No, the user provided code block! We will patch /api/gemteam/dipendenti/:id
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ team })
+      });
+      if (!res.ok) throw new Error('Errore aggiornamento reparto');
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/gemteam/dipendenti'] })
+  });
+  
+  const { data: weekAssignment } = useQuery<any>({
+    queryKey: ['/api/gemteam/turni/week-assignment', format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd')],
+  });
+const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !isSystemEmployee(d));
   const filteredManutenzione = dipendenti.filter(d => (d.team === 'ass_manutenzione' || d.team === 'manutenzione') && !isSystemEmployee(d));
   const filteredUfficio = dipendenti.filter(d => d.team === 'ufficio' && !isSystemEmployee(d));
   const filteredAmministrazione = dipendenti.filter(d => d.team === 'amministrazione' && !isSystemEmployee(d));
@@ -969,12 +1028,27 @@ export default function GemTeam() {
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                     
-                    <Badge variant="secondary" className="hidden sm:inline-flex ml-4 font-semibold text-xs border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer">
-                      Sett. 33 · Tipo A · 14-19 apr
-                    </Badge>
-                    {isSameDay(turniDate, new Date()) && 
-                      <Badge className="bg-emerald-500 hover:bg-emerald-600 text-[10px]">OGGI</Badge>
-                    }
+                    
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Badge variant="secondary" className="hidden sm:inline-flex ml-4 font-semibold text-xs border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer">
+      Tipo {weekAssignment?.settimana || 'A'} · {format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'd MMM')} - {format(endOfWeek(turniDate, { weekStartsOn: 1 }), 'd MMM')}
+    </Badge>
+  </DropdownMenuTrigger>
+  {isMaster && (
+    <DropdownMenuContent>
+      {['A', 'B', 'C', 'D', 'E'].map(l => (
+        <DropdownMenuItem key={l} onClick={() => weekTypeMutation.mutate(l)}>Settimana Tipo {l}</DropdownMenuItem>
+      ))}
+    </DropdownMenuContent>
+  )}
+</DropdownMenu>
+
+                    {isSameDay(turniDate, new Date()) ? (
+        <Badge onClick={() => setTurniDate(new Date())} className="bg-emerald-500 hover:bg-emerald-600 text-[10px] cursor-pointer">OGGI</Badge>
+    ) : (
+        <Badge onClick={() => setTurniDate(new Date())} variant="outline" className="text-emerald-600 border-emerald-500 hover:bg-emerald-50 text-[10px] cursor-pointer bg-white">OGGI</Badge>
+    )}
                   </div>
                 </div>
 
@@ -1009,7 +1083,20 @@ export default function GemTeam() {
                       <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50">
                         <Plus className="h-3 w-3 mr-1" /> Aggiungi turno
                       </Button>
-                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => console.log('Scarica turni PDF')}>
+                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => {
+    const el = document.getElementById('griglia-turni');
+    if (!el) return;
+    html2canvas(el, { scale: 2 }).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.setFontSize(16);
+      pdf.text(`GemTeam — Turni ${format(turniDate, "EEEE d MMMM yyyy", { locale: it })} — Tipo ${weekAssignment?.settimana || 'A'}`, 10, 15);
+      pdf.addImage(imgData, 'PNG', 10, 25, pdfWidth - 20, pdfHeight - 20);
+      pdf.save(`turni_${format(turniDate, 'yyyyMMdd')}_tipo${weekAssignment?.settimana || 'A'}.pdf`);
+    });
+}}>
                         <Download className="h-3 w-3 mr-1" /> Scarica turni
                       </Button>
                       
@@ -1020,9 +1107,33 @@ export default function GemTeam() {
                           </Button>
                         </SheetTrigger>
                         <SheetContent>
-                          <SheetHeader>
-                            <SheetTitle>Gestione Postazioni (In arrivo)</SheetTitle>
-                          </SheetHeader>
+                          
+<SheetHeader>
+  <SheetTitle>Gestione Postazioni</SheetTitle>
+</SheetHeader>
+<div className="mt-6 flex flex-col gap-4">
+  <div className="bg-slate-100 rounded-md p-3">
+    <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Aggiungi nuova</div>
+    <form className="flex gap-2" onSubmit={async (e: any) => { 
+        e.preventDefault(); 
+        await fetch('/api/gemteam/postazioni', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ nome: e.target.nome.value, contaOre: true, attiva: true }) });
+        queryClient.invalidateQueries({ queryKey: ['/api/gemteam/postazioni'] });
+        e.target.reset();
+    }}>
+      <Input name="nome" placeholder="Es. RECEPTION" className="h-8 text-xs font-bold uppercase w-full" required />
+      <Button size="sm" type="submit" className="h-8">Add</Button>
+    </form>
+  </div>
+  <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2">
+    {postazioniApi.map((p: any) => (
+      <div key={p.id} className="flex items-center justify-between p-2 border rounded-md shadow-sm opacity-100 bg-white hover:border-blue-200">
+        <span className="text-xs font-bold text-slate-800 uppercase">{p.nome}</span>
+        <Button disabled variant="outline" size="sm" className="h-6 text-[10px]">Attiva</Button>
+      </div>
+    ))}
+  </div>
+</div>
+
                         </SheetContent>
                       </Sheet>
 
@@ -1045,7 +1156,7 @@ export default function GemTeam() {
 
             {/* SEZIONE C: GRIGLIA ORARIA GIORNALIERA */}
             <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
-              <table className="w-full border-collapse min-w-max bg-white table-fixed">
+              <table id="griglia-turni" className="w-full border-collapse min-w-max bg-white table-fixed">
                 <thead className="sticky top-0 z-20 shadow-sm border-b border-slate-300">
                   {/* Raggruppamento Team */}
                   <tr>
@@ -1065,9 +1176,9 @@ export default function GemTeam() {
                       <th key={dip.id} className="bg-white border-r border-slate-200 p-1.5 w-28 group">
                          <div className="flex items-center justify-center gap-1">
                             {isMaster && <GripVertical className="h-3 w-3 text-slate-300 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity" />}
-                            <span className="text-[10px] font-bold text-slate-700 uppercase truncate" title={dip.cognome + ' ' + dip.nome}>
-                              {dip.cognome} {dip.nome ? dip.nome.charAt(0) : ''}.
-                            </span>
+                            <span className="text-[10px] font-bold text-slate-700 uppercase truncate" title={dip.nome + ' ' + dip.cognome}>
+      {dip.nome} {dip.cognome ? dip.cognome.charAt(0) : ''}.
+    </span>
                          </div>
                       </th>
                     ))}
@@ -1101,38 +1212,54 @@ export default function GemTeam() {
                                       <h4 className="font-bold text-sm mb-2">Modifica Turno</h4>
                                       <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
                                       
-                                      <div className="space-y-3">
+                                      <form onSubmit={(e) => {
+  e.preventDefault();
+  const formData = new FormData(e.currentTarget);
+  shiftMutation.mutate({
+    id: turniFiltrato.id,
+    employeeId: dip.id,
+    data: formattedTurniDate,
+    oraInizio: formData.get('inizio'),
+    oraFine: formData.get('fine'),
+    postazione: formData.get('postazione'),
+    note: formData.get('note')
+  });
+}}>
+<div className="space-y-3">
                                         <div>
                                           <label className="text-xs font-semibold text-slate-600">Postazione</label>
-                                          <Select defaultValue={turniFiltrato.postazione}>
-                                            <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
-                                            <SelectContent>
-                                              {/* STUB per now, will be populated by postazioni API in the real query */}
-                                              <SelectItem value="RECEPTION">Reception</SelectItem>
-                                              <SelectItem value="UFFICIO">Ufficio</SelectItem>
-                                            </SelectContent>
-                                          </Select>
+                                          
+<Select name="postazione" defaultValue={turniFiltrato.postazione}>
+  <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
+  <SelectContent>
+    {postazioniApi.filter((p:any) => p.attiva !== false).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
+      <SelectItem key={p.id} value={p.nome}>{p.nome}</SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+
                                         </div>
                                         <div className="flex gap-2">
                                           <div className="w-1/2">
                                             <label className="text-xs font-semibold text-slate-600">Inizio</label>
-                                            <Input type="time" defaultValue={hour} />
+                                            <Input name="inizio" type="time" defaultValue={hour} />
                                           </div>
                                           <div className="w-1/2">
                                             <label className="text-xs font-semibold text-slate-600">Fine</label>
-                                            <Input type="time" defaultValue={`${hour.substring(0,2)}:30`} />
+                                            <Input name="fine" type="time" defaultValue={`${hour.substring(0,2)}:30`} />
                                           </div>
                                         </div>
                                         <div>
                                           <label className="text-xs font-semibold text-slate-600">Note</label>
-                                          <Input placeholder="Opzionale..." />
+                                          <Input name="note" placeholder="Opzionale..." />
                                         </div>
                                       </div>
 
                                       <div className="flex gap-2 justify-end mt-4">
-                                         <Button variant="destructive" size="sm">Elimina</Button>
-                                         <Button size="sm">Salva</Button>
+                                         <Button type="button" variant="destructive" size="sm" onClick={(e) => { e.preventDefault(); deleteShiftMutation.mutate(turniFiltrato.id);}}>Elimina</Button>
+                                         <Button type="submit" size="sm" disabled={shiftMutation.isPending}>{shiftMutation.isPending ? "..." : "Salva"}</Button>
                                       </div>
+</form>
                                     </PopoverContent>
                                   )}
                                 </Popover>
@@ -1146,34 +1273,50 @@ export default function GemTeam() {
                                       <h4 className="font-bold text-sm mb-2">Aggiungi Turno</h4>
                                       <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
                                       
-                                      <div className="space-y-3">
+                                      <form onSubmit={(e) => {
+  e.preventDefault();
+  const formData = new FormData(e.currentTarget);
+  shiftMutation.mutate({
+    employeeId: dip.id,
+    data: formattedTurniDate,
+    oraInizio: formData.get('inizio'),
+    oraFine: formData.get('fine'),
+    postazione: formData.get('postazione'),
+    note: formData.get('note')
+  });
+}}>
+<div className="space-y-3">
                                         <div>
                                           <label className="text-xs font-semibold text-slate-600">Postazione</label>
-                                          <Select>
-                                            <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="RECEPTION">Reception</SelectItem>
-                                              <SelectItem value="UFFICIO">Ufficio</SelectItem>
-                                            </SelectContent>
-                                          </Select>
+                                          
+<Select name="postazione">
+  <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
+  <SelectContent>
+    {postazioniApi.filter((p:any) => p.attiva !== false).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
+      <SelectItem key={p.id} value={p.nome}>{p.nome}</SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+
                                         </div>
                                         <div className="flex gap-2">
                                           <div className="w-1/2">
                                             <label className="text-xs font-semibold text-slate-600">Inizio</label>
-                                            <Input type="time" defaultValue={hour} />
+                                            <Input name="inizio" type="time" defaultValue={hour} />
                                           </div>
                                           <div className="w-1/2">
                                             <label className="text-xs font-semibold text-slate-600">Fine</label>
-                                            <Input type="time" defaultValue={`${hour.substring(0,2)}:30`} />
+                                            <Input name="fine" type="time" defaultValue={`${hour.substring(0,2)}:30`} />
                                           </div>
                                         </div>
                                         <div>
                                           <label className="text-xs font-semibold text-slate-600">Note</label>
-                                          <Input placeholder="Opzionale..." />
+                                          <Input name="note" placeholder="Opzionale..." />
                                         </div>
                                       </div>
 
-                                      <Button size="sm" className="w-full mt-4">Aggiungi</Button>
+                                      <Button type="submit" size="sm" className="w-full mt-4" disabled={shiftMutation.isPending}>{shiftMutation.isPending ? "..." : "Aggiungi"}</Button>
+</form>
                                     </PopoverContent>
                                   )}
                                 </Popover>
@@ -1193,7 +1336,20 @@ export default function GemTeam() {
                     {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
                       <td key={`tot-${dip.id}`} className="text-center p-2 font-bold text-xs text-slate-600 border-r border-slate-200 bg-slate-50">
                         {/* Mock calculation: in final version we sum duration of postazioni with conta_ore=1 */}
-                        {dip.id === 1 ? '8.0h' : '0.0h'}
+                        {(() => {
+  const turniDip = Array.isArray(turniScheduled) ? turniScheduled.filter((t:any) => t.employeeId === dip.id) : [];
+  if (turniDip.length === 0) return '0.0h';
+  let mins = 0;
+  turniDip.forEach((t:any) => {
+    if (!t.oraInizio || !t.oraFine) return;
+    const [hS, mS] = t.oraInizio.split(':').map(Number);
+    const [hE, mE] = t.oraFine.split(':').map(Number);
+    mins += (hE * 60 + mE) - (hS * 60 + mS);
+  });
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}.${m/6}h` : `${h}.0h`;
+})()}
                       </td>
                     ))}
                   </tr>
