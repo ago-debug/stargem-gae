@@ -291,8 +291,12 @@ export function AppSidebar() {
 
   useEffect(() => {
     const me = usersInfoRaw.find((u: any) => u.id === user?.id);
-    if (!me || me.stato !== 'online' || !me.segmentoCorrenteInizio) {
+    
+    if (me?.stato === 'pausa') {
       setLiveExtra(0);
+    }
+
+    if (!me || me.stato !== 'online' || !me.segmentoCorrenteInizio) {
       return;
     }
     
