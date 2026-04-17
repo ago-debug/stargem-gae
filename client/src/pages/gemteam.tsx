@@ -396,6 +396,7 @@ export default function GemTeam() {
 
   // Auth Guard rimossa: la dashboard è visibile a tutti i dipendenti senza filtro ruolo.
   const userRole = (user as any)?.role?.toLowerCase() || "";
+  const isAllowed = ['admin', 'master', 'direzione', 'super admin', 'amministratore totale'].includes(userRole);
 
   return (
     <div className="p-6 md:p-8 space-y-8 w-full max-w-7xl mx-auto animate-in fade-in zoom-in-95 duration-500">
