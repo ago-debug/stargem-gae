@@ -1001,51 +1001,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   async function checkAndCloseStaleSegments(db: any, userSessionSegments: any, eq: any, and: any, isNull: any, lt: any) {
     const now = Date.now();
     const tenMinutesAgo = new Date(now - 10 * 60 * 1000);
-    const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
+    const fiveMinutesAgo = new Date(now - 5 * 60 * 1000);
 
-    // Segmenti online aperti da > 2 min → diventa pausa
-    const staleOnline = await db
-      .select()
-      .from(userSessionSegments)
-      .where(
-        and(
-          eq(userSessionSegments.tipo, 'online'),
-          isNull(userSessionSegments.endedAt),
-          lt(userSessionSegments.startedAt, twoMinutesAgo)
-        )
-      );
+    const staleOnline = await db.select().from(userSessionSegments).where(
+      and(
+        eq(userSessionSegments.tipo, 'online'),
+        isNull(userSessionSegments.endedAt),
+        lt(userSessionSegments.lastHeartbeatAt, fiveMinutesAgo)
+      )
+    );
 
     for (const seg of staleOnline) {
-      const diffMs = twoMinutesAgo.getTime() - new Date(seg.startedAt).getTime();
-      const durataReale = diffMs > 30000 ? Math.max(1, Math.round(diffMs / 60000)) : 0;
-      const MAX_ONLINE_SEGMENT = 30;
-      const durataMinuti = Math.min(durataReale, MAX_ONLINE_SEGMENT);
-      await db.update(userSessionSegments)
-        .set({ endedAt: twoMinutesAgo, durataMinuti })
-        .where(eq(userSessionSegments.id, seg.id));
-        
-      await db.insert(userSessionSegments).values({
-        userId: seg.userId, tipo: 'pausa', startedAt: twoMinutesAgo
-      });
+      const lHbTime = new Date(seg.lastHeartbeatAt || seg.startedAt).getTime();
+      const stTime = new Date(seg.startedAt).getTime();
+      const durataRealeMin = Math.max(0, Math.round((lHbTime - stTime) / 60000));
+      
+      const isDeadOffline = lHbTime < tenMinutesAgo.getTime();
+      
+      if (isDeadOffline) {
+        await db.update(userSessionSegments)
+          .set({ endedAt: new Date(lHbTime), durataMinuti: durataRealeMin })
+          .where(eq(userSessionSegments.id, seg.id));
+      } else {
+        await db.update(userSessionSegments)
+          .set({ endedAt: new Date(lHbTime), durataMinuti: durataRealeMin })
+          .where(eq(userSessionSegments.id, seg.id));
+          
+        await db.insert(userSessionSegments).values({
+          userId: seg.userId, tipo: 'pausa', startedAt: new Date(lHbTime), lastHeartbeatAt: new Date(lHbTime)
+        });
+      }
     }
 
-    // Segmenti pausa aperti da > 10 min → chiudi (OFFLINE)
-    const stalePausa = await db
-      .select()
-      .from(userSessionSegments)
-      .where(
-        and(
-          eq(userSessionSegments.tipo, 'pausa'),
-          isNull(userSessionSegments.endedAt),
-          lt(userSessionSegments.startedAt, tenMinutesAgo)
-        )
-      );
+    const stalePausa = await db.select().from(userSessionSegments).where(
+      and(
+        eq(userSessionSegments.tipo, 'pausa'),
+        isNull(userSessionSegments.endedAt),
+        lt(userSessionSegments.lastHeartbeatAt, tenMinutesAgo)
+      )
+    );
 
     for (const seg of stalePausa) {
-      const diffMs = tenMinutesAgo.getTime() - new Date(seg.startedAt).getTime();
-      const durataMinuti = diffMs > 30000 ? Math.max(1, Math.round(diffMs / 60000)) : 0;
+      const lHbTime = new Date(seg.lastHeartbeatAt || seg.startedAt).getTime();
+      const stTime = new Date(seg.startedAt).getTime();
+      const durataMinuti = Math.max(0, Math.round((lHbTime - stTime) / 60000));
+      
       await db.update(userSessionSegments)
-        .set({ endedAt: tenMinutesAgo, durataMinuti })
+        .set({ endedAt: new Date(lHbTime), durataMinuti })
         .where(eq(userSessionSegments.id, seg.id));
     }
   }
@@ -1053,56 +1055,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   async function handleHeartbeat(userId: string, db: any, users: any, userSessionSegments: any, eq: any, and: any, isNull: any) {
     const now = new Date();
     
-    // Trova segmento aperto
-    const openSegment = await db
-      .select()
-      .from(userSessionSegments)
-      .where(
-        and(
-          eq(userSessionSegments.userId, userId),
-          isNull(userSessionSegments.endedAt)
-        )
-      )
-      .limit(1);
+    const openSegment = await db.select().from(userSessionSegments).where(
+      and(eq(userSessionSegments.userId, userId), isNull(userSessionSegments.endedAt))
+    ).limit(1);
 
-    if (openSegment.length === 0) {
-      await db.insert(userSessionSegments).values({
-        userId, tipo: 'online', startedAt: now
-      });
-    } else {
+    if (openSegment.length > 0) {
       const seg = openSegment[0];
-      const diffMs = now.getTime() - new Date(seg.startedAt).getTime();
-      const diffMin = diffMs / 60000;
+      if (seg.tipo === 'online') {
+          await db.update(userSessionSegments)
+            .set({ lastHeartbeatAt: now })
+            .where(eq(userSessionSegments.id, seg.id));
 
-      if (seg.tipo === 'online' && diffMin <= 2) {
-        // Ancora online - non fare nulla, logica heartbeat handled
-      } else if (seg.tipo === 'online' && diffMin > 2) {
-        // Era online, torna dopo pausa
-        const durataReale = diffMs > 30000 ? Math.max(1, Math.round(diffMin)) : 0;
-        const MAX_ONLINE_SEGMENT = 30;
-        const safeDurata = Math.min(durataReale, MAX_ONLINE_SEGMENT);
-        await db.update(userSessionSegments)
-          .set({ endedAt: now, durataMinuti: safeDurata })
-          .where(eq(userSessionSegments.id, seg.id));
-        await db.insert(userSessionSegments).values({
-          userId, tipo: 'online', startedAt: now
-        });
+          const diffMs = now.getTime() - new Date(seg.startedAt).getTime();
+          const diffMin = Math.round(diffMs / 60000);
+          if (diffMin >= 30) {
+             await db.update(userSessionSegments)
+               .set({ endedAt: now, durataMinuti: diffMin })
+               .where(eq(userSessionSegments.id, seg.id));
+             await db.insert(userSessionSegments).values({
+               userId, tipo: 'online', startedAt: now, lastHeartbeatAt: now
+             });
+          }
       } else if (seg.tipo === 'pausa') {
-        // In pausa, torna online
-        const safeDurata = diffMs > 30000 ? Math.max(1, Math.round(diffMin)) : 0;
-        await db.update(userSessionSegments)
-          .set({ endedAt: now, durataMinuti: safeDurata })
-          .where(eq(userSessionSegments.id, seg.id));
-        await db.insert(userSessionSegments).values({
-          userId, tipo: 'online', startedAt: now
-        });
+          const diffMs = now.getTime() - new Date(seg.startedAt).getTime();
+          const safeDurata = Math.round(diffMs / 60000);
+          await db.update(userSessionSegments)
+            .set({ endedAt: now, durataMinuti: safeDurata })
+            .where(eq(userSessionSegments.id, seg.id));
+          await db.insert(userSessionSegments).values({
+            userId, tipo: 'online', startedAt: now, lastHeartbeatAt: now
+          });
       }
+    } else {
+       await db.insert(userSessionSegments).values({
+          userId, tipo: 'online', startedAt: now, lastHeartbeatAt: now
+       });
     }
 
-    // Aggiorna sempre last_seen_at
-    await db.update(users)
-      .set({ lastSeenAt: now })
-      .where(eq(users.id, userId));
+    await db.update(users).set({ lastSeenAt: now }).where(eq(users.id, userId));
   }
 
   // User Presence Heartbeat
@@ -1190,7 +1180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const now = Date.now();
         if (u.lastSeenAt) {
            const diffSec = (now - new Date(u.lastSeenAt).getTime()) / 1000;
-           if (diffSec < 120) stato = 'online';
+           if (diffSec < 300) stato = 'online';
            else if (diffSec < 600) stato = 'pausa';
            else stato = 'offline';
         }

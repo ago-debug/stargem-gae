@@ -8,13 +8,16 @@ export function UserPresenceTracker() {
   useEffect(() => {
     if (!user) return;
 
-    let lastActivityTime = Date.now();
+    let lastHeartbeatSent = 0;
 
     const pingHeartbeat = async () => {
-      // Se l'utente non interagisce da 2 minuti (120 secondi), non inviamo l'heartbeat
-      if (Date.now() - lastActivityTime > 2 * 60 * 1000) {
+      const now = Date.now();
+      // Throttle di 30 secondi per evitare spam al server
+      if (now - lastHeartbeatSent < 30 * 1000) {
         return;
       }
+      lastHeartbeatSent = now;
+      
       try {
         await apiRequest("POST", "/api/users/presence/heartbeat");
       } catch (error) {
@@ -22,27 +25,21 @@ export function UserPresenceTracker() {
       }
     };
 
-    const updateActivity = () => {
-      const now = Date.now();
-      // Se ci stiamo risvegliando da una pausa profonda (> 2 minuti), forziamo un ping immediato al server
-      if (now - lastActivityTime > 2 * 60 * 1000) {
-        lastActivityTime = now;
-        pingHeartbeat();
-      } else {
-        lastActivityTime = now;
-      }
-    };
-
-    window.addEventListener("mousemove", updateActivity, { passive: true });
-    window.addEventListener("keydown", updateActivity, { passive: true });
-    window.addEventListener("click", updateActivity, { passive: true });
-    window.addEventListener("scroll", updateActivity, { passive: true });
-
-    // Ping immediato iniziale
+    // Ping immediato iniziale al caricamento
     pingHeartbeat();
 
-    // Loop heartbeat ogni 20 secondi
-    const intervalId = setInterval(pingHeartbeat, 20000);
+    // Event handler throttling
+    const handleActivity = () => {
+      pingHeartbeat();
+    };
+
+    // Ascolta gli eventi reali
+    window.addEventListener("mousemove", handleActivity, { passive: true });
+    window.addEventListener("keydown", handleActivity, { passive: true });
+    window.addEventListener("click", handleActivity, { passive: true });
+    window.addEventListener("scroll", handleActivity, { passive: true });
+    window.addEventListener("mousedown", handleActivity, { passive: true });
+    window.addEventListener("touchstart", handleActivity, { passive: true });
 
     const handleUnload = () => {
       navigator.sendBeacon("/api/users/presence/offline");
@@ -52,11 +49,12 @@ export function UserPresenceTracker() {
     window.addEventListener("pagehide", handleUnload);
 
     return () => {
-      clearInterval(intervalId);
-      window.removeEventListener("mousemove", updateActivity);
-      window.removeEventListener("keydown", updateActivity);
-      window.removeEventListener("click", updateActivity);
-      window.removeEventListener("scroll", updateActivity);
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      window.removeEventListener("click", handleActivity);
+      window.removeEventListener("scroll", handleActivity);
+      window.removeEventListener("mousedown", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
       window.removeEventListener("beforeunload", handleUnload);
       window.removeEventListener("pagehide", handleUnload);
     };

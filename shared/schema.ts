@@ -60,6 +60,7 @@ export const userSessionSegments = mysqlTable("user_session_segments", {
   id: int("id").primaryKey().autoincrement(),
   userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id, { onDelete: "cascade" }),
   startedAt: timestamp("started_at").notNull().defaultNow(),
+  lastHeartbeatAt: timestamp("last_heartbeat_at"),
   endedAt: timestamp("ended_at"),
   tipo: mysqlEnum("tipo", ["online", "pausa"]).notNull().default("online"),
   durataMinuti: int("durata_minuti"),
