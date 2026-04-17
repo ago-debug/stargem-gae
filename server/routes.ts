@@ -4671,6 +4671,33 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   // GEMTEAM ROUTES
   // ============================================================================
   
+  app.get("/api/gemteam/turni", isAuthenticated, async (req, res) => {
+    try {
+      const employeeId = req.query.employee_id 
+        ? parseInt(req.query.employee_id as string) 
+        : null;
+      const settimana = req.query.settimana as any || 'A';
+
+      const turni = await db.select()
+        .from(schema.teamShiftTemplates)
+        .where(employeeId 
+          ? and(
+              eq(schema.teamShiftTemplates.employeeId, employeeId),
+              eq(schema.teamShiftTemplates.settimanaTipo, settimana)
+            )
+          : eq(schema.teamShiftTemplates.settimanaTipo, settimana)
+        )
+        .orderBy(
+          asc(schema.teamShiftTemplates.giornoSettimana),
+          asc(schema.teamShiftTemplates.oraInizio)
+        );
+
+      return res.json(turni);
+    } catch (error) {
+      console.error('[GemTeam] GET /turni error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
   app.get("/api/gemteam/dipendenti", isAuthenticated, async (req, res) => {
     try {
       const role = (req.user as any)?.role;
