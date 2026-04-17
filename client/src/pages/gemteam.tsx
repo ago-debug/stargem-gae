@@ -1046,7 +1046,7 @@ export default function GemTeam() {
                                     <PopoverTrigger asChild>
                                       <div className={`w-full h-8 flex items-center justify-center cursor-pointer relative hover:ring-1 hover:ring-inset hover:ring-blue-400 hover:z-10 transition-all ${badgeColor}`}>
                                         {isEdited && <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-orange-500 rounded-full" />}
-                                        <span className="text-[10px]">{val}</span>
+                                        <span className="text-[10px]">{!isNaN(parseFloat(val)) && val !== "" ? fmtOre(parseFloat(val)) : val}</span>
                                       </div>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-48 p-3 shadow-xl" align="center">
@@ -1075,7 +1075,7 @@ export default function GemTeam() {
                               );
                             })}
                             <td className="sticky right-0 bg-slate-50 border-l border-slate-300 font-bold p-1 shadow-[-1px_0_0_0_#cbd5e1] z-10 text-slate-800 tabular-nums">
-                              {tot > 0 ? tot : "-"}
+                              {tot > 0 ? fmtOre(tot) : "-"}
                             </td>
                           </tr>
                         );
@@ -1096,19 +1096,19 @@ export default function GemTeam() {
                           });
                           return (
                             <td key={day} className="text-[10px] border border-slate-700 tabular-nums">
-                              {colSum > 0 ? colSum : ""}
+                              {colSum > 0 ? fmtOre(colSum) : ""}
                             </td>
                           );
                         })}
                         <td className="sticky right-0 bg-slate-900 border-l border-slate-700 shadow-[-1px_0_0_0_#0f172a] z-30 ring-1 ring-slate-900">
-                          {dipendenti.reduce((acc, dip) => {
+                          {fmtOre(dipendenti.reduce((acc, dip) => {
                             for (let d = 1; d <= 30; d++) {
                               const val = presenzeData[dip.id]?.[d];
                               const parsed = parseFloat(val);
                               if (!isNaN(parsed)) acc += parsed;
                             }
                             return acc;
-                          }, 0)}
+                          }, 0))}
                         </td>
                       </tr>
                     </tfoot>
