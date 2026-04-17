@@ -4702,7 +4702,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     }
   });
 
-  app.get("/api/gemteam/turni/preview", isAuthenticated, async (req, res) => {
+  app.get("/api/gemteam/turni/preview-import", isAuthenticated, async (req, res) => {
     try {
       const filePath = path.join(process.cwd(), "team_TURNI.xlsx");
       if (!fs.existsSync(filePath)) {
@@ -4712,12 +4712,12 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       const records = parseTurniXlsx(buffer);
       return res.json(records);
     } catch (error) {
-      console.error('[GemTeam] GET /turni/preview error:', error);
+      console.error('[GemTeam] GET /turni/preview-import error:', error);
       return res.status(500).json({ error: 'Errore interno' });
     }
   });
 
-  app.post("/api/gemteam/turni/import", isAuthenticated, async (req, res) => {
+  app.post("/api/gemteam/turni/do-import", isAuthenticated, async (req, res) => {
     try {
       const filePath = path.join(process.cwd(), "team_TURNI.xlsx");
       if (!fs.existsSync(filePath)) {
