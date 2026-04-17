@@ -994,44 +994,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helpers per Session Segments
+  async function checkAndCloseStaleSegments(db: any, userSessionSegments: any, eq: any, and: any, isNull: any, lt: any) {
+    const now = Date.now();
+    const tenMinutesAgo = new Date(now - 10 * 60 * 1000);
+    const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
+
+    // Segmenti online aperti da > 2 min → diventa pausa
+    const staleOnline = await db
+      .select()
+      .from(userSessionSegments)
+      .where(
+        and(
+          eq(userSessionSegments.tipo, 'online'),
+          isNull(userSessionSegments.endedAt),
+          lt(userSessionSegments.startedAt, twoMinutesAgo)
+        )
+      );
+
+    for (const seg of staleOnline) {
+      const durataMinuti = Math.round(
+        (twoMinutesAgo.getTime() - new Date(seg.startedAt).getTime()) / 60000
+      );
+      await db.update(userSessionSegments)
+        .set({ endedAt: twoMinutesAgo, durataMinuti })
+        .where(eq(userSessionSegments.id, seg.id));
+        
+      await db.insert(userSessionSegments).values({
+        userId: seg.userId, tipo: 'pausa', startedAt: twoMinutesAgo
+      });
+    }
+
+    // Segmenti pausa aperti da > 10 min → chiudi (OFFLINE)
+    const stalePausa = await db
+      .select()
+      .from(userSessionSegments)
+      .where(
+        and(
+          eq(userSessionSegments.tipo, 'pausa'),
+          isNull(userSessionSegments.endedAt),
+          lt(userSessionSegments.startedAt, tenMinutesAgo)
+        )
+      );
+
+    for (const seg of stalePausa) {
+      const durataMinuti = Math.round(
+        (tenMinutesAgo.getTime() - new Date(seg.startedAt).getTime()) / 60000
+      );
+      await db.update(userSessionSegments)
+        .set({ endedAt: tenMinutesAgo, durataMinuti })
+        .where(eq(userSessionSegments.id, seg.id));
+    }
+  }
+
+  async function handleHeartbeat(userId: string, db: any, users: any, userSessionSegments: any, eq: any, and: any, isNull: any) {
+    const now = new Date();
+    
+    // Trova segmento aperto
+    const openSegment = await db
+      .select()
+      .from(userSessionSegments)
+      .where(
+        and(
+          eq(userSessionSegments.userId, userId),
+          isNull(userSessionSegments.endedAt)
+        )
+      )
+      .limit(1);
+
+    if (openSegment.length === 0) {
+      await db.insert(userSessionSegments).values({
+        userId, tipo: 'online', startedAt: now
+      });
+    } else {
+      const seg = openSegment[0];
+      const diffMs = now.getTime() - new Date(seg.startedAt).getTime();
+      const diffMin = diffMs / 60000;
+
+      if (seg.tipo === 'online' && diffMin <= 2) {
+        // Ancora online - non fare nulla, logica heartbeat handled
+      } else if (seg.tipo === 'online' && diffMin > 2) {
+        // Era online, torna dopo pausa
+        await db.update(userSessionSegments)
+          .set({ endedAt: now, durataMinuti: Math.round(diffMin) })
+          .where(eq(userSessionSegments.id, seg.id));
+        await db.insert(userSessionSegments).values({
+          userId, tipo: 'online', startedAt: now
+        });
+      } else if (seg.tipo === 'pausa') {
+        // In pausa, torna online
+        await db.update(userSessionSegments)
+          .set({ endedAt: now, durataMinuti: Math.round(diffMin) })
+          .where(eq(userSessionSegments.id, seg.id));
+        await db.insert(userSessionSegments).values({
+          userId, tipo: 'online', startedAt: now
+        });
+      }
+    }
+
+    // Aggiorna sempre last_seen_at
+    await db.update(users)
+      .set({ lastSeenAt: now })
+      .where(eq(users.id, userId));
+  }
+
   // User Presence Heartbeat
   app.post("/api/users/presence/heartbeat", isAuthenticated, async (req, res) => {
     try {
       const userId = (req.user as any).id;
       const { db } = await import("./db");
-      const { users } = await import("../shared/schema");
-      const { sql, eq } = await import("drizzle-orm");
+      const { users, userSessionSegments } = await import("../shared/schema");
+      const { eq, and, isNull, lt } = await import("drizzle-orm");
 
-      const currentUserState = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-      const lastSeen = currentUserState[0]?.lastSeenAt;
-      const isNewSession = !currentUserState[0]?.currentSessionStart || (lastSeen && (Date.now() - new Date(lastSeen).getTime()) > 20 * 60000);
-
-      await db.update(users).set({
-        lastSeenAt: sql`CURRENT_TIMESTAMP`,
-        currentSessionStart: sql`
-          CASE 
-            WHEN current_session_start IS NULL THEN CURRENT_TIMESTAMP
-            WHEN last_seen_at IS NULL THEN CURRENT_TIMESTAMP
-            WHEN TIMESTAMPDIFF(SECOND, last_seen_at, CURRENT_TIMESTAMP) > 1200 THEN CURRENT_TIMESTAMP
-            WHEN TIMESTAMPDIFF(SECOND, last_seen_at, CURRENT_TIMESTAMP) > 180 THEN DATE_ADD(current_session_start, INTERVAL TIMESTAMPDIFF(SECOND, last_seen_at, CURRENT_TIMESTAMP) SECOND)
-            WHEN current_session_start > CURRENT_TIMESTAMP THEN CURRENT_TIMESTAMP
-            ELSE current_session_start
-          END
-        `
-      }).where(eq(users.id, userId));
-
-      if (isNewSession && currentUserState[0]) {
-        try {
-          await storage.logActivity({
-            userId,
-            action: "LOGIN",
-            ipAddress: req.ip || null,
-            details: { username: currentUserState[0].username, note: "Session resumed" }
-          });
-        } catch (e) {
-          console.error("Failed to log implicit login", e);
-        }
-      }
+      await checkAndCloseStaleSegments(db, userSessionSegments, eq, and, isNull, lt);
+      await handleHeartbeat(userId, db, users, userSessionSegments, eq, and, isNull);
 
       res.json({ success: true });
     } catch (error: any) {
@@ -1044,23 +1120,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = (req.user as any).id;
       const { db } = await import("./db");
-      const { users } = await import("../shared/schema");
-      const { sql, eq } = await import("drizzle-orm");
+      const { users, userSessionSegments } = await import("../shared/schema");
+      const { eq, and, isNull } = await import("drizzle-orm");
 
-      const currentUserState = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-      const start = currentUserState[0]?.currentSessionStart;
-      const calculatedDuration = start ? Math.round((Date.now() - new Date(start).getTime()) / 60000) : 0;
+      // Chiudiamo i segmenti aperti immediatamente se fa offline esplicito
+      const now = new Date();
+      const openSegment = await db
+        .select()
+        .from(userSessionSegments)
+        .where(
+          and(
+            eq(userSessionSegments.userId, userId),
+            isNull(userSessionSegments.endedAt)
+          )
+        )
+        .limit(1);
 
-      // Prima del salvataggio, applica il cap
-      const cappedDuration = Math.min(calculatedDuration, 840);
+      if (openSegment.length > 0) {
+        const seg = openSegment[0];
+        const diffMin = (now.getTime() - new Date(seg.startedAt).getTime()) / 60000;
+        await db.update(userSessionSegments)
+          .set({ endedAt: now, durataMinuti: Math.round(diffMin) })
+          .where(eq(userSessionSegments.id, seg.id));
+      }
 
-      // Al refresh o chiusura tab inviamo i minuti finali, ma NON distruggiamo 
-      // brutalmente la sessione (currentSessionStart). Manteniamo la memoria intatta: 
-      // il sistema backend deciderà di azzerarla solo se passano oltre 20 min dal lastSeenAt.
-      await db.update(users).set({
-        lastSeenAt: sql`CURRENT_TIMESTAMP`,
-        lastSessionDuration: cappedDuration
-      }).where(eq(users.id, userId));
+      await db.update(users).set({ lastSeenAt: now }).where(eq(users.id, userId));
 
       res.json({ success: true });
     } catch (error: any) {
@@ -1072,8 +1156,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/presence/active", isAuthenticated, async (req, res) => {
     try {
       const { db } = await import("./db");
-      const { users } = await import("../shared/schema");
-      const { desc, gt } = await import("drizzle-orm");
+      const { users, userSessionSegments } = await import("../shared/schema");
+      const { desc, eq, and, isNull, lt, sql } = await import("drizzle-orm");
+
+      await checkAndCloseStaleSegments(db, userSessionSegments, eq, and, isNull, lt);
 
       const allUsers = await db.select({
         id: users.id,
@@ -1081,16 +1167,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: users.firstName,
         lastName: users.lastName,
         profileImageUrl: users.profileImageUrl,
-        currentSessionStart: users.currentSessionStart,
-        lastSeenAt: users.lastSeenAt,
-        lastSessionDuration: users.lastSessionDuration,
         role: users.role,
-        email: users.email
+        lastSeenAt: users.lastSeenAt,
       })
       .from(users)
       .orderBy(desc(users.lastSeenAt));
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const enhancedUsers = await Promise.all(allUsers.map(async (u) => {
+        let stato: 'online' | 'pausa' | 'offline' = 'offline';
+        const now = Date.now();
+        if (u.lastSeenAt) {
+           const diffSec = (now - new Date(u.lastSeenAt).getTime()) / 1000;
+           if (diffSec < 120) stato = 'online';
+           else if (diffSec < 600) stato = 'pausa';
+           else stato = 'offline';
+        }
+
+        const segments = await db.select().from(userSessionSegments).where(eq(userSessionSegments.userId, u.id));
+        
+        let lavoroOggiMinuti = 0;
+        let pausaOggiMinuti = 0;
+        let segmentoCorrenteInizio = null;
+        let segmentoCorrenteTipo = null;
+
+        for (const seg of segments) {
+           if (seg.endedAt === null) {
+              segmentoCorrenteInizio = seg.startedAt;
+              segmentoCorrenteTipo = seg.tipo;
+           }
+           if (new Date(seg.startedAt) >= today) {
+              if (seg.tipo === 'online') lavoroOggiMinuti += (seg.durataMinuti || 0);
+              if (seg.tipo === 'pausa') pausaOggiMinuti += (seg.durataMinuti || 0);
+           }
+        }
+
+        return {
+          ...u,
+          stato,
+          lavoroOggiMinuti,
+          pausaOggiMinuti,
+          segmentoCorrenteInizio,
+          segmentoCorrenteTipo
+        };
+      }));
       
-      res.json(allUsers);
+      res.json(enhancedUsers);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

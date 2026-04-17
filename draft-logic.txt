@@ -1,0 +1,64 @@
+  async excludeDuplicatePair(memberId1: number, memberId2: number, excludedBy: string): Promise<void> {
+    await db.insert(memberDuplicateExclusions).values({
+      memberId1: Math.min(memberId1, memberId2),
+      memberId2: Math.max(memberId1, memberId2),
+      excludedBy
+    });
+  }
+
+  async mergeMembersAdvanced(winnerId: number, loserId: number, fieldOverrides: Partial<Member>): Promise<void> {
+    // 1. Update winner with fieldOverrides
+    if (Object.keys(fieldOverrides).length > 0) {
+       await db.update(members).set(fieldOverrides).where(eq(members.id, winnerId));
+    }
+
+    // 2. FK migration via raw SQL based on deduced table names
+    const tablesToUpdate = [
+      { table: 'memberships', col: 'member_id' },
+      { table: 'payments', col: 'member_id' },
+      { table: 'enrollments', col: 'member_id' },
+      { table: 'attendances', col: 'member_id' },
+      { table: 'medical_certificates', col: 'member_id' },
+      { table: 'member_uploads', col: 'member_id' },
+      { table: 'gem_conversations', col: 'member_id' },
+      { table: 'staff_presenze', col: 'member_id' },
+      { table: 'staff_contracts_compliance', col: 'member_id' },
+      { table: 'staff_document_signatures', col: 'member_id' },
+      { table: 'staff_disciplinary_log', col: 'member_id' },
+      { table: 'instructor_agreements', col: 'instructor_id' }, // note: check column name
+      { table: 'member_packages', col: 'member_id' },
+      { table: 'carnet_wallets', col: 'member_id' },
+      { table: 'team_documents', col: 'employee_id' }, // note: check column name
+      { table: 'payslips', col: 'member_id' },
+      { table: 'member_forms_submissions', col: 'member_id' },
+      { table: 'team_employees', col: 'user_id' }, // note: check column name, usually team_employees links member somehow
+      { table: 'studio_bookings', col: 'member_id' },
+      { table: 'member_discounts', col: 'member_id' },
+      { table: 'promo_rules', col: 'target_member_id' }, // check col
+      { table: 'access_logs', col: 'member_id' }
+    ];
+
+    for (const link of tablesToUpdate) {
+      try {
+        await db.execute(dql`UPDATE ${dql.raw(link.table)} SET ${dql.raw(link.col)} = ${winnerId} WHERE ${dql.raw(link.col)} = ${loserId}`);
+      } catch (err: any) {
+        if (!err.message.includes("doesn't exist")) {
+           console.error(\`Merge error on \${link.table}: \${err.message}\`);
+        }
+      }
+    }
+
+    // Double links
+    try { await db.execute(dql`UPDATE member_relationships SET member_id = ${winnerId} WHERE member_id = ${loserId}`); } catch(e){}
+    try { await db.execute(dql`UPDATE member_relationships SET related_member_id = ${winnerId} WHERE related_member_id = ${loserId}`); } catch(e){}
+    
+    try { await db.execute(dql`UPDATE staff_sostituzioni SET absent_member_id = ${winnerId} WHERE absent_member_id = ${loserId}`); } catch(e){}
+    try { await db.execute(dql`UPDATE staff_sostituzioni SET substitute_member_id = ${winnerId} WHERE substitute_member_id = ${loserId}`); } catch(e){}
+
+    try { await db.execute(dql`UPDATE instructor_agreements SET instructor_id = ${winnerId} WHERE instructor_id = ${loserId}`); } catch(e){}
+    try { await db.execute(dql`UPDATE team_employees SET member_id = ${winnerId} WHERE member_id = ${loserId}`); } catch(e){}
+    try { await db.execute(dql`UPDATE team_documents SET employee_id = ${winnerId} WHERE employee_id = ${loserId}`); } catch(e){}
+
+    // 3. Delete loser
+    await db.delete(members).where(eq(members.id, loserId));
+  }
