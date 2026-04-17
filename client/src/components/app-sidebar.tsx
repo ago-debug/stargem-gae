@@ -683,9 +683,9 @@ export function AppSidebar() {
 
                         let text = "";
                         if (isOnline) {
-                          text = `🟢 Lavoro: ${lavoroStr}`;
+                          text = `Lavoro: ${lavoroStr}`;
                         } else if (isPausa) {
-                          text = `🟡 ⏸ Pausa: ${pausaStr || "0m"} · Lavoro: ${lavoroStr}`;
+                          text = `Pausa: ${pausaStr || "0m"} · Lavoro: ${lavoroStr}`;
                         } else {
                           let uscitaStr = "Uscito Mai";
                           if (u.lastSeenAt) {
@@ -697,7 +697,7 @@ export function AppSidebar() {
                               ? 'Uscito ' + lastSeen.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})
                               : 'Uscito ' + lastSeen.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'}) + ' ' + lastSeen.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
                           }
-                          text = `⚫ ${uscitaStr} · Lavoro: ${lavoroStr}`;
+                          text = `${uscitaStr} · Lavoro: ${lavoroStr}`;
                         }
 
                         return (
