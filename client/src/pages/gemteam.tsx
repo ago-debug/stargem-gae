@@ -4,7 +4,7 @@ import { useActiveUsers } from "@/hooks/use-active-users";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download, Plus, Activity } from "lucide-react";
+import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download, Plus, Activity, LogIn, LogOut } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -360,6 +360,32 @@ export default function GemTeam() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/gemteam/report/lock', reportAnnoRaw, reportMeseRaw] })
   });
 
+  // Checkin Individuale nello Sheet
+  const { data: sheetCheckinStatus, refetch: refetchSheetCheckin } = useQuery({
+    queryKey: ['/api/gemteam/checkin/status', selectedSheetDip?.id],
+    queryFn: async () => {
+       if (!selectedSheetDip?.id) return null;
+       const r = await fetch(`/api/gemteam/checkin/status/${selectedSheetDip.id}`);
+       return r.json();
+    },
+    enabled: !!selectedSheetDip?.id && isSheetOpen
+  });
+
+  const checkinMutation = useMutation({
+    mutationFn: async ({ tipo, employee_id }: { tipo: 'IN' | 'OUT', employee_id: number }) => {
+      const r = await fetch('/api/gemteam/checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo, employee_id })
+      });
+      return r.json();
+    },
+    onSuccess: () => {
+      refetchSheetCheckin();
+      queryClient.invalidateQueries({ queryKey: ['/api/gemteam/checkin/oggi'] }); // Refetch tab generale dashboard
+    }
+  });
+
   // Auth Guard
   const userRole = (user as any)?.role?.toLowerCase() || "";
   if (userRole === "dipendente") {
@@ -638,6 +664,44 @@ export default function GemTeam() {
                     </SheetHeader>
                     
                     <div className="py-6 space-y-8">
+                      {/* PRESENZA IN SEDE OGGI */}
+                      <section>
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-green-600" /> Presenza in Sede Oggi
+                        </h4>
+                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col gap-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-slate-600">Stato:</span>
+                            <span className="text-sm font-bold">
+                              {!sheetCheckinStatus || (sheetCheckinStatus.lastEvent === 'SCONOSCIUTO' || (sheetCheckinStatus.lastEvent === 'OUT' && !sheetCheckinStatus.checkInOggi)) 
+                                ? "⚪ Non registrato" 
+                                : sheetCheckinStatus.lastEvent === 'IN' 
+                                ? `🟢 IN SEDE dalle ${new Date(sheetCheckinStatus.lastTimestamp).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`
+                                : `🔴 Uscito alle ${new Date(sheetCheckinStatus.lastTimestamp).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })} — Ore: ${fmtOre(sheetCheckinStatus.oreOggi)}`
+                              }
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <Button 
+                              variant="outline"
+                              className="bg-green-600 hover:bg-green-700 text-white font-bold border-transparent shadow-sm" 
+                              onClick={() => checkinMutation.mutate({ tipo: 'IN', employee_id: selectedSheetDip.id })}
+                              disabled={!sheetCheckinStatus || sheetCheckinStatus.lastEvent === 'IN' || (sheetCheckinStatus.lastEvent === 'OUT' && sheetCheckinStatus.checkInOggi) || checkinMutation.isPending}
+                            >
+                              <LogIn className="w-4 h-4 mr-2" /> ENTRA IN SEDE
+                            </Button>
+                            <Button 
+                              variant="destructive" 
+                              className="font-bold shadow-sm"
+                              onClick={() => checkinMutation.mutate({ tipo: 'OUT', employee_id: selectedSheetDip.id })}
+                              disabled={!sheetCheckinStatus || sheetCheckinStatus.lastEvent !== 'IN' || checkinMutation.isPending}
+                            >
+                              <LogOut className="w-4 h-4 mr-2" /> ESCI SEDE
+                            </Button>
+                          </div>
+                        </div>
+                      </section>
+
                       {/* ANAGRAFICA */}
                       <section>
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
