@@ -968,25 +968,25 @@ export default function GemTeam() {
                           {time}
                         </td>
                         {turniViewMode === 'singola' ? DAYS.map((day, idx) => {
-                          const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => t.giornoSettimana === idx && t.oraInizio === time && (String(t.employeeId) === String(selectedEmpId) || !selectedEmpId)) : null;
+                          const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => t.giornoSettimana === idx && t.oraInizio?.substring(0, 5) === time && (String(t.employeeId) === String(selectedEmpId) || !selectedEmpId)) : null;
                           const colorClass = turniFound ? (SHIFT_COLORS[turniFound.postazione.replace('. ', '.')] || SHIFT_COLORS[turniFound.postazione] || 'bg-slate-100 text-slate-800 border-slate-200') : '';
                           return (
                             <td key={`${day}-${time}`} className="border border-slate-200 p-1 relative hover:bg-slate-50 transition-colors bg-white h-[38px]">
                               {turniFound && (
-                                <div className={`text-[9.5px] sm:text-[10px] uppercase font-bold px-1 py-1 rounded border text-center shadow-sm w-full h-full flex flex-col justify-center leading-tight ${colorClass}`} title={`${turniFound.postazione} ${turniFound.oraInizio}-${turniFound.oraFine}`}>
+                                <div className={`text-[9.5px] sm:text-[10px] uppercase font-bold px-1 py-1 rounded border text-center shadow-sm w-full h-full flex flex-col justify-center leading-tight ${colorClass}`} title={`${turniFound.postazione} ${turniFound.oraInizio?.substring(0, 5)}-${turniFound.oraFine?.substring(0, 5)}`}>
                                   <div className="truncate">{turniFound.postazione.replace('_', ' ')}</div>
-                                  <div className="text-[8px] opacity-80 mt-0.5">{turniFound.oraInizio}-{turniFound.oraFine}</div>
+                                  <div className="text-[8px] opacity-80 mt-0.5">{turniFound.oraInizio?.substring(0, 5)}-{turniFound.oraFine?.substring(0, 5)}</div>
                                 </div>
                               )}
                             </td>
                           );
                         }) : dipendenti.filter(d => !isSystemEmployee(d)).map(dip => {
-                          const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => String(t.employeeId) === String(dip.id) && t.oraInizio === time) : null;
+                          const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => String(t.employeeId) === String(dip.id) && t.oraInizio?.substring(0, 5) === time) : null;
                           const colorClass = turniFound ? (SHIFT_COLORS[turniFound.postazione.replace('. ', '.')] || SHIFT_COLORS[turniFound.postazione] || 'bg-slate-100 text-slate-800 border-slate-200') : '';
                           return (
                             <td key={`${dip.id}-${time}`} className="border border-slate-200 p-1 relative hover:bg-slate-50 transition-colors bg-white h-[38px]">
                               {turniFound && (
-                                <div className={`text-[9.5px] sm:text-[10px] uppercase font-bold px-1 py-1 rounded border text-center shadow-sm w-full h-full flex flex-col justify-center leading-tight ${colorClass}`} title={`${turniFound.postazione} ${turniFound.oraInizio}-${turniFound.oraFine}`}>
+                                <div className={`text-[9.5px] sm:text-[10px] uppercase font-bold px-1 py-1 rounded border text-center shadow-sm w-full h-full flex flex-col justify-center leading-tight ${colorClass}`} title={`${turniFound.postazione} ${turniFound.oraInizio?.substring(0, 5)}-${turniFound.oraFine?.substring(0, 5)}`}>
                                   <div className="truncate">{turniFound.postazione.replace('_', ' ')}</div>
                                 </div>
                               )}
