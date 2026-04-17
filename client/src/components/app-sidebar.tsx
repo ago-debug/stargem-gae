@@ -289,13 +289,23 @@ export function AppSidebar() {
   const { data: usersInfoRaw = [] } = useActiveUsers();
   const [liveExtra, setLiveExtra] = useState(0);
   const [minLavoro, setMinLavoro] = useState(0);
+  const [minLavoroDate, setMinLavoroDate] = useState(new Date().toDateString());
 
   useEffect(() => {
+    const oggi = new Date().toDateString();
+    let isNewDay = false;
+    if (oggi !== minLavoroDate) {
+      setMinLavoro(0);
+      setLiveExtra(0);
+      setMinLavoroDate(oggi);
+      isNewDay = true;
+    }
+
     const me = usersInfoRaw.find((u: any) => u.id === user?.id);
     
     if (me) {
       const apiLavoro = me.lavoroOggiMinuti || 0;
-      setMinLavoro(prev => Math.max(prev, apiLavoro));
+      setMinLavoro(prev => isNewDay ? Math.max(0, apiLavoro) : Math.max(prev, apiLavoro));
     }
     
     if (me?.stato === 'pausa') {

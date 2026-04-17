@@ -1175,8 +1175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .from(users)
       .orderBy(desc(users.lastSeenAt));
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const todayStr = new Date().toLocaleDateString('en-CA');
 
       const enhancedUsers = await Promise.all(allUsers.map(async (u) => {
         let stato: 'online' | 'pausa' | 'offline' = 'offline';
@@ -1192,15 +1191,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Segmenti chiusi oggi
         const chiusiOnline = segments
-          .filter(s => s.tipo === 'online' && s.endedAt !== null && new Date(s.startedAt) >= today)
+          .filter(s => {
+            const segDate = new Date(s.startedAt).toLocaleDateString('en-CA');
+            return s.tipo === 'online' && s.endedAt !== null && segDate === todayStr;
+          })
           .reduce((sum, s) => sum + (s.durataMinuti || 0), 0);
           
         const chiusiPausa = segments
-          .filter(s => s.tipo === 'pausa' && s.endedAt !== null && new Date(s.startedAt) >= today)
+          .filter(s => {
+            const segDate = new Date(s.startedAt).toLocaleDateString('en-CA');
+            return s.tipo === 'pausa' && s.endedAt !== null && segDate === todayStr;
+          })
           .reduce((sum, s) => sum + (s.durataMinuti || 0), 0);
 
-        // Segmento aperto corrente (se esiste)
-        const aperto = segments.find(s => s.endedAt === null);
+        // Segmento aperto corrente (se esiste e appartiene a oggi)
+        const aperto = segments.find(s => {
+            const segDate = new Date(s.startedAt).toLocaleDateString('en-CA');
+            return s.endedAt === null && segDate === todayStr;
+        });
         let segmentoCorrenteInizio = aperto ? aperto.startedAt : null;
         let segmentoCorrenteTipo = aperto ? aperto.tipo : null;
         let segmentoLiveMinuti = 0;
