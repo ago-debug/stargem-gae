@@ -1049,14 +1049,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const currentUserState = await db.select().from(users).where(eq(users.id, userId)).limit(1);
       const start = currentUserState[0]?.currentSessionStart;
-      const durationMins = start ? Math.round((Date.now() - new Date(start).getTime()) / 60000) : 0;
+      const calculatedDuration = start ? Math.round((Date.now() - new Date(start).getTime()) / 60000) : 0;
+
+      // Prima del salvataggio, applica il cap
+      const cappedDuration = Math.min(calculatedDuration, 840);
 
       // Al refresh o chiusura tab inviamo i minuti finali, ma NON distruggiamo 
       // brutalmente la sessione (currentSessionStart). Manteniamo la memoria intatta: 
       // il sistema backend deciderà di azzerarla solo se passano oltre 20 min dal lastSeenAt.
       await db.update(users).set({
         lastSeenAt: sql`CURRENT_TIMESTAMP`,
-        lastSessionDuration: durationMins
+        lastSessionDuration: cappedDuration
       }).where(eq(users.id, userId));
 
       res.json({ success: true });
