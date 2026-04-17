@@ -230,6 +230,9 @@ export default function GemTeam() {
   const checkInStats = useMemo(() => {
     let inSede = 0; let online = 0; let usciti = 0; let attesi = 0; let assenti = 0;
     dipendenti.forEach(dip => {
+      // Escludi admin e botAI dal conteggio presenze
+      if (dip.id === 15 || dip.id === 16) return;
+
       const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find(c => c.employeeId === dip.id) : null;
       if (chk) {
         if (chk.lastEvent === "IN") inSede++;
@@ -508,7 +511,8 @@ export default function GemTeam() {
                     )}
                     {dipendenti.map(dip => {
                       const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find(c => c.employeeId === dip.id) : null;
-                      const stato = chk?.lastEvent || "ATTESO";
+                      // Assicura che un lastEvent null fallback a "ATTESO" in maniera esplicita
+                      const stato = chk?.lastEvent ? chk.lastEvent : "ATTESO";
                       const oreSede = chk && chk.oreOggi > 0 ? fmtOre(Number(chk.oreOggi)) : "—";
 
                       const presenceInfo = activeUsers.find((u: any) => u.id === dip.userId);
