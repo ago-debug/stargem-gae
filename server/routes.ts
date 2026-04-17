@@ -1,4 +1,5 @@
 import { parseTurniXlsx } from "./scripts/import-turni";
+import { parsePresenzeXlsx } from "./scripts/import-presenze";
 import fs from "fs";
 import { createInsertSchema } from "drizzle-zod";
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
@@ -4748,6 +4749,67 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       return res.status(500).json({ error: 'Errore interno' });
     }
   });
+
+  app.get("/api/gemteam/presenze/preview-import", isAuthenticated, async (req, res) => {
+    try {
+      const filePath = path.join(process.cwd(), "team_20252026_PRESENZE_TEAM.xlsx");
+      if (!fs.existsSync(filePath)) {
+         return res.status(404).json({ error: "File team_20252026_PRESENZE_TEAM.xlsx non trovato nella root" });
+      }
+      const buffer = fs.readFileSync(filePath);
+      const records = parsePresenzeXlsx(buffer);
+      return res.json(records);
+    } catch (error) {
+      console.error('[GemTeam] GET /presenze/preview-import error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.post("/api/gemteam/presenze/do-import", isAuthenticated, async (req, res) => {
+    try {
+      const filePath = path.join(process.cwd(), "team_20252026_PRESENZE_TEAM.xlsx");
+      if (!fs.existsSync(filePath)) {
+         return res.status(404).json({ error: "File team_20252026_PRESENZE_TEAM.xlsx non trovato nella root" });
+      }
+      const buffer = fs.readFileSync(filePath);
+      const records = parsePresenzeXlsx(buffer);
+      
+      if (records.length === 0) {
+        return res.status(400).json({ error: "Nessun record valido trovato" });
+      }
+
+      // To avoid duplicates or partial overwrites, the user wants us to import.
+      // Usually historical import does not flush the table entirely, but we could do delete-insert logic
+      // per employee and date to be idempotent, or just bulk insert with ON DUPLICATE KEY UPDATE.
+      // Easiest is to ON DUPLICATE KEY UPDATE through drizzle or manual mapping, or just bulk insert.
+      // I'll do a simple loop or use mysql raw query for on duplicate key update if needed.
+      // Since Drizzle's ON DUPLICATE KEY is tricky with dynamic fields, I'll delete pre-existing dates first?
+      // Wait, the user says: "Procedi con script e do-import". They didn't ask to delete. I'll just insert.
+      
+      const toInsert = records.map(r => ({
+        employeeId: r.employee_id,
+        data: r.data,
+        oreLavorate: r.ore_lavorate !== null ? String(r.ore_lavorate) : null,
+        tipoAssenza: r.tipo_assenza as any
+      }));
+
+      // In Mariadb, safe bulk insert (ignore duplicates or on duplicate key update)
+      await db.insert(schema.teamAttendanceLogs)
+        .values(toInsert)
+        .onDuplicateKeyUpdate({
+           set: {
+             oreLavorate: sql`VALUES(ore_lavorate)`,
+             tipoAssenza: sql`VALUES(tipo_assenza)`
+           }
+        });
+
+      return res.json({ success: true, inserted: toInsert.length });
+    } catch (error) {
+      console.error('[GemTeam] POST /presenze/do-import error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
 
   app.get("/api/gemteam/dipendenti", isAuthenticated, async (req, res) => {
     try {
