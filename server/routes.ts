@@ -1,3 +1,5 @@
+import { parseTurniXlsx } from "./scripts/import-turni";
+import fs from "fs";
 import { createInsertSchema } from "drizzle-zod";
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import { createServer, type Server } from "http";
@@ -4698,6 +4700,55 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       return res.status(500).json({ error: 'Errore interno' });
     }
   });
+
+  app.get("/api/gemteam/turni/preview", isAuthenticated, async (req, res) => {
+    try {
+      const filePath = path.join(process.cwd(), "team_TURNI.xlsx");
+      if (!fs.existsSync(filePath)) {
+         return res.status(404).json({ error: "File team_TURNI.xlsx non trovato nella root del progetto" });
+      }
+      const buffer = fs.readFileSync(filePath);
+      const records = parseTurniXlsx(buffer);
+      return res.json(records);
+    } catch (error) {
+      console.error('[GemTeam] GET /turni/preview error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.post("/api/gemteam/turni/import", isAuthenticated, async (req, res) => {
+    try {
+      const filePath = path.join(process.cwd(), "team_TURNI.xlsx");
+      if (!fs.existsSync(filePath)) {
+         return res.status(404).json({ error: "File team_TURNI.xlsx non trovato nella root del progetto" });
+      }
+      const buffer = fs.readFileSync(filePath);
+      const records = parseTurniXlsx(buffer);
+      
+      if (records.length === 0) {
+        return res.status(400).json({ error: "Nessun record valido trovato" });
+      }
+
+      await db.delete(schema.teamShiftTemplates);
+
+      const toInsert = records.map(r => ({
+        employeeId: r.employee_id,
+        settimanaTipo: r.settimana_tipo as any,
+        giornoSettimana: r.giorno_settimana,
+        oraInizio: r.ora_inizio,
+        oraFine: r.ora_fine,
+        postazione: r.postazione as any,
+      }));
+
+      await db.insert(schema.teamShiftTemplates).values(toInsert);
+
+      return res.json({ success: true, inserted: toInsert.length });
+    } catch (error) {
+      console.error('[GemTeam] POST /turni/import error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
   app.get("/api/gemteam/dipendenti", isAuthenticated, async (req, res) => {
     try {
       const role = (req.user as any)?.role;
