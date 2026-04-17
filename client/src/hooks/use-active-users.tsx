@@ -14,6 +14,6 @@ export type PresenceUser = {
 export function useActiveUsers() {
   return useQuery<PresenceUser[]>({
     queryKey: ["/api/users/presence/active"],
-    refetchInterval: 10000,
+    refetchInterval: 15000,
   });
 }

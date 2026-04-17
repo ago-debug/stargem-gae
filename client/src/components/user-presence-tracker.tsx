@@ -41,8 +41,8 @@ export function UserPresenceTracker() {
     // Ping immediato iniziale
     pingHeartbeat();
 
-    // Loop heartbeat ogni 60 secondi
-    const intervalId = setInterval(pingHeartbeat, 60000);
+    // Loop heartbeat ogni 20 secondi
+    const intervalId = setInterval(pingHeartbeat, 20000);
 
     const handleUnload = () => {
       navigator.sendBeacon("/api/users/presence/offline");

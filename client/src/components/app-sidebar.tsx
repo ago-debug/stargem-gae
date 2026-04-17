@@ -646,10 +646,11 @@ export function AppSidebar() {
                   return 0;
                 }).map((u: any) => {
                   const now = new Date().getTime();
-                  const diffMins = u.lastSeenAt ? Math.round((now - new Date(u.lastSeenAt).getTime()) / 60000) : 0;
+                  const diffMs = u.lastSeenAt ? (now - new Date(u.lastSeenAt).getTime()) : 0;
+                  const diffMins = u.lastSeenAt ? Math.round(diffMs / 60000) : 0;
                   
-                  const isOnline = !!u.currentSessionStart && diffMins <= 2;
-                  const isAway = !!u.currentSessionStart && diffMins > 2 && diffMins <= 20;
+                  const isOnline = !!u.currentSessionStart && diffMs < 30 * 1000;
+                  const isAway = !!u.currentSessionStart && diffMs >= 30 * 1000 && diffMins <= 20;
                   const isMe = user?.id === u.id;
                   
                   return (
