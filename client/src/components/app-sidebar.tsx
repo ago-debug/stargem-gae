@@ -288,9 +288,15 @@ export function AppSidebar() {
 
   const { data: usersInfoRaw = [] } = useActiveUsers();
   const [liveExtra, setLiveExtra] = useState(0);
+  const [minLavoro, setMinLavoro] = useState(0);
 
   useEffect(() => {
     const me = usersInfoRaw.find((u: any) => u.id === user?.id);
+    
+    if (me) {
+      const apiLavoro = me.lavoroOggiMinuti || 0;
+      setMinLavoro(prev => Math.max(prev, apiLavoro));
+    }
     
     if (me?.stato === 'pausa') {
       setLiveExtra(0);
@@ -715,7 +721,7 @@ export function AppSidebar() {
                           return h > 0 ? `${h}h ${min}m` : `${min}m`;
                         }
 
-                        let userMinuti = u.lavoroOggiMinuti || 0;
+                        let userMinuti = isMe ? Math.max(minLavoro, (u.lavoroOggiMinuti || 0)) : (u.lavoroOggiMinuti || 0);
                         if (isMe && isOnline) {
                            // Sovrascriviamo calcolando i minuti base senza il live, poi gli aggiungiamo il nostro contatore fluido extra
                            userMinuti = userMinuti + liveExtra;
