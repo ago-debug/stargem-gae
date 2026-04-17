@@ -5540,7 +5540,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   app.get("/api/gemteam/diario/:employee_id/:data", isAuthenticated, async (req, res) => {
     try {
       const empId = parseInt(req.params.employee_id);
-      const parsedDate = new Date(req.params.data);
+      const parsedDate = req.params.data; // stringa YYYY-MM-DD
       
       const records = await db.select({
          entry: schema.teamShiftDiaryEntries,
