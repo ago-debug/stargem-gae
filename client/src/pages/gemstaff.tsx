@@ -598,6 +598,13 @@ export default function GemStaff() {
      queryFn: async () => await apiRequest("GET", `/api/gemstaff/compliance/${complianceMemberId}`)
   });
 
+  const ptListSorted = useMemo(() => {
+    return [...ptList].sort((a: any, b: any) =>
+      (a.lastName || a.cognome || '').localeCompare(b.lastName || b.cognome || '', 'it') ||
+      (a.firstName || a.nome || '').localeCompare(b.firstName || b.nome || '', 'it')
+    );
+  }, [ptList]);
+
   const staffList = useMemo(() => {
     return staffListQuery.map((g: any) => {
       const instr = instructorsList.find((i: any) => i.firstName === g.firstName && i.lastName === g.lastName);
@@ -610,7 +617,10 @@ export default function GemStaff() {
         email: g.email || instr?.email,
         phone: g.phone || instr?.phone,
       };
-    });
+    }).sort((a: any, b: any) =>
+      (a.lastName || a.cognome || '').localeCompare(b.lastName || b.cognome || '', 'it') ||
+      (a.firstName || a.nome || '').localeCompare(b.firstName || b.nome || '', 'it')
+    );
   }, [staffListQuery, instructorsList]);
 
   const filteredStaffRaw = staffList.filter((s) => {
@@ -932,7 +942,7 @@ export default function GemStaff() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                   {ptList.map((pt) => (
+                   {ptListSorted.map((pt: any) => (
                       <TableRow key={pt.id || pt.firstName} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedStaff(pt)}>
                          <TableCell className="font-semibold">{pt.firstName} {pt.lastName}</TableCell>
                          <TableCell>{pt.specializzazione || 'Personal Trainer'}</TableCell>
@@ -962,7 +972,7 @@ export default function GemStaff() {
                  {staffList.map((s) => (
                    <SelectItem key={s.id || s.firstName} value={s.id?.toString() || s.firstName}>{s.firstName} {s.lastName}</SelectItem>
                  ))}
-                 {ptList.map(pt => (
+                 {ptListSorted.map((pt: any) => (
                    <SelectItem key={`pt-${pt.id || pt.firstName}`} value={pt.id?.toString() || pt.firstName}>{pt.firstName} {pt.lastName} (PT)</SelectItem>
                  ))}
                </SelectContent>
