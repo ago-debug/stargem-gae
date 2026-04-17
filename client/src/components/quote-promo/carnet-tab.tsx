@@ -210,7 +210,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
 
                 return (
                   <TableRow key={carnet.id}>
-                    <TableCell className="font-bold">{carnet.member?.firstName} {carnet.member?.lastName}</TableCell>
+                    <TableCell className="font-bold">{carnet.member?.lastName} {carnet.member?.firstName}</TableCell>
                     <TableCell><Badge variant="secondary">{carnet.carnetType}</Badge></TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1 items-start">
@@ -264,7 +264,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
             <DialogHeader>
                <DialogTitle>Registra Utilizzo Carnet</DialogTitle>
                <DialogDescription>
-                  Cliente: <strong className="text-slate-800">{selectedCarnet?.member?.firstName} {selectedCarnet?.member?.lastName}</strong> ({selectedCarnet?.carnetType})
+                  Cliente: <strong className="text-slate-800">{selectedCarnet?.member?.lastName} {selectedCarnet?.member?.firstName}</strong> ({selectedCarnet?.carnetType})
                </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
@@ -279,7 +279,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
                         <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
                         <SelectContent>
                            {safeInstructors.map((i: Member) => (
-                              <SelectItem key={i.id} value={String(i.id)}>{i.firstName} {i.lastName}</SelectItem>
+                              <SelectItem key={i.id} value={String(i.id)}>{i.lastName} {i.firstName}</SelectItem>
                            ))}
                         </SelectContent>
                      </Select>
