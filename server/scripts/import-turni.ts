@@ -60,7 +60,8 @@ export function parseTurniXlsx(buffer: Buffer): any[] {
       
       let timeStr = "";
       if (typeof rawTime === 'number') {
-        const totalMins = Math.round(rawTime * 24 * 60);
+        const fraction = rawTime % 1;
+        const totalMins = Math.round(fraction * 24 * 60);
         const h = Math.floor(totalMins / 60);
         const m = totalMins % 60;
         timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
