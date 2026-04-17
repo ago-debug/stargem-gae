@@ -645,8 +645,12 @@ export default function GemTeam() {
                                   </Badge>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-500">Lavoro oggi:</span>
+                                  <span className="text-slate-500">Lavoro online oggi:</span>
                                   <span className="font-semibold text-slate-700">{fmtMin(lavoroMins)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-slate-500">Presenza fisica:</span>
+                                  <span className="font-semibold text-slate-400 italic">[da check-in]</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                   <span className="text-slate-500">Pausa oggi:</span>
