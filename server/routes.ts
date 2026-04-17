@@ -1088,7 +1088,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: users.email
       })
       .from(users)
-      .where(gt(users.lastSeenAt, new Date(Date.now() - 30 * 1000)))
       .orderBy(desc(users.lastSeenAt));
       
       res.json(allUsers);
