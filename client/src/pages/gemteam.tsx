@@ -65,13 +65,14 @@ const TIME_SLOTS = Array.from({length: 31}, (_, i) => {
 });
 
 const SHIFT_COLORS: Record<string, string> = {
-  "RECEPTION": "bg-blue-100 text-blue-800 border-blue-200",
+  "RECEPTION": "bg-green-100 text-green-800 border-green-200",
+  "PRIMO": "bg-blue-100 text-blue-800 border-blue-200",
+  "SECONDO": "bg-sky-100 text-sky-800 border-sky-200",
+  "UFFICIO": "bg-orange-100 text-orange-800 border-orange-200",
+  "AMM.ZIONE": "bg-purple-100 text-purple-800 border-purple-200",
+  "WORKSHOP": "bg-yellow-100 text-yellow-800 border-yellow-200",
   "PAUSA": "bg-slate-100 text-slate-600 border-slate-200",
   "RIPOSO": "bg-slate-300 text-slate-800 border-slate-400 font-bold",
-  "UFFICIO": "bg-indigo-100 text-indigo-800 border-indigo-200",
-  "AMM.ZIONE": "bg-purple-100 text-purple-800 border-purple-200",
-  "PRIMO": "bg-teal-100 text-teal-800 border-teal-200",
-  "SECONDO": "bg-teal-100 text-teal-800 border-teal-200",
   "RIUNIONE": "bg-amber-100 text-amber-800 border-amber-200",
   "STUDIO_1": "bg-cyan-100 text-cyan-800 border-cyan-200",
   "STUDIO_2": "bg-cyan-100 text-cyan-800 border-cyan-200",
@@ -192,14 +193,23 @@ export default function GemTeam() {
     return found?.id;
   }, [selectedEmployee, dipendenti]);
 
+  const [turniViewMode, setTurniViewMode] = useState<"collettiva" | "singola">("collettiva");
+  const [turniGiorno, setTurniGiorno] = useState<number>(() => {
+    const d = new Date().getDay();
+    return d === 0 ? 6 : d - 1;
+  });
+
   const { data: turniData = [] } = useQuery({
-    queryKey: ['/api/gemteam/turni', selectedEmpId, selectedWeek],
+    queryKey: ['/api/gemteam/turni', turniViewMode, selectedEmpId, selectedWeek, turniGiorno],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (selectedEmpId) {
+      if (turniViewMode === 'singola' && selectedEmpId) {
         params.append('employee_id', String(selectedEmpId));
       }
       params.append('settimana', selectedWeek || 'A');
+      if (turniViewMode === 'collettiva') {
+         params.append('giorno', String(turniGiorno));
+      }
       const r = await fetch(`/api/gemteam/turni?${params}`);
       return r.json();
     },
@@ -865,25 +875,47 @@ export default function GemTeam() {
               
               {/* Toolbar */}
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-transparent lg:border-slate-200 pb-0 lg:pb-4 p-4 lg:p-0">
-                <div className="flex items-center gap-4 w-full lg:w-auto">
-                  <div className="w-full sm:w-64">
-                    <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                      <SelectTrigger className="font-semibold bg-white border-slate-300 shadow-sm w-full">
-                        <SelectValue placeholder="Seleziona dipendente" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {MOCK_EMPLOYEES.map(emp => (
-                          <SelectItem key={emp} value={emp}>{emp}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+                  <div className="flex items-center gap-2 bg-white rounded-lg border border-slate-300 p-1 shadow-sm shrink-0">
+                    <Button 
+                      variant={turniViewMode === 'collettiva' ? "default" : "ghost"} 
+                      size="sm" 
+                      onClick={() => setTurniViewMode('collettiva')}
+                    >Collettiva</Button>
+                    <Button 
+                      variant={turniViewMode === 'singola' ? "default" : "ghost"} 
+                      size="sm" 
+                      onClick={() => setTurniViewMode('singola')}
+                    >Singola</Button>
                   </div>
-                  <div className="hidden sm:flex text-sm shrink-0 items-center gap-2">
-                    <span className="text-slate-500">Squadra: </span>
-                    <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-white shadow-sm border-slate-300 text-slate-700">
-                      {selectedEmployee === 'Jasir' || selectedEmployee === 'Giuditta' ? 'Operator / Co-Admin' : 'Personale Operativo'}
-                    </Badge>
-                  </div>
+                  {turniViewMode === 'singola' && (
+                    <div className="w-full sm:w-64">
+                      <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                        <SelectTrigger className="font-semibold bg-white border-slate-300 shadow-sm w-full">
+                          <SelectValue placeholder="Seleziona dipendente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MOCK_EMPLOYEES.map(emp => (
+                            <SelectItem key={emp} value={emp}>{emp}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  {turniViewMode === 'collettiva' && (
+                    <div className="w-full sm:w-48">
+                      <Select value={String(turniGiorno)} onValueChange={(val) => setTurniGiorno(parseInt(val))}>
+                        <SelectTrigger className="font-semibold bg-white border-slate-300 shadow-sm w-full">
+                          <SelectValue placeholder="Seleziona giorno" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DAYS.map((day, idx) => (
+                            <SelectItem key={idx} value={String(idx)}>{day}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3 bg-white p-1.5 rounded-lg border border-slate-300 shadow-sm w-full sm:w-auto overflow-x-auto">
@@ -903,10 +935,14 @@ export default function GemTeam() {
                 <table className="w-full border-collapse text-sm min-w-[800px] table-fixed">
                   <thead className="sticky top-0 z-20 shadow-sm">
                     <tr>
-                      <th className="bg-slate-200 border-slate-300 border px-1 py-3 w-[60px] sm:w-[80px] text-[10px] sm:text-xs uppercase text-slate-600 tracking-wider">Ora</th>
-                      {DAYS.map(day => (
+                      <th className="bg-slate-200 border-slate-300 border px-1 py-4 w-[60px] sm:w-[80px] text-[10px] sm:text-xs uppercase text-slate-600 tracking-wider sticky left-0 z-30">Ora</th>
+                      {turniViewMode === 'singola' ? DAYS.map(day => (
                         <th key={day} className="bg-slate-200 border-slate-300 border p-2 w-auto font-semibold text-slate-700">
                           {day}
+                        </th>
+                      )) : dipendenti.map(dip => (
+                        <th key={dip.id} className="bg-slate-200 border-slate-300 border p-2 w-fit min-w-[100px] font-semibold text-slate-700 truncate" title={`${dip.cognome} ${dip.nome}`}>
+                          {dip.cognome} {dip.nome.charAt(0)}.
                         </th>
                       ))}
                     </tr>
@@ -917,14 +953,27 @@ export default function GemTeam() {
                         <td className="border border-slate-200 p-1 sm:p-2 text-center text-[10px] sm:text-xs font-bold text-slate-500 bg-white sticky left-0 z-10 shadow-[1px_0_0_0_#e2e8f0]">
                           {time}
                         </td>
-                        {DAYS.map((day, idx) => {
-                          const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => t.giornoSettimana === idx && t.oraInizio === time) : null;
-                          const shift = turniFound ? `${turniFound.postazione} ${turniFound.oraInizio}→${turniFound.oraFine}` : null;
+                        {turniViewMode === 'singola' ? DAYS.map((day, idx) => {
+                          const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => t.giornoSettimana === idx && t.oraInizio === time && (String(t.employeeId) === String(selectedEmpId) || !selectedEmpId)) : null;
+                          const colorClass = turniFound ? (SHIFT_COLORS[turniFound.postazione.replace('. ', '.')] || SHIFT_COLORS[turniFound.postazione] || 'bg-slate-100 text-slate-800 border-slate-200') : '';
                           return (
-                            <td key={`${day}-${time}`} className="border border-slate-200 p-1 sm:p-1.5 relative group-hover:border-slate-300 transition-colors bg-white">
-                              {shift && (
-                                <div className={`text-[9px] sm:text-[10px] font-bold px-1 py-1.5 sm:px-2 sm:py-2 rounded-md border text-center shadow-sm whitespace-nowrap overflow-hidden text-ellipsis transition-all ${SHIFT_COLORS[shift] || 'bg-slate-100 text-slate-800'}`} title={shift}>
-                                  {shift}
+                            <td key={`${day}-${time}`} className="border border-slate-200 p-1 relative hover:bg-slate-50 transition-colors bg-white h-[38px]">
+                              {turniFound && (
+                                <div className={`text-[9.5px] sm:text-[10px] uppercase font-bold px-1 py-1 rounded border text-center shadow-sm w-full h-full flex flex-col justify-center leading-tight ${colorClass}`} title={`${turniFound.postazione} ${turniFound.oraInizio}-${turniFound.oraFine}`}>
+                                  <div className="truncate">{turniFound.postazione.replace('_', ' ')}</div>
+                                  <div className="text-[8px] opacity-80 mt-0.5">{turniFound.oraInizio}-{turniFound.oraFine}</div>
+                                </div>
+                              )}
+                            </td>
+                          );
+                        }) : dipendenti.map(dip => {
+                          const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => String(t.employeeId) === String(dip.id) && t.oraInizio === time) : null;
+                          const colorClass = turniFound ? (SHIFT_COLORS[turniFound.postazione.replace('. ', '.')] || SHIFT_COLORS[turniFound.postazione] || 'bg-slate-100 text-slate-800 border-slate-200') : '';
+                          return (
+                            <td key={`${dip.id}-${time}`} className="border border-slate-200 p-1 relative hover:bg-slate-50 transition-colors bg-white h-[38px]">
+                              {turniFound && (
+                                <div className={`text-[9.5px] sm:text-[10px] uppercase font-bold px-1 py-1 rounded border text-center shadow-sm w-full h-full flex flex-col justify-center leading-tight ${colorClass}`} title={`${turniFound.postazione} ${turniFound.oraInizio}-${turniFound.oraFine}`}>
+                                  <div className="truncate">{turniFound.postazione.replace('_', ' ')}</div>
                                 </div>
                               )}
                             </td>
