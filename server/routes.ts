@@ -4702,7 +4702,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
         .leftJoin(schema.users, eq(schema.users.id, schema.teamEmployees.userId))
         .where(eq(schema.teamEmployees.attivo, true))
-        .orderBy(schema.teamEmployees.team, schema.members.lastName);
+        .orderBy(schema.teamEmployees.team, asc(schema.members.lastName), asc(schema.members.firstName));
 
       const enhancedRecords = await Promise.all(records.map(async (emp) => {
         // Check-in fisico di oggi
@@ -4798,7 +4798,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
             lte(schema.teamAttendanceLogs.data, endDate)
           )
         )
-        .orderBy(schema.members.lastName, schema.teamAttendanceLogs.data);
+        .orderBy(asc(schema.members.lastName), asc(schema.members.firstName), schema.teamAttendanceLogs.data);
 
       return res.json(records);
     } catch (error) {
@@ -5548,7 +5548,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       })
       .from(schema.teamShiftDiaryEntries)
       .leftJoin(schema.teamActivityTypes, eq(schema.teamShiftDiaryEntries.activityTypeId, schema.teamActivityTypes.id))
-      .where(and(eq(schema.teamShiftDiaryEntries.employeeId, empId), eq(schema.teamShiftDiaryEntries.data, parsedDate)))
+      .where(and(eq(schema.teamShiftDiaryEntries.employeeId, empId), sql`DATE(${schema.teamShiftDiaryEntries.data}) = ${parsedDate}`))
       .orderBy(schema.teamShiftDiaryEntries.oraSlot);
 
       return res.json(records);
