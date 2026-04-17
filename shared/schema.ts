@@ -2651,6 +2651,7 @@ export const teamEmployees = mysqlTable("team_employees", {
   id: int("id").primaryKey().autoincrement(),
   memberId: int("member_id").notNull().references(() => members.id, { onDelete: "restrict" }),
   userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  displayOrder: int("display_order").notNull().default(0),
   team: mysqlEnum("team", ["segreteria","ass_manutenzione","ufficio","amministrazione","comunicazione"]).notNull(),
   tariffaOraria: decimal("tariffa_oraria", { precision: 5, scale: 2 }),
   stipendioFissoMensile: decimal("stipendio_fisso_mensile", { precision: 8, scale: 2 }),
