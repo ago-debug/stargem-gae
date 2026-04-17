@@ -678,17 +678,26 @@ export function AppSidebar() {
                           return h > 0 ? `${h}h ${min}m` : `${min}m`;
                         }
 
-                        const lavoroStr = fmtMin(u.lavoroOggiMinuti) || "0m";
+                        const lavoroStr = fmtMin(u.lavoroOggiMinuti) || fmtMin(Math.round((u.lastSessionDuration || 0))) || "0m";
                         const pausaStr = fmtMin(u.pausaOggiMinuti);
 
                         let text = "";
                         if (isOnline) {
-                          text = `Lavoro: ${lavoroStr}`;
+                          text = `🟢 Lavoro: ${lavoroStr}`;
                         } else if (isPausa) {
-                          text = `⏸ Pausa: ${pausaStr || "0m"} · Lavoro: ${lavoroStr}`;
+                          text = `🟡 ⏸ Pausa: ${pausaStr || "0m"} · Lavoro: ${lavoroStr}`;
                         } else {
-                          const timeStr = u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : "Mai";
-                          text = `Uscito ${timeStr} · Lavoro: ${lavoroStr}`;
+                          let uscitaStr = "Uscito Mai";
+                          if (u.lastSeenAt) {
+                            const lastSeen = new Date(u.lastSeenAt);
+                            const oggi = new Date();
+                            const isOggi = lastSeen.toDateString() === oggi.toDateString();
+                            
+                            uscitaStr = isOggi
+                              ? 'Uscito ' + lastSeen.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})
+                              : 'Uscito ' + lastSeen.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'}) + ' ' + lastSeen.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+                          }
+                          text = `⚫ ${uscitaStr} · Lavoro: ${lavoroStr}`;
                         }
 
                         return (
