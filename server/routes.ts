@@ -5772,338 +5772,6 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       if ((req.user as any)?.role !== 'admin' && (req.user as any)?.role !== 'operator') return res.status(403).json({ error: 'Solo Admin/Operator' });
 
 
-  // ==========================================
-  // GEMTEAM F1-022: SCHEDULED SHIFTS & ASSIGNMENTS
-  // ==========================================
-  
-  const isMasterGuard = (req: any, res: any, next: any) => {
-    const r = (req.user as any)?.role?.toLowerCase();
-    if (!['admin', 'master', 'super admin'].includes(r)) {
-      return res.status(403).json({ error: 'Solo per Master/Admin.' });
-    }
-    next();
-  };
-
-  app.get("/api/gemteam/turni/week-assignment", isAuthenticated, async (req, res) => {
-    try {
-      const weekStartStr = req.query.weekStart as string; // YYYY-MM-DD
-      if (!weekStartStr) return res.status(400).json({ error: 'weekStart mancante' });
-      
-      const targetQuery = await db.select().from(schema.teamWeekAssignments).where(eq(schema.teamWeekAssignments.weekStart, new Date(weekStartStr)));
-      if (targetQuery.length > 0) {
-        return res.json({ settimana: targetQuery[0].settimana, weekStart: weekStartStr, isOverride: targetQuery[0].isManualOverride });
-      }
-
-      // fallback: ciclico A-E. (Logica semplificata: calcolo dummy o fallback su A).
-      // Se non definito, restituiamo settimana A per default e isOverride false.
-      // (In una V2 qui metteremmo l'algoritmo matematico del ciclo)
-      return res.json({ settimana: 'A', weekStart: weekStartStr, isOverride: false });
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.post("/api/gemteam/turni/week-assignment", isAuthenticated, isMasterGuard, async (req, res) => {
-    try {
-      const { weekStart, settimana } = req.body;
-      const parsedDate = new Date(weekStart);
-      
-      await db.insert(schema.teamWeekAssignments).values({
-        weekStart: parsedDate,
-        settimana,
-        isManualOverride: true
-      }).onDuplicateKeyUpdate({
-        set: { settimana, isManualOverride: true, updatedAt: new Date() }
-      });
-      return res.json({ success: true });
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.get("/api/gemteam/turni/scheduled", isAuthenticated, async (req, res) => {
-    try {
-      const dataStr = req.query.data as string;
-      if (!dataStr) return res.status(400).json({ error: 'data mancante' });
-      const targetDate = new Date(dataStr);
-
-      const records = await db.select({
-        id: schema.teamScheduledShifts.id,
-        employeeId: schema.teamScheduledShifts.employeeId,
-        data: schema.teamScheduledShifts.data,
-        oraInizio: schema.teamScheduledShifts.oraInizio,
-        oraFine: schema.teamScheduledShifts.oraFine,
-        postazione: schema.teamScheduledShifts.postazione,
-        note: schema.teamScheduledShifts.note,
-        firstName: schema.members.firstName,
-        lastName: schema.members.lastName,
-        displayOrder: schema.teamEmployees.displayOrder,
-        team: schema.teamEmployees.team,
-        assenzaRegistrata: schema.teamAttendanceLogs.tipoAssenza
-      })
-      .from(schema.teamScheduledShifts)
-      .innerJoin(schema.teamEmployees, eq(schema.teamEmployees.id, schema.teamScheduledShifts.employeeId))
-      .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
-      .leftJoin(schema.teamAttendanceLogs, and(
-         eq(schema.teamAttendanceLogs.employeeId, schema.teamScheduledShifts.employeeId),
-         eq(sql`DATE(${schema.teamAttendanceLogs.data})`, targetDate),
-         isNotNull(schema.teamAttendanceLogs.tipoAssenza)
-      ))
-      .where(eq(schema.teamScheduledShifts.data, targetDate))
-      .orderBy(sql`${schema.teamEmployees.displayOrder} ASC`, sql`${schema.teamScheduledShifts.oraInizio} ASC`);
-
-      const mapped = records.map(r => ({
-        ...r,
-        hasConflict: !!r.assenzaRegistrata
-      }));
-      return res.json(mapped);
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.post("/api/gemteam/turni/scheduled", isAuthenticated, isMasterGuard, async (req, res) => {
-    try {
-      const { employeeId, data, oraInizio, oraFine, postazione, note } = req.body;
-      if (!employeeId || !data || !oraInizio || !oraFine || !postazione) {
-        return res.status(400).json({ error: 'Dati incompleti' });
-      }
-
-      await db.insert(schema.teamScheduledShifts).values({
-        employeeId, data: new Date(data), oraInizio, oraFine, postazione, note,
-        createdByUserId: (req.user as any)?.id
-      });
-
-      // Notifica & Email
-      await db.insert(schema.teamNotifications).values({
-        employeeId, tipo: 'turno_aggiunto', titolo: 'Nuovo turno programmato',
-        messaggio: `Data: ${data}, Ora: ${oraInizio}-${oraFine}, Postazione: ${postazione}`,
-        dataRiferimento: new Date(data)
-      });
-      console.log(`Mock sending email via SMTP 465 to employee ${employeeId} for new shift`);
-
-      return res.json({ success: true });
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore interno (forse duplicato)' });
-    }
-  });
-
-  app.patch("/api/gemteam/turni/scheduled/:id", isAuthenticated, isMasterGuard, async (req, res) => {
-    try {
-      const recordId = parseInt(req.params.id);
-      const { postazione, oraInizio, oraFine, note } = req.body;
-
-      const results = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
-      if (!results.length) return res.status(404).json({ error: 'Non trovato' });
-
-      await db.update(schema.teamScheduledShifts)
-        .set({ postazione, oraInizio, oraFine, note, modifiedByUserId: (req.user as any)?.id, updatedAt: new Date() })
-        .where(eq(schema.teamScheduledShifts.id, recordId));
-
-      await db.insert(schema.teamNotifications).values({
-        employeeId: results[0].employeeId, tipo: 'turno_modificato', titolo: 'Turno modificato',
-        messaggio: `Il tuo turno del ${results[0].data} è stato modificato.`,
-        dataRiferimento: new Date(results[0].data)
-      });
-      console.log(`Mock sending email via SMTP 465 to EX ${results[0].employeeId} updated shift`);
-
-      return res.json({ success: true });
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.delete("/api/gemteam/turni/scheduled/:id", isAuthenticated, isMasterGuard, async (req, res) => {
-    try {
-      const recordId = parseInt(req.params.id);
-      const results = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
-      if (!results.length) return res.json({ ok: true }); // already gone
-
-      await db.delete(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
-
-      await db.insert(schema.teamNotifications).values({
-        employeeId: results[0].employeeId, tipo: 'turno_cancellato', titolo: 'Turno cancellato',
-        messaggio: `Il turno del ${results[0].data} è stato cancellato.`,
-        dataRiferimento: new Date(results[0].data)
-      });
-
-      return res.json({ ok: true });
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.post("/api/gemteam/turni/apply-template", isAuthenticated, isMasterGuard, async (req, res) => {
-    try {
-      const { weekStart, settimana } = req.body;
-      const startD = new Date(weekStart);
-
-      const templates = await db.select().from(schema.teamShiftTemplates).where(eq(schema.teamShiftTemplates.settimanaTipo, settimana));
-      let created = 0, skipped = 0;
-
-      for (const t of templates) {
-        const slotDate = new Date(startD);
-        slotDate.setDate(slotDate.getDate() + t.giornoSettimana);
-
-        try {
-          await db.insert(schema.teamScheduledShifts).values({
-             employeeId: t.employeeId,
-             data: slotDate,
-             oraInizio: t.oraInizio,
-             oraFine: t.oraFine,
-             postazione: t.postazione,
-             createdByUserId: (req.user as any)?.id
-          });
-          created++;
-        } catch(e) {
-          skipped++; // Ignora i duplicati
-        }
-      }
-
-      return res.json({ created, skipped });
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.post("/api/gemteam/turni/copy-day", isAuthenticated, isMasterGuard, async (req, res) => {
-    try {
-      const { fromData, toData } = req.body;
-      if (!fromData || !toData) return res.status(400).json({ error: 'date mancanti' });
-
-      const fromD = new Date(fromData);
-      const toD = new Date(toData);
-
-      const sourceShifts = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.data, fromD));
-      let created = 0, skipped = 0;
-
-      for (const s of sourceShifts) {
-        try {
-          await db.insert(schema.teamScheduledShifts).values({
-            employeeId: s.employeeId,
-            data: toD,
-            oraInizio: s.oraInizio,
-            oraFine: s.oraFine,
-            postazione: s.postazione,
-            note: s.note,
-            createdByUserId: (req.user as any)?.id
-          });
-          created++;
-        } catch(e) {
-          skipped++;
-        }
-      }
-      return res.json({ created, skipped });
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.get("/api/gemteam/turni/ore-mensili", isAuthenticated, async (req, res) => {
-    try {
-      // Dummy response o implementazione reale query complessa.
-      // Esempio logica semplificata
-      const records = await db.execute(sql`
-        SELECT E.id AS employeeId, M.first_name, M.last_name, 
-               SUM(TIMESTAMPDIFF(MINUTE, S.ora_inizio, S.ora_fine)) / 60 as ore_totali
-        FROM team_scheduled_shifts S
-        JOIN team_employees E ON S.employee_id = E.id
-        JOIN members M ON E.member_id = M.id
-        JOIN team_postazioni P ON S.postazione = P.nome
-        WHERE YEAR(S.data) = ${req.query.anno} AND MONTH(S.data) = ${req.query.mese} 
-          AND P.conta_ore = 1
-        GROUP BY E.id, M.first_name, M.last_name
-      `);
-      return res.json(records[0] || []);
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.get("/api/gemteam/notifiche", isAuthenticated, async (req, res) => {
-    try {
-      // Find logged employeeId... (assuming matching logic already handled by roles auth)
-      // Since 'isSystemEmployee' handles the rest, we output generic for now
-      return res.json([]);
-    } catch(err) {
-      return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.patch("/api/gemteam/notifiche/:id/letta", isAuthenticated, async (req, res) => {
-    try {
-      await db.update(schema.teamNotifications)
-        .set({ letta: true })
-        .where(eq(schema.teamNotifications.id, parseInt(req.params.id)));
-      return res.json({ success: true });
-    } catch(err) {
-      return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.get("/api/gemteam/postazioni", isAuthenticated, async (req, res) => {
-    try {
-      const records = await db.select().from(schema.teamPostazioni).orderBy(sql`ordine ASC`);
-      return res.json(records);
-    } catch(err) {
-      return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.post("/api/gemteam/postazioni", isAuthenticated, isMasterGuard, async (req, res) => {
-    try {
-      const { nome, contaOre, attiva, colore } = req.body;
-      if (!nome) return res.status(400).json({ error: 'Nome obbligatorio' });
-      await db.insert(schema.teamPostazioni).values({
-        nome,
-        contaOre: contaOre ?? true,
-        attiva: attiva ?? true,
-        colore: colore || 'var(--indigo-50)',
-        ordine: 99
-      });
-      return res.json({ success: true });
-    } catch(err) {
-      return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
-  app.patch("/api/gemteam/postazioni/:id", isAuthenticated, isMasterGuard, async (req, res) => {
-    // Implement post update
-    return res.json({ success: true });
-  });
-
-  app.delete("/api/gemteam/postazioni/:id", isAuthenticated, isMasterGuard, async (req, res) => {
-    // Implement delete
-    return res.json({ success: true });
-  });
-
-  app.get("/api/gemteam/turni/eventi-giorno", isAuthenticated, async (req, res) => {
-    try {
-      const { data } = req.query;
-      if (!data) return res.status(400).json({ error: 'data mancante' });
-      const targetDate = new Date(data as string);
-
-      const events = await db.select({
-        title: schema.strategicEvents.title,
-        eventType: schema.strategicEvents.eventType,
-        color: schema.strategicEvents.color,
-        startDate: schema.strategicEvents.startDate,
-        endDate: schema.strategicEvents.endDate
-      })
-      .from(schema.strategicEvents)
-      .where(and(
-        lte(schema.strategicEvents.startDate, targetDate),
-        or(gte(schema.strategicEvents.endDate, targetDate), isNull(schema.strategicEvents.endDate)),
-        eq(schema.strategicEvents.affectsCalendar, true),
-        eq(schema.strategicEvents.status, 'active')
-      ));
-      
-      return res.json(events);
-    } catch(err) {
-      console.error(err); return res.status(500).json({ error: 'Errore' });
-    }
-  });
-
 
 
       const recordId = parseInt(req.params.id);
@@ -11054,6 +10722,340 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ error: err.message });
     }
   });
+
+  // ==========================================
+  // GEMTEAM F1-022: SCHEDULED SHIFTS & ASSIGNMENTS
+  // ==========================================
+  
+  const isMasterGuard = (req: any, res: any, next: any) => {
+    const r = (req.user as any)?.role?.toLowerCase();
+    if (!['admin', 'master', 'super admin'].includes(r)) {
+      return res.status(403).json({ error: 'Solo per Master/Admin.' });
+    }
+    next();
+  };
+
+  app.get("/api/gemteam/turni/week-assignment", isAuthenticated, async (req, res) => {
+    try {
+      const weekStartStr = req.query.weekStart as string; // YYYY-MM-DD
+      if (!weekStartStr) return res.status(400).json({ error: 'weekStart mancante' });
+      
+      const targetQuery = await db.select().from(schema.teamWeekAssignments).where(eq(schema.teamWeekAssignments.weekStart, new Date(weekStartStr)));
+      if (targetQuery.length > 0) {
+        return res.json({ settimana: targetQuery[0].settimana, weekStart: weekStartStr, isOverride: targetQuery[0].isManualOverride });
+      }
+
+      // fallback: ciclico A-E. (Logica semplificata: calcolo dummy o fallback su A).
+      // Se non definito, restituiamo settimana A per default e isOverride false.
+      // (In una V2 qui metteremmo l'algoritmo matematico del ciclo)
+      return res.json({ settimana: 'A', weekStart: weekStartStr, isOverride: false });
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.post("/api/gemteam/turni/week-assignment", isAuthenticated, isMasterGuard, async (req, res) => {
+    try {
+      const { weekStart, settimana } = req.body;
+      const parsedDate = new Date(weekStart);
+      
+      await db.insert(schema.teamWeekAssignments).values({
+        weekStart: parsedDate,
+        settimana,
+        isManualOverride: true
+      }).onDuplicateKeyUpdate({
+        set: { settimana, isManualOverride: true, updatedAt: new Date() }
+      });
+      return res.json({ success: true });
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.get("/api/gemteam/turni/scheduled", isAuthenticated, async (req, res) => {
+    try {
+      const dataStr = req.query.data as string;
+      if (!dataStr) return res.status(400).json({ error: 'data mancante' });
+      const targetDate = new Date(dataStr);
+
+      const records = await db.select({
+        id: schema.teamScheduledShifts.id,
+        employeeId: schema.teamScheduledShifts.employeeId,
+        data: schema.teamScheduledShifts.data,
+        oraInizio: schema.teamScheduledShifts.oraInizio,
+        oraFine: schema.teamScheduledShifts.oraFine,
+        postazione: schema.teamScheduledShifts.postazione,
+        note: schema.teamScheduledShifts.note,
+        firstName: schema.members.firstName,
+        lastName: schema.members.lastName,
+        displayOrder: schema.teamEmployees.displayOrder,
+        team: schema.teamEmployees.team,
+        assenzaRegistrata: schema.teamAttendanceLogs.tipoAssenza
+      })
+      .from(schema.teamScheduledShifts)
+      .innerJoin(schema.teamEmployees, eq(schema.teamEmployees.id, schema.teamScheduledShifts.employeeId))
+      .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
+      .leftJoin(schema.teamAttendanceLogs, and(
+         eq(schema.teamAttendanceLogs.employeeId, schema.teamScheduledShifts.employeeId),
+         eq(sql`DATE(${schema.teamAttendanceLogs.data})`, targetDate),
+         isNotNull(schema.teamAttendanceLogs.tipoAssenza)
+      ))
+      .where(eq(schema.teamScheduledShifts.data, targetDate))
+      .orderBy(sql`${schema.teamEmployees.displayOrder} ASC`, sql`${schema.teamScheduledShifts.oraInizio} ASC`);
+
+      const mapped = records.map(r => ({
+        ...r,
+        hasConflict: !!r.assenzaRegistrata
+      }));
+      return res.json(mapped);
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.post("/api/gemteam/turni/scheduled", isAuthenticated, isMasterGuard, async (req, res) => {
+    try {
+      const { employeeId, data, oraInizio, oraFine, postazione, note } = req.body;
+      if (!employeeId || !data || !oraInizio || !oraFine || !postazione) {
+        return res.status(400).json({ error: 'Dati incompleti' });
+      }
+
+      await db.insert(schema.teamScheduledShifts).values({
+        employeeId, data: new Date(data), oraInizio, oraFine, postazione, note,
+        createdByUserId: (req.user as any)?.id
+      });
+
+      // Notifica & Email
+      await db.insert(schema.teamNotifications).values({
+        employeeId, tipo: 'turno_aggiunto', titolo: 'Nuovo turno programmato',
+        messaggio: `Data: ${data}, Ora: ${oraInizio}-${oraFine}, Postazione: ${postazione}`,
+        dataRiferimento: new Date(data)
+      });
+      console.log(`Mock sending email via SMTP 465 to employee ${employeeId} for new shift`);
+
+      return res.json({ success: true });
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore interno (forse duplicato)' });
+    }
+  });
+
+  app.patch("/api/gemteam/turni/scheduled/:id", isAuthenticated, isMasterGuard, async (req, res) => {
+    try {
+      const recordId = parseInt(req.params.id);
+      const { postazione, oraInizio, oraFine, note } = req.body;
+
+      const results = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
+      if (!results.length) return res.status(404).json({ error: 'Non trovato' });
+
+      await db.update(schema.teamScheduledShifts)
+        .set({ postazione, oraInizio, oraFine, note, modifiedByUserId: (req.user as any)?.id, updatedAt: new Date() })
+        .where(eq(schema.teamScheduledShifts.id, recordId));
+
+      await db.insert(schema.teamNotifications).values({
+        employeeId: results[0].employeeId, tipo: 'turno_modificato', titolo: 'Turno modificato',
+        messaggio: `Il tuo turno del ${results[0].data} è stato modificato.`,
+        dataRiferimento: new Date(results[0].data)
+      });
+      console.log(`Mock sending email via SMTP 465 to EX ${results[0].employeeId} updated shift`);
+
+      return res.json({ success: true });
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.delete("/api/gemteam/turni/scheduled/:id", isAuthenticated, isMasterGuard, async (req, res) => {
+    try {
+      const recordId = parseInt(req.params.id);
+      const results = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
+      if (!results.length) return res.json({ ok: true }); // already gone
+
+      await db.delete(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
+
+      await db.insert(schema.teamNotifications).values({
+        employeeId: results[0].employeeId, tipo: 'turno_cancellato', titolo: 'Turno cancellato',
+        messaggio: `Il turno del ${results[0].data} è stato cancellato.`,
+        dataRiferimento: new Date(results[0].data)
+      });
+
+      return res.json({ ok: true });
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.post("/api/gemteam/turni/apply-template", isAuthenticated, isMasterGuard, async (req, res) => {
+    try {
+      const { weekStart, settimana } = req.body;
+      const startD = new Date(weekStart);
+
+      const templates = await db.select().from(schema.teamShiftTemplates).where(eq(schema.teamShiftTemplates.settimanaTipo, settimana));
+      let created = 0, skipped = 0;
+
+      for (const t of templates) {
+        const slotDate = new Date(startD);
+        slotDate.setDate(slotDate.getDate() + t.giornoSettimana);
+
+        try {
+          await db.insert(schema.teamScheduledShifts).values({
+             employeeId: t.employeeId,
+             data: slotDate,
+             oraInizio: t.oraInizio,
+             oraFine: t.oraFine,
+             postazione: t.postazione,
+             createdByUserId: (req.user as any)?.id
+          });
+          created++;
+        } catch(e) {
+          skipped++; // Ignora i duplicati
+        }
+      }
+
+      return res.json({ created, skipped });
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.post("/api/gemteam/turni/copy-day", isAuthenticated, isMasterGuard, async (req, res) => {
+    try {
+      const { fromData, toData } = req.body;
+      if (!fromData || !toData) return res.status(400).json({ error: 'date mancanti' });
+
+      const fromD = new Date(fromData);
+      const toD = new Date(toData);
+
+      const sourceShifts = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.data, fromD));
+      let created = 0, skipped = 0;
+
+      for (const s of sourceShifts) {
+        try {
+          await db.insert(schema.teamScheduledShifts).values({
+            employeeId: s.employeeId,
+            data: toD,
+            oraInizio: s.oraInizio,
+            oraFine: s.oraFine,
+            postazione: s.postazione,
+            note: s.note,
+            createdByUserId: (req.user as any)?.id
+          });
+          created++;
+        } catch(e) {
+          skipped++;
+        }
+      }
+      return res.json({ created, skipped });
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.get("/api/gemteam/turni/ore-mensili", isAuthenticated, async (req, res) => {
+    try {
+      // Dummy response o implementazione reale query complessa.
+      // Esempio logica semplificata
+      const records = await db.execute(sql`
+        SELECT E.id AS employeeId, M.first_name, M.last_name, 
+               SUM(TIMESTAMPDIFF(MINUTE, S.ora_inizio, S.ora_fine)) / 60 as ore_totali
+        FROM team_scheduled_shifts S
+        JOIN team_employees E ON S.employee_id = E.id
+        JOIN members M ON E.member_id = M.id
+        JOIN team_postazioni P ON S.postazione = P.nome
+        WHERE YEAR(S.data) = ${req.query.anno} AND MONTH(S.data) = ${req.query.mese} 
+          AND P.conta_ore = 1
+        GROUP BY E.id, M.first_name, M.last_name
+      `);
+      return res.json(records[0] || []);
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.get("/api/gemteam/notifiche", isAuthenticated, async (req, res) => {
+    try {
+      // Find logged employeeId... (assuming matching logic already handled by roles auth)
+      // Since 'isSystemEmployee' handles the rest, we output generic for now
+      return res.json([]);
+    } catch(err) {
+      return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.patch("/api/gemteam/notifiche/:id/letta", isAuthenticated, async (req, res) => {
+    try {
+      await db.update(schema.teamNotifications)
+        .set({ letta: true })
+        .where(eq(schema.teamNotifications.id, parseInt(req.params.id)));
+      return res.json({ success: true });
+    } catch(err) {
+      return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.get("/api/gemteam/postazioni", isAuthenticated, async (req, res) => {
+    try {
+      const records = await db.select().from(schema.teamPostazioni).orderBy(sql`ordine ASC`);
+      return res.json(records);
+    } catch(err) {
+      return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.post("/api/gemteam/postazioni", isAuthenticated, isMasterGuard, async (req, res) => {
+    try {
+      const { nome, contaOre, attiva, colore } = req.body;
+      if (!nome) return res.status(400).json({ error: 'Nome obbligatorio' });
+      await db.insert(schema.teamPostazioni).values({
+        nome,
+        contaOre: contaOre ?? true,
+        attiva: attiva ?? true,
+        colore: colore || 'var(--indigo-50)',
+        ordine: 99
+      });
+      return res.json({ success: true });
+    } catch(err) {
+      return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+  app.patch("/api/gemteam/postazioni/:id", isAuthenticated, isMasterGuard, async (req, res) => {
+    // Implement post update
+    return res.json({ success: true });
+  });
+
+  app.delete("/api/gemteam/postazioni/:id", isAuthenticated, isMasterGuard, async (req, res) => {
+    // Implement delete
+    return res.json({ success: true });
+  });
+
+  app.get("/api/gemteam/turni/eventi-giorno", isAuthenticated, async (req, res) => {
+    try {
+      const { data } = req.query;
+      if (!data) return res.status(400).json({ error: 'data mancante' });
+      const targetDate = new Date(data as string);
+
+      const events = await db.select({
+        title: schema.strategicEvents.title,
+        eventType: schema.strategicEvents.eventType,
+        color: schema.strategicEvents.color,
+        startDate: schema.strategicEvents.startDate,
+        endDate: schema.strategicEvents.endDate
+      })
+      .from(schema.strategicEvents)
+      .where(and(
+        lte(schema.strategicEvents.startDate, targetDate),
+        or(gte(schema.strategicEvents.endDate, targetDate), isNull(schema.strategicEvents.endDate)),
+        eq(schema.strategicEvents.affectsCalendar, true),
+        eq(schema.strategicEvents.status, 'active')
+      ));
+      
+      return res.json(events);
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore' });
+    }
+  });
+
+
 
   return httpServer;
 }
