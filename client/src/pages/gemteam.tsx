@@ -869,7 +869,6 @@ export default function GemTeam() {
               </SheetContent>
             </Sheet>
           </div>
-          </div>
         </TabsContent>
 
         <TabsContent value="turni" className="w-full">
@@ -1121,6 +1120,7 @@ export default function GemTeam() {
               )}
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="presenze">
@@ -1292,6 +1292,7 @@ export default function GemTeam() {
 
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="diario">
