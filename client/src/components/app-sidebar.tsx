@@ -701,7 +701,7 @@ export function AppSidebar() {
                         }
 
                         return (
-                          <span className="text-[9px] shrink-0 text-slate-400">
+                          <span className={`text-[9px] shrink-0 ${isOnline ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>
                             {text}
                           </span>
                         );
