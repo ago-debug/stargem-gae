@@ -377,7 +377,7 @@ export function AppSidebar() {
         </Link>
         {isInsegnante && user && (
           <div className="flex flex-col items-center mt-4">
-            <span className="font-bold text-slate-800">Ciao {user.firstName || user.username} 👋</span>
+            <span className="font-bold text-slate-800">Ciao {((user as any).lastName || user.firstName) ? `${(user as any).lastName || ""} ${user.firstName || ""}`.trim() : user.username} 👋</span>
             <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded mt-1 shadow-sm border border-amber-200">STAFF</span>
           </div>
         )}
@@ -719,7 +719,7 @@ export function AppSidebar() {
                            <PowerOff className="w-2.5 h-2.5 shrink-0 text-slate-400" />
                         )}
                         <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : isPausa ? "text-slate-500 font-medium" : "text-slate-400 opacity-80"}`}>
-                          {isMe ? "Tu" : (u.firstName || u.username)}
+                          {isMe ? "Tu" : ((u.lastName || u.firstName) ? `${u.lastName || ""} ${u.firstName || ""}`.trim() : u.username)}
                         </span>
                       </div>
                       
@@ -787,7 +787,7 @@ export function AppSidebar() {
                 <p className="flex justify-between items-center text-[8.5px]">
                   <span className="opacity-80">Da/Azione:</span>
                   <span className="font-medium text-slate-400 opacity-80 truncate max-w-[100px] text-right" title={`Di: ${latestActivity.user?.username} / Sys: v${__APP_VERSION__}`}>
-                    {latestActivity.user?.firstName || latestActivity.user?.username || "Sys"} (v{__APP_VERSION__})
+                    {((latestActivity.user as any)?.lastName || latestActivity.user?.firstName) ? `${(latestActivity.user as any)?.lastName || ""} ${latestActivity.user?.firstName || ""}`.trim() : (latestActivity.user?.username || "Sys")} (v{__APP_VERSION__})
                   </span>
                 </p>
               </div>
@@ -808,8 +808,8 @@ export function AppSidebar() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-sidebar-foreground truncate group-hover:text-primary leading-tight">
-                      {user.firstName || user.lastName
-                        ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+                      {user.lastName || user.firstName
+                        ? `${user.lastName || ""} ${user.firstName || ""}`.trim()
                         : user.username}
                     </p>
                     <p className="text-[8px] text-muted-foreground truncate uppercase tracking-widest font-bold">

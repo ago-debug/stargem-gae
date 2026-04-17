@@ -195,7 +195,7 @@ function PresenzeTab({ isAdmin }: { isAdmin: boolean }) {
                       <TableRow><TableCell colSpan={3} className="text-center py-6 text-muted-foreground">Nessuna presenza trovata per questo mese.</TableCell></TableRow>
                    ) : presenzeList.map((p) => (
                       <TableRow key={p.id}>
-                        <TableCell className="font-semibold">{p.firstName} {p.lastName}</TableCell>
+                        <TableCell className="font-semibold">{p.lastName} {p.firstName}</TableCell>
                         <TableCell>{p.ore_totali}</TableCell>
                         <TableCell>
                           <Badge className={p.status === 'CONFERMATO' ? 'bg-emerald-500' : 'bg-slate-400'}>{p.status || 'BOZZA'}</Badge>
@@ -315,7 +315,7 @@ function DisciplinareTab({ staffList }: { staffList: any[] }) {
              <Select value={memberId} onValueChange={setMemberId}>
                <SelectTrigger className="mt-2 bg-white"><SelectValue placeholder="Scegli..."/></SelectTrigger>
                <SelectContent>
-                 {staffList.map(s => <SelectItem key={s.id || s.firstName} value={s.id?.toString() || s.firstName}>{s.firstName} {s.lastName}</SelectItem>)}
+                 {staffList.map(s => <SelectItem key={s.id || s.firstName} value={s.id?.toString() || s.firstName}>{s.lastName} {s.firstName}</SelectItem>)}
                </SelectContent>
              </Select>
           </div>
@@ -624,7 +624,7 @@ export default function GemStaff() {
   }, [staffListQuery, instructorsList]);
 
   const filteredStaffRaw = staffList.filter((s) => {
-     const fullName = `${s.firstName || ''} ${s.lastName || ''}`.toLowerCase();
+     const fullName = `${s.lastName || ''} ${s.firstName || ''}`.toLowerCase();
      const matchName = searchName === "" || fullName.includes(searchName.toLowerCase());
      const matchCat = categoryFilter === "all" || s.specialization?.includes(categoryFilter) || s.corsi?.includes(categoryFilter);
      
@@ -900,7 +900,7 @@ export default function GemStaff() {
                                </Button>
                                <Button variant="ghost" size="icon" onClick={(e) => { 
                                   e.stopPropagation(); 
-                                  if (confirm(`Sei sicuro di voler eliminare ${s.firstName} ${s.lastName}? Questa azione non può essere annullata.`)) {
+                                  if (confirm(`Sei sicuro di voler eliminare ${s.lastName} ${s.firstName}? Questa azione non può essere annullata.`)) {
                                     if(s.instructorId) deleteMutation.mutate(s.instructorId);
                                   }
                                }}>
@@ -944,7 +944,7 @@ export default function GemStaff() {
                 <TableBody>
                    {ptListSorted.map((pt: any) => (
                       <TableRow key={pt.id || pt.firstName} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedStaff(pt)}>
-                         <TableCell className="font-semibold">{pt.firstName} {pt.lastName}</TableCell>
+                         <TableCell className="font-semibold">{pt.lastName} {pt.firstName}</TableCell>
                          <TableCell>{pt.specializzazione || 'Personal Trainer'}</TableCell>
                          <TableCell>{pt.phone || '—'}</TableCell>
                          <TableCell>{pt.email || '—'}</TableCell>
@@ -970,10 +970,10 @@ export default function GemStaff() {
                </SelectTrigger>
                <SelectContent>
                  {staffList.map((s) => (
-                   <SelectItem key={s.id || s.firstName} value={s.id?.toString() || s.firstName}>{s.firstName} {s.lastName}</SelectItem>
+                   <SelectItem key={s.id || s.firstName} value={s.id?.toString() || s.firstName}>{s.lastName} {s.firstName}</SelectItem>
                  ))}
                  {ptListSorted.map((pt: any) => (
-                   <SelectItem key={`pt-${pt.id || pt.firstName}`} value={pt.id?.toString() || pt.firstName}>{pt.firstName} {pt.lastName} (PT)</SelectItem>
+                   <SelectItem key={`pt-${pt.id || pt.firstName}`} value={pt.id?.toString() || pt.firstName}>{pt.lastName} {pt.firstName} (PT)</SelectItem>
                  ))}
                </SelectContent>
              </Select>
@@ -1005,7 +1005,7 @@ export default function GemStaff() {
                   <TableBody>
                      {staffList.map((s) => (
                         <TableRow key={s.id}>
-                           <TableCell className="font-semibold">{s.firstName} {s.lastName}</TableCell>
+                           <TableCell className="font-semibold">{s.lastName} {s.firstName}</TableCell>
                            <TableCell>{s.corsi || '—'}</TableCell>
                            <TableCell>
                              {s.tariffa_base ? `€${s.tariffa_base}/h` : '—'}
@@ -1060,7 +1060,7 @@ export default function GemStaff() {
         <SheetContent className="sm:max-w-md overflow-y-auto w-full">
           <SheetHeader>
             <SheetTitle className="text-xl flex items-center justify-between mt-4">
-               <span>{selectedStaff?.firstName} {selectedStaff?.lastName}</span>
+               <span>{selectedStaff?.lastName} {selectedStaff?.firstName}</span>
                <Badge className={selectedStaff?.staff_status === 'INATTIVO' ? 'bg-slate-400' : 'bg-emerald-500'}>
                   {selectedStaff?.staff_status || 'ATTIVO'}
                </Badge>
@@ -1179,7 +1179,7 @@ export default function GemStaff() {
       <Dialog open={isCreateAccountDialogOpen} onOpenChange={setIsCreateAccountDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Crea account per {selectedStaff?.firstName} {selectedStaff?.lastName}</DialogTitle>
+            <DialogTitle>Crea account per {selectedStaff?.lastName} {selectedStaff?.firstName}</DialogTitle>
             <DialogDescription>
               Verrà creato un account con email:<br/>
               <strong>{selectedStaff?.email || "Nessuna email"}</strong><br/><br/>

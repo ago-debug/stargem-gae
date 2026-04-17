@@ -474,7 +474,7 @@ export default function GemTeam() {
                               {dip.photo_url ? <AvatarImage src={dip.photo_url} /> : null}
                               <AvatarFallback className={`text-[10px] ${TEAM_COLORS[dip.team]}`}>{dip.nome.charAt(0)}{dip.cognome.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            {dip.nome} {dip.cognome}
+                            {dip.cognome} {dip.nome}
                           </td>
                           <td className="p-4">
                             <Badge variant="outline" className={`${statoColors[stato]} font-bold`}>{statoLabel}</Badge>
@@ -557,7 +557,7 @@ export default function GemTeam() {
                         </AvatarFallback>
                       </Avatar>
                       
-                      <h3 className="font-bold text-slate-800 truncate w-full px-2">{dip.nome} {dip.cognome}</h3>
+                      <h3 className="font-bold text-slate-800 truncate w-full px-2">{dip.cognome} {dip.nome}</h3>
                       <Badge variant="secondary" className={`mt-1 mb-3 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[dip.team] || 'bg-slate-200 text-slate-800'}`}>
                         {TEAM_LABELS[dip.team] || (dip.team === 'Staff' || dip.team === 'staff' ? 'COLLABORATORE EXT' : dip.team)}
                       </Badge>
@@ -600,7 +600,7 @@ export default function GemTeam() {
                         </Avatar>
                         <div>
                           <SheetTitle className="text-2xl text-slate-800 m-0 p-0 leading-none">
-                            {selectedSheetDip.nome} {selectedSheetDip.cognome}
+                            {selectedSheetDip.cognome} {selectedSheetDip.nome}
                           </SheetTitle>
                           <Badge variant="secondary" className={`mt-2 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[selectedSheetDip.team]}`}>
                             {TEAM_LABELS[selectedSheetDip.team]}
@@ -1028,7 +1028,7 @@ export default function GemTeam() {
                         return (
                           <tr key={dip.id} className="hover:bg-blue-50/40 relative group border-b border-slate-200">
                             <td className="sticky left-0 bg-white border-r border-slate-200 p-2 text-left font-semibold text-slate-700 whitespace-nowrap shadow-[1px_0_0_0_#e2e8f0] z-10 group-hover:bg-blue-50/40 flex items-center justify-between">
-                              <span>{dip.nome} {dip.cognome.charAt(0)}.</span>
+                              <span>{dip.cognome} {dip.nome.charAt(0)}.</span>
                               <div className={`w-2 h-2 rounded-full ml-2 ${TEAM_COLORS[dip.team]?.split(' ')[0]}`} />
                             </td>
                             {Array.from({length: 30}, (_, i) => {
@@ -1348,7 +1348,7 @@ export default function GemTeam() {
                     <tbody className="divide-y divide-slate-100 bg-white">
                       {reportData.map((row: any) => (
                         <tr key={row.employee_id} className="hover:bg-slate-50 transition-colors">
-                          <td className="p-3 pl-4 font-bold text-slate-800">{row.nome} {row.cognome}</td>
+                          <td className="p-3 pl-4 font-bold text-slate-800">{row.cognome} {row.nome}</td>
                           <td className="p-3 text-center font-black text-slate-700 text-lg">{fmtOre(row.oreTotali)}</td>
                           <td className="p-3 text-center font-bold text-slate-500">{row.giorniLavorati}</td>
                           <td className="p-3 text-center text-sky-600 font-semibold">{row.FE || 0}</td>

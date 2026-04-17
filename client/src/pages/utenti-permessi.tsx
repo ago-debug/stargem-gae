@@ -127,7 +127,7 @@ export default function UtentiPermessi() {
   const getSortValueUser = (u: User, key: string) => {
     switch (key) {
       case "username": return u.username;
-      case "fullName": return `${u.firstName || ""} ${u.lastName || ""}`;
+      case "fullName": return `${u.lastName || ""} ${u.firstName || ""}`;
       case "phone": return u.phone || "";
       case "email": return u.email || "";
       case "role": return u.role || "";
@@ -485,7 +485,7 @@ export default function UtentiPermessi() {
                               {u.username}
                             </TableCell>
                             <TableCell className={cn(iscUser("fullName") && "sorted-column-cell")}>
-                              {u.firstName || u.lastName ? `${u.firstName || ""} ${u.lastName || ""}` : "-"}
+                              {u.firstName || u.lastName ? `${u.lastName || ""} ${u.firstName || ""}` : "-"}
                             </TableCell>
                             <TableCell className={cn(iscUser("phone") && "sorted-column-cell")}>{u.phone || "-"}</TableCell>
                             <TableCell className={cn(iscUser("email") && "sorted-column-cell")}>{u.email || "-"}</TableCell>
