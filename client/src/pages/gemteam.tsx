@@ -1,10 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useActiveUsers } from "@/hooks/use-active-users";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download, Plus, Activity, LogIn, LogOut } from "lucide-react";
+import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download, Plus, Activity, LogIn, LogOut, GripVertical } from "lucide-react";
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -146,6 +149,19 @@ function fmtOre(ore: number | null): string {
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }
 
+function SortableDipendente({ id, dipendente }: { id: number, dipendente: GemTeamMember }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-md shadow-sm mb-2 z-50 relative">
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:bg-slate-100 p-1.5 rounded text-slate-400">
+        <GripVertical className="w-4 h-4" />
+      </div>
+      <div className="font-semibold text-sm text-slate-700">{dipendente.cognome} {dipendente.nome}</div>
+    </div>
+  );
+}
+
 export default function GemTeam() {
   const { user } = useAuth();
   const { data: activeUsers = [] } = useActiveUsers();
@@ -159,11 +175,49 @@ export default function GemTeam() {
     queryKey: ['/api/gemteam/dipendenti'],
   });
 
+  const role = user?.role?.toLowerCase() || '';
+  const isMaster = ['admin', 'master', 'super admin'].includes(role);
+
+  const [isSheetOrderOpen, setIsSheetOrderOpen] = useState(false);
+  const [localOrder, setLocalOrder] = useState<GemTeamMember[]>([]);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+
+  const handleDragEnd = (event: any) => {
+    const {active, over} = event;
+    if (active.id !== over.id) {
+      setLocalOrder((items) => {
+        const oldIndex = items.findIndex(i => i.id === active.id);
+        const newIndex = items.findIndex(i => i.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const handleSaveOrder = async () => {
+    try {
+      setIsSavingOrder(true);
+      const order = localOrder.map((d, i) => ({ id: d.id, display_order: i + 1 }));
+      const res = await fetch('/api/gemteam/dipendenti/reorder', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order })
+      });
+      if (!res.ok) throw new Error('Errore salvataggio ordine');
+      
+      await queryClient.invalidateQueries({ queryKey: ["/api/gemteam/dipendenti"] });
+      setIsSheetOrderOpen(false);
+    } catch (e) {
+      console.error(e);
+      alert('Errore di salvataggio');
+    } finally {
+      setIsSavingOrder(true);
+      setTimeout(() => setIsSavingOrder(false), 500);
+    }
+  };
+
   const dipendenti: GemTeamMember[] = useMemo(() => {
-    const sortedAPI = [...dipendentiAPI].sort((a, b) =>
-      (a.lastName || '').localeCompare(b.lastName || '', 'it') ||
-      (a.firstName || '').localeCompare(b.firstName || '', 'it')
-    );
+    // Nessun sort front-end: il backend ordina giÃ  per display_order ASC
+    const sortedAPI = [...dipendentiAPI];
 
     return sortedAPI.map(d => ({
       id: d.id,
@@ -184,6 +238,12 @@ export default function GemTeam() {
       last_session_duration: d.lastSessionDuration
     }));
   }, [dipendentiAPI]);
+
+  useEffect(() => {
+    if (dipendenti.length > 0) {
+      setLocalOrder(dipendenti.filter(d => !isSystemEmployee(d)));
+    }
+  }, [dipendenti, isSheetOrderOpen]);
 
   const MOCK_EMPLOYEES = useMemo(() => dipendenti.map(d => d.nome), [dipendenti]);
   const [selectedEmployee, setSelectedEmployee] = useState(MOCK_EMPLOYEES[0] || "Seleziona...");
@@ -941,6 +1001,38 @@ export default function GemTeam() {
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
+                  
+                  {isMaster && (
+                    <div className="pl-1 border-l border-slate-200 ml-1">
+                      <Sheet open={isSheetOrderOpen} onOpenChange={setIsSheetOrderOpen}>
+                        <SheetTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-900">
+                            <GripVertical className="h-4 w-4" />
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent>
+                          <SheetHeader>
+                            <SheetTitle>Ordina colonne</SheetTitle>
+                            <SheetDescription>Trascina le righe per riordinare le colonne dei dipendenti.</SheetDescription>
+                          </SheetHeader>
+                          <div className="mt-6 max-h-[70vh] overflow-y-auto scrollbar-thin px-1">
+                            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                              <SortableContext items={localOrder.map(d => d.id)} strategy={verticalListSortingStrategy}>
+                                {localOrder.map(dip => (
+                                  <SortableDipendente key={dip.id} id={dip.id} dipendente={dip} />
+                                ))}
+                              </SortableContext>
+                            </DndContext>
+                          </div>
+                          <div className="mt-8 pt-4 border-t">
+                            <Button className="w-full" onClick={handleSaveOrder} disabled={isSavingOrder}>
+                              {isSavingOrder ? 'Salvataggio...' : 'Salva ordine'}
+                            </Button>
+                          </div>
+                        </SheetContent>
+                      </Sheet>
+                    </div>
+                  )}
                 </div>
               </div>
 
