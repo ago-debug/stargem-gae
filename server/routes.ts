@@ -4822,6 +4822,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
           id: schema.teamEmployees.id,
           memberId: schema.teamEmployees.memberId,
           userId: schema.teamEmployees.userId,
+          displayOrder: schema.teamEmployees.displayOrder,
           team: schema.teamEmployees.team,
           tariffaOraria: schema.teamEmployees.tariffaOraria,
           stipendioFissoMensile: schema.teamEmployees.stipendioFissoMensile,
@@ -4843,7 +4844,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
         .leftJoin(schema.users, eq(schema.users.id, schema.teamEmployees.userId))
         .where(eq(schema.teamEmployees.attivo, true))
-        .orderBy(schema.teamEmployees.team, asc(schema.members.lastName), asc(schema.members.firstName));
+        .orderBy(asc(schema.teamEmployees.displayOrder));
 
       const enhancedRecords = await Promise.all(records.map(async (emp) => {
         // Check-in fisico di oggi
@@ -4898,6 +4899,37 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       return res.json(enhancedRecords);
     } catch (error) {
       console.error('[GemTeam] GET /dipendenti error:', error);
+      return res.status(500).json({ error: 'Errore interno' });
+    }
+  });
+
+  app.patch("/api/gemteam/dipendenti/reorder", isAuthenticated, async (req, res) => {
+    try {
+      const role = (req.user as any)?.role?.toLowerCase();
+      if (!['admin', 'master', 'super admin'].includes(role)) {
+        return res.status(403).json({ error: 'Non autorizzato. Solo amministratori o master possono riordinare.' });
+      }
+
+      const { order } = req.body;
+      if (!Array.isArray(order)) {
+        return res.status(400).json({ error: 'Formato payload order non valido' });
+      }
+
+      // Valida IDs: 1 to 14 allowed
+      let updatedCount = 0;
+      for (const item of order) {
+        if (typeof item.id !== 'number' || typeof item.display_order !== 'number') continue;
+        if (item.id === 15 || item.id === 16) continue; // Skip System accounts
+        
+        await db.update(schema.teamEmployees)
+          .set({ displayOrder: item.display_order })
+          .where(eq(schema.teamEmployees.id, item.id));
+        updatedCount++;
+      }
+
+      return res.json({ ok: true, updated: updatedCount });
+    } catch (error) {
+      console.error('[GemTeam] PATCH /dipendenti/reorder error:', error);
       return res.status(500).json({ error: 'Errore interno' });
     }
   });
