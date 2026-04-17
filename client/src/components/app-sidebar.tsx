@@ -611,18 +611,19 @@ export function AppSidebar() {
             <div className="mt-2 pb-2">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                  Connessioni Live
                   {onlineCount > 0 ? (
-                    <span className="relative flex h-2 w-2">
+                    <span className="relative flex h-5 w-5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                      <span className="relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-emerald-500 text-white text-[10px] font-bold">
+                        {onlineCount}
+                      </span>
                     </span>
                   ) : (
-                    <span className="h-2 w-2 rounded-full bg-yellow-500" />
+                    <span className="flex items-center justify-center rounded-full h-5 w-5 bg-yellow-500 text-white text-[10px] font-bold">
+                      0
+                    </span>
                   )}
-                  Connessioni Live
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full text-white ${onlineCount > 0 ? "bg-emerald-500" : "bg-yellow-500"}`}>
-                    {onlineCount}
-                  </span>
                 </p>
                 <Dialog>
                   <DialogTrigger asChild>
