@@ -7,18 +7,11 @@ const imports = `import { format, addDays, subDays, startOfWeek, endOfWeek, isSa
 import { it } from "date-fns/locale";`;
 
 const hoursGenerators = `
-const HOURS = [];
-for(let h=7; h<=23; h++) {
-  HOURS.push(\`\${h < 10 ? '0'+h : h}:00\`);
-  HOURS.push(\`\${h < 10 ? '0'+h : h}:30\`);
+const HOURS: string[] = [];
+for (let h = 7; h <= 23; h++) {
+  HOURS.push(\`\${String(h).padStart(2,'0')}:00\`);
+  HOURS.push(\`\${String(h).padStart(2,'0')}:30\`);
 }
-
-const getWeekLabel = (offset) => {
-  if (offset === 0) return "Corrente";
-  if (offset === 1) return "Prossima";
-  if (offset === -1) return "Scorsa";
-  return offset > 0 ? \`+\${offset} Sett.\` : \`\${offset} Sett.\`;
-};
 `;
 
 const turniComponentCode = `
@@ -41,7 +34,7 @@ const turniComponentCode = `
                     </Button>
                     
                     <Badge variant="secondary" className="hidden sm:inline-flex ml-4 font-semibold text-xs border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer">
-                      Settimana · Tipo A
+                      Sett. 33 · Tipo A · 14-19 apr
                     </Badge>
                     {isSameDay(turniDate, new Date()) && 
                       <Badge className="bg-emerald-500 hover:bg-emerald-600 text-[10px]">OGGI</Badge>
@@ -80,12 +73,23 @@ const turniComponentCode = `
                       <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50">
                         <Plus className="h-3 w-3 mr-1" /> Aggiungi turno
                       </Button>
-                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50">
+                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => console.log('Scarica turni PDF')}>
                         <Download className="h-3 w-3 mr-1" /> Scarica turni
                       </Button>
-                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-slate-600 border-slate-200 hover:bg-slate-50">
-                        ⚙ Postazioni
-                      </Button>
+                      
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-slate-600 border-slate-200 hover:bg-slate-50">
+                            ⚙ Postazioni
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent>
+                          <SheetHeader>
+                            <SheetTitle>Gestione Postazioni (In arrivo)</SheetTitle>
+                          </SheetHeader>
+                        </SheetContent>
+                      </Sheet>
+
                     </div>
                   )}
                 </div>
@@ -110,20 +114,23 @@ const turniComponentCode = `
                   {/* Raggruppamento Team */}
                   <tr>
                     <th className="w-20 min-w-20 bg-slate-50 border-r border-slate-300"></th>
-                    <th colSpan={filteredSegreteria.length || 1} className="bg-green-100 border-r border-green-200 py-1 text-center font-bold text-[10px] text-green-800 uppercase tracking-widest truncate">Segreteria</th>
-                    <th colSpan={filteredManutenzione.length || 1} className="bg-amber-100 border-r border-amber-200 py-1 text-center font-bold text-[10px] text-amber-800 uppercase tracking-widest truncate">Manutenzione</th>
-                    <th colSpan={filteredUfficio.length || 1} className="bg-blue-100 border-r border-blue-200 py-1 text-center font-bold text-[10px] text-blue-800 uppercase tracking-widest truncate">Ufficio</th>
+                    <th colSpan={filteredSegreteria.length || 1} style={{backgroundColor: '#EAF3DE', color: '#3B6D11'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Segreteria</th>
+                    <th colSpan={filteredManutenzione.length || 1} style={{backgroundColor: '#FAEEDA', color: '#633806'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Manutenzione</th>
+                    <th colSpan={filteredUfficio.length || 1} style={{backgroundColor: '#E6F1FB', color: '#185FA5'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Ufficio</th>
+                    <th colSpan={filteredAmministrazione.length || 1} style={{backgroundColor: '#E1F5EE', color: '#0F6E56'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Amministrazione</th>
+                    <th colSpan={filteredComunicazione.length || 1} style={{backgroundColor: '#FAECE7', color: '#993C1D'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Comunicazione</th>
+                    <th colSpan={filteredDirezione.length || 1} style={{backgroundColor: '#EEEDFE', color: '#3C3489'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Direzione</th>
                   </tr>
 
                   {/* Nomi Dipendenti */}
                   <tr>
                     <th className="bg-slate-100 border-r border-slate-300 text-[10px] text-slate-500 font-bold p-1 w-20">ORA</th>
-                    {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio].map(dip => (
+                    {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
                       <th key={dip.id} className="bg-white border-r border-slate-200 p-1.5 w-28 group">
                          <div className="flex items-center justify-center gap-1">
                             {isMaster && <GripVertical className="h-3 w-3 text-slate-300 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity" />}
                             <span className="text-[10px] font-bold text-slate-700 uppercase truncate" title={dip.cognome + ' ' + dip.nome}>
-                              {dip.cognome} {dip.nome?.charAt(0)}.
+                              {dip.cognome} {dip.nome ? dip.nome.charAt(0) : ''}.
                             </span>
                          </div>
                       </th>
@@ -134,19 +141,19 @@ const turniComponentCode = `
                 <tbody className="divide-y divide-slate-100">
                   {HOURS.map(hour => (
                     <tr key={hour} className="group hover:bg-slate-50/50 transition-colors">
-                      <td className="bg-slate-50 border-r border-b border-slate-200 text-center text-[11px] font-semibold text-slate-600 p-1 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 w-20 h-[30px]">
+                      <td className="bg-slate-50 border-r border-b border-slate-200 text-center text-[11px] font-semibold text-slate-600 p-1 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 w-20 h-[22px]">
                         {hour}
                       </td>
-                      {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio].map(dip => {
+                      {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => {
                          const turniFiltrato = Array.isArray(turniScheduled) ? turniScheduled.find((t:any) => t.employeeId === dip.id && t.oraInizio?.substring(0,5) === hour) : null;
                          const isAssente = turniFiltrato?.hasAbsence || false;
                          
                          return (
-                           <td key={\`\${dip.id}-\${hour}\`} className={\`border-r border-b \${isAssente ? 'border-red-400 ring-1 ring-inset ring-red-500/30' : 'border-slate-200'} p-0.5 relative cursor-pointer\`}>
+                           <td key={\`\${dip.id}-\${hour}\`} className={\`border-r border-b \${isAssente ? 'border-red-400 ring-2 ring-inset ring-red-500/30' : 'border-slate-200'} p-0.5 relative cursor-pointer min-h-[22px]\`}>
                               {turniFiltrato ? (
                                 <Popover>
                                   <PopoverTrigger asChild>
-                                    <div className={\`\${isAssente ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} w-full h-full rounded border flex items-center justify-center p-0.5 shadow-sm hover:brightness-95\`}>
+                                    <div title={isAssente ? "Assenza registrata" : ""} className={\`\${isAssente ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} w-full h-full min-h-[20px] rounded border flex items-center justify-center p-0.5 shadow-sm hover:brightness-95\`}>
                                       <span className="text-[9px] font-bold uppercase truncate max-w-full">
                                         {isAssente && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
                                         {turniFiltrato.postazione}
@@ -154,9 +161,38 @@ const turniComponentCode = `
                                     </div>
                                   </PopoverTrigger>
                                   {isMaster && (
-                                    <PopoverContent className="w-64 p-3">
+                                    <PopoverContent className="w-72 p-4">
                                       <h4 className="font-bold text-sm mb-2">Modifica Turno</h4>
                                       <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
+                                      
+                                      <div className="space-y-3">
+                                        <div>
+                                          <label className="text-xs font-semibold text-slate-600">Postazione</label>
+                                          <Select defaultValue={turniFiltrato.postazione}>
+                                            <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
+                                            <SelectContent>
+                                              {/* STUB per now, will be populated by postazioni API in the real query */}
+                                              <SelectItem value="RECEPTION">Reception</SelectItem>
+                                              <SelectItem value="UFFICIO">Ufficio</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                        <div className="flex gap-2">
+                                          <div className="w-1/2">
+                                            <label className="text-xs font-semibold text-slate-600">Inizio</label>
+                                            <Input type="time" defaultValue={hour} />
+                                          </div>
+                                          <div className="w-1/2">
+                                            <label className="text-xs font-semibold text-slate-600">Fine</label>
+                                            <Input type="time" defaultValue={\`\${hour.substring(0,2)}:30\`} />
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <label className="text-xs font-semibold text-slate-600">Note</label>
+                                          <Input placeholder="Opzionale..." />
+                                        </div>
+                                      </div>
+
                                       <div className="flex gap-2 justify-end mt-4">
                                          <Button variant="destructive" size="sm">Elimina</Button>
                                          <Button size="sm">Salva</Button>
@@ -167,13 +203,41 @@ const turniComponentCode = `
                               ) : (
                                 <Popover>
                                   <PopoverTrigger asChild>
-                                    <div className="w-full h-full transparent"></div>
+                                    <div className="w-full h-full min-h-[20px] bg-white text-transparent">_</div>
                                   </PopoverTrigger>
                                   {isMaster && (
-                                    <PopoverContent className="w-64 p-3">
+                                    <PopoverContent className="w-72 p-4">
                                       <h4 className="font-bold text-sm mb-2">Aggiungi Turno</h4>
                                       <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
-                                      <Button size="sm" className="w-full">Aggiungi</Button>
+                                      
+                                      <div className="space-y-3">
+                                        <div>
+                                          <label className="text-xs font-semibold text-slate-600">Postazione</label>
+                                          <Select>
+                                            <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="RECEPTION">Reception</SelectItem>
+                                              <SelectItem value="UFFICIO">Ufficio</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                        <div className="flex gap-2">
+                                          <div className="w-1/2">
+                                            <label className="text-xs font-semibold text-slate-600">Inizio</label>
+                                            <Input type="time" defaultValue={hour} />
+                                          </div>
+                                          <div className="w-1/2">
+                                            <label className="text-xs font-semibold text-slate-600">Fine</label>
+                                            <Input type="time" defaultValue={\`\${hour.substring(0,2)}:30\`} />
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <label className="text-xs font-semibold text-slate-600">Note</label>
+                                          <Input placeholder="Opzionale..." />
+                                        </div>
+                                      </div>
+
+                                      <Button size="sm" className="w-full mt-4">Aggiungi</Button>
                                     </PopoverContent>
                                   )}
                                 </Popover>
@@ -190,10 +254,10 @@ const turniComponentCode = `
                     <td className="bg-slate-100 border-r border-slate-300 text-center text-[10px] font-extrabold text-slate-600 p-2 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 tracking-widest uppercase">
                       TOT ORE
                     </td>
-                    {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio].map(dip => (
+                    {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
                       <td key={\`tot-\${dip.id}\`} className="text-center p-2 font-bold text-xs text-slate-600 border-r border-slate-200 bg-slate-50">
                         {/* Mock calculation: in final version we sum duration of postazioni with conta_ore=1 */}
-                        0.0h
+                        {dip.id === 1 ? '8.0h' : '0.0h'}
                       </td>
                     ))}
                   </tr>
@@ -211,7 +275,7 @@ let endIndex = code.indexOf('<TabsContent value="presenze"');
 if (startIndex > -1 && endIndex > -1) {
     let before = code.substring(0, startIndex);
     
-    // Inject variables we need for to render
+    // Inject the new hooks
     const injectHooks = `
   const [turniDate, setTurniDate] = useState(new Date());
   const formattedTurniDate = format(turniDate, 'yyyy-MM-dd');
@@ -224,9 +288,16 @@ if (startIndex > -1 && endIndex > -1) {
     queryKey: ['/api/gemteam/turni/eventi-giorno', formattedTurniDate],
   });
 
+  const { data: postazioniApi = [] } = useQuery<any[]>({
+    queryKey: ['/api/gemteam/postazioni'],
+  });
+
   const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !isSystemEmployee(d));
   const filteredManutenzione = dipendenti.filter(d => (d.team === 'ass_manutenzione' || d.team === 'manutenzione') && !isSystemEmployee(d));
   const filteredUfficio = dipendenti.filter(d => d.team === 'ufficio' && !isSystemEmployee(d));
+  const filteredAmministrazione = dipendenti.filter(d => d.team === 'amministrazione' && !isSystemEmployee(d));
+  const filteredComunicazione = dipendenti.filter(d => d.team === 'comunicazione' && !isSystemEmployee(d));
+  const filteredDirezione = dipendenti.filter(d => d.team === 'direzione' && !isSystemEmployee(d));
 `;
     
     const insertHookIdx = before.lastIndexOf('const MOCK_EMPLOYEES');
@@ -238,16 +309,15 @@ if (startIndex > -1 && endIndex > -1) {
     
     // Inject imports
     if(!newCode.includes('AlertTriangle')) {
-        newCode = newCode.replace('GripVertical', 'GripVertical, AlertTriangle');
+        newCode = newCode.replace('GripVertical, AlertTriangle } from "lucide-react";', 'GripVertical } from "lucide-react";'); // reset
+        newCode = newCode.replace('GripVertical } from "lucide-react";', 'GripVertical, AlertTriangle } from "lucide-react";');
     }
-    if(!newCode.includes('date-fns')) {
-        newCode = imports + "\n" + newCode;
-    }
-    if(!newCode.includes('HOURS = []')) {
-        const importEnd = newCode.indexOf('// Mock data');
-        if(importEnd > -1) {
-            newCode = newCode.substring(0, importEnd) + hoursGenerators + "\n" + newCode.substring(importEnd);
-        }
+    
+    // Replace HOURS logic completely just to be safe
+    const hoursStart = newCode.indexOf('const HOURS: string[] = [];');
+    const hoursEnd = newCode.indexOf('// Mock data');
+    if (hoursStart > -1 && hoursEnd > -1) {
+        newCode = newCode.substring(0, hoursStart) + hoursGenerators + "\n" + newCode.substring(hoursEnd);
     }
 
     fs.writeFileSync(path, newCode);
