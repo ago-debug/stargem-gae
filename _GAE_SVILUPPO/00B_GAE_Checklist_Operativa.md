@@ -10,6 +10,15 @@
 
 ---
 
+[16-17/04 · GemTeam UI/UX] F1-023→024 + F2-015→016
+  [x] DB: Modificata tabella staff_presenze (ore in formato h:m) tramite script.
+  [x] DB: Alter Table column su Enum `postazione`.
+  [x] Import: Mappatura Turni Settimanale tramite Drizzle ORM.
+  [x] Dashboard: 5 KPI (Presenti, Usciti, Assenti, etc) e badge Online operativi.
+  [x] Check-In: Flow ingressi dipendenti da interfaccia /gemteam.
+  [x] Grid View: Vista Collettiva Full-Width (Tutto lo schermo) per visualizzazione panoramica 4k.
+  [x] Edge Cases: Nascosti botAI e super-admin dalla turnazione.
+
 [15/04 · Chat_10_Utenti-GemPortal] F1-001→013 + F2-001→011
   [x] AUTH: user_roles allineati (7 ruoli)
   [x] AUTH: login email O username

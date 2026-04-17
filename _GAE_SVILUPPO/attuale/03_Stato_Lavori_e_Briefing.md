@@ -50,6 +50,12 @@ Il blocco principale dei lavori odierni ha riguardato il consolidamento dei modu
 
 ---
 
+### F. GemTeam & GemStaff (Modulo HR)
+- **Stato:** 🟢 OPERATIVO (Completo).
+- **Dettagli:** Implementata "Shift Grid" Full-Width per gli orari a tutto schermo e la Dashboard 5 KPI, escludendo dinamicamente gli account root/admin dalle presenze. Modulo di check-in personale `Entra / Esci` attivato e logica turni importata. Operatività del Team Staff consolidata in `/gemteam`.
+
+---
+
 ## Decisioni di business già fissate
 
 ### Attività ufficiali (14 tipologie canoniche)

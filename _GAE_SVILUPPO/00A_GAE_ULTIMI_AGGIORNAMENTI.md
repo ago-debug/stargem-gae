@@ -5,6 +5,18 @@ Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, 
 
 ---
 
+### 16-17 Aprile 2026 (Completamento Moduli GemTeam & Presenze)
+
+* **[F1-023] Importazione Massiva Turni & Presenze:** Elaborato e schierato lo script nativo `import_turni.ts` per l'assorbimento retroattivo da Excel master dei log operativi Staff (`team_TURNI.xlsx` e `team_20252026_PRESENZE_TEAM.xlsx`). Processate e sanificate su database le ore giacenti e gli orari di ingresso/uscita pregressi, mappando le anagrafiche sul layer relazionale unificato MySQL.
+* **[F1-024] Estensione Enum Postazioni:** Modificato in emergenza lo strato database `stargem_v2` integrando dinamicamente nuovi enum (ad esempio `C. CHIAMATE`) sfuggiti al mock originario, bypassando le restrizioni di MariaDB per garantire la coerenza 1:1 dello shift-board con la struttura gestionale.
+* **[F2-015 / F2-016] Architettura Core GemTeam Shift & Dashboard:** Trasformata la sezione Staff/Team (`gemteam.tsx`).
+  * **Shift Dashboard:** Implementata KPI Bar con metriche live (In Sede, Online, Usciti, Non Pervenuti). Costruite le routines asincrone di polling ed i totalizzatori nativi che distinguono i login cloud.
+  * **Self-Service Check-In:** Iniettato nello Sheet Personale il modulo action-based per la timbratura d'ingresso e uscita (`Entra in Sede` / `Esci Sede`), connesso dinamicamente alla route unificata `POST /api/gemteam/checkin/oggi`.
+  * **Full-Width Shift Grid (V2):** Disaccoppiato strategicamente il contenitore del calendario settimanale dei turni dal Root Layout Max-Width (`max-w-7xl`). Configurato lo sprawl al 100% dell'asse orizzontale (`w-full`) consentendo alle matrici orarie di riempire i monitor giganti senza compressione o padding.
+  * **Sistema Esclusione Silente (Dummy Accounts):** Costruita pipeline di filtering su rendering per decurtare in vivo gli account di root-bot (Admin `15`, AI `16`) rimuovendone le spine di calcolo dalle totalizzazioni "Attesi".
+
+---
+
 ### 15 Aprile 2026 (Chat_10_Utenti-GemPortal — Auth + GemPortal)
 
 AUTH & ACCESSI (F1-001 → F1-008 / F2-001 → F2-003):
