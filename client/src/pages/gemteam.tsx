@@ -162,7 +162,7 @@ export default function GemTeam() {
   const role = user?.role?.toLowerCase() || '';
   const isMaster = ['admin', 'master', 'super admin'].includes(role);
 
-  const [isSheetOrderOpen, setIsSheetOrderOpen] = useState(false);
+  const [ordinaOpen, setOrdinaOpen] = useState(false);
   const [localOrder, setLocalOrder] = useState<GemTeamMember[]>([]);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
 
@@ -189,7 +189,7 @@ export default function GemTeam() {
       if (!res.ok) throw new Error('Errore salvataggio ordine');
       
       await queryClient.invalidateQueries({ queryKey: ["/api/gemteam/dipendenti"] });
-      setIsSheetOrderOpen(false);
+      setOrdinaOpen(false);
     } catch (e) {
       console.error(e);
       alert('Errore di salvataggio');
@@ -227,7 +227,7 @@ export default function GemTeam() {
     if (dipendenti.length > 0) {
       setLocalOrder(dipendenti.filter(d => !isSystemEmployee(d)));
     }
-  }, [dipendenti, isSheetOrderOpen]);
+  }, [dipendenti, ordinaOpen]);
 
 
 
@@ -245,6 +245,11 @@ export default function GemTeam() {
 
   const { data: postazioniApi = [] } = useQuery<any[]>({
     queryKey: ['/api/gemteam/postazioni'],
+    queryFn: async () => {
+      const res = await fetch('/api/gemteam/postazioni', { credentials: 'include' });
+      if (!res.ok) return [];
+      return res.json();
+    }
   });
 
   
@@ -289,10 +294,11 @@ export default function GemTeam() {
   
   const updateTeamMutation = useMutation({
     mutationFn: async ({ id, team }: { id: number, team: string }) => {
-      const res = await fetch(`/api/gemteam/dipendenti/${id}`, { // Fallback if reorder or specific ID route missing? No, the user provided code block! We will patch /api/gemteam/dipendenti/:id
+      const res = await fetch(`/api/gemteam/dipendenti/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ team })
+        body: JSON.stringify({ team }),
+        credentials: 'include'
       });
       if (!res.ok) throw new Error('Errore aggiornamento reparto');
       return res.json();
@@ -1029,20 +1035,27 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
                     </Button>
                     
                     
-<DropdownMenu>
-  <DropdownMenuTrigger asChild>
+
+<Popover>
+  <PopoverTrigger asChild>
     <Badge variant="secondary" className="hidden sm:inline-flex ml-4 font-semibold text-xs border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer">
-      Tipo {weekAssignment?.settimana || 'A'} · {format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'd MMM')} - {format(endOfWeek(turniDate, { weekStartsOn: 1 }), 'd MMM')}
+      Tipo {weekAssignment?.settimana || 'A'} · {format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'd MMM')}
     </Badge>
-  </DropdownMenuTrigger>
+  </PopoverTrigger>
   {isMaster && (
-    <DropdownMenuContent>
-      {['A', 'B', 'C', 'D', 'E'].map(l => (
-        <DropdownMenuItem key={l} onClick={() => weekTypeMutation.mutate(l)}>Settimana Tipo {l}</DropdownMenuItem>
-      ))}
-    </DropdownMenuContent>
+    <PopoverContent className="w-auto p-3">
+      <h4 className="text-xs font-bold text-slate-500 mb-2 uppercase text-center">Settimana Tipo</h4>
+      <div className="flex gap-1.5">
+        {['A', 'B', 'C', 'D', 'E'].map(l => (
+          <Button key={l} variant={weekAssignment?.settimana === l ? "default" : "outline"} size="sm" className="h-8 w-8 p-0" onClick={() => {
+            weekTypeMutation.mutate(l);
+          }}>{l}</Button>
+        ))}
+      </div>
+    </PopoverContent>
   )}
-</DropdownMenu>
+</Popover>
+
 
                     {isSameDay(turniDate, new Date()) ? (
         <Badge onClick={() => setTurniDate(new Date())} className="bg-emerald-500 hover:bg-emerald-600 text-[10px] cursor-pointer">OGGI</Badge>
@@ -1062,7 +1075,7 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
                   
                   {isMaster && (
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Sheet open={isSheetOrderOpen} onOpenChange={setIsSheetOrderOpen}>
+                      <Sheet open={ordinaOpen} onOpenChange={setOrdinaOpen}>
                         <SheetTrigger asChild>
                           <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white">
                             <GripVertical className="h-3 w-3 mr-1 opacity-50" /> Ordina colonne
@@ -1074,8 +1087,18 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
                             <SheetDescription>Trascina i dipendenti per riordinare.</SheetDescription>
                           </SheetHeader>
                           <div className="mt-6 max-h-[70vh] overflow-y-auto px-1">
-                            {/* Drag context was requested to be kept stubbed if out of time, but F2-018 logic is already functioning for localOrder */}
-                            Reimposta ordine
+                            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                              <SortableContext items={localOrder.map(d => d.id)} strategy={verticalListSortingStrategy}>
+                                <div className="space-y-2">
+                                  {localOrder.map(d => (
+                                    <SortableDipendente key={d.id} id={d.id} dipendente={d} />
+                                  ))}
+                                </div>
+                              </SortableContext>
+                            </DndContext>
+                            <Button onClick={handleSaveOrder} disabled={isSavingOrder} className="w-full mt-6 bg-primary text-white">
+                              {isSavingOrder ? 'Salvataggio...' : 'Salva ordine'}
+                            </Button>
                           </div>
                         </SheetContent>
                       </Sheet>
@@ -1232,7 +1255,7 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
 <Select name="postazione" defaultValue={turniFiltrato.postazione}>
   <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
   <SelectContent>
-    {postazioniApi.filter((p:any) => p.attiva !== false).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
+    {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
       <SelectItem key={p.id} value={p.nome}>{p.nome}</SelectItem>
     ))}
   </SelectContent>
@@ -1292,7 +1315,7 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
 <Select name="postazione">
   <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
   <SelectContent>
-    {postazioniApi.filter((p:any) => p.attiva !== false).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
+    {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
       <SelectItem key={p.id} value={p.nome}>{p.nome}</SelectItem>
     ))}
   </SelectContent>
