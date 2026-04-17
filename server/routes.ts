@@ -4676,20 +4676,21 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   
   app.get("/api/gemteam/turni", isAuthenticated, async (req, res) => {
     try {
-      const employeeId = req.query.employee_id 
+      const employeeId = req.query.employee_id && req.query.employee_id !== 'null'
         ? parseInt(req.query.employee_id as string) 
         : null;
       const settimana = req.query.settimana as any || 'A';
+      const giornoStr = req.query.giorno as string | undefined;
+
+      const conditions = [eq(schema.teamShiftTemplates.settimanaTipo, settimana)];
+      if (employeeId && !isNaN(employeeId)) conditions.push(eq(schema.teamShiftTemplates.employeeId, employeeId));
+      if (giornoStr !== undefined && giornoStr !== null && !isNaN(parseInt(giornoStr))) {
+          conditions.push(eq(schema.teamShiftTemplates.giornoSettimana, parseInt(giornoStr)));
+      }
 
       const turni = await db.select()
         .from(schema.teamShiftTemplates)
-        .where(employeeId 
-          ? and(
-              eq(schema.teamShiftTemplates.employeeId, employeeId),
-              eq(schema.teamShiftTemplates.settimanaTipo, settimana)
-            )
-          : eq(schema.teamShiftTemplates.settimanaTipo, settimana)
-        )
+        .where(and(...conditions))
         .orderBy(
           asc(schema.teamShiftTemplates.giornoSettimana),
           asc(schema.teamShiftTemplates.oraInizio)
