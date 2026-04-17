@@ -42,14 +42,16 @@ const TEAM_COLORS: Record<string, string> = {
   'segreteria': 'bg-pink-100 text-pink-700',
   'ass_manutenzione': 'bg-orange-100 text-orange-700',
   'ufficio': 'bg-blue-100 text-blue-700',
-  'amministrazione': 'bg-purple-100 text-purple-700'
+  'amministrazione': 'bg-purple-100 text-purple-700',
+  'collaboratori': 'bg-slate-200 text-slate-800'
 };
 
 const TEAM_LABELS: Record<string, string> = {
   'segreteria': 'Segreteria',
   'ass_manutenzione': 'Manutenzione',
   'ufficio': 'Ufficio',
-  'amministrazione': 'Amministrazione'
+  'amministrazione': 'Amministrazione',
+  'collaboratori': 'COLLABORATORE EXT'
 };
 
 const WEEKS = ["A", "B", "C", "D", "E"];
@@ -142,10 +144,10 @@ export default function GemTeam() {
     return dipendentiAPI.map(d => ({
       id: d.id,
       userId: d.userId,
-      nome: d.firstName || "Sconosciuto",
-      cognome: d.lastName || "",
-      team: d.team || "Membro",
-      ruolo: d.noteHr || "N/A",
+      nome: d.firstName || (d.username === 'admin' ? 'Admin' : d.username === 'botAI' ? 'Bot' : 'Sconosciuto'),
+      cognome: d.lastName || (d.username === 'admin' ? 'Manager' : d.username === 'botAI' ? 'AI' : ''),
+      team: (d.team === 'Staff' || d.team === 'staff') ? 'collaboratori' : (d.team || 'collaboratori'),
+      ruolo: (d.noteHr === 'Staff' || d.noteHr === 'staff') ? 'N/A' : (d.noteHr || "N/A"),
       attivo: d.attivo,
       tariffa: d.tariffaOraria ? parseFloat(d.tariffaOraria) : null,
       fisso: !!d.stipendioFissoMensile,
@@ -338,7 +340,7 @@ export default function GemTeam() {
         </div>
         <div className="flex gap-2">
           <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1 text-sm shadow-sm">
-            <Users2 className="w-4 h-4 mr-1.5" /> 14 Dipendenti
+            <Users2 className="w-4 h-4 mr-1.5" /> {dipendenti.length} Dipendenti
           </Badge>
         </div>
       </div>
@@ -477,6 +479,7 @@ export default function GemTeam() {
                 <ToggleGroupItem value="ass_manutenzione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-orange-100 data-[state=on]:text-orange-800">Manutenzione</ToggleGroupItem>
                 <ToggleGroupItem value="ufficio" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800">Ufficio</ToggleGroupItem>
                 <ToggleGroupItem value="amministrazione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-purple-100 data-[state=on]:text-purple-800">Amministrazione</ToggleGroupItem>
+                <ToggleGroupItem value="collaboratori" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-slate-200 data-[state=on]:text-slate-800">Collaboratori</ToggleGroupItem>
               </ToggleGroup>
             </div>
 
@@ -509,18 +512,18 @@ export default function GemTeam() {
                         </div>
                       )}
                       
-                      <Avatar className={`w-16 h-16 mb-3 border-2 border-white shadow-sm ring-2 ${dip.team === 'segreteria' ? 'ring-pink-100' : dip.team === 'ass_manutenzione' ? 'ring-orange-100' : dip.team === 'ufficio' ? 'ring-blue-100' : 'ring-purple-100'}`}>
+                      <Avatar className={`w-16 h-16 mb-3 border-2 border-white shadow-sm ring-2 ${dip.team === 'segreteria' ? 'ring-pink-100' : dip.team === 'ass_manutenzione' ? 'ring-orange-100' : dip.team === 'ufficio' ? 'ring-blue-100' : dip.team === 'collaboratori' ? 'ring-slate-200' : 'ring-purple-100'}`}>
                         {dip.photo_url ? (
                           <AvatarImage src={dip.photo_url} alt={dip.nome} className="object-cover" />
                         ) : null}
-                        <AvatarFallback className={`text-lg font-bold ${TEAM_COLORS[dip.team]}`}>
-                          {dip.nome.charAt(0)}{dip.cognome.charAt(0)}
+                        <AvatarFallback className={`text-lg font-bold ${TEAM_COLORS[dip.team] || 'bg-slate-200 text-slate-800'}`}>
+                          {dip.nome.charAt(0)}{dip.cognome ? dip.cognome.charAt(0) : ''}
                         </AvatarFallback>
                       </Avatar>
                       
                       <h3 className="font-bold text-slate-800 truncate w-full px-2">{dip.nome} {dip.cognome}</h3>
-                      <Badge variant="secondary" className={`mt-1 mb-3 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[dip.team]}`}>
-                        {TEAM_LABELS[dip.team] || dip.team}
+                      <Badge variant="secondary" className={`mt-1 mb-3 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[dip.team] || 'bg-slate-200 text-slate-800'}`}>
+                        {TEAM_LABELS[dip.team] || (dip.team === 'Staff' || dip.team === 'staff' ? 'COLLABORATORE EXT' : dip.team)}
                       </Badge>
                       
                       <div className="w-full bg-slate-50 rounded-lg p-2 mt-auto border border-slate-100">
