@@ -412,10 +412,10 @@ export default function GemTeam() {
   const isAllowed = ['admin', 'master', 'direzione', 'super admin', 'amministratore totale'].includes(userRole);
 
   return (
-    <div className="p-6 md:p-8 space-y-8 w-full max-w-7xl mx-auto animate-in fade-in zoom-in-95 duration-500">
+    <div className="py-6 md:py-8 space-y-8 w-full animate-in fade-in zoom-in-95 duration-500">
       
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b pb-6 gap-4">
+      <div className="px-6 md:px-8 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end border-b pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Users2 className="w-8 h-8 text-primary" />
@@ -437,7 +437,8 @@ export default function GemTeam() {
 
       {/* TABS */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-flow-auto grid-cols-3 md:grid-cols-6 h-auto p-1.5 gap-1.5 bg-slate-100 rounded-xl mb-8">
+        <div className="px-6 md:px-8 max-w-7xl mx-auto w-full">
+          <TabsList className="grid w-full grid-flow-auto grid-cols-3 md:grid-cols-6 h-auto p-1.5 gap-1.5 bg-slate-100 rounded-xl mb-8">
           <TabsTrigger value="dashboard" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
             <Home className="w-4 h-4 mr-2" /> Dashboard
           </TabsTrigger>
@@ -457,9 +458,10 @@ export default function GemTeam() {
             <PieChart className="w-4 h-4 mr-2" /> Report
           </TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value="dashboard">
-          <div className="space-y-6">
+          <div className="px-6 md:px-8 max-w-7xl mx-auto space-y-6">
             <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
               <span className="relative flex h-3 w-3 mr-1">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -574,7 +576,7 @@ export default function GemTeam() {
         </TabsContent>
 
         <TabsContent value="dipendenti">
-          <div className="space-y-6">
+          <div className="px-6 md:px-8 max-w-7xl mx-auto space-y-6">
             {/* Filtri */}
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
               <div className="relative w-full md:w-80">
@@ -867,14 +869,15 @@ export default function GemTeam() {
               </SheetContent>
             </Sheet>
           </div>
+          </div>
         </TabsContent>
 
-        <TabsContent value="turni">
-          <Card className="border-slate-200 shadow-sm overflow-hidden">
-            <CardContent className="p-0 sm:p-6 space-y-6 bg-slate-50">
+        <TabsContent value="turni" className="w-full">
+          <div className="border-y border-slate-200 shadow-sm overflow-hidden bg-slate-50">
+            <div className="p-0 sm:p-2 space-y-6">
               
               {/* Toolbar */}
-              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-transparent lg:border-slate-200 pb-0 lg:pb-4 p-4 lg:p-0">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-200 pb-4 p-4 md:px-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
                   <div className="flex items-center gap-2 bg-white rounded-lg border border-slate-300 p-1 shadow-sm shrink-0">
                     <Button 
@@ -940,7 +943,7 @@ export default function GemTeam() {
                         <th key={day} className="bg-slate-200 border-slate-300 border p-2 w-auto font-semibold text-slate-700">
                           {day}
                         </th>
-                      )) : dipendenti.map(dip => (
+                      )) : dipendenti.filter(d => d.id !== 15 && d.id !== 16).map(dip => (
                         <th key={dip.id} className="bg-slate-200 border-slate-300 border p-2 w-fit min-w-[100px] font-semibold text-slate-700 truncate" title={`${dip.cognome} ${dip.nome}`}>
                           {dip.cognome} {dip.nome.charAt(0)}.
                         </th>
@@ -966,7 +969,7 @@ export default function GemTeam() {
                               )}
                             </td>
                           );
-                        }) : dipendenti.map(dip => {
+                        }) : dipendenti.filter(d => d.id !== 15 && d.id !== 16).map(dip => {
                           const turniFound = Array.isArray(turniData) ? turniData.find((t: any) => String(t.employeeId) === String(dip.id) && t.oraInizio === time) : null;
                           const colorClass = turniFound ? (SHIFT_COLORS[turniFound.postazione.replace('. ', '.')] || SHIFT_COLORS[turniFound.postazione] || 'bg-slate-100 text-slate-800 border-slate-200') : '';
                           return (
@@ -986,7 +989,7 @@ export default function GemTeam() {
               </div>
 
               {/* Legenda rapida */}
-              <div className="flex flex-wrap gap-1.5 pt-2 px-4 pb-4 sm:p-0">
+              <div className="flex flex-wrap gap-1.5 pt-2 px-4 pb-4 md:px-6">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center mr-2">Legenda Postazioni</span>
                 {Object.entries(SHIFT_COLORS).map(([name, classes]) => (
                   <Badge key={name} variant="outline" className={`text-[9px] px-1.5 py-0.5 border ${classes} opacity-90 shadow-sm`}>
@@ -995,13 +998,14 @@ export default function GemTeam() {
                 ))}
               </div>
 
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* SEPARATORE */}
           <div className="my-8 border-t border-slate-200" />
 
           {/* CALENDARIO REALE */}
+          <div className="px-6 md:px-8 max-w-7xl mx-auto py-8">
           <Card className="border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-4 sm:p-6 space-y-6 bg-slate-50">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-transparent lg:border-slate-200 pb-0 lg:pb-4 p-4 lg:p-0">
@@ -1120,6 +1124,7 @@ export default function GemTeam() {
         </TabsContent>
 
         <TabsContent value="presenze">
+          <div className="px-6 md:px-8 max-w-7xl mx-auto">
           <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
             <CardContent className="p-0 sm:p-6 space-y-6">
               
@@ -1290,6 +1295,7 @@ export default function GemTeam() {
         </TabsContent>
 
         <TabsContent value="diario">
+          <div className="px-6 md:px-8 max-w-7xl mx-auto">
           <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
             <CardContent className="p-0 sm:p-6 space-y-6">
               
@@ -1414,9 +1420,11 @@ export default function GemTeam() {
               
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="report">
+          <div className="px-6 md:px-8 max-w-7xl mx-auto">
           <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
             <CardContent className="p-0 sm:p-6 space-y-6">
               
@@ -1536,6 +1544,7 @@ export default function GemTeam() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
 
       </Tabs>
