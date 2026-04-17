@@ -1,7 +1,7 @@
 import "dotenv/config";
 import * as nodeCrypto from "node:crypto";
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+import { registerRoutes, runStaleSegmentsCron } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import fs from 'fs';
 import path from 'path';
@@ -114,5 +114,14 @@ app.use((req, res, next) => {
     host: "::",
   }, () => {
     log(`serving on port ${port}`);
+
+    // Auto-close stale segments ogni 5 minuti
+    setInterval(async () => {
+      try {
+        await runStaleSegmentsCron();
+      } catch (e) {
+        console.error('Cron presence:', e);
+      }
+    }, 5 * 60 * 1000);
   });
 })();

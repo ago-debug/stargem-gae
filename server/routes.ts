@@ -1014,7 +1014,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     for (const seg of staleOnline) {
       const diffMs = twoMinutesAgo.getTime() - new Date(seg.startedAt).getTime();
-      const durataMinuti = diffMs > 30000 ? Math.max(1, Math.round(diffMs / 60000)) : 0;
+      const durataReale = diffMs > 30000 ? Math.max(1, Math.round(diffMs / 60000)) : 0;
+      const MAX_ONLINE_SEGMENT = 30;
+      const durataMinuti = Math.min(durataReale, MAX_ONLINE_SEGMENT);
       await db.update(userSessionSegments)
         .set({ endedAt: twoMinutesAgo, durataMinuti })
         .where(eq(userSessionSegments.id, seg.id));
@@ -1073,7 +1075,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Ancora online - non fare nulla, logica heartbeat handled
       } else if (seg.tipo === 'online' && diffMin > 2) {
         // Era online, torna dopo pausa
-        const safeDurata = diffMs > 30000 ? Math.max(1, Math.round(diffMin)) : 0;
+        const durataReale = diffMs > 30000 ? Math.max(1, Math.round(diffMin)) : 0;
+        const MAX_ONLINE_SEGMENT = 30;
+        const safeDurata = Math.min(durataReale, MAX_ONLINE_SEGMENT);
         await db.update(userSessionSegments)
           .set({ endedAt: now, durataMinuti: safeDurata })
           .where(eq(userSessionSegments.id, seg.id));
@@ -1140,7 +1144,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const seg = openSegment[0];
         const diffMs = now.getTime() - new Date(seg.startedAt).getTime();
         const diffMin = diffMs / 60000;
-        const safeDurata = diffMs > 30000 ? Math.max(1, Math.round(diffMin)) : 0;
+        const durataReale = diffMs > 30000 ? Math.max(1, Math.round(diffMin)) : 0;
+        const safeDurata = seg.tipo === 'online' ? Math.min(durataReale, 30) : durataReale;
         await db.update(userSessionSegments)
           .set({ endedAt: now, durataMinuti: safeDurata })
           .where(eq(userSessionSegments.id, seg.id));
@@ -10475,4 +10480,29 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   });
 
   return httpServer;
+}
+export async function runStaleSegmentsCron() {
+  const { db } = await import("./db");
+  const { userSessionSegments } = await import("../shared/schema");
+  const { eq, and, isNull, lt } = await import("drizzle-orm");
+
+  const now = Date.now();
+  const tenMinutesAgo = new Date(now - 10 * 60 * 1000);
+  const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
+
+  const staleOnline = await db.select().from(userSessionSegments).where(and(eq(userSessionSegments.tipo, 'online'), isNull(userSessionSegments.endedAt), lt(userSessionSegments.startedAt, twoMinutesAgo)));
+  for (const seg of staleOnline) {
+    const diffMs = twoMinutesAgo.getTime() - new Date(seg.startedAt).getTime();
+    const durataReale = diffMs > 30000 ? Math.max(1, Math.round(diffMs / 60000)) : 0;
+    const durataMinuti = Math.min(durataReale, 30);
+    await db.update(userSessionSegments).set({ endedAt: twoMinutesAgo, durataMinuti }).where(eq(userSessionSegments.id, seg.id));
+    await db.insert(userSessionSegments).values({ userId: seg.userId, tipo: 'pausa', startedAt: twoMinutesAgo });
+  }
+
+  const stalePausa = await db.select().from(userSessionSegments).where(and(eq(userSessionSegments.tipo, 'pausa'), isNull(userSessionSegments.endedAt), lt(userSessionSegments.startedAt, tenMinutesAgo)));
+  for (const seg of stalePausa) {
+    const diffMs = tenMinutesAgo.getTime() - new Date(seg.startedAt).getTime();
+    const durataMinuti = diffMs > 30000 ? Math.max(1, Math.round(diffMs / 60000)) : 0;
+    await db.update(userSessionSegments).set({ endedAt: tenMinutesAgo, durataMinuti }).where(eq(userSessionSegments.id, seg.id));
+  }
 }
