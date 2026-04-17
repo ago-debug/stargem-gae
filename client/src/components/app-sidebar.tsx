@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -284,6 +285,28 @@ export function AppSidebar() {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
   const isInsegnante = (user as any)?.role === 'insegnante';
+
+  const { data: usersInfoRaw = [] } = useActiveUsers();
+  const [liveExtra, setLiveExtra] = useState(0);
+
+  useEffect(() => {
+    const me = usersInfoRaw.find((u: any) => u.id === user?.id);
+    if (!me || me.stato !== 'online' || !me.segmentoCorrenteInizio) {
+      setLiveExtra(0);
+      return;
+    }
+    
+    const start = new Date(me.segmentoCorrenteInizio).getTime();
+    
+    // Il server ha restituito i dati a questo istante ("base"). 
+    // Calcoliamo la differenza rispetto ad ora. Non sommiamo start ma facciamo un delta
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - start) / 60000);
+      setLiveExtra(elapsed); 
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [usersInfoRaw, user]);
 
   const { data: latestActivity } = useQuery<{
     action: string;
@@ -592,7 +615,6 @@ export function AppSidebar() {
 
         {/* ACTIVE USERS ACCORDION/LIST */}
         {!isInsegnante && (() => {
-          const { data: usersInfoRaw = [] } = useActiveUsers();
           const usersInfo = usersInfoRaw.filter((u: any) => {
             if (u.username?.toLowerCase().includes('martina')) return false;
             if (u.username?.includes('example.com')) return false;
@@ -689,7 +711,15 @@ export function AppSidebar() {
                           return h > 0 ? `${h}h ${min}m` : `${min}m`;
                         }
 
-                        const lavoroStr = fmtMin(u.lavoroOggiMinuti) || fmtMin(Math.round((u.lastSessionDuration || 0))) || "0m";
+                        let userMinuti = u.lavoroOggiMinuti || 0;
+                        if (isMe && isOnline) {
+                           // Sovrascriviamo calcolando i minuti base senza il live, poi gli aggiungiamo il nostro contatore fluido extra
+                           userMinuti = userMinuti + liveExtra;
+                           // Al momento il valore di u.lavoroOggiMinuti restituito dall'API potrebbe includere già l'ultimo ping. 
+                           // L'utente desidera veder avanzare questo specifico valore
+                        }
+
+                        const lavoroStr = fmtMin(userMinuti) || fmtMin(Math.round((u.lastSessionDuration || 0))) || "0m";
                         const pausaStr = fmtMin(u.pausaOggiMinuti);
 
                         let text = "";
