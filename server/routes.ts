@@ -1013,9 +1013,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
     for (const seg of staleOnline) {
-      const durataMinuti = Math.round(
-        (twoMinutesAgo.getTime() - new Date(seg.startedAt).getTime()) / 60000
-      );
+      const diffMs = twoMinutesAgo.getTime() - new Date(seg.startedAt).getTime();
+      const durataMinuti = diffMs > 30000 ? Math.max(1, Math.round(diffMs / 60000)) : 0;
       await db.update(userSessionSegments)
         .set({ endedAt: twoMinutesAgo, durataMinuti })
         .where(eq(userSessionSegments.id, seg.id));
@@ -1038,9 +1037,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
     for (const seg of stalePausa) {
-      const durataMinuti = Math.round(
-        (tenMinutesAgo.getTime() - new Date(seg.startedAt).getTime()) / 60000
-      );
+      const diffMs = tenMinutesAgo.getTime() - new Date(seg.startedAt).getTime();
+      const durataMinuti = diffMs > 30000 ? Math.max(1, Math.round(diffMs / 60000)) : 0;
       await db.update(userSessionSegments)
         .set({ endedAt: tenMinutesAgo, durataMinuti })
         .where(eq(userSessionSegments.id, seg.id));
@@ -1075,16 +1073,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Ancora online - non fare nulla, logica heartbeat handled
       } else if (seg.tipo === 'online' && diffMin > 2) {
         // Era online, torna dopo pausa
+        const safeDurata = diffMs > 30000 ? Math.max(1, Math.round(diffMin)) : 0;
         await db.update(userSessionSegments)
-          .set({ endedAt: now, durataMinuti: Math.round(diffMin) })
+          .set({ endedAt: now, durataMinuti: safeDurata })
           .where(eq(userSessionSegments.id, seg.id));
         await db.insert(userSessionSegments).values({
           userId, tipo: 'online', startedAt: now
         });
       } else if (seg.tipo === 'pausa') {
         // In pausa, torna online
+        const safeDurata = diffMs > 30000 ? Math.max(1, Math.round(diffMin)) : 0;
         await db.update(userSessionSegments)
-          .set({ endedAt: now, durataMinuti: Math.round(diffMin) })
+          .set({ endedAt: now, durataMinuti: safeDurata })
           .where(eq(userSessionSegments.id, seg.id));
         await db.insert(userSessionSegments).values({
           userId, tipo: 'online', startedAt: now
@@ -1138,9 +1138,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (openSegment.length > 0) {
         const seg = openSegment[0];
-        const diffMin = (now.getTime() - new Date(seg.startedAt).getTime()) / 60000;
+        const diffMs = now.getTime() - new Date(seg.startedAt).getTime();
+        const diffMin = diffMs / 60000;
+        const safeDurata = diffMs > 30000 ? Math.max(1, Math.round(diffMin)) : 0;
         await db.update(userSessionSegments)
-          .set({ endedAt: now, durataMinuti: Math.round(diffMin) })
+          .set({ endedAt: now, durataMinuti: safeDurata })
           .where(eq(userSessionSegments.id, seg.id));
       }
 
