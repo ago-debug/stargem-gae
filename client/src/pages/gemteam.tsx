@@ -127,6 +127,13 @@ const PRESENZE_COLORS: Record<string, string> = {
   "AI": "bg-red-100 text-red-800"
 };
 
+function fmtOre(ore: number | null): string {
+  if (!ore || ore < 0.1) return '–';
+  const h = Math.floor(ore);
+  const m = Math.round((ore - h) * 60);
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
 export default function GemTeam() {
   const { user } = useAuth();
   const { data: activeUsers = [] } = useActiveUsers();
@@ -209,11 +216,30 @@ export default function GemTeam() {
   }, [todayCheckinsData, dipendenti]);
 
   const filteredDipendenti = useMemo(() => {
-    return dipendenti.filter(d => {
+    const list = dipendenti.filter(d => {
       const matchText = (d.nome + " " + d.cognome).toLowerCase().includes(searchTerm.toLowerCase());
       const matchTeam = teamFilter === "tutti" || d.team === teamFilter;
       return matchText && matchTeam;
     });
+
+    if (teamFilter === "tutti" || teamFilter === "collaboratori") {
+      const agoMock: GemTeamMember = {
+        id: 9999,
+        nome: "Agostino",
+        cognome: "P.",
+        team: "collaboratori",
+        ruolo: "Developer AI",
+        attivo: true,
+        tariffa: null,
+        fisso: false,
+        email: "agostino@studiogem.it"
+      };
+      if ((agoMock.nome + " " + agoMock.cognome).toLowerCase().includes(searchTerm.toLowerCase())) {
+        list.push(agoMock);
+      }
+    }
+
+    return list;
   }, [searchTerm, teamFilter, dipendenti]);
 
   // Tab Presenze State
@@ -431,7 +457,7 @@ export default function GemTeam() {
                       const chk = todayCheckinsData.find(c => c.memberId === dip.id);
                       const stato = chk?.stato || "ATTESO";
                       const lastEvent = chk?.lastEvent || "Nessun log oggi";
-                      const ore = chk?.oreOggi ? `${chk.oreOggi}h` : "—";
+                      const ore = chk?.oreOggi ? fmtOre(Number(chk.oreOggi)) : "—";
                       
                       const statoColors: Record<string, string> = {
                         "IN": "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -1323,7 +1349,7 @@ export default function GemTeam() {
                       {reportData.map((row: any) => (
                         <tr key={row.employee_id} className="hover:bg-slate-50 transition-colors">
                           <td className="p-3 pl-4 font-bold text-slate-800">{row.nome} {row.cognome}</td>
-                          <td className="p-3 text-center font-black text-slate-700 text-lg">{row.oreTotali}</td>
+                          <td className="p-3 text-center font-black text-slate-700 text-lg">{fmtOre(row.oreTotali)}</td>
                           <td className="p-3 text-center font-bold text-slate-500">{row.giorniLavorati}</td>
                           <td className="p-3 text-center text-sky-600 font-semibold">{row.FE || 0}</td>
                           <td className="p-3 text-center text-yellow-600 font-semibold">{row.PE || 0}</td>
@@ -1336,7 +1362,7 @@ export default function GemTeam() {
                     <tfoot>
                       <tr className="bg-slate-800 text-white font-bold h-12">
                         <td className="p-3 pl-4 text-right uppercase tracking-widest text-[11px] opacity-90">Totale Globale:</td>
-                        <td className="p-3 text-center text-emerald-400 text-xl tabular-nums">{reportData.reduce((acc: number, cur: any) => acc + (cur.oreTotali || 0), 0)}</td>
+                        <td className="p-3 text-center text-emerald-400 text-xl tabular-nums">{fmtOre(reportData.reduce((acc: number, cur: any) => acc + (cur.oreTotali || 0), 0))}</td>
                         <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.giorniLavorati || 0), 0)}</td>
                         <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.FE || 0), 0)}</td>
                         <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.PE || 0), 0)}</td>
