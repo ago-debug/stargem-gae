@@ -558,9 +558,14 @@ export default function UtentiPermessi() {
             </TabsContent>
           );
 
-          const teamUsers = users?.filter(u => getRoleCategory(u.role) === "team") || [];
-          const staffUsers = users?.filter(u => getRoleCategory(u.role) === "staff") || [];
-          const clientUsers = users?.filter(u => getRoleCategory(u.role) === "utenti") || [];
+          const sortedUsers = [...(users || [])].sort((a, b) =>
+            (a.lastName || (a as any).cognome || '').localeCompare(b.lastName || (b as any).cognome || '', 'it') ||
+            (a.firstName || (a as any).nome || '').localeCompare(b.firstName || (b as any).nome || '', 'it')
+          );
+          
+          const teamUsers = sortedUsers.filter(u => getRoleCategory(u.role) === "team");
+          const staffUsers = sortedUsers.filter(u => getRoleCategory(u.role) === "staff");
+          const clientUsers = sortedUsers.filter(u => getRoleCategory(u.role) === "utenti");
 
           return (
             <>

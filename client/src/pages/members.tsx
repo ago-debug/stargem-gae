@@ -183,7 +183,12 @@ export default function Members() {
     staleTime: 30000,
   });
 
-  const membersRaw = membersData?.members || [];
+  const membersRaw = useMemo(() => {
+    return [...(membersData?.members || [])].sort((a, b) =>
+      (a.lastName || (a as any).cognome || '').localeCompare(b.lastName || (b as any).cognome || '', 'it') ||
+      (a.firstName || (a as any).nome || '').localeCompare(b.firstName || (b as any).nome || '', 'it')
+    );
+  }, [membersData?.members]);
 
   const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Member>("lastName");
 
