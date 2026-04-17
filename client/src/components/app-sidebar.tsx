@@ -594,27 +594,12 @@ export function AppSidebar() {
         {!isInsegnante && (() => {
           const { data: usersInfoRaw = [] } = useActiveUsers();
           const usersInfo = usersInfoRaw.filter((u: any) => {
-            // Escludi per username (più affidabile dell'email
-            // perché l'endpoint presence potrebbe non restituire email)
             if (u.username?.toLowerCase().includes('martina')) return false;
-            if (u.username?.toLowerCase() === 'martina.ricci3@example.com') return false;
-            
-            // Aggiungi anche check sul username che contiene example.com
             if (u.username?.includes('example.com')) return false;
-
-            // Escludi account di test noti
-            if (u.username === 'botAI') return false;
             if (u.username === 'cavallo') return false;
-            if (u.username === 'cavallo pazzo') return false;
-            
-            // Escludi email di test
             if (u.email?.includes('example.com')) return false;
-            if (u.email?.includes('@test.')) return false;
-            
-            // Escludi solo i client puri (non staff)
             if (u.role?.toLowerCase() === 'client') return false;
             
-            // Tutto il resto passa
             return true;
           });
 
