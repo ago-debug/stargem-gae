@@ -645,61 +645,50 @@ export function AppSidebar() {
                   if (b.id === user?.id) return 1;
                   return 0;
                 }).map((u: any) => {
-                  const now = new Date().getTime();
-                  const diffMs = u.lastSeenAt ? (now - new Date(u.lastSeenAt).getTime()) : 0;
-                  const diffMins = u.lastSeenAt ? Math.round(diffMs / 60000) : 0;
-                  
-                  const isOnline = !!u.currentSessionStart && diffMs < 30 * 1000;
-                  const isAway = !!u.currentSessionStart && diffMs >= 30 * 1000 && diffMins <= 20;
+                  const isOnline = u.stato === 'online';
+                  const isPausa = u.stato === 'pausa';
+                  const isOffline = u.stato === 'offline' || !u.stato;
                   const isMe = user?.id === u.id;
                   
                   return (
                     <div key={u.id} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 min-w-0" title={isOnline ? 'Online' : isAway ? 'In Stop / Pausa' : 'Offline'}>
+                      <div className="flex items-center gap-1.5 min-w-0" title={isOnline ? 'Online' : isPausa ? 'In Pausa' : 'Offline'}>
                         {isOnline ? (
                            <div className="relative flex h-[10px] w-[10px] shrink-0 justify-center items-center">
                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
                            </div>
-                        ) : isAway ? (
-                           <PauseCircle className="w-[11px] h-[11px] fill-current shrink-0 text-amber-500" />
+                        ) : isPausa ? (
+                           <div className="relative flex h-[10px] w-[10px] shrink-0 justify-center items-center">
+                             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+                           </div>
                         ) : (
                            <PowerOff className="w-2.5 h-2.5 shrink-0 text-slate-400" />
                         )}
-                        <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : isAway ? "text-slate-500" : "text-slate-400 opacity-80"}`}>
+                        <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : isPausa ? "text-slate-500 font-medium" : "text-slate-400 opacity-80"}`}>
                           {isMe ? "Tu" : (u.firstName || u.username)}
                         </span>
                       </div>
                       
                       {(() => {
-                        const isOffline = !isOnline && !isAway;
+                        function fmtMin(m: number | undefined | null) {
+                          if (!m || m === 0) return null;
+                          const h = Math.floor(m / 60);
+                          const min = m % 60;
+                          return h > 0 ? `${h}h ${min}m` : `${min}m`;
+                        }
+
+                        const lavoroStr = fmtMin(u.lavoroOggiMinuti) || "0m";
+                        const pausaStr = fmtMin(u.pausaOggiMinuti);
+
                         let text = "";
-                        let workedMins = 0;
-                        
-                        if (diffMins > 20) {
-                          // Utente inattivo — usa solo lastSessionDuration
-                          workedMins = u.lastSessionDuration ?? 0;
-                        } else if (u.currentSessionStart) {
-                          // Utente attivo — sessione corrente + sessioni precedenti
-                          const startT = new Date(u.currentSessionStart).getTime();
-                          const sessionMins = Math.round((now - startT) / 60000);
-                          workedMins = (u.lastSessionDuration ?? 0) + sessionMins;
+                        if (isOnline) {
+                          text = `Lavoro: ${lavoroStr}`;
+                        } else if (isPausa) {
+                          text = `⏸ Pausa: ${pausaStr || "0m"} · Lavoro: ${lavoroStr}`;
                         } else {
-                          workedMins = u.lastSessionDuration ?? 0;
-                        }
-
-                        let durStr = "";
-                        if (workedMins > 0) {
-                          durStr = workedMins > 60 ? `(lavoro: ${Math.floor(workedMins / 60)}h ${workedMins % 60}m)` : `(lavoro: ${workedMins}m)`;
-                        }
-
-                        if (isOffline) {
-                          const dateStr = u.lastSeenAt ? format(new Date(u.lastSeenAt), "dd/MM HH:mm") : "";
-                          text = `Uscito ${dateStr}${durStr ? ` ${durStr}` : ""}`;
-                        } else if (u.currentSessionStart) {
-                          const timeStr = new Date(u.currentSessionStart).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-                          const durStrOnly = workedMins > 60 ? `${Math.floor(workedMins / 60)}h ${workedMins % 60}m` : `${workedMins}m`;
-                          text = `${timeStr} (lavoro: ${durStrOnly})`;
+                          const timeStr = u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : "Mai";
+                          text = `Uscito ${timeStr} · Lavoro: ${lavoroStr}`;
                         }
 
                         return (

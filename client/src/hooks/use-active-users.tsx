@@ -9,6 +9,12 @@ export type PresenceUser = {
   currentSessionStart: string | null;
   lastSessionDuration: number | null;
   lastSeenAt: string | null;
+  role?: string | null;
+  stato?: 'online' | 'pausa' | 'offline';
+  lavoroOggiMinuti?: number;
+  pausaOggiMinuti?: number;
+  segmentoCorrenteInizio?: string | null;
+  segmentoCorrenteTipo?: 'online' | 'pausa' | null;
 };
 
 export function useActiveUsers() {

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useActiveUsers } from "@/hooks/use-active-users";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -31,6 +32,7 @@ interface GemTeamMember {
   email?: string;
   phone?: string;
   photo_url?: string;
+  userId?: string | null;
   last_seen_at?: string | null;
   current_session_start?: string | null;
   last_session_duration?: number | null;
@@ -125,6 +127,7 @@ const PRESENZE_COLORS: Record<string, string> = {
 
 export default function GemTeam() {
   const { user } = useAuth();
+  const { data: activeUsers = [] } = useActiveUsers();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -138,6 +141,7 @@ export default function GemTeam() {
   const dipendenti: GemTeamMember[] = useMemo(() => {
     return dipendentiAPI.map(d => ({
       id: d.id,
+      userId: d.userId,
       nome: d.firstName || "Sconosciuto",
       cognome: d.lastName || "",
       team: d.team || "Membro",
@@ -598,47 +602,59 @@ export default function GemTeam() {
                         </h4>
                         <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col gap-3">
                           {(() => {
-                            const now = new Date().getTime();
-                            const lastSeenAt = selectedSheetDip.last_seen_at;
-                            const diffMins = lastSeenAt ? Math.round((now - new Date(lastSeenAt).getTime()) / 60000) : null;
+                            const presenceInfo = activeUsers.find((u: any) => u.id === selectedSheetDip.userId);
                             
-                            let statoBadge = <Badge variant="outline" className="bg-slate-200 text-slate-500 border-slate-300 font-bold">OFFLINE</Badge>;
-                            if (diffMins !== null) {
-                              if (diffMins <= 5) statoBadge = <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 font-bold"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block"></span>ONLINE</Badge>;
-                              else if (diffMins <= 480) statoBadge = <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-bold">ATTIVO OGGI</Badge>;
+                            let lavoroMins = 0;
+                            let pausaMins = 0;
+                            let statoStr = "OFFLINE";
+                            let badgeStyle = "bg-slate-200 text-slate-500 border-slate-300";
+                            let lastSeenStr = "Mai";
+
+                            if (presenceInfo) {
+                                lavoroMins = presenceInfo.lavoroOggiMinuti || 0;
+                                pausaMins = presenceInfo.pausaOggiMinuti || 0;
+                                
+                                if (presenceInfo.stato === 'online') {
+                                    statoStr = "ONLINE";
+                                    badgeStyle = "bg-emerald-100 text-emerald-800 border-emerald-200";
+                                } else if (presenceInfo.stato === 'pausa') {
+                                    statoStr = "IN PAUSA";
+                                    badgeStyle = "bg-amber-100 text-amber-800 border-amber-200";
+                                }
+                                
+                                if (presenceInfo.lastSeenAt) {
+                                    lastSeenStr = new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' }).format(new Date(presenceInfo.lastSeenAt));
+                                }
                             }
 
-                            let workedMins = 0;
-                            if (diffMins !== null && diffMins > 20) {
-                              workedMins = selectedSheetDip.last_session_duration ?? 0;
-                            } else if (selectedSheetDip.current_session_start) {
-                              const startT = new Date(selectedSheetDip.current_session_start).getTime();
-                              const sessionMins = Math.round((now - startT) / 60000);
-                              workedMins = (selectedSheetDip.last_session_duration ?? 0) + sessionMins;
-                            } else {
-                              workedMins = selectedSheetDip.last_session_duration ?? 0;
+                            function fmtMin(m: number) {
+                              if (!m || m === 0) return "0m";
+                              const h = Math.floor(m / 60);
+                              const min = m % 60;
+                              return h > 0 ? `${h}h ${min}m` : `${min}m`;
                             }
-
-                            let durStr = "—";
-                            if (workedMins > 0) {
-                              durStr = workedMins > 60 ? `${Math.floor(workedMins / 60)}h ${workedMins % 60}m` : `${workedMins}m`;
-                            }
-
-                            const lastSeenStr = lastSeenAt ? new Intl.DateTimeFormat('it-IT', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lastSeenAt)) : "Mai";
 
                             return (
                               <>
                                 <div className="flex justify-between items-center text-sm">
                                   <span className="text-slate-500">Stato:</span>
-                                  {statoBadge}
+                                  <Badge variant="outline" className={`${badgeStyle} font-bold`}>
+                                    {statoStr === "ONLINE" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block"></span>}
+                                    {statoStr === "IN PAUSA" && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 inline-block"></span>}
+                                    {statoStr}
+                                  </Badge>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-500">Ultima Sessione:</span>
+                                  <span className="text-slate-500">Lavoro oggi:</span>
+                                  <span className="font-semibold text-slate-700">{fmtMin(lavoroMins)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-slate-500">Pausa oggi:</span>
+                                  <span className="font-semibold text-slate-700">{fmtMin(pausaMins)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-slate-500">Ultimo accesso:</span>
                                   <span className="font-semibold text-slate-700">{lastSeenStr}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-500">Tempo Sessione Lavoro:</span>
-                                  <span className="font-semibold text-slate-700">{durStr}</span>
                                 </div>
                               </>
                             );
