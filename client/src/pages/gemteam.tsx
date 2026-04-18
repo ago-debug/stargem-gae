@@ -238,7 +238,7 @@ export default function GemTeam() {
   const { data: turniScheduled = [], refetch: refetchScheduled } = useQuery<any[]>({
     queryKey: ['/api/gemteam/turni/scheduled', formattedTurniDate],
     queryFn: () =>
-      fetch(`/api/gemteam/turni/scheduled/${formattedTurniDate}`, {
+      fetch(`/api/gemteam/turni/scheduled?data=${formattedTurniDate}`, {
         credentials: 'include',
         headers: { 'Accept': 'application/json' }
       }).then(r => r.ok ? r.json() : []),
@@ -248,7 +248,7 @@ export default function GemTeam() {
   const { data: eventiGiorno = [] } = useQuery<any[]>({
     queryKey: ['/api/gemteam/turni/eventi-giorno', formattedTurniDate],
     queryFn: () =>
-      fetch(`/api/gemteam/turni/eventi-giorno/${formattedTurniDate}`, {
+      fetch(`/api/gemteam/turni/eventi-giorno?data=${formattedTurniDate}`, {
         credentials: 'include',
         headers: { 'Accept': 'application/json' }
       }).then(r => r.ok ? r.json() : []),
@@ -322,7 +322,7 @@ export default function GemTeam() {
   const { data: weekAssignment } = useQuery<any>({
     queryKey: ['/api/gemteam/turni/week-assignment', format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd')],
     queryFn: () =>
-      fetch(`/api/gemteam/turni/week-assignment/${format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd')}`, {
+      fetch(`/api/gemteam/turni/week-assignment?weekStart=${format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd')}`, {
         credentials: 'include',
         headers: { 'Accept': 'application/json' }
       }).then(r => r.ok ? r.json() : []),
@@ -1234,7 +1234,17 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
                         {hour}
                       </td>
                       {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => {
-                         const turniFiltrato = Array.isArray(turniScheduled) ? turniScheduled.find((t:any) => t.employeeId === dip.id && t.oraInizio?.substring(0,5) === hour) : null;
+                         const turniFiltrato = Array.isArray(turniScheduled) ? turniScheduled.find((t:any) => {
+                           if (String(t.employeeId) !== String(dip.id)) return false;
+                           if (!t.oraInizio || !t.oraFine) return false;
+                           const [hI, mI] = t.oraInizio.split(':');
+                           const [hF, mF] = t.oraFine.split(':');
+                           const [hS, mS] = hour.split(':');
+                           const startMins = Number(hI) * 60 + Number(mI);
+                           const endMins = Number(hF) * 60 + Number(mF);
+                           const slotMins = Number(hS) * 60 + Number(mS);
+                           return slotMins >= startMins && slotMins < endMins;
+                         }) : null;
                          const isAssente = turniFiltrato?.hasAbsence || false;
                          
                          return (
