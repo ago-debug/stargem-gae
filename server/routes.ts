@@ -4960,8 +4960,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       const mese = parseInt(req.params.mese);
       if (isNaN(anno) || isNaN(mese)) return res.status(400).json({ error: 'Anno/Mese non validi' });
 
-      const startDate = new Date(anno, mese - 1, 1);
-      const endDate = new Date(anno, mese, 0, 23, 59, 59);
+
 
       const records = await db
         .select({
@@ -4983,10 +4982,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         .innerJoin(schema.teamEmployees, eq(schema.teamEmployees.id, schema.teamAttendanceLogs.employeeId))
         .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
         .where(
-          and(
-            gte(schema.teamAttendanceLogs.data, startDate),
-            lte(schema.teamAttendanceLogs.data, endDate)
-          )
+          sql`YEAR(${schema.teamAttendanceLogs.data}) = ${anno} AND MONTH(${schema.teamAttendanceLogs.data}) = ${mese}`
         )
         .orderBy(asc(schema.members.lastName), asc(schema.members.firstName), schema.teamAttendanceLogs.data);
 
@@ -10776,7 +10772,6 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     try {
       const dataStr = req.query.data as string;
       if (!dataStr) return res.status(400).json({ error: 'data mancante' });
-      const targetDate = new Date(dataStr);
 
       const records = await db.select({
         id: schema.teamScheduledShifts.id,
@@ -10797,10 +10792,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
       .leftJoin(schema.teamAttendanceLogs, and(
          eq(schema.teamAttendanceLogs.employeeId, schema.teamScheduledShifts.employeeId),
-         eq(sql`DATE(${schema.teamAttendanceLogs.data})`, targetDate),
+         sql`DATE(${schema.teamAttendanceLogs.data}) = ${dataStr}`,
          isNotNull(schema.teamAttendanceLogs.tipoAssenza)
       ))
-      .where(eq(schema.teamScheduledShifts.data, targetDate))
+      .where(sql`DATE(${schema.teamScheduledShifts.data}) = ${dataStr}`)
       .orderBy(sql`${schema.teamEmployees.displayOrder} ASC`, sql`${schema.teamScheduledShifts.oraInizio} ASC`);
 
       const mapped = records.map(r => ({
@@ -10922,17 +10917,17 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       const { fromData, toData } = req.body;
       if (!fromData || !toData) return res.status(400).json({ error: 'date mancanti' });
 
-      const fromD = new Date(fromData);
-      const toD = new Date(toData);
+      const fromD = fromData;
+      const toD = toData;
 
-      const sourceShifts = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.data, fromD));
+      const sourceShifts = await db.select().from(schema.teamScheduledShifts).where(sql`DATE(${schema.teamScheduledShifts.data}) = ${fromD}`);
       let created = 0, skipped = 0;
 
       for (const s of sourceShifts) {
         try {
           await db.insert(schema.teamScheduledShifts).values({
             employeeId: s.employeeId,
-            data: toD,
+            data: new Date(toD),
             oraInizio: s.oraInizio,
             oraFine: s.oraFine,
             postazione: s.postazione,
@@ -11032,7 +11027,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     try {
       const { data } = req.query;
       if (!data) return res.status(400).json({ error: 'data mancante' });
-      const targetDate = new Date(data as string);
+      const dateStr = data as string;
 
       const events = await db.select({
         title: schema.strategicEvents.title,
@@ -11043,8 +11038,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       })
       .from(schema.strategicEvents)
       .where(and(
-        lte(schema.strategicEvents.startDate, targetDate),
-        or(gte(schema.strategicEvents.endDate, targetDate), isNull(schema.strategicEvents.endDate)),
+        sql`DATE(${schema.strategicEvents.startDate}) <= ${dateStr}`,
+        or(sql`DATE(${schema.strategicEvents.endDate}) >= ${dateStr}`, isNull(schema.strategicEvents.endDate)),
         eq(schema.strategicEvents.affectsCalendar, true),
         eq(schema.strategicEvents.status, 'active')
       ));
