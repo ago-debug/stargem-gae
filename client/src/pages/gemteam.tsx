@@ -237,19 +237,32 @@ export default function GemTeam() {
 
   const { data: turniScheduled = [], refetch: refetchScheduled } = useQuery<any[]>({
     queryKey: ['/api/gemteam/turni/scheduled', formattedTurniDate],
+    queryFn: () =>
+      fetch(`/api/gemteam/turni/scheduled/${formattedTurniDate}`, {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      }).then(r => r.ok ? r.json() : []),
+    staleTime: 60000
   });
 
   const { data: eventiGiorno = [] } = useQuery<any[]>({
     queryKey: ['/api/gemteam/turni/eventi-giorno', formattedTurniDate],
+    queryFn: () =>
+      fetch(`/api/gemteam/turni/eventi-giorno/${formattedTurniDate}`, {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      }).then(r => r.ok ? r.json() : []),
+    staleTime: 60000
   });
 
   const { data: postazioniApi = [] } = useQuery<any[]>({
     queryKey: ['/api/gemteam/postazioni'],
-    queryFn: async () => {
-      const res = await fetch('/api/gemteam/postazioni', { credentials: 'include' });
-      if (!res.ok) return [];
-      return res.json();
-    }
+    queryFn: () =>
+      fetch('/api/gemteam/postazioni', {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      }).then(r => r.ok ? r.json() : []),
+    staleTime: 60000
   });
 
   
@@ -308,6 +321,12 @@ export default function GemTeam() {
   
   const { data: weekAssignment } = useQuery<any>({
     queryKey: ['/api/gemteam/turni/week-assignment', format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd')],
+    queryFn: () =>
+      fetch(`/api/gemteam/turni/week-assignment/${format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd')}`, {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      }).then(r => r.ok ? r.json() : []),
+    staleTime: 60000
   });
 const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !isSystemEmployee(d));
   const filteredManutenzione = dipendenti.filter(d => (d.team === 'ass_manutenzione' || d.team === 'manutenzione') && !isSystemEmployee(d));
@@ -555,10 +574,10 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
   const isAllowed = ['admin', 'master', 'direzione', 'super admin', 'amministratore totale'].includes(userRole);
 
   return (
-    <div className="py-6 md:py-8 space-y-8 w-full animate-in fade-in zoom-in-95 duration-500">
+    <div className="py-3 md:py-4 space-y-4 w-full animate-in fade-in zoom-in-95 duration-500">
       
       {/* HEADER */}
-      <div className="px-6 md:px-8 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end border-b pb-6 gap-4">
+      <div className="px-6 md:px-8 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end border-b pb-4 gap-3">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Users2 className="w-8 h-8 text-primary" />
@@ -581,7 +600,7 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
       {/* TABS */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="px-6 md:px-8 max-w-7xl mx-auto w-full">
-          <TabsList className="grid w-full grid-flow-auto grid-cols-3 md:grid-cols-6 h-auto p-1.5 gap-1.5 bg-slate-100 rounded-xl mb-8">
+          <TabsList className="grid w-full grid-flow-auto grid-cols-3 md:grid-cols-6 h-auto p-1.5 gap-1.5 bg-slate-100 rounded-xl mb-4">
           <TabsTrigger value="dashboard" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
             <Home className="w-4 h-4 mr-2" /> Dashboard
           </TabsTrigger>
@@ -1017,10 +1036,10 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
         
         
         <TabsContent value="turni" className="w-full relative">
-          <div className="border-y border-slate-200 shadow-sm overflow-hidden bg-slate-50 w-full mb-8 flex flex-col">
+          <div className="border-y border-slate-200 shadow-sm overflow-hidden bg-slate-50 w-full mb-4 flex flex-col">
             
             {/* SEZIONE A: HEADER */}
-            <div className="bg-white border-b border-slate-200 p-4 sticky top-0 z-30">
+            <div className="bg-white border-b border-slate-200 py-2 px-4 sticky top-0 z-30">
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center gap-3">
