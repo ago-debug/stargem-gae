@@ -309,6 +309,7 @@ export default function GemTeam() {
       return res.json();
     },
     onSuccess: () => {
+        refetchScheduled();
         queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] });
         document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     }
