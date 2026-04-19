@@ -309,20 +309,30 @@ export default function GemTeam() {
 
   const weekTypeMutation = useMutation({
     mutationFn: async (settimana: string) => {
+      const wStart = format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
       const res = await fetch('/api/gemteam/turni/week-assignment', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
-          weekStart: format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
+          weekStart: wStart,
           settimana
         })
       });
       if (!res.ok) throw new Error('Errore aggiornamento settimana');
+      
+      const applyRes = await fetch('/api/gemteam/turni/apply-template', {
+         method: 'POST',
+         credentials: 'include',
+         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+         body: JSON.stringify({ weekStart: wStart, settimana })
+      });
+      if (!applyRes.ok) throw new Error('Errore in apply-template');
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/week-assignment'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] });
       toast({title: "Aggiornato", description: "Variazione tipo di settimana registrata con successo."});
     }
   });
@@ -350,22 +360,8 @@ export default function GemTeam() {
       }).then(r => r.ok ? r.json() : []),
     staleTime: 60000
   });
-  const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
-  const filteredManutenzione = dipendenti.filter(d => (d.team === 'ass_manutenzione' || d.team === 'manutenzione') && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
-  const filteredUfficio = dipendenti.filter(d => d.team === 'ufficio' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
-  const filteredAmministrazione = dipendenti.filter(d => d.team === 'amministrazione' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
-  const filteredComunicazione = dipendenti.filter(d => d.team === 'comunicazione' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
-  const filteredDirezione = dipendenti.filter(d => d.team === 'direzione' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
-
   const MOCK_EMPLOYEES = useMemo(() => dipendenti.map(d => d.nome), [dipendenti]);
   const [selectedEmployee, setSelectedEmployee] = useState(MOCK_EMPLOYEES[0] || "Seleziona...");
-
-  const [calWeekOffset, setCalWeekOffset] = useState(0);
-  const [programmedWeeks, setProgrammedWeeks] = useState<Record<number, string>>({});
-  const [draftTemplate, setDraftTemplate] = useState("A");
-
-  // Tab Dipendenti State
-  const [searchTerm, setSearchTerm] = useState("");
 
   const selectedEmpId = useMemo(() => {
     const found = dipendenti.find(d => 
@@ -376,6 +372,20 @@ export default function GemTeam() {
     );
     return found?.id;
   }, [selectedEmployee, dipendenti]);
+
+  const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredManutenzione = dipendenti.filter(d => (d.team === 'ass_manutenzione' || d.team === 'manutenzione') && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredUfficio = dipendenti.filter(d => d.team === 'ufficio' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredAmministrazione = dipendenti.filter(d => d.team === 'amministrazione' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredComunicazione = dipendenti.filter(d => d.team === 'comunicazione' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredDirezione = dipendenti.filter(d => d.team === 'direzione' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+
+  const [calWeekOffset, setCalWeekOffset] = useState(0);
+  const [programmedWeeks, setProgrammedWeeks] = useState<Record<number, string>>({});
+  const [draftTemplate, setDraftTemplate] = useState("A");
+
+  // Tab Dipendenti State
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [turniGiorno, setTurniGiorno] = useState<number>(() => {
     const d = new Date().getDay();
@@ -1084,15 +1094,37 @@ export default function GemTeam() {
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center gap-3">
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTurniDate(subDays(turniDate, 1))}>
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <div className="text-base sm:text-lg font-bold text-slate-800 tracking-tight min-w-[200px] text-center capitalize">
-                      {format(turniDate, "EEEE d MMMM yyyy", { locale: it })}
-                    </div>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTurniDate(addDays(turniDate, 1))}>
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+                    {turniViewMode !== 'collettiva' ? (
+                      <>
+                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTurniDate(subDays(turniDate, 1))}>
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <div className="text-base sm:text-lg font-bold text-slate-800 tracking-tight min-w-[200px] text-center capitalize">
+                          {format(turniDate, "EEEE d MMMM yyyy", { locale: it })}
+                        </div>
+                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTurniDate(addDays(turniDate, 1))}>
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="flex bg-slate-100 rounded-lg p-1 border border-slate-200 shadow-inner">
+                        {[0,1,2,3,4,5,6].map(offset => {
+                          const d = addDays(startOfWeek(turniDate, { weekStartsOn: 1 }), offset);
+                          const isSelected = format(d, 'yyyy-MM-dd') === format(turniDate, 'yyyy-MM-dd');
+                          return (
+                            <Button 
+                              key={offset} 
+                              variant={isSelected ? "default" : "ghost"} 
+                              size="sm" 
+                              className={`h-8 px-3 text-xs font-bold ${!isSelected && 'text-slate-500'}`}
+                              onClick={() => setTurniDate(d)}
+                            >
+                              {format(d, 'EEEE', { locale: it })}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    )}
                     
                     
 
@@ -1256,16 +1288,7 @@ export default function GemTeam() {
               </div>
             </div>
 
-            {/* SEZIONE B: BANNER EVENTI */}
-            {eventiGiorno.length > 0 && (
-              <div className="bg-amber-100/80 border-b border-amber-200 px-4 py-2 flex items-center justify-center gap-2">
-                {eventiGiorno.map((e: any) => (
-                  <span key={e.id} className="text-amber-800 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-                    <AlertTriangle className="h-3.5 w-3.5" /> {e.titolo}
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* SEZIONE B: BANNER EVENTI (Rimossa via direttiva) */}
 
             {/* SEZIONE C: GRIGLIA ORARIA GIORNALIERA / COLLETTIVA / SINGOLA */}
             {turniViewMode !== 'settimanale' && (
@@ -1291,7 +1314,7 @@ export default function GemTeam() {
                          <div className="flex items-center justify-center gap-1">
                             {isMaster && <GripVertical className="h-3 w-3 text-slate-300 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity" />}
                             <span className="text-[10px] font-bold text-slate-700 uppercase truncate" title={dip.nome + ' ' + dip.cognome}>
-      {dip.nome} {dip.cognome ? dip.cognome.charAt(0) : ''}.
+      {dip.nome.split(' ')[0]} {dip.cognome ? dip.cognome.charAt(0) + '.' : ''}
     </span>
                          </div>
                       </th>
@@ -1370,15 +1393,21 @@ export default function GemTeam() {
                                         
                                         <form onSubmit={(e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const selectEl = e.currentTarget.elements.namedItem('postazione') as HTMLSelectElement;
+    const startEl = e.currentTarget.elements.namedItem('inizio') as HTMLInputElement;
+    const endEl = e.currentTarget.elements.namedItem('fine') as HTMLInputElement;
+    const noteEl = e.currentTarget.elements.namedItem('note') as HTMLInputElement;
+    
+    if (!selectEl.value) { toast({title: "Errore", description: "Seleziona postazione", variant: "destructive"}); return; }
+
     shiftMutation.mutate({
       id: turniFiltrato.id,
       employeeId: dip.id,
       data: formattedTurniDate,
-      oraInizio: formData.get('inizio'),
-      oraFine: formData.get('fine'),
-      postazione: formData.get('postazione'),
-      note: formData.get('note')
+      oraInizio: startEl.value,
+      oraFine: endEl.value,
+      postazione: selectEl.value,
+      note: noteEl.value
     });
   }}>
   <div className="space-y-3">
@@ -1469,14 +1498,20 @@ export default function GemTeam() {
                                       
                                       <form onSubmit={(e) => {
   e.preventDefault();
-  const formData = new FormData(e.currentTarget);
+  const selectEl = e.currentTarget.elements.namedItem('postazione') as HTMLSelectElement;
+  const startEl = e.currentTarget.elements.namedItem('inizio') as HTMLInputElement;
+  const endEl = e.currentTarget.elements.namedItem('fine') as HTMLInputElement;
+  const noteEl = e.currentTarget.elements.namedItem('note') as HTMLInputElement;
+  
+  if (!selectEl.value) { toast({title: "Errore", description: "Seleziona postazione", variant: "destructive"}); return; }
+  
   shiftMutation.mutate({
     employeeId: dip.id,
     data: formattedTurniDate,
-    oraInizio: formData.get('inizio'),
-    oraFine: formData.get('fine'),
-    postazione: formData.get('postazione'),
-    note: formData.get('note')
+    oraInizio: startEl.value,
+    oraFine: endEl.value,
+    postazione: selectEl.value,
+    note: noteEl.value
   });
 }}>
 <div className="space-y-3">
@@ -1572,10 +1607,10 @@ export default function GemTeam() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {dipendenti.filter(d => !isSystemEmployee(d)).map(dip => (
-                        <tr key={dip.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="bg-slate-50 p-2 border-r border-slate-200 font-semibold text-[11px] text-slate-700 sticky left-0 z-10 shadow-[1px_0_0_rgba(200,200,200,0.5)] truncate max-w-[160px]">
-                               {dip.nome} {dip.cognome}
+                    {dipendenti.filter(d => !isSystemEmployee(d)).map((dip, idx) => (
+                        <tr key={dip.id} className={`hover:bg-slate-100 transition-colors border-b-2 border-slate-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+                            <td className="p-2 border-r border-slate-200 font-semibold text-[11px] text-slate-700 sticky left-0 z-10 shadow-[1px_0_0_rgba(200,200,200,0.5)] truncate max-w-[160px] bg-inherit align-top">
+                               <div className="sticky top-0">{dip.nome} {dip.cognome}</div>
                             </td>
                             {[0,1,2,3,4,5,6].map(offset => {
                                 const currentDate = format(addDays(startOfWeek(turniDate, { weekStartsOn: 1 }), offset), 'yyyy-MM-dd');

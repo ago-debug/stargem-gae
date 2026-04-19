@@ -10837,13 +10837,18 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   app.patch("/api/gemteam/turni/scheduled/:id", isAuthenticated, isMasterGuard, async (req, res) => {
     try {
       const recordId = parseInt(req.params.id);
-      const { postazione, oraInizio, oraFine, note } = req.body;
+      const { postazione, oraInizio, oraFine, note, employeeId, data } = req.body;
 
       const results = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
       if (!results.length) return res.status(404).json({ error: 'Non trovato' });
 
       await db.update(schema.teamScheduledShifts)
-        .set({ postazione, oraInizio, oraFine, note, modifiedByUserId: (req.user as any)?.id, updatedAt: new Date() })
+        .set({ 
+          postazione, oraInizio, oraFine, note, 
+          ...(employeeId ? {employeeId} : {}), 
+          ...(data ? {data: new Date(data)} : {}), 
+          modifiedByUserId: (req.user as any)?.id, updatedAt: new Date() 
+        })
         .where(eq(schema.teamScheduledShifts.id, recordId));
 
       await db.insert(schema.teamNotifications).values({
