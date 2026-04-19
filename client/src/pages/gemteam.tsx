@@ -23,6 +23,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
@@ -148,6 +149,7 @@ function SortableDipendente({ id, dipendente }: { id: number, dipendente: GemTea
 
 export default function GemTeam() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const { data: activeUsers = [] } = useActiveUsers();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -232,16 +234,24 @@ export default function GemTeam() {
 
 
   
+  const [turniViewMode, setTurniViewMode] = useState<"giornaliera" | "settimanale" | "collettiva" | "singola">("giornaliera");
   const [turniDate, setTurniDate] = useState(new Date());
   const formattedTurniDate = format(turniDate, 'yyyy-MM-dd');
 
   const { data: turniScheduled = [], refetch: refetchScheduled } = useQuery<any[]>({
-    queryKey: ['/api/gemteam/turni/scheduled', formattedTurniDate],
-    queryFn: () =>
-      fetch(`/api/gemteam/turni/scheduled?data=${formattedTurniDate}`, {
+    queryKey: ['/api/gemteam/turni/scheduled', turniViewMode, formattedTurniDate],
+    queryFn: async () => {
+      if (turniViewMode === 'settimanale') {
+        const startD = startOfWeek(turniDate, { weekStartsOn: 1 });
+        const days = [0,1,2,3,4,5,6].map(i => format(addDays(startD, i), 'yyyy-MM-dd'));
+        const results = await Promise.all(days.map(d => fetch(`/api/gemteam/turni/scheduled?data=${d}`, { credentials: 'include', headers: { 'Accept': 'application/json' } }).then(r => r.ok ? r.json() : [])));
+        return results.flat();
+      }
+      return fetch(`/api/gemteam/turni/scheduled?data=${formattedTurniDate}`, {
         credentials: 'include',
         headers: { 'Accept': 'application/json' }
-      }).then(r => r.ok ? r.json() : []),
+      }).then(r => r.ok ? r.json() : []);
+    },
     staleTime: 60000
   });
 
@@ -293,7 +303,8 @@ export default function GemTeam() {
     mutationFn: async (settimana: string) => {
       const res = await fetch('/api/gemteam/turni/week-assignment', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
           weekStart: format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
           settimana
@@ -302,7 +313,10 @@ export default function GemTeam() {
       if (!res.ok) throw new Error('Errore aggiornamento settimana');
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/week-assignment'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/week-assignment'] });
+      toast({title: "Aggiornato", description: "Variazione tipo di settimana registrata con successo."});
+    }
   });
   
   const updateTeamMutation = useMutation({
@@ -328,12 +342,12 @@ export default function GemTeam() {
       }).then(r => r.ok ? r.json() : []),
     staleTime: 60000
   });
-const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !isSystemEmployee(d));
-  const filteredManutenzione = dipendenti.filter(d => (d.team === 'ass_manutenzione' || d.team === 'manutenzione') && !isSystemEmployee(d));
-  const filteredUfficio = dipendenti.filter(d => d.team === 'ufficio' && !isSystemEmployee(d));
-  const filteredAmministrazione = dipendenti.filter(d => d.team === 'amministrazione' && !isSystemEmployee(d));
-  const filteredComunicazione = dipendenti.filter(d => d.team === 'comunicazione' && !isSystemEmployee(d));
-  const filteredDirezione = dipendenti.filter(d => d.team === 'direzione' && !isSystemEmployee(d));
+  const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredManutenzione = dipendenti.filter(d => (d.team === 'ass_manutenzione' || d.team === 'manutenzione') && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredUfficio = dipendenti.filter(d => d.team === 'ufficio' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredAmministrazione = dipendenti.filter(d => d.team === 'amministrazione' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredComunicazione = dipendenti.filter(d => d.team === 'comunicazione' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
+  const filteredDirezione = dipendenti.filter(d => d.team === 'direzione' && !isSystemEmployee(d) && (turniViewMode !== 'singola' || d.id === selectedEmpId));
 
   const MOCK_EMPLOYEES = useMemo(() => dipendenti.map(d => d.nome), [dipendenti]);
   const [selectedEmployee, setSelectedEmployee] = useState(MOCK_EMPLOYEES[0] || "Seleziona...");
@@ -355,7 +369,6 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
     return found?.id;
   }, [selectedEmployee, dipendenti]);
 
-  const [turniViewMode, setTurniViewMode] = useState<"giornaliera" | "settimanale" | "collettiva" | "singola">("giornaliera");
   const [turniGiorno, setTurniGiorno] = useState<number>(() => {
     const d = new Date().getDay();
     return d === 0 ? 6 : d - 1;
@@ -848,9 +861,29 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
                           <SheetTitle className="text-2xl text-slate-800 m-0 p-0 leading-none">
                             {selectedSheetDip.cognome} {selectedSheetDip.nome}
                           </SheetTitle>
-                          <Badge variant="secondary" className={`mt-2 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[selectedSheetDip.team]}`}>
-                            {TEAM_LABELS[selectedSheetDip.team]}
-                          </Badge>
+                          {isMaster ? (
+                            <Select 
+                              defaultValue={selectedSheetDip.team} 
+                              onValueChange={(val) => updateTeamMutation.mutate({ id: selectedSheetDip.id, team: val })}
+                              disabled={updateTeamMutation.isPending}
+                            >
+                              <SelectTrigger className={`mt-2 h-7 text-[10px] w-auto inline-flex font-bold tracking-wider uppercase border-transparent ${TEAM_COLORS[selectedSheetDip.team]} ${updateTeamMutation.isPending ? 'opacity-50' : ''}`}>
+                                <SelectValue placeholder="Seleziona..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="segreteria">SEGRETERIA</SelectItem>
+                                <SelectItem value="ass_manutenzione">MANUTENZIONE</SelectItem>
+                                <SelectItem value="ufficio">UFFICIO</SelectItem>
+                                <SelectItem value="amministrazione">AMMINISTRAZIONE</SelectItem>
+                                <SelectItem value="comunicazione">COMUNICAZIONE</SelectItem>
+                                <SelectItem value="direzione">DIREZIONE</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge variant="secondary" className={`mt-2 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[selectedSheetDip.team]}`}>
+                              {TEAM_LABELS[selectedSheetDip.team]}
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       <SheetDescription className="pt-2 text-slate-500">
@@ -1090,6 +1123,18 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
                     <Button variant={turniViewMode === 'settimanale' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-slate-500" onClick={() => setTurniViewMode('settimanale')}>Settimanale</Button>
                     <Button variant={turniViewMode === 'collettiva' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-slate-500" onClick={() => setTurniViewMode('collettiva')}>Collettiva</Button>
                     <Button variant={turniViewMode === 'singola' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-slate-500" onClick={() => setTurniViewMode('singola')}>Singola</Button>
+                    {turniViewMode === 'singola' && (
+                      <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                        <SelectTrigger className="h-7 w-40 text-xs font-semibold bg-white border-transparent">
+                          <SelectValue placeholder="Seleziona dipendente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {dipendenti.map(d => (
+                            <SelectItem key={d.id} value={`${d.nome} ${d.cognome}`}>{d.nome} {d.cognome}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                   
                   {isMaster && (
@@ -1196,9 +1241,10 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
               </div>
             )}
 
-            {/* SEZIONE C: GRIGLIA ORARIA GIORNALIERA */}
-            <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
-              <table id="griglia-turni" className="w-full border-collapse min-w-max bg-white table-fixed">
+            {/* SEZIONE C: GRIGLIA ORARIA GIORNALIERA / COLLETTIVA / SINGOLA */}
+            {turniViewMode !== 'settimanale' && (
+              <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
+                <table id="griglia-turni" className="w-full border-collapse min-w-max bg-white table-fixed">
                 <thead className="sticky top-0 z-20 shadow-sm border-b border-slate-300">
                   {/* Raggruppamento Team */}
                   <tr>
@@ -1245,16 +1291,17 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
                            const slotMins = Number(hS) * 60 + Number(mS);
                            return slotMins >= startMins && slotMins < endMins;
                          }) : null;
-                         const isAssente = turniFiltrato?.hasAbsence || false;
+                         const hasConflict = turniFiltrato?.hasConflict || false;
+                         const postInfo = turniFiltrato ? postazioniApi.find((p:any) => p.nome === turniFiltrato.postazione) : null;
                          
                          return (
-                           <td key={`${dip.id}-${hour}`} className={`border-r border-b ${isAssente ? 'border-red-400 ring-2 ring-inset ring-red-500/30' : 'border-slate-200'} p-0.5 relative cursor-pointer min-h-[22px]`}>
+                           <td key={`${dip.id}-${hour}`} className={`border-r border-b ${hasConflict ? 'border-red-400 ring-2 ring-inset ring-red-500/30' : 'border-slate-200'} p-0.5 relative cursor-pointer min-h-[22px]`}>
                               {turniFiltrato ? (
                                 <Popover>
                                   <PopoverTrigger asChild>
-                                    <div title={isAssente ? "Assenza registrata" : ""} className={`${isAssente ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} w-full h-full min-h-[20px] rounded border flex items-center justify-center p-0.5 shadow-sm hover:brightness-95`}>
+                                    <div title={hasConflict ? "Conflitto registrato" : ""} style={postInfo?.colore ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}} className={`${hasConflict ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} w-full h-full min-h-[20px] rounded border flex items-center justify-center p-0.5 shadow-sm hover:brightness-95`}>
                                       <span className="text-[9px] font-bold uppercase truncate max-w-full">
-                                        {isAssente && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
+                                        {hasConflict && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
                                         {turniFiltrato.postazione}
                                       </span>
                                     </div>
@@ -1382,6 +1429,16 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
 
                 <tfoot className="sticky bottom-0 z-20 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] bg-white border-t-2 border-slate-300">
                   <tr>
+                    <td colSpan={100} className="p-2 border-b border-slate-200 bg-slate-50">
+                      <div className="flex flex-wrap items-center gap-4 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+                         <span className="text-slate-400">LEGENDA:</span>
+                         {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).map((p:any) => (
+                            <div key={p.id} className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full shadow-sm" style={{backgroundColor: p.colore || '#e2e8f0'}} /><span>{p.nome}</span></div>
+                         ))}
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
                     <td className="bg-slate-100 border-r border-slate-300 text-center text-[10px] font-extrabold text-slate-600 p-2 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 tracking-widest uppercase">
                       TOT ORE
                     </td>
@@ -1389,11 +1446,13 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
                       <td key={`tot-${dip.id}`} className="text-center p-2 font-bold text-xs text-slate-600 border-r border-slate-200 bg-slate-50">
                         {/* Mock calculation: in final version we sum duration of postazioni with conta_ore=1 */}
                         {(() => {
-  const turniDip = Array.isArray(turniScheduled) ? turniScheduled.filter((t:any) => t.employeeId === dip.id) : [];
+  const turniDip = Array.isArray(turniScheduled) ? turniScheduled.filter((t:any) => String(t.employeeId) === String(dip.id)) : [];
   if (turniDip.length === 0) return '0.0h';
   let mins = 0;
   turniDip.forEach((t:any) => {
     if (!t.oraInizio || !t.oraFine) return;
+    const postazioneInfo = postazioniApi.find((p:any) => p.nome === t.postazione);
+    if (!postazioneInfo || !postazioneInfo.contaOre) return; // Conta ore check
     const [hS, mS] = t.oraInizio.split(':').map(Number);
     const [hE, mE] = t.oraFine.split(':').map(Number);
     mins += (hE * 60 + mE) - (hS * 60 + mS);
@@ -1408,7 +1467,64 @@ const filteredSegreteria = dipendenti.filter(d => d.team === 'segreteria' && !is
                 </tfoot>
               </table>
             </div>
+            )}
             
+            {/* GRIGLIA SETTIMANALE */}
+            {turniViewMode === 'settimanale' && (
+              <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
+                <table id="griglia-settimanale" className="w-full border-collapse min-w-max bg-white table-fixed">
+                  <thead className="sticky top-0 z-20 shadow-sm border-b border-slate-300">
+                    <tr>
+                      <th className="w-40 min-w-40 bg-slate-50 border-r border-slate-300 p-2 text-left text-[11px] text-slate-500 font-bold uppercase tracking-widest shadow-[1px_0_0_rgba(200,200,200,0.5)] z-30">
+                        Dipendente
+                      </th>
+                      {[0,1,2,3,4,5,6].map(offset => {
+                          const d = addDays(startOfWeek(turniDate, { weekStartsOn: 1 }), offset);
+                          return (
+                             <th key={offset} className="w-32 bg-slate-50 border-r border-slate-300 p-2 text-center text-[10px] font-bold text-slate-700 uppercase">
+                                 {format(d, 'EEEE dd/MM', { locale: it })}
+                             </th>
+                          );
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {dipendenti.filter(d => !isSystemEmployee(d)).map(dip => (
+                        <tr key={dip.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="bg-slate-50 p-2 border-r border-slate-200 font-semibold text-[11px] text-slate-700 sticky left-0 z-10 shadow-[1px_0_0_rgba(200,200,200,0.5)] truncate max-w-[160px]">
+                               {dip.nome} {dip.cognome}
+                            </td>
+                            {[0,1,2,3,4,5,6].map(offset => {
+                                const currentDate = format(addDays(startOfWeek(turniDate, { weekStartsOn: 1 }), offset), 'yyyy-MM-dd');
+                                const turniGiorno = Array.isArray(turniScheduled) ? turniScheduled.filter((t:any) => String(t.employeeId) === String(dip.id) && format(new Date(t.data), 'yyyy-MM-dd') === currentDate) : [];
+                                if (turniGiorno.length === 0) return <td key={offset} className="p-1 border-r border-slate-200 min-h-[40px]"></td>;
+                                
+                                return (
+                                   <td key={offset} className="p-1 border-r border-slate-200 min-h-[40px] align-top">
+                                      <div className="flex flex-col gap-1">
+                                      {turniGiorno.map(t => {
+                                          const postInfo = postazioniApi.find((p:any) => p.nome === t.postazione);
+                                          const hasConflict = t.hasConflict || false;
+                                          return (
+                                              <div key={t.id} title={hasConflict ? "Conflitto registrato" : ""} className={`w-full min-h-[30px] rounded border flex flex-col items-center justify-center p-1 shadow-sm text-center ${hasConflict ? 'bg-red-100 text-red-800 border-red-300 ring-2 ring-red-500/30' : ''}`} style={(!hasConflict && postInfo?.colore) ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}}>
+                                                  <span className="text-[9px] font-bold uppercase truncate max-w-full">
+                                                     {hasConflict && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
+                                                     {t.postazione}
+                                                  </span>
+                                                  <span className="text-[8px] opacity-80 font-medium">{(t.oraInizio || '').substring(0,5)} - {(t.oraFine || '').substring(0,5)}</span>
+                                              </div>
+                                          )
+                                      })}
+                                      </div>
+                                   </td>
+                                )
+                            })}
+                        </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}            
           </div>
         </TabsContent>
 
