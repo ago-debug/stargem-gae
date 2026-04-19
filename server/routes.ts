@@ -10931,13 +10931,20 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
 
   app.post("/api/gemteam/turni/copy-day", isAuthenticated, isMasterGuard, async (req, res) => {
     try {
-      const { fromData, toData } = req.body;
+      const { fromData, toData, employeeIds } = req.body;
       if (!fromData || !toData) return res.status(400).json({ error: 'date mancanti' });
 
       const fromD = fromData;
       const toD = toData;
 
-      const sourceShifts = await db.select().from(schema.teamScheduledShifts).where(sql`DATE(${schema.teamScheduledShifts.data}) = ${fromD}`);
+      let conditions = [sql`DATE(${schema.teamScheduledShifts.data}) = ${fromD}`];
+      if (employeeIds && Array.isArray(employeeIds) && employeeIds.length > 0) {
+        conditions.push(inArray(schema.teamScheduledShifts.employeeId, employeeIds));
+      }
+
+      const sourceShifts = await db.select()
+        .from(schema.teamScheduledShifts)
+        .where(and(...conditions));
       let created = 0, skipped = 0;
 
       for (const s of sourceShifts) {
