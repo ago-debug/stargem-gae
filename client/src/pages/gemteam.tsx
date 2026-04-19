@@ -8,10 +8,12 @@ import { useActiveUsers } from "@/hooks/use-active-users";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download, Plus, Activity, LogIn, LogOut, GripVertical, AlertTriangle } from "lucide-react";
+import { Users2, ShieldCheck, PieChart, Home, ClipboardList, PenTool, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Search, Mail, Phone, MapPin, UserPlus, Download, Plus, Activity, LogIn, LogOut, GripVertical, AlertTriangle, Copy } from "lucide-react";
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -291,6 +293,7 @@ export default function GemTeam() {
     },
     onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni'] });
         document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     }
   });
@@ -333,6 +336,7 @@ export default function GemTeam() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/week-assignment'] });
       queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni'] });
       toast({title: "Aggiornato", description: "Variazione tipo di settimana registrata con successo."});
     }
   });
@@ -386,6 +390,8 @@ export default function GemTeam() {
 
   // Tab Dipendenti State
   const [searchTerm, setSearchTerm] = useState("");
+  const [isCopiaWeekOpen, setIsCopiaWeekOpen] = useState(false);
+  const [targetCopiaWeekDate, setTargetCopiaWeekDate] = useState<Date | undefined>(undefined);
 
   const [turniGiorno, setTurniGiorno] = useState<number>(() => {
     const d = new Date().getDay();
@@ -1265,33 +1271,64 @@ export default function GemTeam() {
                     </div>
                   )}
 
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Legenda</Button>
-                    </PopoverTrigger>
-                    <PopoverContent align="end" className="w-[300px] p-4">
-                      <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Colori Postazioni</div>
-                      <div className="flex flex-wrap gap-3">
-                        {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).map((p:any) => (
-                          <div key={p.id} className="flex items-center gap-1.5 w-[120px]">
-                            <div className="w-3 h-3 rounded-full shadow-sm" style={{backgroundColor: p.colore || '#e2e8f0'}} />
-                            <span className="text-xs uppercase font-medium truncate">{p.nome}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Legenda</Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-[300px] p-4">
+                        <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Colori Postazioni</div>
+                        <div className="flex flex-wrap gap-3">
+                          {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).map((p:any) => (
+                            <div key={p.id} className="flex items-center gap-1.5 w-[120px]">
+                              <div className="w-3 h-3 rounded-full shadow-sm" style={{backgroundColor: p.colore || '#e2e8f0'}} />
+                              <span className="text-xs uppercase font-medium truncate">{p.nome}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
 
+                    {isMaster && (
+                       <Dialog open={isCopiaWeekOpen} onOpenChange={setIsCopiaWeekOpen}>
+                         <DialogTrigger asChild>
+                           <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50">
+                             <Copy className="h-3 w-3 mr-1" /> Copia settimana
+                           </Button>
+                         </DialogTrigger>
+                         <DialogContent className="max-w-[340px] p-4 flex flex-col items-center zoom-in-95">
+                            <h3 className="font-bold text-sm mb-2">Copia su un'altra settimana</h3>
+                            <p className="text-xs text-slate-500 mb-2 leading-tight text-center">Copia da: <strong>{format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'dd/MM/yyyy')}</strong>. Seleziona la settimana di arrivo.</p>
+                            <Calendar mode="single" selected={targetCopiaWeekDate} onSelect={(date) => { if(date) setTargetCopiaWeekDate(startOfWeek(date, { weekStartsOn: 1 })) }} className="bg-slate-50 rounded-md border border-slate-200" />
+                            <div className="mt-4 w-full">
+                               <Button disabled={!targetCopiaWeekDate} className="w-full h-8 text-xs font-semibold" onClick={async () => {
+                                  if (!targetCopiaWeekDate) return;
+                                  const cWeek = startOfWeek(turniDate, { weekStartsOn: 1 });
+                                  const tWeek = startOfWeek(targetCopiaWeekDate, { weekStartsOn: 1 });
+                                  let totCreated = 0;
+                                  for (let i=0; i<7; i++) {
+                                     const from = format(addDays(cWeek, i), 'yyyy-MM-dd');
+                                     const to = format(addDays(tWeek, i), 'yyyy-MM-dd');
+                                     const p = await fetch('/api/gemteam/turni/copy-day', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fromData: from, toData: to }) }).then(r => r.ok ? r.json() : null);
+                                     if (p?.created) totCreated += p.created;
+                                  }
+                                  setIsCopiaWeekOpen(false);
+                                  toast({title: "Copia effettuata", description: `${totCreated} turni copiati con successo sulla settimana del ${format(tWeek, 'dd/MM/yyyy')}.`});
+                                  queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni'] });
+                               }}>Conferma Copia</Button>
+                            </div>
+                         </DialogContent>
+                       </Dialog>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
             {/* SEZIONE B: BANNER EVENTI (Rimossa via direttiva) */}
 
             {/* SEZIONE C: GRIGLIA ORARIA GIORNALIERA / COLLETTIVA / SINGOLA */}
             {turniViewMode !== 'settimanale' && (
               <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
-                <table id="griglia-turni" className="min-w-max border-collapse bg-white">
+                <table id="griglia-turni" className={`border-collapse bg-white ${turniViewMode === 'singola' ? 'w-full table-fixed' : 'min-w-max'}`}>
                 <thead className="sticky top-0 z-20 shadow-sm border-b border-slate-300">
                   {/* Raggruppamento Team */}
                   <tr>
@@ -1308,7 +1345,7 @@ export default function GemTeam() {
                   <tr>
                     <th className="bg-slate-100 border-r border-slate-300 text-[10px] text-slate-500 font-bold p-1 w-20 min-w-[80px]">ORA</th>
                     {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
-                      <th key={dip.id} className="bg-white border-r border-slate-200 p-1.5 w-28 min-w-[112px] group">
+                      <th key={dip.id} className={`bg-white border-r border-slate-200 p-1.5 group ${turniViewMode === 'singola' ? 'w-full' : 'w-28 min-w-[112px]'}`}>
                          <div className="flex items-center justify-center gap-1">
                             {isMaster && <GripVertical className="h-3 w-3 text-slate-300 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity" />}
                             <span className="text-[10px] font-bold text-slate-700 uppercase truncate" title={dip.nome + ' ' + dip.cognome}>
