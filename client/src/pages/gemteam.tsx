@@ -16,6 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSub, ContextMenuSubTrigger, ContextMenuSubContent } from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -281,22 +282,29 @@ export default function GemTeam() {
       const isUpdate = !!data.id;
       const res = await fetch('/api/gemteam/turni/scheduled' + (isUpdate ? `/${data.id}` : ''), {
         method: isUpdate ? 'PATCH' : 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error('Errore salvataggio turno');
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] })
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] });
+        document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    }
   });
 
   const deleteShiftMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/gemteam/turni/scheduled/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/gemteam/turni/scheduled/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) throw new Error('Errore eliminazione turno');
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] })
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] });
+        document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    }
   });
 
   const weekTypeMutation = useMutation({
@@ -1089,10 +1097,10 @@ export default function GemTeam() {
                     
 
 <Popover>
-  <PopoverTrigger asChild>
-    <Badge variant="secondary" className="hidden sm:inline-flex ml-4 font-semibold text-xs border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer">
+  <PopoverTrigger>
+    <div className="hidden sm:inline-flex ml-4 font-semibold text-xs border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer rounded-full px-2.5 py-0.5" role="button">
       Tipo {weekAssignment?.settimana || 'A'} · {format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'd MMM')}
-    </Badge>
+    </div>
   </PopoverTrigger>
   {isMaster && (
     <PopoverContent className="w-auto p-3">
@@ -1226,6 +1234,24 @@ export default function GemTeam() {
 
                     </div>
                   )}
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Legenda</Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-[300px] p-4">
+                      <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Colori Postazioni</div>
+                      <div className="flex flex-wrap gap-3">
+                        {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).map((p:any) => (
+                          <div key={p.id} className="flex items-center gap-1.5 w-[120px]">
+                            <div className="w-3 h-3 rounded-full shadow-sm" style={{backgroundColor: p.colore || '#e2e8f0'}} />
+                            <span className="text-xs uppercase font-medium truncate">{p.nome}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
                 </div>
               </div>
             </div>
@@ -1244,24 +1270,24 @@ export default function GemTeam() {
             {/* SEZIONE C: GRIGLIA ORARIA GIORNALIERA / COLLETTIVA / SINGOLA */}
             {turniViewMode !== 'settimanale' && (
               <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
-                <table id="griglia-turni" className="w-full border-collapse min-w-max bg-white table-fixed">
+                <table id="griglia-turni" className="min-w-max border-collapse bg-white">
                 <thead className="sticky top-0 z-20 shadow-sm border-b border-slate-300">
                   {/* Raggruppamento Team */}
                   <tr>
-                    <th className="w-20 min-w-20 bg-slate-50 border-r border-slate-300"></th>
-                    <th colSpan={filteredSegreteria.length || 1} style={{backgroundColor: '#EAF3DE', color: '#3B6D11'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Segreteria</th>
-                    <th colSpan={filteredManutenzione.length || 1} style={{backgroundColor: '#FAEEDA', color: '#633806'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Manutenzione</th>
-                    <th colSpan={filteredUfficio.length || 1} style={{backgroundColor: '#E6F1FB', color: '#185FA5'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Ufficio</th>
-                    <th colSpan={filteredAmministrazione.length || 1} style={{backgroundColor: '#E1F5EE', color: '#0F6E56'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Amministrazione</th>
-                    <th colSpan={filteredComunicazione.length || 1} style={{backgroundColor: '#FAECE7', color: '#993C1D'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Comunicazione</th>
-                    <th colSpan={filteredDirezione.length || 1} style={{backgroundColor: '#EEEDFE', color: '#3C3489'}} className="border-r border-slate-300 py-1 text-center font-bold text-[10px] uppercase tracking-widest truncate">Direzione</th>
+                    <th className="w-20 min-w-[80px] bg-slate-50 border-r border-slate-300"></th>
+                    {filteredSegreteria.length > 0 && <th colSpan={filteredSegreteria.length} style={{backgroundColor: '#EAF3DE', color: '#3B6D11'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Segreteria</th>}
+                    {filteredManutenzione.length > 0 && <th colSpan={filteredManutenzione.length} style={{backgroundColor: '#FAEEDA', color: '#633806'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Manutenzione</th>}
+                    {filteredUfficio.length > 0 && <th colSpan={filteredUfficio.length} style={{backgroundColor: '#E6F1FB', color: '#185FA5'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Ufficio</th>}
+                    {filteredAmministrazione.length > 0 && <th colSpan={filteredAmministrazione.length} style={{backgroundColor: '#E1F5EE', color: '#0F6E56'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Amministrazione</th>}
+                    {filteredComunicazione.length > 0 && <th colSpan={filteredComunicazione.length} style={{backgroundColor: '#FAECE7', color: '#993C1D'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Comunicazione</th>}
+                    {filteredDirezione.length > 0 && <th colSpan={filteredDirezione.length} style={{backgroundColor: '#EEEDFE', color: '#3C3489'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Direzione</th>}
                   </tr>
 
                   {/* Nomi Dipendenti */}
                   <tr>
-                    <th className="bg-slate-100 border-r border-slate-300 text-[10px] text-slate-500 font-bold p-1 w-20">ORA</th>
+                    <th className="bg-slate-100 border-r border-slate-300 text-[10px] text-slate-500 font-bold p-1 w-20 min-w-[80px]">ORA</th>
                     {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
-                      <th key={dip.id} className="bg-white border-r border-slate-200 p-1.5 w-28 group">
+                      <th key={dip.id} className="bg-white border-r border-slate-200 p-1.5 w-28 min-w-[112px] group">
                          <div className="flex items-center justify-center gap-1">
                             {isMaster && <GripVertical className="h-3 w-3 text-slate-300 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity" />}
                             <span className="text-[10px] font-bold text-slate-700 uppercase truncate" title={dip.nome + ' ' + dip.cognome}>
@@ -1295,73 +1321,142 @@ export default function GemTeam() {
                          const postInfo = turniFiltrato ? postazioniApi.find((p:any) => p.nome === turniFiltrato.postazione) : null;
                          
                          return (
-                           <td key={`${dip.id}-${hour}`} className={`border-r border-b ${hasConflict ? 'border-red-400 ring-2 ring-inset ring-red-500/30' : 'border-slate-200'} p-0.5 relative cursor-pointer min-h-[22px]`}>
+                           <td 
+                             key={`${dip.id}-${hour}`} 
+                             className={`border-r border-b ${hasConflict ? 'border-red-400 ring-2 ring-inset ring-red-500/30' : 'border-slate-200'} p-0.5 relative cursor-pointer min-h-[22px] ${turniViewMode==='singola'?'min-w-[200px] w-full':''}`}
+                             onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                             onDrop={(e) => {
+                               e.preventDefault();
+                               const shiftId = e.dataTransfer.getData("shiftId");
+                               if (shiftId && shiftId !== "null" && turniScheduled) {
+                                 const droppedShift = turniScheduled.find((t:any) => String(t.id) === shiftId);
+                                 if (droppedShift) {
+                                   let fineHours = parseInt(hour.substring(0,2)) + (parseInt(droppedShift.oraFine.split(':')[0]) - parseInt(droppedShift.oraInizio.split(':')[0]));
+                                   let strFine = String(fineHours).padStart(2,'0') + ':' + droppedShift.oraFine.split(':')[1];
+                                   shiftMutation.mutate({
+                                     id: droppedShift.id,
+                                     employeeId: dip.id,
+                                     data: formattedTurniDate,
+                                     oraInizio: hour,
+                                     oraFine: strFine,
+                                     postazione: droppedShift.postazione
+                                   });
+                                 }
+                               }
+                             }}
+                           >
                               {turniFiltrato ? (
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <div title={hasConflict ? "Conflitto registrato" : ""} style={postInfo?.colore ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}} className={`${hasConflict ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} w-full h-full min-h-[20px] rounded border flex items-center justify-center p-0.5 shadow-sm hover:brightness-95`}>
-                                      <span className="text-[9px] font-bold uppercase truncate max-w-full">
-                                        {hasConflict && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
-                                        {turniFiltrato.postazione}
-                                      </span>
-                                    </div>
-                                  </PopoverTrigger>
-                                  {isMaster && (
-                                    <PopoverContent className="w-72 p-4">
-                                      <h4 className="font-bold text-sm mb-2">Modifica Turno</h4>
-                                      <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
-                                      
-                                      <form onSubmit={(e) => {
-  e.preventDefault();
-  const formData = new FormData(e.currentTarget);
-  shiftMutation.mutate({
-    id: turniFiltrato.id,
-    employeeId: dip.id,
-    data: formattedTurniDate,
-    oraInizio: formData.get('inizio'),
-    oraFine: formData.get('fine'),
-    postazione: formData.get('postazione'),
-    note: formData.get('note')
-  });
-}}>
-<div className="space-y-3">
-                                        <div>
-                                          <label className="text-xs font-semibold text-slate-600">Postazione</label>
-                                          
-<Select name="postazione" defaultValue={turniFiltrato.postazione}>
-  <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
-  <SelectContent>
+                                <ContextMenu>
+                                 <ContextMenuTrigger>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <div 
+                                        draggable={isMaster}
+                                        onDragStart={(e) => { e.dataTransfer.setData("shiftId", String(turniFiltrato.id)); e.dataTransfer.effectAllowed = "move"; }}
+                                        title={hasConflict ? "Conflitto registrato" : ""} 
+                                        style={postInfo?.colore ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}} 
+                                        className={`${hasConflict ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} w-full h-full min-h-[20px] rounded border flex items-center justify-center p-0.5 shadow-sm hover:brightness-95`}
+                                      >
+                                        <span className="text-[9px] font-bold uppercase truncate max-w-full">
+                                          {hasConflict && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
+                                          {turniFiltrato.postazione}
+                                        </span>
+                                      </div>
+                                    </PopoverTrigger>
+                                    {isMaster && (
+                                      <PopoverContent className="w-72 p-4">
+                                        <h4 className="font-bold text-sm mb-2">Modifica Turno</h4>
+                                        <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
+                                        
+                                        <form onSubmit={(e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    shiftMutation.mutate({
+      id: turniFiltrato.id,
+      employeeId: dip.id,
+      data: formattedTurniDate,
+      oraInizio: formData.get('inizio'),
+      oraFine: formData.get('fine'),
+      postazione: formData.get('postazione'),
+      note: formData.get('note')
+    });
+  }}>
+  <div className="space-y-3">
+                                            <div className="w-full">
+                                            <label className="text-xs font-semibold text-slate-600">Postazione</label>
+                                            
+  <select name="postazione" defaultValue={turniFiltrato.postazione} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" required>
+    <option value="" disabled>Seleziona...</option>
     {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
-      <SelectItem key={p.id} value={p.nome}>{p.nome}</SelectItem>
+      <option key={p.id} value={p.nome}>{p.nome}</option>
     ))}
-  </SelectContent>
-</Select>
+  </select>
 
-                                        </div>
-                                        <div className="flex gap-2">
-                                          <div className="w-1/2">
-                                            <label className="text-xs font-semibold text-slate-600">Inizio</label>
-                                            <Input name="inizio" type="time" defaultValue={hour} />
                                           </div>
-                                          <div className="w-1/2">
-                                            <label className="text-xs font-semibold text-slate-600">Fine</label>
-                                            <Input name="fine" type="time" defaultValue={`${hour.substring(0,2)}:30`} />
+                                          <div className="flex gap-2">
+                                            <div className="w-1/2">
+                                              <label className="text-xs font-semibold text-slate-600">Inizio</label>
+                                              <Input name="inizio" type="time" defaultValue={hour} />
+                                            </div>
+                                            <div className="w-1/2">
+                                              <label className="text-xs font-semibold text-slate-600">Fine</label>
+                                              <Input name="fine" type="time" defaultValue={`${hour.substring(0,2)}:30`} />
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <label className="text-xs font-semibold text-slate-600">Note</label>
+                                            <Input name="note" placeholder="Opzionale..." defaultValue={turniFiltrato.note || ''} />
                                           </div>
                                         </div>
-                                        <div>
-                                          <label className="text-xs font-semibold text-slate-600">Note</label>
-                                          <Input name="note" placeholder="Opzionale..." />
-                                        </div>
-                                      </div>
 
-                                      <div className="flex gap-2 justify-end mt-4">
-                                         <Button type="button" variant="destructive" size="sm" onClick={(e) => { e.preventDefault(); deleteShiftMutation.mutate(turniFiltrato.id);}}>Elimina</Button>
-                                         <Button type="submit" size="sm" disabled={shiftMutation.isPending}>{shiftMutation.isPending ? "..." : "Salva"}</Button>
-                                      </div>
-</form>
-                                    </PopoverContent>
-                                  )}
-                                </Popover>
+                                        <div className="flex gap-2 justify-end mt-4">
+                                           <Button type="button" variant="destructive" size="sm" onClick={(e) => { e.preventDefault(); deleteShiftMutation.mutate(turniFiltrato.id);}}>Elimina</Button>
+                                           <Button type="submit" size="sm" disabled={shiftMutation.isPending}>{shiftMutation.isPending ? "..." : "Salva"}</Button>
+                                        </div>
+  </form>
+                                      </PopoverContent>
+                                    )}
+                                  </Popover>
+                                 </ContextMenuTrigger>
+                                 {isMaster && (
+                                   <ContextMenuContent className="w-56">
+                                     <ContextMenuSub>
+                                       <ContextMenuSubTrigger>Copia su dipendente</ContextMenuSubTrigger>
+                                       <ContextMenuSubContent className="w-48 overflow-y-auto max-h-[300px]">
+                                         {dipendenti.filter(d => !isSystemEmployee(d) && d.id !== dip.id).map(d => (
+                                           <ContextMenuItem key={d.id} onClick={() => shiftMutation.mutate({employeeId: d.id, data: formattedTurniDate, oraInizio: turniFiltrato.oraInizio, oraFine: turniFiltrato.oraFine, postazione: turniFiltrato.postazione})}>{d.nome} {d.cognome}</ContextMenuItem>
+                                         ))}
+                                       </ContextMenuSubContent>
+                                     </ContextMenuSub>
+                                     <ContextMenuSub>
+                                       <ContextMenuSubTrigger>Copia in data...</ContextMenuSubTrigger>
+                                       <ContextMenuSubContent className="w-40">
+                                         {[1,2,3,4,5,6].map(offset => {
+                                            const tDate = addDays(turniDate, offset);
+                                            return <ContextMenuItem key={offset} onClick={() => shiftMutation.mutate({employeeId: dip.id, data: format(tDate, 'yyyy-MM-dd'), oraInizio: turniFiltrato.oraInizio, oraFine: turniFiltrato.oraFine, postazione: turniFiltrato.postazione})}>{format(tDate, 'EEEE d MMM', {locale:it})}</ContextMenuItem>
+                                         })}
+                                       </ContextMenuSubContent>
+                                     </ContextMenuSub>
+                                     <ContextMenuSub>
+                                        <ContextMenuSubTrigger>Copia settimana intera</ContextMenuSubTrigger>
+                                        <ContextMenuSubContent className="w-44">
+                                           <ContextMenuItem onClick={async () => {
+                                              const bDate = startOfWeek(turniDate, { weekStartsOn: 1 });
+                                              const nextWeek = addDays(bDate, 7);
+                                              const shiftsToCopy = turniScheduled.filter((ts:any) => String(ts.employeeId) === String(dip.id));
+                                              for (let s of shiftsToCopy) {
+                                                const thatDayObj = new Date(s.data);
+                                                const diff = Math.floor((thatDayObj.getTime() - bDate.getTime()) / (1000*60*60*24));
+                                                const targetDate = format(addDays(nextWeek, diff), 'yyyy-MM-dd');
+                                                await fetch('/api/gemteam/turni/scheduled', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ employeeId: dip.id, data: targetDate, oraInizio: s.oraInizio, oraFine: s.oraFine, postazione: s.postazione }) });
+                                              }
+                                              queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] });
+                                           }}>Su prossima settimana</ContextMenuItem>
+                                        </ContextMenuSubContent>
+                                     </ContextMenuSub>
+                                   </ContextMenuContent>
+                                 )}
+                                </ContextMenu>
                               ) : (
                                 <Popover>
                                   <PopoverTrigger asChild>
@@ -1388,14 +1483,12 @@ export default function GemTeam() {
                                         <div>
                                           <label className="text-xs font-semibold text-slate-600">Postazione</label>
                                           
-<Select name="postazione">
-  <SelectTrigger><SelectValue placeholder="Seleziona..." /></SelectTrigger>
-  <SelectContent>
-    {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
-      <SelectItem key={p.id} value={p.nome}>{p.nome}</SelectItem>
-    ))}
-  </SelectContent>
-</Select>
+<select name="postazione" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" required>
+  <option value="" disabled selected>Seleziona...</option>
+  {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
+    <option key={p.id} value={p.nome}>{p.nome}</option>
+  ))}
+</select>
 
                                         </div>
                                         <div className="flex gap-2">
@@ -1428,16 +1521,6 @@ export default function GemTeam() {
                 </tbody>
 
                 <tfoot className="sticky bottom-0 z-20 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] bg-white border-t-2 border-slate-300">
-                  <tr>
-                    <td colSpan={100} className="p-2 border-b border-slate-200 bg-slate-50">
-                      <div className="flex flex-wrap items-center gap-4 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
-                         <span className="text-slate-400">LEGENDA:</span>
-                         {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).map((p:any) => (
-                            <div key={p.id} className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full shadow-sm" style={{backgroundColor: p.colore || '#e2e8f0'}} /><span>{p.nome}</span></div>
-                         ))}
-                      </div>
-                    </td>
-                  </tr>
                   <tr>
                     <td className="bg-slate-100 border-r border-slate-300 text-center text-[10px] font-extrabold text-slate-600 p-2 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 tracking-widest uppercase">
                       TOT ORE
