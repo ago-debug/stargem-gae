@@ -10821,12 +10821,16 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       });
 
       // Notifica & Email
-      await db.insert(schema.teamNotifications).values({
-        employeeId, tipo: 'turno_aggiunto', titolo: 'Nuovo turno programmato',
-        messaggio: `Data: ${data}, Ora: ${oraInizio}-${oraFine}, Postazione: ${postazione}`,
-        dataRiferimento: new Date(data)
-      });
-      console.log(`Mock sending email via SMTP 465 to employee ${employeeId} for new shift`);
+      try {
+        await db.insert(schema.teamNotifications).values({
+          employeeId, tipo: 'turno_aggiunto', titolo: 'Nuovo turno programmato',
+          messaggio: `Data: ${data}, Ora: ${oraInizio}-${oraFine}, Postazione: ${postazione}`,
+          dataRiferimento: new Date(data)
+        });
+        console.log(`Mock sending email via SMTP 465 to employee ${employeeId} for new shift`);
+      } catch (e: any) {
+        console.error('Silently ignored notification insert error:', e.message);
+      }
 
       return res.json({ success: true });
     } catch(err) {
@@ -10851,12 +10855,16 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         })
         .where(eq(schema.teamScheduledShifts.id, recordId));
 
-      await db.insert(schema.teamNotifications).values({
-        employeeId: results[0].employeeId, tipo: 'turno_modificato', titolo: 'Turno modificato',
-        messaggio: `Il tuo turno del ${results[0].data} è stato modificato.`,
-        dataRiferimento: new Date(results[0].data)
-      });
-      console.log(`Mock sending email via SMTP 465 to EX ${results[0].employeeId} updated shift`);
+      try {
+        await db.insert(schema.teamNotifications).values({
+          employeeId: results[0].employeeId, tipo: 'turno_modificato', titolo: 'Turno modificato',
+          messaggio: `Il tuo turno del ${results[0].data} è stato modificato.`,
+          dataRiferimento: new Date(results[0].data)
+        });
+        console.log(`Mock sending email via SMTP 465 to EX ${results[0].employeeId} updated shift`);
+      } catch (e: any) {
+        console.error('Silently ignored notification insert error:', e.message);
+      }
 
       return res.json({ success: true });
     } catch(err) {
@@ -10872,11 +10880,15 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
 
       await db.delete(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
 
-      await db.insert(schema.teamNotifications).values({
-        employeeId: results[0].employeeId, tipo: 'turno_cancellato', titolo: 'Turno cancellato',
-        messaggio: `Il turno del ${results[0].data} è stato cancellato.`,
-        dataRiferimento: new Date(results[0].data)
-      });
+      try {
+        await db.insert(schema.teamNotifications).values({
+          employeeId: results[0].employeeId, tipo: 'turno_cancellato', titolo: 'Turno cancellato',
+          messaggio: `Il turno del ${results[0].data} è stato cancellato.`,
+          dataRiferimento: new Date(results[0].data)
+        });
+      } catch (e: any) {
+        console.error('Silently ignored notification insert error:', e.message);
+      }
 
       return res.json({ ok: true });
     } catch(err) {
