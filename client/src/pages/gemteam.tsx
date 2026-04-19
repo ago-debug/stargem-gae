@@ -398,6 +398,7 @@ export default function GemTeam() {
   const [isCopiaWeekOpen, setIsCopiaWeekOpen] = useState(false);
   const [targetCopiaWeekDate, setTargetCopiaWeekDate] = useState<Date | undefined>(undefined);
   const [selectedCopiaEmployees, setSelectedCopiaEmployees] = useState<number[]>([]);
+  const [selectedShifts, setSelectedShifts] = useState<number[]>([]);
 
   useEffect(() => {
     if (isCopiaWeekOpen) {
@@ -1337,7 +1338,7 @@ export default function GemTeam() {
                                 ))}
                               </div>
                               <div className="flex-1 flex flex-col pt-1">
-                                <Calendar mode="single" selected={targetCopiaWeekDate} onSelect={(date) => { if(date) setTargetCopiaWeekDate(startOfWeek(date, { weekStartsOn: 1 })) }} className="bg-slate-50 rounded-md border border-slate-200 self-center" />
+                                <Calendar mode="single" selected={targetCopiaWeekDate} onSelect={(date) => { if(date) setTargetCopiaWeekDate(startOfWeek(date, { weekStartsOn: 1 })) }} weekStartsOn={1} className="bg-slate-50 rounded-md border border-slate-200 self-center" />
                               </div>
                             </div>
 
@@ -1461,8 +1462,19 @@ export default function GemTeam() {
                                         onDragStart={(e) => { e.dataTransfer.setData("shiftId", String(turniFiltrato.id)); e.dataTransfer.effectAllowed = "move"; }}
                                         title={hasConflict ? "Conflitto registrato" : ""} 
                                         style={postInfo?.colore ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}} 
-                                        className={`${hasConflict ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} w-full h-full min-h-[20px] rounded border flex items-center justify-center p-0.5 shadow-sm hover:brightness-95`}
+                                        className={`${hasConflict ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} ${selectedShifts.includes(turniFiltrato.id) ? 'ring-2 ring-indigo-600 ring-offset-1' : ''} w-full h-full min-h-[20px] rounded border flex flex-col items-center justify-center p-0.5 shadow-sm hover:brightness-95 relative group`}
                                       >
+                                        {isMaster && (
+                                          <div className="absolute top-0 right-0 p-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                                            <input type="checkbox" className="w-3 h-3 m-0.5 cursor-pointer accent-indigo-600" 
+                                              checked={selectedShifts.includes(turniFiltrato.id)}
+                                              onChange={(e) => {
+                                                if (e.target.checked) setSelectedShifts([...new Set([...selectedShifts, turniFiltrato.id])]);
+                                                else setSelectedShifts(selectedShifts.filter(id => id !== turniFiltrato.id));
+                                              }}
+                                            />
+                                          </div>
+                                        )}
                                         <span className="text-[9px] font-bold uppercase truncate max-w-full">
                                           {hasConflict && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
                                           {turniFiltrato.postazione}
@@ -1470,8 +1482,92 @@ export default function GemTeam() {
                                       </div>
                                     </PopoverTrigger>
                                     {isMaster && (
-                                      <PopoverContent className="w-72 p-4">
-                                        <h4 className="font-bold text-sm mb-2">Modifica Turno</h4>
+                                      <PopoverContent className="w-80 p-4">
+                                        {selectedShifts.length > 0 && selectedShifts.includes(turniFiltrato.id) && (
+                                          <div className="bg-indigo-50 border border-indigo-200 rounded p-3 mb-4 shadow-sm">
+                                            <h5 className="font-bold text-indigo-800 text-xs mb-2">Azione Massiva ({selectedShifts.length} turni)</h5>
+                                            
+                                            <div className="flex flex-col gap-2">
+                                               {/* Spostamento/Copia per Dipendente */}
+                                               <div className="flex gap-2 items-center">
+                                                 <select id="mass-emp-select" className="flex h-8 w-full rounded-md border border-input bg-white px-2 text-[10px] uppercase shadow-sm">
+                                                   <option value="">Seleziona team...</option>
+                                                   {dipendenti.filter(d => !isSystemEmployee(d)).map(d => (
+                                                     <option key={d.id} value={d.id}>{d.nome} {d.cognome}</option>
+                                                   ))}
+                                                 </select>
+                                                 <Button size="sm" className="h-8 text-[10px] px-2 whitespace-nowrap" onClick={async () => {
+                                                    const sel = document.getElementById('mass-emp-select') as HTMLSelectElement;
+                                                    if (!sel.value) return;
+                                                    let processed = 0;
+                                                    for (let sid of selectedShifts) {
+                                                       const orig = turniScheduled.find((t:any) => t.id === sid);
+                                                       if (orig) {
+                                                         await fetch(`/api/gemteam/turni/scheduled/${sid}`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ employeeId: sel.value, data: orig.data.split('T')[0], postazione: orig.postazione, oraInizio: orig.oraInizio, oraFine: orig.oraFine, note: orig.note }) });
+                                                         processed++;
+                                                       }
+                                                    }
+                                                    setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Spostati", description: `${processed} turni spostati correttamente.`});
+                                                 }}>Sposta</Button>
+                                                 <Button size="sm" variant="outline" className="h-8 text-[10px] px-2 whitespace-nowrap" onClick={async () => {
+                                                    const sel = document.getElementById('mass-emp-select') as HTMLSelectElement;
+                                                    if (!sel.value) return;
+                                                    let processed = 0;
+                                                    for (let sid of selectedShifts) {
+                                                       const orig = turniScheduled.find((t:any) => t.id === sid);
+                                                       if (orig) {
+                                                          await fetch(`/api/gemteam/turni/scheduled`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ employeeId: sel.value, data: orig.data.split('T')[0], postazione: orig.postazione, oraInizio: orig.oraInizio, oraFine: orig.oraFine, note: orig.note }) });
+                                                          processed++;
+                                                       }
+                                                    }
+                                                    setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Duplicati", description: `${processed} turni duplicati correttamente.`});
+                                                 }}>Duplica</Button>
+                                               </div>
+
+                                               {/* Spostamento/Copia per Data */}
+                                               <div className="flex gap-2 items-center">
+                                                 <Input type="date" id="mass-date-select" className="h-8 w-full text-[10px] bg-white px-2" defaultValue={formattedTurniDate} />
+                                                 <Button size="sm" className="h-8 text-[10px] px-2 whitespace-nowrap" onClick={async () => {
+                                                    const sel = document.getElementById('mass-date-select') as HTMLInputElement;
+                                                    if (!sel.value) return;
+                                                    let processed = 0;
+                                                    for (let sid of selectedShifts) {
+                                                       const orig = turniScheduled.find((t:any) => t.id === sid);
+                                                       if (orig) {
+                                                         await fetch(`/api/gemteam/turni/scheduled/${sid}`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: sel.value, employeeId: orig.employeeId, postazione: orig.postazione, oraInizio: orig.oraInizio, oraFine: orig.oraFine, note: orig.note }) });
+                                                         processed++;
+                                                       }
+                                                    }
+                                                    setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Spostati", description: `${processed} turni spostati correttamente sulla nuova data.`});
+                                                 }}>Sposta</Button>
+                                                 <Button size="sm" variant="outline" className="h-8 text-[10px] px-2 whitespace-nowrap" onClick={async () => {
+                                                    const sel = document.getElementById('mass-date-select') as HTMLInputElement;
+                                                    if (!sel.value) return;
+                                                    let processed = 0;
+                                                    for (let sid of selectedShifts) {
+                                                       const orig = turniScheduled.find((t:any) => t.id === sid);
+                                                       if (orig) {
+                                                          await fetch(`/api/gemteam/turni/scheduled`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: sel.value, employeeId: orig.employeeId, postazione: orig.postazione, oraInizio: orig.oraInizio, oraFine: orig.oraFine, note: orig.note }) });
+                                                          processed++;
+                                                       }
+                                                    }
+                                                    setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Duplicati", description: `${processed} turni duplicati correttamente sulla nuova data.`});
+                                                 }}>Duplica</Button>
+                                               </div>
+                                               
+                                               <Button variant="destructive" size="sm" className="h-8 text-[10px] w-full mt-1" onClick={async () => {
+                                                   if (!confirm(`Sei sicuro di voler eliminare ${selectedShifts.length} turni selezionati?`)) return;
+                                                   let processed = 0;
+                                                   for (let sid of selectedShifts) {
+                                                      const ok = await fetch(`/api/gemteam/turni/scheduled/${sid}`, { method: 'DELETE', credentials: 'include' }).then(r => r.ok);
+                                                      if (ok) processed++;
+                                                   }
+                                                   setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Eliminati", description: `${processed} turni eliminati con successo.`});
+                                               }}>Elimina tutti i {selectedShifts.length} selezionati</Button>
+                                            </div>
+                                          </div>
+                                        )}
+                                        <h4 className="font-bold text-sm mb-2">Modifica Singolo Turno</h4>
                                         <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
                                         
                                         <form onSubmit={(e) => {
