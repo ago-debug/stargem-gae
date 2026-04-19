@@ -395,6 +395,14 @@ export default function GemTeam() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCopiaWeekOpen, setIsCopiaWeekOpen] = useState(false);
   const [targetCopiaWeekDate, setTargetCopiaWeekDate] = useState<Date | undefined>(undefined);
+  const [selectedCopiaEmployees, setSelectedCopiaEmployees] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (isCopiaWeekOpen) {
+      setSelectedCopiaEmployees(dipendenti.map(d => d.id));
+      setTargetCopiaWeekDate(undefined);
+    }
+  }, [isCopiaWeekOpen, dipendenti]);
 
   const [turniGiorno, setTurniGiorno] = useState<number>(() => {
     const d = new Date().getDay();
@@ -1298,24 +1306,57 @@ export default function GemTeam() {
                              <Copy className="h-3 w-3 mr-1" /> Copia settimana
                            </Button>
                          </DialogTrigger>
-                         <DialogContent className="max-w-[340px] p-4 flex flex-col items-center zoom-in-95">
+                         <DialogContent className="max-w-[440px] p-4 flex flex-col items-center zoom-in-95 max-h-[90vh] overflow-hidden">
                             <h3 className="font-bold text-sm mb-2">Copia su un'altra settimana</h3>
-                            <p className="text-xs text-slate-500 mb-2 leading-tight text-center">Copia da: <strong>{format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'dd/MM/yyyy')}</strong>. Seleziona la settimana di arrivo.</p>
-                            <Calendar mode="single" selected={targetCopiaWeekDate} onSelect={(date) => { if(date) setTargetCopiaWeekDate(startOfWeek(date, { weekStartsOn: 1 })) }} className="bg-slate-50 rounded-md border border-slate-200" />
-                            <div className="mt-4 w-full">
-                               <Button disabled={!targetCopiaWeekDate} className="w-full h-8 text-xs font-semibold" onClick={async () => {
-                                  if (!targetCopiaWeekDate) return;
+                            <p className="text-xs text-slate-500 mb-2 leading-tight text-center">Copia da: <strong>{format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'dd/MM/yyyy')}</strong>. Seleziona chi copiare e la settimana d'arrivo.</p>
+                            
+                            <div className="w-full flex gap-4 h-full min-h-0 overflow-hidden">
+                              <div className="flex-1 border rounded-md p-2 overflow-y-auto space-y-2 h-[280px]">
+                                <div className="flex items-center space-x-2 mb-2 pb-2 border-b">
+                                  <Checkbox id="selectAllCopy" 
+                                    checked={selectedCopiaEmployees.length === dipendenti.length}
+                                    onCheckedChange={(checked) => setSelectedCopiaEmployees(checked ? dipendenti.map(d => d.id) : [])}
+                                  />
+                                  <label htmlFor="selectAllCopy" className="text-xs font-bold leading-none cursor-pointer">Seleziona tutti</label>
+                                </div>
+                                {dipendenti.map(dip => (
+                                  <div key={dip.id} className="flex items-center space-x-2">
+                                    <Checkbox id={`copy-${dip.id}`} 
+                                      checked={selectedCopiaEmployees.includes(dip.id)}
+                                      onCheckedChange={(checked) => {
+                                        if (checked) setSelectedCopiaEmployees([...selectedCopiaEmployees, dip.id]);
+                                        else setSelectedCopiaEmployees(selectedCopiaEmployees.filter(id => id !== dip.id));
+                                      }}
+                                    />
+                                    <label htmlFor={`copy-${dip.id}`} className="text-xs font-medium leading-none cursor-pointer truncate">
+                                      {dip.nome} {dip.cognome}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="flex-1 flex flex-col pt-1">
+                                <Calendar mode="single" selected={targetCopiaWeekDate} onSelect={(date) => { if(date) setTargetCopiaWeekDate(startOfWeek(date, { weekStartsOn: 1 })) }} className="bg-slate-50 rounded-md border border-slate-200 self-center" />
+                              </div>
+                            </div>
+
+                            <div className="mt-4 w-full pt-2">
+                               <Button disabled={!targetCopiaWeekDate || selectedCopiaEmployees.length === 0} className="w-full h-8 text-xs font-semibold" onClick={async () => {
+                                  if (!targetCopiaWeekDate || selectedCopiaEmployees.length === 0) return;
                                   const cWeek = startOfWeek(turniDate, { weekStartsOn: 1 });
                                   const tWeek = startOfWeek(targetCopiaWeekDate, { weekStartsOn: 1 });
                                   let totCreated = 0;
                                   for (let i=0; i<7; i++) {
                                      const from = format(addDays(cWeek, i), 'yyyy-MM-dd');
                                      const to = format(addDays(tWeek, i), 'yyyy-MM-dd');
-                                     const p = await fetch('/api/gemteam/turni/copy-day', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fromData: from, toData: to }) }).then(r => r.ok ? r.json() : null);
+                                     const p = await fetch('/api/gemteam/turni/copy-day', { 
+                                       method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, 
+                                       body: JSON.stringify({ fromData: from, toData: to, employeeIds: selectedCopiaEmployees }) 
+                                     }).then(r => r.ok ? r.json() : null);
                                      if (p?.created) totCreated += p.created;
                                   }
                                   setIsCopiaWeekOpen(false);
-                                  toast({title: "Copia effettuata", description: `${totCreated} turni copiati con successo sulla settimana del ${format(tWeek, 'dd/MM/yyyy')}.`});
+                                  toast({title: "Copia effettuata", description: `${totCreated} turni copiati con successo.`});
+                                  refetchScheduled();
                                   queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni'] });
                                }}>Conferma Copia</Button>
                             </div>
