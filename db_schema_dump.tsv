@@ -1,0 +1,109 @@
+tableName	rowCount	columns
+access_logs	0	id, member_id, barcode, access_time, access_type, membership_status, notes
+accounting_periods	30	id, tenant_id, season_id, year, month, label, is_closed, closed_at, notes, created_at
+activities	1274	id, tenant_id, category_id, location_id, name, start_time, end_time, instructor_id, max_capacity, base_price, is_punch_card, punch_card_total_accesses, extra_info_overrides, created_at, updated_at
+activity_details	428	id, type, name, description, sku, active, category_id, instructor_id, studio_id, day_of_week, start_date, end_date, start_time, end_time, price, max_capacity, current_enrollment, extra_info, created_at, updated_at
+act_statuses	12	id, name, color, sort_order, active, created_at
+agreement_monthly_overrides	3	id, agreement_id, season_id, month, override_amount, notes
+attendances	0	id, member_id, course_id, enrollment_id, attendance_date, type, notes, created_at, updated_at, season_id
+audit_logs	0	id, action, entity_type, entity_id, performed_by, details, created_at
+booking_services	3	id, name, description, price, color, active, created_at, category_id
+booking_service_categories	3	id, name, description, color, active, created_at, icon, sort_order, parent_id, updated_at
+carnet_sessions	0	id, wallet_id, session_number, session_date, session_time_start, session_time_end, instructor_id, is_bonus, notes, created_at
+carnet_wallets	0	id, member_id, wallet_type_id, total_units, used_units, expiry_days, payment_id, trial_date, purchased_at, expires_at, is_active, notes, created_at, updated_at, group_size, location_type, price_per_unit, total_paid, bonus_units
+categories	5	id, name, description, parent_id, color, created_at, updated_at
+cities	8062	id, name, province_id, postal_code, istat_code
+cli_cats	6	id, name, description, parent_id, color, created_at, updated_at
+company_agreements	11	id, tenant_id, company_name, company_type, discount_courses, discount_merch, discount_other, exclude_open, exclude_other_promos, eligible_who, special_rules, promo_rule_id, valid_from, valid_to, is_active, approved_by, requires_verification, verification_notes, metadata, notes, created_at, updated_at
+cost_centers	7	id, tenant_id, code, label, description, is_active, created_at
+countries	0	id, code, name, is_default
+courses	409	id, sku, name, description, category_id, studio_id, instructor_id, secondary_instructor1_id, secondary_instructor2_id, price, max_capacity, current_enrollment, day_of_week, start_time, end_time, recurrence_type, schedule, start_date, end_date, status_tags, active, created_at, updated_at, season_id, google_event_id, quote_id, level, age_group, lesson_type, number_of_people, activity_type
+course_quotes_grid	9	id, activity_type, category, description, details, corsi_week, months_data, sort_order, created_at, updated_at
+custom_lists	17	id, name, system_name, description, created_at, system_code, linked_activities
+custom_list_items	235	id, list_id, value, sort_order, active, color
+custom_reports	0	id, name, description, entity_type, selected_fields, filters, sort_field, sort_direction, created_by, created_at, updated_at
+deprecation_logs	1	id, table_name, operation, triggered_at, note
+enrollments	0	id, member_id, course_id, status, enrollment_date, notes, created_at, season_id, online_source, pending_medical_cert, pending_membership, completion_notes, details, participation_type, target_date
+enroll_details	13	id, name, color, sort_order, active, created_at
+express_sessions	150	session_id, expires, data
+gem_conversations	0	id, channel, participant_id, participant_user_id, status, assigned_to, bot_context, last_message_at, unread_team, unread_participant, created_at, updated_at
+gem_messages	0	id, conversation_id, sender_type, sender_id, content, attachment_url, attachment_name, attachment_size, quick_link_type, quick_link_id, is_read, created_at
+import_configs	2	id, name, entity_type, source_type, field_mapping, import_key, created_at
+ind_less_cats	5	id, name, description, parent_id, color, created_at, updated_at
+instructor_agreements	8	id, tenant_id, member_id, season_id, agreement_type, base_monthly_amount, pack_hours, spese_mensili, billing_day, payment_mode, studio_id, schedule_notes, notes, is_active, metadata, created_at, updated_at
+journal_entries	1	id, tenant_id, period_id, payment_id, entry_date, description, debit_account, credit_account, amount, vat_amount, vat_code, cost_center_id, is_auto, notes, created_at, created_by_id
+knowledge	0	id, sezione, titolo, descrizione, created_at, updated_at
+medical_certificates	0	id, member_id, issue_date, expiry_date, doctor_name, notes, status, created_at, updated_at
+members	90	id, first_name, last_name, fiscal_code, date_of_birth, place_of_birth, birth_province, birth_nation, gender, email, secondary_email, phone, mobile, category_id, subscription_type_id, card_number, card_issue_date, card_expiry_date, entity_card_type, entity_card_number, entity_card_issue_date, entity_card_expiry_date, has_medical_certificate, medical_certificate_expiry, is_minor, mother_first_name, mother_last_name, mother_fiscal_code, mother_email, mother_phone, mother_mobile, father_first_name, father_last_name, father_fiscal_code, father_email, father_phone, father_mobile, street_address, city, province, postal_code, country, address, notes, admin_notes, health_notes, food_alerts, tags, residence_permit, residence_permit_expiry, active, enrollment_status, created_at, updated_at, photo_url, mother_birth_date, mother_birth_place, mother_birth_province, mother_street_address, mother_city, mother_province, mother_postal_code, father_birth_date, father_birth_place, father_birth_province, father_street_address, father_city, father_province, father_postal_code, season, internal_id, insertion_date, participant_type, from_where, profession, document_type, document_expiry, team_segreteria, detraction_requested, detraction_year, credits_requested, credits_year, tesserino_tecnico_number, tesserino_tecnico_date, created_by, updated_by, privacy_accepted, privacy_date, regulations_accepted, membership_application_signed, specialization, bio, hourly_rate, attachment_metadata, gift_metadata, tessere_metadata, certificato_medico_metadata, crm_profile_level, crm_profile_score, crm_profile_override, crm_profile_reason, staff_status, lezioni_private_autorizzate, lezioni_private_autorizzate_at, lezioni_private_autorizzate_by, lezioni_private_note, user_id, tutor1_fiscal_code, tutor1_phone, tutor1_email, tutor2_fiscal_code, tutor2_phone, tutor2_email, nationality, region, consent_image, consent_marketing, consent_newsletter
+memberships	89	id, member_id, membership_number, previous_membership_number, barcode, issue_date, expiry_date, status, type, fee, created_at, updated_at, renewal_type, is_renewal, renewed_from_id, entity_card_number, entity_card_expiry_date, membership_type, season_competence, season_start_year, season_end_year, notes
+member_discounts	0	id, tenant_id, member_id, promo_rule_id, discount_type, discount_value, discount_percent, approved_by, approved_at, valid_for_season_id, valid_from, valid_to, is_used, used_at, payment_id, bonus_note, internal_notes, company_agreement_id, metadata, created_at, updated_at, created_by_id
+member_duplicate_exclusions	0	id, member_id_1, member_id_2, excluded_by, excluded_at
+member_forms_submissions	1	id, member_id, form_type, form_version, season_id, payload_data, signed_at, signed_by_ip, signature_hash, created_by, created_at, updated_at
+member_packages	0	id, member_id, package_code, package_type, total_uses, used_uses, price_paid, notes, active, created_at, updated_at
+member_relationships	0	id, member_id, related_member_id, relationship_type, created_at
+member_uploads	0	id, member_id, document_type, filename, file_url, file_size, mime_type, uploaded_at, verified_by, verified_at, notes, season_id
+merchandising_categories	0	id, name, description, color, sort_order, active, parent_id, created_at, updated_at
+messages	0	id, sender_id, receiver_id, content, is_read, timestamp
+notifications	0	id, user_id, title, message, type, is_read, created_at
+pagodil_tiers	3	id, tenant_id, provider_name, range_min, range_max, fee_amount, fee_type, installments_max, is_active
+participant_types	7	id, name, color, sort_order, active, created_at
+payments	0	id, member_id, enrollment_id, amount, type, description, status, due_date, paid_date, payment_method_id, payment_method, notes, created_at, updated_at, season_id, created_by_id, updated_by_id, booking_id, membership_id, quantity, quota_description, period, total_quota, discount_code, discount_value, discount_percentage, promo_code, promo_value, promo_percentage, deposit, annual_balance, receipts_count, transfer_confirmation_date, payment_note_labels, enrollment_detail_labels, global_enrollment_id, accounting_code, vat_code, cost_center_code, source
+payment_methods	0	id, name, description, active, created_at, updated_at
+payslips	0	id, member_id, month, year, hours_taught, rate, total, status, notes, confirmed_by, confirmed_at, created_at
+pay_notes	28	id, name, color, sort_order, active, created_at
+price_lists	6	id, name, valid_from, valid_to, active, notes, created_at, updated_at
+price_list_items	14	id, price_list_id, entity_type, entity_id, price, created_at, quote_id
+price_matrix	22	id, tenant_id, season_id, category, quantity_type, course_count, valid_from_month, valid_to_month, base_price, max_slots, exclude_from_promo, notes, created_at
+pricing_rules	7	id, tenant_id, rule_code, rule_label, applies_to, rule_type, trigger_condition, trigger_value, effect_type, effect_value, requires_authorization, authorized_by, priority, is_active, notes, metadata, created_at, updated_at
+promo_rules	50	id, tenant_id, code, label, rule_type, value, valid_from, valid_to, max_uses, used_count, exclude_open, not_cumulative, target_type, company_name, member_id, metadata, created_at, updated_at, approved_by, internal_notes
+provinces	107	id, code, name, region, country_id
+quotes	12	id, name, amount, category, notes, active, created_at, updated_at
+rental_categories	9	id, name, description, color, sort_order, active, parent_id, created_at, updated_at
+seasons	2	id, name, description, start_date, end_date, active, created_at, updated_at
+sessions	0	sid, sess, expire
+staff_contracts_compliance	0	id, member_id, doc_type, doc_value, has_doc, expires_at, notes, updated_at
+staff_disciplinary_log	0	id, member_id, event_type, event_date, description, staff_response, staff_response_at, decision, resolved_at, created_by, created_at
+staff_document_signatures	0	id, member_id, doc_type, doc_version, signed_at, signed_by, method, notes
+staff_presenze	0	id, member_id, course_id, date, hours, source, status, confirmed_by, confirmed_at, notes, created_at
+staff_rates	3	id, tenant_id, service_code, service_label, amount, rate_type, applicable_to, studio_restriction, requires_membership, requires_medical_cert, max_sessions_per_week, is_active, notes, metadata, created_at, updated_at
+staff_sostituzioni	0	id, absent_member_id, substitute_member_id, course_id, absence_date, lesson_description, payment_to, amount_override, notes, visto_segreteria, visto_elisa, created_by, created_at
+strategic_events	28	id, title, description, event_type, start_date, end_date, all_day, season_id, status, affects_calendar, affects_planning, affects_payments, studio_id, color, created_at, updated_at
+studios	13	id, name, floor, operating_hours, operating_days, capacity, equipment, notes, active, created_at, updated_at, google_calendar_id
+studio_bookings	0	id, member_id, studio_id, service_id, title, description, booking_date, start_time, end_time, status, paid, amount, google_event_id, instructor_id, season_id, created_at, updated_at
+sub_types	0	id, name, description, active, created_at
+system_configs	0	id, key_name, value, description, updated_at
+team_activity_types	36	id, team, label, categoria, attivo, sort_order, created_at
+team_attendance_logs	2077	id, employee_id, data, ore_lavorate, tipo_assenza, check_in, check_out, note, modified_by_admin, modified_at, created_at
+team_checkin_events	1	id, employee_id, timestamp, tipo, postazione, device, override_admin, note
+team_comments	15	id, author_id, author_name, content, priority, is_resolved, created_at, updated_at, assigned_to, parent_id
+team_documents	0	id, member_id, tipo, titolo, caricato_da, visibile_dipendente, is_current, scadenza, created_at
+team_document_alerts	0	id, document_id, employee_id, tipo, data_alert, inviato_at, risolto, created_at
+team_document_versions	0	id, document_id, versione_numero, file_url, file_name, file_size, mime_type, hash_file, uploaded_by, uploaded_at, note_versione
+team_employees	16	id, member_id, user_id, display_order, team, tariffa_oraria, stipendio_fisso_mensile, data_assunzione, attivo, note_hr, created_at, updated_at
+team_employee_activity_log	0	id, employee_id, eseguita_da, azione, entita_modificata, entita_id, valore_prima, valore_dopo, ip_address, created_at
+team_handover_notes	0	id, employee_id, shift_id, data, postazione, testo, priorita, letta_da, created_at
+team_leave_requests	0	id, employee_id, tipo, data_inizio, data_fine, ore_totali, status, approved_by, approved_at, note_dipendente, note_admin, created_at, updated_at
+team_maintenance_tickets	0	id, employee_id, studio_numero, titolo, descrizione, status, foto_url, risolto_da, risolto_at, created_at, updated_at
+team_monthly_reports	28	id, employee_id, anno, mese, ore_totali, giorni_lavorati, stipendio_fisso, ore_extra_pos, ore_extra_neg, importo_extra, cnt_FE, cnt_PE, cnt_ML, cnt_F, cnt_AI, cnt_AG, cnt_MT, cnt_IN, export_at, locked, created_at, updated_at
+team_notes	28	id, author_id, author_name, title, content, category, is_pinned, created_at, updated_at, target_url, deleted_at, deleted_by
+team_note_reactions	0	id, note_id, user_id, author_name, reaction_type, emoji, created_at
+team_notifications	0	id, type, reference_id, title, message, is_read, user_id, created_at
+team_postazioni	25	id, nome, conta_ore, colore, attiva, ordine, created_at
+team_profile_change_requests	0	id, employee_id, campo_modificato, valore_vecchio, valore_nuovo, motivazione, status, requested_at, reviewed_by, reviewed_at, note_admin
+team_scheduled_shifts	225	id, employee_id, data, postazione, ora_inizio, ora_fine, template_id, note, created_by_user_id, created_at, updated_at, modified_by_user_id
+team_shift_diary_entries	5	id, employee_id, shift_id, data, ora_slot, postazione, activity_type_id, attivita_libera, quantita, minuti, note, ok_flag, created_at
+team_shift_templates	550	id, employee_id, settimana_tipo, giorno_settimana, ora_inizio, ora_fine, postazione, note, created_at
+team_shift_templates_BAK_F1_030	550	id, employee_id, settimana_tipo, giorno_settimana, ora_inizio, ora_fine, postazione, note, created_at
+team_tasks	0	id, text, completed, created_at, updated_at
+team_week_assignments	0	id, week_start, settimana, is_manual_override, note, created_at, updated_at
+todos	6	id, text, completed, created_by, created_at, completed_by, completed_at
+trn_cats	5	id, name, description, parent_id, color, created_at, updated_at
+universal_enrollments	18	id, member_id, activity_detail_id, status, enrollment_date, residual_entries, notes, extra_data, created_at, updated_at
+users	19	id, email, first_name, last_name, profile_image_url, created_at, updated_at, username, password, role, phone, last_seen_at, current_session_start, last_session_duration, email_verified, otp_token, otp_expires_at
+user_activity_logs	1782	id, user_id, action, entity_type, entity_id, details, ip_address, created_at
+user_roles	7	id, name, description, permissions, created_at, updated_at
+user_session_segments	137	id, user_id, started_at, last_heartbeat_at, ended_at, tipo, durata_minuti, created_at
+wc_product_mapping	8	id, tenant_id, wc_product_id, wc_product_name, stargem_category, stargem_course_count, stargem_activity_type, notes
+webhook_logs	2	id, tenant_id, source, event_type, external_id, raw_payload, status, processed_at, error_message, payment_id, created_at
+welfare_providers	4	id, tenant_id, name, requires_membership_fee, requires_medical_cert, extra_fee_percent, available_categories, operative_notes, is_active, metadata, updated_at
+__drizzle_migrations	0	id, hash, created_at

@@ -5062,11 +5062,11 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         .where(eq(schema.teamEmployees.id, empId))
         .limit(1);
         
-      if (empTarget.length === 0) return res.status(404).json({ error: 'Dipendente non trovato' });
+      if (empTarget.length === 0) return res.status(404).json({ error: 'Membro del team non trovato' });
       
       if (role !== 'admin' && role !== 'operator') {
          if ((req.user as any)?.id !== empTarget[0].userId) {
-             return res.status(403).json({ error: 'Non puoi timbrare per un altro dipendente!' });
+             return res.status(403).json({ error: 'Non puoi timbrare per un altro membro del team!' });
          }
       }
 
@@ -10846,7 +10846,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         .set({ 
           postazione, oraInizio, oraFine, note, 
           ...(employeeId ? {employeeId} : {}), 
-          ...(data ? {data: new Date(data)} : {}), 
+          ...(data ? {data} : {}), 
           modifiedByUserId: (req.user as any)?.id, updatedAt: new Date() 
         })
         .where(eq(schema.teamScheduledShifts.id, recordId));
