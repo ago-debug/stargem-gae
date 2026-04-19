@@ -431,9 +431,12 @@ export default function GemTeam() {
   });
 
   const checkInStats = useMemo(() => {
-    let inSede = 0; let online = 0; let usciti = 0; let attesi = 0; let assenti = 0;
+    let inSede = 0; 
+    let online = activeUsers.filter((u: any) => u.stato === 'online').length; 
+    let usciti = 0; let attesi = 0; let assenti = 0;
+    
     dipendenti.forEach(dip => {
-      // Escludi admin e botAI dal conteggio presenze
+      // Escludi admin e botAI dal conteggio presenze in sede
       if (isSystemEmployee(dip)) return;
 
       const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find(c => c.employeeId === dip.id) : null;
@@ -444,11 +447,6 @@ export default function GemTeam() {
         else attesi++;
       } else {
         attesi++;
-      }
-
-      const presenceInfo = activeUsers.find((u: any) => u.id === dip.userId);
-      if (presenceInfo && presenceInfo.stato === 'online') {
-        online++;
       }
     });
     return { inSede, online, usciti, attesi, assenti };
