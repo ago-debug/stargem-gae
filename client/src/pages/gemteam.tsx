@@ -292,9 +292,12 @@ export default function GemTeam() {
       return res.json();
     },
     onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni'] });
+        refetchScheduled();
+        queryClient.invalidateQueries();
         document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    },
+    onError: (err: any) => {
+        toast({title: "Errore API", description: err.message, variant: "destructive"});
     }
   });
 
@@ -1383,12 +1386,14 @@ export default function GemTeam() {
                              key={`${dip.id}-${hour}`} 
                              className={`border-r border-b ${hasConflict ? 'border-red-400 ring-2 ring-inset ring-red-500/30' : 'border-slate-200'} p-0.5 relative cursor-pointer min-h-[22px] ${turniViewMode==='singola'?'min-w-[200px] w-full':''}`}
                              onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                             onDragEnter={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
                              onDrop={(e) => {
                                e.preventDefault();
                                const shiftId = e.dataTransfer.getData("shiftId");
                                if (shiftId && shiftId !== "null" && turniScheduled) {
                                  const droppedShift = turniScheduled.find((t:any) => String(t.id) === shiftId);
                                  if (droppedShift) {
+                                   if (String(droppedShift.employeeId) === String(dip.id) && droppedShift.oraInizio === hour) return;
                                    let fineHours = parseInt(hour.substring(0,2)) + (parseInt(droppedShift.oraFine.split(':')[0]) - parseInt(droppedShift.oraInizio.split(':')[0]));
                                    let strFine = String(fineHours).padStart(2,'0') + ':' + droppedShift.oraFine.split(':')[1];
                                    shiftMutation.mutate({
@@ -1398,7 +1403,7 @@ export default function GemTeam() {
                                      oraInizio: hour,
                                      oraFine: strFine,
                                      postazione: droppedShift.postazione
-                                   });
+                                   }, { onSuccess: () => refetchScheduled() });
                                  }
                                }
                              }}
@@ -1443,7 +1448,7 @@ export default function GemTeam() {
       oraFine: endEl.value,
       postazione: selectEl.value,
       note: noteEl.value
-    });
+    }, { onSuccess: () => refetchScheduled() });
   }}>
   <div className="space-y-3">
                                             <div className="w-full">
@@ -1514,6 +1519,7 @@ export default function GemTeam() {
                                                 const targetDate = format(addDays(nextWeek, diff), 'yyyy-MM-dd');
                                                 await fetch('/api/gemteam/turni/scheduled', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ employeeId: dip.id, data: targetDate, oraInizio: s.oraInizio, oraFine: s.oraFine, postazione: s.postazione }) });
                                               }
+                                              refetchScheduled();
                                               queryClient.invalidateQueries({ queryKey: ['/api/gemteam/turni/scheduled'] });
                                            }}>Su prossima settimana</ContextMenuItem>
                                         </ContextMenuSubContent>
@@ -1547,7 +1553,7 @@ export default function GemTeam() {
     oraFine: endEl.value,
     postazione: selectEl.value,
     note: noteEl.value
-  });
+  }, { onSuccess: () => refetchScheduled() });
 }}>
 <div className="space-y-3">
                                         <div>
