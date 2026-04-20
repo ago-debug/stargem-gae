@@ -1,6 +1,6 @@
 import { useState, useMemo, Fragment, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Calendar as CalendarIcon, Filter, Plus, CalendarRange } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon, Filter, Plus, CalendarRange, Info } from "lucide-react";
 import { format, getYear, getMonth, getDate, getDaysInMonth, isSameDay } from "date-fns";
 import { it } from 'date-fns/locale';
 import { Link } from "wouter";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getEventColorClass } from "@/lib/activity-colors";
@@ -48,14 +49,26 @@ const MONTHS_ORDERED = [
 
 const getStrategicColor = (type: string) => {
     switch(type) {
-        case 'chiusura': return 'bg-red-100 border-red-300 text-red-800';
-        case 'ferie': return 'bg-purple-100 border-purple-300 text-purple-800';
+        case 'chiusura': return 'bg-pink-200 text-pink-900 border-pink-400';
+        case 'ferie': return 'bg-purple-200 text-purple-900 border-purple-400';
+        case 'saggio': return 'bg-pink-400 text-white border-pink-500';
+        case 'campus': return 'bg-sky-700 text-white border-sky-800';
         case 'apertura_eccezionale': return 'bg-emerald-100 border-emerald-300 text-emerald-800';
-        case 'evento_macro': return 'bg-blue-100 border-blue-300 text-blue-800';
-        case 'nota': return 'bg-yellow-100 border-yellow-300 text-yellow-800';
-        default: return 'bg-slate-100 border-slate-300 text-slate-800';
+        case 'evento_macro': return 'bg-orange-700 text-white border-orange-800';
+        case 'nota': return 'bg-gray-200 border-gray-400 text-gray-800';
+        default: return 'bg-gray-200 text-gray-800 border-gray-300';
     }
 };
+
+const LEGENDA_ITEMS = [
+  { color: '#DC2626', label: '🇮🇹 Festività Nazionali' },
+  { color: '#9D174D', label: '🔒 Chiusure Studio' },
+  { color: '#be185d', label: '🎭 Saggi / Spettacoli' },
+  { color: '#0369a1', label: '🏕️ Campus / Intensivi' },
+  { color: '#c2410c', label: '📋 Workshop / Macro-Evento' },
+  { color: '#6b7280', label: '📌 Note' },
+  { color: '#374151', label: '📦 Corsi (aggregati)' },
+];
 
 // Innesco HMR per Vite (Bypass cache Subagent)
 export default function Planning() {
@@ -442,6 +455,25 @@ export default function Planning() {
                         <Button variant={viewMode === 'mensile' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('mensile')} className="rounded-md h-7">Mensile</Button>
                         <Button variant={viewMode === 'settimanale' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('settimanale')} className="rounded-md h-7">Settimanale</Button>
                     </div>
+
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" size="sm" className="gap-2 h-9 shrink-0">
+                                <Info className="h-4 w-4" /> Legenda
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64 p-3" align="end">
+                            <div className="space-y-2">
+                                <h4 className="font-semibold text-sm border-b pb-1 mb-2">Legenda Colori</h4>
+                                {LEGENDA_ITEMS.map(item => (
+                                    <div key={item.label} className="flex items-center gap-2 text-sm">
+                                        <div className="w-3 h-3 rounded-sm shadow-sm" style={{ backgroundColor: item.color }}></div>
+                                        <span>{item.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
 
                     <Button onClick={() => setStrategicModalOpen(true)} size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-white shadow-sm h-9 shrink-0">
                         <Plus className="h-4 w-4" /> Nuovo Evento
