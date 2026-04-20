@@ -2406,27 +2406,27 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     <tbody className="divide-y divide-slate-100 bg-white">
                       {reportData.map((row: any) => (
                         <tr key={row.employee_id} className="hover:bg-slate-50 transition-colors">
-                          <td className="p-3 pl-4 font-bold text-slate-800">{row.cognome} {row.nome}</td>
-                          <td className="p-3 text-center font-black text-slate-700 text-lg">{fmtOre(row.oreTotali)}</td>
-                          <td className="p-3 text-center font-bold text-slate-500">{row.giorniLavorati}</td>
-                          <td className="p-3 text-center text-sky-600 font-semibold">{row.FE || 0}</td>
-                          <td className="p-3 text-center text-yellow-600 font-semibold">{row.PE || 0}</td>
-                          <td className="p-3 text-center text-orange-600 font-semibold">{row.ML || 0}</td>
-                          <td className="p-3 text-center text-purple-600 font-semibold">{row.F || 0}</td>
-                          <td className="p-3 text-center text-red-600 font-semibold">{row.AI || 0}</td>
+                          <td className="p-3 pl-4 font-bold text-slate-800">{row.lastName} {row.firstName}</td>
+                          <td className="p-3 text-center font-black text-slate-700 text-lg">{fmtOre(row.ore_totali)}</td>
+                          <td className="p-3 text-center font-bold text-slate-500">{row.giorni_lavorati}</td>
+                          <td className="p-3 text-center text-sky-600 font-semibold">{row.cnt_FE || 0}</td>
+                          <td className="p-3 text-center text-yellow-600 font-semibold">{row.cnt_PE || 0}</td>
+                          <td className="p-3 text-center text-orange-600 font-semibold">{row.cnt_ML || 0}</td>
+                          <td className="p-3 text-center text-purple-600 font-semibold">{row.cnt_F || 0}</td>
+                          <td className="p-3 text-center text-red-600 font-semibold">{row.cnt_AI || 0}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <tr className="bg-slate-800 text-white font-bold h-12">
                         <td className="p-3 pl-4 text-right uppercase tracking-widest text-[11px] opacity-90">Totale Globale:</td>
-                        <td className="p-3 text-center text-emerald-400 text-xl tabular-nums">{fmtOre(reportData.reduce((acc: number, cur: any) => acc + (cur.oreTotali || 0), 0))}</td>
-                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.giorniLavorati || 0), 0)}</td>
-                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.FE || 0), 0)}</td>
-                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.PE || 0), 0)}</td>
-                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.ML || 0), 0)}</td>
-                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.F || 0), 0)}</td>
-                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.AI || 0), 0)}</td>
+                        <td className="p-3 text-center text-emerald-400 text-xl tabular-nums">{fmtOre(reportData.reduce((acc: number, cur: any) => acc + (parseFloat(cur.ore_totali) || 0), 0))}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (parseInt(cur.giorni_lavorati) || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.cnt_FE || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.cnt_PE || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.cnt_ML || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.cnt_F || 0), 0)}</td>
+                        <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.cnt_AI || 0), 0)}</td>
                       </tr>
                     </tfoot>
                   </table>
