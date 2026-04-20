@@ -1,7 +1,7 @@
-Aggiornato al: 2026-04-20 17:15
+Aggiornato al: 2026-04-20 17:50
 
 # 📊 STATO DB REALE — Audit Aggiornato
-Data e orario aggiornamento: 2026-04-20 16:14
+Data e orario aggiornamento: 2026-04-20 17:50
 
 ## Tabelle attive con dati reali
 
@@ -16,7 +16,7 @@ Data e orario aggiornamento: 2026-04-20 16:14
 | `team_attendance_logs` | **2.078** | Log presenze GemTeam |
 | `team_scheduled_shifts` | **17** | Turni programmati (Drastico calo - *probabile "WIPE settimana"* per via del deploy 035) |
 | `team_shift_templates` | **1** | Template turni (*Calo per cancellazione massiva precedente/test*) |
-| `strategic_events` | **31** | Pianificazione + Festa Lavoratori 2026 |
+| `strategic_events` | **10** | Pianificazione + Festa Lavoratori 2026 (*pulizia F1-002 effettuata*) |
 | `team_monthly_reports` | **28** | Report mensili team |
 | `team_employees` | **16** | Dipendenti GemTeam |
 | `team_postazioni` | **25** | Postazioni configurate |
