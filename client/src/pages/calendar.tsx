@@ -316,7 +316,25 @@ export default function CalendarPage() {
         return m;
     }, [currentWeekStart]);
 
+    // Determina la data massima navigabile (Fine della Stagione Attiva + 1)
+    const maxNavDate = useMemo(() => {
+        if (!seasons?.length) return new Date(new Date().getFullYear() + 1, 7, 31);
+        const activeSeason = seasons.find((s: any) => s.active) || seasons[0];
+        if (activeSeason) {
+            const yearMatch = activeSeason.name.match(/20(\d{2})\/20(\d{2})/);
+            if (yearMatch) {
+                const activeYear = 2000 + parseInt(yearMatch[1]);
+                // es. se siamo nel 25-26, il massimo navigabile è agosto 2027
+                return new Date(`${activeYear + 2}-08-31T23:59:59.000Z`);
+            }
+        }
+        return new Date(new Date().getFullYear() + 1, 7, 31);
+    }, [seasons]);
 
+    const isNextDisabled = useMemo(() => {
+        const nextWeekStart = startOfWeek(addDays(viewDate, 7), { weekStartsOn: 1 });
+        return nextWeekStart > maxNavDate;
+    }, [viewDate, maxNavDate]);
 
     const nextWeek = () => setViewDate(prev => addDays(prev, 7));
     const prevWeek = () => setViewDate(prev => addDays(prev, -7));
@@ -1740,6 +1758,7 @@ export default function CalendarPage() {
                                 <Calendar
                                     mode="single"
                                     selected={viewDate}
+                                    disabled={(date) => date > maxNavDate}
                                     onSelect={(d: Date | undefined) => {
                                         if (d) {
                                             setViewDate(d);
@@ -1762,7 +1781,7 @@ export default function CalendarPage() {
                             <span className="text-sm font-semibold min-w-[170px] text-center px-2">
                                 {format(currentWeekStart, "dd MMM", { locale: it })} - {format(currentWeekEnd, "dd MMM yyyy", { locale: it })}
                             </span>
-                            <Button variant="ghost" size="icon" className="h-full w-9 shrink-0" onClick={nextWeek}>
+                            <Button variant="ghost" size="icon" className="h-full w-9 shrink-0 disabled:opacity-30 disabled:hover:text-slate-500" onClick={nextWeek} disabled={isNextDisabled}>
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
                         </div>
