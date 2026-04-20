@@ -160,6 +160,11 @@ export default function GemTeam() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedWeek, setSelectedWeek] = useState("A");
   
+  // Template Mode State
+  const [isTemplateMode, setIsTemplateMode] = useState(false);
+  const [templatePreset, setTemplatePreset] = useState("A");
+
+  
   // API Calls
   const { data: dipendentiAPI = [], isLoading: isLoadingDipendenti, isError: isErrorDipendenti } = useQuery<any[]>({
     queryKey: ['/api/gemteam/dipendenti'],
@@ -243,15 +248,16 @@ export default function GemTeam() {
   const formattedTurniDate = format(turniDate, 'yyyy-MM-dd');
 
   const { data: turniScheduled = [], refetch: refetchScheduled } = useQuery<any[]>({
-    queryKey: ['/api/gemteam/turni/scheduled', turniViewMode, formattedTurniDate],
+    queryKey: ['/api/gemteam/turni/scheduled', turniViewMode, formattedTurniDate, isTemplateMode, templatePreset],
     queryFn: async () => {
+      const templateQuery = isTemplateMode ? `&isTemplate=${templatePreset}` : '';
       if (turniViewMode === 'settimanale') {
         const startD = startOfWeek(turniDate, { weekStartsOn: 1 });
         const days = [0,1,2,3,4,5,6].map(i => format(addDays(startD, i), 'yyyy-MM-dd'));
-        const results = await Promise.all(days.map(d => fetch(`/api/gemteam/turni/scheduled?data=${d}`, { credentials: 'include', headers: { 'Accept': 'application/json' } }).then(r => r.ok ? r.json() : [])));
+        const results = await Promise.all(days.map(d => fetch(`/api/gemteam/turni/scheduled?data=${d}${templateQuery}`, { credentials: 'include', headers: { 'Accept': 'application/json' } }).then(r => r.ok ? r.json() : [])));
         return results.flat();
       }
-      return fetch(`/api/gemteam/turni/scheduled?data=${formattedTurniDate}`, {
+      return fetch(`/api/gemteam/turni/scheduled?data=${formattedTurniDate}${templateQuery}`, {
         credentials: 'include',
         headers: { 'Accept': 'application/json' }
       }).then(r => r.ok ? r.json() : []);
@@ -279,11 +285,12 @@ export default function GemTeam() {
     staleTime: 60000
   });
 
-  
   const shiftMutation = useMutation({
     mutationFn: async (data: any) => {
       const isUpdate = !!data.id;
-      const res = await fetch('/api/gemteam/turni/scheduled' + (isUpdate ? `/${data.id}` : ''), {
+      const queryParams = isTemplateMode ? `?isTemplate=${templatePreset}` : '';
+      const url = '/api/gemteam/turni/scheduled' + (isUpdate ? `/${data.id}` : '') + queryParams;
+      const res = await fetch(url, {
         method: isUpdate ? 'PATCH' : 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -1146,25 +1153,32 @@ export default function GemTeam() {
                     
                     
 
-<Popover>
-  <PopoverTrigger>
-    <div className="hidden sm:inline-flex ml-4 font-semibold text-xs border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer rounded-full px-2.5 py-0.5" role="button">
-      Tipo {weekAssignment?.settimana || 'A'} · {format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'd MMM')}
-    </div>
-  </PopoverTrigger>
+                     {!isTemplateMode && (
+                        <Popover>
+                          <PopoverTrigger>
+                            <div className="hidden sm:inline-flex ml-4 font-semibold text-xs border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer rounded-full px-2.5 py-0.5" role="button">
+                              Tipo {weekAssignment?.settimana || 'A'} · {format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'd MMM')}
+                            </div>
+                          </PopoverTrigger>
   {isMaster && (
     <PopoverContent className="w-auto p-3">
       <h4 className="text-xs font-bold text-slate-500 mb-2 uppercase text-center">Settimana Tipo</h4>
       <div className="flex gap-1.5">
         {['A', 'B', 'C', 'D', 'E'].map(l => (
           <Button key={l} variant={weekAssignment?.settimana === l ? "default" : "outline"} size="sm" className="h-8 w-8 p-0" onClick={() => {
-            weekTypeMutation.mutate(l);
+            const procedi = window.confirm(`ATTENZIONE: Stai per sovrascrivere l'intera settimana!
+            
+Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di questa settimana verranno cancellati e rimpiazzati con i turni di default del Template ${l}. Sei sicuro di volerlo fare?`);
+            if (procedi) {
+               weekTypeMutation.mutate(l);
+            }
           }}>{l}</Button>
         ))}
       </div>
     </PopoverContent>
   )}
 </Popover>
+)}
 
 
                     {isSameDay(turniDate, new Date()) ? (
@@ -1302,7 +1316,23 @@ export default function GemTeam() {
                       </PopoverContent>
                     </Popover>
 
+                    {isTemplateMode && (
+                        <div className="flex items-center gap-2 border-l border-r border-slate-200 px-3 h-8 bg-violet-50 rounded-md">
+                           <span className="text-[10px] font-bold text-violet-600 uppercase">Stai editando:</span>
+                           <div className="flex gap-1">
+                             {['A', 'B', 'C', 'D', 'E'].map(l => (
+                                <Button key={l} variant={templatePreset === l ? "default" : "outline"} size="sm" className={`h-6 w-6 p-0 text-[10px] ${templatePreset === l ? 'bg-violet-600 hover:bg-violet-700 text-white' : 'border-violet-200 text-violet-700 bg-white hover:bg-violet-100'}`} onClick={() => setTemplatePreset(l)}>{l}</Button>
+                             ))}
+                           </div>
+                        </div>
+                    )}
+
                     {isMaster && (
+                       <Button variant={isTemplateMode ? "default" : "outline"} size="sm" className={`h-8 text-xs font-semibold ${isTemplateMode ? 'bg-violet-600 hover:bg-violet-700 text-white border-violet-700' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`} onClick={() => setIsTemplateMode(!isTemplateMode)}>
+                          {isTemplateMode ? 'Esci da Mode Template' : 'Modifica Preset A-E'}
+                       </Button>
+                    )}
+                    {isMaster && !isTemplateMode && (
                        <Dialog open={isCopiaWeekOpen} onOpenChange={setIsCopiaWeekOpen}>
                          <DialogTrigger asChild>
                            <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50">
@@ -1484,7 +1514,8 @@ export default function GemTeam() {
                                  }
 
                                  // Proceed with granular mass-action move
-                                 fetch(`/api/gemteam/turni/scheduled/mass-action-granular`, {
+                                 const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
+                                 fetch(tgtUrl, {
                                     method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ action: 'move', employeeTarget: dip.id, dateTarget: formattedTurniDate, timeOffsetMins, cells: cellsToMove })
                                  }).then(() => {
@@ -1569,7 +1600,8 @@ export default function GemTeam() {
                                                  <Button size="sm" variant="outline" className="h-8 text-[10px] px-2 whitespace-nowrap" onClick={async () => {
                                                     const sel = document.getElementById('mass-date-select') as HTMLInputElement;
                                                     if (!sel.value) return;
-                                                    await fetch(`/api/gemteam/turni/scheduled/mass-action-granular`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'duplicate', dateTarget: sel.value, cells: selectedShifts }) });
+                                                    const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
+                                                    await fetch(tgtUrl, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'duplicate', dateTarget: sel.value, cells: selectedShifts }) });
                                                     setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Duplicati", description: `Celle duplicate correttamente sulla nuova data.`});
                                                  }}>Duplica</Button>
                                                </div>
@@ -1581,7 +1613,8 @@ export default function GemTeam() {
                                                    // We just need to remove selected blocks from original shifts.
                                                    // I can use mass-action-granular with employeeTarget = null ? No. It requires target. 
                                                    // Let me just tell backend to delete them by adding a 'delete' action.
-                                                   await fetch(`/api/gemteam/turni/scheduled/mass-action-granular`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', cells: selectedShifts }) });
+                                                   const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
+                                                   await fetch(tgtUrl, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', cells: selectedShifts }) });
                                                    
                                                    setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Eliminate", description: `Celle eliminate con successo.`});
                                                }}>Elimina tutte le {selectedShifts.length} celle selezionate</Button>
