@@ -1,0 +1,976 @@
+
+=== QUERY: SHOW COLUMNS FROM courses... === 
+[
+  {
+    "Field": "id",
+    "Type": "int(11)",
+    "Null": "NO",
+    "Key": "PRI",
+    "Default": null,
+    "Extra": "auto_increment"
+  },
+  {
+    "Field": "sku",
+    "Type": "varchar(100)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "name",
+    "Type": "varchar(255)",
+    "Null": "NO",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "description",
+    "Type": "text",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "category_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "MUL",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "studio_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "MUL",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "instructor_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "MUL",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "secondary_instructor1_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "MUL",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "secondary_instructor2_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "MUL",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "price",
+    "Type": "decimal(10,2)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "max_capacity",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "current_enrollment",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": "0",
+    "Extra": ""
+  },
+  {
+    "Field": "day_of_week",
+    "Type": "varchar(20)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "start_time",
+    "Type": "varchar(10)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "end_time",
+    "Type": "varchar(10)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "recurrence_type",
+    "Type": "varchar(20)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "schedule",
+    "Type": "text",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "start_date",
+    "Type": "date",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "end_date",
+    "Type": "date",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "status_tags",
+    "Type": "longtext",
+    "Null": "YES",
+    "Key": "",
+    "Default": "'[]'",
+    "Extra": ""
+  },
+  {
+    "Field": "active",
+    "Type": "tinyint(1)",
+    "Null": "YES",
+    "Key": "",
+    "Default": "1",
+    "Extra": ""
+  },
+  {
+    "Field": "created_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": "current_timestamp()",
+    "Extra": ""
+  },
+  {
+    "Field": "updated_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": "current_timestamp()",
+    "Extra": ""
+  },
+  {
+    "Field": "season_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "google_event_id",
+    "Type": "varchar(255)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "quote_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "MUL",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "level",
+    "Type": "varchar(100)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "age_group",
+    "Type": "varchar(100)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "lesson_type",
+    "Type": "longtext",
+    "Null": "YES",
+    "Key": "",
+    "Default": "'[]'",
+    "Extra": ""
+  },
+  {
+    "Field": "number_of_people",
+    "Type": "varchar(50)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "activity_type",
+    "Type": "varchar(50)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  }
+]
+
+=== QUERY: SHOW COLUMNS FROM activities... === 
+[
+  {
+    "Field": "id",
+    "Type": "int(11)",
+    "Null": "NO",
+    "Key": "PRI",
+    "Default": null,
+    "Extra": "auto_increment"
+  },
+  {
+    "Field": "tenant_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "category_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "location_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "name",
+    "Type": "varchar(255)",
+    "Null": "NO",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "start_time",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "end_time",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "instructor_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "max_capacity",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "base_price",
+    "Type": "decimal(10,2)",
+    "Null": "NO",
+    "Key": "",
+    "Default": "0.00",
+    "Extra": ""
+  },
+  {
+    "Field": "is_punch_card",
+    "Type": "tinyint(1)",
+    "Null": "YES",
+    "Key": "",
+    "Default": "0",
+    "Extra": ""
+  },
+  {
+    "Field": "punch_card_total_accesses",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "extra_info_overrides",
+    "Type": "longtext",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "created_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": "current_timestamp()",
+    "Extra": ""
+  },
+  {
+    "Field": "updated_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": "current_timestamp()",
+    "Extra": "on update current_timestamp()"
+  }
+]
+
+=== QUERY: SELECT COUNT(*) FROM courses... === 
+[
+  {
+    "COUNT(*)": 421
+  }
+]
+
+=== QUERY: SELECT COUNT(*) FROM activities... === 
+[
+  {
+    "COUNT(*)": 1284
+  }
+]
+
+=== QUERY: SELECT * FROM activities LIMIT 3... === 
+[
+  {
+    "id": 1,
+    "tenant_id": null,
+    "category_id": 1,
+    "location_id": null,
+    "name": "Ago Danza classica",
+    "start_time": "2026-02-16 08:00:00",
+    "end_time": "2026-06-30 08:00:00",
+    "instructor_id": null,
+    "max_capacity": 20,
+    "base_price": "450.00",
+    "is_punch_card": 0,
+    "punch_card_total_accesses": null,
+    "extra_info_overrides": "{\"legacyId\":1,\"legacyType\":\"course\",\"sku\":\"2526AGOMAR16\",\"description\":\"hhhhhh\",\"recurrenceType\":\"weekly\",\"dayOfWeek\":\"MAR\",\"startDate\":\"2026-02-16T00:00:00.000Z\",\"endDate\":\"2026-06-30T00:00:00.000Z\",\"statusTags\":\"[\\\"BLACK\\\",\\\"APERTO\\\"]\"}",
+    "created_at": "2026-03-12 22:16:50",
+    "updated_at": "2026-03-12 22:16:50"
+  },
+  {
+    "id": 2,
+    "tenant_id": null,
+    "category_id": 2,
+    "location_id": null,
+    "name": "Massimiliano Danza Del ventrre",
+    "start_time": "2026-02-24 20:30:00",
+    "end_time": "2026-06-30 20:35:00",
+    "instructor_id": null,
+    "max_capacity": 20,
+    "base_price": "300.00",
+    "is_punch_card": 0,
+    "punch_card_total_accesses": null,
+    "extra_info_overrides": "{\"legacyId\":2,\"legacyType\":\"course\",\"sku\":\"2526nembrilun21\",\"description\":\"fjflkgfljflkjd\",\"recurrenceType\":\"weekly\",\"dayOfWeek\":\"LUN\",\"startDate\":\"2026-02-24T00:00:00.000Z\",\"endDate\":\"2026-06-30T00:00:00.000Z\",\"statusTags\":\"[]\"}",
+    "created_at": "2026-03-12 22:16:50",
+    "updated_at": "2026-03-12 22:16:50"
+  },
+  {
+    "id": 3,
+    "tenant_id": null,
+    "category_id": null,
+    "location_id": 6,
+    "name": "Modulo Accademy",
+    "start_time": null,
+    "end_time": null,
+    "instructor_id": null,
+    "max_capacity": 40,
+    "base_price": "0.00",
+    "is_punch_card": 0,
+    "punch_card_total_accesses": null,
+    "extra_info_overrides": "{\"legacyId\":3,\"legacyType\":\"course\",\"sku\":\"2526MODULOLUN09.Y\",\"description\":null,\"recurrenceType\":null,\"dayOfWeek\":\"LUN\",\"startDate\":null,\"endDate\":null,\"statusTags\":\"\\\"[]\\\"\"}",
+    "created_at": "2026-03-12 22:16:50",
+    "updated_at": "2026-03-12 22:16:50"
+  }
+]
+
+=== QUERY: SELECT * FROM courses LIMIT 3... === 
+[
+  {
+    "id": 1,
+    "sku": "2526AGOMAR16",
+    "name": "Ago Danza classica",
+    "description": "hhhhhh",
+    "category_id": 410,
+    "studio_id": null,
+    "instructor_id": null,
+    "secondary_instructor1_id": null,
+    "secondary_instructor2_id": null,
+    "price": "450.00",
+    "max_capacity": 20,
+    "current_enrollment": 1,
+    "day_of_week": "MAR",
+    "start_time": "09:00",
+    "end_time": "10:00",
+    "recurrence_type": "weekly",
+    "schedule": null,
+    "start_date": "2025-09-01",
+    "end_date": "2026-06-30",
+    "status_tags": "[\"STATE:BLACK\",\"STATE:APERTO\"]",
+    "active": 1,
+    "created_at": "2026-02-16 11:42:25",
+    "updated_at": "2026-04-08 17:02:03",
+    "season_id": 1,
+    "google_event_id": null,
+    "quote_id": null,
+    "level": null,
+    "age_group": null,
+    "lesson_type": "[]",
+    "number_of_people": null,
+    "activity_type": "course"
+  },
+  {
+    "id": 2,
+    "sku": "2526INDBALLO1PERS",
+    "name": "test INDBALLO1PERS",
+    "description": null,
+    "category_id": 409,
+    "studio_id": null,
+    "instructor_id": null,
+    "secondary_instructor1_id": null,
+    "secondary_instructor2_id": null,
+    "price": "0.00",
+    "max_capacity": 1,
+    "current_enrollment": 0,
+    "day_of_week": null,
+    "start_time": null,
+    "end_time": null,
+    "recurrence_type": null,
+    "schedule": null,
+    "start_date": null,
+    "end_date": null,
+    "status_tags": "[\"STATE:ATTIVO\",\"STATE:APERTO\"]",
+    "active": 1,
+    "created_at": "2026-02-24 10:16:52",
+    "updated_at": "2026-04-07 11:26:38",
+    "season_id": 1,
+    "google_event_id": null,
+    "quote_id": null,
+    "level": null,
+    "age_group": null,
+    "lesson_type": "[]",
+    "number_of_people": null,
+    "activity_type": "course"
+  },
+  {
+    "id": 4,
+    "sku": "2526SEABRALUN09.Y",
+    "name": "Seabra Accademy",
+    "description": null,
+    "category_id": null,
+    "studio_id": 7,
+    "instructor_id": null,
+    "secondary_instructor1_id": null,
+    "secondary_instructor2_id": null,
+    "price": null,
+    "max_capacity": 20,
+    "current_enrollment": 0,
+    "day_of_week": "LUN",
+    "start_time": "09:30",
+    "end_time": "10:30",
+    "recurrence_type": null,
+    "schedule": null,
+    "start_date": "2025-09-01",
+    "end_date": "2026-06-30",
+    "status_tags": "[]",
+    "active": 1,
+    "created_at": "2026-02-24 12:25:36",
+    "updated_at": "2026-02-24 12:25:36",
+    "season_id": 1,
+    "google_event_id": null,
+    "quote_id": null,
+    "level": null,
+    "age_group": null,
+    "lesson_type": "[]",
+    "number_of_people": null,
+    "activity_type": "course"
+  }
+]
+
+=== QUERY: SELECT table_name FROM information_schema.tables WHERE table_schema = 'stargem_v... === 
+[]
+
+=== QUERY: SHOW COLUMNS FROM strategic_events... === 
+[
+  {
+    "Field": "id",
+    "Type": "int(11)",
+    "Null": "NO",
+    "Key": "PRI",
+    "Default": null,
+    "Extra": "auto_increment"
+  },
+  {
+    "Field": "title",
+    "Type": "varchar(255)",
+    "Null": "NO",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "description",
+    "Type": "text",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "event_type",
+    "Type": "varchar(100)",
+    "Null": "NO",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "start_date",
+    "Type": "date",
+    "Null": "NO",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "end_date",
+    "Type": "date",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "all_day",
+    "Type": "tinyint(1)",
+    "Null": "YES",
+    "Key": "",
+    "Default": "1",
+    "Extra": ""
+  },
+  {
+    "Field": "season_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "status",
+    "Type": "varchar(50)",
+    "Null": "YES",
+    "Key": "",
+    "Default": "active",
+    "Extra": ""
+  },
+  {
+    "Field": "affects_calendar",
+    "Type": "tinyint(1)",
+    "Null": "YES",
+    "Key": "",
+    "Default": "1",
+    "Extra": ""
+  },
+  {
+    "Field": "affects_planning",
+    "Type": "tinyint(1)",
+    "Null": "YES",
+    "Key": "",
+    "Default": "1",
+    "Extra": ""
+  },
+  {
+    "Field": "affects_payments",
+    "Type": "tinyint(1)",
+    "Null": "YES",
+    "Key": "",
+    "Default": "0",
+    "Extra": ""
+  },
+  {
+    "Field": "studio_id",
+    "Type": "int(11)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "color",
+    "Type": "varchar(50)",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "created_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": "current_timestamp()",
+    "Extra": ""
+  },
+  {
+    "Field": "updated_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": "current_timestamp()",
+    "Extra": "on update current_timestamp()"
+  }
+]
+
+=== QUERY: SELECT * FROM strategic_events LIMIT 5... === 
+[
+  {
+    "id": 1,
+    "title": "Ferie Agosto 26",
+    "description": null,
+    "event_type": "ferie",
+    "start_date": "2026-08-10",
+    "end_date": null,
+    "all_day": 1,
+    "season_id": null,
+    "status": "active",
+    "affects_calendar": 1,
+    "affects_planning": 1,
+    "affects_payments": 0,
+    "studio_id": null,
+    "color": null,
+    "created_at": "2026-03-28 23:02:35",
+    "updated_at": "2026-03-28 23:02:35"
+  },
+  {
+    "id": 2,
+    "title": "Ferie Agosto 26",
+    "description": null,
+    "event_type": "ferie",
+    "start_date": "2026-08-10",
+    "end_date": null,
+    "all_day": 1,
+    "season_id": null,
+    "status": "active",
+    "affects_calendar": 1,
+    "affects_planning": 1,
+    "affects_payments": 0,
+    "studio_id": null,
+    "color": null,
+    "created_at": "2026-03-28 23:03:22",
+    "updated_at": "2026-03-28 23:03:22"
+  },
+  {
+    "id": 3,
+    "title": "Test Zod Drizzle",
+    "description": null,
+    "event_type": "ferie",
+    "start_date": "2026-08-10",
+    "end_date": null,
+    "all_day": 1,
+    "season_id": null,
+    "status": "active",
+    "affects_calendar": 1,
+    "affects_planning": 1,
+    "affects_payments": 0,
+    "studio_id": null,
+    "color": null,
+    "created_at": "2026-03-28 23:04:36",
+    "updated_at": "2026-03-28 23:04:36"
+  },
+  {
+    "id": 4,
+    "title": "Test Zod Drizzle",
+    "description": null,
+    "event_type": "ferie",
+    "start_date": "2026-08-10",
+    "end_date": null,
+    "all_day": 1,
+    "season_id": null,
+    "status": "active",
+    "affects_calendar": 1,
+    "affects_planning": 1,
+    "affects_payments": 0,
+    "studio_id": null,
+    "color": null,
+    "created_at": "2026-03-28 23:06:05",
+    "updated_at": "2026-03-28 23:06:05"
+  },
+  {
+    "id": 5,
+    "title": "Chiusura Estiva",
+    "description": "Ferie estive dello staff",
+    "event_type": "chiusura",
+    "start_date": "2026-08-10",
+    "end_date": "2026-08-20",
+    "all_day": 1,
+    "season_id": null,
+    "status": "active",
+    "affects_calendar": 1,
+    "affects_planning": 1,
+    "affects_payments": 0,
+    "studio_id": null,
+    "color": null,
+    "created_at": "2026-03-28 23:52:33",
+    "updated_at": "2026-03-28 23:52:33"
+  }
+]
+
+=== QUERY: SELECT id, title, name, description, created_at FROM strategic_events WHERE LOWE... === 
+
+=== QUERY: SELECT id, name, title, created_at FROM activities WHERE LOWER(name) LIKE '%prov... === 
+
+=== QUERY: SELECT title, COUNT(*) as n FROM strategic_events GROUP BY title HAVING n > 1... === 
+[
+  {
+    "title": "acs",
+    "n": 2
+  },
+  {
+    "title": "dsaad",
+    "n": 4
+  },
+  {
+    "title": "Ferie Agosto 26",
+    "n": 2
+  },
+  {
+    "title": "Ferie Demo",
+    "n": 6
+  },
+  {
+    "title": "Festa dei lavoratori",
+    "n": 3
+  },
+  {
+    "title": "Prova Fitness",
+    "n": 2
+  },
+  {
+    "title": "Prova Tabella",
+    "n": 3
+  },
+  {
+    "title": "test",
+    "n": 2
+  },
+  {
+    "title": "Test Zod Drizzle",
+    "n": 2
+  }
+]
+
+=== QUERY: SELECT participant_type, COUNT(*) as n FROM members GROUP BY participant_type... === 
+[
+  {
+    "participant_type": "DIPENDENTE",
+    "n": 16
+  },
+  {
+    "participant_type": "INSEGNANTE",
+    "n": 70
+  },
+  {
+    "participant_type": "PERSONAL_TRAINER",
+    "n": 6
+  }
+]
+
+=== QUERY: SELECT id, first_name, last_name, role, team as department, is_active FROM team_... === 
+
+=== QUERY: SELECT id, first_name, last_name, role, email FROM users ORDER BY id... === 
+[
+  {
+    "id": "1db5007f-054e-4f0d-b47d-df95e6829d01",
+    "first_name": "Gaetano",
+    "last_name": "Ambrosio",
+    "role": "admin",
+    "email": "gaetano@studio-gem.it"
+  },
+  {
+    "id": "2ca8dee4-b0a6-4162-baf7-748a3a4fcbb2",
+    "first_name": "Alexandra",
+    "last_name": "Maldonado",
+    "role": "operator",
+    "email": "alexandra@studio-gem.it"
+  },
+  {
+    "id": "305776d0-45d0-44b3-ba92-f52dcc92e236",
+    "first_name": "Joel",
+    "last_name": "Villon",
+    "role": "operator",
+    "email": "Joel@studio-gem.it"
+  },
+  {
+    "id": "32574a55-0363-4986-ac82-b4c2dadcb818",
+    "first_name": "Nura",
+    "last_name": "Hani",
+    "role": "operator",
+    "email": "nura@studio-gem.it"
+  },
+  {
+    "id": "4eb4c805-2db1-4c22-a329-66538b8a5ccc",
+    "first_name": "Jasir",
+    "last_name": "Blanco",
+    "role": "operator",
+    "email": "jasir@studio-gem.it"
+  },
+  {
+    "id": "5435e479-b2ed-4de9-be93-1ba630fba902",
+    "first_name": "Kevin",
+    "last_name": "Bonila",
+    "role": "operator",
+    "email": "kevin@studio-gem.it"
+  },
+  {
+    "id": "5dc7fcb5-22d4-4e74-a473-74f5e37a30c1",
+    "first_name": "Massimiliano",
+    "last_name": "Nembri",
+    "role": "operator",
+    "email": "massimiliano@studio-gem.it"
+  },
+  {
+    "id": "6ca54efa-44d3-40cd-b2b4-7d3726b4a361",
+    "first_name": "Giuditta",
+    "last_name": "Fumagalli",
+    "role": "operator",
+    "email": "Giuditta@studio-gem.it"
+  },
+  {
+    "id": "7619065e-9f78-4d28-8430-21e04bf3fba8",
+    "first_name": "Ago",
+    "last_name": "Genca",
+    "role": "Super Admin",
+    "email": "ago@agogo.it"
+  },
+  {
+    "id": "77d749ef-8730-49d0-8bb9-12ab68cf1d67",
+    "first_name": "Martina",
+    "last_name": "Ricci",
+    "role": "client",
+    "email": "martina.ricci3@example.com"
+  },
+  {
+    "id": "a5925172-d5fd-4c48-8b65-53958e218e93",
+    "first_name": "Estefany",
+    "last_name": "Segura",
+    "role": "operator",
+    "email": "Estefany@studio-gem.it"
+  },
+  {
+    "id": "admin-id",
+    "first_name": null,
+    "last_name": null,
+    "role": "admin",
+    "email": null
+  },
+  {
+    "id": "c564c984-4db3-4b47-bf85-a1d4d526cb43",
+    "first_name": "Sara",
+    "last_name": "Jannelli",
+    "role": "operator",
+    "email": "sara@studio-gem.it"
+  },
+  {
+    "id": "d53438b8-3789-11f1-9289-02018e0774a6",
+    "first_name": "Diego",
+    "last_name": "Candelario",
+    "role": "operator",
+    "email": "diego@studio-gem.it"
+  },
+  {
+    "id": "db4a4439-caeb-4ee5-83b8-382d30b1d65e",
+    "first_name": "Bot",
+    "last_name": "AI",
+    "role": "admin",
+    "email": ""
+  },
+  {
+    "id": "dd568623-df12-4b19-a76e-4875e8ec84bd",
+    "first_name": "Santo",
+    "last_name": "Mantice",
+    "role": "Direttivo",
+    "email": "amministrazione@studio-gem.it"
+  },
+  {
+    "id": "e4000709-fd0a-479d-af2b-84cc1fbd561f",
+    "first_name": "Stefano",
+    "last_name": "Saracchi",
+    "role": "operator",
+    "email": "stefano@studio-gem.it"
+  },
+  {
+    "id": "ee4c5ccb-0f9f-4ffd-bf84-ca9724fb0b2f",
+    "first_name": "Elisa",
+    "last_name": "Arrivabene",
+    "role": "admin",
+    "email": "elisa@studio-gem.it"
+  },
+  {
+    "id": "faaf36de-3d6c-429c-92ae-d2e38dccb715",
+    "first_name": "cavallo",
+    "last_name": "pazzo",
+    "role": "Front-Desk",
+    "email": "gae71@mac.com"
+  }
+]

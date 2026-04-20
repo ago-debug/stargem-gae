@@ -1,5 +1,5 @@
 # 📊 STATO DB REALE — Audit Aggiornato
-Data e orario aggiornamento: 2026-04-20 16:14
+Data e orario aggiornamento: 2026-04-20 17:10
 
 ## Tabelle attive con dati reali
 
@@ -11,11 +11,11 @@ Data e orario aggiornamento: 2026-04-20 16:14
 | `courses` | **409** | Attività STI |
 | `activities` | **1.274** | Attività dettaglio |
 | `activity_details` | **428** | Dettagli attività |
-| `team_attendance_logs` | **2.078** | Log presenze GemTeam |
+| `team_attendance_logs` | **2** | Log presenze (pulizia mock test conclusa) |
 | `team_scheduled_shifts` | **17** | Turni programmati (Drastico calo - *probabile "WIPE settimana"* per via del deploy 035) |
 | `team_shift_templates` | **1** | Template turni (*Calo per cancellazione massiva precedente/test*) |
 | `strategic_events` | **31** | Pianificazione + Festa Lavoratori 2026 |
-| `team_monthly_reports` | **28** | Report mensili team |
+| `team_monthly_reports` | **16** | Report mensili team (azzerati e rigenerati) |
 | `team_employees` | **16** | Dipendenti GemTeam |
 | `team_postazioni` | **25** | Postazioni configurate |
 | `team_activity_types` | **36** | Tipi attività team |
@@ -47,7 +47,7 @@ Data e orario aggiornamento: 2026-04-20 16:14
 | `booking_services` | **3** | Servizi booking |
 | `rental_categories` | **9** | Categorie affitto |
 | `wc_product_mapping` | **8** | Mapping WooCommerce |
-| `team_checkin_events` | **3** | Check-in events |
+| `team_checkin_events` | **6** | Check-in events (pulizia mock effettuata) |
 | `journal_entries` | **1** | Prima nota |
 | `deprecation_logs` | **1** | Log deprecazione |
 | `member_forms_submissions` | **1** | Firme documenti |
