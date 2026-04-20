@@ -94,6 +94,11 @@ export default function StrategicProgrammingTable() {
             startDate: modalStartDate,
             endDate: modalEndDate || null,
             seasonId: targetSeason?.id || null,
+            affectsCalendar: true,
+            affectsPlanning: true,
+            allDay: true,
+            color: '#DC2626',
+            isPublicHoliday: false
         });
     };
 
