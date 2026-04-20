@@ -9,9 +9,20 @@ import { getSeasonLabel } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar as CalendarIcon, Save, Plus, CalendarDays } from "lucide-react";
+import { Calendar as CalendarIcon, Save, Plus, CalendarDays, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { apiRequest } from "@/lib/queryClient";
+
+const LEGENDA_ITEMS = [
+  { color: '#DC2626', label: '🇮🇹 Festività Nazionali' },
+  { color: '#9D174D', label: '🔒 Chiusure Studio' },
+  { color: '#be185d', label: '🎭 Saggi / Spettacoli' },
+  { color: '#0369a1', label: '🏕️ Campus / Intensivi' },
+  { color: '#c2410c', label: '📋 Workshop / Macro-Evento' },
+  { color: '#6b7280', label: '📌 Note' },
+  { color: '#374151', label: '📦 Corsi (aggregati)' },
+];
 
 export default function StrategicProgrammingTable() {
     const { toast } = useToast();
@@ -77,7 +88,7 @@ export default function StrategicProgrammingTable() {
     const saveEventMutation = useMutation({
         mutationFn: async (data: any) => {
             const res = await apiRequest("POST", "/api/strategic-events", data);
-            return res.json();
+            return res;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["/api/strategic-events"], exact: false });
@@ -210,9 +221,29 @@ export default function StrategicProgrammingTable() {
                 <CardHeader className="bg-slate-100/50 border-b pb-4">
                     <CardTitle className="text-lg flex items-center justify-between">
                         Foglio Operativo: {getSeasonLabel(targetSeason, seasons)}
-                        <Button size="sm" onClick={() => openCellModal(new Date())}>
-                            <Plus className="w-4 h-4 mr-2" /> Aggiungi Evento
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" size="sm" className="gap-2 shrink-0">
+                                        <Info className="h-4 w-4" /> Legenda
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-64 p-3" align="end">
+                                    <div className="space-y-2">
+                                        <h4 className="font-semibold text-sm border-b pb-1 mb-2">Legenda Colori</h4>
+                                        {LEGENDA_ITEMS.map(item => (
+                                            <div key={item.label} className="flex items-center gap-2 text-sm">
+                                                <div className="w-3 h-3 rounded-sm shadow-sm" style={{ backgroundColor: item.color }}></div>
+                                                <span className="font-normal">{item.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                            <Button size="sm" onClick={() => openCellModal(new Date())}>
+                                <Plus className="w-4 h-4 mr-2" /> Aggiungi Evento
+                            </Button>
+                        </div>
                     </CardTitle>
                 </CardHeader>
                 <div className="flex-1 overflow-auto bg-white p-0 relative">

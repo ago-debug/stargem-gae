@@ -1851,17 +1851,17 @@ export default function CalendarPage() {
                                 {selectedDay === 'all' ? (
                                     WEEKDAYS.map((day, idx) => {
                                         const dayDate = addDays(currentWeekStart, idx);
-                                        const overlappingEvents = strategicEventsData?.filter(e => {
-                                            const sDate = new Date(e.startDate);
-                                            sDate.setHours(0,0,0,0);
-                                            const eDate = e.endDate ? new Date(e.endDate) : new Date(e.startDate);
-                                            eDate.setHours(23,59,59,999);
-                                            return dayDate >= sDate && dayDate <= eDate && e.affectsCalendar;
+                                        const dayStr = format(dayDate, 'yyyy-MM-dd');
+                                        const dayStrategicEvents = strategicEventsData?.filter(e => {
+                                            const evtStart = e.startDate?.split('T')[0];
+                                            const evtEnd = (e.endDate || e.startDate)?.split('T')[0];
+                                            return dayStr >= evtStart && dayStr <= evtEnd && e.affectsCalendar;
                                         }) ?? [];
 
-                                        const isPublicHoliday = overlappingEvents.some(e => e.isPublicHoliday);
-                                        const isStudioClosed = overlappingEvents.some(e => e.eventType === 'chiusura' || e.eventType === 'ferie');
-                                        const holidayName = overlappingEvents.find(e => e.isPublicHoliday)?.title;
+                                        const isPublicHoliday = dayStrategicEvents.some(e => e.isPublicHoliday === true || e.isPublicHoliday === 1);
+                                        const isStudioClosed = dayStrategicEvents.some(e => e.eventType === 'chiusura' || e.eventType === 'ferie');
+                                        const holidayName = dayStrategicEvents.find(e => e.isPublicHoliday === true || e.isPublicHoliday === 1)?.title;
+                                        const overlappingEvents = dayStrategicEvents;
 
                                         const isToday = isSameDay(dayDate, new Date());
                                         let rowBg = isToday ? "bg-yellow-50/50" : "bg-white";
