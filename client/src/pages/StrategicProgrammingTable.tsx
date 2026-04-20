@@ -80,10 +80,17 @@ export default function StrategicProgrammingTable() {
             return res.json();
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/strategic-events?seasonId=all"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/strategic-events"], exact: false });
             queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
             setEventModalOpen(false);
             toast({ title: "Salvato", description: "Evento strategico registrato." });
+        },
+        onError: (error: any) => {
+            toast({
+                title: "Errore nel salvataggio",
+                description: error?.message || "Riprova o contatta il supporto.",
+                variant: "destructive"
+            });
         }
     });
 
@@ -353,7 +360,10 @@ export default function StrategicProgrammingTable() {
                                 <SelectContent>
                                     <SelectItem value="chiusura">Chiusura Straordinaria / Festività</SelectItem>
                                     <SelectItem value="ferie">Ferie / Vacanze</SelectItem>
-                                    <SelectItem value="evento_macro">Evento Macro / Saggio / Gara</SelectItem>
+                                    <SelectItem value="festivita">🇮🇹 Festività Nazionale</SelectItem>
+                                    <SelectItem value="saggio">🎭 Saggio / Spettacolo</SelectItem>
+                                    <SelectItem value="campus">🏕️ Campus / Intensivo</SelectItem>
+                                    <SelectItem value="evento_macro">Evento Macro / Gara</SelectItem>
                                     <SelectItem value="nota">Nota o Promozione speciale</SelectItem>
                                 </SelectContent>
                             </Select>

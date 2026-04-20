@@ -20,7 +20,7 @@ export function ActiveUserAvatars() {
     if (u.username?.toLowerCase().includes('martina')) return false;
     if (u.username?.includes('example.com')) return false;
     if (u.username === 'cavallo') return false;
-    if (u.email?.includes('example.com')) return false;
+    if ((u as any).email?.includes('example.com')) return false;
     if (u.role?.toLowerCase() === 'client') return false;
 
     // Se è online o in pausa, lo includiamo (stessa logica della sidebar!)

@@ -28,6 +28,7 @@ interface PlanningEvent {
     dayOfWeek?: number; // 1-7 (Mon-Sun)
     colorClass: string;
     count?: number; // Per corsi aggregati
+    isPublicHoliday?: boolean;
 }
 
 const MONTHS_ORDERED = [
@@ -196,7 +197,8 @@ export default function Planning() {
                 title: se.title,
                 startDate: new Date(se.startDate),
                 endDate: se.endDate ? new Date(se.endDate) : undefined,
-                colorClass: getStrategicColor(se.eventType)
+                colorClass: getStrategicColor(se.eventType),
+                isPublicHoliday: se.isPublicHoliday === true || se.isPublicHoliday === 1
             })));
         }
 
@@ -219,19 +221,33 @@ export default function Planning() {
         
         let cellEvents = [];
 
+        // 1. Assign specific events (campuses, workshops, etc.)
+        const specificEvents = events.filter(e => {
+            if (e.endDate) {
+                // If it's a range event (like Campus)
+                const start = new Date(e.startDate.setHours(0,0,0,0));
+                const end = new Date(e.endDate.setHours(23,59,59,999));
+                return cellDate >= start && cellDate <= end;
+            }
+            return isSameDay(e.startDate, cellDate);
+        });
+
         // 0. Holiday highlighting directly as an event or badge
-        const holidayName = isItalianHoliday(cellDate);
-        if (holidayName) {
+        const systemHolidayName = isItalianHoliday(cellDate);
+        const dbHoliday = specificEvents.find(e => e.isPublicHoliday);
+        const resolvedHolidayName = dbHoliday ? dbHoliday.title : systemHolidayName;
+
+        if (resolvedHolidayName) {
             cellEvents.push(
                 <div key={`hol_${day}_${realMonthIndex}`} className="mb-1 w-full bg-red-500 text-white px-1 py-0.5 text-[10px] font-bold rounded text-center uppercase shadow-sm truncate">
-                    {holidayName}
+                    {resolvedHolidayName}
                 </div>
             );
         }
 
-        // 1. Assign aggregated courses (repeated weekly within boundaries)
+        // 2. Assign aggregated courses (repeated weekly within boundaries)
         const coursesCount = getCoursesCountForDate(cellDate, cellDayOfWeek);
-        if (coursesCount > 0 && !holidayName) { // Optionally don't show courses on National Holidays
+        if (coursesCount > 0 && !resolvedHolidayName) { // Optionally don't show courses on National Holidays
             // Passiamo la data esatta come parametro GET query per far aprire il Calendario nel giorno giusto
             const dateStr = format(cellDate, "yyyy-MM-dd");
             cellEvents.push(
@@ -243,18 +259,10 @@ export default function Planning() {
             );
         }
 
-        // 2. Assign specific events (campuses, workshops, etc.)
-        const specificEvents = events.filter(e => {
-            if (e.endDate) {
-                // If it's a range event (like Campus)
-                const start = new Date(e.startDate.setHours(0,0,0,0));
-                const end = new Date(e.endDate.setHours(23,59,59,999));
-                return cellDate >= start && cellDate <= end;
-            }
-            return isSameDay(e.startDate, cellDate);
-        });
-
+        // 3. Render cards for remaining specific events
         specificEvents.forEach(e => {
+            if (e.isPublicHoliday) return; // Esclude doppio rendering festività (solo badge rosso)
+
             const pureId = e.id.split('_')[1];
             // Determina il link basato sul tipo puntando alla scheda precisa
             let linkTo = "";
