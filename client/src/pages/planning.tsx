@@ -82,6 +82,30 @@ export default function Planning() {
 
     const { data: seasons, isLoading: seasonsLoading } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
 
+    // Determina l'anno massimo navigabile (Stagione Attiva + 1)
+    const maxStartYear = useMemo(() => {
+        if (!seasons) return defaultStartYear + 1;
+        const activeSeason = seasons.find(s => s.active) || seasons[0];
+        if (activeSeason) {
+            const yearMatch = activeSeason.name.match(/20(\d{2})\/20(\d{2})/);
+            if (yearMatch) return 2000 + parseInt(yearMatch[1]) + 1;
+        }
+        return defaultStartYear + 1;
+    }, [seasons, defaultStartYear]);
+
+    // Controlla se disabilitare il tasto "Succ"
+    const isNextDisabled = useMemo(() => {
+        if (viewMode === 'annuale') return startYear >= maxStartYear;
+        if (viewMode === 'mensile' || viewMode === 'settimanale') {
+            const navYear = currentDateParam.getFullYear();
+            const maxNavYear = maxStartYear + 1; // max anno gregoriano toccabile (es. stagione 26/27 tocca il 2027)
+            if (navYear > maxNavYear) return true;
+            if (navYear === maxNavYear && currentDateParam.getMonth() >= 8) return true; // max agosto della seconda annata
+            return false;
+        }
+        return false;
+    }, [viewMode, startYear, maxStartYear, currentDateParam]);
+
     // Determina la stagione correntemente visualizzata
     const targetSeasonId = useMemo(() => {
         if (!seasons) return 'all';
@@ -92,6 +116,7 @@ export default function Planning() {
             if (matched) return matched.id;
             const fallback = seasons.find(s => s.name.includes(`${startYear}`));
             if (fallback) return fallback.id;
+            return -1; // Prevent cross-contamination of courses into non-existent seasons
         } else {
             const matched = seasons.find(s => {
                 if (!s.startDate || !s.endDate) return false;
@@ -100,8 +125,8 @@ export default function Planning() {
                 return currentDateParam >= d1 && currentDateParam <= d2;
             });
             if (matched) return matched.id;
+            return -1; // Prevent cross-contamination of courses into non-existent seasons
         }
-        return seasons.find(s => s.active)?.id || 'all';
     }, [seasons, viewMode, startYear, currentDateParam]);
 
     // --- FETCH DATA ---
@@ -426,7 +451,7 @@ export default function Planning() {
                              viewMode === 'mensile' ? format(currentDateParam, "MMMM yyyy", { locale: it }) : 
                              `Settimana ${format(currentDateParam, "d MMM yyyy", { locale: it })}`}
                         </div>
-                        <Button variant="ghost" size="sm" onClick={nextTimeSpan} className="text-slate-500 hover:text-slate-900 h-7">Succ. &rarr;</Button>
+                        <Button variant="ghost" size="sm" onClick={nextTimeSpan} disabled={isNextDisabled} className="text-slate-500 hover:text-slate-900 h-7 disabled:opacity-30 disabled:hover:text-slate-500">Succ. &rarr;</Button>
                     </div>
 
                     <div className="text-xs font-semibold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors h-9 flex items-center shrink-0"
