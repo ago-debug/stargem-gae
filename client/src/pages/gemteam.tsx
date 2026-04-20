@@ -1431,24 +1431,66 @@ export default function GemTeam() {
                              className={`border-r border-b ${hasConflict ? 'border-red-400 ring-2 ring-inset ring-red-500/30' : 'border-slate-200'} p-0.5 relative cursor-pointer min-h-[22px] ${turniViewMode==='singola'?'min-w-[200px] w-full':''}`}
                              onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
                              onDragEnter={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                             onDragStart={(e) => { 
+                               // We pass the source hour in standard drag
+                               e.dataTransfer.setData("sourceHour", hour);
+                             }}
                              onDrop={(e) => {
                                e.preventDefault();
-                               const shiftId = e.dataTransfer.getData("shiftId");
-                               if (shiftId && shiftId !== "null" && turniScheduled) {
-                                 const droppedShift = turniScheduled.find((t:any) => String(t.id) === shiftId);
-                                 if (droppedShift) {
-                                   if (String(droppedShift.employeeId) === String(dip.id) && droppedShift.oraInizio === hour) return;
-                                   let fineHours = parseInt(hour.substring(0,2)) + (parseInt(droppedShift.oraFine.split(':')[0]) - parseInt(droppedShift.oraInizio.split(':')[0]));
-                                   let strFine = String(fineHours).padStart(2,'0') + ':' + droppedShift.oraFine.split(':')[1];
-                                   shiftMutation.mutate({
-                                     id: droppedShift.id,
-                                     employeeId: dip.id,
-                                     data: formattedTurniDate,
-                                     oraInizio: hour,
-                                     oraFine: strFine,
-                                     postazione: droppedShift.postazione
-                                   }, { onSuccess: () => refetchScheduled() });
+                               const shiftIdStr = e.dataTransfer.getData("shiftId");
+                               const sourceHour = e.dataTransfer.getData("sourceHour");
+                               if (shiftIdStr && shiftIdStr !== "null" && sourceHour && turniScheduled) {
+                                 const shiftId = parseInt(shiftIdStr);
+                                 const droppedShift = turniScheduled.find((t:any) => t.id === shiftId);
+                                 if (!droppedShift) return;
+
+                                 const [sh, sm] = sourceHour.split(':').map(Number);
+                                 const [th, tm] = hour.split(':').map(Number);
+                                 const timeOffsetMins = (th * 60 + tm) - (sh * 60 + sm);
+                                 
+                                 const isSelected = selectedShifts.some(s => s.shiftId === shiftId && s.hour === sourceHour);
+                                 const cellsToMove = isSelected ? selectedShifts : [{ shiftId, hour: sourceHour }];
+
+                                 // Conflict Check
+                                 let hasHardConflict = false;
+                                 for (const c of cellsToMove) {
+                                     const [ch, cm] = c.hour.split(':').map(Number);
+                                     let tot = ch * 60 + cm + timeOffsetMins;
+                                     let targetH = `${String(Math.floor(tot/60)).padStart(2,'0')}:${String(tot%60).padStart(2,'0')}`;
+                                     
+                                     // Check if targetH overlaps with any existing shift of the target employee
+                                     const overlaps = turniScheduled.some((s:any) => {
+                                        if (String(s.employeeId) !== String(dip.id)) return false;
+                                        if (s.data.split('T')[0] !== formattedTurniDate) return false;
+                                        if (targetH < s.oraInizio || targetH >= s.oraFine) return false;
+                                        
+                                        // Ignore self-overlap if we are dropping exactly where it was
+                                        if (s.id === c.shiftId && c.hour === targetH && String(droppedShift.employeeId) === String(dip.id)) return false;
+                                        // Also, if targetH is literally one of the cells we are moving, we don't consider it a conflict
+                                        // Actually, if we are moving within the same shift bounds, the original boundaries overlap.
+                                        // A perfectly safe way: if s.id === c.shiftId, and we are just shifing but staying inside the old shift. 
+                                        // To be extremely precise, we check if targetH is in the remaining slots of the original shift. This is complex in frontend.
+                                        // Let's just trust a basic check: if s.id !== c.shiftId it's definitely a conflict (another shift).
+                                        if (s.id !== c.shiftId) return true;
+                                        return false;
+                                     });
+                                     if (overlaps) { hasHardConflict = true; break; }
                                  }
+
+                                 if (hasHardConflict) {
+                                    toast({ title: "Spazio Occupato", description: "Impossibile spostare. Orario già occupato da un altro turno.", variant: "destructive" });
+                                    return;
+                                 }
+
+                                 // Proceed with granular mass-action move
+                                 fetch(`/api/gemteam/turni/scheduled/mass-action-granular`, {
+                                    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: 'move', employeeTarget: dip.id, dateTarget: formattedTurniDate, timeOffsetMins, cells: cellsToMove })
+                                 }).then(() => {
+                                    setSelectedShifts([]);
+                                    refetchScheduled();
+                                    toast({title: "Spostato", description: `Record spostato con successo.`});
+                                 });
                                }
                              }}
                            >
@@ -1459,7 +1501,11 @@ export default function GemTeam() {
                                     <PopoverTrigger asChild>
                                       <div 
                                         draggable={isMaster}
-                                        onDragStart={(e) => { e.dataTransfer.setData("shiftId", String(turniFiltrato.id)); e.dataTransfer.effectAllowed = "move"; }}
+                                        onDragStart={(e) => { 
+                                           e.dataTransfer.setData("shiftId", String(turniFiltrato.id)); 
+                                           e.dataTransfer.setData("sourceHour", hour);
+                                           e.dataTransfer.effectAllowed = "move"; 
+                                        }}
                                         title={hasConflict ? "Conflitto registrato" : ""} 
                                         style={postInfo?.colore ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}} 
                                         className={`${hasConflict ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} ${selectedShifts.some(s => s.shiftId === turniFiltrato.id && s.hour === hour) ? 'ring-2 ring-indigo-600 ring-offset-1' : ''} w-full h-full min-h-[20px] rounded border flex flex-col items-center justify-center p-0.5 shadow-sm hover:brightness-95 relative group`}

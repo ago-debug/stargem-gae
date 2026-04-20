@@ -10839,8 +10839,17 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   });
   app.post("/api/gemteam/turni/scheduled/mass-action-granular", isAuthenticated, isMasterGuard, async (req, res) => {
     try {
-      const { action, employeeTarget, dateTarget, cells } = req.body;
+      const { action, employeeTarget, dateTarget, cells, timeOffsetMins } = req.body;
       if (!action || !cells || !cells.length) return res.status(400).json({ error: 'Dati mancanti' });
+
+      const addOffset = (t: string, offsetMins: number) => {
+         if (!offsetMins) return t;
+         const [h, m] = t.split(':').map(Number);
+         let totalMins = h * 60 + m + offsetMins;
+         let nh = Math.floor(totalMins / 60);
+         let nm = totalMins % 60;
+         return `${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}`;
+      };
 
       // cells = [{ shiftId, hour }] come "10:30"
       // Raggruppiamo le celle per shiftId
@@ -10905,7 +10914,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
 
          // Crea i blocchi DI DESTINAZIONE (se non è una delete)
          if (action !== 'delete') {
-            const targetBlocks = groupToBlocks(selectedSlots);
+            const targetSlots = timeOffsetMins ? selectedSlots.map(s => addOffset(s, timeOffsetMins)) : selectedSlots;
+            const targetBlocks = groupToBlocks(targetSlots);
             for (const b of targetBlocks) {
                await db.insert(schema.teamScheduledShifts).values({
                   employeeId: employeeTarget || originalShift.employeeId,
