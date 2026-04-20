@@ -10885,7 +10885,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       return res.json({ success: true });
     } catch(err: any) {
       console.error(err); 
-      if (err.code === 'ER_DUP_ENTRY') {
+      if (err.code === 'ER_DUP_ENTRY' || err.cause?.code === 'ER_DUP_ENTRY') {
         return res.status(409).json({ error: 'Errore: duplicazione nello stesso spazio (turno già presente in questo orario).' });
       }
       return res.status(500).json({ error: 'Errore salvataggio turno' });
