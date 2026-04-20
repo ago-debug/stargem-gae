@@ -146,6 +146,18 @@ export default function StrategicProgrammingTable() {
         });
     };
 
+    const getEventLabel = (evt: any) => {
+        const isHoliday = evt?.isPublicHoliday === true || evt?.isPublicHoliday === 1;
+        if (isHoliday) return `🇮🇹 FESTIVITÀ: ${evt?.title}`;
+        switch(evt?.eventType) {
+            case 'chiusura': return `🔒 CHIUSURA: ${evt?.title}`;
+            case 'ferie':    return `🏖️ FERIE: ${evt?.title}`;
+            case 'saggio':   return `🎭 SAGGIO: ${evt?.title}`;
+            case 'campus':   return `🏕️ CAMPUS: ${evt?.title}`;
+            default:         return `📌 ${evt?.eventType?.toUpperCase()}: ${evt?.title}`;
+        }
+    };
+
     if (seasonsLoading) return <div className="p-8">Caricamento...</div>;
 
     return (
@@ -232,10 +244,21 @@ export default function StrategicProgrammingTable() {
 
                                             if (dayEvts.length > 0) {
                                                 const priorityEvt = dayEvts[0] || {};
-                                                if (priorityEvt.eventType === 'chiusura') bgColor = 'bg-red-100 text-red-900 border-red-200';
-                                                else if (priorityEvt.eventType === 'ferie') bgColor = 'bg-purple-100 text-purple-900 border-purple-200';
-                                                else if (priorityEvt.eventType === 'evento_macro') bgColor = 'bg-blue-100 text-blue-900 border-blue-200';
-                                                else bgColor = 'bg-yellow-100 text-yellow-900 border-yellow-200';
+                                                const isHoliday = priorityEvt.isPublicHoliday === true || priorityEvt.isPublicHoliday === 1;
+                                                
+                                                if (isHoliday) {
+                                                    bgColor = 'bg-red-100 text-red-800 border-red-300';
+                                                } else if (priorityEvt.eventType === 'chiusura') {
+                                                    bgColor = 'bg-pink-100 text-pink-900 border-pink-200';
+                                                } else if (priorityEvt.eventType === 'ferie') {
+                                                    bgColor = 'bg-purple-100 text-purple-900 border-purple-200';
+                                                } else if (priorityEvt.eventType === 'saggio' || priorityEvt.eventType === 'evento_macro') {
+                                                    bgColor = 'bg-orange-100 text-orange-900 border-orange-200';
+                                                } else if (priorityEvt.eventType === 'campus') {
+                                                    bgColor = 'bg-sky-100 text-sky-900 border-sky-200';
+                                                } else {
+                                                    bgColor = 'bg-yellow-100 text-yellow-900 border-yellow-200';
+                                                }
                                             }
 
                                             return (
@@ -259,7 +282,7 @@ export default function StrategicProgrammingTable() {
                                                 ) : (
                                                     uniqueEvents.map(evt => (
                                                         <div key={evt?.id} className="font-medium bg-white p-1 rounded shadow-sm border border-slate-100 flex items-center justify-between">
-                                                            <span><strong className="uppercase">{evt?.eventType}:</strong> {evt?.title}</span>
+                                                            <span>{getEventLabel(evt)}</span>
                                                             {evt?.description && <span className="text-slate-400">({evt.description})</span>}
                                                         </div>
                                                     ))
