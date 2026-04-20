@@ -480,7 +480,7 @@ export default function GemTeam() {
     });
 
     let inSede = 0; 
-    let online = validUsers.filter((u: any) => u.stato === 'online').length; 
+    let online = validUsers.filter((u: any) => u.stato === 'online' || u.stato === 'pausa').length; 
     let usciti = 0; let attesi = 0; let assenti = 0;
     
     // Per inSede usiamo il check degli employees + chi sta loggando (inclusi admin/bot)
@@ -678,20 +678,20 @@ export default function GemTeam() {
             <PopoverContent align="end" className="w-56 p-3">
               <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 border-b pb-1">Dettaglio Connessioni</h4>
               <div className="flex justify-between text-xs py-1">
-                <span className="text-slate-600">Dipendenti Online:</span>
-                <span className="font-bold">{activeUsers.filter((u:any) => u.stato === 'online' && dipendenti.some(d => d.userId === u.id && d.team !== 'collaboratori' && !isSystemEmployee(d))).length}</span>
+                <span className="text-slate-600">Dipendenti (On/Pausa):</span>
+                <span className="font-bold">{activeUsers.filter((u:any) => (u.stato === 'online' || u.stato === 'pausa') && dipendenti.some(d => d.userId === u.id && d.team !== 'collaboratori' && !isSystemEmployee(d))).length}</span>
               </div>
               <div className="flex justify-between text-xs py-1">
-                <span className="text-slate-600">Collaboratori Online:</span>
-                <span className="font-bold">{activeUsers.filter((u:any) => u.stato === 'online' && dipendenti.some(d => d.userId === u.id && d.team === 'collaboratori')).length}</span>
+                <span className="text-slate-600">Collaboratori (On/Pausa):</span>
+                <span className="font-bold">{activeUsers.filter((u:any) => (u.stato === 'online' || u.stato === 'pausa') && dipendenti.some(d => d.userId === u.id && d.team === 'collaboratori')).length}</span>
               </div>
               <div className="flex justify-between text-xs py-1 text-primary">
                 <span className="font-semibold">Utenti Tecnici (Admin/Bot):</span>
-                <span className="font-bold">{activeUsers.filter((u:any) => u.stato === 'online' && (!dipendenti.some(d => d.userId === u.id) || isSystemEmployee(dipendenti.find(d => d.userId === u.id)!))).length}</span>
+                <span className="font-bold">{activeUsers.filter((u:any) => (u.stato === 'online' || u.stato === 'pausa') && (!dipendenti.some(d => d.userId === u.id) || isSystemEmployee(dipendenti.find(d => d.userId === u.id)!))).length}</span>
               </div>
               <div className="border-t mt-2 pt-2 flex justify-between text-xs">
                 <span className="font-bold text-slate-800">Totale Dispositivi:</span>
-                <span className="font-black text-blue-600">{activeUsers.filter((u:any)=>u.stato==='online').length}</span>
+                <span className="font-black text-blue-600">{activeUsers.filter((u:any)=>u.stato==='online' || u.stato==='pausa').length}</span>
               </div>
             </PopoverContent>
           </Popover>
@@ -744,7 +744,7 @@ export default function GemTeam() {
               <Card className="bg-blue-50 border-blue-200 shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <span className="text-3xl font-black text-blue-600 mb-1">{checkInStats.online}</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-blue-800">Online</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-blue-800">Connessi</span>
                 </CardContent>
               </Card>
               <Card className="bg-slate-100 border-slate-200 shadow-sm">
@@ -790,13 +790,15 @@ export default function GemTeam() {
                         const statoA = chkA?.lastEvent || "ATTESO";
                         const presenceA = activeUsers.find((u: any) => u.id === a.userId);
                         const isOnlineA = presenceA?.stato === 'online';
-                        const scoreA = (isOnlineA ? 2 : 0) + (statoA === "IN" ? 1 : 0);
+                        const isPausaA = presenceA?.stato === 'pausa';
+                        const scoreA = (isOnlineA ? 2 : isPausaA ? 1 : 0) + (statoA === "IN" ? 1.5 : 0);
 
                         const chkB = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === b.id) : null;
                         const statoB = chkB?.lastEvent || "ATTESO";
                         const presenceB = activeUsers.find((u: any) => u.id === b.userId);
                         const isOnlineB = presenceB?.stato === 'online';
-                        const scoreB = (isOnlineB ? 2 : 0) + (statoB === "IN" ? 1 : 0);
+                        const isPausaB = presenceB?.stato === 'pausa';
+                        const scoreB = (isOnlineB ? 2 : isPausaB ? 1 : 0) + (statoB === "IN" ? 1.5 : 0);
 
                         if (scoreA !== scoreB) return scoreB - scoreA;
 
@@ -843,10 +845,15 @@ export default function GemTeam() {
                               <Badge variant="outline" className={`${statoColors[stato] || statoColors["ATTESO"]} font-bold shadow-sm`}>{statoLabel}</Badge>
                             </td>
                             <td className="p-4">
-                              {isOnline ? (
+                              {presenceInfo?.stato === 'online' ? (
                                  <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 font-bold shadow-sm">
                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block"></span>
                                    ONLINE
+                                 </Badge>
+                              ) : presenceInfo?.stato === 'pausa' ? (
+                                 <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 font-bold shadow-sm">
+                                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 inline-block"></span>
+                                   IN PAUSA
                                  </Badge>
                               ) : (
                                  <Badge variant="outline" className="bg-slate-100 text-slate-500 border-transparent">
