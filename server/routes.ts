@@ -23,7 +23,7 @@ import { log } from "./vite";
 import { db } from "./db";
 import { sendSMS, sendEmail } from "./notifications";
 import { getUnifiedActivitiesPreview, getUnifiedActivityById, getUnifiedEnrollmentsPreview } from "./services/unifiedBridge";
-import { eq, desc, asc, and, isNull, isNotNull, sql, gte, lte, lt, or, like, ne } from "drizzle-orm";
+import { eq, desc, asc, and, isNull, isNotNull, sql, gte, lte, lt, or, like, ne, inArray } from "drizzle-orm";
 import { differenceInYears } from "date-fns";
 import * as schema from "@shared/schema";
 import { gemConversations, gemMessages, memberUploads, insertMemberSchema,
@@ -10830,6 +10830,117 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         console.log(`Mock sending email via SMTP 465 to employee ${employeeId} for new shift`);
       } catch (e: any) {
         console.error('Silently ignored notification insert error:', e.message);
+      }
+
+      return res.json({ success: true });
+    } catch(err) {
+      console.error(err); return res.status(500).json({ error: 'Errore interno (forse duplicato)' });
+    }
+  });
+  app.post("/api/gemteam/turni/scheduled/mass-action-granular", isAuthenticated, isMasterGuard, async (req, res) => {
+    try {
+      const { action, employeeTarget, dateTarget, cells } = req.body;
+      if (!action || !cells || !cells.length) return res.status(400).json({ error: 'Dati mancanti' });
+
+      // cells = [{ shiftId, hour }] come "10:30"
+      // Raggruppiamo le celle per shiftId
+      const groupedByShift: Record<number, string[]> = {};
+      for (const c of cells) {
+         if (!groupedByShift[c.shiftId]) groupedByShift[c.shiftId] = [];
+         groupedByShift[c.shiftId].push(c.hour);
+      }
+
+      // Funzione helper per raggruppare ore in blocchi continui da 30 min
+      const groupToBlocks = (slots: string[]): {start: string, end: string}[] => {
+         if (!slots.length) return [];
+         const sorted = [...slots].sort();
+         const blocks = [];
+         let bStart = sorted[0];
+         
+         const add30 = (t: string) => {
+            const [h, m] = t.split(':').map(Number);
+            let nm = m + 30; let nh = h;
+            if (nm >= 60) { nm -= 60; nh += 1; }
+            return `${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}`;
+         };
+
+         let currentEnd = add30(bStart);
+         for (let i = 1; i < sorted.length; i++) {
+            if (sorted[i] === currentEnd) {
+               currentEnd = add30(sorted[i]);
+            } else {
+               blocks.push({ start: bStart, end: currentEnd });
+               bStart = sorted[i];
+               currentEnd = add30(sorted[i]);
+            }
+         }
+         blocks.push({ start: bStart, end: currentEnd });
+         return blocks;
+      };
+
+      // Helper estrazione slots
+      const getSlots = (start: string, end: string) => {
+         const slots = [];
+         let curr = start;
+         const add30 = (t: string) => {
+            const [h, m] = t.split(':').map(Number);
+            let nm = m + 30; let nh = h;
+            if (nm >= 60) { nm -= 60; nh += 1; }
+            return `${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}`;
+         };
+         while (curr < end) {
+           slots.push(curr);
+           curr = add30(curr);
+         }
+         return slots;
+      };
+
+      for (const shiftIdStr in groupedByShift) {
+         const shiftId = parseInt(shiftIdStr);
+         const selectedSlots = groupedByShift[shiftId];
+         
+         const results = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, shiftId));
+         if (!results.length) continue;
+         const originalShift = results[0];
+
+         // Crea i blocchi DI DESTINAZIONE (se non è una delete)
+         if (action !== 'delete') {
+            const targetBlocks = groupToBlocks(selectedSlots);
+            for (const b of targetBlocks) {
+               await db.insert(schema.teamScheduledShifts).values({
+                  employeeId: employeeTarget || originalShift.employeeId,
+                  data: dateTarget ? new Date(dateTarget) : new Date(originalShift.data),
+                  oraInizio: b.start,
+                  oraFine: b.end,
+                  postazione: originalShift.postazione,
+                  note: originalShift.note,
+                  createdByUserId: (req.user as any)?.id
+               });
+            }
+         }
+
+         // Se è 'move' o 'delete', dobbiamo tagliare il turno originale
+         if (action === 'move' || action === 'delete') {
+            const originalSlots = getSlots(originalShift.oraInizio, originalShift.oraFine);
+            const remainingSlots = originalSlots.filter(s => !selectedSlots.includes(s));
+            
+            await db.delete(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, shiftId));
+
+            if (remainingSlots.length > 0) {
+               const remainingBlocks = groupToBlocks(remainingSlots);
+               for (const b of remainingBlocks) {
+                  await db.insert(schema.teamScheduledShifts).values({
+                     employeeId: originalShift.employeeId,
+                     data: new Date(originalShift.data),
+                     oraInizio: b.start,
+                     oraFine: b.end,
+                     postazione: originalShift.postazione,
+                     note: originalShift.note,
+                     createdByUserId: (req.user as any)?.id
+                  });
+               }
+            }
+         }
       }
 
       return res.json({ success: true });
