@@ -2157,6 +2157,7 @@ export const strategicEvents = mysqlTable("strategic_events", {
   affectsPayments: boolean("affects_payments").default(false),
   studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
   color: varchar("color", { length: 50 }),
+  isPublicHoliday: boolean("is_public_holiday").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
