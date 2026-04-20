@@ -18,7 +18,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSub, ContextMenuSubTrigger, ContextMenuSubContent } from "@/components/ui/context-menu";
+import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSub, ContextMenuSubTrigger, ContextMenuSubContent, ContextMenuSeparator } from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -1566,127 +1566,117 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                     </PopoverTrigger>
                                     {isMaster && (
                                      <PopoverContent className="w-80 p-4">
-                                        {selectedShifts.length > 0 && selectedShifts.some(s => s.shiftId === turniFiltrato.id) && (
-                                          <div className="bg-indigo-50 border border-indigo-200 rounded p-3 mb-4 shadow-sm">
-                                            <h5 className="font-bold text-indigo-800 text-xs mb-2">Azione Massiva ({selectedShifts.length} celle scelte)</h5>
-                                            
-                                            <div className="flex flex-col gap-2">
-                                               {/* Spostamento/Copia per Dipendente */}
-                                               <div className="flex gap-2 items-center">
-                                                 <select id="mass-emp-select" className="flex h-8 w-full rounded-md border border-input bg-white px-2 text-[10px] uppercase shadow-sm">
-                                                   <option value="">Seleziona team...</option>
-                                                   {dipendenti.filter(d => !isSystemEmployee(d)).map(d => (
-                                                     <option key={d.id} value={d.id}>{d.nome} {d.cognome}</option>
-                                                   ))}
-                                                 </select>
-                                                 <Button size="sm" className="h-8 text-[10px] px-2 whitespace-nowrap" onClick={async () => {
-                                                    const sel = document.getElementById('mass-emp-select') as HTMLSelectElement;
-                                                    if (!sel.value) return;
-                                                    await fetch(`/api/gemteam/turni/scheduled/mass-action-granular`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'move', employeeTarget: parseInt(sel.value), cells: selectedShifts }) });
-                                                    setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Spostati", description: `Celle spostate sul nuovo dipendente.`});
-                                                 }}>Sposta</Button>
-                                                 <Button size="sm" variant="outline" className="h-8 text-[10px] px-2 whitespace-nowrap" onClick={async () => {
-                                                    const sel = document.getElementById('mass-emp-select') as HTMLSelectElement;
-                                                    if (!sel.value) return;
-                                                    await fetch(`/api/gemteam/turni/scheduled/mass-action-granular`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'duplicate', employeeTarget: parseInt(sel.value), cells: selectedShifts }) });
-                                                    setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Duplicati", description: `Celle duplicate sul nuovo dipendente.`});
-                                                 }}>Duplica</Button>
-                                               </div>
+                                        {selectedShifts.length > 0 && selectedShifts.some(s => s.shiftId === turniFiltrato.id) ? (
+                                           <div className="flex flex-col gap-3">
+                                              <div className="bg-indigo-50 border border-indigo-200 rounded p-3 shadow-sm">
+                                                <h5 className="font-bold text-indigo-800 text-xs mb-3">Azione Massiva ({selectedShifts.length} slot)</h5>
+                                                <div className="flex flex-col gap-3">
+                                                   <div className="space-y-1">
+                                                     <label className="text-[10px] font-semibold text-slate-500 uppercase">Copia/Sposta verso:</label>
+                                                     <div className="flex flex-col gap-2">
+                                                       <select id="mass-emp-select" className="w-full h-8 rounded-md border border-input bg-white px-2 text-[10px] uppercase shadow-sm">
+                                                          <option value={dip.id}>👉 Stesso Dipendente</option>
+                                                          {dipendenti.filter(d => !isSystemEmployee(d) && d.id !== dip.id).map(d => (
+                                                            <option key={d.id} value={d.id}>{d.nome} {d.cognome}</option>
+                                                          ))}
+                                                       </select>
+                                                       <Input type="date" id="mass-date-select" className="h-8 w-full text-[10px] bg-white px-2" defaultValue={formattedTurniDate} />
+                                                     </div>
+                                                   </div>
+                                                </div>
+                                              </div>
+                                              
+                                              <div className="flex gap-2">
+                                                <Button size="sm" variant="outline" className="flex-1 h-8 text-[10px]" onClick={async () => {
+                                                     const empTgt = parseInt((document.getElementById('mass-emp-select') as HTMLSelectElement).value);
+                                                     const dateTgt = (document.getElementById('mass-date-select') as HTMLInputElement).value;
+                                                     const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
+                                                     await fetch(tgtUrl, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'duplicate', employeeTarget: empTgt, dateTarget: dateTgt, cells: selectedShifts }) });
+                                                     setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Duplicati", description: `Slot duplicati con successo.`});
+                                                }}>Duplica</Button>
+                                                <Button size="sm" className="flex-1 h-8 text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white" onClick={async () => {
+                                                     const empTgt = parseInt((document.getElementById('mass-emp-select') as HTMLSelectElement).value);
+                                                     const dateTgt = (document.getElementById('mass-date-select') as HTMLInputElement).value;
+                                                     const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
+                                                     await fetch(tgtUrl, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'move', employeeTarget: empTgt, dateTarget: dateTgt, cells: selectedShifts }) });
+                                                     setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Spostati", description: `Slot spostati con successo.`});
+                                                }}>Sposta</Button>
+                                              </div>
+                                              <Button variant="destructive" size="sm" className="h-8 text-[10px] w-full" onClick={async () => {
+                                                 if (!confirm(`Sei sicuro di voler eliminare le ${selectedShifts.length} celle selezionate?`)) return;
+                                                 const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
+                                                 await fetch(tgtUrl, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', cells: selectedShifts }) });
+                                                 setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Eliminate", description: `Celle eliminate con successo.`});
+                                              }}>Elimina {selectedShifts.length} slot</Button>
+                                           </div>
+                                         ) : (
+                                           <div className="flex flex-col gap-0 w-full">
+                                              <h4 className="font-bold text-sm mb-2">Modifica Intero Turno</h4>
+                                              <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
+                                              
+                                              <form onSubmit={(e) => {
+                                                  e.preventDefault();
+                                                  const selectEl = e.currentTarget.elements.namedItem('postazione') as HTMLSelectElement;
+                                                  const startEl = e.currentTarget.elements.namedItem('inizio') as HTMLInputElement;
+                                                  const endEl = e.currentTarget.elements.namedItem('fine') as HTMLInputElement;
+                                                  const noteEl = e.currentTarget.elements.namedItem('note') as HTMLInputElement;
+                                                  
+                                                  if (!selectEl.value) { toast({title: "Errore", description: "Seleziona postazione", variant: "destructive"}); return; }
 
-                                               {/* Spostamento/Copia per Data */}
-                                               <div className="flex gap-2 items-center">
-                                                 <Input type="date" id="mass-date-select" className="h-8 w-full text-[10px] bg-white px-2" defaultValue={formattedTurniDate} />
-                                                 <Button size="sm" className="h-8 text-[10px] px-2 whitespace-nowrap" onClick={async () => {
-                                                    const sel = document.getElementById('mass-date-select') as HTMLInputElement;
-                                                    if (!sel.value) return;
-                                                    await fetch(`/api/gemteam/turni/scheduled/mass-action-granular`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'move', dateTarget: sel.value, cells: selectedShifts }) });
-                                                    setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Spostati", description: `Celle spostate correttamente sulla nuova data.`});
-                                                 }}>Sposta</Button>
-                                                 <Button size="sm" variant="outline" className="h-8 text-[10px] px-2 whitespace-nowrap" onClick={async () => {
-                                                    const sel = document.getElementById('mass-date-select') as HTMLInputElement;
-                                                    if (!sel.value) return;
-                                                    const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
-                                                    await fetch(tgtUrl, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'duplicate', dateTarget: sel.value, cells: selectedShifts }) });
-                                                    setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Duplicati", description: `Celle duplicate correttamente sulla nuova data.`});
-                                                 }}>Duplica</Button>
-                                               </div>
-                                               
-                                               <Button variant="destructive" size="sm" className="h-8 text-[10px] w-full mt-1" onClick={async () => {
-                                                   if (!confirm(`Sei sicuro di voler eliminare le ${selectedShifts.length} celle selezionate?`)) return;
-                                                   // Delete was not explicitly added to mass-action-granular. Let's process it client side using the original logic or simulate a move to nowhere 
-                                                   // Actually, moving without assigning is not handled. Let's do it via DELETE logic:
-                                                   // We just need to remove selected blocks from original shifts.
-                                                   // I can use mass-action-granular with employeeTarget = null ? No. It requires target. 
-                                                   // Let me just tell backend to delete them by adding a 'delete' action.
-                                                   const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
-                                                   await fetch(tgtUrl, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', cells: selectedShifts }) });
-                                                   
-                                                   setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Eliminate", description: `Celle eliminate con successo.`});
-                                               }}>Elimina tutte le {selectedShifts.length} celle selezionate</Button>
-                                            </div>
-                                          </div>
-                                        )}
-                                        <h4 className="font-bold text-sm mb-2">Modifica Intero Turno</h4>
-                                        <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
-                                        
-                                        <form onSubmit={(e) => {
-    e.preventDefault();
-    const selectEl = e.currentTarget.elements.namedItem('postazione') as HTMLSelectElement;
-    const startEl = e.currentTarget.elements.namedItem('inizio') as HTMLInputElement;
-    const endEl = e.currentTarget.elements.namedItem('fine') as HTMLInputElement;
-    const noteEl = e.currentTarget.elements.namedItem('note') as HTMLInputElement;
-    
-    if (!selectEl.value) { toast({title: "Errore", description: "Seleziona postazione", variant: "destructive"}); return; }
+                                                  shiftMutation.mutate({
+                                                    id: turniFiltrato.id,
+                                                    employeeId: dip.id,
+                                                    data: formattedTurniDate,
+                                                    oraInizio: startEl.value,
+                                                    oraFine: endEl.value,
+                                                    postazione: selectEl.value,
+                                                    note: noteEl.value
+                                                  }, { onSuccess: () => refetchScheduled() });
+                                                }}>
+                                                <div className="space-y-3">
+                                                  <div className="w-full">
+                                                    <label className="text-xs font-semibold text-slate-600">Postazione</label>
+                                                    
+                                                    <select name="postazione" defaultValue={turniFiltrato.postazione} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" required>
+                                                      <option value="" disabled>Seleziona...</option>
+                                                      {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
+                                                        <option key={p.id} value={p.nome}>{p.nome}</option>
+                                                      ))}
+                                                    </select>
+                                                  </div>
+                                                  <div className="flex gap-2">
+                                                    <div className="w-1/2">
+                                                      <label className="text-xs font-semibold text-slate-600">Inizio</label>
+                                                      <Input name="inizio" type="time" defaultValue={hour} />
+                                                    </div>
+                                                    <div className="w-1/2">
+                                                      <label className="text-xs font-semibold text-slate-600">Fine</label>
+                                                      <Input name="fine" type="time" defaultValue={`${hour.substring(0,2)}:30`} />
+                                                    </div>
+                                                  </div>
+                                                  <div>
+                                                    <label className="text-xs font-semibold text-slate-600">Note</label>
+                                                    <Input name="note" placeholder="Opzionale..." defaultValue={turniFiltrato.note || ''} />
+                                                  </div>
+                                                </div>
 
-    shiftMutation.mutate({
-      id: turniFiltrato.id,
-      employeeId: dip.id,
-      data: formattedTurniDate,
-      oraInizio: startEl.value,
-      oraFine: endEl.value,
-      postazione: selectEl.value,
-      note: noteEl.value
-    }, { onSuccess: () => refetchScheduled() });
-  }}>
-  <div className="space-y-3">
-                                            <div className="w-full">
-                                            <label className="text-xs font-semibold text-slate-600">Postazione</label>
-                                            
-  <select name="postazione" defaultValue={turniFiltrato.postazione} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" required>
-    <option value="" disabled>Seleziona...</option>
-    {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).sort((a:any, b:any) => (a.ordine || 0) - (b.ordine || 0)).map((p:any) => (
-      <option key={p.id} value={p.nome}>{p.nome}</option>
-    ))}
-  </select>
-
-                                          </div>
-                                          <div className="flex gap-2">
-                                            <div className="w-1/2">
-                                              <label className="text-xs font-semibold text-slate-600">Inizio</label>
-                                              <Input name="inizio" type="time" defaultValue={hour} />
-                                            </div>
-                                            <div className="w-1/2">
-                                              <label className="text-xs font-semibold text-slate-600">Fine</label>
-                                              <Input name="fine" type="time" defaultValue={`${hour.substring(0,2)}:30`} />
-                                            </div>
-                                          </div>
-                                          <div>
-                                            <label className="text-xs font-semibold text-slate-600">Note</label>
-                                            <Input name="note" placeholder="Opzionale..." defaultValue={turniFiltrato.note || ''} />
-                                          </div>
-                                        </div>
-
-                                        <div className="flex gap-2 justify-end mt-4">
-                                           <Button type="button" variant="destructive" size="sm" onClick={(e) => { e.preventDefault(); deleteShiftMutation.mutate(turniFiltrato.id);}}>Elimina</Button>
-                                           <Button type="submit" size="sm" disabled={shiftMutation.isPending}>{shiftMutation.isPending ? "..." : "Salva"}</Button>
-                                        </div>
-  </form>
+                                                <div className="flex justify-between items-center mt-6 pt-3 border-t border-slate-100">
+                                                   <Button type="button" variant="destructive" size="sm" className="h-8 text-[11px] px-3 font-semibold" onClick={(e) => { e.preventDefault(); deleteShiftMutation.mutate(turniFiltrato.id);}}>Elimina</Button>
+                                                   <Button type="submit" size="sm" className="h-8 text-[11px] px-6 font-semibold bg-amber-500 hover:bg-amber-600 text-white" disabled={shiftMutation.isPending}>{shiftMutation.isPending ? "..." : "Salva"}</Button>
+                                                </div>
+                                              </form>
+                                           </div>
+                                         )}
                                       </PopoverContent>
                                     )}
                                   </Popover>
                                  </ContextMenuTrigger>
                                  {isMaster && (
                                    <ContextMenuContent className="w-56">
+                                     <ContextMenuItem className="font-semibold text-amber-600" onClick={() => shiftMutation.mutate({employeeId: dip.id, data: formattedTurniDate, oraInizio: turniFiltrato.oraInizio, oraFine: turniFiltrato.oraFine, postazione: turniFiltrato.postazione, note: turniFiltrato.note})}>
+                                       Duplica sullo stesso dipendente
+                                     </ContextMenuItem>
+                                     <ContextMenuSeparator />
                                      <ContextMenuSub>
                                        <ContextMenuSubTrigger>Copia su dipendente</ContextMenuSubTrigger>
                                        <ContextMenuSubContent className="w-48 overflow-y-auto max-h-[300px]">
