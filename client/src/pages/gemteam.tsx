@@ -469,12 +469,22 @@ export default function GemTeam() {
   });
 
   const checkInStats = useMemo(() => {
+    // Filtro attivo globale per evitare bot inutili e cloni
+    const validUsers = activeUsers.filter((u: any) => {
+      if (u.username?.toLowerCase().includes('martina')) return false;
+      if (u.username?.includes('example.com')) return false;
+      if (u.username === 'cavallo') return false;
+      if (u.email?.includes('example.com')) return false;
+      if (u.role?.toLowerCase() === 'client') return false;
+      return true;
+    });
+
     let inSede = 0; 
-    let online = activeUsers.filter((u: any) => u.stato === 'online').length; 
+    let online = validUsers.filter((u: any) => u.stato === 'online').length; 
     let usciti = 0; let attesi = 0; let assenti = 0;
     
+    // Per inSede usiamo temporaneamente il check degli employees + chi sta loggando
     dipendenti.forEach(dip => {
-      // Escludi admin e botAI dal conteggio presenze in sede
       if (isSystemEmployee(dip)) return;
 
       const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find(c => c.employeeId === dip.id) : null;
@@ -487,6 +497,9 @@ export default function GemTeam() {
         attesi++;
       }
     });
+
+    // Includiamo anche check virtuale (es. tech admins contati solo se online)
+    
     return { inSede, online, usciti, attesi, assenti };
   }, [todayCheckinsData, dipendenti, activeUsers]);
 
@@ -658,9 +671,32 @@ export default function GemTeam() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1 text-sm shadow-sm">
-            <Users2 className="w-4 h-4 mr-1.5" /> {dipendenti.filter(d => !isSystemEmployee(d)).length} Dipendenti
-          </Badge>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-7 px-3 py-1 text-sm shadow-sm rounded-full border-none">
+                <Users2 className="w-4 h-4 mr-1.5" /> {dipendenti.filter(d => !isSystemEmployee(d)).length} Team
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-56 p-3">
+              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 border-b pb-1">Dettaglio Connessioni</h4>
+              <div className="flex justify-between text-xs py-1">
+                <span className="text-slate-600">Dipendenti Online:</span>
+                <span className="font-bold">{activeUsers.filter((u:any) => u.stato === 'online' && dipendenti.some(d => d.userId === u.id && d.team !== 'collaboratori' && !isSystemEmployee(d))).length}</span>
+              </div>
+              <div className="flex justify-between text-xs py-1">
+                <span className="text-slate-600">Collaboratori Online:</span>
+                <span className="font-bold">{activeUsers.filter((u:any) => u.stato === 'online' && dipendenti.some(d => d.userId === u.id && d.team === 'collaboratori')).length}</span>
+              </div>
+              <div className="flex justify-between text-xs py-1 text-primary">
+                <span className="font-semibold">Utenti Tecnici (Admin/Bot):</span>
+                <span className="font-bold">{activeUsers.filter((u:any) => u.stato === 'online' && (!dipendenti.some(d => d.userId === u.id) || isSystemEmployee(dipendenti.find(d => d.userId === u.id)!))).length}</span>
+              </div>
+              <div className="border-t mt-2 pt-2 flex justify-between text-xs">
+                <span className="font-bold text-slate-800">Totale Dispositivi:</span>
+                <span className="font-black text-blue-600">{activeUsers.filter((u:any)=>u.stato==='online').length}</span>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -672,7 +708,7 @@ export default function GemTeam() {
             <Home className="w-4 h-4 mr-2" /> Dashboard
           </TabsTrigger>
           <TabsTrigger value="dipendenti" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
-            <Users2 className="w-4 h-4 mr-2" /> Dipendenti
+            <Users2 className="w-4 h-4 mr-2" /> Team
           </TabsTrigger>
           <TabsTrigger value="turni" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
             <ShieldCheck className="w-4 h-4 mr-2" /> Turni
@@ -739,7 +775,7 @@ export default function GemTeam() {
                 <table className="w-full text-left text-sm whitespace-nowrap">
                   <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                     <tr>
-                      <th className="p-4 font-bold">DIPENDENTE</th>
+                      <th className="p-4 font-bold">TEAM</th>
                       <th className="p-4 font-bold">SEDE</th>
                       <th className="p-4 font-bold">ONLINE</th>
                       <th className="p-4 text-right font-bold">ORE SEDE</th>
@@ -751,15 +787,35 @@ export default function GemTeam() {
                       <tr><td colSpan={5} className="p-8 text-center text-slate-500">Caricamento dipendenti...</td></tr>
                     )}
                     {(() => {
-                      const sortedDip = [...dipendenti].sort((a, b) => {
+                      // Costruiamo i technical users falsi per renderli nella lista Team
+                      const techUsers = activeUsers
+                         .filter((u: any) => {
+                             if (u.username?.toLowerCase().includes('martina')) return false;
+                             if (u.username?.includes('example.com')) return false;
+                             if (u.username === 'cavallo') return false;
+                             return (!dipendenti.some(d => d.userId === u.id) || isSystemEmployee(dipendenti.find(d => d.userId === u.id)!));
+                         })
+                         .map((u: any) => ({
+                             id: -(u.id || Math.floor(Math.random() * 100000)), // fake id negativo per evitare clash
+                             userId: u.id,
+                             nome: u.firstName || u.username || 'Sistema',
+                             cognome: u.lastName || 'Tecnico',
+                             team: 'direzione',
+                             photo_url: u.profileImageUrl || null,
+                             isTechMock: true
+                         }));
+
+                      const combinedList = [...dipendenti.filter(d => !isSystemEmployee(d)), ...techUsers];
+
+                      const sortedDip = combinedList.sort((a, b) => {
                         const chkA = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === a.id) : null;
-                        const statoA = chkA?.lastEvent || "ATTESO";
+                        const statoA = a.isTechMock ? "OUT" : (chkA?.lastEvent || "ATTESO");
                         const presenceA = activeUsers.find((u: any) => u.id === a.userId);
                         const isOnlineA = presenceA?.stato === 'online';
                         const scoreA = (isOnlineA ? 2 : 0) + (statoA === "IN" ? 1 : 0);
 
                         const chkB = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === b.id) : null;
-                        const statoB = chkB?.lastEvent || "ATTESO";
+                        const statoB = b.isTechMock ? "OUT" : (chkB?.lastEvent || "ATTESO");
                         const presenceB = activeUsers.find((u: any) => u.id === b.userId);
                         const isOnlineB = presenceB?.stato === 'online';
                         const scoreB = (isOnlineB ? 2 : 0) + (statoB === "IN" ? 1 : 0);
@@ -781,7 +837,7 @@ export default function GemTeam() {
 
                       return sortedDip.map(dip => {
                         const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === dip.id) : null;
-                        const stato = chk?.lastEvent ? chk.lastEvent : "ATTESO";
+                        const stato = (dip as any).isTechMock ? "ATTESO" : (chk?.lastEvent ? chk.lastEvent : "ATTESO");
                         const oreSede = chk && chk.oreOggi > 0 ? fmtOre(Number(chk.oreOggi)) : "—";
 
                         const presenceInfo = activeUsers.find((u: any) => u.id === dip.userId);
