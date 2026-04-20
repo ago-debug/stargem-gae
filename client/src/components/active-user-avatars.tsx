@@ -14,42 +14,24 @@ export function ActiveUserAvatars() {
   const { data: users = [] } = useActiveUsers();
   const { user: currentUser } = useAuth();
 
-  // Filtriamo quelli online e in pausa (ping < 20 minuti fa e con sessione aperta) escludendo se stessi
   const activeUsers = users.filter((u) => {
     if (u.id === currentUser?.id) return false;
-    if (!u.lastSeenAt || !u.currentSessionStart) return false;
-    const diff = new Date().getTime() - new Date(u.lastSeenAt).getTime();
-    return diff <= 20 * 60 * 1000;
+    // Ignoriamo bot e test account come fa la sidebar
+    if (u.username?.toLowerCase().includes('martina')) return false;
+    if (u.username?.includes('example.com')) return false;
+    if (u.username === 'cavallo') return false;
+    if (u.email?.includes('example.com')) return false;
+    if (u.role?.toLowerCase() === 'client') return false;
+
+    // Se è online o in pausa, lo includiamo (stessa logica della sidebar!)
+    return u.stato === 'online' || u.stato === 'pausa';
   });
+
+  if (activeUsers.length === 0) return null;
 
   const displayLimit = 3;
   const visibleUsers = activeUsers.slice(0, displayLimit);
   const hiddenCount = Math.max(0, activeUsers.length - displayLimit);
-
-  if (activeUsers.length === 0) {
-    return (
-      <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-full px-2 py-1 shadow-sm opacity-60">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-slate-200 text-[10px] font-bold text-slate-500 shadow-sm hover:bg-slate-300 transition-colors cursor-pointer">
-              0
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-64 p-2">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs font-semibold flex items-center gap-2 text-slate-500 uppercase tracking-wider">
-                <Users className="w-3 h-3" /> 
-                Nessun utente live oltre a te
-              </h4>
-            </div>
-            <div className="text-xs text-slate-400 p-2 text-center">
-              Tutti gli altri membri del team sono attualmente offline.
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-    );
-  }
 
   return (
     <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-full px-2 py-1 shadow-sm">
