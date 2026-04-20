@@ -1462,15 +1462,16 @@ export default function GemTeam() {
                                      const overlaps = turniScheduled.some((s:any) => {
                                         if (String(s.employeeId) !== String(dip.id)) return false;
                                         if (s.data.split('T')[0] !== formattedTurniDate) return false;
-                                        if (targetH < s.oraInizio || targetH >= s.oraFine) return false;
+                                        
+                                        const sStart = s.oraInizio.substring(0, 5);
+                                        const sEnd = s.oraFine.substring(0, 5);
+                                        
+                                        if (targetH < sStart || targetH >= sEnd) return false;
                                         
                                         // Ignore self-overlap if we are dropping exactly where it was
-                                        if (s.id === c.shiftId && c.hour === targetH && String(droppedShift.employeeId) === String(dip.id)) return false;
-                                        // Also, if targetH is literally one of the cells we are moving, we don't consider it a conflict
-                                        // Actually, if we are moving within the same shift bounds, the original boundaries overlap.
-                                        // A perfectly safe way: if s.id === c.shiftId, and we are just shifing but staying inside the old shift. 
-                                        // To be extremely precise, we check if targetH is in the remaining slots of the original shift. This is complex in frontend.
-                                        // Let's just trust a basic check: if s.id !== c.shiftId it's definitely a conflict (another shift).
+                                        if (s.id === c.shiftId && targetH === c.hour.substring(0, 5) && String(droppedShift.employeeId) === String(dip.id)) return false;
+                                        
+                                        // To be perfectly safe, any overlap with a different shift is a conflict
                                         if (s.id !== c.shiftId) return true;
                                         return false;
                                      });
