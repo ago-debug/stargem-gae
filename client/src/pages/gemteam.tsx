@@ -1328,7 +1328,12 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     )}
 
                     {isMaster && (
-                       <Button variant={isTemplateMode ? "default" : "outline"} size="sm" className={`h-8 text-xs font-semibold ${isTemplateMode ? 'bg-violet-600 hover:bg-violet-700 text-white border-violet-700' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`} onClick={() => setIsTemplateMode(!isTemplateMode)}>
+                       <Button variant={isTemplateMode ? "default" : "outline"} size="sm" className={`h-8 text-xs font-semibold ${isTemplateMode ? 'bg-violet-600 hover:bg-violet-700 text-white border-violet-700' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`} onClick={() => {
+                           if (!isTemplateMode && weekAssignment?.settimana) {
+                               setTemplatePreset(weekAssignment.settimana);
+                           }
+                           setIsTemplateMode(!isTemplateMode);
+                       }}>
                           {isTemplateMode ? 'Esci da Mode Template' : 'Modifica Preset A-E'}
                        </Button>
                     )}
