@@ -10736,7 +10736,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       const weekStartStr = req.query.weekStart as string; // YYYY-MM-DD
       if (!weekStartStr) return res.status(400).json({ error: 'weekStart mancante' });
       
-      const targetQuery = await db.select().from(schema.teamWeekAssignments).where(eq(schema.teamWeekAssignments.weekStart, new Date(weekStartStr)));
+      const targetQuery = await db.select().from(schema.teamWeekAssignments).where(sql`DATE(${schema.teamWeekAssignments.weekStart}) = ${weekStartStr}`);
       if (targetQuery.length > 0) {
         return res.json({ settimana: targetQuery[0].settimana, weekStart: weekStartStr, isOverride: targetQuery[0].isManualOverride });
       }
