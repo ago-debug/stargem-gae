@@ -112,8 +112,9 @@ export default function StrategicProgrammingTable() {
 
     const openCellModal = (date: Date) => {
         setCurrentEditDate(date);
-        setModalStartDate(format(date, "yyyy-MM-dd"));
-        setModalEndDate("");
+        const dateStr = format(date, "yyyy-MM-dd");
+        setModalStartDate(dateStr);
+        setModalEndDate(dateStr);
         setModalTitle("");
         setModalType("chiusura");
         setEventModalOpen(true);
@@ -364,10 +365,9 @@ export default function StrategicProgrammingTable() {
                                 <SelectContent>
                                     <SelectItem value="chiusura">Chiusura Straordinaria / Festività</SelectItem>
                                     <SelectItem value="ferie">Ferie / Vacanze</SelectItem>
-                                    <SelectItem value="festivita">🇮🇹 Festività Nazionale</SelectItem>
-                                    <SelectItem value="saggio">🎭 Saggio / Spettacolo</SelectItem>
-                                    <SelectItem value="campus">🏕️ Campus / Intensivo</SelectItem>
-                                    <SelectItem value="evento_macro">Evento Macro / Gara</SelectItem>
+                                    <SelectItem value="festivita">Festività Nazionale</SelectItem>
+                                    <SelectItem value="saggio">Saggio / Spettacolo</SelectItem>
+                                    <SelectItem value="campus">Campus / Intensivo</SelectItem>
                                     <SelectItem value="nota">Nota o Promozione speciale</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -379,10 +379,15 @@ export default function StrategicProgrammingTable() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Data Inizio</Label>
-                                <Input type="date" value={modalStartDate} onChange={e => setModalStartDate(e.target.value)} />
+                                <Input type="date" value={modalStartDate} onChange={e => {
+                                    setModalStartDate(e.target.value);
+                                    if (!modalEndDate || modalEndDate <= modalStartDate) {
+                                        setModalEndDate(e.target.value);
+                                    }
+                                }} />
                             </div>
                             <div className="space-y-2">
-                                <Label>Data Fine (opzionale)</Label>
+                                <Label>Data Fine</Label>
                                 <Input type="date" value={modalEndDate} onChange={e => setModalEndDate(e.target.value)} />
                             </div>
                         </div>
