@@ -1856,24 +1856,41 @@ export default function CalendarPage() {
                                             sDate.setHours(0,0,0,0);
                                             const eDate = e.endDate ? new Date(e.endDate) : new Date(e.startDate);
                                             eDate.setHours(23,59,59,999);
-                                            return dayDate >= sDate && dayDate <= eDate;
-                                        });
+                                            return dayDate >= sDate && dayDate <= eDate && e.affectsCalendar;
+                                        }) ?? [];
+
+                                        const isPublicHoliday = overlappingEvents.some(e => e.isPublicHoliday);
+                                        const isStudioClosed = overlappingEvents.some(e => e.eventType === 'chiusura' || e.eventType === 'ferie');
+                                        const holidayName = overlappingEvents.find(e => e.isPublicHoliday)?.title;
 
                                         const isToday = isSameDay(dayDate, new Date());
-                                        const rowBg = isToday ? "bg-yellow-50/50" : "bg-white";
+                                        let rowBg = isToday ? "bg-yellow-50/50" : "bg-white";
+                                        if (isPublicHoliday) rowBg = "bg-red-50";
+                                        else if (isStudioClosed) rowBg = "bg-pink-50";
+
+                                        let headerBorderClass = isToday ? "border-b-[3px] border-yellow-400 text-yellow-900" : "text-[#333]";
+                                        if (isPublicHoliday) headerBorderClass = "border-b-[3px] border-red-300 text-red-700";
+                                        else if (isStudioClosed) headerBorderClass = "border-b-[3px] border-pink-300 text-pink-700";
 
                                         return (
-                                            <div key={day.id} className={`text-center border-r last:border-r-0 font-bold text-[12px] uppercase tracking-tight text-[#333] ${rowBg} min-w-[120px] flex flex-col items-center justify-start relative`}>
+                                            <div key={day.id} className={`text-center border-r last:border-r-0 font-bold text-[12px] uppercase tracking-tight ${rowBg} min-w-[120px] flex flex-col items-center justify-start relative`}>
                                                 {/* Testata Data Base */}
-                                                <div className={`p-3 pb-1 flex flex-col items-center w-full ${isToday ? 'border-b-[3px] border-yellow-400 text-yellow-900' : ''}`}>
+                                                <div className={`p-3 pb-1 flex flex-col items-center w-full ${headerBorderClass}`}>
                                                     <span>{day.label} {format(dayDate, "d")}</span>
-                                                    <span className="text-[10px] font-normal text-muted-foreground">{format(dayDate, "MMMM", { locale: it })}</span>
-                                                    {isToday && <span className="absolute top-1.5 right-1.5 text-[7.5px] bg-yellow-400 text-yellow-900 px-[4px] py-[2px] rounded-sm font-black uppercase tracking-wider shadow-sm border border-yellow-500/30">Oggi</span>}
+                                                    <span className={`text-[10px] font-normal ${isPublicHoliday ? 'text-red-500' : (isStudioClosed ? 'text-pink-500' : 'text-muted-foreground')}`}>{format(dayDate, "MMMM", { locale: it })}</span>
+                                                    {isToday && <span className={`absolute top-1.5 right-1.5 text-[7.5px] px-[4px] py-[2px] rounded-sm font-black uppercase tracking-wider shadow-sm border ${isPublicHoliday ? 'bg-red-500 text-white border-red-600' : 'bg-yellow-400 text-yellow-900 border-yellow-500/30'}`}>Oggi</span>}
                                                 </div>
                                                 
+                                                {/* Banner Festività */}
+                                                {(isPublicHoliday || isStudioClosed) && (
+                                                    <div className={`w-full text-xs font-bold px-1 pb-1 pt-1 flex justify-center items-center ${isPublicHoliday ? 'text-red-600 bg-red-100/50 border-b border-red-100' : 'text-pink-600 bg-pink-100/50 border-b border-pink-100'}`}>
+                                                        {isPublicHoliday ? `☀️ ${holidayName || "Festività"}` : `🔒 Studio Chiuso`}
+                                                    </div>
+                                                )}
+                                                
                                                 {/* Banner Eventi Strategici (Chiusure/Ferie/Macro) */}
-                                                <div className="w-full flex-grow flex flex-col gap-[1px] px-[2px] pb-[4px]">
-                                                {overlappingEvents && overlappingEvents.map(evt => {
+                                                <div className="w-full flex-grow flex flex-col gap-[1px] px-[2px] pb-[4px] pt-1">
+                                                {overlappingEvents && overlappingEvents.filter(e => !e.isPublicHoliday).map(evt => {
                                                     let bgColor = 'bg-slate-200 text-slate-800';
                                                     if (evt.eventType === 'chiusura') bgColor = 'bg-red-500 text-white';
                                                     if (evt.eventType === 'ferie') bgColor = 'bg-purple-500 text-white';
