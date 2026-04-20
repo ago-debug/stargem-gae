@@ -12,6 +12,9 @@ const ACTIVITY_LEGEND = [
   { label: "Vacanze Studio", badge: "VAC", color: "#15803d" },
   { label: "Campus", badge: "CAM", color: "#0369a1" },
   { label: "Affitti", badge: "AFT", color: "#374151" },
+  { label: "Festività Nazionali", badge: "FES", color: "#DC2626" },
+  { label: "Chiusure Studio / Ferie", badge: "CHI", color: "#9D174D" },
+  { label: "Note / Generico", badge: "NOT", color: "#6b7280" },
 ];
 
 export function ActivityColorLegend({ variant = "card" }: { variant?: "card" | "popover" }) {
