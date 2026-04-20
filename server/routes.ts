@@ -10771,7 +10771,44 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   app.get("/api/gemteam/turni/scheduled", isAuthenticated, async (req, res) => {
     try {
       const dataStr = req.query.data as string;
+      const isTemplate = req.query.isTemplate as string;
       if (!dataStr) return res.status(400).json({ error: 'data mancante' });
+
+      if (isTemplate) {
+        // Calcola giornoSettimana (0=Lunedì, 6=Domenica)
+        const dt = new Date(dataStr);
+        let gd = dt.getDay() - 1;
+        if (gd === -1) gd = 6;
+        
+        const records = await db.select({
+          id: schema.teamShiftTemplates.id,
+          employeeId: schema.teamShiftTemplates.employeeId,
+          giornoSettimana: schema.teamShiftTemplates.giornoSettimana,
+          oraInizio: schema.teamShiftTemplates.oraInizio,
+          oraFine: schema.teamShiftTemplates.oraFine,
+          postazione: schema.teamShiftTemplates.postazione,
+          note: schema.teamShiftTemplates.note,
+          firstName: schema.members.firstName,
+          lastName: schema.members.lastName,
+          displayOrder: schema.teamEmployees.displayOrder,
+          team: schema.teamEmployees.team
+        })
+        .from(schema.teamShiftTemplates)
+        .innerJoin(schema.teamEmployees, eq(schema.teamEmployees.id, schema.teamShiftTemplates.employeeId))
+        .innerJoin(schema.members, eq(schema.members.id, schema.teamEmployees.memberId))
+        .where(and(
+           eq(schema.teamShiftTemplates.settimanaTipo, isTemplate as any),
+           eq(schema.teamShiftTemplates.giornoSettimana, gd)
+        ))
+        .orderBy(sql`${schema.teamEmployees.displayOrder} ASC`, sql`${schema.teamShiftTemplates.oraInizio} ASC`);
+
+        const mapped = records.map(r => ({
+          ...r,
+          data: new Date(dataStr), // Fake the date so frontend renders it correctly
+          hasConflict: false
+        }));
+        return res.json(mapped);
+      }
 
       const records = await db.select({
         id: schema.teamScheduledShifts.id,
@@ -10811,8 +10848,21 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   app.post("/api/gemteam/turni/scheduled", isAuthenticated, isMasterGuard, async (req, res) => {
     try {
       const { employeeId, data, oraInizio, oraFine, postazione, note } = req.body;
+      const isTemplate = req.query.isTemplate as string;
+      
       if (!employeeId || !data || !oraInizio || !oraFine || !postazione) {
         return res.status(400).json({ error: 'Dati incompleti' });
+      }
+
+      if (isTemplate) {
+        const dt = new Date(data);
+        let gd = dt.getDay() - 1;
+        if (gd === -1) gd = 6;
+        
+        await db.insert(schema.teamShiftTemplates).values({
+          employeeId, settimanaTipo: isTemplate as any, giornoSettimana: gd, oraInizio, oraFine, postazione: postazione as any, note
+        });
+        return res.json({ success: true });
       }
 
       await db.insert(schema.teamScheduledShifts).values({
@@ -10910,7 +10960,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
          const shiftId = parseInt(shiftIdStr);
          const selectedSlots = groupedByShift[shiftId];
          
-         const results = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, shiftId));
+         const tbl = req.query.isTemplate ? schema.teamShiftTemplates : schema.teamScheduledShifts;
+         const results = await db.select().from(tbl).where(eq(tbl.id, shiftId));
          if (!results.length) continue;
          const originalShift = results[0];
 
@@ -10919,15 +10970,30 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
             const targetSlots = timeOffsetMins ? selectedSlots.map(s => addOffset(s, timeOffsetMins)) : selectedSlots;
             const targetBlocks = groupToBlocks(targetSlots);
             for (const b of targetBlocks) {
-               await db.insert(schema.teamScheduledShifts).values({
-                  employeeId: employeeTarget || originalShift.employeeId,
-                  data: dateTarget ? new Date(dateTarget) : new Date(originalShift.data),
-                  oraInizio: b.start,
-                  oraFine: b.end,
-                  postazione: originalShift.postazione,
-                  note: originalShift.note,
-                  createdByUserId: (req.user as any)?.id
-               });
+               if (req.query.isTemplate) {
+                 const dt = new Date(dateTarget || new Date()); // though dateTarget should not be used much in template mode mass-action unless moving across days
+                 let gd = dateTarget ? (new Date(dateTarget).getDay() - 1) : (originalShift as any).giornoSettimana;
+                 if (gd === -1) gd = 6;
+                 await db.insert(schema.teamShiftTemplates).values({
+                    employeeId: employeeTarget || originalShift.employeeId,
+                    settimanaTipo: req.query.isTemplate as any,
+                    giornoSettimana: gd,
+                    oraInizio: b.start,
+                    oraFine: b.end,
+                    postazione: originalShift.postazione as any,
+                    note: originalShift.note
+                 });
+               } else {
+                 await db.insert(schema.teamScheduledShifts).values({
+                    employeeId: employeeTarget || originalShift.employeeId,
+                    data: dateTarget ? new Date(dateTarget) : new Date((originalShift as any).data),
+                    oraInizio: b.start,
+                    oraFine: b.end,
+                    postazione: originalShift.postazione,
+                    note: originalShift.note,
+                    createdByUserId: (req.user as any)?.id
+                 });
+               }
             }
          }
 
@@ -10936,20 +11002,32 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
             const originalSlots = getSlots(originalShift.oraInizio, originalShift.oraFine);
             const remainingSlots = originalSlots.filter(s => !selectedSlots.includes(s));
             
-            await db.delete(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, shiftId));
+            await db.delete(req.query.isTemplate ? schema.teamShiftTemplates : schema.teamScheduledShifts).where(eq((req.query.isTemplate ? schema.teamShiftTemplates : schema.teamScheduledShifts).id, shiftId));
 
             if (remainingSlots.length > 0) {
                const remainingBlocks = groupToBlocks(remainingSlots);
                for (const b of remainingBlocks) {
-                  await db.insert(schema.teamScheduledShifts).values({
-                     employeeId: originalShift.employeeId,
-                     data: new Date(originalShift.data),
-                     oraInizio: b.start,
-                     oraFine: b.end,
-                     postazione: originalShift.postazione,
-                     note: originalShift.note,
-                     createdByUserId: (req.user as any)?.id
-                  });
+                  if (req.query.isTemplate) {
+                     await db.insert(schema.teamShiftTemplates).values({
+                        employeeId: originalShift.employeeId,
+                        settimanaTipo: req.query.isTemplate as any,
+                        giornoSettimana: (originalShift as any).giornoSettimana,
+                        oraInizio: b.start,
+                        oraFine: b.end,
+                        postazione: originalShift.postazione as any,
+                        note: originalShift.note
+                     });
+                  } else {
+                     await db.insert(schema.teamScheduledShifts).values({
+                        employeeId: originalShift.employeeId,
+                        data: new Date((originalShift as any).data),
+                        oraInizio: b.start,
+                        oraFine: b.end,
+                        postazione: originalShift.postazione,
+                        note: originalShift.note,
+                        createdByUserId: (req.user as any)?.id
+                     });
+                  }
                }
             }
          }
@@ -10969,11 +11047,23 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       const results = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
       if (!results.length) return res.status(404).json({ error: 'Non trovato' });
 
+      const isTemplate = req.query.isTemplate as string;
+
+      if (isTemplate) {
+        await db.update(schema.teamShiftTemplates)
+          .set({ 
+            postazione: postazione as any, oraInizio, oraFine, note, 
+            ...(employeeId ? {employeeId} : {})
+          })
+          .where(eq(schema.teamShiftTemplates.id, recordId));
+        return res.json({ success: true });
+      }
+
       await db.update(schema.teamScheduledShifts)
         .set({ 
           postazione, oraInizio, oraFine, note, 
           ...(employeeId ? {employeeId} : {}), 
-          ...(data ? {data} : {}), 
+          ...(data ? {data: new Date(data)} : {}), 
           modifiedByUserId: (req.user as any)?.id, updatedAt: new Date() 
         })
         .where(eq(schema.teamScheduledShifts.id, recordId));
@@ -10998,6 +11088,15 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   app.delete("/api/gemteam/turni/scheduled/:id", isAuthenticated, isMasterGuard, async (req, res) => {
     try {
       const recordId = parseInt(req.params.id);
+      const isTemplate = req.query.isTemplate as string;
+
+      if (isTemplate) {
+        const results = await db.select().from(schema.teamShiftTemplates).where(eq(schema.teamShiftTemplates.id, recordId));
+        if (!results.length) return res.json({ ok: true });
+        await db.delete(schema.teamShiftTemplates).where(eq(schema.teamShiftTemplates.id, recordId));
+        return res.json({ ok: true });
+      }
+
       const results = await db.select().from(schema.teamScheduledShifts).where(eq(schema.teamScheduledShifts.id, recordId));
       if (!results.length) return res.json({ ok: true }); // already gone
 
@@ -11007,7 +11106,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         await db.insert(schema.teamNotifications).values({
           employeeId: results[0].employeeId, tipo: 'turno_cancellato', titolo: 'Turno cancellato',
           messaggio: `Il turno del ${results[0].data} è stato cancellato.`,
-          dataRiferimento: new Date(results[0].data)
+          dataRiferimento: new Date((results[0] as any).data)
         });
       } catch (e: any) {
         console.error('Silently ignored notification insert error:', e.message);
@@ -11023,6 +11122,17 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     try {
       const { weekStart, settimana } = req.body;
       const startD = new Date(weekStart);
+      const endD = new Date(weekStart);
+      endD.setDate(endD.getDate() + 6); // Domenica della stessa settimana
+
+      // WIPE della settimana corrente su teamScheduledShifts
+      await db.delete(schema.teamScheduledShifts)
+        .where(
+          and(
+            sql`DATE(${schema.teamScheduledShifts.data}) >= DATE(${startD})`,
+            sql`DATE(${schema.teamScheduledShifts.data}) <= DATE(${endD})`
+          )
+        );
 
       const templates = await db.select().from(schema.teamShiftTemplates).where(eq(schema.teamShiftTemplates.settimanaTipo, settimana));
       let created = 0, skipped = 0;
