@@ -10890,14 +10890,16 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       // Helper estrazione slots
       const getSlots = (start: string, end: string) => {
          const slots = [];
-         let curr = start;
+         let curr = start.substring(0, 5);
+         const endFmt = end.substring(0, 5);
+         
          const add30 = (t: string) => {
             const [h, m] = t.split(':').map(Number);
             let nm = m + 30; let nh = h;
             if (nm >= 60) { nm -= 60; nh += 1; }
             return `${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')}`;
          };
-         while (curr < end) {
+         while (curr < endFmt) {
            slots.push(curr);
            curr = add30(curr);
          }
