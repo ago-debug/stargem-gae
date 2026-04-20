@@ -1146,7 +1146,11 @@ export default function GemTeam() {
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                   <span className="text-slate-500">Presenza fisica:</span>
-                                  <span className="font-semibold text-slate-400 italic">[da check-in]</span>
+                                  <span className="font-semibold text-slate-700">
+                                    {sheetCheckinStatus && Number(sheetCheckinStatus.oreOggi) > 0 
+                                      ? fmtMin(Math.round(Number(sheetCheckinStatus.oreOggi) * 60)) 
+                                      : "0m"}
+                                  </span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                   <span className="text-slate-500">Pausa oggi:</span>
