@@ -69,8 +69,8 @@ export default function AuthPage() {
     const form = useForm<LoginData>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
-            username: import.meta.env.DEV ? "admin" : "",
-            password: import.meta.env.DEV ? "Palermo_1" : "",
+            username: "",
+            password: "",
         },
     });
 
@@ -162,7 +162,7 @@ export default function AuthPage() {
                                         <FormLabel className="text-slate-700 font-semibold text-xs uppercase tracking-wider">EMAIL O USERNAME</FormLabel>
                                         <FormControl>
                                             <Input 
-                                                autoComplete="username" 
+                                                autoComplete="off" 
                                                 placeholder="Email o username"
                                                 className="h-11 bg-slate-50/50 border-slate-200 focus:bg-white transition-all shadow-sm" 
                                                 {...field} 
@@ -181,7 +181,7 @@ export default function AuthPage() {
                                         <FormControl>
                                             <Input 
                                                 type="password" 
-                                                autoComplete="current-password" 
+                                                autoComplete="off" 
                                                 className="h-11 bg-slate-50/50 border-slate-200 focus:bg-white transition-all shadow-sm" 
                                                 {...field} 
                                             />
