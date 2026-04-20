@@ -296,7 +296,15 @@ export default function GemTeam() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Errore salvataggio turno');
+      if (!res.ok) {
+         try {
+            const errData = await res.json();
+            throw new Error(errData.error || 'Errore salvataggio turno');
+         } catch(e: any) {
+            if (e.message && e.message !== 'Unexpected end of JSON input') throw e;
+            throw new Error('Errore salvataggio turno');
+         }
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -1673,9 +1681,45 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                  </ContextMenuTrigger>
                                  {isMaster && (
                                    <ContextMenuContent className="w-56">
-                                     <ContextMenuItem className="font-semibold text-amber-600" onClick={() => shiftMutation.mutate({employeeId: dip.id, data: formattedTurniDate, oraInizio: turniFiltrato.oraInizio, oraFine: turniFiltrato.oraFine, postazione: turniFiltrato.postazione, note: turniFiltrato.note})}>
-                                       Duplica sullo stesso dipendente
-                                     </ContextMenuItem>
+                                     <ContextMenuSub>
+                                       <ContextMenuSubTrigger className="font-semibold text-amber-600">Duplica sullo stesso dipendente</ContextMenuSubTrigger>
+                                       <ContextMenuSubContent className="w-56">
+                                         <ContextMenuItem onClick={() => {
+                                            const startParts = turniFiltrato.oraInizio.split(':').map(Number);
+                                            const endParts = turniFiltrato.oraFine.split(':').map(Number);
+                                            const startMins = startParts[0]*60 + startParts[1];
+                                            const endMins = endParts[0]*60 + endParts[1];
+                                            const duration = endMins - startMins;
+                                            let newStartM = startMins - duration;
+                                            if (newStartM < 0) newStartM = 0;
+                                            const newEndM = newStartM + duration;
+                                            const nSh = String(Math.floor(newStartM/60)).padStart(2,'0');
+                                            const nSm = String(newStartM%60).padStart(2,'0');
+                                            const nEh = String(Math.floor(newEndM/60)).padStart(2,'0');
+                                            const nEm = String(newEndM%60).padStart(2,'0');
+                                            shiftMutation.mutate({employeeId: dip.id, data: formattedTurniDate, oraInizio: `${nSh}:${nSm}:00`, oraFine: `${nEh}:${nEm}:00`, postazione: turniFiltrato.postazione, note: turniFiltrato.note});
+                                         }}>
+                                            Copia Sopra (Prima)
+                                         </ContextMenuItem>
+                                         <ContextMenuItem onClick={() => {
+                                            const startParts = turniFiltrato.oraInizio.split(':').map(Number);
+                                            const endParts = turniFiltrato.oraFine.split(':').map(Number);
+                                            const startMins = startParts[0]*60 + startParts[1];
+                                            const endMins = endParts[0]*60 + endParts[1];
+                                            const duration = endMins - startMins;
+                                            let newEndM = endMins + duration;
+                                            if (newEndM > 24*60) newEndM = 24*60;
+                                            const newStartM = newEndM - duration;
+                                            const nSh = String(Math.floor(newStartM/60)).padStart(2,'0');
+                                            const nSm = String(newStartM%60).padStart(2,'0');
+                                            const nEh = String(Math.floor(newEndM/60)).padStart(2,'0');
+                                            const nEm = String(newEndM%60).padStart(2,'0');
+                                            shiftMutation.mutate({employeeId: dip.id, data: formattedTurniDate, oraInizio: `${nSh}:${nSm}:00`, oraFine: `${nEh}:${nEm}:00`, postazione: turniFiltrato.postazione, note: turniFiltrato.note});
+                                         }}>
+                                            Copia Sotto (Dopo)
+                                         </ContextMenuItem>
+                                       </ContextMenuSubContent>
+                                     </ContextMenuSub>
                                      <ContextMenuSeparator />
                                      <ContextMenuSub>
                                        <ContextMenuSubTrigger>Copia su dipendente</ContextMenuSubTrigger>
