@@ -1655,11 +1655,11 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                                   <div className="flex gap-2">
                                                     <div className="w-1/2">
                                                       <label className="text-xs font-semibold text-slate-600">Inizio</label>
-                                                      <Input name="inizio" type="time" defaultValue={hour} />
+                                                      <Input name="inizio" type="time" defaultValue={turniFiltrato.oraInizio.substring(0, 5)} />
                                                     </div>
                                                     <div className="w-1/2">
                                                       <label className="text-xs font-semibold text-slate-600">Fine</label>
-                                                      <Input name="fine" type="time" defaultValue={`${hour.substring(0,2)}:30`} />
+                                                      <Input name="fine" type="time" defaultValue={turniFiltrato.oraFine.substring(0, 5)} />
                                                     </div>
                                                   </div>
                                                   <div>
@@ -1806,7 +1806,11 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                           </div>
                                           <div className="w-1/2">
                                             <label className="text-xs font-semibold text-slate-600">Fine</label>
-                                            <Input name="fine" type="time" defaultValue={`${hour.substring(0,2)}:30`} />
+                                            <Input name="fine" type="time" defaultValue={(() => {
+                                               const [hh, mm] = hour.split(':').map(Number);
+                                               let d = hh * 60 + mm + 30;
+                                               return `${String(Math.floor(d/60)).padStart(2,'0')}:${String(d%60).padStart(2,'0')}`;
+                                            })()} />
                                           </div>
                                         </div>
                                         <div>
