@@ -4932,11 +4932,12 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       }
 
       const id = parseInt(req.params.id);
-      const { team, displayOrder } = req.body;
+      const { team, displayOrder, ruolo } = req.body;
       
       const toUpdate: any = {};
       if (team !== undefined) toUpdate.team = team;
       if (displayOrder !== undefined) toUpdate.displayOrder = displayOrder;
+      if (ruolo !== undefined) toUpdate.ruolo = ruolo;
       
       if (Object.keys(toUpdate).length > 0) {
         await db.update(schema.teamEmployees)

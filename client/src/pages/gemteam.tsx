@@ -362,11 +362,14 @@ export default function GemTeam() {
   });
   
   const updateTeamMutation = useMutation({
-    mutationFn: async ({ id, team }: { id: number, team: string }) => {
+    mutationFn: async ({ id, team, ruolo }: { id: number, team?: string, ruolo?: string }) => {
+      const bodyPayload: any = {};
+      if (team !== undefined) bodyPayload.team = team;
+      if (ruolo !== undefined) bodyPayload.ruolo = ruolo;
       const res = await fetch(`/api/gemteam/dipendenti/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ team }),
+        body: JSON.stringify(bodyPayload),
         credentials: 'include'
       });
       if (!res.ok) throw new Error('Errore aggiornamento reparto');
@@ -938,7 +941,23 @@ export default function GemTeam() {
                         </div>
                       </div>
                       <SheetDescription className="pt-2 text-slate-500">
-                        {selectedSheetDip.ruolo} • {selectedSheetDip.fisso ? "Compenso Fisso" : selectedSheetDip.tariffa ? `Tariffa Oraria: €${selectedSheetDip.tariffa}` : "—"}
+                        {isMaster ? (
+                          <Input 
+                            defaultValue={selectedSheetDip.ruolo || ""} 
+                            onBlur={(e) => {
+                              if (e.target.value !== selectedSheetDip.ruolo) {
+                                updateTeamMutation.mutate({ id: selectedSheetDip.id, ruolo: e.target.value });
+                              }
+                            }}
+                            className="h-8 text-xs font-medium w-64 mb-2 bg-white"
+                            placeholder="Inserisci mansione/ruolo..."
+                          />
+                        ) : (
+                          <span className="block mb-1">{selectedSheetDip.ruolo || "Nessun ruolo specificato"}</span>
+                        )}
+                        <span className="text-xs">
+                           {selectedSheetDip.fisso ? "Compenso Fisso" : selectedSheetDip.tariffa ? `Tariffa Oraria: €${selectedSheetDip.tariffa}` : "—"}
+                        </span>
                       </SheetDescription>
                     </SheetHeader>
                     
