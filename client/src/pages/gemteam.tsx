@@ -483,10 +483,8 @@ export default function GemTeam() {
     let online = validUsers.filter((u: any) => u.stato === 'online').length; 
     let usciti = 0; let attesi = 0; let assenti = 0;
     
-    // Per inSede usiamo temporaneamente il check degli employees + chi sta loggando
+    // Per inSede usiamo il check degli employees + chi sta loggando (inclusi admin/bot)
     dipendenti.forEach(dip => {
-      if (isSystemEmployee(dip)) return;
-
       const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find(c => c.employeeId === dip.id) : null;
       if (chk) {
         if (chk.lastEvent === "IN") inSede++;
@@ -787,35 +785,15 @@ export default function GemTeam() {
                       <tr><td colSpan={5} className="p-8 text-center text-slate-500">Caricamento dipendenti...</td></tr>
                     )}
                     {(() => {
-                      // Costruiamo i technical users falsi per renderli nella lista Team
-                      const techUsers = activeUsers
-                         .filter((u: any) => {
-                             if (u.username?.toLowerCase().includes('martina')) return false;
-                             if (u.username?.includes('example.com')) return false;
-                             if (u.username === 'cavallo') return false;
-                             return (!dipendenti.some(d => d.userId === u.id) || isSystemEmployee(dipendenti.find(d => d.userId === u.id)!));
-                         })
-                         .map((u: any) => ({
-                             id: -(u.id || Math.floor(Math.random() * 100000)), // fake id negativo per evitare clash
-                             userId: u.id,
-                             nome: u.firstName || u.username || 'Sistema',
-                             cognome: u.lastName || 'Tecnico',
-                             team: 'direzione',
-                             photo_url: u.profileImageUrl || null,
-                             isTechMock: true
-                         }));
-
-                      const combinedList = [...dipendenti.filter(d => !isSystemEmployee(d)), ...techUsers];
-
-                      const sortedDip = combinedList.sort((a, b) => {
+                      const sortedDip = [...dipendenti].sort((a, b) => {
                         const chkA = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === a.id) : null;
-                        const statoA = a.isTechMock ? "OUT" : (chkA?.lastEvent || "ATTESO");
+                        const statoA = chkA?.lastEvent || "ATTESO";
                         const presenceA = activeUsers.find((u: any) => u.id === a.userId);
                         const isOnlineA = presenceA?.stato === 'online';
                         const scoreA = (isOnlineA ? 2 : 0) + (statoA === "IN" ? 1 : 0);
 
                         const chkB = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === b.id) : null;
-                        const statoB = b.isTechMock ? "OUT" : (chkB?.lastEvent || "ATTESO");
+                        const statoB = chkB?.lastEvent || "ATTESO";
                         const presenceB = activeUsers.find((u: any) => u.id === b.userId);
                         const isOnlineB = presenceB?.stato === 'online';
                         const scoreB = (isOnlineB ? 2 : 0) + (statoB === "IN" ? 1 : 0);
@@ -837,7 +815,7 @@ export default function GemTeam() {
 
                       return sortedDip.map(dip => {
                         const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === dip.id) : null;
-                        const stato = (dip as any).isTechMock ? "ATTESO" : (chk?.lastEvent ? chk.lastEvent : "ATTESO");
+                        const stato = chk?.lastEvent ? chk.lastEvent : "ATTESO";
                         const oreSede = chk && chk.oreOggi > 0 ? fmtOre(Number(chk.oreOggi)) : "—";
 
                         const presenceInfo = activeUsers.find((u: any) => u.id === dip.userId);
