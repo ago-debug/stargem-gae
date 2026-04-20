@@ -1,3 +1,5 @@
+Aggiornato al: 2026-04-20 17:15
+
 
 
 <!-- --- INIZIO SORGENTE: futuro/14_GAE_Strategic_Plan_Clarissa_CRM.md --- -->

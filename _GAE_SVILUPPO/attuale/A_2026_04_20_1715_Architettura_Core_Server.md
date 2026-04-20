@@ -1,3 +1,5 @@
+Aggiornato al: 2026-04-20 17:15
+
 # Master Document: Architettura e Database StarGem Manager (Stato Attuale)
 
 Questo documento rappresenta la mappa completa ed esaustiva di tutte le sezioni del gestionale. Sostituisce i precedenti file frammentati di analisi strutturale e funge da *Source of Truth* (SOT) per l'architettura dati dopo la migrazione a Single Table Inheritance (STI).

@@ -1,5 +1,7 @@
+Aggiornato al: 2026-04-20 17:15
+
 # 📊 STATO DB REALE — Audit Aggiornato
-Data e orario aggiornamento: 2026-04-20 17:10
+Data e orario aggiornamento: 2026-04-20 16:14
 
 ## Tabelle attive con dati reali
 
@@ -11,11 +13,11 @@ Data e orario aggiornamento: 2026-04-20 17:10
 | `courses` | **409** | Attività STI |
 | `activities` | **1.274** | Attività dettaglio |
 | `activity_details` | **428** | Dettagli attività |
-| `team_attendance_logs` | **2** | Log presenze (pulizia mock test conclusa) |
+| `team_attendance_logs` | **2.078** | Log presenze GemTeam |
 | `team_scheduled_shifts` | **17** | Turni programmati (Drastico calo - *probabile "WIPE settimana"* per via del deploy 035) |
 | `team_shift_templates` | **1** | Template turni (*Calo per cancellazione massiva precedente/test*) |
 | `strategic_events` | **31** | Pianificazione + Festa Lavoratori 2026 |
-| `team_monthly_reports` | **16** | Report mensili team (azzerati e rigenerati) |
+| `team_monthly_reports` | **28** | Report mensili team |
 | `team_employees` | **16** | Dipendenti GemTeam |
 | `team_postazioni` | **25** | Postazioni configurate |
 | `team_activity_types` | **36** | Tipi attività team |
@@ -47,7 +49,7 @@ Data e orario aggiornamento: 2026-04-20 17:10
 | `booking_services` | **3** | Servizi booking |
 | `rental_categories` | **9** | Categorie affitto |
 | `wc_product_mapping` | **8** | Mapping WooCommerce |
-| `team_checkin_events` | **6** | Check-in events (pulizia mock effettuata) |
+| `team_checkin_events` | **3** | Check-in events |
 | `journal_entries` | **1** | Prima nota |
 | `deprecation_logs` | **1** | Log deprecazione |
 | `member_forms_submissions` | **1** | Firme documenti |
@@ -82,3 +84,7 @@ Data e orario aggiornamento: 2026-04-20 17:10
 2. **Categorie frammentate** — 14 tabelle categorie ancora esistenti a database. Consolidamento logico ancora da ultimare.
 3. **Mancanza dati contabili** — `payments` = 0. Il modulo cassa non è ancora completamente agganciato a regime in produzione.
 4. ~~`team_shift_templates_BAK_F1_030`~~ — **RIMOSSA** ✅ Protocollo F1-032.
+
+## 2026-04-20 17:15 - Pulizia Dati (GemTeam)
+- Svuotati `team_attendance_logs` (da 2079 a 0 veri, + 2 test odierni) e `team_checkin_events` (mock eliminati, rimasti solo bot e admin).
+- Troncato ed azzerato storicamente `team_monthly_reports` per far partire le statistiche pulite in produzione.

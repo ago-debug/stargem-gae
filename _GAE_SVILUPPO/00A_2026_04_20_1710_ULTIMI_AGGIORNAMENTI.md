@@ -1,3 +1,5 @@
+Aggiornato al: 2026-04-20 17:15
+
 # Ultimi Aggiornamenti Progetto "StarGem Manager"
 **Periodo di riferimento:** 23 Febbraio 2026 - 13 Aprile 2026
 
@@ -553,3 +555,9 @@ Commits principali:
 * **[F1-016 / 017] Multi-Pass Import Architecture & GDPR Core:** Architettato e sviluppato lo script `import_soci.ts` (Passata 1 e 2) per consolidamento e merging massivo di anagrafiche Master GSheet e Athena. Ampliata rigorosamente la core table `members` in `shared/schema.ts` aggiungendo 10 nuovi campi dedicati alla tutela minorile (tutori fisio-legali GDPR) e filtri geografici (`region`, `nationality`). Aggiunto tracking unificato assensi Marketing.
 * **[F1-018 / 021] Algoritmo di Deduplicazione e Merge Soci (Fase 1-2):** Sviluppati e lanciati in live environment `validate_cf.ts` (Omocodia e ISO check validati con checksum 16 chr italiano) e routines complesse di pulizia doppiette. Eseguita macro-pulizia atomica del DB cancellando **~530 ghost records**, duplicati fonetici telefonici e sovrapposizioni email. Il conteggio attivi è stato scalfito con precisione a **9.400 membri attivi univoci**. Pushed e backuppato con timestamp orario (`/root/backups/`). 
 * **[F1-022] Evoluzione Runtime Filtri ed `enrollment_status`:** Aggiunto il flag ENUM nativo `enrollment_status` su `members` disaccoppiando l'eliminazione anagrafica (active) dalla frequentazione stagionale. Standardizzato il timestamp temporale al layer database assegnando d'ufficio la stagione '2025-2026' a tutte le 9.400 utenze attive. Sostituita in `server/storage.ts` `/getMembersPaginated` la logica hardcoded per la verifica Età (`is_minor`) introducendo il calcolo dinamico server-side timestamp diff `TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) < 18` garantendo profilazione età realtime a vita. Completato ciclo di staging e Push in Produzione su IONOS Nginx.
+
+
+## 2026-04-20 (17:15)
+- Sistemato bug UI : aggiunta gestione `pausa` nella griglia e conteggio header.
+- Fix variabili report mensile (`firstName`, `ore_totali`).
+- Wipe righe fittizie in attendance per avviare tracciamento pulito su produzione.
