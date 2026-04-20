@@ -750,53 +750,82 @@ export default function GemTeam() {
                     {dipendenti.length === 0 && isLoadingDipendenti && (
                       <tr><td colSpan={5} className="p-8 text-center text-slate-500">Caricamento dipendenti...</td></tr>
                     )}
-                    {dipendenti.map(dip => {
-                      const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find(c => c.employeeId === dip.id) : null;
-                      // Assicura che un lastEvent null fallback a "ATTESO" in maniera esplicita
-                      const stato = chk?.lastEvent ? chk.lastEvent : "ATTESO";
-                      const oreSede = chk && chk.oreOggi > 0 ? fmtOre(Number(chk.oreOggi)) : "—";
+                    {(() => {
+                      const sortedDip = [...dipendenti].sort((a, b) => {
+                        const chkA = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === a.id) : null;
+                        const statoA = chkA?.lastEvent || "ATTESO";
+                        const presenceA = activeUsers.find((u: any) => u.id === a.userId);
+                        const isOnlineA = presenceA?.stato === 'online';
+                        const scoreA = (isOnlineA ? 2 : 0) + (statoA === "IN" ? 1 : 0);
 
-                      const presenceInfo = activeUsers.find((u: any) => u.id === dip.userId);
-                      const isOnline = presenceInfo && presenceInfo.stato === 'online';
-                      const oreOnline = presenceInfo?.lavoroOggiMinuti ? fmtMin(presenceInfo.lavoroOggiMinuti) : "—";
-                      
-                      const statoColors: Record<string, string> = {
-                        "IN": "bg-emerald-100 text-emerald-800 border-emerald-200",
-                        "OUT": "bg-slate-100 text-slate-700 border-slate-200",
-                        "ATTESO": "bg-yellow-100 text-yellow-800 border-yellow-200",
-                        "ASSENTE": "bg-rose-100 text-rose-800 border-rose-200"
-                      };
-                      const statoLabel = stato === "IN" ? "🟢 IN SEDE" : (stato === "OUT" && chk?.lastTimestamp) ? "⚪ USCITO" : (stato === "ASSENTE") ? "🔴 ASSENTE" : "🟡 ATTESO";
+                        const chkB = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === b.id) : null;
+                        const statoB = chkB?.lastEvent || "ATTESO";
+                        const presenceB = activeUsers.find((u: any) => u.id === b.userId);
+                        const isOnlineB = presenceB?.stato === 'online';
+                        const scoreB = (isOnlineB ? 2 : 0) + (statoB === "IN" ? 1 : 0);
 
-                      return (
-                        <tr key={dip.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="p-4 font-bold text-slate-800 flex items-center gap-3">
-                            <Avatar className={`w-8 h-8 border ring-1 ring-offset-1 ${dip.team === 'segreteria' ? 'ring-pink-100' : 'ring-slate-100'}`}>
-                              {dip.photo_url ? <AvatarImage src={dip.photo_url} /> : null}
-                              <AvatarFallback className={`text-[10px] ${TEAM_COLORS[dip.team]}`}>{dip.nome.charAt(0)}{dip.cognome.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            {dip.cognome} {dip.nome}
-                          </td>
-                          <td className="p-4">
-                            <Badge variant="outline" className={`${statoColors[stato] || statoColors["ATTESO"]} font-bold shadow-sm`}>{statoLabel}</Badge>
-                          </td>
-                          <td className="p-4">
-                            {isOnline ? (
-                               <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 font-bold shadow-sm">
-                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block"></span>
-                                 ONLINE
-                               </Badge>
-                            ) : (
-                               <Badge variant="outline" className="bg-slate-100 text-slate-500 border-transparent">
-                                 OFFLINE
-                               </Badge>
-                            )}
-                          </td>
-                          <td className="p-4 text-right font-bold text-slate-700">{oreSede}</td>
-                          <td className="p-4 text-right font-bold text-slate-700">{oreOnline}</td>
-                        </tr>
-                      );
-                    })}
+                        if (scoreA !== scoreB) return scoreB - scoreA;
+
+                        const timeA = Math.max(
+                          presenceA?.lastSeenAt ? new Date(presenceA.lastSeenAt).getTime() : 0,
+                          chkA?.lastTimestamp ? new Date(chkA.lastTimestamp).getTime() : 0
+                        );
+                        const timeB = Math.max(
+                          presenceB?.lastSeenAt ? new Date(presenceB.lastSeenAt).getTime() : 0,
+                          chkB?.lastTimestamp ? new Date(chkB.lastTimestamp).getTime() : 0
+                        );
+
+                        if (timeA !== timeB) return timeB - timeA;
+                        return 0;
+                      });
+
+                      return sortedDip.map(dip => {
+                        const chk = Array.isArray(todayCheckinsData) ? todayCheckinsData.find((c: any) => c.employeeId === dip.id) : null;
+                        const stato = chk?.lastEvent ? chk.lastEvent : "ATTESO";
+                        const oreSede = chk && chk.oreOggi > 0 ? fmtOre(Number(chk.oreOggi)) : "—";
+
+                        const presenceInfo = activeUsers.find((u: any) => u.id === dip.userId);
+                        const isOnline = presenceInfo && presenceInfo.stato === 'online';
+                        const oreOnline = presenceInfo?.lavoroOggiMinuti ? fmtMin(presenceInfo.lavoroOggiMinuti) : "—";
+                        
+                        const statoColors: Record<string, string> = {
+                          "IN": "bg-emerald-100 text-emerald-800 border-emerald-200",
+                          "OUT": "bg-slate-100 text-slate-700 border-slate-200",
+                          "ATTESO": "bg-yellow-100 text-yellow-800 border-yellow-200",
+                          "ASSENTE": "bg-rose-100 text-rose-800 border-rose-200"
+                        };
+                        const statoLabel = stato === "IN" ? "🟢 IN SEDE" : (stato === "OUT" && chk?.lastTimestamp) ? "⚪ USCITO" : (stato === "ASSENTE") ? "🔴 ASSENTE" : "🟡 ATTESO";
+
+                        return (
+                          <tr key={dip.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="p-4 font-bold text-slate-800 flex items-center gap-3">
+                              <Avatar className={`w-8 h-8 border ring-1 ring-offset-1 ${dip.team === 'segreteria' ? 'ring-pink-100' : 'ring-slate-100'}`}>
+                                {dip.photo_url ? <AvatarImage src={dip.photo_url} /> : null}
+                                <AvatarFallback className={`text-[10px] ${TEAM_COLORS[dip.team]}`}>{dip.nome.charAt(0)}{dip.cognome.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              {dip.cognome} {dip.nome}
+                            </td>
+                            <td className="p-4">
+                              <Badge variant="outline" className={`${statoColors[stato] || statoColors["ATTESO"]} font-bold shadow-sm`}>{statoLabel}</Badge>
+                            </td>
+                            <td className="p-4">
+                              {isOnline ? (
+                                 <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 font-bold shadow-sm">
+                                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block"></span>
+                                   ONLINE
+                                 </Badge>
+                              ) : (
+                                 <Badge variant="outline" className="bg-slate-100 text-slate-500 border-transparent">
+                                   OFFLINE
+                                 </Badge>
+                              )}
+                            </td>
+                            <td className="p-4 text-right font-bold text-slate-700">{oreSede}</td>
+                            <td className="p-4 text-right font-bold text-slate-700">{oreOnline}</td>
+                          </tr>
+                        );
+                      });
+                    })()}
                   </tbody>
                 </table>
               </div>
