@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getEventColorClass } from "@/lib/activity-colors";
@@ -59,16 +59,6 @@ const getStrategicColor = (type: string) => {
         default: return 'bg-gray-200 text-gray-800 border-gray-300';
     }
 };
-
-const LEGENDA_ITEMS = [
-  { color: '#DC2626', label: '🇮🇹 Festività Nazionali' },
-  { color: '#9D174D', label: '🔒 Chiusure Studio' },
-  { color: '#be185d', label: '🎭 Saggi / Spettacoli' },
-  { color: '#0369a1', label: '🏕️ Campus / Intensivi' },
-  { color: '#c2410c', label: '📋 Workshop / Macro-Evento' },
-  { color: '#6b7280', label: '📌 Note' },
-  { color: '#374151', label: '📦 Corsi (aggregati)' },
-];
 
 // Innesco HMR per Vite (Bypass cache Subagent)
 export default function Planning() {
@@ -456,24 +446,7 @@ export default function Planning() {
                         <Button variant={viewMode === 'settimanale' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('settimanale')} className="rounded-md h-7">Settimanale</Button>
                     </div>
 
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button variant="outline" size="sm" className="gap-2 h-9 shrink-0">
-                                <Info className="h-4 w-4" /> Legenda
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-64 p-3" align="end">
-                            <div className="space-y-2">
-                                <h4 className="font-semibold text-sm border-b pb-1 mb-2">Legenda Colori</h4>
-                                {LEGENDA_ITEMS.map(item => (
-                                    <div key={item.label} className="flex items-center gap-2 text-sm">
-                                        <div className="w-3 h-3 rounded-sm shadow-sm" style={{ backgroundColor: item.color }}></div>
-                                        <span>{item.label}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </PopoverContent>
-                    </Popover>
+                    <ActivityColorLegend variant="popover" />
 
                     <Button onClick={() => setStrategicModalOpen(true)} size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-white shadow-sm h-9 shrink-0">
                         <Plus className="h-4 w-4" /> Nuovo Evento
@@ -579,18 +552,6 @@ export default function Planning() {
                     )}
                 </CardContent>
             </Card>
-
-            <div className="flex flex-wrap gap-4 text-sm p-4 border-t bg-[#f8f9fa] z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] shrink-0 mx-[-1.5rem] px-6">
-                <div className="font-semibold mr-2 flex items-center">Legenda:</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-sm"></div> Festività</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-slate-50 border border-slate-200 rounded-sm"></div> Corsi (Aggregati)</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-orange-100 border border-orange-300 rounded-sm"></div> Chiusure/Vacanze</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-indigo-100 border border-indigo-300 rounded-sm"></div> Workshop</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-100 border border-amber-300 rounded-sm"></div> Domenica in mov.</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-teal-100 border border-teal-300 rounded-sm"></div> Campus</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-rose-100 border border-rose-300 rounded-sm"></div> Saggi</div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-slate-200 border border-slate-300 rounded-sm"></div> Esterni</div>
-            </div>
 
             {/* Strategic Event Draft Modal */}
             <Dialog open={strategicModalOpen} onOpenChange={setStrategicModalOpen}>
