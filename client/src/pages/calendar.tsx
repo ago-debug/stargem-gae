@@ -897,9 +897,10 @@ export default function CalendarPage() {
         if (ACTIVITY_TYPE_COLORS[type] && type !== "course") {
             const hex = ACTIVITY_TYPE_COLORS[type];
             return {
-                backgroundColor: `${hex}25`,
+                backgroundColor: `${hex}15`, // Fondo pastello leggero
                 borderLeftColor: hex,
-                color: hex,
+                color: '#334155', // Testo sempre leggibile scuro
+                badgeColor: hex // Colore puro per l'etichetta
             };
         }
         
@@ -908,14 +909,19 @@ export default function CalendarPage() {
         if (category?.color) {
             const hex = category.color;
             return {
-                backgroundColor: `${hex}25`,
+                backgroundColor: `${hex}15`,
                 borderLeftColor: hex,
-                color: hex,
+                color: '#334155',
+                badgeColor: hex
             };
         }
         
-        const id = course.categoryId || 0;
-        return { className: COLORS[id % COLORS.length] };
+        return {
+            backgroundColor: '#1e40af15', // Default blu pastello
+            borderLeftColor: '#1e40af',
+            color: '#334155',
+            badgeColor: '#1e40af'
+        };
     };
 
     const getBookingColor = (booking: any) => {
@@ -2097,8 +2103,12 @@ export default function CalendarPage() {
                                                             return (
                                                                 <div className="absolute top-1 right-1 flex flex-col items-end gap-1 z-30 max-w-[70%]">
                                                                     {evt.categoryName && (
-                                                                        <div className="bg-white/80 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase truncate shadow-sm border border-black/5" 
-                                                                            style={currentActType === "course" ? {} : { color: ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"] }} 
+                                                                        <div className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase truncate shadow-sm border border-black/5" 
+                                                                            style={
+                                                                                currentActType === "course" 
+                                                                                    ? { backgroundColor: (evt.colorProps as any).badgeColor || '#94a3b8', color: '#ffffff' } 
+                                                                                    : { backgroundColor: ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"], color: '#ffffff' }
+                                                                            } 
                                                                             title={evt.categoryName}>
                                                                             {evt.categoryName}
                                                                         </div>
