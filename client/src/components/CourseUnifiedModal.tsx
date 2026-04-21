@@ -1209,11 +1209,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annulla</Button>
-                  {isEdit && (
-                    <Button type="button" variant="secondary" onClick={handleDuplicateFromModal} disabled={updateMutation.isPending || createMutation.isPending} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200">
-                      {createMutation.isPending ? "Duplicazione..." : "Crea Copia (Duplica)"}
-                    </Button>
-                  )}
+                  {/* Il tasto Duplica è stato rimosso da qui e spostato all'esterno sulla card */}
                   <Button type="submit" disabled={updateMutation.isPending || createMutation.isPending} className="gold-3d-button text-black">
                     {updateMutation.isPending ? "Salvataggio..." : submitLabel}
                   </Button>

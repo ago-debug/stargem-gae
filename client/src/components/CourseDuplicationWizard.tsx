@@ -34,13 +34,13 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   const effectiveSourceSeasonId = currentSeasonId === "active" ? activeSeasonFallbackId : currentSeasonId;
 
   const { data: courses, isLoading: loadingCourses } = useQuery<Course[]>({ 
-      queryKey: [effectiveSourceSeasonId ? `/api/courses?seasonId=${effectiveSourceSeasonId}` : "/api/courses"],
+      queryKey: [effectiveSourceSeasonId ? `/api/courses?seasonId=${effectiveSourceSeasonId}&activityType=course` : "/api/courses?activityType=course"],
       enabled: !!effectiveSourceSeasonId
   });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
 
-  // Filtra solo i corsi della stagione di partenza corrente
+  // Filtra solo i corsi della stagione di partenza corrente (e per sicurezza in RAM)
   const sourceCourses = useMemo(() => {
     if (!courses || !effectiveSourceSeasonId) return [];
     return courses.filter(c => {
@@ -79,7 +79,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   // Fetch target season courses per anti-duplicazione
   React.useEffect(() => {
     if (targetSeasonId) {
-        fetch(`/api/courses?seasonId=${targetSeasonId}`)
+        fetch(`/api/courses?seasonId=${targetSeasonId}&activityType=course`)
             .then(r => r.json())
             .then(data => setTargetCourses(data))
             .catch(() => setTargetCourses([]));
@@ -174,6 +174,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
             const newCourse = {
                 // CAMPI ESPLICITAMENTE COPIATI (Come da ref. AG-018)
                 name: overrides.name ?? originalCourse.name, // Genere/Nome
+                activityType: originalCourse.activityType || "course",
                 categoryId: originalCourse.categoryId, // Genere (id di categoria)
                 instructorId: overrides.instructorId !== undefined ? overrides.instructorId : originalCourse.instructorId, // Insegnante
                 dayOfWeek: overrides.dayOfWeek ?? originalCourse.dayOfWeek, // Giorno
@@ -245,6 +246,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
 
     const newCourse = {
         name: overrides.name ?? originalCourse.name,
+        activityType: originalCourse.activityType || "course",
         categoryId: originalCourse.categoryId,
         instructorId: overrides.instructorId !== undefined ? overrides.instructorId : originalCourse.instructorId,
         dayOfWeek: overrides.dayOfWeek ?? originalCourse.dayOfWeek,

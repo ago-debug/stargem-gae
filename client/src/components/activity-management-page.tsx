@@ -252,6 +252,24 @@ export default function ActivityManagementPage({
       active: true,
     };
 
+    if (!data.startDate || !data.endDate || !data.startTime || !data.endTime) {
+      toast({
+        title: "Campi Temporali Mancanti",
+        description: "Devi inserire obbligatoriamente Data Inizio, Data Fine, Ora Inizio e Ora Fine.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!data.studioId || !data.dayOfWeek) {
+      toast({
+        title: "Incastro Spazio-Temporale Mancante",
+        description: "Devi obbligatoriamente assegnare uno Studio/Sala e un Giorno della Settimana.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (activityType === "individual_lesson") {
       data.memberId = selectedMemberId ? parseInt(selectedMemberId) : null;
       data.targetPurpose = targetPurpose || null;
@@ -451,7 +469,7 @@ export default function ActivityManagementPage({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="studioId">Studio/Sala</Label>
+          <Label htmlFor="studioId">Studio/Sala <span className="text-red-500">*</span></Label>
           <Combobox
              name="studioId"
              value={defaultItem?.studioId?.toString()}
@@ -537,7 +555,7 @@ export default function ActivityManagementPage({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="startDate">Data Inizio</Label>
+          <Label htmlFor="startDate">Data Inizio <span className="text-red-500">*</span></Label>
           <Input
             id="startDate"
             name="startDate"
@@ -548,7 +566,7 @@ export default function ActivityManagementPage({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="endDate">Data Fine</Label>
+          <Label htmlFor="endDate">Data Fine <span className="text-red-500">*</span></Label>
           <Input
             id="endDate"
             name="endDate"
@@ -561,7 +579,7 @@ export default function ActivityManagementPage({
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="dayOfWeek">Giorno Settimana</Label>
+          <Label htmlFor="dayOfWeek">Giorno Settimana <span className="text-red-500">*</span></Label>
           <Select value={selectedDayOfWeek} onValueChange={setSelectedDayOfWeek}>
             <SelectTrigger data-testid={`select-${testIdPrefix}-dayOfWeek`}>
               <SelectValue placeholder="Seleziona" />
@@ -577,7 +595,7 @@ export default function ActivityManagementPage({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="startTime">Ora Inizio</Label>
+          <Label htmlFor="startTime">Ora Inizio <span className="text-red-500">*</span></Label>
           <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
             <SelectTrigger data-testid={`select-${testIdPrefix}-startTime`}>
               <SelectValue placeholder="--:--" />
@@ -593,7 +611,7 @@ export default function ActivityManagementPage({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="endTime">Ora Fine</Label>
+          <Label htmlFor="endTime">Ora Fine <span className="text-red-500">*</span></Label>
           <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
             <SelectTrigger data-testid={`select-${testIdPrefix}-endTime`}>
               <SelectValue placeholder="--:--" />
