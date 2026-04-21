@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, addDays, startOfWeek, endOfWeek, isBefore, isAfter, isSameDay, getDay } from "date-fns";
 import { it } from "date-fns/locale";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,7 +10,7 @@ import { getSeasonLabel } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar as CalendarIcon, Save, Plus, CalendarDays } from "lucide-react";
+import { Calendar as CalendarIcon, Save, Plus, CalendarDays, Rocket, Edit2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 import { apiRequest } from "@/lib/queryClient";
@@ -17,6 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 export default function StrategicProgrammingTable() {
     const { toast } = useToast();
     const queryClient = useQueryClient();
+    const [, setLocation] = useLocation();
 
     // Queries
     const { data: seasons, isLoading: seasonsLoading } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
@@ -28,6 +30,7 @@ export default function StrategicProgrammingTable() {
     const [currentEditDate, setCurrentEditDate] = useState<Date | null>(null);
 
     // Modal Form State
+    const [modalEventId, setModalEventId] = useState<number | null>(null);
     const [modalTitle, setModalTitle] = useState("");
     const [modalType, setModalType] = useState("chiusura");
     const [modalStartDate, setModalStartDate] = useState("");
@@ -77,8 +80,10 @@ export default function StrategicProgrammingTable() {
     // Mutation
     const saveEventMutation = useMutation({
         mutationFn: async (data: any) => {
-            const res = await apiRequest("POST", "/api/strategic-events", data);
-            return res;
+            if (modalEventId) {
+                return await apiRequest("PATCH", `/api/strategic-events/${modalEventId}`, data);
+            }
+            return await apiRequest("POST", "/api/strategic-events", data);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).includes('/api/strategic-events') });
@@ -92,6 +97,19 @@ export default function StrategicProgrammingTable() {
                 description: error?.message || "Riprova o contatta il supporto.",
                 variant: "destructive"
             });
+        }
+    });
+
+    const deleteEventMutation = useMutation({
+        mutationFn: async (id: number) => {
+            return await apiRequest("DELETE", `/api/strategic-events/${id}`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).includes('/api/strategic-events') });
+            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"], exact: false });
+            setEventModalOpen(false);
+            toast({ title: "Cancellato", description: "Evento rimosso con successo." });
+            setModalEventId(null);
         }
     });
 
@@ -112,11 +130,34 @@ export default function StrategicProgrammingTable() {
 
     const openCellModal = (date: Date) => {
         setCurrentEditDate(date);
-        const dateStr = format(date, "yyyy-MM-dd");
-        setModalStartDate(dateStr);
-        setModalEndDate(dateStr);
+        setModalEventId(null);
+        const startStr = format(date, "yyyy-MM-dd");
+        setModalStartDate(startStr);
+        setModalEndDate(startStr); // Auto-fill data fine = data inizio
         setModalTitle("");
         setModalType("chiusura");
+        setEventModalOpen(true);
+    };
+
+    const handleCellClick = (date: Date, dayEvts: any[]) => {
+        if (dayEvts && dayEvts.length > 0) {
+            // Se c'è già un evento in questa data, UNIFICHIAMO aprendolo in Modifica
+            openEditModal(dayEvts[0]);
+        } else {
+            // Altrimenti, apri per crearne uno nuovo pulito
+            openCellModal(date);
+        }
+    };
+
+    const openEditModal = (evt: any) => {
+        setCurrentEditDate(new Date(evt.startDate));
+        setModalEventId(evt.id);
+        const startStr = evt.startDate && typeof evt.startDate === 'string' ? evt.startDate.split('T')[0] : new Date(evt.startDate).toISOString().split('T')[0];
+        setModalStartDate(startStr);
+        const endStr = evt.endDate ? (typeof evt.endDate === 'string' ? evt.endDate.split('T')[0] : new Date(evt.endDate).toISOString().split('T')[0]) : startStr;
+        setModalEndDate(endStr);
+        setModalTitle(evt.title || "");
+        setModalType(evt.eventType || "chiusura");
         setEventModalOpen(true);
     };
 
@@ -161,11 +202,30 @@ export default function StrategicProgrammingTable() {
         switch(evt?.eventType) {
             case 'chiusura': return `🔒 CHIUSURA: ${evt?.title}`;
             case 'ferie':    return `🏖️ FERIE: ${evt?.title}`;
+            case 'evento':   return `✨ EVENTO: ${evt?.title}`;
             case 'saggio':   return `🎭 SAGGIO: ${evt?.title}`;
             case 'campus':   return `🏕️ CAMPUS: ${evt?.title}`;
             default:         return `📌 ${evt?.eventType?.toUpperCase()}: ${evt?.title}`;
         }
     };
+
+    // Auto-scroll logic
+    const hasScrolledRef = useRef(false);
+    useEffect(() => {
+        if (!seasonsLoading && gridRows?.length > 0) {
+            const el = document.getElementById("current-week-row");
+            if (el && !hasScrolledRef.current) {
+                // Scroll in visuale all'elemento, in modo morbido.
+                setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+                hasScrolledRef.current = true;
+            }
+        }
+    }, [seasonsLoading, gridRows, targetSeason?.id]);
+
+    // Reset scroller when changing seasons manually
+    useEffect(() => {
+        hasScrolledRef.current = false;
+    }, [selectedSeasonId]);
 
     if (seasonsLoading) return <div className="p-8">Caricamento...</div>;
 
@@ -240,8 +300,15 @@ export default function StrategicProgrammingTable() {
                                                           .map(id => weekEvents.find(e => e.id === id))
                                                           .filter(Boolean);
 
+                                const todayStart = new Date();
+                                const isCurrentWeek = row.start <= todayStart && addDays(row.end, 1) > todayStart;
+
                                 return (
-                                    <tr key={row.weekNum} className="hover:bg-slate-50/80 transition-colors group">
+                                    <tr 
+                                        key={row.weekNum} 
+                                        id={isCurrentWeek ? "current-week-row" : undefined}
+                                        className={`hover:bg-slate-50/80 transition-colors group ${isCurrentWeek ? 'bg-yellow-50/40 ring-1 ring-yellow-400' : ''}`}
+                                    >
                                         <td className="border p-2 text-center font-bold text-slate-400">{row.weekNum}</td>
                                         <td className="border p-2 font-mono text-[10px] text-slate-600 font-medium">
                                             {format(row.start, "dd/MM")} - {format(row.end, "dd/MM/yy")}
@@ -277,8 +344,8 @@ export default function StrategicProgrammingTable() {
                                                 <td 
                                                     key={day.toISOString()} 
                                                     className={`border p-1.5 text-center cursor-pointer hover:ring-2 ring-primary/40 focus:outline-none transition-all ${bgColor}`}
-                                                    onClick={() => openCellModal(day)}
-                                                    title="Clicca per aggiungere chiusura/evento"
+                                                    onClick={() => handleCellClick(day, dayEvts)}
+                                                    title={dayEvts.length > 0 ? "Modifica questo evento" : "Clicca per aggiungere chiusura/evento"}
                                                 >
                                                     <div className="font-semibold">{format(day, "d")}</div>
                                                     <div className="text-[9px] opacity-70 truncate max-w-[80px] mx-auto">
@@ -293,9 +360,60 @@ export default function StrategicProgrammingTable() {
                                                     <span className="text-slate-400 italic text-[10px]">Nessuna nota in questa settimana</span>
                                                 ) : (
                                                     uniqueEvents.map(evt => (
-                                                        <div key={evt?.id} className="font-medium bg-white p-1 rounded shadow-sm border border-slate-100 flex items-center justify-between">
-                                                            <span>{getEventLabel(evt)}</span>
-                                                            {evt?.description && <span className="text-slate-400">({evt.description})</span>}
+                                                        <div key={evt?.id} className="font-medium bg-white p-1.5 rounded shadow-sm border border-slate-100 flex items-start justify-between group/evt">
+                                                            <div className="flex flex-col">
+                                                                <span>{getEventLabel(evt)}</span>
+                                                                {evt?.description && <span className="text-slate-400 text-[10px]">({evt.description})</span>}
+                                                            </div>
+                                                            <div className="flex gap-1 ml-2 shrink-0 transition-opacity">
+                                                                {(() => {
+                                                                    const t = (evt.title || '').toUpperCase();
+                                                                    const isCampus = evt?.eventType === 'campus' || t.includes('CAM');
+                                                                    const isSaggio = evt?.eventType === 'saggio' || t.includes('SAG');
+                                                                    const isWorkshop = t.includes('WS');
+                                                                    const isDom = t.includes('DOM');
+                                                                    const isVac = t.includes('VAC');
+                                                                    const isAft = t.includes('AFT');
+                                                                    
+                                                                    const hasRocket = isCampus || isSaggio || isWorkshop || isDom || isVac || isAft;
+                                                                    let targetUrl = '';
+                                                                    let label = '';
+                                                                    
+                                                                    if (isCampus) { targetUrl = '/attivita/campus'; label = 'Campus'; }
+                                                                    else if (isSaggio) { targetUrl = '/attivita/saggi'; label = 'Saggi'; }
+                                                                    else if (isWorkshop) { targetUrl = '/attivita/workshop'; label = 'Workshop'; }
+                                                                    else if (isDom) { targetUrl = '/attivita/domeniche'; label = 'Domeniche in Movimento'; }
+                                                                    else if (isVac) { targetUrl = '/attivita/vacanze'; label = 'Vacanze Studio'; }
+                                                                    else if (isAft) { targetUrl = '/attivita/affitti'; label = 'Affitti Sale'; }
+
+                                                                    if (!hasRocket) return null;
+
+                                                                    return (
+                                                                        <Button 
+                                                                            size="icon" 
+                                                                            variant="ghost" 
+                                                                            className="h-6 w-6 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-100" 
+                                                                            title={`Sviluppa Operativamente in ${label}`}
+                                                                            onClick={() => {
+                                                                                const startD = evt.startDate && typeof evt.startDate === 'string' ? evt.startDate.split('T')[0] : new Date(evt.startDate).toISOString().split('T')[0];
+                                                                                const endD = evt.endDate ? (typeof evt.endDate === 'string' ? evt.endDate.split('T')[0] : new Date(evt.endDate).toISOString().split('T')[0]) : startD;
+                                                                                setLocation(`${targetUrl}?draftMode=true&title=${encodeURIComponent(evt.title || '')}&startDate=${startD}&endDate=${endD}`);
+                                                                            }}
+                                                                        >
+                                                                            <Rocket className="h-3 w-3" />
+                                                                        </Button>
+                                                                    );
+                                                                })()}
+                                                                <Button 
+                                                                    size="icon" 
+                                                                    variant="ghost" 
+                                                                    className="h-6 w-6 text-slate-400 hover:text-slate-600 hover:bg-slate-100" 
+                                                                    onClick={() => openEditModal(evt)} 
+                                                                    title="Modifica Data Strategica"
+                                                                >
+                                                                    <Edit2 className="h-3 w-3" />
+                                                                </Button>
+                                                            </div>
                                                         </div>
                                                     ))
                                                 )}
@@ -365,9 +483,7 @@ export default function StrategicProgrammingTable() {
                                 <SelectContent>
                                     <SelectItem value="chiusura">Chiusura Straordinaria / Festività</SelectItem>
                                     <SelectItem value="ferie">Ferie / Vacanze</SelectItem>
-                                    <SelectItem value="festivita">Festività Nazionale</SelectItem>
-                                    <SelectItem value="saggio">Saggio / Spettacolo</SelectItem>
-                                    <SelectItem value="campus">Campus / Intensivo</SelectItem>
+                                    <SelectItem value="evento">Evento Libero</SelectItem>
                                     <SelectItem value="nota">Nota o Promozione speciale</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -381,22 +497,31 @@ export default function StrategicProgrammingTable() {
                                 <Label>Data Inizio</Label>
                                 <Input type="date" value={modalStartDate} onChange={e => {
                                     setModalStartDate(e.target.value);
-                                    if (!modalEndDate || modalEndDate <= modalStartDate) {
+                                    if (!modalEndDate || modalEndDate === modalStartDate) {
                                         setModalEndDate(e.target.value);
                                     }
                                 }} />
                             </div>
                             <div className="space-y-2">
-                                <Label>Data Fine</Label>
+                                <Label>Data Fine (opzionale)</Label>
                                 <Input type="date" value={modalEndDate} onChange={e => setModalEndDate(e.target.value)} />
                             </div>
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setEventModalOpen(false)}>Annulla</Button>
-                        <Button onClick={handleSaveEvent} disabled={!modalTitle || !modalStartDate || saveEventMutation.isPending}>
-                            {saveEventMutation.isPending ? "Salvataggio..." : "Salva Evento"}
-                        </Button>
+                    <DialogFooter className="flex justify-between sm:justify-between w-full">
+                        {modalEventId ? (
+                            <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600" onClick={() => deleteEventMutation.mutate(modalEventId)} disabled={deleteEventMutation.isPending}>
+                                Elimina
+                            </Button>
+                        ) : (
+                            <div></div>
+                        )}
+                        <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => setEventModalOpen(false)}>Annulla</Button>
+                            <Button onClick={handleSaveEvent} disabled={!modalTitle || !modalStartDate || saveEventMutation.isPending}>
+                                {saveEventMutation.isPending ? "Salvataggio..." : "Salva Evento"}
+                            </Button>
+                        </div>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
