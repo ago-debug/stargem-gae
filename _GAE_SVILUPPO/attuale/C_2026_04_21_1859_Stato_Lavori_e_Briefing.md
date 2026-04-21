@@ -133,7 +133,13 @@ I file primari a cui il tecnico dovrà prestare attenzione per i task del giorno
 ---
 
 ## Chiusura finale
-Il progetto è considerevolmente avanzato nella giornata odierna stabilizzando flussi UI complessi che prima causavano rallentamenti e perdite utente. L'applicazione non è da rifare da zero; l'infrastruttura tiene ed assorbe bene i workaround visuali in attesa dei futuri refactoring del DB. Giunti in questo punto nodale, serve un collaudo utente serio ed impietoso sulle viste modificate. Il focus di domani deve essere **esclusivamente** la stabilizzazione logica e la verifica finale in campo di questi flussi (Calendario, Planning, Modali Tesseramento/Cassa) al fine di sbloccarne la messa in opera. È imperativo evitare qualsiasi nuova estensione del perimetro finché questi punti non saranno certificati come funzionanti e immuni a deviazioni.
+Il progetto è considerevolmente avanzato nella giornata odierna stabilizzando flussi UI complessi che prima causavano rallentamenti e perdite utente. L'applicazione non è da rifare da zero; l'infrastruttura tiene ed assorbe bene i workaround visuali in attesa dei futuri refactoring del DB. Giunti in questo punto nodale, serve un collaudo utente serio ed- ✓ (Completo) Bugfix: Bug Filtro Giorni Settimana: È stata creata e implementata l'utility `normalizeDay(evt.dayOfWeek)` che scollega stringhe umane (Martedì) dallo standard logico (MAR) nel calendario per i corsi duplicati.
+- ✓ (Completo) Bugfix: Le chiamate QueryKey del Calendario per fetching Corsi e Attività erano sprovviste del `seasonId`, portando a disallineamenti di dati tra "Stagione Futura" visualizzata a tendina ma i dati attuali mostrati sulla griglia. Ora i queryParam dinamici agganciano perfettamente le stagioni future e le invalidano.
+- ✓ (Completo) Duplicazione Sicura: Il `CourseSingleDuplicateModal` è stato arricchito: trasferisce con precisione chirurgica il campo `recurrenceType` (che si perdeva bloccando il clone del corso sulla data d'inizio statica), blocca i periodi (`endDate`) per farli sfociare esattamente il "30 Giugno" della stagione destinazione e blocca input fraudolenti (es. 2029 in stagione 2026).
+- ✓ (Completo) Super Modale Avanzato e Sicurezza Dati: Nel `CourseUnifiedModal` è stata inserita una protezione rigorosa in `onDelete`: è vietata qualsiasi cancellazione di classi se persistono iscritti; l'azione richiede che la lista sia epurata, per garantire lo storico del CRM. È stata implementata in parallelo una feature di auto-rigenerazione "On-the-fly" dello **SKU** per qualsiasi cambio d'orario, giorno della settimana, o stagione.
+
+### Sessione Futura Immediata:
+- Ottimizzare il workflow completo del tracking assenze degli iscritti `enrollments` su corsi che hanno smesso di essere erogati o modificati.
 
 
 <!-- --- FINE SORGENTE: attuale/08_GAE_Briefing_Tecnico_Operativo.md --- -->
@@ -142,8 +148,7 @@ Il progetto è considerevolmente avanzato nella giornata odierna stabilizzando f
 
 <!-- --- INIZIO SORGENTE: attuale/11_GAE_Stato_Lavori_Per_Sezione.md --- -->
 
-# STATO LAVORI PER SEZIONE (Project StarGem Manager)
-**Aggiornato al:** 15 Aprile 2026
+# STATO LAVORI E BRIEFING - Aggiornato al: 21 Aprile 2026 18:59
 
 Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro-area del progetto, fungendo da bussola per gli sviluppatori e la direzione tecnica sullo stato di collaudo e di priorità delle singole sezioni. 
 
@@ -260,6 +265,11 @@ Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro
 
 **Stato Infrastruttura Logica (Post Phase 33):**
 Il backend è saldamente radicato sulle entità unificate `courses` e `enrollments`. Il workflow di duplicazione corsi è ora stabile end-to-end. Il conflict check orario è stato rimosso intenzionalmente dal backend; la UI di copia è completamente guidata (banner + campi rossi) per prevenire errori operativi.
+
+**Riepilogo Sessione 21 Aprile 2026 (WIPE & Refactoring Finale UI):**
+- **[DB WIPE]** Eliminata mole di dati sporchi dalla tabella `activities` generati durante il fallito test STI. Ricollegato ufficialmente l'engine del Calendario alla tabella nativa `courses` ✅
+- **[DB WIPE]** Azzerata la tabella `universal_enrollments` ed evitato il partizionamento; le statistiche iscrizioni puntano ora formalmente ed unicamente ai vecchi e collaudati `enrollments` ✅
+- **[UI REFACTOR]** Uniformati i filtri ed i popover tra Calendario Operativo e Planning Strategico. Il planning plurimensile adotta ora opacità e styling CSS differenziato in tempo reale per nascondere i giorni/mesi storici e sbiancare i giorni inesistenti (es. 31 Novembre) ✅
 
 ---
 

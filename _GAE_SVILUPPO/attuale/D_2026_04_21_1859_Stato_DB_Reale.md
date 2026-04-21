@@ -1,7 +1,7 @@
-Aggiornato al: 2026-04-21 11:40
+Aggiornato al: 2026-04-21 17:35
 
 # 📊 STATO DB REALE — Audit Aggiornato
-Data e orario aggiornamento: 2026-04-21 11:40
+Data e orario aggiornamento: 2026-04-21 17:35
 
 ## Tabelle attive con dati reali
 

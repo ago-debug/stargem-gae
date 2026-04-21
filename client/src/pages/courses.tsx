@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -422,7 +423,6 @@ export default function Courses() {
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Sei sicuro di voler eliminare i ${selectedIds.size} corsi selezionati?`)) return;
     try {
       await Promise.all(Array.from(selectedIds).map(id => apiRequest("DELETE", `/api/courses/${id}`)));
       toast({ title: "Eliminazione completata" });
@@ -782,19 +782,32 @@ export default function Courses() {
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                              onClick={() => {
-                                if (confirm("Sei sicuro di voler eliminare questo corso?")) {
-                                  deleteMutation.mutate(course.id);
-                                }
-                              }}
-                              data-testid={`button-delete-${course.id}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {enrollmentCount === 0 && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                                    data-testid={`button-delete-${course.id}`}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                   <AlertDialogHeader>
+                                      <AlertDialogTitle>Conferma Eliminazione Definitiva</AlertDialogTitle>
+                                      <AlertDialogDescription className="text-secondary-foreground font-medium">
+                                        Sei assolutamente sicuro? Questa azione distruggerà irreversibilmente il corso e i suoi log operativi. Procedi solo se è un corso generato per errore.
+                                      </AlertDialogDescription>
+                                   </AlertDialogHeader>
+                                   <AlertDialogFooter>
+                                      <AlertDialogCancel>Annulla</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => deleteMutation.mutate(course.id)} className="bg-red-600 hover:bg-red-700 text-white">Sì, Rimuovi il corso</AlertDialogAction>
+                                   </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -839,9 +852,35 @@ export default function Courses() {
               {selectedIds.size} {selectedIds.size === 1 ? 'corso selezionato' : 'corsi selezionati'}
             </span>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={handleBulkDelete}>
-                <Trash2 className="w-4 h-4 mr-2" /> Elimina
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={(e) => {
+                    // Controlla se qualcuno dei corsi selezionati ha iscritti
+                    let hasProtectedCourses = false;
+                    for (const id of Array.from(selectedIds)) {
+                        if (getCourseEnrollmentCount(id) > 0) hasProtectedCourses = true;
+                    }
+                    if (hasProtectedCourses) {
+                        e.preventDefault();
+                        toast({ title: "Azione Bloccata (Presenza Iscritti)", description: "Non puoi eliminare massivamente questi corsi: ci sono partecipanti registrati in alcune delle attività selezionate! Filtra o deseleziona i corsi con iscritti.", variant: "destructive", duration: 8000 });
+                    }
+                  }}>
+                    <Trash2 className="w-4 h-4 mr-2" /> Elimina
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                   <AlertDialogHeader>
+                      <AlertDialogTitle>Conferma Eliminazione Massiva</AlertDialogTitle>
+                      <AlertDialogDescription className="text-secondary-foreground font-medium">
+                        Stai per eliminare irreversibilmente {selectedIds.size} {selectedIds.size === 1 ? 'corso' : 'corsi'} vergini senza iscritti. Sei certo di voler smantellare interamente queste attività in blocco?
+                      </AlertDialogDescription>
+                   </AlertDialogHeader>
+                   <AlertDialogFooter>
+                      <AlertDialogCancel>Annulla</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleBulkDelete} className="bg-red-600 hover:bg-red-700 text-white">Sì, Rimuovi Tutto</AlertDialogAction>
+                   </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setShowBulkDuplicateDialog(true)}>
                 <CalendarPlus className="w-4 h-4 mr-2" /> Duplica
               </Button>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -430,6 +431,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
   const [searchMember1, setSearchMember1] = useState("");
   const [searchMember2, setSearchMember2] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   console.log("CATEGORIES:", categories?.map(
     c => ({id: c.id, type: typeof c.id})
@@ -501,7 +503,15 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         // Smart Fill
         if (!defaultsToUse.seasonId && seasons && seasons.length > 0) {
             const activeSeason = seasons.find((s: any) => s.active) || seasons[0];
-            if (activeSeason) defaultsToUse.seasonId = activeSeason.id;
+            if (activeSeason) {
+                defaultsToUse.seasonId = activeSeason.id;
+                if (activeSeason.startDate && activeSeason.endDate) {
+                    const startYear = new Date(activeSeason.startDate).getFullYear();
+                    const endYear = new Date(activeSeason.endDate).getFullYear();
+                    defaultsToUse.startDate = `${startYear}-09-01`;
+                    defaultsToUse.endDate = `${endYear}-06-30`;
+                }
+            }
         }
 
         if (!defaultsToUse.dayOfWeek) {
@@ -531,7 +541,50 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   }, [isOpen, course, defaultValues, seasons]);
 
   const updateForm = (key: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [key]: value }));
+    setFormData((prev: any) => {
+      const next = { ...prev, [key]: value };
+      
+      // Auto-rigenerazione SKU se cambia un campo strutturale
+      if ((key === "dayOfWeek" || key === "seasonId" || key === "instructorId" || key === "categoryId" || key === "startTime") && (!activityType || activityType === "course" || activityType === "workshop")) {
+          try {
+              let codeA = "XXXX";
+              if (next.seasonId && seasons) {
+                 const s = seasons.find((sea: any) => sea.id?.toString() === next.seasonId?.toString());
+                 if (s?.name) {
+                     const parts = s.name.match(/\d+/g);
+                     if (parts && parts.length >= 2) {
+                         codeA = `${parts[0].slice(-2) || "XX"}${parts[1].slice(-2) || "XX"}`;
+                     } else if (parts && parts.length === 1 && parts[0].length === 4) {
+                         codeA = parts[0];
+                     }
+                 }
+              }
+              const inst = instructors?.find((i: any) => i.id?.toString() === next.instructorId?.toString());
+              let codeB = "XXX";
+              if (inst?.lastName) codeB = String(inst.lastName).toUpperCase().replace(/[^A-Z]/g, "").slice(0, 10);
+              
+              const codeC = next.dayOfWeek ? String(next.dayOfWeek).toUpperCase().slice(0, 3) : "XXX";
+              const codeD = next.startTime ? String(next.startTime).split(":")[0] : "XX";
+              
+              const cat = categories?.find((c: any) => c.id?.toString() === next.categoryId?.toString());
+              const codeE = cat?.name ? String(cat.name).toUpperCase().charAt(0) : "X";
+              
+              next.sku = `${codeA}${codeB}${codeC}${codeD}.${codeE}`;
+              
+              if (key === "seasonId" && value) {
+                  const s = seasons?.find((sea: any) => sea.id?.toString() === value?.toString());
+                  if (s && s.startDate && s.endDate) {
+                      const startYear = new Date(s.startDate).getFullYear();
+                      const endYear = new Date(s.endDate).getFullYear();
+                      next.startDate = `${startYear}-09-01`;
+                      next.endDate = `${endYear}-06-30`;
+                  }
+              }
+          } catch(e) {}
+      }
+
+      return next;
+    });
   };
 
   const handlePromoChange = (flag: string, isChecked: boolean) => {
@@ -557,9 +610,12 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       }
     },
     onSuccess: (newRecord: any) => {
-      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
-      queryClient.invalidateQueries({ queryKey: ["/api/courses"] }); // broad: colpisce tutte le varianti activityType
-      queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
+      queryClient.invalidateQueries({
+          predicate: (query) => {
+              const qk = query.queryKey[0] as string;
+              return typeof qk === 'string' && (qk.startsWith(apiEndpoint) || qk.startsWith('/api/activities-unified-preview') || qk.startsWith('/api/courses') || qk.startsWith('/api/strategic-events') || qk.startsWith('/api/calendar/events'));
+          }
+      });
       
       if (isDuplicatingRef.current) {
         // Bug B fix (F2-PROTOCOLLO-099/101): in duplicazione NON chiudiamo mai il modale.
@@ -619,9 +675,12 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
-      queryClient.invalidateQueries({ queryKey: ["/api/courses"] }); // broad: colpisce tutte le varianti activityType
-      queryClient.invalidateQueries({ queryKey: ["/api/calendar/events"] });
+      queryClient.invalidateQueries({
+          predicate: (query) => {
+              const qk = query.queryKey[0] as string;
+              return typeof qk === 'string' && (qk.startsWith(apiEndpoint) || qk.startsWith('/api/activities-unified-preview') || qk.startsWith('/api/courses') || qk.startsWith('/api/strategic-events') || qk.startsWith('/api/calendar/events'));
+          }
+      });
       toast({ title: "Attività aggiornata con successo" });
       setIsCopy(false); // F2-103: rimuove il banner COPIA al primo salvataggio
       onOpenChange(false);
@@ -637,6 +696,26 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validazione Date Stagione
+    if (formData.seasonId && formData.startDate && formData.endDate) {
+        const selectedSeason = seasons?.find(s => s.id?.toString() === formData.seasonId?.toString());
+        if (selectedSeason?.startDate && selectedSeason?.endDate) {
+            const minStr = new Date(selectedSeason.startDate).toISOString().split("T")[0];
+            const maxStr = new Date(selectedSeason.endDate).toISOString().split("T")[0];
+            const startStr = new Date(formData.startDate).toISOString().split("T")[0];
+            const endStr = new Date(formData.endDate).toISOString().split("T")[0];
+            
+            if (startStr < minStr || startStr > maxStr || endStr < minStr || endStr > maxStr) {
+                return toast({
+                    title: "Date fuori stagione",
+                    description: `Date respinte. Le date ("Validità Dal" o "Al") non appartengono alla stagione selezionata (${selectedSeason.name}). Inserisci date valide!`,
+                    variant: "destructive",
+                    duration: 6000
+                });
+            }
+        }
+    }
+
     // Costruiamo statusTags in formato consistente multi-stato
     const mergedTags = [...opStates.map(s => `STATE:${s}`), ...promoFlags.map(p => `PROMO:${p}`)];
     const isActive = !opStates.includes("ANNULLATO");
@@ -866,7 +945,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-semibold text-slate-800">Stagione</Label>
+                  <Label className="font-semibold text-slate-800">Stagione <span className="text-red-500 ml-1">*</span></Label>
                   <div className={(isCopy && !!formData.seasonId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Select 
                      value={formData.seasonId?.toString() || "none"}
@@ -892,7 +971,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Label className="font-semibold text-slate-800 shrink-0">Categoria</Label>
+                    <Label className="font-semibold text-slate-800 shrink-0">Categoria <span className="text-red-500 ml-1">*</span></Label>
                     <Button
                       type="button"
                       size="icon"
@@ -947,7 +1026,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Studio / Sala</Label>
+                  <Label>Studio / Sala <span className="text-red-500 ml-1">*</span></Label>
                   <div className={(isCopy && !!formData.studioId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Combobox
                     name="studioId"
@@ -1059,7 +1138,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Label className="font-semibold text-slate-800">Insegnante Principale</Label>
+                    <Label className="font-semibold text-slate-800">Insegnante Principale <span className="text-red-500 ml-1">*</span></Label>
                     <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("instructor"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
                   </div>
                   <div className={(isCopy && !!formData.instructorId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
@@ -1096,7 +1175,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               ) : (
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="price">Prezzo (€)</Label>
+                  <Label htmlFor="price">Prezzo (€) <span className="text-red-500 ml-1">*</span></Label>
                   <Input id="price" type="number" step="0.01" min="0" value={formData.price || ""} onChange={e => updateForm("price", e.target.value)} className={(isCopy && !!formData.price) ? "border-red-400 bg-red-50" : ""} />
                 </div>
                 <div className="space-y-2">
@@ -1116,7 +1195,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="maxCapacity" className="font-semibold text-slate-800 shrink-0">Posti Disponibili</Label>
+                    <Label htmlFor="maxCapacity" className="font-semibold text-slate-800 shrink-0">Posti Disponibili <span className="text-red-500 ml-1">*</span></Label>
                     <Button
                       type="button"
                       size="icon"
@@ -1147,7 +1226,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   <span className="text-xs font-semibold text-slate-500 uppercase">Pianificazione Oraria</span>
                 </div>
                 <div className="space-y-2">
-                  <Label>Giorno</Label>
+                  <Label>Giorno <span className="text-red-500 ml-1">*</span></Label>
                   <div className={(isCopy && !!formData.dayOfWeek) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Select value={selectedDayOfWeek || "none"} onValueChange={val => updateForm("dayOfWeek", val === "none" ? null : val)}>
                     <SelectTrigger><SelectValue placeholder="Giorno" /></SelectTrigger>
@@ -1159,15 +1238,15 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Inizio</Label>
+                  <Label>Inizio <span className="text-red-500 ml-1">*</span></Label>
                   <Input type="time" value={selectedStartTime} onChange={(e) => updateForm("startTime", e.target.value || null)} className={cn("min-w-[100px]", (isCopy && !!formData.startTime) && "border-red-400 bg-red-50")} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Fine</Label>
+                  <Label>Fine <span className="text-red-500 ml-1">*</span></Label>
                   <Input type="time" value={selectedEndTime} onChange={(e) => updateForm("endTime", e.target.value || null)} className={cn("min-w-[100px]", (isCopy && !!formData.endTime) && "border-red-400 bg-red-50")} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Ricorrenza</Label>
+                  <Label>Ricorrenza <span className="text-red-500 ml-1">*</span></Label>
                   <div className={(isCopy && !!formData.recurrenceType) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Select value={formData.recurrenceType || "none"} onValueChange={val => updateForm("recurrenceType", val === "none" ? null : val)}>
                     <SelectTrigger><SelectValue placeholder="Periodo" /></SelectTrigger>
@@ -1181,11 +1260,11 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 
                 <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                   <div className="space-y-2">
-                    <Label>Validità Dal</Label>
+                    <Label>Validità Dal <span className="text-red-500 ml-1">*</span></Label>
                     <Input type="date" value={getSafeDateStr(formData.startDate)} onChange={e => updateForm("startDate", e.target.value || null)} className={(isCopy && !!formData.startDate) ? "border-red-400 bg-red-50" : ""} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Validità Al</Label>
+                    <Label>Validità Al <span className="text-red-500 ml-1">*</span></Label>
                     <Input type="date" value={getSafeDateStr(formData.endDate)} onChange={e => updateForm("endDate", e.target.value || null)} className={(isCopy && !!formData.endDate) ? "border-red-400 bg-red-50" : ""} />
                   </div>
                 </div>
@@ -1202,12 +1281,27 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               </div>
 
               <DialogFooter className="sticky bottom-0 bg-background pt-4 border-t flex flex-col sm:flex-row items-center justify-between w-full mt-6 gap-2">
-                <div className="w-full sm:w-auto">
-                  {isEdit && onDelete && canWrite && (
-                    <Button type="button" variant="destructive" size="sm" onClick={() => { if (confirm("Sei sicuro di voler eliminare totalmente questa attività?")) { onDelete(course.id); onOpenChange(false); } }}>Elimina</Button>
+                <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4">
+                  <span className="text-xs text-slate-500 hidden sm:inline-block"><span className="text-red-500 font-bold mr-1">*</span> Campi obbligatori</span>
+                  {isEdit && onDelete && canWrite && !(course?.currentEnrollment > 0) && !(formData.member1Id !== null && formData.member1Id !== undefined && formData.member1Id !== "none" && formData.member1Id !== "") && (
+                    <div className="flex items-center">
+                       {!confirmDelete ? (
+                          <Button type="button" variant="destructive" size="sm" onClick={() => setConfirmDelete(true)}>Elimina</Button>
+                       ) : (
+                          <div className="flex items-center gap-2 bg-red-50 p-1.5 rounded-md border border-red-200 animate-in slide-in-from-left-2">
+                             <div className="flex flex-col">
+                                <span className="text-xs font-bold text-red-700 px-2 leading-none uppercase">Confermi?</span>
+                                <span className="text-[10px] text-red-600 px-2 leading-none mt-1">Azione irreversibile</span>
+                             </div>
+                             <Button type="button" variant="ghost" size="sm" className="h-7 text-xs hover:bg-red-100" onClick={() => setConfirmDelete(false)}>Annulla</Button>
+                             <Button type="button" variant="destructive" size="sm" className="h-7 text-xs" onClick={() => { setConfirmDelete(false); onDelete(course.id); onOpenChange(false); }}>Sì, elimina</Button>
+                          </div>
+                       )}
+                    </div>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
+                  <span className="text-xs text-slate-500 sm:hidden block w-full text-right"><span className="text-red-500 font-bold mr-1">*</span> Campi obbligatori</span>
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annulla</Button>
                   {/* Il tasto Duplica è stato rimosso da qui e spostato all'esterno sulla card */}
                   <Button type="submit" disabled={updateMutation.isPending || createMutation.isPending} className="gold-3d-button text-black">
