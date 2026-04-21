@@ -140,11 +140,14 @@ export default function StrategicProgrammingTable() {
     };
 
     const handleCellClick = (date: Date, dayEvts: any[]) => {
-        if (dayEvts && dayEvts.length > 0) {
-            // Se c'è già un evento in questa data, UNIFICHIAMO aprendolo in Modifica
-            openEditModal(dayEvts[0]);
+        // Cerca il primo evento NON-festività (creato manualmente)
+        const editableEvent = dayEvts.find(e => e.isPublicHoliday !== true && e.isPublicHoliday !== 1);
+        
+        if (editableEvent) {
+            // Se c'è un evento creato dall'utente, apri in modifica
+            openEditModal(editableEvent);
         } else {
-            // Altrimenti, apri per crearne uno nuovo pulito
+            // Se non c'è nulla, o c'è SOLO una festività di sistema (intoccabile), apri per creare un nuovo evento sovrapposto!
             openCellModal(date);
         }
     };
@@ -262,6 +265,18 @@ export default function StrategicProgrammingTable() {
                         </Select>
                     </div>
 
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                            document.getElementById('current-week-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
+                        className="font-medium text-slate-700 bg-white border-slate-200 hover:bg-slate-50 gap-2 shrink-0 h-9"
+                    >
+                        <span className="text-red-500 font-bold hidden sm:inline">Oggi:</span> 
+                        <span className="text-red-600 sm:text-slate-700">{format(new Date(), "d MMM", { locale: it })}</span>
+                    </Button>
+
                     <ActivityColorLegend variant="popover" />
                     
                     <Button onClick={() => openCellModal(new Date())} size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-white shadow-sm h-9 shrink-0">
@@ -278,7 +293,7 @@ export default function StrategicProgrammingTable() {
                                 <th className="border p-2 w-[50px] text-center text-slate-500">Sett</th>
                                 <th className="border p-2 min-w-[120px] text-slate-600">Periodo</th>
                                 {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(d => (
-                                    <th key={d} className="border p-2 min-w-[150px] text-center font-bold text-slate-700 uppercase">{d}</th>
+                                    <th key={d} className={`border p-2 min-w-[150px] text-center font-bold uppercase ${d === 'Dom' ? 'bg-red-50 text-red-700/80 tracking-wide' : 'text-slate-700'}`}>{d}</th>
                                 ))}
                                 <th className="border p-2 min-w-[250px]">Note (Chiusure / Eventi)</th>
                             </tr>
@@ -309,54 +324,63 @@ export default function StrategicProgrammingTable() {
                                             const isSunday = getDay(day) === 0;
                                             
                                             // Determine background color based on events
-                                            let bgColor = isSunday ? 'bg-orange-50/30' : '';
+                                            let bgColor = isSunday ? 'bg-red-50/40' : '';
                                             let cellContent = format(day, "d MMM", { locale: it });
 
                                             if (dayEvts.length > 0) {
-                                                const priorityEvt = dayEvts[0] || {};
-                                                const isHoliday = priorityEvt.isPublicHoliday === true || priorityEvt.isPublicHoliday === 1;
+                                                const hasSystemHoliday = dayEvts.some(e => e.isPublicHoliday === true || e.isPublicHoliday === 1);
                                                 
-                                                if (isHoliday) {
-                                                    bgColor = 'bg-red-50 text-red-700 border-l border-red-300';
-                                                } else {
-                                                    const t = (priorityEvt.title || '').toUpperCase();
-                                                    const type = priorityEvt.eventType;
-                                                    if (type === 'campus' || t.includes('CAM')) {
-                                                        bgColor = 'bg-sky-50 text-sky-700 border-l border-sky-300';
-                                                    } else if (type === 'saggio' || t.includes('SAG')) {
-                                                        bgColor = 'bg-pink-50 text-pink-700 border-l border-pink-300';
-                                                    } else if (t.includes('WS')) {
-                                                        bgColor = 'bg-orange-50 text-orange-700 border-l border-orange-300';
-                                                    } else if (t.includes('DOM')) {
-                                                        bgColor = 'bg-yellow-50 text-yellow-800 border-l border-yellow-300';
-                                                    } else if (t.includes('VAC')) {
-                                                        bgColor = 'bg-green-50 text-green-700 border-l border-green-300';
-                                                    } else if (t.includes('AFT')) {
-                                                        bgColor = 'bg-slate-100 text-slate-700 border-l border-slate-300';
-                                                    } else {
-                                                        switch(type) {
-                                                            case 'chiusura': bgColor = 'bg-pink-50 text-pink-700 border-l border-pink-300'; break;
-                                                            case 'ferie': bgColor = 'bg-pink-50 text-pink-700 border-l border-pink-300'; break;
-                                                            case 'evento': bgColor = 'bg-slate-50 text-slate-700 border-l border-slate-300'; break;
-                                                            case 'apertura_eccezionale': bgColor = 'bg-emerald-50 text-emerald-700 border-l border-emerald-300'; break;
-                                                            case 'evento_macro': bgColor = 'bg-orange-50 text-orange-700 border-l border-orange-300'; break;
-                                                            case 'nota': bgColor = 'bg-slate-50 text-slate-700 border-l border-slate-300'; break;
-                                                            default: bgColor = 'bg-slate-50 text-slate-700 border-l border-slate-300'; break;
-                                                        }
-                                                    }
+                                                if (hasSystemHoliday) {
+                                                    bgColor = 'bg-red-50 text-red-700 border-x border-red-200';
                                                 }
                                             }
 
                                             return (
                                                 <td 
                                                     key={day.toISOString()} 
-                                                    className={`border p-1.5 text-center cursor-pointer hover:ring-2 ring-primary/40 focus:outline-none transition-all ${bgColor}`}
-                                                    onClick={() => handleCellClick(day, dayEvts)}
-                                                    title={dayEvts.length > 0 ? "Modifica questo evento" : "Clicca per aggiungere chiusura/evento"}
+                                                    className={`border p-1.5 text-center align-top cursor-cell hover:brightness-95 transition-all ${bgColor}`}
+                                                    onClick={() => openCellModal(day)}
+                                                    title="Clicca sullo spazio per aggiungere un evento sovrapposto"
                                                 >
-                                                    <div className="font-semibold">{format(day, "d")}</div>
-                                                    <div className="text-[10px] font-medium opacity-80 leading-tight max-w-[80px] mx-auto text-balance">
-                                                        {dayEvts.map(e => e?.title).join(', ')}
+                                                    <div className="font-semibold mb-1">{format(day, "d")}</div>
+                                                    <div className="flex flex-col gap-1 items-center w-full">
+                                                        {dayEvts.map(evt => {
+                                                            const isHoliday = evt.isPublicHoliday === true || evt.isPublicHoliday === 1;
+                                                            return (
+                                                                <div 
+                                                                    key={evt.id}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (!isHoliday) {
+                                                                            openEditModal(evt);
+                                                                        }
+                                                                    }}
+                                                                    className={`text-[10px] sm:text-[11px] leading-tight w-full py-0.5 text-center text-balance break-words focus:outline-none ${
+                                                                        isHoliday 
+                                                                            ? 'text-red-700 font-bold tracking-tight' 
+                                                                            : (() => {
+                                                                                const t = (evt.title || '').toUpperCase();
+                                                                                const type = evt.eventType;
+                                                                                let color = 'bg-white/95 text-slate-800'; // Default
+                                                                                if (type === 'chiusura' || t.includes('STRAORDINARI')) color = 'bg-orange-100 text-orange-800 border-l border-orange-400';
+                                                                                else if (type === 'ferie' || t.includes('FERIE')) color = 'bg-[#9D174D]/10 text-[#9D174D] border-l border-[#9D174D]/50';
+                                                                                else if (type === 'campus' || t.includes('CAM')) color = 'bg-sky-100 text-sky-800 border-l border-sky-400';
+                                                                                else if (type === 'saggio' || t.includes('SAG')) color = 'bg-pink-100 text-pink-800 border-l border-pink-400';
+                                                                                else if (t.includes('WS')) color = 'bg-orange-100 text-orange-800 border-l border-orange-400';
+                                                                                else if (t.includes('VAC')) color = 'bg-emerald-100 text-emerald-800 border-l border-emerald-400';
+                                                                                else if (type === 'nota' || t.includes('PROMO')) color = 'bg-yellow-100 text-yellow-800 border-l border-yellow-400';
+                                                                                else if (type === 'evento') color = 'bg-indigo-50 text-indigo-800 border-l border-indigo-400';
+                                                                                else if (t.includes('AFT')) color = 'bg-slate-200 text-slate-800 border-l border-slate-400';
+                                                                                
+                                                                                return `cursor-pointer rounded px-1.5 py-1 font-medium transition-all hover:opacity-90 shadow-sm ${color}`;
+                                                                              })()
+                                                                    }`}
+                                                                    title={isHoliday ? "Festività (non modificabile)" : "Clicca per modificare questo evento speciale"}
+                                                                >
+                                                                    {evt.title}
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 </td>
                                             );
@@ -488,7 +512,7 @@ export default function StrategicProgrammingTable() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="chiusura">Chiusura Straordinaria / Festività</SelectItem>
+                                    <SelectItem value="chiusura">Chiusura Straordinaria</SelectItem>
                                     <SelectItem value="ferie">Ferie / Vacanze</SelectItem>
                                     <SelectItem value="evento">Evento Libero</SelectItem>
                                     <SelectItem value="nota">Nota o Promozione speciale</SelectItem>

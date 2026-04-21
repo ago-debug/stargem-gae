@@ -49,22 +49,17 @@ const MONTHS_ORDERED = [
 
 const getStrategicColor = (type: string, title?: string) => {
     const t = (title || '').toUpperCase();
-    if (type === 'campus' || t.includes('CAM')) return 'bg-sky-50 text-sky-700 border-sky-300 border-l-[3px]';
-    if (type === 'saggio' || t.includes('SAG')) return 'bg-pink-50 text-pink-700 border-pink-300 border-l-[3px]';
-    if (t.includes('WS')) return 'bg-orange-50 text-orange-700 border-orange-300 border-l-[3px]'; // Workshop color in planning
-    if (t.includes('DOM')) return 'bg-yellow-50 text-yellow-800 border-yellow-300 border-l-[3px]';
-    if (t.includes('VAC')) return 'bg-green-50 text-green-700 border-green-300 border-l-[3px]';
-    if (t.includes('AFT')) return 'bg-slate-100 text-slate-700 border-slate-300 border-l-[3px]';
+    if (type === 'chiusura' || t.includes('STRAORDINARI')) return 'bg-orange-100 text-orange-800 border-l border-orange-400';
+    if (type === 'ferie' || t.includes('FERIE')) return 'bg-[#9D174D]/10 text-[#9D174D] border-l border-[#9D174D]/50';
+    if (type === 'campus' || t.includes('CAM')) return 'bg-sky-100 text-sky-800 border-l border-sky-400';
+    if (type === 'saggio' || t.includes('SAG')) return 'bg-pink-100 text-pink-800 border-l border-pink-400';
+    if (t.includes('WS')) return 'bg-orange-100 text-orange-800 border-l border-orange-400';
+    if (t.includes('VAC')) return 'bg-emerald-100 text-emerald-800 border-l border-emerald-400';
+    if (type === 'nota' || t.includes('PROMO')) return 'bg-yellow-100 text-yellow-800 border-l border-yellow-400';
+    if (type === 'evento') return 'bg-indigo-50 text-indigo-800 border-l border-indigo-400';
+    if (t.includes('AFT')) return 'bg-slate-200 text-slate-800 border-l border-slate-400';
     
-    switch(type) {
-        case 'chiusura': return 'bg-pink-50 text-pink-700 border-pink-300 border-l-[3px]';
-        case 'ferie': return 'bg-pink-50 text-pink-700 border-pink-300 border-l-[3px]';
-        case 'evento': return 'bg-slate-50 text-slate-700 border-slate-300 border-l-[3px]';
-        case 'apertura_eccezionale': return 'bg-emerald-50 text-emerald-700 border-emerald-300 border-l-[3px]';
-        case 'evento_macro': return 'bg-orange-50 text-orange-700 border-orange-300 border-l-[3px]';
-        case 'nota': return 'bg-slate-50 text-slate-700 border-slate-300 border-l-[3px]';
-        default: return 'bg-slate-50 text-slate-700 border-slate-300 border-l-[3px]';
-    }
+    return 'bg-white/95 text-slate-800';
 };
 
 // Innesco HMR per Vite (Bypass cache Subagent)
@@ -169,14 +164,14 @@ export default function Planning() {
     const createStrategicMutation = useMutation({
         mutationFn: async (data: any) => {
             if (strategicEventId) {
-                const res = await apiRequest("PATCH", `/api/strategic-events/${strategicEventId}`, data);
-                return res.json();
+                return await apiRequest("PATCH", `/api/strategic-events/${strategicEventId}`, data);
             }
-            const res = await apiRequest("POST", "/api/strategic-events", data);
-            return res.json();
+            return await apiRequest("POST", "/api/strategic-events", data);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/strategic-events?seasonId=all"] });
             queryClient.invalidateQueries({ queryKey: ["/api/strategic-events"] });
+            queryClient.invalidateQueries({ queryKey: ['/api/activities-unified-preview', selectedSeasonId] });
             setStrategicModalOpen(false);
             toast({ title: "Salvato", description: "L'evento strategico è stato salvato con successo." });
             setStrategicEventId(null);
@@ -195,7 +190,9 @@ export default function Planning() {
             return await apiRequest("DELETE", `/api/strategic-events/${id}`);
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/strategic-events?seasonId=all"] });
             queryClient.invalidateQueries({ queryKey: ["/api/strategic-events"] });
+            queryClient.invalidateQueries({ queryKey: ['/api/activities-unified-preview', selectedSeasonId] });
             setStrategicModalOpen(false);
             toast({ title: "Cancellato", description: "L'evento strategico è stato rimosso." });
             setStrategicEventId(null);
@@ -203,6 +200,9 @@ export default function Planning() {
             setStrategicDesc("");
             setStrategicStart("");
             setStrategicEnd("");
+        },
+        onError: (err) => {
+            toast({ title: "Errore", description: "Impossibile eliminare l'evento. Potrebbe essere già stato rimosso.", variant: "destructive" });
         }
     });
 
@@ -367,10 +367,16 @@ export default function Planning() {
 
             const elementBlock = (
                 <div 
-                    className={`mb-1 mt-0.5 break-words whitespace-normal leading-tight rounded border px-1.5 py-1 text-[11px] sm:text-xs font-medium shadow-sm cursor-pointer hover:brightness-95 transition-all ${e.colorClass}`} 
+                    className={`mb-1 mt-0.5 break-words whitespace-normal leading-tight rounded px-1.5 py-1 text-[11px] sm:text-xs font-medium shadow-sm cursor-pointer hover:opacity-90 transition-opacity ${e.colorClass}`} 
                     title={e.title}
                     onClick={(event) => {
                         if (!linkTo && e.id.toString().startsWith('strat_')) {
+                            // Blocca l'apertura se si tratta di una festività di sistema preimpostata
+                            if (e.isPublicHoliday) {
+                                event.stopPropagation();
+                                event.preventDefault();
+                                return;
+                            }
                             event.stopPropagation();
                             event.preventDefault();
                             const pureId = parseInt(e.id.split('_')[1]);
@@ -700,7 +706,7 @@ export default function Planning() {
                                     <SelectValue placeholder="Seleziona tipologia..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="chiusura">Chiusura Straordinaria / Festività</SelectItem>
+                                    <SelectItem value="chiusura">Chiusura Straordinaria</SelectItem>
                                     <SelectItem value="ferie">Ferie / Vacanze</SelectItem>
                                     <SelectItem value="evento">Evento Libero</SelectItem>
                                     <SelectItem value="nota">Nota o Promozione speciale</SelectItem>

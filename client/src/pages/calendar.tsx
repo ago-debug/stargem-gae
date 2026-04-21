@@ -299,13 +299,13 @@ export default function CalendarPage() {
     useEffect(() => {
         if (scrollContainerRef.current) {
             const currentHour = new Date().getHours();
-            if (currentHour >= 8 && currentHour <= 22) {
-                // Calcola l'offset basandosi su ROW_HEIGHT = 120 e scrolla ammorbidendo di 1 ora
-                const targetScroll = Math.max(0, (currentHour - 8 - 1) * 120);
-                // Utilizza un piccolo timeout per assicurarsi che i children e il DOM layout siano completi
+            if (currentHour >= 7 && currentHour <= 23) {
+                // Calcola l'offset basandosi su ROW_HEIGHT = 120 e griglia in partenza dalle 07:00
+                const targetScroll = Math.max(0, (currentHour - 7 - 1) * 120);
+                // Utilizza un timeout leggermente più lungo per assicurarsi che l'API sia finita e le card montate prima di scrollare
                 setTimeout(() => {
                     scrollContainerRef.current?.scrollTo({ top: targetScroll, behavior: 'smooth' });
-                }, 100);
+                }, 400);
             }
         }
     }, [selectedDay, viewDate]);
