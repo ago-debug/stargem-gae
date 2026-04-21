@@ -1,4 +1,4 @@
-import { useState, useMemo, Fragment, useCallback } from 'react';
+import { useState, useMemo, Fragment, useCallback, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Calendar as CalendarIcon, Filter, Plus, CalendarRange, Info } from "lucide-react";
 import { format, getYear, getMonth, getDate, getDaysInMonth, isSameDay } from "date-fns";
@@ -47,12 +47,19 @@ const MONTHS_ORDERED = [
     { label: "Agosto", monthIndex: 7 }
 ];
 
-const getStrategicColor = (type: string) => {
+const getStrategicColor = (type: string, title?: string) => {
+    const t = (title || '').toUpperCase();
+    if (type === 'campus' || t.includes('CAM')) return 'bg-sky-700 text-white border-sky-800';
+    if (type === 'saggio' || t.includes('SAG')) return 'bg-pink-400 text-white border-pink-500';
+    if (t.includes('WS')) return 'bg-orange-600 text-white border-orange-700'; // Workshop color in planning
+    if (t.includes('DOM')) return 'bg-yellow-600 text-white border-yellow-700';
+    if (t.includes('VAC')) return 'bg-green-700 text-white border-green-800';
+    if (t.includes('AFT')) return 'bg-gray-700 text-white border-gray-800';
+    
     switch(type) {
         case 'chiusura': return 'bg-pink-200 text-pink-900 border-pink-400';
         case 'ferie': return 'bg-purple-200 text-purple-900 border-purple-400';
-        case 'saggio': return 'bg-pink-400 text-white border-pink-500';
-        case 'campus': return 'bg-sky-700 text-white border-sky-800';
+        case 'evento': return 'bg-emerald-100 border-emerald-300 text-emerald-800';
         case 'apertura_eccezionale': return 'bg-emerald-100 border-emerald-300 text-emerald-800';
         case 'evento_macro': return 'bg-orange-700 text-white border-orange-800';
         case 'nota': return 'bg-gray-200 border-gray-400 text-gray-800';
@@ -67,10 +74,14 @@ export default function Planning() {
     const defaultStartYear = today.getMonth() < 8 ? today.getFullYear() - 1 : today.getFullYear();
     const [startYear, setStartYear] = useState(defaultStartYear);
     const [strategicModalOpen, setStrategicModalOpen] = useState(false);
+    const [strategicEventId, setStrategicEventId] = useState<number | null>(null);
     const [viewMode, setViewMode] = useState<'annuale' | 'mensile' | 'settimanale'>('annuale');
     // For mensile/settimanale navigation
     const [currentDateParam, setCurrentDateParam] = useState<Date>(today);
     const currentMonthIndex = today.getMonth();
+    const activeRowRef = useRef<HTMLDivElement>(null);
+
+
     
     const { toast } = useToast();
     const [strategicTitle, setStrategicTitle] = useState("");
@@ -142,16 +153,30 @@ export default function Planning() {
     const isLoading = coursesLoading || workshopsLoading || sundayLoading || strategicLoading ||
                       campusLoading || recitalsLoading || vacationsLoading || servicesLoading;
 
+    useEffect(() => {
+        if (!isLoading && activeRowRef.current && viewMode === 'annuale') {
+            const timer = setTimeout(() => {
+                activeRowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 600);
+            return () => clearTimeout(timer);
+        }
+    }, [viewMode, startYear, isLoading]);
+
     // --- MUTATIONS ---
     const createStrategicMutation = useMutation({
         mutationFn: async (data: any) => {
+            if (strategicEventId) {
+                const res = await apiRequest("PATCH", `/api/strategic-events/${strategicEventId}`, data);
+                return res.json();
+            }
             const res = await apiRequest("POST", "/api/strategic-events", data);
             return res.json();
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["/api/strategic-events"] });
             setStrategicModalOpen(false);
-            toast({ title: "Evento creato", description: "L'evento strategico è stato salvato con successo." });
+            toast({ title: "Salvato", description: "L'evento strategico è stato salvato con successo." });
+            setStrategicEventId(null);
             setStrategicTitle("");
             setStrategicDesc("");
             setStrategicStart("");
@@ -159,6 +184,22 @@ export default function Planning() {
         },
         onError: (err) => {
             toast({ title: "Errore", description: "Impossibile salvare l'evento.", variant: "destructive" });
+        }
+    });
+
+    const deleteStrategicMutation = useMutation({
+        mutationFn: async (id: number) => {
+            return await apiRequest("DELETE", `/api/strategic-events/${id}`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/strategic-events"] });
+            setStrategicModalOpen(false);
+            toast({ title: "Cancellato", description: "L'evento strategico è stato rimosso." });
+            setStrategicEventId(null);
+            setStrategicTitle("");
+            setStrategicDesc("");
+            setStrategicStart("");
+            setStrategicEnd("");
         }
     });
 
@@ -225,7 +266,7 @@ export default function Planning() {
                 title: se.title,
                 startDate: new Date(se.startDate),
                 endDate: se.endDate ? new Date(se.endDate) : undefined,
-                colorClass: getStrategicColor(se.eventType),
+                colorClass: getStrategicColor(se.eventType, se.title),
                 isPublicHoliday: se.isPublicHoliday === true || se.isPublicHoliday === 1
             })));
         }
@@ -367,8 +408,12 @@ export default function Planning() {
                             className={`bg-white min-h-[120px] p-2 hover:bg-slate-50 cursor-pointer transition-colors ${isToday ? 'bg-yellow-50/50' : ''}`}
                             onClick={() => {
                                 const dateStr = format(new Date(year, month, d), "yyyy-MM-dd");
+                                setStrategicEventId(null);
                                 setStrategicStart(dateStr);
                                 setStrategicEnd(dateStr);
+                                setStrategicTitle("");
+                                setStrategicDesc("");
+                                setStrategicType("chiusura");
                                 setStrategicModalOpen(true);
                             }}
                         >
@@ -507,8 +552,10 @@ export default function Planning() {
                             
                             {/* Body Giorni */}
                             <div className="border-b">
-                            {daysArray.map(day => (
-                                <div key={day} className="grid grid-cols-12 border-b group hover:bg-slate-50 duration-150 transition-colors">
+                            {daysArray.map(day => {
+                                const isTodayRow = day === today.getDate() && startYear === (today.getMonth() < 8 ? today.getFullYear() - 1 : today.getFullYear());
+                                return (
+                                <div key={day} ref={isTodayRow ? activeRowRef : null} className={`grid grid-cols-12 border-b group hover:bg-slate-50 duration-150 transition-colors ${isTodayRow ? 'bg-yellow-50/30' : ''}`}>
                                     {MONTHS_ORDERED.map((monthObj, monthColIndex) => {
                                         // Determiniamo se è anno successivo (da Gennaio in poi, avendo shiftato Set-Ago)
                                         const cellYear = monthObj.monthIndex < 8 ? startYear + 1 : startYear;
@@ -534,8 +581,12 @@ export default function Planning() {
                                                 onClick={() => {
                                                     if (isValidDay && cellDate) {
                                                         const dateStr = format(cellDate, "yyyy-MM-dd");
+                                                        setStrategicEventId(null);
                                                         setStrategicStart(dateStr);
                                                         setStrategicEnd(dateStr);
+                                                        setStrategicTitle("");
+                                                        setStrategicDesc("");
+                                                        setStrategicType("chiusura");
                                                         setStrategicModalOpen(true);
                                                     }
                                                 }}
@@ -558,10 +609,11 @@ export default function Planning() {
                                                     </>
                                                 )}
                                             </div>
-                                        )
+                                        );
                                     })}
                                 </div>
-                            ))}
+                                );
+                            })}
                             </div>
                         </div>
                     )}
@@ -576,6 +628,8 @@ export default function Planning() {
                         </div>
                     )}
                 </CardContent>
+                {/* Bordino FISSATO (fuori dallo scroll container) */}
+                <div className="h-5 w-full bg-[#f6f6f9] border-t border-slate-200 shrink-0"></div>
             </Card>
 
             {/* Strategic Event Draft Modal */}
@@ -595,11 +649,10 @@ export default function Planning() {
                                     <SelectValue placeholder="Seleziona tipologia..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="chiusura">Chiusura / Festività</SelectItem>
-                                    <SelectItem value="ferie">Ferie Staff</SelectItem>
-                                    <SelectItem value="apertura_eccezionale">Apertura Eccezionale</SelectItem>
-                                    <SelectItem value="evento_macro">Evento Esterno Macro</SelectItem>
-                                    <SelectItem value="nota">Nota Operativa</SelectItem>
+                                    <SelectItem value="chiusura">Chiusura Straordinaria / Festività</SelectItem>
+                                    <SelectItem value="ferie">Ferie / Vacanze</SelectItem>
+                                    <SelectItem value="evento">Evento Libero</SelectItem>
+                                    <SelectItem value="nota">Nota o Promozione speciale</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -610,7 +663,12 @@ export default function Planning() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Data Inizio</Label>
-                                <Input type="date" value={strategicStart} onChange={e => setStrategicStart(e.target.value)} />
+                                <Input type="date" value={strategicStart} onChange={e => {
+                                    setStrategicStart(e.target.value);
+                                    if (!strategicEnd || strategicEnd === strategicStart) {
+                                        setStrategicEnd(e.target.value);
+                                    }
+                                }} />
                             </div>
                             <div className="space-y-2">
                                 <Label>Data Fine (Opzionale)</Label>
@@ -629,12 +687,21 @@ export default function Planning() {
                             <Textarea value={strategicDesc} onChange={e => setStrategicDesc(e.target.value)} placeholder="Dettagli operativi..." />
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setStrategicModalOpen(false)}>Annulla</Button>
-                        <Button onClick={handleSaveStrategicEvent} disabled={createStrategicMutation.isPending}>
-                            {createStrategicMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Salva Evento
-                        </Button>
+                    <DialogFooter className="flex justify-between sm:justify-between w-full">
+                        {strategicEventId ? (
+                            <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600" onClick={() => deleteStrategicMutation.mutate(strategicEventId)} disabled={deleteStrategicMutation.isPending}>
+                                Elimina
+                            </Button>
+                        ) : (
+                            <div></div>
+                        )}
+                        <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => setStrategicModalOpen(false)}>Annulla</Button>
+                            <Button onClick={handleSaveStrategicEvent} disabled={!strategicTitle || !strategicStart || createStrategicMutation.isPending}>
+                                {createStrategicMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Salva Evento
+                            </Button>
+                        </div>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
