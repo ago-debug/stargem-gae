@@ -1,7 +1,7 @@
-Aggiornato al: 2026-04-20 18:40
+Aggiornato al: 2026-04-21 10:11
 
 # 📊 STATO DB REALE — Audit Aggiornato
-Data e orario aggiornamento: 2026-04-20 18:40
+Data e orario aggiornamento: 2026-04-21 10:11
 
 ## Tabelle attive con dati reali
 
@@ -10,8 +10,8 @@ Data e orario aggiornamento: 2026-04-20 18:40
 | `members` | **90** | Anagrafica attuale in produzione |
 | `memberships` | **89** | Tessere emesse |
 | `users` | **19** | Account staff attivi |
-| `courses` | **409** | Attività STI |
-| `activities` | **1.274** | Attività dettaglio |
+| `courses` | **409** | Attività STI (Tornata ad essere sorgente primaria di verità) |
+| `activities` | **0** | Attività dettaglio (*F1-006: Svuotata da sporcizia STI test*) |
 | `activity_details` | **428** | Dettagli attività |
 | `team_attendance_logs` | **2.078** | Log presenze GemTeam |
 | `team_scheduled_shifts` | **17** | Turni programmati (Drastico calo - *probabile "WIPE settimana"* per via del deploy 035) |

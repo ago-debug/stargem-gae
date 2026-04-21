@@ -137,7 +137,7 @@ export interface CalendarEvent {
     rawPayload: any; // Keep origin
 }
 
-export const USE_STI_BRIDGE = true;
+export const USE_STI_BRIDGE = false;
 
 export function mapUnifiedToCalendarEvents(
     activities: any[] // Expected to be UnifiedCalendarEventDTO[]
@@ -2787,8 +2787,12 @@ export default function CalendarPage() {
                                     <SelectItem value="lezione_individuale">Lezione individuale</SelectItem>
                                     <SelectItem value="domenica">Domenica in movimento</SelectItem>
                                     <SelectItem value="allenamento">Allenamento</SelectItem>
-                                    <SelectItem value="affitto">Affitto</SelectItem>
+                                    <SelectItem value="affitto">Affitto / Sala Libera</SelectItem>
                                     <SelectItem value="campus">Campus</SelectItem>
+                                    <SelectItem value="saggi">Saggio / Spettacolo</SelectItem>
+                                    <SelectItem value="vacanze">Vacanze Studio</SelectItem>
+                                    <SelectItem value="evento">Evento Generico / Libero</SelectItem>
+                                    <SelectItem value="chiusura">Festività / Chiusura Straordinaria</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -2813,7 +2817,7 @@ export default function CalendarPage() {
                                     if (newEventSelectionType === "course") {
                                         handleCreateCourse(selectionContext.dayId, sId, selectionContext.hour, selectionContext.date);
                                         setUnifiedFormType("course");
-                                    } else if (newEventSelectionType === "workshop" || newEventSelectionType === "domenica" || newEventSelectionType === "campus") {
+                                    } else if (newEventSelectionType === "workshop" || newEventSelectionType === "domenica" || newEventSelectionType === "campus" || newEventSelectionType === "saggi" || newEventSelectionType === "vacanze") {
                                         const dateStr = selectionContext.date ? selectionContext.date : null;
                                         setEditingWorkshop({
                                             name: "",
