@@ -34,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
+import { useCustomList } from "@/hooks/use-custom-list";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 import type {
@@ -304,7 +305,8 @@ export default function Attivita() {
   const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
   // @ts-ignore // TODO: STI-cleanup
   const { data: workshops } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
-  const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
+  const { data: categorieList } = useCustomList("categorie");
+  const categories = categorieList?.items ? [...categorieList.items].filter((i: any) => i.active !== false).map((i: any) => ({ id: i.id, name: i.value, color: i.color } as Category)) : [];
   const { data: workshopCategories } = useQuery<WorkshopCategory[]>({ queryKey: ["/api/workshop-categories"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
