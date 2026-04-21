@@ -364,9 +364,12 @@ export default function CalendarPage() {
     const [newServiceForm, setNewServiceForm] = useState({ name: "", price: "0", color: "#3b82f6" });
     const [location] = useLocation();
 
+    const [selectedSeasonId, setSelectedSeasonId] = useState<string>("active");
+
     // Queries
+    const coursesQueryKey = selectedSeasonId === "active" ? "/api/courses" : `/api/courses?seasonId=${selectedSeasonId}`;
     const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
-        queryKey: ["/api/courses"],
+        queryKey: [coursesQueryKey],
     });
 
     const { data: studios, isLoading: studiosLoading } = useQuery<Studio[]>({
@@ -402,8 +405,9 @@ export default function CalendarPage() {
     });
 
     // @ts-ignore // TODO: STI-cleanup
+    const workshopsQueryKey = selectedSeasonId === "active" ? "/api/workshops" : `/api/workshops?seasonId=${selectedSeasonId}`;
     const { data: workshops } = useQuery<Workshop[]>({
-        queryKey: ["/api/workshops"],
+        queryKey: [workshopsQueryKey],
     });
 
     const { data: activityStatuses } = useQuery<ActivityStatus[]>({
@@ -433,7 +437,6 @@ export default function CalendarPage() {
         return nextWeekStart > maxNavDate;
     }, [viewDate, maxNavDate]);
 
-    const [selectedSeasonId, setSelectedSeasonId] = useState<string>("active");
 
     const unifiedQueryKey = selectedSeasonId === "active" ? "/api/activities-unified-preview" : `/api/activities-unified-preview?seasonId=${selectedSeasonId}`;
     const { data: unifiedBridgeActivities } = useQuery<any[]>({
@@ -1078,7 +1081,7 @@ export default function CalendarPage() {
                 if (!matchStudio) return false;
                 
                 const targetDayId = isDayCol ? colId : selectedDay;
-                const matchDay = evt.dayOfWeek === targetDayId;
+                const matchDay = normalizeDay(evt.dayOfWeek) === targetDayId;
                 if (!matchDay) return false;
 
                 // Controllo universale sui limiti temporali (startDate / endDate)
@@ -1273,8 +1276,8 @@ export default function CalendarPage() {
             return await apiRequest("PATCH", `/api/courses/${id}`, data);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+            queryClient.invalidateQueries({ queryKey: [unifiedQueryKey] });
+            queryClient.invalidateQueries({ queryKey: [coursesQueryKey] });
             toast({ title: "Corso aggiornato", description: "Le modifiche sono state salvate correttamente." });
             setEditingCourse(null);
         },
@@ -1288,8 +1291,12 @@ export default function CalendarPage() {
             return await apiRequest("DELETE", `/api/courses/${id}`);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+            queryClient.invalidateQueries({
+                predicate: (query) => {
+                    const qk = query.queryKey[0] as string;
+                    return typeof qk === 'string' && (qk.startsWith('/api/activities-unified-preview') || qk.startsWith('/api/courses') || qk.startsWith('/api/strategic-events') || qk.startsWith('/api/calendar/events'));
+                }
+            });
             toast({ title: "Corso eliminato", description: "Il corso è stato rimosso correttamente." });
             setEditingCourse(null);
         },
@@ -1461,8 +1468,8 @@ export default function CalendarPage() {
             return await apiRequest("POST", "/api/courses", data);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+            queryClient.invalidateQueries({ queryKey: [unifiedQueryKey] });
+            queryClient.invalidateQueries({ queryKey: [coursesQueryKey] });
             toast({ title: "Corso creato", description: "Il nuovo corso è stato aggiunto con successo." });
             setEditingCourse(null);
         },
@@ -1895,6 +1902,91 @@ export default function CalendarPage() {
                                 <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">Card</span>
                             </div>
                         )}
+
+                        {(() => {
+                            if (selectedDay === "all") return null;
+                            const activeDateStr = weekDatesMap[selectedDay];
+                            const activeStrategicEvents = activeDateStr ? (strategicEventsData || []).filter((e: any) => {
+                                const evtStart = e.startDate?.split('T')[0];
+                                const evtEnd = (e.endDate || e.startDate)?.split('T')[0];
+                                return activeDateStr >= evtStart && activeDateStr <= evtEnd && e.affectsCalendar && !e.isPublicHoliday;
+                            }) : [];
+                            
+                            const isPublicHoliday = activeDateStr ? (strategicEventsData || []).some((e: any) => {
+                                const evtStart = e.startDate?.split('T')[0];
+                                const evtEnd = (e.endDate || e.startDate)?.split('T')[0];
+                                return activeDateStr >= evtStart && activeDateStr <= evtEnd && (e.isPublicHoliday === true || e.isPublicHoliday === 1);
+                            }) : false;
+                            
+                            const holidayName = activeDateStr ? (strategicEventsData || []).find((e: any) => {
+                                const evtStart = e.startDate?.split('T')[0];
+                                const evtEnd = (e.endDate || e.startDate)?.split('T')[0];
+                                return activeDateStr >= evtStart && activeDateStr <= evtEnd && (e.isPublicHoliday === true || e.isPublicHoliday === 1);
+                            })?.title : null;
+
+                            if (!activeStrategicEvents?.length && !isPublicHoliday) return null;
+
+                            return (
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <div className="flex items-center gap-2 h-10 px-3 bg-white border border-slate-300 rounded-md shadow-sm cursor-help hover:bg-slate-50 transition-colors shrink-0 max-w-[350px]">
+                                            <div className="flex -space-x-1 flex-none">
+                                               {isPublicHoliday && <div className="w-[14px] h-[14px] rounded-full border border-red-600 bg-red-500 shadow-sm z-20" />}
+                                               {activeStrategicEvents?.slice(0,3).map((evt, i) => {
+                                                    let badgeColor = 'bg-slate-200 border-slate-400';
+                                                    if (evt.eventType === 'chiusura' || evt.isPublicHoliday) badgeColor = 'bg-orange-500 border-orange-600';
+                                                    else if (evt.eventType === 'ferie') badgeColor = 'bg-pink-700 border-pink-800';
+                                                    else if (evt.eventType === 'apertura_eccezionale') badgeColor = 'bg-emerald-500 border-emerald-600';
+                                                    else if (evt.eventType === 'evento_macro') badgeColor = 'bg-blue-500 border-blue-600';
+                                                    else if (evt.eventType === 'nota' || evt.title?.toUpperCase().includes('PROMO')) badgeColor = 'bg-yellow-400 border-yellow-500';
+                                                    else if (evt.eventType === 'campus' || evt.title?.toUpperCase().includes('CAM')) badgeColor = 'bg-sky-400 border-sky-500';
+                                                    
+                                                    return <div key={evt.id} className={`w-[14px] h-[14px] rounded-full border shadow-sm ${badgeColor}`} style={{ zIndex: 10 - i }} />
+                                               })}
+                                            </div>
+                                            <span className="text-xs font-bold text-slate-700 truncate line-clamp-1 w-full">
+                                                {isPublicHoliday ? `${holidayName || "Festività"}` : activeStrategicEvents[0]?.title}
+                                                {(((activeStrategicEvents?.length || 0) > 1) || (isPublicHoliday && (activeStrategicEvents?.length || 0) > 0)) && ` ...`}
+                                            </span>
+                                        </div>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[320px] p-0" align="start">
+                                        <div className="p-3 bg-slate-50 border-b font-semibold text-sm flex items-center gap-2">
+                                            Eventi in Programma
+                                            <Button variant="outline" size="sm" className="h-6 px-2 text-xs ml-auto" onClick={() => setLocation('/programmazione-date')}>Modifica</Button>
+                                        </div>
+                                        <div className="p-2 flex flex-col gap-1 max-h-[300px] overflow-auto">
+                                            {isPublicHoliday && (
+                                                <div className="px-2 py-1.5 rounded-sm text-xs font-bold bg-red-50 text-red-700 border-l-[3px] border-red-500">
+                                                    ☀️ {holidayName || "Festività Nazionale"}
+                                                </div>
+                                            )}
+                                            {activeStrategicEvents?.map(evt => {
+                                                 let badgeColor = 'bg-slate-50 text-slate-800 border-l-[3px] border-slate-400';
+                                                 const type = evt.eventType;
+                                                 const t = (evt.title || '').toUpperCase();
+                                                 
+                                                 if (type === 'chiusura' || t.includes('STRAORDINARI')) badgeColor = 'bg-orange-100 text-orange-800 border-l-[3px] border-orange-500';
+                                                 else if (type === 'ferie' || t.includes('FERIE')) badgeColor = 'bg-[#9D174D]/10 text-[#9D174D] border-l-[3px] border-[#9D174D]/50';
+                                                 else if (type === 'campus' || t.includes('CAM')) badgeColor = 'bg-sky-100 text-sky-800 border-l-[3px] border-sky-400';
+                                                 else if (type === 'saggio' || t.includes('SAG')) badgeColor = 'bg-pink-100 text-pink-800 border-l-[3px] border-pink-400';
+                                                 else if (t.includes('WS')) badgeColor = 'bg-orange-100 text-orange-800 border-l-[3px] border-orange-400';
+                                                 else if (t.includes('VAC')) badgeColor = 'bg-emerald-100 text-emerald-800 border-l-[3px] border-emerald-400';
+                                                 else if (type === 'nota' || t.includes('PROMO')) badgeColor = 'bg-yellow-100 text-yellow-800 border-l-[3px] border-yellow-400';
+                                                 else if (type === 'evento') badgeColor = 'bg-indigo-50 text-indigo-800 border-l-[3px] border-indigo-400';
+
+                                                 return (
+                                                     <div key={evt.id} onClick={() => setLocation('/programmazione-date')} className={`px-2 py-2 rounded-[3px] text-[11px] font-medium cursor-pointer hover:opacity-80 transition-opacity shadow-sm ${badgeColor}`}>
+                                                         {evt.title}
+                                                         {evt.description && <div className="text-[10px] font-normal opacity-80 mt-1 line-clamp-2 leading-tight">{evt.description}</div>}
+                                                     </div>
+                                                 );
+                                            })}
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                            );
+                        })()}
                     </div>
 
                     <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-nowrap w-full md:w-auto md:justify-end pb-1 md:pb-0">

@@ -39,6 +39,8 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
+  const { data: categoriesData } = useQuery<any>({ queryKey: ["/api/custom-lists/categorie"] });
+  const categories = categoriesData?.items || [];
 
   // Filtra solo i corsi della stagione di partenza corrente (e per sicurezza in RAM)
   const sourceCourses = useMemo(() => {
@@ -76,15 +78,36 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
       }
   }, [targetSeasons, targetSeasonId, effectiveSourceSeasonId]);
 
-  // Fetch target season courses per anti-duplicazione
+  // Fetch target season courses per anti-duplicazione e auto-fill date
   React.useEffect(() => {
     if (targetSeasonId) {
         fetch(`/api/courses?seasonId=${targetSeasonId}&activityType=course`)
             .then(r => r.json())
             .then(data => setTargetCourses(data))
             .catch(() => setTargetCourses([]));
+            
+        const selectedSeason = seasons?.find(s => s.id?.toString() === targetSeasonId);
+        if (selectedSeason?.startDate && selectedSeason?.endDate) {
+            const startYear = new Date(selectedSeason.startDate).getFullYear();
+            const endYear = new Date(selectedSeason.endDate).getFullYear();
+            const minStr = `${startYear}-09-01`;
+            const maxStr = `${endYear}-06-30`;
+            setGlobalStartDate(minStr);
+            setGlobalEndDate(maxStr);
+            
+            // Auto applica a tutte le source courses per convenienza UX
+            setCourseOverrides(prev => {
+                const next = { ...prev };
+                sourceCourses.forEach(c => {
+                    if (!next[c.id]) next[c.id] = {};
+                    next[c.id].startDate = minStr;
+                    next[c.id].endDate = maxStr;
+                });
+                return next;
+            });
+        }
     }
-  }, [targetSeasonId]);
+  }, [targetSeasonId, seasons, sourceCourses]);
 
   const toggleCourse = (courseId: number) => {
     const next = new Set(selectedCourseIds);
@@ -131,6 +154,31 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
     }
   });
 
+  const generateSKUForCourse = (courseData: any, tgSeasonId: string) => {
+      let codeA = "XXXX";
+      const season = seasons?.find((s: any) => s.id?.toString() === tgSeasonId);
+      if (season?.name) {
+          const parts = season.name.match(/\d+/g);
+          if (parts && parts.length >= 2) {
+              codeA = `${parts[0].slice(-2) || "XX"}${parts[1].slice(-2) || "XX"}`;
+          } else if (parts && parts.length === 1 && parts[0].length === 4) {
+              codeA = parts[0];
+          }
+      }
+      let codeB = "XXX";
+      const inst = instructors?.find(i => i.id?.toString() === courseData.instructorId?.toString());
+      if (inst?.lastName) codeB = String(inst.lastName).toUpperCase().replace(/[^A-Z]/g, "").slice(0, 10);
+      
+      const codeC = courseData.dayOfWeek ? String(courseData.dayOfWeek).toUpperCase().slice(0, 3) : "XXX";
+      const codeD = courseData.startTime ? String(courseData.startTime).split(":")[0] : "XX";
+      
+      let codeE = "X";
+      const cat = categories?.find((c: any) => c.id?.toString() === courseData.categoryId?.toString());
+      if (cat?.value) codeE = String(cat.value).toUpperCase().charAt(0);
+      
+      return `${codeA}${codeB}${codeC}${codeD}.${codeE}`;
+  };
+
   const handleDuplicate = async () => {
     if (!targetSeasonId) {
        toast({ title: "Errore", description: "Seleziona la stagione di destinazione.", variant: "destructive" });
@@ -152,6 +200,15 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
         if (!effectiveStartDate || !effectiveEndDate) {
            toast({ title: "Dati Mancanti", description: `Inserisci Data Inizio e Data Fine per il corso: ${originalCourse?.name}`, variant: "destructive" });
            return;
+        }
+        const selectedSeason = seasons?.find((s: any) => s.id?.toString() === targetSeasonId);
+        if (selectedSeason?.startDate && selectedSeason?.endDate) {
+           const minStr = new Date(selectedSeason.startDate).toISOString().split('T')[0];
+           const maxStr = new Date(selectedSeason.endDate).toISOString().split('T')[0];
+           if (effectiveStartDate < minStr || effectiveStartDate > maxStr || effectiveEndDate < minStr || effectiveEndDate > maxStr) {
+               toast({ title: "Date fuori stagione", description: `Hai sfasato le date per ${originalCourse?.name}. Devono rientrare tra ${new Date(minStr).toLocaleDateString()} e ${new Date(maxStr).toLocaleDateString()} per la stagione ${selectedSeason.name}!`, variant: "destructive", duration: 7000 });
+               return;
+           }
         }
         const duplicateCheck = targetCourses.find(tc => 
             tc.name === (overrides.name ?? originalCourse?.name) &&
@@ -184,17 +241,20 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                 seasonId: parseInt(targetSeasonId), // Nuova Stagione
                 startDate: overrides.startDate || (originalCourse.startDate ? new Date(originalCourse.startDate).toISOString().split('T')[0] : undefined), // Data Inizio Obbligatoria (verificata)
                 endDate: overrides.endDate || (originalCourse.endDate ? new Date(originalCourse.endDate).toISOString().split('T')[0] : undefined), // Data Fine Obbligatoria (verificata)
+                recurrenceType: overrides.recurrenceType ?? originalCourse.recurrenceType ?? "weekly", // <-- Mantiene la ricorrenza originale (o da override)
 
                 // CAMPI PROIBITI O RE-INIZIALIZZATI VUOTI
                 currentEnrollment: 0, 
                 statusTags: [], 
                 googleEventId: null, 
                 quoteId: null, 
-                sku: null, 
+                sku: null as any, 
                 price: "0", // Il prezzo stringa se null spacca l'inseritore, usiamo stringa "0" nominalistica
                 active: true,
                 maxCapacity: originalCourse.maxCapacity // E' una metrica fisica della sala, conviene trapiantarla
             };
+            
+            newCourse.sku = generateSKUForCourse(newCourse, targetSeasonId);
             
             // Nota: I pagamenti storici risiedono nella tabella 'payments' e 
             // legati alle tessere/transazioni (members), non vengono duplicati inviando il corso.
@@ -231,6 +291,16 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
         return;
     }
 
+    const selectedSeason = seasons?.find((s: any) => s.id?.toString() === targetSeasonId);
+    if (selectedSeason?.startDate && selectedSeason?.endDate) {
+        const minStr = new Date(selectedSeason.startDate).toISOString().split('T')[0];
+        const maxStr = new Date(selectedSeason.endDate).toISOString().split('T')[0];
+        if (effectiveStartDate < minStr || effectiveStartDate > maxStr || effectiveEndDate < minStr || effectiveEndDate > maxStr) {
+            toast({ title: "Date fuori stagione", description: `Hai sfasato le date. Devono rientrare tra ${new Date(minStr).toLocaleDateString()} e ${new Date(maxStr).toLocaleDateString()} per la stagione ${selectedSeason.name}!`, variant: "destructive", duration: 7000 });
+            return;
+        }
+    }
+
     const duplicateCheck = targetCourses.find(tc => 
         tc.name === (overrides.name ?? originalCourse?.name) &&
         tc.dayOfWeek === originalCourse?.dayOfWeek &&
@@ -256,15 +326,18 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
         seasonId: parseInt(targetSeasonId),
         startDate: effectiveStartDate,
         endDate: effectiveEndDate,
+        recurrenceType: overrides.recurrenceType ?? originalCourse.recurrenceType ?? "weekly", // <-- Mantiene la ricorrenza originale (o da override)
         currentEnrollment: 0, 
         statusTags: [], 
         googleEventId: null, 
         quoteId: null, 
-        sku: null, 
+        sku: null as any, 
         price: "0",
         active: true,
         maxCapacity: originalCourse.maxCapacity
     };
+
+    newCourse.sku = generateSKUForCourse(newCourse, targetSeasonId);
 
     try {
         await createMutation.mutateAsync(newCourse);
@@ -361,11 +434,11 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                                    onCheckedChange={toggleAll}
                                 />
                             </TableHead>
-                            <TableHead>Corso Originale</TableHead>
-                            <TableHead>Date / Stagione *</TableHead>
-                            <TableHead>Nuovo Nome <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
-                            <TableHead>Sala <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
-                            <TableHead>Insegnante <span className="text-xs text-muted-foreground font-normal">(opz.)</span></TableHead>
+                            <TableHead>Corso Orig. <span className="text-xs text-muted-foreground font-normal">(Vis. SKU)</span></TableHead>
+                            <TableHead>Nome <span className="text-xs text-muted-foreground font-normal">& Ricor.</span></TableHead>
+                            <TableHead>Pianificazione <span className="text-xs text-muted-foreground font-normal">(Giorno/Ora)</span></TableHead>
+                            <TableHead>Risorse <span className="text-xs text-muted-foreground font-normal">(Sala/Staff)</span></TableHead>
+                            <TableHead>Date Stagione *</TableHead>
                             <TableHead className="w-12 text-center"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -380,84 +453,130 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                             const isSelected = selectedCourseIds.has(course.id);
                             return (
                                 <TableRow key={course.id} className={isSelected ? 'bg-indigo-50/30' : ''}>
-                                    <TableCell className="text-center">
+                                    <TableCell className="text-center align-top pt-4">
                                         <Checkbox 
                                            checked={isSelected}
                                            onCheckedChange={() => toggleCourse(course.id)}
                                         />
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="align-top pt-4">
                                         <div className="font-semibold text-slate-900 line-clamp-1 truncate" title={course.name}>{course.name}</div>
-                                        <div className="text-xs text-muted-foreground flex gap-2">
-                                           <span>{course.dayOfWeek} {course.startTime}-{course.endTime}</span>
+                                        <div className="text-[10px] font-mono text-muted-foreground mt-1 bg-slate-100 p-0.5 px-1.5 rounded w-fit inline-block">
+                                           {generateSKUForCourse({
+                                               ...course, 
+                                               name: courseOverrides[course.id]?.name ?? course.name,
+                                               dayOfWeek: courseOverrides[course.id]?.dayOfWeek ?? course.dayOfWeek,
+                                               startTime: courseOverrides[course.id]?.startTime ?? course.startTime,
+                                               instructorId: courseOverrides[course.id]?.instructorId ?? course.instructorId,
+                                           }, targetSeasonId)}
                                         </div>
                                     </TableCell>
-                                    <TableCell>
-                                        <div className="flex gap-2 mb-1">
+                                    <TableCell className="align-top pt-3">
+                                        <div className="space-y-1.5 min-w-[120px]">
+                                            <Input 
+                                               disabled={!isSelected}
+                                               placeholder={course.name}
+                                               value={courseOverrides[course.id]?.name || ""}
+                                               onChange={(e) => updateOverride(course.id, "name", e.target.value)}
+                                               className="h-7 text-xs bg-white"
+                                            />
+                                            <Select 
+                                               disabled={!isSelected}
+                                               value={courseOverrides[course.id]?.recurrenceType || course.recurrenceType || "weekly"}
+                                               onValueChange={(val) => updateOverride(course.id, "recurrenceType", val)}
+                                            >
+                                               <SelectTrigger className="h-7 text-[10px] bg-white text-muted-foreground"><SelectValue /></SelectTrigger>
+                                               <SelectContent>
+                                                   <SelectItem value="weekly">Settimanale</SelectItem>
+                                                   <SelectItem value="bimonthly">Bi-mensile</SelectItem>
+                                                   <SelectItem value="monthly">Mensile</SelectItem>
+                                                   <SelectItem value="single">Singolo Evento</SelectItem>
+                                                   <SelectItem value="daily">Tutti i giorni</SelectItem>
+                                               </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="align-top pt-3">
+                                        <div className="space-y-1.5 min-w-[140px]">
+                                            <Select 
+                                               disabled={!isSelected}
+                                               value={courseOverrides[course.id]?.dayOfWeek || course.dayOfWeek || "none"}
+                                               onValueChange={(val) => updateOverride(course.id, "dayOfWeek", val)}
+                                            >
+                                               <SelectTrigger className="h-7 text-[10px] bg-white"><SelectValue /></SelectTrigger>
+                                               <SelectContent>
+                                                   <SelectItem value="LUN">Lunedì</SelectItem>
+                                                   <SelectItem value="MAR">Martedì</SelectItem>
+                                                   <SelectItem value="MER">Mercoledì</SelectItem>
+                                                   <SelectItem value="GIO">Giovedì</SelectItem>
+                                                   <SelectItem value="VEN">Venerdì</SelectItem>
+                                                   <SelectItem value="SAB">Sabato</SelectItem>
+                                                   <SelectItem value="DOM">Domenica</SelectItem>
+                                               </SelectContent>
+                                            </Select>
+                                            <div className="flex gap-1">
+                                               <Input disabled={!isSelected} type="time" className="h-7 text-[10px] w-[65px] px-1 bg-white" value={courseOverrides[course.id]?.startTime || course.startTime || ""} onChange={(e) => updateOverride(course.id, "startTime", e.target.value)} />
+                                               <Input disabled={!isSelected} type="time" className="h-7 text-[10px] w-[65px] px-1 bg-white" value={courseOverrides[course.id]?.endTime || course.endTime || ""} onChange={(e) => updateOverride(course.id, "endTime", e.target.value)} />
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="align-top pt-3">
+                                        <div className="space-y-1.5 min-w-[130px]">
+                                            <Select 
+                                                disabled={!isSelected}
+                                                value={courseOverrides[course.id]?.studioId?.toString() || course.studioId?.toString() || "none"}
+                                                onValueChange={(val) => updateOverride(course.id, "studioId", val === "none" ? null : parseInt(val))}
+                                            >
+                                                <SelectTrigger className="h-7 text-[10px] bg-white">
+                                                    <SelectValue placeholder="Sala" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none" className="text-muted-foreground italic">Nessuna sala</SelectItem>
+                                                    {studios?.map((s: any) => (
+                                                        <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <Select 
+                                                disabled={!isSelected}
+                                                value={courseOverrides[course.id]?.instructorId?.toString() || course.instructorId?.toString() || "none"}
+                                                onValueChange={(val) => updateOverride(course.id, "instructorId", val === "none" ? null : parseInt(val))}
+                                            >
+                                                <SelectTrigger className="h-7 text-[10px] bg-white">
+                                                    <SelectValue placeholder="Insegnante" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none" className="text-muted-foreground italic">Nessun ins.</SelectItem>
+                                                    {instructors?.map((i: any) => (
+                                                        <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="align-top pt-3">
+                                        <div className="space-y-1.5 min-w-[120px]">
                                             <Input
                                                 type="date"
                                                 disabled={!isSelected}
-                                                className={`h-8 text-xs ${isSelected && !(courseOverrides[course.id]?.startDate || course.startDate) ? "border-red-400 bg-red-50" : ""}`}
+                                                className={`h-7 text-[10px] px-2 ${isSelected && !(courseOverrides[course.id]?.startDate || course.startDate) ? "border-red-400 bg-red-50" : "bg-white"}`}
                                                 value={courseOverrides[course.id]?.startDate || (course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : "")}
                                                 onChange={(e) => updateOverride(course.id, "startDate", e.target.value)}
                                             />
                                             <Input
                                                 type="date"
                                                 disabled={!isSelected}
-                                                className={`h-8 text-xs ${isSelected && !(courseOverrides[course.id]?.endDate || course.endDate) ? "border-red-400 bg-red-50" : ""}`}
+                                                className={`h-7 text-[10px] px-2 ${isSelected && !(courseOverrides[course.id]?.endDate || course.endDate) ? "border-red-400 bg-red-50" : "bg-white"}`}
                                                 value={courseOverrides[course.id]?.endDate || (course.endDate ? new Date(course.endDate).toISOString().split('T')[0] : "")}
                                                 onChange={(e) => updateOverride(course.id, "endDate", e.target.value)}
                                             />
                                         </div>
                                     </TableCell>
-                                    <TableCell>
-                                        <Input 
-                                           disabled={!isSelected}
-                                           placeholder={course.name}
-                                           value={courseOverrides[course.id]?.name || ""}
-                                           onChange={(e) => updateOverride(course.id, "name", e.target.value)}
-                                           className="h-8 text-sm"
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Select 
-                                            disabled={!isSelected}
-                                            value={courseOverrides[course.id]?.studioId?.toString() || course.studioId?.toString() || "none"}
-                                            onValueChange={(val) => updateOverride(course.id, "studioId", val === "none" ? null : parseInt(val))}
-                                        >
-                                            <SelectTrigger className="h-8 text-xs bg-white">
-                                                <SelectValue placeholder="Seleziona Sala..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none" className="text-muted-foreground italic">Nessuna sala</SelectItem>
-                                                {studios?.map(s => (
-                                                    <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Select 
-                                            disabled={!isSelected}
-                                            value={courseOverrides[course.id]?.instructorId?.toString() || course.instructorId?.toString() || "none"}
-                                            onValueChange={(val) => updateOverride(course.id, "instructorId", val === "none" ? null : parseInt(val))}
-                                        >
-                                            <SelectTrigger className="h-8 text-xs bg-white">
-                                                <SelectValue placeholder="Seleziona Insegnante..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none" className="text-muted-foreground italic">Nessun insegnante</SelectItem>
-                                                {instructors?.map(i => (
-                                                    <SelectItem key={i.id} value={i.id.toString()}>{i.lastName} {i.firstName}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </TableCell>
                                     <TableCell className="text-center align-middle">
                                         <Button 
                                             variant="ghost" 
                                             size="icon"
-                                            className="h-8 w-8 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-800"
+                                            className="h-8 w-8 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-800 shrink-0"
                                             onClick={() => handleSingleDuplicate(course.id)}
                                             title="Duplica solo questo corso"
                                             disabled={createMutation.isPending}

@@ -85,10 +85,12 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
       
       const selectedSeason = seasons.find(s => s?.id?.toString() === seasonId);
       if (selectedSeason?.startDate) {
-          setStartDate(new Date(selectedSeason.startDate).toISOString().split("T")[0]);
+          const seasonStartYear = new Date(selectedSeason.startDate).getFullYear();
+          setStartDate(`${seasonStartYear}-09-01`);
       }
       if (selectedSeason?.endDate) {
-          setEndDate(new Date(selectedSeason.endDate).toISOString().split("T")[0]);
+          const seasonEndYear = new Date(selectedSeason.endDate).getFullYear();
+          setEndDate(`${seasonEndYear}-06-30`);
       }
 
       // SKU Generation
@@ -145,6 +147,7 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
     },
     onSuccess: (newRecord) => {
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?seasonId=${seasonId}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/activities-unified-preview"] });
       queryClient.invalidateQueries({ queryKey: [`/api/activities-unified-preview?seasonId=${seasonId}`] });
       onSuccess(newRecord); 
@@ -159,6 +162,40 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
   const handleDuplicate = () => {
      if (!seasonId) return toast({ title: "Seleziona", description: "Seleziona una stagione", variant: "destructive"});
      if (!course) return;
+
+     // 0. Controllo Congruenza Data Inizio e Giorno Settimana
+     if (startDate && dayOfWeek && dayOfWeek !== "none") {
+         const dObj = new Date(`${startDate}T12:00:00`);
+         const dayIdx = dObj.getDay() === 0 ? 6 : dObj.getDay() - 1;
+         const isMatchingDay = WEEKDAYS[dayIdx].id === dayOfWeek;
+         
+         if (!isMatchingDay) {
+             const chosenDayObj = WEEKDAYS.find(w => w.id === dayOfWeek);
+             const wrongDayObj = WEEKDAYS[dayIdx];
+             return toast({
+                 title: "Data di Inizio incompatibile",
+                 description: `La ricorrenza è impostata di ${chosenDayObj?.label}, ma la Data Inizio inserita cade di ${wrongDayObj?.label}. Seleziona la data corretta sul calendario!`,
+                 variant: "destructive",
+                 duration: 6000
+             });
+         }
+     }
+
+     // 0.5 Controllo Limiti Temporali della Stagione
+     const selectedSeason = seasons.find(s => s?.id?.toString() === seasonId);
+     if (selectedSeason?.startDate && selectedSeason?.endDate && startDate && endDate) {
+         const minStr = new Date(selectedSeason.startDate).toISOString().split("T")[0];
+         const maxStr = new Date(selectedSeason.endDate).toISOString().split("T")[0];
+         
+         if (startDate < minStr || startDate > maxStr || endDate < minStr || endDate > maxStr) {
+             return toast({
+                 title: "Date fuori stagione",
+                 description: `Hai sfasato le date. Devono rientrare tra ${new Date(minStr).toLocaleDateString()} e ${new Date(maxStr).toLocaleDateString()} per la stagione ${selectedSeason.name}!`,
+                 variant: "destructive",
+                 duration: 6000
+             });
+         }
+     }
 
      // 1. Controllo Conflitti pre-duplicazione
      if (targetSeasonEvents && targetSeasonEvents.length > 0 && startTime) {
@@ -201,6 +238,7 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
         dayOfWeek: dayOfWeek,
         startTime: startTime,
         endTime: endTime,
+        recurrenceType: course.recurrenceType || "weekly", // <-- Mantiene la ricorrenza originale o usa weekly di default
         studioId: course.studioId,
         seasonId: parseInt(seasonId),
         startDate: startDate ? new Date(startDate) : null,
@@ -232,7 +270,7 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label>1. Cambio Stagione</Label>
+            <Label>1. Cambio Stagione <span className="text-red-500 ml-1">*</span></Label>
             <Select value={seasonId} onValueChange={setSeasonId}>
               <SelectTrigger>
                 <SelectValue placeholder="Seleziona stagione..." />
@@ -253,11 +291,11 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-                <Label>3. Data Inizio</Label>
+                <Label>3. Data Inizio <span className="text-red-500 ml-1">*</span></Label>
                 <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
             </div>
             <div className="space-y-2">
-                <Label>Data Fine</Label>
+                <Label>Data Fine <span className="text-red-500 ml-1">*</span></Label>
                 <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </div>
           </div>
@@ -267,7 +305,7 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
                  <Label className="text-xs text-muted-foreground uppercase">Ricorrenza</Label>
              </div>
              <div className="space-y-1">
-                 <Label className="text-xs">Giorno</Label>
+                 <Label className="text-xs">Giorno <span className="text-red-500 ml-1">*</span></Label>
                  <Select value={dayOfWeek} onValueChange={setDayOfWeek}>
                     <SelectTrigger className="h-8 text-xs px-2"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -276,22 +314,27 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
                  </Select>
              </div>
              <div className="space-y-1">
-                 <Label className="text-xs">Orario Inizio</Label>
+                 <Label className="text-xs">Orario Inizio <span className="text-red-500 ml-1">*</span></Label>
                  <Input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="h-8 text-xs p-1" />
              </div>
              <div className="space-y-1">
-                 <Label className="text-xs">Orario Fine</Label>
+                 <Label className="text-xs">Orario Fine <span className="text-red-500 ml-1">*</span></Label>
                  <Input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="h-8 text-xs p-1" />
              </div>
           </div>
 
         </div>
 
-        <DialogFooter>
-           <Button variant="outline" onClick={() => onOpenChange(false)}>Annulla</Button>
-           <Button onClick={handleDuplicate} disabled={createMutation.isPending} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-              {createMutation.isPending ? "Salvataggio..." : "Crea Copia"}
-           </Button>
+        <DialogFooter className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+           <div className="text-xs text-slate-500">
+              <span className="text-red-500 font-bold mr-1">*</span> Campi obbligatori
+           </div>
+           <div className="flex gap-2">
+             <Button variant="outline" onClick={() => onOpenChange(false)}>Annulla</Button>
+             <Button onClick={handleDuplicate} disabled={createMutation.isPending} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                {createMutation.isPending ? "Salvataggio..." : "Crea Copia"}
+             </Button>
+           </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
