@@ -308,12 +308,13 @@ export default function StrategicProgrammingTable() {
 
                                 const todayStart = new Date();
                                 const isCurrentWeek = row.start <= todayStart && addDays(row.end, 1) > todayStart;
+                                const isPastWeek = addDays(row.end, 1) <= todayStart;
 
                                 return (
                                     <tr 
                                         key={row.weekNum} 
                                         id={isCurrentWeek ? "current-week-row" : undefined}
-                                        className={`hover:bg-slate-50/80 transition-colors group ${isCurrentWeek ? 'bg-yellow-50/40 ring-1 ring-yellow-400' : ''}`}
+                                        className={`hover:bg-slate-50/80 transition-all duration-300 group ${isCurrentWeek ? 'bg-yellow-50/40 ring-1 ring-yellow-400' : ''} ${isPastWeek ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0 bg-slate-50/50' : ''}`}
                                     >
                                         <td className="border p-2 text-center font-bold text-slate-400">{row.weekNum}</td>
                                         <td className="border p-2 font-mono text-[10px] text-slate-600 font-medium">

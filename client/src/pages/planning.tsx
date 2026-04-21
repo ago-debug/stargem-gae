@@ -646,14 +646,14 @@ export default function Planning() {
                                                         setStrategicModalOpen(true);
                                                     }
                                                 }}
-                                                className={`relative min-h-[50px] border-r p-1 text-xs ${isValidDay ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
+                                                className={`relative min-h-[50px] border-r p-1 text-xs transition-opacity duration-300 ${isValidDay ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
                                                     !isValidDay ? 'bg-slate-200' : 
                                                     (isToday ? 'bg-yellow-200 border-2 border-yellow-500 z-10 shadow-md scale-[1.02] transition-transform' : 
-                                                    (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100' : 'bg-red-50/50') : 
+                                                    (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100/80' : 'bg-red-50/50') : 
                                                     (isCurrentMonthCol ? 'bg-yellow-50/20' : 
                                                     (isSaturday ? (isPastBodyMonth ? 'bg-slate-200/50' : 'bg-slate-100/50') : 
-                                                    (isPastBodyMonth ? 'bg-slate-100' : 'bg-white')))))
-                                                }`}
+                                                    (isPastBodyMonth ? 'bg-slate-100/80 border-slate-300/50' : 'bg-white')))))
+                                                } ${isPastBodyMonth && !isToday ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0' : ''}`}
                                             >
                                                 {isValidDay && cellDate && (
                                                     <>
