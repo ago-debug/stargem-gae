@@ -646,8 +646,8 @@ export default function Planning() {
                                                         setStrategicModalOpen(true);
                                                     }
                                                 }}
-                                                className={`relative min-h-[50px] border-r p-1 text-xs transition-opacity duration-300 ${isValidDay ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
-                                                    !isValidDay ? 'bg-slate-50/30' : 
+                                                className={`relative min-h-[50px] p-1 text-xs transition-opacity duration-300 ${isValidDay ? 'border-r cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
+                                                    !isValidDay ? 'bg-white border-transparent' : 
                                                     (isToday ? 'bg-yellow-200 border-2 border-yellow-500 z-10 shadow-md scale-[1.02] transition-transform' : 
                                                     (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100/80' : 'bg-red-50/50') : 
                                                     (isCurrentMonthCol ? 'bg-yellow-50/20' : 
