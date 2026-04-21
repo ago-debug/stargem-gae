@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import { CourseDuplicationWizard } from "@/components/CourseDuplicationWizard";
+import { CourseSingleDuplicateModal } from "@/components/CourseSingleDuplicateModal";
 import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 import { useCustomListValues } from "@/hooks/use-custom-list";
 import { Combobox } from "@/components/ui/combobox";
@@ -54,6 +55,7 @@ import {
     Phone,
     Sparkles,
     Edit2,
+    Copy,
     Activity,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
@@ -280,6 +282,7 @@ export default function CalendarPage() {
     const [conflictInfo, setConflictInfo] = useState<{ message: string, data: any, isUpdate: boolean } | null>(null);
     const [conflictEventId, setConflictEventId] = useState<string | null>(null);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+    const [duplicatingCourse, setDuplicatingCourse] = useState<Course | null>(null);
     // @ts-ignore // TODO: STI-cleanup
     const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
     const [editingBooking, setEditingBooking] = useState<any | null>(null);
@@ -448,17 +451,33 @@ export default function CalendarPage() {
     useEffect(() => {
         if (!seasons?.length) return;
         
-        // Auto-advance season if we are in February or later
+        // Auto-advance season se viene fornita una data via query params O siamo da febbraio in poi
         if (prevSeasonId.current === null && selectedSeasonId === "active") {
+            const hasInitialDateParam = window.location.search.includes('date=');
+            
+            // 1. Se navighiamo direttamente da un link con data specifica (es. dal Planning)
+            if (hasInitialDateParam && initialDate) {
+                const targetSeason = seasons.find(s => {
+                    if (!s.startDate || !s.endDate) return false;
+                    return initialDate >= new Date(s.startDate) && initialDate <= new Date(s.endDate);
+                });
+                
+                if (targetSeason) {
+                    setSelectedSeasonId(targetSeason.id.toString());
+                    prevSeasonId.current = targetSeason.id.toString();
+                    return; // Usciamo perché abbiamo caricato la stagione target esatta
+                }
+            }
+
+            // 2. Altrimenti, logica di Auto-advance basata sul mese attuale
             const now = new Date();
-            if (now.getMonth() >= 1) { // February is index 1
+            if (now.getMonth() >= 1 && now.getMonth() <= 6) { // February is index 1, July is 6
                 const activeSeason = seasons.find(s => s.active) || seasons[0];
                 const activeIdx = seasons.findIndex(s => s.id === activeSeason.id);
                 
-                // activeIdx - 1 is the next season because order is DESC (newest first)
                 if (activeIdx > 0) {
                     setSelectedSeasonId(seasons[activeIdx - 1].id.toString());
-                    return; // Skip normal navigation logic on auto jump
+                    return; 
                 } else if (activeIdx === 0) {
                     // Auto-generate next season
                     const yearMatch = activeSeason.name.match(/20(\d{2})\/20(\d{2})/);
@@ -1058,13 +1077,21 @@ export default function CalendarPage() {
                 
                 if (!matchStudio) return false;
                 
-                if (USE_STI_BRIDGE) {
+                const targetDayId = isDayCol ? colId : selectedDay;
+                const matchDay = evt.dayOfWeek === targetDayId;
+                if (!matchDay) return false;
+
+                // Controllo universale sui limiti temporali (startDate / endDate)
+                if (evt.startDate || evt.endDate) {
                     const targetDateStr = isDayCol ? weekDatesMap[colId] : weekDatesMap[selectedDay];
-                    const targetDayId = isDayCol ? colId : selectedDay;
-                    return isEventOnDate(evt, targetDateStr) && (!evt.dayOfWeek || evt.dayOfWeek === targetDayId);
+                    const s = evt.startDate ? evt.startDate.split('T')[0] : null;
+                    const e = evt.endDate ? evt.endDate.split('T')[0] : null;
+                    
+                    if (s && targetDateStr < s) return false;
+                    if (e && targetDateStr > e) return false;
                 }
-                const matchDay = isDayCol ? evt.dayOfWeek === colId : evt.dayOfWeek === selectedDay;
-                return matchDay;
+
+                return true;
             });
 
             const sorted = [...colFiltered].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
@@ -1190,8 +1217,49 @@ export default function CalendarPage() {
         return { columns, columnEvents, cumulativeTops };
 
     }, [unifiedEvents, selectedDay, selectedStudio, measuredHeights, weekDatesMap, timeToMinutes]);
-    // ----------------------------------------------------------------
 
+    const totalRenderedCards = useMemo(() => {
+        let count = 0;
+        let breakdown: Record<string, number> = {};
+        try {
+            if (calendarLayout?.columnEvents) {
+                Object.values(calendarLayout.columnEvents).forEach((events: any) => {
+                    if (Array.isArray(events)) {
+                        events.forEach((evt: any) => {
+                            if (!evt) return;
+                            
+                            const addEvent = (e: any) => {
+                                const type = e?.eventType || '';
+                                if (type !== 'chiusura' && type !== 'ferie' && type !== 'nota') {
+                                    count++;
+                                    let key = e.registryKey || 'altro';
+                                    if (key === 'course' || key === 'courses') key = 'Corsi';
+                                    else if (key === 'allenamento' || key === 'training') key = 'Allenamenti';
+                                    else if (key === 'lezione_individuale' || key === 'individual_lessons') key = 'Lezioni Individuali';
+                                    else if (key === 'workshop' || key === 'workshops') key = 'Workshop';
+                                    else if (key === 'domenica' || key === 'sunday_activities') key = 'Domeniche';
+                                    else if (key === 'studioBookings' || key === 'rentals') key = 'Affitti/Sale';
+                                    else key = 'Altro';
+                                    
+                                    breakdown[key] = (breakdown[key] || 0) + 1;
+                                }
+                            };
+
+                            if (evt.isCluster && Array.isArray(evt.events)) {
+                                evt.events.forEach((e: any) => addEvent(e));
+                            } else {
+                                addEvent(evt);
+                            }
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error calculating rendered cards:", e);
+        }
+        return { total: count, breakdown };
+    }, [calendarLayout]);
+    // ----------------------------------------------------------------
     const resetFilters = () => {
         setSelectedStudio("all");
         setSelectedInstructor("all");
@@ -1234,6 +1302,10 @@ export default function CalendarPage() {
         setUnifiedFormType((course as any).activityType || "course");
         setEditingCourse(course);
         setEditForm(course);
+    };
+
+    const handleDuplicateSingle = (course: Course) => {
+        setDuplicatingCourse(course);
     };
 
     const handleCreateCourse = (dayId: string, studioId: number, hour: number, selectionDate?: Date) => {
@@ -1797,6 +1869,32 @@ export default function CalendarPage() {
                         <Button variant="outline" size="sm" className="h-10 px-4 font-semibold shrink-0 bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 shadow-sm" onClick={resetToToday}>
                             Oggi
                         </Button>
+                        {totalRenderedCards.total > 0 ? (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-slate-100 hover:bg-slate-200 cursor-pointer text-slate-700 border border-slate-300 shadow-sm rounded-md md:rounded-lg transition-colors">
+                                        <span className="font-extrabold text-sm tracking-tight">{totalRenderedCards.total}</span>
+                                        <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">Card</span>
+                                    </div>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-56 p-3" align="end">
+                                    <h4 className="font-semibold text-sm mb-2 pb-1 border-b text-slate-800">Dettaglio Card Mostrate</h4>
+                                    <div className="space-y-1">
+                                        {Object.entries(totalRenderedCards.breakdown).map(([key, count]) => (
+                                            <div key={key} className="flex justify-between items-center text-sm">
+                                                <span className="text-slate-600 font-medium">{key}</span>
+                                                <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full text-xs">{count}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                        ) : (
+                            <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-slate-50 text-slate-400 border border-slate-200 shadow-sm rounded-md md:rounded-lg">
+                                <span className="font-extrabold text-sm tracking-tight">0</span>
+                                <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">Card</span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-nowrap w-full md:w-auto md:justify-end pb-1 md:pb-0">
@@ -2162,9 +2260,16 @@ export default function CalendarPage() {
                                                                         );
                                                                     })}
                                                                 </div>
-                                                                <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm shrink-0 border border-black/5" title="Modifica rapida">
-                                                                    <Edit2 className="w-2.5 h-2.5" />
-                                                                </button>
+                                                                <div className="flex gap-1 shrink-0">
+                                                                    {(evt.sourceType === "course" || evt.sourceType === "courses") && (
+                                                                        <button onClick={(e) => { e.stopPropagation(); handleDuplicateSingle(evt.rawPayload as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-indigo-600 transition-colors shadow-sm border border-black/5" title="Duplica Corso">
+                                                                            <Copy className="w-2.5 h-2.5" />
+                                                                        </button>
+                                                                    )}
+                                                                    <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm border border-black/5" title="Modifica rapida">
+                                                                        <Edit2 className="w-2.5 h-2.5" />
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                             
                                                             {codeLabel && (
@@ -2250,6 +2355,51 @@ export default function CalendarPage() {
                 setEditingCourse(null);
                 setEditForm({});
               }}
+            />
+
+            <CourseSingleDuplicateModal
+                course={duplicatingCourse}
+                isOpen={!!duplicatingCourse}
+                onOpenChange={(open) => {
+                    if (!open) setDuplicatingCourse(null);
+                }}
+                onSuccess={(newCourse) => {
+                    setDuplicatingCourse(null);
+                    if (newCourse && newCourse.id) {
+                        // 1. Cambia la stagione
+                        setSelectedSeasonId(newCourse.seasonId?.toString() || "");
+                        
+                        // 2. Centra il calendario sulla data di inizio
+                        if (newCourse.startDate) {
+                           const sd = new Date(newCourse.startDate);
+                           if (!isNaN(sd.getTime())) {
+                               setViewDate(sd); // Salta direttamente alla data in cui inizia!
+                           }
+                        }
+                        
+                        // 3. Apre il modale e mappa l'evento prima!
+                        setTimeout(() => {
+                          const mockEvt = {
+                              id: `course_${newCourse.id}`,
+                              sourceType: "course",
+                              sourceId: newCourse.id,
+                              title: newCourse.name || "CORSO",
+                              startTime: newCourse.startTime,
+                              endTime: newCourse.endTime,
+                              dayOfWeek: newCourse.dayOfWeek,
+                              startDate: newCourse.startDate,
+                              endDate: newCourse.endDate,
+                              instructorId: newCourse.instructorId,
+                              studioId: newCourse.studioId,
+                              categoryId: newCourse.categoryId,
+                              registryKey: "courses",
+                              active: true,
+                              rawPayload: { ...newCourse }
+                          };
+                          handleEdit(mockEvt as any);
+                        }, 300);
+                    }
+                }}
             />
 
             <Dialog open={!!editingBooking} onOpenChange={(open) => !open && setEditingBooking(null)}>

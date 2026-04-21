@@ -227,8 +227,6 @@ export default function StrategicProgrammingTable() {
         hasScrolledRef.current = false;
     }, [selectedSeasonId]);
 
-    if (seasonsLoading) return <div className="p-8">Caricamento...</div>;
-
     return (
         <div className="p-6 pb-0 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2rem)] overflow-hidden">
             <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-4 shrink-0 overflow-hidden">
@@ -245,12 +243,10 @@ export default function StrategicProgrammingTable() {
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-4">
-                    <div className="space-y-1">
-                        <Label className="text-xs uppercase font-bold ml-1">Stagione Visualizzata</Label>
+                <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar flex-nowrap w-full md:w-auto pb-1 md:pb-0">
+                    <div className="flex items-center bg-white rounded-md border shadow-sm p-1 shrink-0 h-9">
                         <Select value={selectedSeasonId} onValueChange={setSelectedSeasonId}>
-                            <SelectTrigger className="w-[200px] bg-white">
-                                <CalendarIcon className="w-4 h-4 mr-2" />
+                            <SelectTrigger className="h-7 border-0 bg-transparent shadow-none w-[180px] font-bold text-slate-800 uppercase tracking-wide focus:ring-0">
                                 <SelectValue placeholder="Seleziona stagione" />
                             </SelectTrigger>
                             <SelectContent>
@@ -265,31 +261,26 @@ export default function StrategicProgrammingTable() {
                             </SelectContent>
                         </Select>
                     </div>
+
+                    <ActivityColorLegend variant="popover" />
+                    
+                    <Button onClick={() => openCellModal(new Date())} size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-white shadow-sm h-9 shrink-0">
+                        <Plus className="w-4 h-4" /> Aggiungi Evento
+                    </Button>
                 </div>
             </div>
 
             <Card className="flex-1 overflow-hidden flex flex-col shadow-xl">
-                <CardHeader className="bg-slate-100/50 border-b pb-4">
-                    <CardTitle className="text-lg flex items-center justify-between">
-                        Foglio Operativo: {getSeasonLabel(targetSeason, seasons)}
-                        <div className="flex items-center gap-2">
-                            <ActivityColorLegend variant="popover" />
-                            <Button size="sm" onClick={() => openCellModal(new Date())}>
-                                <Plus className="w-4 h-4 mr-2" /> Aggiungi Evento
-                            </Button>
-                        </div>
-                    </CardTitle>
-                </CardHeader>
                 <div className="flex-1 overflow-auto bg-white p-0 relative">
                     <table className="w-full text-xs text-left border-collapse border-slate-200">
                         <thead className="sticky top-0 bg-slate-100 shadow-sm z-10">
                             <tr>
                                 <th className="border p-2 w-[50px] text-center text-slate-500">Sett</th>
-                                <th className="border p-2 w-[120px] text-slate-600">Periodo</th>
+                                <th className="border p-2 min-w-[120px] text-slate-600">Periodo</th>
                                 {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(d => (
-                                    <th key={d} className="border p-2 w-[80px] text-center font-bold text-slate-700 uppercase">{d}</th>
+                                    <th key={d} className="border p-2 min-w-[150px] text-center font-bold text-slate-700 uppercase">{d}</th>
                                 ))}
-                                <th className="border p-2 min-w-[200px]">Note (Chiusure / Eventi)</th>
+                                <th className="border p-2 min-w-[250px]">Note (Chiusure / Eventi)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -326,17 +317,33 @@ export default function StrategicProgrammingTable() {
                                                 const isHoliday = priorityEvt.isPublicHoliday === true || priorityEvt.isPublicHoliday === 1;
                                                 
                                                 if (isHoliday) {
-                                                    bgColor = 'bg-red-100 text-red-800 border-red-300';
-                                                } else if (priorityEvt.eventType === 'chiusura') {
-                                                    bgColor = 'bg-pink-100 text-pink-900 border-pink-200';
-                                                } else if (priorityEvt.eventType === 'ferie') {
-                                                    bgColor = 'bg-purple-100 text-purple-900 border-purple-200';
-                                                } else if (priorityEvt.eventType === 'saggio' || priorityEvt.eventType === 'evento_macro') {
-                                                    bgColor = 'bg-orange-100 text-orange-900 border-orange-200';
-                                                } else if (priorityEvt.eventType === 'campus') {
-                                                    bgColor = 'bg-sky-100 text-sky-900 border-sky-200';
+                                                    bgColor = 'bg-red-50 text-red-700 border-l border-red-300';
                                                 } else {
-                                                    bgColor = 'bg-yellow-100 text-yellow-900 border-yellow-200';
+                                                    const t = (priorityEvt.title || '').toUpperCase();
+                                                    const type = priorityEvt.eventType;
+                                                    if (type === 'campus' || t.includes('CAM')) {
+                                                        bgColor = 'bg-sky-50 text-sky-700 border-l border-sky-300';
+                                                    } else if (type === 'saggio' || t.includes('SAG')) {
+                                                        bgColor = 'bg-pink-50 text-pink-700 border-l border-pink-300';
+                                                    } else if (t.includes('WS')) {
+                                                        bgColor = 'bg-orange-50 text-orange-700 border-l border-orange-300';
+                                                    } else if (t.includes('DOM')) {
+                                                        bgColor = 'bg-yellow-50 text-yellow-800 border-l border-yellow-300';
+                                                    } else if (t.includes('VAC')) {
+                                                        bgColor = 'bg-green-50 text-green-700 border-l border-green-300';
+                                                    } else if (t.includes('AFT')) {
+                                                        bgColor = 'bg-slate-100 text-slate-700 border-l border-slate-300';
+                                                    } else {
+                                                        switch(type) {
+                                                            case 'chiusura': bgColor = 'bg-pink-50 text-pink-700 border-l border-pink-300'; break;
+                                                            case 'ferie': bgColor = 'bg-pink-50 text-pink-700 border-l border-pink-300'; break;
+                                                            case 'evento': bgColor = 'bg-slate-50 text-slate-700 border-l border-slate-300'; break;
+                                                            case 'apertura_eccezionale': bgColor = 'bg-emerald-50 text-emerald-700 border-l border-emerald-300'; break;
+                                                            case 'evento_macro': bgColor = 'bg-orange-50 text-orange-700 border-l border-orange-300'; break;
+                                                            case 'nota': bgColor = 'bg-slate-50 text-slate-700 border-l border-slate-300'; break;
+                                                            default: bgColor = 'bg-slate-50 text-slate-700 border-l border-slate-300'; break;
+                                                        }
+                                                    }
                                                 }
                                             }
 
@@ -348,7 +355,7 @@ export default function StrategicProgrammingTable() {
                                                     title={dayEvts.length > 0 ? "Modifica questo evento" : "Clicca per aggiungere chiusura/evento"}
                                                 >
                                                     <div className="font-semibold">{format(day, "d")}</div>
-                                                    <div className="text-[9px] opacity-70 truncate max-w-[80px] mx-auto">
+                                                    <div className="text-[10px] font-medium opacity-80 leading-tight max-w-[80px] mx-auto text-balance">
                                                         {dayEvts.map(e => e?.title).join(', ')}
                                                     </div>
                                                 </td>
@@ -361,9 +368,9 @@ export default function StrategicProgrammingTable() {
                                                 ) : (
                                                     uniqueEvents.map(evt => (
                                                         <div key={evt?.id} className="font-medium bg-white p-1.5 rounded shadow-sm border border-slate-100 flex items-start justify-between group/evt">
-                                                            <div className="flex flex-col">
+                                                            <div className="flex flex-col text-[12px] leading-tight mt-0.5">
                                                                 <span>{getEventLabel(evt)}</span>
-                                                                {evt?.description && <span className="text-slate-400 text-[10px]">({evt.description})</span>}
+                                                                {evt?.description && <span className="text-slate-500 font-medium text-[11px]">({evt.description})</span>}
                                                             </div>
                                                             <div className="flex gap-1 ml-2 shrink-0 transition-opacity">
                                                                 {(() => {
@@ -503,8 +510,9 @@ export default function StrategicProgrammingTable() {
                                 }} />
                             </div>
                             <div className="space-y-2">
-                                <Label>Data Fine (opzionale)</Label>
+                                <Label>Data Fine <span className="text-red-500">*</span></Label>
                                 <Input type="date" value={modalEndDate} onChange={e => setModalEndDate(e.target.value)} />
+                                {!modalEndDate && <p className="text-[10px] text-red-500 font-medium">Obbligatoria</p>}
                             </div>
                         </div>
                     </div>
@@ -518,7 +526,7 @@ export default function StrategicProgrammingTable() {
                         )}
                         <div className="flex gap-2">
                             <Button variant="outline" onClick={() => setEventModalOpen(false)}>Annulla</Button>
-                            <Button onClick={handleSaveEvent} disabled={!modalTitle || !modalStartDate || saveEventMutation.isPending}>
+                            <Button onClick={handleSaveEvent} disabled={!modalTitle || !modalStartDate || !modalEndDate || saveEventMutation.isPending}>
                                 {saveEventMutation.isPending ? "Salvataggio..." : "Salva Evento"}
                             </Button>
                         </div>

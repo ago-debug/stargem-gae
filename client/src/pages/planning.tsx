@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Loader2, Calendar as CalendarIcon, Filter, Plus, CalendarRange, Info } from "lucide-react";
 import { format, getYear, getMonth, getDate, getDaysInMonth, isSameDay } from "date-fns";
 import { it } from 'date-fns/locale';
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -49,21 +49,21 @@ const MONTHS_ORDERED = [
 
 const getStrategicColor = (type: string, title?: string) => {
     const t = (title || '').toUpperCase();
-    if (type === 'campus' || t.includes('CAM')) return 'bg-sky-700 text-white border-sky-800';
-    if (type === 'saggio' || t.includes('SAG')) return 'bg-pink-400 text-white border-pink-500';
-    if (t.includes('WS')) return 'bg-orange-600 text-white border-orange-700'; // Workshop color in planning
-    if (t.includes('DOM')) return 'bg-yellow-600 text-white border-yellow-700';
-    if (t.includes('VAC')) return 'bg-green-700 text-white border-green-800';
-    if (t.includes('AFT')) return 'bg-gray-700 text-white border-gray-800';
+    if (type === 'campus' || t.includes('CAM')) return 'bg-sky-50 text-sky-700 border-sky-300 border-l-[3px]';
+    if (type === 'saggio' || t.includes('SAG')) return 'bg-pink-50 text-pink-700 border-pink-300 border-l-[3px]';
+    if (t.includes('WS')) return 'bg-orange-50 text-orange-700 border-orange-300 border-l-[3px]'; // Workshop color in planning
+    if (t.includes('DOM')) return 'bg-yellow-50 text-yellow-800 border-yellow-300 border-l-[3px]';
+    if (t.includes('VAC')) return 'bg-green-50 text-green-700 border-green-300 border-l-[3px]';
+    if (t.includes('AFT')) return 'bg-slate-100 text-slate-700 border-slate-300 border-l-[3px]';
     
     switch(type) {
-        case 'chiusura': return 'bg-pink-200 text-pink-900 border-pink-400';
-        case 'ferie': return 'bg-purple-200 text-purple-900 border-purple-400';
-        case 'evento': return 'bg-emerald-100 border-emerald-300 text-emerald-800';
-        case 'apertura_eccezionale': return 'bg-emerald-100 border-emerald-300 text-emerald-800';
-        case 'evento_macro': return 'bg-orange-700 text-white border-orange-800';
-        case 'nota': return 'bg-gray-200 border-gray-400 text-gray-800';
-        default: return 'bg-gray-200 text-gray-800 border-gray-300';
+        case 'chiusura': return 'bg-pink-50 text-pink-700 border-pink-300 border-l-[3px]';
+        case 'ferie': return 'bg-pink-50 text-pink-700 border-pink-300 border-l-[3px]';
+        case 'evento': return 'bg-slate-50 text-slate-700 border-slate-300 border-l-[3px]';
+        case 'apertura_eccezionale': return 'bg-emerald-50 text-emerald-700 border-emerald-300 border-l-[3px]';
+        case 'evento_macro': return 'bg-orange-50 text-orange-700 border-orange-300 border-l-[3px]';
+        case 'nota': return 'bg-slate-50 text-slate-700 border-slate-300 border-l-[3px]';
+        default: return 'bg-slate-50 text-slate-700 border-slate-300 border-l-[3px]';
     }
 };
 
@@ -141,7 +141,10 @@ export default function Planning() {
     }, [seasons, viewMode, startYear, currentDateParam]);
 
     // --- FETCH DATA ---
-    const { data: courses, isLoading: coursesLoading } = useQuery<any[]>({ queryKey: [`/api/courses?seasonId=${targetSeasonId}`] });
+    const { data: unifiedBridgeActivities, isLoading: unifiedLoading } = useQuery<any[]>({ queryKey: [`/api/activities-unified-preview?seasonId=${targetSeasonId}`] });
+    
+    // Gli altri array servono ancora per renderizzare gli specificEvents lunghi (Campus, ecc.) nel mapping. 
+    // Possiamo lasciarli o usarli se necessari. (La query unificata serve al conteggio quotidiano)
     const { data: workshops, isLoading: workshopsLoading } = useQuery<any[]>({ queryKey: [`/api/workshops?seasonId=${targetSeasonId}`] });
     const { data: sundayActivities, isLoading: sundayLoading } = useQuery<any[]>({ queryKey: [`/api/sunday-activities?seasonId=${targetSeasonId}`] });
     const { data: campusActivities, isLoading: campusLoading } = useQuery<any[]>({ queryKey: [`/api/campus?seasonId=${targetSeasonId}`] });
@@ -150,7 +153,7 @@ export default function Planning() {
     const { data: bookingServices, isLoading: servicesLoading } = useQuery<any[]>({ queryKey: ["/api/booking-services"] });
     const { data: strategicEventsData, isLoading: strategicLoading } = useQuery<any[]>({ queryKey: ["/api/strategic-events?seasonId=all"] });
 
-    const isLoading = coursesLoading || workshopsLoading || sundayLoading || strategicLoading ||
+    const isLoading = unifiedLoading || workshopsLoading || sundayLoading || strategicLoading ||
                       campusLoading || recitalsLoading || vacationsLoading || servicesLoading;
 
     useEffect(() => {
@@ -220,33 +223,36 @@ export default function Planning() {
     };
 
     // --- AGGREGATE COURSES ---
-    // --- AGGREGATE COURSES BY DATE ---
-    const getCoursesCountForDate = useCallback((cellDate: Date, cellDayOfWeek: number) => {
-        let count = 0;
-        if (!courses) return 0;
-        courses.forEach((c: any) => {
-            if (c.active !== false && c.dayOfWeek) {
-                const mappedDay = mapDayOfWeek(c.dayOfWeek);
-                if (mappedDay === cellDayOfWeek) {
-                    let isValid = true;
-                    if (c.startDate) {
-                        const sDate = new Date(c.startDate);
-                        sDate.setHours(0, 0, 0, 0);
-                        if (cellDate < sDate) isValid = false;
-                    }
-                    if (c.endDate) {
-                        const eDate = new Date(c.endDate);
-                        eDate.setHours(23, 59, 59, 999);
-                        if (cellDate > eDate) isValid = false;
-                    }
-                    if (isValid) {
-                        count++;
-                    }
-                }
+    // --- AGGREGATE BREAKDOWN BY DATE ---
+    const groupedUnifiedActivities = useMemo(() => {
+        const map: Record<string, Record<string, number>> = {};
+        if (!unifiedBridgeActivities) return map;
+        
+        unifiedBridgeActivities.forEach((item: any) => {
+            const raw = item.rawPayload || item;
+            if (item.isActive !== false && raw.active !== false && item.startDatetime) {
+                const dateStr = item.startDatetime.split('T')[0];
+                if (!map[dateStr]) map[dateStr] = {};
+                
+                let key = raw.legacy_source_type || item.activityFamily || 'altro';
+                if (key === 'course' || key === 'courses') key = 'Corsi';
+                else if (key === 'allenamento' || key === 'training') key = 'Allenamenti';
+                else if (key === 'lezione_individuale' || key === 'individual_lessons') key = 'Lez. Individuali';
+                else if (key === 'workshop' || key === 'workshops') key = 'Workshop';
+                else if (key === 'domenica' || key === 'sunday_activities') key = 'Domeniche';
+                else if (key === 'studioBookings' || key === 'rentals') key = 'Affitti/Sale';
+                else key = 'Altre Attività';
+                
+                map[dateStr][key] = (map[dateStr][key] || 0) + 1;
             }
         });
-        return count;
-    }, [courses]);
+        return map;
+    }, [unifiedBridgeActivities]);
+
+    const getActivitiesBreakdownForDate = useCallback((cellDate: Date, cellDayOfWeek: number) => {
+        const dateStr = format(cellDate, "yyyy-MM-dd");
+        return groupedUnifiedActivities[dateStr] || {};
+    }, [groupedUnifiedActivities]);
 
     // --- UNIFY EVENTS ---
     const events = useMemo(() => {
@@ -308,24 +314,41 @@ export default function Planning() {
 
         if (resolvedHolidayName) {
             cellEvents.push(
-                <div key={`hol_${day}_${realMonthIndex}`} className="mb-1 w-full bg-red-500 text-white px-1 py-0.5 text-[10px] font-bold rounded text-center uppercase shadow-sm truncate">
+                <div key={`hol_${day}_${realMonthIndex}`} className="mb-1 mt-0.5 w-full bg-red-50 text-red-700 border border-red-300 px-1 py-0.5 text-[11px] font-medium rounded text-center uppercase shadow-sm truncate">
                     {resolvedHolidayName}
                 </div>
             );
         }
 
-        // 2. Assign aggregated courses (repeated weekly within boundaries)
-        const coursesCount = getCoursesCountForDate(cellDate, cellDayOfWeek);
-        if (coursesCount > 0 && !resolvedHolidayName) { // Optionally don't show courses on National Holidays
-            // Passiamo la data esatta come parametro GET query per far aprire il Calendario nel giorno giusto
+        // 2. Assign aggregated breakdown (repeated weekly within boundaries)
+        const breakdown = getActivitiesBreakdownForDate(cellDate, cellDayOfWeek);
+        if (!resolvedHolidayName) { // Optionally don't show normal daily routine on National Holidays
             const dateStr = format(cellDate, "yyyy-MM-dd");
-            cellEvents.push(
-                <Link to={`/calendario-attivita?date=${dateStr}`} key="courses">
-                    <div className="mb-1 rounded border border-slate-200 bg-slate-50 px-1 py-0.5 text-[10px] font-medium text-slate-500 shadow-sm opacity-90 truncate cursor-pointer hover:bg-slate-100 hover:border-slate-300 transition-colors">
-                        Corsi ({coursesCount})
-                    </div>
-                </Link>
-            );
+            const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            const isPastMonthCell = cellDate < currentMonthStart;
+            
+            Object.entries(breakdown).forEach(([key, count]) => {
+                if (count > 0) {
+                    let colorClass = "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:border-slate-300";
+                    if (key === 'Corsi') {
+                        colorClass = isPastMonthCell 
+                            ? "bg-slate-200 border-slate-300 text-slate-700 hover:bg-slate-300" 
+                            : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100";
+                    }
+                    else if (key === 'Allenamenti') colorClass = "bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100";
+                    else if (key === 'Lez. Individuali') colorClass = "bg-green-50 border-green-200 text-green-600 hover:bg-green-100";
+                    else if (key === 'Workshop') colorClass = "bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100";
+                    else if (key === 'Affitti/Sale') colorClass = "bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100";
+
+                    cellEvents.push(
+                        <Link to={`/calendario-attivita?date=${dateStr}`} key={`breakdown-${key}`}>
+                            <div className={`mb-1 mt-0.5 rounded border px-1 py-0.5 text-[11px] font-medium shadow-sm transition-colors truncate cursor-pointer ${colorClass}`}>
+                                {key} ({count})
+                            </div>
+                        </Link>
+                    );
+                }
+            });
         }
 
         // 3. Render cards for remaining specific events
@@ -343,7 +366,28 @@ export default function Planning() {
             else if (e.type === 'external') linkTo = `/attivita/servizi?id=${pureId}`; // Eventi Esterni usano la grid filtrata se non c'è una scheda 1:1
 
             const elementBlock = (
-                <div className={`mb-1 break-words whitespace-normal leading-tight rounded border px-1.5 py-1 text-[10px] sm:text-xs font-medium shadow-sm cursor-pointer hover:brightness-95 transition-all ${e.colorClass}`} title={e.title}>
+                <div 
+                    className={`mb-1 mt-0.5 break-words whitespace-normal leading-tight rounded border px-1.5 py-1 text-[11px] sm:text-xs font-medium shadow-sm cursor-pointer hover:brightness-95 transition-all ${e.colorClass}`} 
+                    title={e.title}
+                    onClick={(event) => {
+                        if (!linkTo && e.id.toString().startsWith('strat_')) {
+                            event.stopPropagation();
+                            event.preventDefault();
+                            const pureId = parseInt(e.id.split('_')[1]);
+                            const originalEvent = strategicEventsData?.find(se => se.id === pureId);
+                            if (originalEvent) {
+                                setStrategicEventId(pureId);
+                                setStrategicStart(format(new Date(originalEvent.startDate), "yyyy-MM-dd"));
+                                setStrategicEnd(originalEvent.endDate ? format(new Date(originalEvent.endDate), "yyyy-MM-dd") : format(new Date(originalEvent.startDate), "yyyy-MM-dd"));
+                                setStrategicTitle(originalEvent.title);
+                                setStrategicDesc(originalEvent.description || "");
+                                setStrategicType(originalEvent.eventType || "chiusura");
+                                setStrategicAllDay(originalEvent.allDay || false);
+                                setStrategicModalOpen(true);
+                            }
+                        }
+                    }}
+                >
                     {e.title}
                 </div>
             );
@@ -533,11 +577,15 @@ export default function Planning() {
                             <div className="sticky top-0 z-40 bg-white shadow-sm border-b">
                                 <div className="grid grid-cols-12 bg-muted/50">
                                 {MONTHS_ORDERED.map((monthObj, idx) => {
-                                    const isAutumn = monthObj.monthIndex >= 8;
+                                    const cellYearHeader = monthObj.monthIndex < 8 ? startYear + 1 : startYear;
+                                    const monthDateHeader = new Date(cellYearHeader, monthObj.monthIndex, 1);
+                                    const currentMonthStartHeader = new Date(today.getFullYear(), today.getMonth(), 1);
+                                    const isMonthPast = monthDateHeader < currentMonthStartHeader;
+
                                     const isCurrentMonth = monthObj.monthIndex === currentMonthIndex && 
                                         (monthObj.monthIndex < 8 ? startYear + 1 === today.getFullYear() : startYear === today.getFullYear());
                                     
-                                    const themeStyle = isAutumn ? "bg-slate-200 text-slate-800" : "bg-blue-50/80 text-blue-800";
+                                    const themeStyle = isMonthPast ? "bg-slate-200 text-slate-800" : "bg-slate-50/80 text-slate-600";
                                     const highlightStyle = isCurrentMonth ? "border-b-4 border-b-yellow-400 bg-yellow-100/50" : "";
                                     
                                     return (
@@ -575,6 +623,8 @@ export default function Planning() {
                                         const isCurrentMonthCol = monthObj.monthIndex === currentMonthIndex && 
                                             cellYear === today.getFullYear();
 
+                                        const isPastBodyMonth = cellDate ? (cellDate < new Date(today.getFullYear(), today.getMonth(), 1)) : false;
+
                                         return (
                                             <div 
                                                 key={`${day}-${monthColIndex}`} 
@@ -593,9 +643,10 @@ export default function Planning() {
                                                 className={`relative min-h-[50px] border-r p-1 text-xs ${isValidDay ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
                                                     !isValidDay ? 'bg-slate-200' : 
                                                     (isToday ? 'bg-yellow-200 border-2 border-yellow-500 z-10 shadow-md scale-[1.02] transition-transform' : 
-                                                    (holidayName || isSunday ? 'bg-red-50/50' : 
+                                                    (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100' : 'bg-red-50/50') : 
                                                     (isCurrentMonthCol ? 'bg-yellow-50/20' : 
-                                                    (isSaturday ? 'bg-slate-100/50' : 'bg-white'))))
+                                                    (isSaturday ? (isPastBodyMonth ? 'bg-slate-200/50' : 'bg-slate-100/50') : 
+                                                    (isPastBodyMonth ? 'bg-slate-100' : 'bg-white')))))
                                                 }`}
                                             >
                                                 {isValidDay && cellDate && (

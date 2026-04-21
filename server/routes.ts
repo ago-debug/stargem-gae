@@ -20,7 +20,7 @@ import {
   getGoogleOAuth2Client
 } from "./google-calendar";
 import { log } from "./vite";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { sendSMS, sendEmail } from "./notifications";
 import { getUnifiedActivitiesPreview, getUnifiedActivityById, getUnifiedEnrollmentsPreview } from "./services/unifiedBridge";
 import { eq, desc, asc, and, isNull, isNotNull, sql, gte, lte, lt, or, like, ne, inArray } from "drizzle-orm";
