@@ -1,0 +1,351 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Danza",
+      "description": null,
+      "parent_id": null,
+      "color": "#07f223",
+      "created_at": "2026-02-16 08:19:47",
+      "updated_at": "2026-02-24 18:28:32"
+    },
+    {
+      "id": 2,
+      "name": "Ballo",
+      "description": null,
+      "parent_id": null,
+      "color": "#3d574e",
+      "created_at": "2026-02-16 08:19:52",
+      "updated_at": "2026-02-16 08:20:29"
+    },
+    {
+      "id": 3,
+      "name": "Aerial",
+      "description": null,
+      "parent_id": null,
+      "color": "#f73bd4",
+      "created_at": "2026-02-16 08:20:00",
+      "updated_at": "2026-02-16 08:20:22"
+    },
+    {
+      "id": 4,
+      "name": "Fitness",
+      "description": null,
+      "parent_id": null,
+      "color": "#02f3f7",
+      "created_at": "2026-02-16 08:20:07",
+      "updated_at": "2026-02-24 18:28:48"
+    },
+    {
+      "id": 5,
+      "name": "Bambini",
+      "description": null,
+      "parent_id": null,
+      "color": "#ffb10a",
+      "created_at": "2026-02-16 08:20:14",
+      "updated_at": "2026-02-24 18:28:22"
+    }
+  ],
+  "trn_cats": [
+    {
+      "id": 3,
+      "name": "Ballo",
+      "description": null,
+      "parent_id": null,
+      "color": "#bbbec3",
+      "created_at": "2026-03-16 10:18:19",
+      "updated_at": "2026-03-16 10:18:19"
+    },
+    {
+      "id": 4,
+      "name": "Danza",
+      "description": null,
+      "parent_id": null,
+      "color": "#32f40b",
+      "created_at": "2026-03-16 10:18:30",
+      "updated_at": "2026-03-16 10:18:30"
+    },
+    {
+      "id": 5,
+      "name": "Fitness",
+      "description": null,
+      "parent_id": null,
+      "color": "#04f6f2",
+      "created_at": "2026-03-16 10:18:45",
+      "updated_at": "2026-03-16 10:18:45"
+    },
+    {
+      "id": 6,
+      "name": "Aerial",
+      "description": null,
+      "parent_id": null,
+      "color": "#f9a3ff",
+      "created_at": "2026-03-16 10:18:58",
+      "updated_at": "2026-03-16 10:18:58"
+    },
+    {
+      "id": 8,
+      "name": "sdasdggds",
+      "description": null,
+      "parent_id": null,
+      "color": "#3b82f6",
+      "created_at": "2026-03-16 12:01:57",
+      "updated_at": "2026-03-16 12:01:57"
+    }
+  ],
+  "ind_less_cats": [
+    {
+      "id": 1,
+      "name": "Danza",
+      "description": null,
+      "parent_id": null,
+      "color": "#3bf748",
+      "created_at": "2026-03-02 10:39:59",
+      "updated_at": "2026-03-02 10:39:59"
+    },
+    {
+      "id": 2,
+      "name": "Fitness",
+      "description": null,
+      "parent_id": null,
+      "color": "#3bf4f7",
+      "created_at": "2026-03-02 10:40:12",
+      "updated_at": "2026-03-02 10:40:12"
+    },
+    {
+      "id": 3,
+      "name": "Ballo",
+      "description": null,
+      "parent_id": null,
+      "color": "#8691a2",
+      "created_at": "2026-03-02 10:40:26",
+      "updated_at": "2026-03-02 10:40:26"
+    },
+    {
+      "id": 4,
+      "name": "Aerial",
+      "description": null,
+      "parent_id": null,
+      "color": "#e4b3ea",
+      "created_at": "2026-03-02 10:40:39",
+      "updated_at": "2026-03-02 10:40:39"
+    },
+    {
+      "id": 5,
+      "name": "dfasfadsfgfas",
+      "description": null,
+      "parent_id": null,
+      "color": "#3b82f6",
+      "created_at": "2026-03-16 12:02:15",
+      "updated_at": "2026-03-16 12:02:15"
+    }
+  ],
+  "cli_cats": [
+    {
+      "id": 1,
+      "name": "Tesserato",
+      "description": null,
+      "parent_id": null,
+      "color": "#ebfb04",
+      "created_at": "2026-02-14 20:00:31",
+      "updated_at": "2026-02-24 18:25:40"
+    },
+    {
+      "id": 2,
+      "name": "Non Tesserato",
+      "description": null,
+      "parent_id": null,
+      "color": "#6366f1",
+      "created_at": "2026-02-15 09:53:24",
+      "updated_at": "2026-02-24 18:22:59"
+    },
+    {
+      "id": 3,
+      "name": "Team",
+      "description": null,
+      "parent_id": null,
+      "color": "#fd0808",
+      "created_at": "2026-02-24 18:22:25",
+      "updated_at": "2026-02-24 18:22:25"
+    },
+    {
+      "id": 4,
+      "name": "Staff/Insegnanti",
+      "description": null,
+      "parent_id": null,
+      "color": "#18fd08",
+      "created_at": "2026-02-24 18:23:12",
+      "updated_at": "2026-02-24 18:25:21"
+    },
+    {
+      "id": 5,
+      "name": "Personal",
+      "description": null,
+      "parent_id": null,
+      "color": "#0afbff",
+      "created_at": "2026-02-24 18:23:33",
+      "updated_at": "2026-02-24 18:25:08"
+    },
+    {
+      "id": 6,
+      "name": "Insegnanti WS",
+      "description": null,
+      "parent_id": null,
+      "color": "#f709fb",
+      "created_at": "2026-02-24 18:24:10",
+      "updated_at": "2026-02-24 18:24:42"
+    }
+  ],
+  "merchandising_categories": [
+    {
+      "id": 1,
+      "name": "Magliette",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 12:06:09",
+      "updated_at": "2026-03-16 12:06:09"
+    }
+  ],
+  "rental_categories": [
+    {
+      "id": 3,
+      "name": "Casting",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 16:21:47",
+      "updated_at": "2026-03-16 16:21:47"
+    },
+    {
+      "id": 4,
+      "name": "Coreografia",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 16:21:54",
+      "updated_at": "2026-03-16 16:21:54"
+    },
+    {
+      "id": 5,
+      "name": "Prove",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 16:22:00",
+      "updated_at": "2026-03-16 16:22:00"
+    },
+    {
+      "id": 6,
+      "name": "Shooting fotografico/video",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 16:22:19",
+      "updated_at": "2026-03-16 16:22:19"
+    },
+    {
+      "id": 7,
+      "name": "Accademia",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 16:22:31",
+      "updated_at": "2026-03-16 16:22:31"
+    },
+    {
+      "id": 8,
+      "name": "Massaggi",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 16:22:38",
+      "updated_at": "2026-03-16 16:22:38"
+    },
+    {
+      "id": 9,
+      "name": "Visita Medica",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 16:22:49",
+      "updated_at": "2026-03-16 16:22:49"
+    },
+    {
+      "id": 10,
+      "name": "Studio Produzione",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 16:23:27",
+      "updated_at": "2026-03-16 16:23:27"
+    },
+    {
+      "id": 11,
+      "name": "Riparazioni Biciclette",
+      "description": null,
+      "color": "#3b82f6",
+      "sort_order": 0,
+      "active": 1,
+      "parent_id": null,
+      "created_at": "2026-03-16 16:23:48",
+      "updated_at": "2026-03-16 16:23:48"
+    }
+  ],
+  "booking_service_categories": [
+    {
+      "id": 13,
+      "name": "Ballerini",
+      "description": null,
+      "color": "#3b82f6",
+      "active": 1,
+      "created_at": "2026-03-16 16:24:05",
+      "icon": null,
+      "sort_order": 0,
+      "parent_id": null,
+      "updated_at": "2026-03-16 16:24:05"
+    },
+    {
+      "id": 14,
+      "name": "Insegnanti",
+      "description": null,
+      "color": "#3b82f6",
+      "active": 1,
+      "created_at": "2026-03-16 16:24:22",
+      "icon": null,
+      "sort_order": 0,
+      "parent_id": null,
+      "updated_at": "2026-03-16 16:25:53"
+    },
+    {
+      "id": 16,
+      "name": "Animazione",
+      "description": null,
+      "color": "#3b82f6",
+      "active": 1,
+      "created_at": "2026-03-16 16:24:58",
+      "icon": null,
+      "sort_order": 0,
+      "parent_id": null,
+      "updated_at": "2026-03-16 16:25:29"
+    }
+  ]
+}

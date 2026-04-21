@@ -12,7 +12,6 @@ import {
   courses,
   studioBookings,
   enrollments,
-  categories,
   users,
   members,
   studios,
@@ -247,7 +246,6 @@ export async function getUnifiedActivitiesPreview(req: Request) {
     db.select().from(studioBookings),
     
     db.select().from(members),
-    db.select().from(categories),
     db.select().from(studios),
     db.select().from(customListItems).where(eq(customListItems.listId, 23))
   ]);

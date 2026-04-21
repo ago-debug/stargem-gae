@@ -6,8 +6,6 @@ import {
   users,
   members,
   memberDuplicateExclusions,
-  categories,
-  clientCategories,
   subscriptionTypes,
   studios,
   courses,
@@ -162,7 +160,6 @@ import {
   courseQuotesGrid,
   type CourseQuotesGrid,
   type InsertCourseQuotesGrid,
-  bookingServiceCategories,
   type BookingServiceCategory,
   type InsertBookingServiceCategory,
   customLists,
@@ -183,10 +180,8 @@ import {
   type StrategicEvent,
   type InsertStrategicEvent,
   strategicEvents,
-  merchandisingCategories,
   type MerchandisingCategory,
   type InsertMerchandisingCategory,
-  rentalCategories,
   type RentalCategory,
   type InsertRentalCategory,
 } from "@shared/schema";
@@ -845,7 +840,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBookingServiceCategory(id: number): Promise<void> {
-    await db.delete(bookingServiceCategories).where(eq(bookingServiceCategories.id, id));
+    await db.delete(customListItems).where(eq(customListItems.id, id));
   }
 
   // ==== Booking Services ====
@@ -903,7 +898,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteMerchandisingCategory(id: number): Promise<void> {
-    await db.delete(merchandisingCategories).where(eq(merchandisingCategories.id, id));
+    await db.delete(customListItems).where(eq(customListItems.id, id));
   }
 
   // ==== Rental Categories (Affitti) ====
@@ -934,7 +929,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteRentalCategory(id: number): Promise<void> {
-    await db.delete(rentalCategories).where(eq(rentalCategories.id, id));
+    await db.delete(customListItems).where(eq(customListItems.id, id));
   }
 
   // ==== Studio Bookings ====
@@ -1791,7 +1786,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCategory(id: number): Promise<void> {
-    await db.delete(categories).where(eq(categories.id, id));
+    await db.delete(customListItems).where(eq(customListItems.id, id));
   }
 
   // ==== Client Categories ====
@@ -1821,7 +1816,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteClientCategory(id: number): Promise<void> {
-    await db.delete(clientCategories).where(eq(clientCategories.id, id));
+    await db.delete(customListItems).where(eq(customListItems.id, id));
   }
 
   // ==== Subscription Types ====
