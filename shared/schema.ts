@@ -236,253 +236,26 @@ export type CustomListItem = typeof customListItems.$inferSelect;
 // ============================================================================
 
 // Categories (hierarchical structure)
-export const categories = mysqlTable("categories", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  parentId: int("parent_id"),
-  color: varchar("color", { length: 7 }), // hex color for UI
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const categoriesRelations = relations(categories, ({ one, many }) => ({
-  parent: one(categories, {
-    fields: [categories.parentId],
-    references: [categories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(categories, { relationName: "subcategories" }),
-  courses: many(courses),
-}));
-
-export const insertCategorySchema = createInsertSchema(categories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertCategory = z.infer<typeof insertCategorySchema>;
-export type Category = typeof categories.$inferSelect;
 
 // Workshop Categories (separate category system for workshops)
-export const workshopCategories = mysqlTable("ws_cats", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  parentId: int("parent_id"),
-  color: varchar("color", { length: 7 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const workshopCategoriesRelations = relations(workshopCategories, ({ one, many }) => ({
-  parent: one(workshopCategories, {
-    fields: [workshopCategories.parentId],
-    references: [workshopCategories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(workshopCategories, { relationName: "subcategories" }),
-}));
 
-export const insertWorkshopCategorySchema = createInsertSchema(workshopCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertWorkshopCategory = z.infer<typeof insertWorkshopCategorySchema>;
-export type WorkshopCategory = typeof workshopCategories.$inferSelect;
 
-export const sundayCategories = mysqlTable("sun_cats", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  parentId: int("parent_id"),
-  color: varchar("color", { length: 7 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const sundayCategoriesRelations = relations(sundayCategories, ({ one, many }) => ({
-  parent: one(sundayCategories, {
-    fields: [sundayCategories.parentId],
-    references: [sundayCategories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(sundayCategories, { relationName: "subcategories" }),
-}));
 
-export const insertSundayCategorySchema = createInsertSchema(sundayCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertSundayCategory = z.infer<typeof insertSundayCategorySchema>;
-export type SundayCategory = typeof sundayCategories.$inferSelect;
 
-export const trainingCategories = mysqlTable("trn_cats", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  parentId: int("parent_id"),
-  color: varchar("color", { length: 7 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const trainingCategoriesRelations = relations(trainingCategories, ({ one, many }) => ({
-  parent: one(trainingCategories, {
-    fields: [trainingCategories.parentId],
-    references: [trainingCategories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(trainingCategories, { relationName: "subcategories" }),
-}));
 
-export const insertTrainingCategorySchema = createInsertSchema(trainingCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertTrainingCategory = z.infer<typeof insertTrainingCategorySchema>;
-export type TrainingCategory = typeof trainingCategories.$inferSelect;
 
-export const individualLessonCategories = mysqlTable("ind_less_cats", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  parentId: int("parent_id"),
-  color: varchar("color", { length: 7 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const individualLessonCategoriesRelations = relations(individualLessonCategories, ({ one, many }) => ({
-  parent: one(individualLessonCategories, {
-    fields: [individualLessonCategories.parentId],
-    references: [individualLessonCategories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(individualLessonCategories, { relationName: "subcategories" }),
-}));
 
-export const insertIndividualLessonCategorySchema = createInsertSchema(individualLessonCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertIndividualLessonCategory = z.infer<typeof insertIndividualLessonCategorySchema>;
-export type IndividualLessonCategory = typeof individualLessonCategories.$inferSelect;
-
-export const campusCategories = mysqlTable("cmp_cats", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  parentId: int("parent_id"),
-  color: varchar("color", { length: 7 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const campusCategoriesRelations = relations(campusCategories, ({ one, many }) => ({
-  parent: one(campusCategories, {
-    fields: [campusCategories.parentId],
-    references: [campusCategories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(campusCategories, { relationName: "subcategories" }),
-}));
-
-export const insertCampusCategorySchema = createInsertSchema(campusCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertCampusCategory = z.infer<typeof insertCampusCategorySchema>;
-export type CampusCategory = typeof campusCategories.$inferSelect;
-
-export const recitalCategories = mysqlTable("rec_cats", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  parentId: int("parent_id"),
-  color: varchar("color", { length: 7 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const recitalCategoriesRelations = relations(recitalCategories, ({ one, many }) => ({
-  parent: one(recitalCategories, {
-    fields: [recitalCategories.parentId],
-    references: [recitalCategories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(recitalCategories, { relationName: "subcategories" }),
-}));
-
-export const insertRecitalCategorySchema = createInsertSchema(recitalCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertRecitalCategory = z.infer<typeof insertRecitalCategorySchema>;
-export type RecitalCategory = typeof recitalCategories.$inferSelect;
 
 // Vacation Study Categories (hierarchical structure for vacation study programs)
-export const vacationCategories = mysqlTable("vac_cats", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  parentId: int("parent_id"),
-  color: varchar("color", { length: 7 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const vacationCategoriesRelations = relations(vacationCategories, ({ one, many }) => ({
-  parent: one(vacationCategories, {
-    fields: [vacationCategories.parentId],
-    references: [vacationCategories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(vacationCategories, { relationName: "subcategories" }),
-}));
-
-export const insertVacationCategorySchema = createInsertSchema(vacationCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertVacationCategory = z.infer<typeof insertVacationCategorySchema>;
-export type VacationCategory = typeof vacationCategories.$inferSelect;
 
 // Client Categories (hierarchical structure for client classification)
-export const clientCategories = mysqlTable("cli_cats", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  parentId: int("parent_id"),
-  color: varchar("color", { length: 7 }), // hex color for UI
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const clientCategoriesRelations = relations(clientCategories, ({ one, many }) => ({
-  parent: one(clientCategories, {
-    fields: [clientCategories.parentId],
-    references: [clientCategories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(clientCategories, { relationName: "subcategories" }),
-  members: many(members),
-}));
-
-export const insertClientCategorySchema = createInsertSchema(clientCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertClientCategory = z.infer<typeof insertClientCategorySchema>;
-export type ClientCategory = typeof clientCategories.$inferSelect;
 
 // Subscription Types (Tipo Iscrizione)
 export const subscriptionTypes = mysqlTable("sub_types", {
@@ -1501,50 +1274,13 @@ export type Todo = typeof todos.$inferSelect;
 // MERCHANDISING
 // ============================================================================
 
-export const merchandisingCategories = mysqlTable("merchandising_categories", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  color: varchar("color", { length: 50 }),
-  sortOrder: int("sort_order").default(0),
-  active: boolean("active").default(true),
-  parentId: int("parent_id"), // Self-referencing relative ID
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-});
 
-export const insertMerchandisingCategorySchema = createInsertSchema(merchandisingCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertMerchandisingCategory = z.infer<typeof insertMerchandisingCategorySchema>;
-export type MerchandisingCategory = typeof merchandisingCategories.$inferSelect;
 
 // ============================================================================
 // RENTAL CATEGORIES (Affitti)
 // ============================================================================
 
-export const rentalCategories = mysqlTable("rental_categories", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  color: varchar("color", { length: 50 }),
-  sortOrder: int("sort_order").default(0),
-  active: boolean("active").default(true),
-  parentId: int("parent_id"), // Self-referencing relative ID
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-});
 
-export const insertRentalCategorySchema = createInsertSchema(rentalCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertRentalCategory = z.infer<typeof insertRentalCategorySchema>;
-export type RentalCategory = typeof rentalCategories.$inferSelect;
 
 
 // ============================================================================
@@ -1552,36 +1288,7 @@ export type RentalCategory = typeof rentalCategories.$inferSelect;
 // ============================================================================
 
 // Booking Service Categories
-export const bookingServiceCategories = mysqlTable("booking_service_categories", {
-  id: int("id").primaryKey().autoincrement(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  color: varchar("color", { length: 50 }),
-  icon: varchar("icon", { length: 50 }),
-  sortOrder: int("sort_order").default(0),
-  active: boolean("active").default(true),
-  parentId: int("parent_id"), // Self-referencing relative ID
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-});
 
-export const bookingServiceCategoriesRelations = relations(bookingServiceCategories, ({ one, many }) => ({
-  parent: one(bookingServiceCategories, {
-    fields: [bookingServiceCategories.parentId],
-    references: [bookingServiceCategories.id],
-    relationName: "subcategories",
-  }),
-  subcategories: many(bookingServiceCategories, { relationName: "subcategories" }),
-  services: many(bookingServices),
-}));
-
-export const insertBookingServiceCategorySchema = createInsertSchema(bookingServiceCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertBookingServiceCategory = z.infer<typeof insertBookingServiceCategorySchema>;
-export type BookingServiceCategory = typeof bookingServiceCategories.$inferSelect;
 
 // Booking Services (Servizi prenotabili, es. Affitto, PT, ecc.)
 export const bookingServices = mysqlTable("booking_services", {
@@ -1917,24 +1624,7 @@ export type InsertTenant = z.infer<typeof insertTenantSchema>;
 export type Tenant = typeof tenants.$inferSelect;
 
 // 2. ACTIVITY MACRO-CATEGORIES
-export const activityCategories = mysqlTable("activity_categories", {
-  id: int("id").primaryKey().autoincrement(),
-  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
-  name: varchar("name", { length: 255 }).notNull(),
-  uiRenderingType: varchar("ui_rendering_type", { length: 100 }).notNull(),
-  extraInfoSchema: json("extra_info_schema"),
-  isSystemDefault: boolean("is_system_default").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-});
 
-export const insertActivityCategorySchema = createInsertSchema(activityCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertActivityCategory = z.infer<typeof insertActivityCategorySchema>;
-export type ActivityCategory = typeof activityCategories.$inferSelect;
 
 // 3. LA SUPER-TABELLA: ACTIVITIES (Unifies 11 Silos)
 export const activities = mysqlTable("activities", {
@@ -3007,3 +2697,20 @@ export const teamPostazioni = mysqlTable("team_postazioni", {
   ordine: int("ordine").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Migrated categories to custom_list_items
+import { z } from 'zod';
+export const insertClientCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
+export type ClientCategory = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+
+export const insertRentalCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
+export type RentalCategory = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+
+export const insertBookingServiceCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
+export type BookingServiceCategory = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+
+export const insertMerchandisingCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
+export type MerchandisingCategory = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+
+export const insertCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
+export type Category = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };

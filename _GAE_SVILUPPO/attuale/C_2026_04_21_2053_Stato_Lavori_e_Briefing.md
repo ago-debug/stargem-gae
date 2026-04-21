@@ -5,7 +5,7 @@
 # Briefing Tecnico Operativo – Stato Attuale e Priorità
 
 ## Sintesi iniziale
-Il blocco principale dei lavori odierni ha riguardato il consolidamento dei moduli **Attività, Calendario e Planning**. Moltissimi interventi sono stati completati con successo lato UI e frontend (routing, rendering visivo, overlay, redirect sicuri), aggirando la necessità di riscrivere pesantemente il backend in questa fase. Sebbene la struttura sia ora stabile e aderente alle nuove direttive, restano da collaudare sul campo alcuni comportamenti critici e rifinire l'esperienza utente finale.
+Oggi il focus è stato sul completamento dell'unificazione architetturale lato Database. Sono state eliminate definitivamente 14 tabelle storiche usate come "silos" per le categorie, migrando tutto il sistema a puntare sulla singola entità `custom_list_items`. Il backend è stato riadattato e testato risolvendo colli di bottiglia critici nel caricamento corsi.
 
 ---
 
@@ -148,7 +148,7 @@ Il progetto è considerevolmente avanzato nella giornata odierna stabilizzando f
 
 <!-- --- INIZIO SORGENTE: attuale/11_GAE_Stato_Lavori_Per_Sezione.md --- -->
 
-# STATO LAVORI E BRIEFING - Aggiornato al: 21 Aprile 2026 18:59
+# STATO LAVORI E BRIEFING - Aggiornato al: 21 Aprile 2026 20:08
 
 Questo documento fotografa in modo pragmatico e verticale lo stato di ogni macro-area del progetto, fungendo da bussola per gli sviluppatori e la direzione tecnica sullo stato di collaudo e di priorità delle singole sezioni. 
 
@@ -270,6 +270,8 @@ Il backend è saldamente radicato sulle entità unificate `courses` e `enrollmen
 - **[DB WIPE]** Eliminata mole di dati sporchi dalla tabella `activities` generati durante il fallito test STI. Ricollegato ufficialmente l'engine del Calendario alla tabella nativa `courses` ✅
 - **[DB WIPE]** Azzerata la tabella `universal_enrollments` ed evitato il partizionamento; le statistiche iscrizioni puntano ora formalmente ed unicamente ai vecchi e collaudati `enrollments` ✅
 - **[UI REFACTOR]** Uniformati i filtri ed i popover tra Calendario Operativo e Planning Strategico. Il planning plurimensile adotta ora opacità e styling CSS differenziato in tempo reale per nascondere i giorni/mesi storici e sbiancare i giorni inesistenti (es. 31 Novembre) ✅
+- **[UI WIPE]** Eseguito script di clean-up profondo eliminando 120 eventi di Planning fantasma creati da test pregressi (`strategic_events`) e purgate attività orfane da `courses` ✅
+- **[LOGIC REFACTOR]** Modificato il fetch frontend delle UI Operative per contare gli iscritti nativamente con aggregazione DB `(count(*))` al posto dell'approssimazione su array. Risolto disallineamento `currentEnrollments`. ✅
 
 ---
 

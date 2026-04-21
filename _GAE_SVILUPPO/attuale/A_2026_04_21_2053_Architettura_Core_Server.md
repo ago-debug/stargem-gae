@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-20 17:15
+Aggiornato al: 2026-04-21 20:53
 
 # Master Document: Architettura e Database StarGem Manager (Stato Attuale)
 
@@ -39,8 +39,8 @@ I volumi di records presenti al termine delle bonifiche e mock dei dati sono i s
 | Entità / Modulo | Tabella Fisica DB | Ruolo e Funzione | Totale Record |
 | :--- | :--- | :--- | :---: |
 | **Membri e Anagrafiche** | `members` | Profilo centrale di iscritti e staff. | **9.504** |
-| **Corsi e Attività STI** | `courses` | Classi, Workshop e Campus fusi. | **421** |
-| **Iscrizioni (Enrollments)**| `enrollments` | Aggancio allievo (`member`) e classe (`course`). | **13** |
+| **Corsi e Attività STI** | `courses` | Classi, Workshop e Campus fusi. | **296** |
+| **Iscrizioni (Enrollments)**| `enrollments` | Aggancio allievo (`member`) e classe (`course`). | **0** |
 | **Pagamenti (Mastro)** | `payments` | Registratore globale per ogni transazione economica| **30** |
 | **Regole e Promo** | `promo_rules` | Codici promozionali, sconti Black Friday. | **50** |
 | **Aule / Spazi Fisici** | `studios` | Le sale della struttura (es. Sala 1). | **13** |

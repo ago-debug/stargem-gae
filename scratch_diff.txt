@@ -1,0 +1,541 @@
+diff --git a/server/storage.ts b/server/storage.ts
+index 496e326..d93ed9a 100644
+--- a/server/storage.ts
++++ b/server/storage.ts
+@@ -6,8 +6,6 @@ import {
+   users,
+   members,
+   memberDuplicateExclusions,
+-  categories,
+-  clientCategories,
+   subscriptionTypes,
+   studios,
+   courses,
+@@ -21,6 +19,7 @@ import {
+   costCenters,
+   accountingPeriods,
+   journalEntries,
++  customLists,
+   customListItems,
+   memberships,
+   medicalCertificates,
+@@ -162,7 +161,6 @@ import {
+   courseQuotesGrid,
+   type CourseQuotesGrid,
+   type InsertCourseQuotesGrid,
+-  bookingServiceCategories,
+   type BookingServiceCategory,
+   type InsertBookingServiceCategory,
+   customLists,
+@@ -183,10 +181,8 @@ import {
+   type StrategicEvent,
+   type InsertStrategicEvent,
+   strategicEvents,
+-  merchandisingCategories,
+   type MerchandisingCategory,
+   type InsertMerchandisingCategory,
+-  rentalCategories,
+   type RentalCategory,
+   type InsertRentalCategory,
+ } from "@shared/schema";
+@@ -818,34 +814,37 @@ export class DatabaseStorage implements IStorage {
+   }
+ 
+   // ==== Booking Service Categories ====
+-  async getBookingServiceCategories(): Promise<BookingServiceCategory[]> {
+-    return await db.select().from(bookingServiceCategories).orderBy(bookingServiceCategories.sortOrder);
++  async getBookingServiceCategories(): Promise<any[]> {
++    const items = await db.select({
++      id: customListItems.id,
++      value: customListItems.value,
++      color: customListItems.color,
++      sortOrder: customListItems.sortOrder
++    })
++    .from(customListItems)
++    .innerJoin(customLists, eq(customListItems.listId, customLists.id))
++    .where(eq(customLists.systemName, 'booking_service_categories'))
++    .orderBy(customListItems.sortOrder);
++    return items.map(i => ({ id: i.id, name: i.value, color: i.color, sortOrder: i.sortOrder }));
+   }
+ 
+-  async getBookingServiceCategory(id: number): Promise<BookingServiceCategory | undefined> {
+-    const [category] = await db.select().from(bookingServiceCategories).where(eq(bookingServiceCategories.id, id));
+-    return category;
++  async getBookingServiceCategory(id: number): Promise<any | undefined> {
++    const [item] = await db.select().from(customListItems).where(eq(customListItems.id, id));
++    return item ? { id: item.id, name: item.value, color: item.color, sortOrder: item.sortOrder } : undefined;
+   }
+ 
+-  async createBookingServiceCategory(category: InsertBookingServiceCategory): Promise<BookingServiceCategory> {
+-    const [result] = await db.insert(bookingServiceCategories).values(category as any);
+-    const id = (result as any).insertId || (result as any).id;
+-    const fetched = await this.getBookingServiceCategory(id);
+-    return fetched!;
++  async createBookingServiceCategory(category: any): Promise<any> {
++    const [result] = await db.insert(customListItems).values({ systemName: 'booking_service_categories', value: category.name, color: category.color, sortOrder: category.sortOrder || 0 } as any);
++    return { id: (result as any).insertId, name: category.name, color: category.color, sortOrder: category.sortOrder || 0 };
+   }
+ 
+-  async updateBookingServiceCategory(id: number, category: Partial<InsertBookingServiceCategory>): Promise<BookingServiceCategory> {
+-    await db
+-      .update(bookingServiceCategories)
+-      .set({ ...category, updatedAt: new Date() })
+-      .where(eq(bookingServiceCategories.id, id));
+-
+-    const updated = await this.getBookingServiceCategory(id);
+-    return updated!;
++  async updateBookingServiceCategory(id: number, category: any): Promise<any> {
++    await db.update(customListItems).set({ value: category.name, color: category.color, sortOrder: category.sortOrder }).where(eq(customListItems.id, id));
++    return { id, name: category.name, color: category.color, sortOrder: category.sortOrder };
+   }
+ 
+   async deleteBookingServiceCategory(id: number): Promise<void> {
+-    await db.delete(bookingServiceCategories).where(eq(bookingServiceCategories.id, id));
++    await db.delete(customListItems).where(eq(customListItems.id, id));
+   }
+ 
+   // ==== Booking Services ====
+@@ -876,65 +875,71 @@ export class DatabaseStorage implements IStorage {
+   }
+ 
+   // ==== Merchandising Categories ====
+-  async getMerchandisingCategories(): Promise<MerchandisingCategory[]> {
+-    return await db.select().from(merchandisingCategories).orderBy(merchandisingCategories.sortOrder);
++  async getMerchandisingCategories(): Promise<any[]> {
++    const items = await db.select({
++      id: customListItems.id,
++      value: customListItems.value,
++      color: customListItems.color,
++      sortOrder: customListItems.sortOrder
++    })
++    .from(customListItems)
++    .innerJoin(customLists, eq(customListItems.listId, customLists.id))
++    .where(eq(customLists.systemName, 'merchandising_categories'))
++    .orderBy(customListItems.sortOrder);
++    return items.map(i => ({ id: i.id, name: i.value, color: i.color, sortOrder: i.sortOrder }));
+   }
+ 
+-  async getMerchandisingCategory(id: number): Promise<MerchandisingCategory | undefined> {
+-    const [category] = await db.select().from(merchandisingCategories).where(eq(merchandisingCategories.id, id));
+-    return category;
++  async getMerchandisingCategory(id: number): Promise<any | undefined> {
++    const [item] = await db.select().from(customListItems).where(eq(customListItems.id, id));
++    return item ? { id: item.id, name: item.value, color: item.color, sortOrder: item.sortOrder } : undefined;
+   }
+ 
+-  async createMerchandisingCategory(category: InsertMerchandisingCategory): Promise<MerchandisingCategory> {
+-    const [result] = await db.insert(merchandisingCategories).values(category as any);
+-    const id = (result as any).insertId || (result as any).id;
+-    const fetched = await this.getMerchandisingCategory(id);
+-    return fetched!;
++  async createMerchandisingCategory(category: any): Promise<any> {
++    const [result] = await db.insert(customListItems).values({ systemName: 'merchandising_categories', value: category.name, color: category.color, sortOrder: category.sortOrder || 0 } as any);
++    return { id: (result as any).insertId, name: category.name, color: category.color, sortOrder: category.sortOrder || 0 };
+   }
+ 
+-  async updateMerchandisingCategory(id: number, category: Partial<InsertMerchandisingCategory>): Promise<MerchandisingCategory> {
+-    await db
+-      .update(merchandisingCategories)
+-      .set({ ...category, updatedAt: new Date() })
+-      .where(eq(merchandisingCategories.id, id));
+-
+-    const updated = await this.getMerchandisingCategory(id);
+-    return updated!;
++  async updateMerchandisingCategory(id: number, category: any): Promise<any> {
++    await db.update(customListItems).set({ value: category.name, color: category.color, sortOrder: category.sortOrder }).where(eq(customListItems.id, id));
++    return { id, name: category.name, color: category.color, sortOrder: category.sortOrder };
+   }
+ 
+   async deleteMerchandisingCategory(id: number): Promise<void> {
+-    await db.delete(merchandisingCategories).where(eq(merchandisingCategories.id, id));
++    await db.delete(customListItems).where(eq(customListItems.id, id));
+   }
+ 
+   // ==== Rental Categories (Affitti) ====
+-  async getRentalCategories(): Promise<RentalCategory[]> {
+-    return await db.select().from(rentalCategories).orderBy(rentalCategories.sortOrder);
++  async getRentalCategories(): Promise<any[]> {
++    const items = await db.select({
++      id: customListItems.id,
++      value: customListItems.value,
++      color: customListItems.color,
++      sortOrder: customListItems.sortOrder
++    })
++    .from(customListItems)
++    .innerJoin(customLists, eq(customListItems.listId, customLists.id))
++    .where(eq(customLists.systemName, 'rental_categories'))
++    .orderBy(customListItems.sortOrder);
++    return items.map(i => ({ id: i.id, name: i.value, color: i.color, sortOrder: i.sortOrder }));
+   }
+ 
+-  async getRentalCategory(id: number): Promise<RentalCategory | undefined> {
+-    const [category] = await db.select().from(rentalCategories).where(eq(rentalCategories.id, id));
+-    return category;
++  async getRentalCategory(id: number): Promise<any | undefined> {
++    const [item] = await db.select().from(customListItems).where(eq(customListItems.id, id));
++    return item ? { id: item.id, name: item.value, color: item.color, sortOrder: item.sortOrder } : undefined;
+   }
+ 
+-  async createRentalCategory(category: InsertRentalCategory): Promise<RentalCategory> {
+-    const [result] = await db.insert(rentalCategories).values(category as any);
+-    const id = (result as any).insertId || (result as any).id;
+-    const fetched = await this.getRentalCategory(id);
+-    return fetched!;
++  async createRentalCategory(category: any): Promise<any> {
++    const [result] = await db.insert(customListItems).values({ systemName: 'rental_categories', value: category.name, color: category.color, sortOrder: category.sortOrder || 0 } as any);
++    return { id: (result as any).insertId, name: category.name, color: category.color, sortOrder: category.sortOrder || 0 };
+   }
+ 
+-  async updateRentalCategory(id: number, category: Partial<InsertRentalCategory>): Promise<RentalCategory> {
+-    await db
+-      .update(rentalCategories)
+-      .set({ ...category, updatedAt: new Date() })
+-      .where(eq(rentalCategories.id, id));
+-
+-    const updated = await this.getRentalCategory(id);
+-    return updated!;
++  async updateRentalCategory(id: number, category: any): Promise<any> {
++    await db.update(customListItems).set({ value: category.name, color: category.color, sortOrder: category.sortOrder }).where(eq(customListItems.id, id));
++    return { id, name: category.name, color: category.color, sortOrder: category.sortOrder };
+   }
+ 
+   async deleteRentalCategory(id: number): Promise<void> {
+-    await db.delete(rentalCategories).where(eq(rentalCategories.id, id));
++    await db.delete(customListItems).where(eq(customListItems.id, id));
+   }
+ 
+   // ==== Studio Bookings ====
+@@ -1765,302 +1770,53 @@ export class DatabaseStorage implements IStorage {
+   }
+ 
+   // ==== Categories ====
+-  async getCategories(): Promise<Category[]> {
+-    return await db.select().from(categories).orderBy(categories.name);
++  async getCategories(): Promise<any[]> {
++    const items = await db.select().from(customListItems).where(eq(customListItems.systemName, 'course_categories')).orderBy(customListItems.sortOrder);
++    return items.map(i => ({ id: i.id, name: i.value, color: i.color, sortOrder: i.sortOrder }));
+   }
+ 
+-  async getCategory(id: number): Promise<Category | undefined> {
+-    const [category] = await db.select().from(categories).where(eq(categories.id, id));
+-    return category;
++  async getCategory(id: number): Promise<any | undefined> {
++    const [item] = await db.select().from(customListItems).where(eq(customListItems.id, id));
++    return item ? { id: item.id, name: item.value, color: item.color, sortOrder: item.sortOrder } : undefined;
+   }
+ 
+-  async createCategory(category: InsertCategory): Promise<Category> {
+-    const [result] = await db.insert(categories).values(category);
+-    const [newCategory] = await db.select().from(categories).where(eq(categories.id, result.insertId));
+-    return newCategory;
++  async createCategory(category: any): Promise<any> {
++    const [result] = await db.insert(customListItems).values({ systemName: 'course_categories', value: category.name, color: category.color, sortOrder: category.sortOrder || 0 } as any);
++    return { id: (result as any).insertId, name: category.name, color: category.color, sortOrder: category.sortOrder || 0 };
+   }
+ 
+-  async updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category> {
+-    await db
+-      .update(categories)
+-      .set({ ...category, updatedAt: new Date() })
+-      .where(eq(categories.id, id));
+-
+-    const [updated] = await db.select().from(categories).where(eq(categories.id, id));
+-    return updated;
++  async updateCategory(id: number, category: any): Promise<any> {
++    await db.update(customListItems).set({ value: category.name, color: category.color, sortOrder: category.sortOrder }).where(eq(customListItems.id, id));
++    return { id, name: category.name, color: category.color, sortOrder: category.sortOrder };
+   }
+ 
+   async deleteCategory(id: number): Promise<void> {
+-    await db.delete(categories).where(eq(categories.id, id));
++    await db.delete(customListItems).where(eq(customListItems.id, id));
+   }
+ 
+   // ==== Client Categories ====
+-  async getClientCategories(): Promise<ClientCategory[]> {
+-    return await db.select().from(clientCategories).orderBy(clientCategories.name);
+-  }
+-
+-  async getClientCategory(id: number): Promise<ClientCategory | undefined> {
+-    const [category] = await db.select().from(clientCategories).where(eq(clientCategories.id, id));
+-    return category;
+-  }
+-
+-  async createClientCategory(category: InsertClientCategory): Promise<ClientCategory> {
+-    const [result] = await db.insert(clientCategories).values(category);
+-    const [newCategory] = await db.select().from(clientCategories).where(eq(clientCategories.id, result.insertId));
+-    return newCategory;
+-  }
+-
+-  async updateClientCategory(id: number, category: Partial<InsertClientCategory>): Promise<ClientCategory> {
+-    await db
+-      .update(clientCategories)
+-      .set({ ...category, updatedAt: new Date() })
+-      .where(eq(clientCategories.id, id));
+-
+-    const [updated] = await db.select().from(clientCategories).where(eq(clientCategories.id, id));
+-    return updated;
+-  }
+-
+-  async deleteClientCategory(id: number): Promise<void> {
+-    await db.delete(clientCategories).where(eq(clientCategories.id, id));
+-  }
+-
+-  // ==== Subscription Types ====
+-  async getSubscriptionTypes(): Promise<SubscriptionType[]> {
+-    return await db.select().from(subscriptionTypes).orderBy(subscriptionTypes.name);
+-  }
+-
+-  async getSubscriptionType(id: number): Promise<SubscriptionType | undefined> {
+-    const [subscriptionType] = await db.select().from(subscriptionTypes).where(eq(subscriptionTypes.id, id));
+-    return subscriptionType;
+-  }
+-
+-  async createSubscriptionType(subscriptionType: InsertSubscriptionType): Promise<SubscriptionType> {
+-    const [result] = await db.insert(subscriptionTypes).values(subscriptionType);
+-    const [newSubscriptionType] = await db.select().from(subscriptionTypes).where(eq(subscriptionTypes.id, result.insertId));
+-    return newSubscriptionType;
+-  }
+-
+-  async updateSubscriptionType(id: number, data: Partial<InsertSubscriptionType>): Promise<SubscriptionType> {
+-    await db
+-      .update(subscriptionTypes)
+-      .set(data)
+-      .where(eq(subscriptionTypes.id, id));
+-
+-    const [updated] = await db.select().from(subscriptionTypes).where(eq(subscriptionTypes.id, id));
+-    return updated;
+-  }
+-
+-  async deleteSubscriptionType(id: number): Promise<void> {
+-    await db.delete(subscriptionTypes).where(eq(subscriptionTypes.id, id));
+-  }
+-
+-  // ==== Instructors (Le persone con participantType che contiene INSEGNANTE o STAFF) ====
+-  async getInstructors(): Promise<Instructor[]> {
+-    return await db.select()
+-      .from(members)
+-      .where(
+-        or(
+-          eq(members.participantType, "INSEGNANTE"),
+-          sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+-          sql`LOWER(${members.participantType}) LIKE '%staff%'`
+-        )
+-      )
+-      .orderBy(members.lastName, members.firstName);
+-  }
+-
+-  async getInstructor(id: number): Promise<Instructor | undefined> {
+-    const [instructor] = await db.select()
+-      .from(members)
+-      .where(
+-        and(
+-          eq(members.id, id),
+-          or(
+-            eq(members.participantType, "INSEGNANTE"),
+-            sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+-            sql`LOWER(${members.participantType}) LIKE '%staff%'`
+-          )
+-        )
+-      );
+-    return instructor;
+-  }
+-
+-  async createInstructor(instructor: InsertInstructor): Promise<Instructor> {
+-    const [result] = await db.insert(members).values({
+-      firstName: instructor.firstName || "Nuovo",
+-      lastName: instructor.lastName || "Insegnante",
+-      ...instructor,
+-      participantType: "INSEGNANTE"
+-    } as any);
+-    const [newInstructor] = await db.select()
+-      .from(members)
+-      .where(eq(members.id, result.insertId));
+-    return newInstructor;
+-  }
+-
+-  async updateInstructor(id: number, instructor: Partial<InsertInstructor>): Promise<Instructor> {
+-    await db
+-      .update(members)
+-      .set(instructor)
+-      .where(
+-        and(
+-          eq(members.id, id),
+-          or(
+-            eq(members.participantType, "INSEGNANTE"),
+-            sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+-            sql`LOWER(${members.participantType}) LIKE '%staff%'`
+-          )
+-        )
+-      );
+-    const [updated] = await db.select()
+-      .from(members)
+-      .where(eq(members.id, id));
+-    return updated;
+-  }
+-
+-  async deleteInstructor(id: number): Promise<void> {
+-    await db.delete(members)
+-      .where(
+-        and(
+-          eq(members.id, id),
+-          or(
+-            eq(members.participantType, "INSEGNANTE"),
+-            sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+-            sql`LOWER(${members.participantType}) LIKE '%staff%'`
+-          )
+-        )
+-      );
+-  }
+-
+-  async getInstructorByEmail(email: string): Promise<Instructor | undefined> {
+-    const [instructor] = await db.select()
+-      .from(members)
+-      .where(
+-        and(
+-          eq(members.email, email),
+-          or(
+-            eq(members.participantType, "INSEGNANTE"),
+-            sql`LOWER(${members.participantType}) LIKE '%insegnante%'`,
+-            sql`LOWER(${members.participantType}) LIKE '%staff%'`
+-          )
+-        )
+-      );
+-    return instructor;
+-  }
+-
+-  async syncInstructorFromMember(member: Member): Promise<void> {
+-    // No-op: handled dynamically by querying members table directly.
+-  }
+-
+-  // ==== Studios ====
+-  async getStudios(): Promise<Studio[]> {
+-    return db.select().from(studios).orderBy(studios.name);
+-  }
+-
+-  async getStudio(id: number): Promise<Studio | undefined> {
+-    const [studio] = await db.select().from(studios).where(eq(studios.id, id));
+-    return studio;
+-  }
+-
+-  async createStudio(studioData: InsertStudio): Promise<Studio> {
+-    // Ensure JSON fields are stringified if they are objects, or passed as is if already handled by driver
+-    const dataToSave = {
+-      name: studioData.name,
+-      floor: studioData.floor ?? null,
+-      operatingHours: studioData.operatingHours ?? null,
+-      operatingDays: studioData.operatingDays ?? null,
+-      capacity: studioData.capacity ?? null,
+-      equipment: studioData.equipment ?? null,
+-      notes: studioData.notes ?? null,
+-      active: studioData.active !== undefined ? studioData.active : true,
+-      googleCalendarId: studioData.googleCalendarId ?? null,
+-      updatedAt: new Date(),
+-    };
+-
+-    const [result] = await db
+-      .insert(studios)
+-      .values(dataToSave as any);
+-
+-    const insertId = (result as any).insertId;
+-    const [studio] = await db.select().from(studios).where(eq(studios.id, insertId));
+-    if (!studio) throw new Error("Studio non trovato dopo la creazione");
+-    return studio;
+-  }
+-
+-  async updateStudio(id: number, studioData: Partial<InsertStudio>): Promise<Studio> {
+-    await db
+-      .update(studios)
+-      .set(studioData)
+-      .where(eq(studios.id, id));
+-
+-    const [studio] = await db.select().from(studios).where(eq(studios.id, id));
+-    return studio;
+-  }
+-
+-  async deleteStudio(id: number): Promise<void> {
+-    await db.delete(studios).where(eq(studios.id, id));
+-  }
+-
+-  // ==== Courses ====
+-  async getCourses(activityType?: string): Promise<(Course & { categoryName?: string | null; instructorName?: string | null })[]> {
+-    const instructorMembers = aliasedTable(members, 'instructorMembers');
+-    const query = db
+-      .select({
+-        ...getTableColumns(courses),
+-        categoryName: customListItems.value,
+-        instructorFirstName: instructorMembers.firstName,
+-        instructorLastName: instructorMembers.lastName,
+-      })
+-      .from(courses)
+-      .leftJoin(
+-        customListItems,
+-        eq(courses.categoryId, customListItems.id)
+-      )
+-      .leftJoin(
+-        instructorMembers,
+-        eq(courses.instructorId, instructorMembers.id)
+-      );
+-
+-    let result;
+-    if (activityType) {
+-      result = await query
+-        .where(eq(courses.activityType, activityType))
+-        .orderBy(desc(courses.createdAt));
+-    } else {
+-      result = await query.orderBy(desc(courses.createdAt));
+-    }
+-
+-    return result.map(row => ({
+-      ...row,
+-      instructorName: row.instructorFirstName ? `${row.instructorLastName} ${row.instructorFirstName}` : null
+-    }));
++  async getClientCategories(): Promise<any[]> {
++    const items = await db.select({
++      id: customListItems.id,
++      value: customListItems.value,
++      color: customListItems.color,
++      sortOrder: customListItems.sortOrder
++    })
++    .from(customListItems)
++    .innerJoin(customLists, eq(customListItems.listId, customLists.id))
++    .where(eq(customLists.systemName, 'client_categories'))
++    .orderBy(customListItems.sortOrder);
++    return items.map(i => ({ id: i.id, name: i.value, color: i.color, sortOrder: i.sortOrder }));
+   }
+ 
+-  async getCourse(id: number): Promise<Course | undefined> {
+-    const [course] = await db.select().from(courses).where(eq(courses.id, id));
+-    return course;
++  async getClientCategory(id: number): Promise<any | undefined> {
++    const [item] = await db.select().from(customListItems).where(eq(customListItems.id, id));
++    return item ? { id: item.id, name: item.value, color: item.color, sortOrder: item.sortOrder } : undefined;
+   }
+ 
+-
+-  async createCourse(course: InsertCourse): Promise<Course> {
+-    const activeSeason = await this.getActiveSeason();
+-    const dataToSave = {
+-      ...course,
+-      startDate: course.startDate ? (course.startDate instanceof Date ? course.startDate.toISOString().split('T')[0] : course.startDate) : null,
+-      endDate: course.endDate ? (course.endDate instanceof Date ? course.endDate.toISOString().split('T')[0] : course.endDate) : null,
+-      seasonId: course.seasonId || activeSeason?.id || null,
+-      lessonType: course.lessonType ? course.lessonType : null,
+-      statusTags: course.statusTags ? course.statusTags : null
+-    };
+-    let result;
+-    try {
+-      [result] = await db.insert(courses).values(dataToSave as any);
+-    } catch (e) {
+-      console.error("[Storage] db.insert error:", e);
+-      throw e;
+-    }
+-    const id = (result as any).insertId || (result as any).id;
+-    const fetched = await this.getCourse(id);
+-    return fetched!;
++  async createClientCategory(category: any): Promise<any> {
++    const [result] = await db.insert(customListItems).values({ systemName: 'client_categories', value: category.name, color: category.color, sortOrder: category.sortOrder || 0 } as any);
++    return { id: (result as any).insertId, name: category.name, color: category.color, sortOrder: category.sortOrder || 0 };
+   }
+ 
+   async getCoursesBySeason(seasonId: number): Promise<(Course & { categoryName?: string | null; instructorName?: string | null })[]> {

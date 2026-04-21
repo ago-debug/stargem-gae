@@ -1,9 +1,18 @@
-Aggiornato al: 2026-04-20 17:15
+Aggiornato al: 2026-04-21 20:53
 
 # Ultimi Aggiornamenti Progetto "StarGem Manager"
-**Periodo di riferimento:** 23 Febbraio 2026 - 13 Aprile 2026
+**Periodo di riferimento:** 23 Febbraio 2026 - 21 Aprile 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
+
+---
+
+### 21 Aprile 2026 (Consolidamento Architettura Categorie)
+
+* **[DB-001] Hard Wipe Tabelle Categorie:** Eseguita l'eliminazione definitiva di 14 tabelle storiche frammentate (`ws_cats`, `sun_cats`, `cmp_cats`, `rec_cats`, `vac_cats`, `sub_types`, `activity_categories`, `merchandising_categories`, `cli_cats`, `rental_categories`, `booking_service_categories`, `categories`, `trn_cats`, `ind_less_cats`) per azzerare il debito tecnico.
+* **[BE-002] Refactoring Storage Level:** Riscritto `server/storage.ts` per dirottare il traffico di tutte le categorie verso la tabella universale `custom_list_items`. Risolto blocco `/api/courses` causato dalla perdita involontaria di mapping.
+* **[BE-003] Pulizia Schema Drizzle:** Rimossi da `shared/schema.ts` tutti i riferimenti e le foreign keys associati alle tabelle eliminate.
+* **[OPS-001] Stabilizzazione Ambiente:** Riavvio completo del tunnel SSH e del dev server per validare l'integrità architetturale a seguito della pulizia massiva del DB.
 
 ---
 
@@ -561,3 +570,9 @@ Commits principali:
 - Sistemato bug UI : aggiunta gestione `pausa` nella griglia e conteggio header.
 - Fix variabili report mensile (`firstName`, `ore_totali`).
 - Wipe righe fittizie in attendance per avviare tracciamento pulito su produzione.
+
+## 2026-04-21 (20:08)
+- **[DB WIPE]** Eliminata mole di dati sporchi dalla tabella `activities` generati durante test STI pregressi, con ricollegamento ufficiale del Calendario Operativo alla tabella nativa `courses`.
+- **[DB WIPE]** Azzerata la tabella `universal_enrollments`, riconducendo formalmente le statistiche iscrizioni ai collaudati `enrollments`. Eliminati eventi di Planning fantasma (`strategic_events`).
+- **[UI REFACTOR]** Uniformati filtri e popover tra Calendario Operativo e Planning Strategico. Implementato styling CSS (opacità) per mascherare giorni storici o non esistenti.
+- **[LOGIC REFACTOR]** Ottimizzato il fetch per contare nativamente gli iscritti tramite aggregazione DB `(count(*))`.

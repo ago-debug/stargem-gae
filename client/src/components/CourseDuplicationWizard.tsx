@@ -63,8 +63,16 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   }, [sourceCourses, searchFilter, instructors]);
 
   const targetSeasons = useMemo(() => {
-    if (!seasons) return [];
-    return seasons.filter(s => s.id.toString() !== effectiveSourceSeasonId);
+    if (!seasons || !seasons.length) return [];
+    const sourceSeason = seasons.find(s => s.id.toString() === effectiveSourceSeasonId);
+    if (!sourceSeason) return [];
+    
+    // Mostra solo le stagioni successive (con id o data inizio maggiore)
+    return seasons.filter(s => {
+       const isDifferent = s.id.toString() !== effectiveSourceSeasonId;
+       const isSuccessive = new Date(s.startDate) > new Date(sourceSeason.startDate);
+       return isDifferent && isSuccessive;
+    });
   }, [seasons, effectiveSourceSeasonId]);
 
   React.useEffect(() => {

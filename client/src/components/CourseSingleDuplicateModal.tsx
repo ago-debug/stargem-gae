@@ -276,7 +276,14 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
                 <SelectValue placeholder="Seleziona stagione..." />
               </SelectTrigger>
               <SelectContent>
-                {Array.isArray(seasons) && seasons.map(s => s && s.id ? (
+                {Array.isArray(seasons) && seasons
+                  .filter(s => {
+                    const sourceSeasonId = course?.seasonId || course?.rawPayload?.seasonId;
+                    const sourceSeason = seasons.find(os => os.id === sourceSeasonId);
+                    if (!sourceSeason) return s.id !== sourceSeasonId; // fallback se non troviamo la sorgente
+                    return s.id !== sourceSeasonId && new Date(s.startDate) > new Date(sourceSeason.startDate);
+                  })
+                  .map(s => s && s.id ? (
                   <SelectItem key={s.id} value={s.id.toString()}>{getSeasonLabel(s, seasons)}</SelectItem>
                 ) : null)}
               </SelectContent>
