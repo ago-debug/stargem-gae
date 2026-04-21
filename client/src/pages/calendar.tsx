@@ -377,7 +377,7 @@ export default function CalendarPage() {
     });
 
     const { data: enrollments } = useQuery<any[]>({
-        queryKey: ["/api/universal-enrollments"],
+        queryKey: ["/api/enrollments"],
     });
 
     const { data: quotes } = useQuery<Quote[]>({ // Fetch quotes
@@ -780,7 +780,7 @@ export default function CalendarPage() {
     const isLoading = coursesLoading || studiosLoading || instructorsLoading || categoriesLoading || strategicLoading;
 
     const getCourseStats = (courseId: number) => {
-        const courseEnrollments = enrollments?.filter(e => e.activityDetailId === courseId && (e.status === 'active' || !e.status)) || [];
+        const courseEnrollments = enrollments?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status)) || [];
         const men = courseEnrollments.filter(e => {
             const g = e.memberGender?.toUpperCase();
             return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
@@ -793,7 +793,7 @@ export default function CalendarPage() {
     };
 
     const getWorkshopStats = (workshopId: number) => {
-        const enrolls = enrollments?.filter(e => e.activityDetailId === workshopId && (e.status === 'active' || !e.status)) || [];
+        const enrolls = enrollments?.filter(e => e.courseId === workshopId && (e.status === 'active' || !e.status)) || [];
         const men = enrolls.filter(e => {
             const g = e.memberGender?.toUpperCase();
             return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
