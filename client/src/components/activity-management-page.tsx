@@ -103,6 +103,16 @@ export default function ActivityManagementPage({
   const urlParams = new URLSearchParams(searchString);
   const initialSearch = urlParams.get('search') || "";
   const actionParam = urlParams.get("action");
+  const draftMode = urlParams.get("draftMode");
+  const draftTitle = urlParams.get("title");
+  const draftStartDate = urlParams.get("startDate");
+  const draftEndDate = urlParams.get("endDate");
+
+  const draftDefaultValues = draftMode === "true" ? {
+    name: draftTitle || "",
+    startDate: draftStartDate || "",
+    endDate: draftEndDate || "",
+  } : undefined;
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -113,13 +123,13 @@ export default function ActivityManagementPage({
   const [nameFilter, setNameFilter] = useState<string>("all");
 
   useEffect(() => {
-    if (actionParam === "create") {
+    if (actionParam === "create" || draftMode === "true") {
       setIsFormOpen(true);
       // Rimuovi il parametro per non riaprire alla navigazione indietro
       const newUrl = window.location.pathname + (initialSearch ? `?search=${initialSearch}` : "");
       window.history.replaceState({}, "", newUrl);
     }
-  }, [actionParam, initialSearch]);
+  }, [actionParam, initialSearch, draftMode]);
   const [editingItem, setEditingItem] = useState<ActivityItem | null>(null);
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<string>("");
   const [selectedStartTime, setSelectedStartTime] = useState<string>("");
@@ -978,6 +988,7 @@ export default function ActivityManagementPage({
           onOpenChange={(open) => { if (!open) closeDialog(); }} 
           course={editingItem} 
           activityType={activityType as any} 
+          defaultValues={draftDefaultValues}
           onDuplicated={(newRecord) => {
             // F2-102: aggiorna editingItem col nuovo record (mantiene isFormOpen=true)
             setEditingItem(newRecord);
@@ -997,7 +1008,7 @@ export default function ActivityManagementPage({
                 {editingItem ? `Modifica i dettagli del ${itemLabel}` : `Inserisci i dettagli del ${itemLabel}`}
               </DialogDescription>
             </DialogHeader>
-            {editingItem ? renderForm(editingItem) : renderForm()}
+            {isFormOpen && renderForm(editingItem || (draftDefaultValues as any))}
           </DialogContent>
         </Dialog>
       )}
