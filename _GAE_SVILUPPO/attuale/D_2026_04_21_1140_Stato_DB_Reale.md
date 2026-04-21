@@ -1,18 +1,20 @@
-Aggiornato al: 2026-04-21 10:11
+Aggiornato al: 2026-04-21 11:40
 
 # 📊 STATO DB REALE — Audit Aggiornato
-Data e orario aggiornamento: 2026-04-21 10:11
+Data e orario aggiornamento: 2026-04-21 11:40
 
 ## Tabelle attive con dati reali
 
 | Tabella | Record | Note |
 |---------|--------|------|
-| `members` | **90** | Anagrafica attuale in produzione |
+| `members` | **92** | Anagrafica attuale in produzione |
 | `memberships` | **89** | Tessere emesse |
 | `users` | **19** | Account staff attivi |
-| `courses` | **409** | Attività STI (Tornata ad essere sorgente primaria di verità) |
+| `courses` | **409** | Attività Miste (Corsi, Workshop, Campus) |
 | `activities` | **0** | Attività dettaglio (*F1-006: Svuotata da sporcizia STI test*) |
 | `activity_details` | **428** | Dettagli attività |
+| `enrollments` | **0** | Iscrizioni Reali (*F1-007: Pronta per pagamenti*) |
+| `universal_enrollments` | **0** | Iscrizioni Vecchie (*F1-007: Svuotata da sporcizia STI*) |
 | `team_attendance_logs` | **2.078** | Log presenze GemTeam |
 | `team_scheduled_shifts` | **17** | Turni programmati (Drastico calo - *probabile "WIPE settimana"* per via del deploy 035) |
 | `team_shift_templates` | **1** | Template turni (*Calo per cancellazione massiva precedente/test*) |
@@ -88,3 +90,5 @@ Data e orario aggiornamento: 2026-04-21 10:11
 ## 2026-04-20 17:15 - Pulizia Dati (GemTeam)
 - Svuotati `team_attendance_logs` (da 2079 a 0 veri, + 2 test odierni) e `team_checkin_events` (mock eliminati, rimasti solo bot e admin).
 - Troncato ed azzerato storicamente `team_monthly_reports` per far partire le statistiche pulite in produzione.
+
+
