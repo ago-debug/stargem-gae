@@ -19,8 +19,10 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [newValue, setNewValue] = useState("");
+  const [newColor, setNewColor] = useState("#94a3b8");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState("");
+  const [editingColor, setEditingColor] = useState("");
 
   const { data: listData } = useCustomList(listType);
 
@@ -28,34 +30,36 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
   const items = (listData?.items || []).filter((i: any) => i.active !== false).sort((a: any, b: any) => String(a.value).localeCompare(String(b.value), undefined, { numeric: true }));
 
   const createMutation = useMutation({
-    mutationFn: async (value: string) => {
+    mutationFn: async ({ value, color }: { value: string; color: string }) => {
       if (items?.some((i: any) => i.value.toLowerCase() === value.toLowerCase())) {
         throw new Error("Questa voce esiste già nel dizionario.");
       }
       if (!listId) throw new Error("Sorgente dizionario non accessibile (ListId)");
       const maxOrder = items?.reduce((max: number, s: any) => Math.max(max, s.sortOrder || 0), 0) || 0;
-      await apiRequest("POST", `/api/custom-lists/${listId}/items`, { value, sortOrder: maxOrder + 1, active: true });
+      await apiRequest("POST", `/api/custom-lists/${listId}/items`, { value, color: color || null, sortOrder: maxOrder + 1, active: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/custom-lists/${listType}`] });
       setNewValue("");
+      setNewColor("#94a3b8");
       toast({ title: "Voce creata con successo" });
     },
     onError: (error: Error) => toast({ title: "Errore", description: error.message, variant: "destructive" }),
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, value }: { id: number; value: string }) => {
+    mutationFn: async ({ id, value, color }: { id: number; value: string; color: string }) => {
       if (items?.some((i: any) => i.id !== id && i.value.toLowerCase() === value.toLowerCase())) {
         throw new Error("Questa voce esiste già nel dizionario.");
       }
       if (!listId) throw new Error("Sorgente dizionario non accessibile");
-      await apiRequest("PATCH", `/api/custom-lists/${listId}/items/${id}`, { value });
+      await apiRequest("PATCH", `/api/custom-lists/${listId}/items/${id}`, { value, color: color || null });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/custom-lists/${listType}`] });
       setEditingId(null);
       setEditingValue("");
+      setEditingColor("");
       toast({ title: "Voce aggiornata con successo" });
     },
     onError: (error: Error) => toast({ title: "Errore", description: error.message, variant: "destructive" }),
@@ -84,13 +88,20 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Input
+              type="color"
+              value={newColor}
+              onChange={(e) => setNewColor(e.target.value)}
+              className="w-10 h-10 p-1 flex-shrink-0 cursor-pointer"
+              title="Scegli Colore"
+            />
+            <Input
               placeholder="Nuova voce..."
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && newValue.trim()) {
                   e.preventDefault();
-                  createMutation.mutate(newValue.trim());
+                  createMutation.mutate({ value: newValue.trim(), color: newColor });
                 }
               }}
               className="flex-1"
@@ -100,7 +111,7 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
               size="icon"
               className="gold-3d-button flex-shrink-0"
               onClick={() => {
-                if (newValue.trim()) createMutation.mutate(newValue.trim());
+                if (newValue.trim()) createMutation.mutate({ value: newValue.trim(), color: newColor });
               }}
               disabled={createMutation.isPending}
             >
@@ -115,13 +126,19 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
                 {editingId === item.id ? (
                   <div className="flex items-center gap-2 flex-1">
                     <Input
+                      type="color"
+                      value={editingColor}
+                      onChange={(e) => setEditingColor(e.target.value)}
+                      className="w-8 h-8 p-0 flex-shrink-0 cursor-pointer"
+                    />
+                    <Input
                       value={editingValue}
                       onChange={(e) => setEditingValue(e.target.value)}
                       className="h-8 text-sm flex-1"
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && editingValue.trim()) {
                           e.preventDefault();
-                          updateMutation.mutate({ id: item.id, value: editingValue.trim() });
+                          updateMutation.mutate({ id: item.id, value: editingValue.trim(), color: editingColor });
                         }
                         if (e.key === "Escape") setEditingId(null);
                       }}
@@ -132,7 +149,7 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
                       size="icon"
                       className="gold-3d-button h-8 w-8 flex-shrink-0"
                       onClick={() => {
-                        if (editingValue.trim()) updateMutation.mutate({ id: item.id, value: editingValue.trim() });
+                        if (editingValue.trim()) updateMutation.mutate({ id: item.id, value: editingValue.trim(), color: editingColor });
                       }}
                     >
                       <Edit className="w-3 h-3" />
@@ -140,7 +157,12 @@ export function CustomListManagerDialog({ listType, title, open, onOpenChange }:
                   </div>
                 ) : (
                   <>
-                    <span className="flex-1">{item.value}</span>
+                    <div 
+                        className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm border border-gray-200" 
+                        style={{ backgroundColor: item.color || '#cccccc' }} 
+                        title={`Colore: ${item.color || '#cccccc'}`}
+                    />
+                    <span className="flex-1 text-sm font-medium">{item.value}</span>
                     <Button
                       type="button"
                       size="icon"

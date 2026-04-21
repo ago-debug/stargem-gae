@@ -26,7 +26,6 @@ import { SortableTableHead, useSortableTable } from "@/components/sortable-table
 import { useCustomList, useCustomListValues } from "@/hooks/use-custom-list";
 import { MultiSelectStatus } from "@/components/multi-select-status";
 import { CustomListManagerDialog } from "@/components/custom-list-manager-dialog";
-import { CategoryListManagerDialog } from "@/components/category-list-manager-dialog";
 import { MultiSelectCustomList } from "@/components/ui/multi-select-custom-list";
 import { QuickMemberAddModal } from "./QuickMemberAddModal";
 import { MessageSquare, Mail, Phone } from "lucide-react";
@@ -1238,7 +1237,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       </DialogContent>
     </Dialog>
     <CustomListManagerDialog listType={nameListType} title={activityType === "prenotazioni" ? "Gestione Generi Lezioni Individuali" : activityType === "allenamenti" ? "Gestione Generi Allenamenti" : activityType === "campus" ? "Gestione Nomi Campus" : activityType === "workshop" ? "Gestione Nomi Workshop" : "Gestione Generi / Nomi Corsi"} open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
-    <CategoryListManagerDialog open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} />
+    <CustomListManagerDialog listType="categorie" title="Gestione Categorie" open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} />
     <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
     <CustomListManagerDialog listType="livello" title="Gestione Livelli" open={isLivelloModalOpen} onOpenChange={setIsLivelloModalOpen} />
     <CustomListManagerDialog listType="fascia_eta" title="Gestione Fasce d'Età" open={isFasciaEtaModalOpen} onOpenChange={setIsFasciaEtaModalOpen} />

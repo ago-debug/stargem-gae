@@ -19,7 +19,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { useCustomList } from "@/hooks/use-custom-list";
+import { apiRequest } from "@/lib/queryClient";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -372,9 +374,9 @@ export default function CalendarPage() {
         queryKey: ["/api/instructors"],
     });
 
-    const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
-        queryKey: ["/api/categories"],
-    });
+    const { data: categorieList } = useCustomList("categorie");
+    const categories = categorieList?.items ? [...categorieList.items].filter((i: any) => i.active !== false).map((i: any) => ({ id: i.id, name: i.value, color: i.color } as Category)) : [];
+    const categoriesLoading = !categorieList;
 
     const { data: enrollments } = useQuery<any[]>({
         queryKey: ["/api/enrollments"],
