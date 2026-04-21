@@ -2103,11 +2103,11 @@ export default function CalendarPage() {
                                                             return (
                                                                 <div className="absolute top-1 right-1 flex flex-col items-end gap-1 z-30 max-w-[70%]">
                                                                     {evt.categoryName && (
-                                                                        <div className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase truncate shadow-sm border border-black/5" 
+                                                                        <div className="px-1 py-[2px] rounded text-[6.5px] font-extrabold uppercase truncate shadow-sm border border-black/5" 
                                                                             style={
                                                                                 currentActType === "course" 
-                                                                                    ? { backgroundColor: (evt.colorProps as any).badgeColor || '#94a3b8', color: '#ffffff' } 
-                                                                                    : { backgroundColor: ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"], color: '#ffffff' }
+                                                                                    ? { backgroundColor: '#f1f5f9', color: (evt.colorProps as any).badgeColor || '#64748b' } 
+                                                                                    : { backgroundColor: '#f1f5f9', color: ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"] }
                                                                             } 
                                                                             title={evt.categoryName}>
                                                                             {evt.categoryName}
