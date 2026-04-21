@@ -629,7 +629,7 @@ export default function Planning() {
                                         const isCurrentMonthCol = monthObj.monthIndex === currentMonthIndex && 
                                             cellYear === today.getFullYear();
 
-                                        const isPastBodyMonth = cellDate ? (cellDate < new Date(today.getFullYear(), today.getMonth(), 1)) : false;
+                                        const isPastBodyMonth = new Date(cellYear, realMonthIndex, 1) < new Date(today.getFullYear(), today.getMonth(), 1);
 
                                         return (
                                             <div 
