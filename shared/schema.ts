@@ -546,6 +546,7 @@ export const members = mysqlTable("members", {
   // Registration info
   season: varchar("season", { length: 50 }),
   internalId: varchar("internal_id", { length: 50 }),
+  athenaId: varchar("athena_id", { length: 50 }), // Codice ID dal gestionale Athena
   insertionDate: date("insertion_date"),
   participantType: varchar("participant_type", { length: 50 }),
   fromWhere: varchar("from_where", { length: 255 }),
@@ -575,9 +576,85 @@ export const members = mysqlTable("members", {
 
   address: text("address"), // Mantenuto per retrocompatibilità
   notes: text("notes"),
+  previousMembershipNumber: varchar("previous_membership_number", { length: 50 }),
+  dataQualityFlag: varchar("data_quality_flag", { length: 50 }),
+
+  // ANAGRAFICA
+  title: varchar("title", { length: 20 }),
+  whatsapp: varchar("whatsapp", { length: 20 }),
+  consentSms: boolean("consent_sms").default(false),
+  fatturaFatta: boolean("fattura_fatta").default(false),
+  emailPec: varchar("email_pec", { length: 255 }),
+  familyCode: varchar("family_code", { length: 50 }),
+  athenaGroup: varchar("athena_group", { length: 100 }),
+  alias: varchar("alias", { length: 100 }),
+  cancellationDate: date("cancellation_date"),
+
+  // AZIENDA
+  companyName: varchar("company_name", { length: 200 }),
+  companyFiscalCode: varchar("company_fiscal_code", { length: 16 }),
+  companyAddress: varchar("company_address", { length: 255 }),
+  companyCap: varchar("company_cap", { length: 10 }),
+  companyCity: varchar("company_city", { length: 100 }),
+  companyProvince: varchar("company_province", { length: 10 }),
+  companyPhone: varchar("company_phone", { length: 20 }),
+  companyEmail: varchar("company_email", { length: 255 }),
+
+  // DOCUMENTO
+  documentIssuedBy: varchar("document_issued_by", { length: 100 }),
+  documentIssueDate: date("document_issue_date"),
+
+  // DATI BANCARI
+  bankName: varchar("bank_name", { length: 100 }),
+  iban: varchar("iban", { length: 34 }),
+
+  // TAGLIE
+  sizeShirt: varchar("size_shirt", { length: 10 }),
+  sizePants: varchar("size_pants", { length: 10 }),
+  sizeShoes: varchar("size_shoes", { length: 10 }),
+  height: varchar("height", { length: 10 }),
+  weight: varchar("weight", { length: 10 }),
+
+  // SOCIAL
+  socialFacebook: varchar("social_facebook", { length: 255 }),
+  socialInstagram: varchar("social_instagram", { length: 255 }),
+  socialTiktok: varchar("social_tiktok", { length: 255 }),
+  socialYoutube: varchar("social_youtube", { length: 255 }),
+  website: varchar("website", { length: 255 }),
+  driveFolderUrl: varchar("drive_folder_url", { length: 500 }),
+
+  // FORMAZIONE
+  educationTitle: varchar("education_title", { length: 200 }),
+  educationInstitute: varchar("education_institute", { length: 200 }),
+  educationDate: date("education_date"),
+
+  // EMERGENZA
+  emergencyContact1Name: varchar("emergency_contact1_name", { length: 100 }),
+  emergencyContact1Phone: varchar("emergency_contact1_phone", { length: 20 }),
+  emergencyContact1Email: varchar("emergency_contact1_email", { length: 255 }),
+  emergencyContact2Name: varchar("emergency_contact2_name", { length: 100 }),
+  emergencyContact2Phone: varchar("emergency_contact2_phone", { length: 20 }),
+  emergencyContact2Email: varchar("emergency_contact2_email", { length: 255 }),
+  emergencyContact3Name: varchar("emergency_contact3_name", { length: 100 }),
+  emergencyContact3Phone: varchar("emergency_contact3_phone", { length: 20 }),
+  emergencyContact3Email: varchar("emergency_contact3_email", { length: 255 }),
+
+  // ATHENA
+  sedeRiferimento: varchar("sede_riferimento", { length: 100 }),
+  athenaMemberType: varchar("athena_member_type", { length: 50 }),
+  firstEnrollmentDate: date("first_enrollment_date"),
+  consentCertificate: boolean("consent_certificate").default(false),
+  consentModule: boolean("consent_module").default(false),
+  codiceCatastale: varchar("codice_catastale", { length: 10 }),
+  mastroC: varchar("mastro_c", { length: 30 }),
+  mastroCol: varchar("mastro_col", { length: 30 }),
+  codiceFe: varchar("codice_fe", { length: 50 }),
+
 
   // Campi Tutori (GDPR e minori)
   tutor1FiscalCode: varchar("tutor1_fiscal_code", { length: 16 }),
+  tutor1BirthDate: date("tutor1_birth_date"),
+  tutor1BirthPlace: varchar("tutor1_birth_place", { length: 100 }),
   tutor1Phone: varchar("tutor1_phone", { length: 20 }),
   tutor1Email: varchar("tutor1_email", { length: 255 }),
   tutor2FiscalCode: varchar("tutor2_fiscal_code", { length: 16 }),
@@ -809,6 +886,7 @@ export const enrollments = mysqlTable("enrollments", {
   memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   courseId: int("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
   participationType: varchar("participation_type", { length: 50 }).default("STANDARD_COURSE"), // 'STANDARD_COURSE', 'FREE_TRIAL', 'PAID_TRIAL', 'SINGLE_LESSON'
+  sourceFile: varchar("source_file", { length: 50 }),
   targetDate: date("target_date"), // Riferimento temporale specifico per lezioni singole e prove
   status: varchar("status", { length: 50 }).notNull().default("active"), // 'active', 'waitlist', 'completed', 'cancelled'
   enrollmentDate: timestamp("enrollment_date").defaultNow(),
@@ -892,10 +970,12 @@ export const memberships = mysqlTable("memberships", {
   seasonCompetence: varchar("season_competence", { length: 50 }), // 'CORRENTE' or 'SUCCESSIVA'
   seasonStartYear: int("season_start_year"), // Added by refactor
   seasonEndYear: int("season_end_year"), // Added by refactor
+  seasonId: int("season_id").references(() => seasons.id), // Link to seasons table
   renewalType: varchar("renewal_type", { length: 50 }), // @deprecated - mantenuto temporaneamente per retrocompatibilità
   isRenewal: boolean("is_renewal").notNull().default(false),
   renewedFromId: int("renewed_from_id"),
   notes: text("notes"),
+  dataQualityFlag: varchar("data_quality_flag", { length: 50 }),
   entityCardNumber: varchar("entity_card_number", { length: 100 }), 
   entityCardExpiryDate: date("entity_card_expiry_date"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -1025,6 +1105,7 @@ export const payments = mysqlTable("payments", {
   source: varchar("source", { length: 20 }).default("sede"),
   seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdById: varchar("created_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  operatorName: varchar("operator_name", { length: 100 }), // Legacy operator import
   updatedById: varchar("updated_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   bookingId: int("booking_id").references(() => studioBookings.id, { onDelete: "cascade" }),
   membershipId: int("membership_id").references(() => memberships.id, { onDelete: "cascade" }),
@@ -2699,7 +2780,6 @@ export const teamPostazioni = mysqlTable("team_postazioni", {
 });
 
 // Migrated categories to custom_list_items
-import { z } from 'zod';
 export const insertClientCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
 export type ClientCategory = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
 

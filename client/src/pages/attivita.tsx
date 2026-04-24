@@ -38,9 +38,7 @@ import { useCustomList } from "@/hooks/use-custom-list";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 import type {
-  Course, Category, WorkshopCategory, Instructor, Studio,
-  SundayCategory, TrainingCategory, IndividualLessonCategory,
-  CampusCategory, RecitalCategory, VacationCategory,
+  Course, Category, Instructor, Studio
 } from "@shared/schema";
 import { getActiveActivities } from "../config/activities";
 
@@ -127,7 +125,7 @@ function CourseCard({ course, categories, instructors }: { course: Course; categ
 }
 
 // @ts-ignore // TODO: STI-cleanup
-function WorkshopCard({ workshop, categories, instructors }: { workshop: Workshop; categories?: WorkshopCategory[]; instructors?: Instructor[] }) {
+function WorkshopCard({ workshop, categories, instructors }: { workshop: Course; categories?: Category[]; instructors?: Instructor[] }) {
   const category = categories?.find(c => c.id === workshop.categoryId);
   const instructor = instructors?.find(i => i.id === workshop.instructorId);
   const dayLabel = workshop.dayOfWeek ? WEEKDAYS[workshop.dayOfWeek] || workshop.dayOfWeek : null;
@@ -304,10 +302,10 @@ export default function Attivita() {
 
   const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
   // @ts-ignore // TODO: STI-cleanup
-  const { data: workshops } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
+  const { data: workshops } = useQuery<Course[]>({ queryKey: ["/api/workshops"] });
   const { data: categorieList } = useCustomList("categorie");
   const categories = categorieList?.items ? [...categorieList.items].filter((i: any) => i.active !== false).map((i: any) => ({ id: i.id, name: i.value, color: i.color } as Category)) : [];
-  const { data: workshopCategories } = useQuery<WorkshopCategory[]>({ queryKey: ["/api/workshop-categories"] });
+  const { data: workshopCategories } = useQuery<Category[]>({ queryKey: ["/api/workshop-categories"] });
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
 

@@ -1,19 +1,18 @@
-Aggiornato al: 2026-04-21 20:53
+Aggiornato al: 2026-04-23 19:07
 
 # 📊 STATO DB REALE — Audit Aggiornato
-Data e orario aggiornamento: 2026-04-21 20:53
+Data e orario aggiornamento: 2026-04-23 19:07
 
 ## Tabelle attive con dati reali
 
 | Tabella | Record | Note |
 |---------|--------|------|
-| `members` | **92** | Anagrafica attuale in produzione |
-| `memberships` | **0** | Tessere (*Svuotata per nuova importazione in arrivo*) |
+| `members` | **4.489** | Anagrafica estesa post P1-P4 |
+| `memberships` | **3.700** | Tessere (importate da P1/P3) |
 | `users` | **19** | Account staff attivi |
-| `courses` | **296** | Attività Miste (Corsi, Workshop, Campus) - Puliti da fantasmi e test |
+| `courses` | **581** | Corsi + Workshop creati da importazione |
 | `activities` | **0** | Attività dettaglio (*F1-006: Svuotata da sporcizia STI test*) |
-| `activity_details` | **428** | Dettagli attività |
-| `enrollments` | **0** | Iscrizioni Reali (*F1-007: Pronta per pagamenti*) |
+| `enrollments` | **10.475** | Iscrizioni Reali importate (P3/P4) |
 | `universal_enrollments` | **0** | Iscrizioni Vecchie (*F1-007: Svuotata da sporcizia STI*) |
 | `team_attendance_logs` | **2.078** | Log presenze GemTeam |
 | `team_scheduled_shifts` | **17** | Turni programmati (Drastico calo - *probabile "WIPE settimana"* per via del deploy 035) |
@@ -65,7 +64,7 @@ Data e orario aggiornamento: 2026-04-21 20:53
 | Tabella | Sezione di Riferimento | Note / Funzione |
 |---------|------------------------|-----------------|
 | **Pagamenti & Cassa** | | |
-| `payments` | Gestione Cassa | Transazioni e pagamenti (Attualmente a 0 in attesa di importazione e aggancio finale) |
+| `payments` | Gestione Cassa | **3.775** (Transazioni create in P4 e P5) |
 | `payment_methods` | Gestione Cassa | Metodi di pagamento configurati nel sistema |
 | `carnet_wallets` | Quote & Promo | Portafogli carnet prepagati |
 | `carnet_sessions` | Quote & Promo | Dettaglio singole sessioni scalate dai carnet |
@@ -75,7 +74,7 @@ Data e orario aggiornamento: 2026-04-21 20:53
 | `attendances` | Motore Attività STI | Registro presenze allievi |
 | `studio_bookings` | Motore Attività STI | Prenotazioni sale fisiche |
 | **Anagrafica & Tesserati** | | |
-| `medical_certificates` | Anagrafica / GemPass | Scadenziario certificati medici |
+| `medical_certificates` | Anagrafica / GemPass | **2.770** certificati medici caricati (P1) |
 | `member_relationships` | Anagrafica | Parentele e tutele legali (es. genitori-minori) |
 | `member_uploads` | GemPortal (B2C) | File caricati autonomamente dai clienti |
 | `member_packages` | Anagrafica | Pacchetti promozionali assegnati |
@@ -133,11 +132,13 @@ Data e orario aggiornamento: 2026-04-21 20:53
 
 1. ~~**Iscrizioni duplicate**~~ — **RISOLTO** ✅ `universal_enrollments` è stata definitivamente svuotata e azzerata (0 record).
 2. ~~**Categorie frammentate**~~ — **RISOLTO** ✅ Tutte le 14 tabelle categorie legacy sono state definitivamente migrate su `custom_list_items` e **DROPPATE** dal DB fisico e dallo schema.
-3. **Mancanza dati contabili** — `payments` = 0. Il modulo cassa non è ancora completamente agganciato a regime in produzione.
+3. ~~**Mancanza dati contabili**~~ — **RISOLTO** ✅ `payments` è ora popolato con 3.775 transazioni da MASTER e file Workshop.
 4. ~~`team_shift_templates_BAK_F1_030`~~ — **RIMOSSA** ✅ Protocollo F1-032.
 
 ## 2026-04-20 17:15 - Pulizia Dati (GemTeam)
 - Svuotati `team_attendance_logs` (da 2079 a 0 veri, + 2 test odierni) e `team_checkin_events` (mock eliminati, rimasti solo bot e admin).
 - Troncato ed azzerato storicamente `team_monthly_reports` per far partire le statistiche pulite in produzione.
 
-
+## 2026-04-23 19:07 - Importazione Storica Completata
+- Importati con successo i dati dei fogli GSheets / Bitrix storici (P1, P2, P3, P4, P5).
+- Membri attivi: 4.489. Iscrizioni: 10.475. Pagamenti: 3.775.

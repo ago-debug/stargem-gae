@@ -1,10 +1,13 @@
-Aggiornato al: 2026-04-21 20:53
+Aggiornato al: 2026-04-22 14:35
 
 # Ultimi Aggiornamenti Progetto "StarGem Manager"
 **Periodo di riferimento:** 23 Febbraio 2026 - 21 Aprile 2026
 
 Di seguito è riportato il riepilogo dettagliato di tutti i lavori di sviluppo, refactoring e bug fixing effettuati nel progetto, suddivisi giorno per giorno a partire dal più recente.
 
+---
+
+[2026-04-22] DROP TABLE activity_details (428 record — relitto STI, zero FK, zero route attive)
 ---
 
 ### 21 Aprile 2026 (Consolidamento Architettura Categorie)

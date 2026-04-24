@@ -47,9 +47,9 @@ import {
   type Member,
   type InsertMember,
   type Category,
-  type InsertCategory,
+  //   type InsertCategory,
   type ClientCategory,
-  type InsertClientCategory,
+  //   type InsertClientCategory,
   type SubscriptionType,
   type InsertSubscriptionType,
   type Instructor,
@@ -113,27 +113,27 @@ import {
   quotes,
   type Quote,
   type InsertQuote,
-  workshopCategories,
-  type WorkshopCategory,
-  type InsertWorkshopCategory,
-  sundayCategories,
-  type SundayCategory,
-  type InsertSundayCategory,
-  trainingCategories,
-  type TrainingCategory,
-  type InsertTrainingCategory,
-  individualLessonCategories,
-  type IndividualLessonCategory,
-  type InsertIndividualLessonCategory,
-  campusCategories,
-  type CampusCategory,
-  type InsertCampusCategory,
-  recitalCategories,
-  type RecitalCategory,
-  type InsertRecitalCategory,
-  vacationCategories,
-  type VacationCategory,
-  type InsertVacationCategory,
+  //   workshopCategories,
+  //   type WorkshopCategory,
+  //   type InsertWorkshopCategory,
+  //   sundayCategories,
+  //   type SundayCategory,
+  //   type InsertSundayCategory,
+  //   trainingCategories,
+  //   type TrainingCategory,
+  //   type InsertTrainingCategory,
+  //   individualLessonCategories,
+  //   type IndividualLessonCategory,
+  //   type InsertIndividualLessonCategory,
+  //   campusCategories,
+  //   type CampusCategory,
+  //   type InsertCampusCategory,
+  //   recitalCategories,
+  //   type RecitalCategory,
+  //   type InsertRecitalCategory,
+  //   vacationCategories,
+  //   type VacationCategory,
+  //   type InsertVacationCategory,
   // @ts-ignore // TODO: STI-cleanup
   type CampusActivity,
   // @ts-ignore // TODO: STI-cleanup
@@ -161,7 +161,7 @@ import {
   type CourseQuotesGrid,
   type InsertCourseQuotesGrid,
   type BookingServiceCategory,
-  type InsertBookingServiceCategory,
+  //   type InsertBookingServiceCategory,
   customLists,
   type CustomList,
   type InsertCustomList,
@@ -181,9 +181,9 @@ import {
   type InsertStrategicEvent,
   strategicEvents,
   type MerchandisingCategory,
-  type InsertMerchandisingCategory,
+  //   type InsertMerchandisingCategory,
   type RentalCategory,
-  type InsertRentalCategory,
+  //   type InsertRentalCategory,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -212,11 +212,11 @@ export interface IStorage {
   createAuditLog(log: InsertAuditLog): Promise<void>;
 
   // Booking Service Categories operations
-  getBookingServiceCategories(): Promise<BookingServiceCategory[]>;
-  getBookingServiceCategory(id: number): Promise<BookingServiceCategory | undefined>;
-  createBookingServiceCategory(category: InsertBookingServiceCategory): Promise<BookingServiceCategory>;
-  updateBookingServiceCategory(id: number, category: Partial<InsertBookingServiceCategory>): Promise<BookingServiceCategory>;
-  deleteBookingServiceCategory(id: number): Promise<void>;
+  // LEGACY: getBookingServiceCategories(): Promise<BookingServiceCategory[]>;
+  // LEGACY: getBookingServiceCategory(id: number): Promise<BookingServiceCategory | undefined>;
+  // LEGACY: createBookingServiceCategory(category: InsertBookingServiceCategory): Promise<BookingServiceCategory>;
+  // LEGACY: updateBookingServiceCategory(id: number, category: Partial<InsertBookingServiceCategory>): Promise<BookingServiceCategory>;
+  // LEGACY: deleteBookingServiceCategory(id: number): Promise<void>;
 
   // Booking Service operations
   getBookingServices(): Promise<BookingService[]>;
@@ -307,18 +307,18 @@ export interface IStorage {
 
 
   // Categories
-  getCategories(): Promise<Category[]>;
-  getCategory(id: number): Promise<Category | undefined>;
-  createCategory(category: InsertCategory): Promise<Category>;
-  updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category>;
-  deleteCategory(id: number): Promise<void>;
+  // LEGACY: getCategories(): Promise<Category[]>;
+  // LEGACY: getCategory(id: number): Promise<Category | undefined>;
+  // LEGACY: createCategory(category: InsertCategory): Promise<Category>;
+  // LEGACY: updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category>;
+  // LEGACY: deleteCategory(id: number): Promise<void>;
 
   // Client Categories
-  getClientCategories(): Promise<ClientCategory[]>;
-  getClientCategory(id: number): Promise<ClientCategory | undefined>;
-  createClientCategory(category: InsertClientCategory): Promise<ClientCategory>;
-  updateClientCategory(id: number, category: Partial<InsertClientCategory>): Promise<ClientCategory>;
-  deleteClientCategory(id: number): Promise<void>;
+  // LEGACY: getClientCategories(): Promise<ClientCategory[]>;
+  // LEGACY: getClientCategory(id: number): Promise<ClientCategory | undefined>;
+  // LEGACY: createClientCategory(category: InsertClientCategory): Promise<ClientCategory>;
+  // LEGACY: updateClientCategory(id: number, category: Partial<InsertClientCategory>): Promise<ClientCategory>;
+  // LEGACY: deleteClientCategory(id: number): Promise<void>;
 
   // Subscription Types
   getSubscriptionTypes(): Promise<SubscriptionType[]>;
@@ -502,18 +502,18 @@ export interface IStorage {
   // RecitalCategories
   // VacationCategories
   // MerchandisingCategories
-  getMerchandisingCategories(): Promise<MerchandisingCategory[]>;
-  getMerchandisingCategory(id: number): Promise<MerchandisingCategory | undefined>;
-  createMerchandisingCategory(merchandisingCategory: InsertMerchandisingCategory): Promise<MerchandisingCategory>;
-  updateMerchandisingCategory(id: number, merchandisingCategory: Partial<InsertMerchandisingCategory>): Promise<MerchandisingCategory>;
-  deleteMerchandisingCategory(id: number): Promise<void>;
+  // LEGACY: getMerchandisingCategories(): Promise<MerchandisingCategory[]>;
+  // LEGACY: getMerchandisingCategory(id: number): Promise<MerchandisingCategory | undefined>;
+  // LEGACY: createMerchandisingCategory(merchandisingCategory: InsertMerchandisingCategory): Promise<MerchandisingCategory>;
+  // LEGACY: updateMerchandisingCategory(id: number, merchandisingCategory: Partial<InsertMerchandisingCategory>): Promise<MerchandisingCategory>;
+  // LEGACY: deleteMerchandisingCategory(id: number): Promise<void>;
 
   // RentalCategories (Affitti)
-  getRentalCategories(): Promise<RentalCategory[]>;
-  getRentalCategory(id: number): Promise<RentalCategory | undefined>;
-  createRentalCategory(rentalCategory: InsertRentalCategory): Promise<RentalCategory>;
-  updateRentalCategory(id: number, rentalCategory: Partial<InsertRentalCategory>): Promise<RentalCategory>;
-  deleteRentalCategory(id: number): Promise<void>;
+  // LEGACY: getRentalCategories(): Promise<RentalCategory[]>;
+  // LEGACY: getRentalCategory(id: number): Promise<RentalCategory | undefined>;
+  // LEGACY: createRentalCategory(rentalCategory: InsertRentalCategory): Promise<RentalCategory>;
+  // LEGACY: updateRentalCategory(id: number, rentalCategory: Partial<InsertRentalCategory>): Promise<RentalCategory>;
+  // LEGACY: deleteRentalCategory(id: number): Promise<void>;
 
   // FreeTrials
   // SingleLessons
@@ -813,35 +813,60 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Booking Service Categories ====
-  async getBookingServiceCategories(): Promise<BookingServiceCategory[]> {
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
+  // LEGACY: async getBookingServiceCategories(): Promise<BookingServiceCategory[]> {
     return await db.select().from(bookingServiceCategories).orderBy(bookingServiceCategories.sortOrder);
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async getBookingServiceCategory(id: number): Promise<BookingServiceCategory | undefined> {
+  // LEGACY: async getBookingServiceCategory(id: number): Promise<BookingServiceCategory | undefined> {
     const [category] = await db.select().from(bookingServiceCategories).where(eq(bookingServiceCategories.id, id));
     return category;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async createBookingServiceCategory(category: InsertBookingServiceCategory): Promise<BookingServiceCategory> {
+  // LEGACY: async createBookingServiceCategory(category: InsertBookingServiceCategory): Promise<BookingServiceCategory> {
     const [result] = await db.insert(bookingServiceCategories).values(category as any);
     const id = (result as any).insertId || (result as any).id;
-    const fetched = await this.getBookingServiceCategory(id);
+  // LEGACY: const fetched = await this.getBookingServiceCategory(id);
     return fetched!;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async updateBookingServiceCategory(id: number, category: Partial<InsertBookingServiceCategory>): Promise<BookingServiceCategory> {
+  // LEGACY: async updateBookingServiceCategory(id: number, category: Partial<InsertBookingServiceCategory>): Promise<BookingServiceCategory> {
     await db
       .update(bookingServiceCategories)
       .set({ ...category, updatedAt: new Date() })
       .where(eq(bookingServiceCategories.id, id));
 
-    const updated = await this.getBookingServiceCategory(id);
+  // LEGACY: const updated = await this.getBookingServiceCategory(id);
     return updated!;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async deleteBookingServiceCategory(id: number): Promise<void> {
+  // LEGACY: async deleteBookingServiceCategory(id: number): Promise<void> {
     await db.delete(customListItems).where(eq(customListItems.id, id));
   }
+  */
 
   // ==== Booking Services ====
   async getBookingServices(): Promise<BookingService[]> {
@@ -871,66 +896,116 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Merchandising Categories ====
-  async getMerchandisingCategories(): Promise<MerchandisingCategory[]> {
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
+  // LEGACY: async getMerchandisingCategories(): Promise<MerchandisingCategory[]> {
     return await db.select().from(merchandisingCategories).orderBy(merchandisingCategories.sortOrder);
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async getMerchandisingCategory(id: number): Promise<MerchandisingCategory | undefined> {
+  // LEGACY: async getMerchandisingCategory(id: number): Promise<MerchandisingCategory | undefined> {
     const [category] = await db.select().from(merchandisingCategories).where(eq(merchandisingCategories.id, id));
     return category;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async createMerchandisingCategory(category: InsertMerchandisingCategory): Promise<MerchandisingCategory> {
+  // LEGACY: async createMerchandisingCategory(category: InsertMerchandisingCategory): Promise<MerchandisingCategory> {
     const [result] = await db.insert(merchandisingCategories).values(category as any);
     const id = (result as any).insertId || (result as any).id;
-    const fetched = await this.getMerchandisingCategory(id);
+  // LEGACY: const fetched = await this.getMerchandisingCategory(id);
     return fetched!;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async updateMerchandisingCategory(id: number, category: Partial<InsertMerchandisingCategory>): Promise<MerchandisingCategory> {
+  // LEGACY: async updateMerchandisingCategory(id: number, category: Partial<InsertMerchandisingCategory>): Promise<MerchandisingCategory> {
     await db
       .update(merchandisingCategories)
       .set({ ...category, updatedAt: new Date() })
       .where(eq(merchandisingCategories.id, id));
 
-    const updated = await this.getMerchandisingCategory(id);
+  // LEGACY: const updated = await this.getMerchandisingCategory(id);
     return updated!;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async deleteMerchandisingCategory(id: number): Promise<void> {
+  // LEGACY: async deleteMerchandisingCategory(id: number): Promise<void> {
     await db.delete(customListItems).where(eq(customListItems.id, id));
   }
+  */
 
   // ==== Rental Categories (Affitti) ====
-  async getRentalCategories(): Promise<RentalCategory[]> {
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
+  // LEGACY: async getRentalCategories(): Promise<RentalCategory[]> {
     return await db.select().from(rentalCategories).orderBy(rentalCategories.sortOrder);
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async getRentalCategory(id: number): Promise<RentalCategory | undefined> {
+  // LEGACY: async getRentalCategory(id: number): Promise<RentalCategory | undefined> {
     const [category] = await db.select().from(rentalCategories).where(eq(rentalCategories.id, id));
     return category;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async createRentalCategory(category: InsertRentalCategory): Promise<RentalCategory> {
+  // LEGACY: async createRentalCategory(category: InsertRentalCategory): Promise<RentalCategory> {
     const [result] = await db.insert(rentalCategories).values(category as any);
     const id = (result as any).insertId || (result as any).id;
-    const fetched = await this.getRentalCategory(id);
+  // LEGACY: const fetched = await this.getRentalCategory(id);
     return fetched!;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async updateRentalCategory(id: number, category: Partial<InsertRentalCategory>): Promise<RentalCategory> {
+  // LEGACY: async updateRentalCategory(id: number, category: Partial<InsertRentalCategory>): Promise<RentalCategory> {
     await db
       .update(rentalCategories)
       .set({ ...category, updatedAt: new Date() })
       .where(eq(rentalCategories.id, id));
 
-    const updated = await this.getRentalCategory(id);
+  // LEGACY: const updated = await this.getRentalCategory(id);
     return updated!;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async deleteRentalCategory(id: number): Promise<void> {
+  // LEGACY: async deleteRentalCategory(id: number): Promise<void> {
     await db.delete(customListItems).where(eq(customListItems.id, id));
   }
+  */
 
   // ==== Studio Bookings ====
   async getStudioBookings(startDate?: Date, endDate?: Date, seasonId?: number): Promise<(StudioBooking & {
@@ -1760,22 +1835,41 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Categories ====
-  async getCategories(): Promise<Category[]> {
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
+  // LEGACY: async getCategories(): Promise<Category[]> {
     return await db.select().from(categories).orderBy(categories.name);
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async getCategory(id: number): Promise<Category | undefined> {
+  // LEGACY: async getCategory(id: number): Promise<Category | undefined> {
     const [category] = await db.select().from(categories).where(eq(categories.id, id));
     return category;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async createCategory(category: InsertCategory): Promise<Category> {
+  // LEGACY: async createCategory(category: InsertCategory): Promise<Category> {
     const [result] = await db.insert(categories).values(category);
     const [newCategory] = await db.select().from(categories).where(eq(categories.id, result.insertId));
     return newCategory;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category> {
+  // LEGACY: async updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category> {
     await db
       .update(categories)
       .set({ ...category, updatedAt: new Date() })
@@ -1784,28 +1878,53 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db.select().from(categories).where(eq(categories.id, id));
     return updated;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
   async deleteCategory(id: number): Promise<void> {
     await db.delete(customListItems).where(eq(customListItems.id, id));
   }
+  */
 
   // ==== Client Categories ====
-  async getClientCategories(): Promise<ClientCategory[]> {
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
+  // LEGACY: async getClientCategories(): Promise<ClientCategory[]> {
     return await db.select().from(clientCategories).orderBy(clientCategories.name);
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async getClientCategory(id: number): Promise<ClientCategory | undefined> {
+  // LEGACY: async getClientCategory(id: number): Promise<ClientCategory | undefined> {
     const [category] = await db.select().from(clientCategories).where(eq(clientCategories.id, id));
     return category;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async createClientCategory(category: InsertClientCategory): Promise<ClientCategory> {
+  // LEGACY: async createClientCategory(category: InsertClientCategory): Promise<ClientCategory> {
     const [result] = await db.insert(clientCategories).values(category);
     const [newCategory] = await db.select().from(clientCategories).where(eq(clientCategories.id, result.insertId));
     return newCategory;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async updateClientCategory(id: number, category: Partial<InsertClientCategory>): Promise<ClientCategory> {
+  // LEGACY: async updateClientCategory(id: number, category: Partial<InsertClientCategory>): Promise<ClientCategory> {
     await db
       .update(clientCategories)
       .set({ ...category, updatedAt: new Date() })
@@ -1814,10 +1933,16 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db.select().from(clientCategories).where(eq(clientCategories.id, id));
     return updated;
   }
+  */
+  // TODO: vecchie tabelle categorie
+  // eliminate in F1-021 (Chat_00_errori)
+  // ripristinare se necessario
+  /*
 
-  async deleteClientCategory(id: number): Promise<void> {
+  // LEGACY: async deleteClientCategory(id: number): Promise<void> {
     await db.delete(customListItems).where(eq(customListItems.id, id));
   }
+  */
 
   // ==== Subscription Types ====
   async getSubscriptionTypes(): Promise<SubscriptionType[]> {

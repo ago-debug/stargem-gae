@@ -171,7 +171,7 @@ export default function Planning() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["/api/strategic-events?seasonId=all"] });
             queryClient.invalidateQueries({ queryKey: ["/api/strategic-events"] });
-            queryClient.invalidateQueries({ queryKey: ['/api/activities-unified-preview', selectedSeasonId] });
+            queryClient.invalidateQueries({ queryKey: ['/api/activities-unified-preview', targetSeasonId] });
             setStrategicModalOpen(false);
             toast({ title: "Salvato", description: "L'evento strategico è stato salvato con successo." });
             setStrategicEventId(null);
@@ -192,7 +192,7 @@ export default function Planning() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["/api/strategic-events?seasonId=all"] });
             queryClient.invalidateQueries({ queryKey: ["/api/strategic-events"] });
-            queryClient.invalidateQueries({ queryKey: ['/api/activities-unified-preview', selectedSeasonId] });
+            queryClient.invalidateQueries({ queryKey: ['/api/activities-unified-preview', targetSeasonId] });
             setStrategicModalOpen(false);
             toast({ title: "Cancellato", description: "L'evento strategico è stato rimosso." });
             setStrategicEventId(null);

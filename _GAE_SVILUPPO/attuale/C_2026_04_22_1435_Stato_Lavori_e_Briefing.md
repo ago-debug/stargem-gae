@@ -5,7 +5,7 @@
 # Briefing Tecnico Operativo – Stato Attuale e Priorità
 
 ## Sintesi iniziale
-Oggi il focus è stato sul completamento dell'unificazione architetturale lato Database. Sono state eliminate definitivamente 14 tabelle storiche usate come "silos" per le categorie, migrando tutto il sistema a puntare sulla singola entità `custom_list_items`. Il backend è stato riadattato e testato risolvendo colli di bottiglia critici nel caricamento corsi.
+Oggi il focus è sulla pulizia chirurgica del Database (Fase di Consolidamento). Abbiamo eliminato definitivamente il "relitto STI" `activity_details` da 428 record dopo un'autopsia approfondita che ne ha confermato l'inutilità.
 
 ---
 

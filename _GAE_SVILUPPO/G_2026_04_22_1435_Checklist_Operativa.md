@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-21 20:53
+Aggiornato al: 2026-04-22 14:35
 
 # 📝 Checklist Operativa StarGem Manager (Roadmap Fase 2)
 *(Questo documento funge da promemoria vivente per il team di sviluppo. Spuntare i task o aggiungerne di nuovi mano a mano che l'architettura SaaS V2 prende forma).*
