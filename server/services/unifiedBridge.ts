@@ -238,13 +238,11 @@ export async function getUnifiedActivitiesPreview(req: Request) {
     dbCourses,
     dbRentals,
     dbMembers,
-    dbCats,
     dbStudios,
     dbCustomCats
   ] = await Promise.all([
     db.select().from(courses),
     db.select().from(studioBookings),
-    
     db.select().from(members),
     db.select().from(studios),
     db.select().from(customListItems).where(eq(customListItems.listId, 23))

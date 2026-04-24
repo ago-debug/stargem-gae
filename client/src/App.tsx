@@ -220,12 +220,24 @@ function Router() {
       <ProtectedRoute path="/iscrizioni-pagamenti" component={IscrizioniPagamenti} />
       <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
       <ProtectedRoute path="/attivita" component={Attivita} />
-      <ProtectedRoute path="/categorie-corsi" component={Categories} />
-      <ProtectedRoute path="/categorie-affitti" component={RentalsCategories} />
-      <ProtectedRoute path="/categorie-campus" component={CampusCategories} />
-      <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} />
-      <ProtectedRoute path="/categorie-eventi-esterni" component={BookingServiceCategories} />
-      <ProtectedRoute path="/categorie-merchandising" component={MerchandisingCategories} />
+      {/* TODO: pagine categorie legacy
+          commentata in F1-015b (Chat_22) */}
+      {/*       <ProtectedRoute path="/categorie-corsi" component={Categories} /> */}
+      {/* TODO: pagine categorie legacy
+          commentata in F1-015b (Chat_22) */}
+      {/*       <ProtectedRoute path="/categorie-affitti" component={RentalsCategories} /> */}
+      {/* TODO: pagine categorie legacy
+          commentata in F1-015b (Chat_22) */}
+      {/*       <ProtectedRoute path="/categorie-campus" component={CampusCategories} /> */}
+      {/* TODO: pagine categorie legacy
+          commentata in F1-015b (Chat_22) */}
+      {/*       <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} /> */}
+      {/* TODO: pagine categorie legacy
+          commentata in F1-015b (Chat_22) */}
+      {/*       <ProtectedRoute path="/categorie-eventi-esterni" component={BookingServiceCategories} /> */}
+      {/* TODO: pagine categorie legacy
+          commentata in F1-015b (Chat_22) */}
+      {/*       <ProtectedRoute path="/categorie-merchandising" component={MerchandisingCategories} /> */}
       <Route path="/promo-sconti"><Redirect to="/quote-promo" /></Route>
       <ProtectedRoute path="/quote-promo" component={QuotePromo} />
       <ProtectedRoute path="/webhook-status" component={WebhookStatus} />

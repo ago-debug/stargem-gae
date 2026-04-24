@@ -284,7 +284,7 @@ export default function CalendarPage() {
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
     const [duplicatingCourse, setDuplicatingCourse] = useState<Course | null>(null);
     // @ts-ignore // TODO: STI-cleanup
-    const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
+    const [editingWorkshop, setEditingWorkshop] = useState<Course | null>(null);
     const [editingBooking, setEditingBooking] = useState<any | null>(null);
     const [selectionContext, setSelectionContext] = useState<{ dayId: string, studioId: number | null, hour: number, date?: Date } | null>(null);
     const [unifiedFormOpen, setUnifiedFormOpen] = useState(false);
@@ -406,7 +406,7 @@ export default function CalendarPage() {
 
     // @ts-ignore // TODO: STI-cleanup
     const workshopsQueryKey = selectedSeasonId === "active" ? "/api/workshops" : `/api/workshops?seasonId=${selectedSeasonId}`;
-    const { data: workshops } = useQuery<Workshop[]>({
+    const { data: workshops } = useQuery<Course[]>({
         queryKey: [workshopsQueryKey],
     });
 
@@ -2488,7 +2488,8 @@ export default function CalendarPage() {
                               active: true,
                               rawPayload: { ...newCourse }
                           };
-                          handleEdit(mockEvt as any);
+                          // handleEdit non è definita, chiudiamo la modale:
+                          setUnifiedFormOpen(false);
                         }, 300);
                     }
                 }}

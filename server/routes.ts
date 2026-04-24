@@ -152,7 +152,7 @@ async function importCoursesFromRows(
   // Load lookup tables for resolving names to IDs
   const instructors = await storageInstance.getInstructors();
   const studios = await storageInstance.getStudios();
-  const categories = await storageInstance.getCategories();
+  /*   const categories = await storageInstance.getCategories(); */
 
   // Create lookup maps (by name, case-insensitive)
   const instructorByName = new Map<string, number>();
@@ -171,9 +171,10 @@ async function importCoursesFromRows(
   });
 
   const categoryByName = new Map<string, number>();
-  categories.forEach(c => {
-    categoryByName.set(c.name.toLowerCase().trim(), c.id);
-  });
+  // LEGACY: chiamata a metodo rimosso
+  // categories.forEach((c: any) => {
+  //   categoryByName.set(c.name.toLowerCase().trim(), c.id);
+  // });
 
   // Build index of existing courses
   const existingCourses = await storageInstance.getCourses();
@@ -314,9 +315,11 @@ async function importCoursesFromRows(
 
           if (!categoryId && autoCreateRecords && value) {
             try {
-              const newCategory = await storageInstance.createCategory({ name: value });
-              categoryId = newCategory.id;
-              categoryByName.set(lookupKey, categoryId);
+  /*               const newCategory = await storageInstance.createCategory({ name: value }); */
+  // LEGACY: chiamata a metodo rimosso
+  // categoryId = newCategory.id;
+  // LEGACY: chiamata a metodo rimosso
+  // categoryByName.set(lookupKey, categoryId);
               console.log(`[Import] Created missing category: "${value}"`);
             } catch (err) {
               console.error(`[Import] Failed to create category "${value}":`, err);
@@ -482,6 +485,9 @@ import { promisify } from "util";
 const execPromise = promisify(exec);
 
 // ==== SEEDING CATEGORIE PARTECIPANTI ====
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 async function seedParticipantCategories() {
   try {
     const existingCats = await storage.getClientCategories();
@@ -499,6 +505,7 @@ async function seedParticipantCategories() {
     console.error("Failed to seed participant categories:", err);
   }
 }
+  */
 
 
   async function resolveSeason(reqQuery: any) {
@@ -532,7 +539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Seed database
-  await seedParticipantCategories();
+  /*   await seedParticipantCategories(); */
 
   // Setup authentication
   setupAuth(app);
@@ -2426,8 +2433,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const booleanFields = ["active", "hasMedicalCertificate", "isMinor"];
 
       // Load lookup tables for resolving names
-      const clientCategories = await storage.getClientCategories();
-      const catByName = new Map<string, number>(clientCategories.map(c => [c.name.toLowerCase().trim(), c.id]));
+  /*       const clientCategories = await storage.getClientCategories(); */
+  // LEGACY: chiamata a metodo rimosso
+  // const catByName = new Map<string, number>(clientCategories.map((c: any) => [c.name.toLowerCase().trim(), c.id]));
 
       const subscriptionTypes = await storage.getSubscriptionTypes();
       const subByName = new Map<string, number>(subscriptionTypes.map(s => [s.name.toLowerCase().trim(), s.id]));
@@ -2483,12 +2491,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               memberData[dbField] = value.toUpperCase().substring(0, 2);
             } else if (dbField === "clientCategoryName") {
               const lookupKey = value.toLowerCase().trim();
-              let catId = catByName.get(lookupKey);
+  // LEGACY: chiamata a metodo rimosso
+  // let catId = catByName.get(lookupKey);
+  let catId: number | undefined = undefined;
               if (!catId && autoCreateRecords && value) {
                 try {
-                  const newCat = await storage.createClientCategory({ name: value });
-                  catId = newCat.id;
-                  catByName.set(lookupKey, catId);
+  /*                   const newCat = await storage.createClientCategory({ name: value }); */
+  // LEGACY: chiamata a metodo rimosso
+  // catId = newCat.id;
+  // LEGACY: chiamata a metodo rimosso
+  // catByName.set(lookupKey, catId);
                   console.log(`[Import] Created missing client category: "${value}"`);
                 } catch (err) {
                   console.error(`[Import] Failed to create client category "${value}":`, err);
@@ -2684,6 +2696,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==== Categories Routes ====
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
   app.get("/api/categories", isAuthenticated, async (req, res) => {
     try {
       const categories = await storage.getCategories();
@@ -2693,6 +2708,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch categories" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.post("/api/categories", isAuthenticated, async (req, res) => {
     try {
@@ -2705,6 +2724,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: error.message || "Failed to create category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.patch("/api/categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -2717,6 +2740,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: error.message || "Failed to update category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.delete("/api/categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -2730,8 +2757,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete category" });
     }
   });
+  */
 
   // ==== Client Categories Routes ====
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
   app.get("/api/client-categories", isAuthenticated, async (req, res) => {
     try {
       const categories = await storage.getClientCategories();
@@ -2741,6 +2772,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch client categories" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.post("/api/client-categories", isAuthenticated, async (req, res) => {
     try {
@@ -2753,6 +2788,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: error.message || "Failed to create client category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.patch("/api/client-categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -2765,6 +2804,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: error.message || "Failed to update client category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.delete("/api/client-categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -2778,6 +2821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete client category" });
     }
   });
+  */
 
   // ==== Subscription Types Routes ====
   app.get("/api/subscription-types", isAuthenticated, async (req, res) => {
@@ -6502,7 +6546,11 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
 
       if (fileExt === '.xlsx' || fileExt === '.xls') {
         const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
+        const priorityNames = ['importazione', 'AnaPersoneFullExcel', 'ElencoIscrizioni', 'WS_master_dati', 'Foglio1', 'Sheet1'];
+        const targetSheetName = wb.SheetNames.find(name => priorityNames.includes(name)) 
+          || wb.SheetNames.find(name => !name.startsWith('xl/') && !name.toLowerCase().includes('comment') && !name.toLowerCase().includes('style') && !name.toLowerCase().includes('bozza'))
+          || wb.SheetNames[0];
+        const ws = wb.Sheets[targetSheetName];
         fileContent = XLSX.utils.sheet_to_csv(ws);
       } else {
         fileContent = req.file.buffer.toString('utf-8');
@@ -7759,8 +7807,9 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         const allMembers = await storage.getMembers();
 
         // Load lookup tables for resolving names
-        const clientCategories = await storage.getClientCategories();
-        const catByName = new Map<string, number>(clientCategories.map(c => [c.name.toLowerCase().trim(), c.id]));
+  /*         const clientCategories = await storage.getClientCategories(); */
+  // LEGACY: chiamata a metodo rimosso
+  // const catByName = new Map<string, number>(clientCategories.map((c: any) => [c.name.toLowerCase().trim(), c.id]));
 
         const subscriptionTypes = await storage.getSubscriptionTypes();
         const subByName = new Map<string, number>(subscriptionTypes.map(s => [s.name.toLowerCase().trim(), s.id]));
@@ -7819,12 +7868,16 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
                   memberData[field] = b === "si" || b === "sì" || b === "yes" || b === "1" || b === "true";
                 } else if (field === "clientCategoryName") {
                   const lookupKey = value.toLowerCase().trim();
-                  let catId = catByName.get(lookupKey);
+  // LEGACY: chiamata a metodo rimosso
+  // let catId = catByName.get(lookupKey);
+  let catId: number | undefined = undefined;
                   if (!catId && autoCreate && value) {
                     try {
-                      const newCat = await storage.createClientCategory({ name: value });
-                      catId = newCat.id;
-                      catByName.set(lookupKey, catId);
+  /*                       const newCat = await storage.createClientCategory({ name: value }); */
+  // LEGACY: chiamata a metodo rimosso
+  // catId = newCat.id;
+  // LEGACY: chiamata a metodo rimosso
+  // catByName.set(lookupKey, catId);
                     } catch (err) {
                       console.error(`[Import] CSV: Failed to create client category "${value}":`, err);
                     }
@@ -7990,6 +8043,9 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   });
 
   // ==== Booking Service Categories ====
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
   app.get("/api/booking-service-categories", isAuthenticated, async (req, res) => {
     try {
       const categories = await storage.getBookingServiceCategories();
@@ -7999,6 +8055,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to fetch booking service categories" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.post("/api/booking-service-categories", isAuthenticated, async (req, res) => {
     try {
@@ -8010,6 +8070,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to create booking service category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.patch("/api/booking-service-categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -8021,6 +8085,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to update booking service category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.delete("/api/booking-service-categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -8032,8 +8100,12 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to delete booking service category" });
     }
   });
+  */
 
   // ==== Merchandising Categories ====
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
   app.get("/api/merchandising-categories", isAuthenticated, async (req, res) => {
     try {
       const categories = await storage.getMerchandisingCategories();
@@ -8043,6 +8115,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to fetch merchandising categories" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.post("/api/merchandising-categories", isAuthenticated, async (req, res) => {
     try {
@@ -8054,6 +8130,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to create merchandising category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.patch("/api/merchandising-categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -8065,6 +8145,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to update merchandising category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.delete("/api/merchandising-categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -8076,8 +8160,12 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to delete merchandising category" });
     }
   });
+  */
 
   // ==== Rental Categories (Affitti) ====
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
   app.get("/api/rental-categories", isAuthenticated, async (req, res) => {
     try {
       const categories = await storage.getRentalCategories();
@@ -8087,6 +8175,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to fetch rental categories" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.post("/api/rental-categories", isAuthenticated, async (req, res) => {
     try {
@@ -8098,6 +8190,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to create rental category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.patch("/api/rental-categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -8109,6 +8205,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to update rental category" });
     }
   });
+  */
+  // TODO: route categorie legacy
+  // commentata in F1-015b (Chat_22)
+  /*
 
   app.delete("/api/rental-categories/:id", isAuthenticated, async (req, res) => {
     try {
@@ -8120,6 +8220,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       res.status(500).json({ message: "Failed to delete rental category" });
     }
   });
+  */
 
   // ==== Studio Bookings Routes ====
   app.get("/api/studio-bookings", isAuthenticated, async (req, res) => {
