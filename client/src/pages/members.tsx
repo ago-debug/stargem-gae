@@ -863,6 +863,7 @@ export default function Members() {
               }
             }}
             columns={[
+              { key: 'id', label: 'ID Database', default: true },
               { key: 'lastName', label: 'Cognome', default: true },
               { key: 'firstName', label: 'Nome', default: true },
               { key: 'fiscalCode', label: 'Codice Fiscale', default: true },

@@ -518,6 +518,7 @@ export default function Workshops() {
       apiEndpoint="/api/export"
       apiParams={{ table: 'workshops' }}
       columns={[
+              { key: 'id', label: 'ID Database', default: true },
         { key: 'name', label: 'Nome Workshop', default: true },
         { key: 'sku', label: 'SKU', default: true },
         { key: 'instructor', label: 'Insegnante', default: true },

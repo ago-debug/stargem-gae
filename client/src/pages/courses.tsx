@@ -528,6 +528,7 @@ export default function Courses() {
       apiEndpoint="/api/export"
       apiParams={{ table: 'courses' }}
       columns={[
+              { key: 'id', label: 'ID Database', default: true },
         { key: 'name', label: 'Nome Corso', default: true },
         { key: 'sku', label: 'SKU', default: true },
         { key: 'category', label: 'Categoria', default: true },

@@ -2353,14 +2353,20 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     Genera Report
                   </Button>
                   
-                  <Button 
-                    variant="outline" 
-                    onClick={() => window.open(`/api/gemteam/report/${reportAnnoRaw}/${reportMeseRaw}/export`, '_blank')}
-                    disabled={reportData.length === 0}
-                    className="gap-2 font-bold"
-                  >
-                    <Download className="w-4 h-4" /> Esporta .xlsx
-                  </Button>
+                  <ExportWizard 
+                    filename="presenze_gemteam"
+                    title="Esporta Presenze GemTeam"
+                    apiEndpoint={`/api/gemteam/report/${reportAnnoRaw}/${reportMeseRaw}/export`}
+                    apiParams={{ table: 'gemteam' }}
+                    columns={[
+                      { key: 'id', label: 'ID Database', default: true },
+                      { key: 'lastName', label: 'Cognome', default: true },
+                      { key: 'firstName', label: 'Nome', default: true },
+                      { key: 'role', label: 'Ruolo', default: true },
+                      { key: 'totalHours', label: 'Ore Totali', default: true },
+                      { key: 'status', label: 'Stato', default: true }
+                    ]}
+                  />
 
                   {isAllowed && !reportLocked && (
                     <AlertDialog>
