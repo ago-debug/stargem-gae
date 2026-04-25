@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-24 11:51
+Aggiornato al: 2026-04-25 12:15
 
 # Master Document: Architettura e Database StarGem Manager (Stato Attuale)
 

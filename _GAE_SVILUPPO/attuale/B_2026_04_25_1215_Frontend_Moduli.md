@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-24 11:51
+Aggiornato al: 2026-04-25 12:15
 
 
 
@@ -1161,3 +1161,12 @@ Al fine di sbloccare l'operatività di base, sono stati consolidati e protetti i
 - I colori delle card a calendario vantano un flusso logico rigoroso: il colore semantico/fisso tipico del parent STI (`ALL` = Blu, `IND` = Viola) riceve precedenza assoluta d'esposizione rispetto al colore generico della "Categoria", eliminando le sovrascritture visive (Fix B066).
 
 <!-- --- FINE SORGENTE: attuale/17_GAE_Calendario_Multi_Stagione.md --- -->
+
+## Nuovi Componenti Trasversali
+
+### ExportWizard
+Componente universale (`ExportWizard.tsx`) che accetta una configurazione di colonne e permette lo scaricamento XLSX (via backend stream) o CSV, rimpiazzando tutti i pulsanti esporta disallineati nel sistema. Presente in 10 moduli.
+
+### Importata Data
+La route unificata `/importa` fornisce un Wizard in 3 step: (1) Upload CSV (2) Map Colonne (3) Dry-Run Preview (visualizza le righe da aggiornare o creare) e poi invia in backend il payload, rilasciando il file di log degli errori.
+

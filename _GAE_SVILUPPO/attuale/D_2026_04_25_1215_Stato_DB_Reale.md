@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-25 12:05
+Aggiornato al: 2026-04-25 12:15
 
 # 📊 STATO DB REALE — 25/04/2026 12:05
 ## Import completato — riepilogo
