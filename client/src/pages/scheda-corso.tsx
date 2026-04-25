@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
@@ -35,9 +35,10 @@ export default function SchedaCorso() {
     const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<Enrollment[]>({ queryKey: ["/api/enrollments?type=corsi"] });
     const { data: payments, isLoading: paymentsLoading } = useQuery<Payment[]>({ queryKey: ["/api/payments"] });
     const { data: attendances, isLoading: attendancesLoading } = useQuery<Attendance[]>({ queryKey: ["/api/attendances"] });
+    const { data: strategicEventsData, isLoading: strategicEventsLoading } = useQuery<any[]>({ queryKey: ["/api/strategic-events"] });
 
     const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
-    if (coursesLoading || membersLoading || enrollmentsLoading || paymentsLoading || attendancesLoading) {
+    if (coursesLoading || membersLoading || enrollmentsLoading || paymentsLoading || attendancesLoading || strategicEventsLoading) {
         return (
             <div className="p-6 md:p-8 space-y-6 mx-auto">
                 <Skeleton className="h-12 w-64" />
@@ -79,6 +80,60 @@ export default function SchedaCorso() {
             </div>
         );
     }
+
+    const closedDaysMap = useMemo(() => {
+        const map: Record<string, boolean> = {};
+        if (!strategicEventsData) return map;
+        strategicEventsData.forEach(e => {
+            const isClosedType = ['festivita','chiusura','ferie'].includes(e.eventType);
+            if (isClosedType && (e.affectsCalendar || e.affectsCalendar === 1)) {
+                const eStart = e.startDate?.split('T')[0];
+                const eEnd = (e.endDate || e.startDate)?.split('T')[0];
+                if (eStart && eEnd) {
+                    let d = new Date(eStart);
+                    const end = new Date(eEnd);
+                    while (d <= end) {
+                        map[d.toISOString().split('T')[0]] = true;
+                        d.setDate(d.getDate() + 1);
+                    }
+                }
+            }
+        });
+        return map;
+    }, [strategicEventsData]);
+
+    let effettuate: number | null = null;
+    let rimanenti: number | null = null;
+
+    if (course && course.totalOccurrences && course.startDate && course.endDate && course.dayOfWeek) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const dayMap: Record<string, number> = { 'LUN': 1, 'MAR': 2, 'MER': 3, 'GIO': 4, 'VEN': 5, 'SAB': 6, 'DOM': 0 };
+        const targetDay = dayMap[course.dayOfWeek.toUpperCase()];
+
+        if (targetDay !== undefined) {
+            const start = new Date((course.startDate as unknown as string).split('T')[0]);
+            const end = new Date((course.endDate as unknown as string).split('T')[0]);
+            const today = new Date(todayStr);
+
+            let eff = 0;
+            let rim = 0;
+
+            let d = new Date(start);
+            while (d <= end) {
+                if (d.getDay() === targetDay) {
+                    const ds = d.toISOString().split('T')[0];
+                    if (!closedDaysMap[ds]) {
+                        if (d <= today) eff++;
+                        else rim++;
+                    }
+                }
+                d.setDate(d.getDate() + 1);
+            }
+            effettuate = eff;
+            rimanenti = rim;
+        }
+    }
+
     const enrichedData = buildEnrolledMembersData({
         activityId: courseId,
         isWorkshop: false,
@@ -170,6 +225,16 @@ export default function SchedaCorso() {
                                 <Users className="w-3.5 h-3.5" />
                                 {enrolledMembersData.length} iscritti attivi
                             </Badge>
+                            {course.totalOccurrences && effettuate !== null && rimanenti !== null && (
+                                <>
+                                    <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
+                                        📅 {effettuate} / {course.totalOccurrences} lezioni
+                                    </Badge>
+                                    <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
+                                        🔁 {rimanenti} rimanenti
+                                    </Badge>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
@@ -252,7 +317,7 @@ export default function SchedaCorso() {
                                                 {paymentStatusBadge}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/?memberId=${member.id}`}>
+                                                <Link href={`/anagrafica/${member.id}`}>
                                                     <Button variant="ghost" size="sm" className="text-gold hover:text-gold-foreground hover:bg-gold/10 font-medium">
                                                         Profilo Completo <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                                                     </Button>

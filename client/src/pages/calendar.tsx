@@ -379,7 +379,6 @@ export default function CalendarPage() {
         return m;
     }, [currentWeekStart]);
 
-
     const nextWeek = () => setViewDate(prev => addDays(prev, 7));
     const prevWeek = () => setViewDate(prev => addDays(prev, -7));
     const resetToToday = () => {
@@ -506,6 +505,27 @@ export default function CalendarPage() {
     const { data: strategicEventsData, isLoading: strategicLoading } = useQuery<any[]>({
         queryKey: [strategicQueryKey]
     });
+
+    const closedDaysMap = useMemo(() => {
+        const map: Record<string, boolean> = {};
+        if (!strategicEventsData) return map;
+        strategicEventsData.forEach(e => {
+            const isClosedType = ['festivita','chiusura','ferie'].includes(e.eventType);
+            if (isClosedType && (e.affectsCalendar || e.affectsCalendar === 1)) {
+                const eStart = e.startDate?.split('T')[0];
+                const eEnd = (e.endDate || e.startDate)?.split('T')[0];
+                if (eStart && eEnd) {
+                    let d = new Date(eStart);
+                    const end = new Date(eEnd);
+                    while (d <= end) {
+                        map[d.toISOString().split('T')[0]] = true;
+                        d.setDate(d.getDate() + 1);
+                    }
+                }
+            }
+        });
+        return map;
+    }, [strategicEventsData]);
 
     const prevSeasonId = useRef<string | null>(null);
 
@@ -2418,11 +2438,36 @@ export default function CalendarPage() {
                                                             
                                                             <div className="flex w-full items-center justify-between mt-1 gap-1">
                                                                 <div className="flex items-center gap-1 overflow-hidden">
-                                                                    {evt.rawPayload?.totalOccurrences && evt.rawPayload.totalOccurrences > 0 && (
-                                                                        <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
-                                                                            {evt.rawPayload.totalOccurrences} Lez
-                                                                        </span>
-                                                                    )}
+                                                                    {(() => {
+                                                                        let remainingOccurrences = evt.rawPayload?.totalOccurrences || null;
+                                                                        if (remainingOccurrences && evt.rawPayload?.endDate && evt.dayOfWeek) {
+                                                                            const isDayCol = selectedDay === 'all';
+                                                                            const colId = col.id;
+                                                                            const targetDateStr = isDayCol ? weekDatesMap[colId] : weekDatesMap[selectedDay];
+                                                                            if (targetDateStr) {
+                                                                                const end = evt.rawPayload.endDate?.split('T')[0];
+                                                                                const dayMap: Record<string,number> = { 'LUN':1,'MAR':2,'MER':3,'GIO':4,'VEN':5,'SAB':6,'DOM':0 };
+                                                                                const target = dayMap[normalizeDay(evt.dayOfWeek)];
+                                                                                let count = 0;
+                                                                                const d = new Date(targetDateStr);
+                                                                                const endDate = new Date(end);
+                                                                                while (d <= endDate) {
+                                                                                    if (d.getDay() === target) {
+                                                                                        const ds = d.toISOString().split('T')[0];
+                                                                                        if (!closedDaysMap[ds]) count++;
+                                                                                    }
+                                                                                    d.setDate(d.getDate() + 1);
+                                                                                }
+                                                                                remainingOccurrences = count;
+                                                                            }
+                                                                        }
+                                                                        
+                                                                        return remainingOccurrences && remainingOccurrences > 0 ? (
+                                                                            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
+                                                                                {remainingOccurrences} Lez
+                                                                            </span>
+                                                                        ) : null;
+                                                                    })()}
                                                                     <div className="flex flex-wrap gap-1" title={statusLabels.join(", ")}>
                                                                         {statusLabels.map(s => {
                                                                         const color = getStatusColor(s, activityStatuses);
