@@ -1882,10 +1882,6 @@ export default function MascheraInputGenerale() {
     setLocation('/importa');
   };
 
-  const handleGSheets = () => {
-    toast({ title: "Google Sheets", description: "Integrazione Google Sheets non configurata.", variant: "default" });
-  };
-
   const totalActivitiesCount =
     (memberEnrollments?.length || 0) +
     (memberPtEnrollments?.length || 0) +
@@ -1940,13 +1936,14 @@ export default function MascheraInputGenerale() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-gsheets" onClick={handleGSheets}>
-                <FileSpreadsheet className="w-3 h-3 mr-1 sidebar-icon-gold" />
-                GSheets
-              </Button>
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-pulisci" onClick={handleReset}>
+
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-white" data-testid="button-pulisci" onClick={handleReset}>
                 <RotateCcw className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Pulisci
+              </Button>
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-white" data-testid="button-importa" onClick={handleImport}>
+                <Download className="w-3 h-3 mr-1 sidebar-icon-gold" />
+                Importa
               </Button>
               <ExportWizard 
       filename="membro"
@@ -1961,14 +1958,10 @@ export default function MascheraInputGenerale() {
         { key: 'phone', label: 'Telefono', default: true }
       ]}
     />
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-importa" onClick={handleImport}>
-                <Download className="w-3 h-3 mr-1 sidebar-icon-gold" />
-                Importa
-              </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className={`text-xs h-8 ${Object.keys(dirtyFields).length > 0 && isFormValid ? 'gold-3d-button' : 'bg-background'} `}
+                className={`text-xs h-8 ${Object.keys(dirtyFields).length > 0 && isFormValid ? 'gold-3d-button' : 'bg-white'} `}
                 data-testid="button-salva"
                 disabled={!isFormValid || saveMutation.isPending || Object.keys(dirtyFields).length === 0 || hasConflicts}
                 title={hasConflicts ? "Risolvi i conflitti prima di salvare" : (!isFormValid ? (hasOrphanPayments ? "Errore: Ci sono pagamenti orfani (senza attività). Correggi prima di salvare." : "Compila tutti i campi obbligatori (*) per salvare") : Object.keys(dirtyFields).length === 0 ? "Nessuna modifica da salvare" : "")}
@@ -2044,7 +2037,7 @@ export default function MascheraInputGenerale() {
                 variant="outline"
                 size="sm"
                 onClick={() => scrollToSection(item.id)}
-                className="text-xs h-8 bg-background relative"
+                className="text-xs h-8 bg-white relative"
                 data-testid={`nav - ${item.id} `}
               >
                 <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />

@@ -837,8 +837,9 @@ export default function Members() {
             variant="outline"
             onClick={() => setLocation("/importa")}
             data-testid="button-import-csv"
+            className="bg-white"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 mr-2 sidebar-icon-gold" />
             Importa CSV
           </Button>
           <ExportWizard 
