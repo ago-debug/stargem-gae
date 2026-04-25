@@ -53,7 +53,10 @@ export function ExportWizard({
   };
 
   const getFormattedFilename = (base: string, ext: string) => {
-    return `${new Date().toISOString().slice(0,16).replace('T','_').replace(':','-')}_${base}.${ext}`;
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(now.getTime() - offset)).toISOString().slice(0,16).replace('T','_').replace(':','-');
+    return `${localISOTime}_${base}.${ext}`;
   };
 
   const getFilteredData = (rawData: any[]) => {
@@ -61,12 +64,18 @@ export function ExportWizard({
       const filteredRow: any = {};
       selectedColumns.forEach(key => {
         let val = row[key];
-        if (val) {
-          const isDateString = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(val);
-          if (val instanceof Date || isDateString) {
-            try {
-              val = new Date(val).toLocaleString('it-IT', { dateStyle:'short', timeStyle:'short' });
-            } catch(e) {}
+        if (val !== null && val !== undefined) {
+          if (typeof val === 'boolean') {
+            val = val ? 'Sì' : 'No';
+          } else {
+            const isJsDateString = typeof val === 'string' && val.includes('GMT');
+            const isIsoString = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val);
+            if (val instanceof Date || isJsDateString || isIsoString) {
+              const d = new Date(val);
+              if (!isNaN(d.getTime())) {
+                val = d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+              }
+            }
           }
         }
         filteredRow[columns.find(c => c.key === key)?.label || key] = val;
@@ -96,7 +105,7 @@ export function ExportWizard({
         const ws = XLSX.utils.json_to_sheet([]);
         XLSX.utils.sheet_add_aoa(ws, [
           [`Esportazione: ${filename}`],
-          [`Data: ${new Date().toLocaleString('it-IT', { dateStyle:'short', timeStyle:'short' })}`],
+          [`Data: ${new Date().toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`],
           [`Colonne: ${selectedColumns.length}`],
           []
         ], { origin: "A1" });
