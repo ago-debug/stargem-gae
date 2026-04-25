@@ -11656,7 +11656,23 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         columns.forEach((col: any) => {
           const key = typeof col === 'string' ? col : col.key;
           const label = typeof col === 'string' ? col : col.label;
-          obj[label] = row[key];
+          let val = row[key];
+          
+          if (val !== null && val !== undefined) {
+            if (typeof val === 'boolean') {
+              val = val ? 'Sì' : 'No';
+            } else {
+              const isJsDateString = typeof val === 'string' && val.includes('GMT');
+              const isIsoString = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val);
+              if (val instanceof Date || isJsDateString || isIsoString) {
+                const d = new Date(val);
+                if (!isNaN(d.getTime())) {
+                  val = d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                }
+              }
+            }
+          }
+          obj[label] = val;
         });
         return obj;
       });
@@ -11697,13 +11713,25 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         const workbook = new ExcelJS.stream.xlsx.WorkbookWriter(options);
         const worksheet = workbook.addWorksheet('Export');
         
-        worksheet.columns = columns.map((col: any) => {
-          const label = typeof col === 'string' ? col : col.label;
-          return { header: label, key: label, width: 20 };
-        });
+        // Add header rows
+        const offset = new Date().getTimezoneOffset() * 60000;
+        const localDateStr = new Date(Date.now() - offset).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         
+        worksheet.addRow([`Esportazione: ${table}`]).commit();
+        worksheet.addRow([`Data: ${localDateStr}`]).commit();
+        worksheet.addRow([`Colonne: ${columns.length}`]).commit();
+        worksheet.addRow([]).commit();
+
+        // Add table headers
+        const headerRow = columns.map((col: any) => typeof col === 'string' ? col : col.label);
+        worksheet.addRow(headerRow).commit();
+
         for (const row of formattedData) {
-          worksheet.addRow(row).commit();
+          const rowValues = columns.map((col: any) => {
+            const label = typeof col === 'string' ? col : col.label;
+            return row[label];
+          });
+          worksheet.addRow(rowValues).commit();
         }
         
         worksheet.commit();
