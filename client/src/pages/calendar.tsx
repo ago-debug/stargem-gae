@@ -2395,9 +2395,6 @@ export default function CalendarPage() {
                                                         <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full pr-[45px] text-slate-900">{evt.startTime} - {evt.endTime}</div>
                                                         <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[45px] break-normal overflow-hidden text-slate-900">
                                                             {evt.title}
-                                                            {evt.rawPayload?.totalOccurrences && evt.rawPayload.totalOccurrences > 0 && (
-                                                                <span className="ml-1 text-[9px] font-bold text-slate-600 bg-slate-200 px-1 py-[1px] rounded-sm whitespace-nowrap">🔁 {evt.rawPayload.totalOccurrences}x</span>
-                                                            )}
                                                         </div>
                                                         {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5 text-slate-800">{ins1}</div>}
                                                         {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90 text-slate-800">{ins2}</div>}
@@ -2420,8 +2417,14 @@ export default function CalendarPage() {
                                                             )}
                                                             
                                                             <div className="flex w-full items-center justify-between mt-1 gap-1">
-                                                                <div className="flex flex-wrap gap-1" title={statusLabels.join(", ")}>
-                                                                    {statusLabels.map(s => {
+                                                                <div className="flex items-center gap-1 overflow-hidden">
+                                                                    {evt.rawPayload?.totalOccurrences && evt.rawPayload.totalOccurrences > 0 && (
+                                                                        <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
+                                                                            {evt.rawPayload.totalOccurrences} Lez
+                                                                        </span>
+                                                                    )}
+                                                                    <div className="flex flex-wrap gap-1" title={statusLabels.join(", ")}>
+                                                                        {statusLabels.map(s => {
                                                                         const color = getStatusColor(s, activityStatuses);
                                                                         return (
                                                                             <div key={s} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: `${color}15`, color, border: `0.5px solid ${color}40` } : { color: s === "ATTIVO" ? "#15803d" : "#b91c1c" }}>
@@ -2429,6 +2432,7 @@ export default function CalendarPage() {
                                                                             </div>
                                                                         );
                                                                     })}
+                                                                    </div>
                                                                 </div>
                                                                 <div className="flex gap-1 shrink-0">
                                                                     {(evt.sourceType === "course" || evt.sourceType === "courses") && (

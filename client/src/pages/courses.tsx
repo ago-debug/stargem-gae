@@ -22,6 +22,7 @@ import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
+import { InternalBadge } from "@/components/multi-select-internal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, parseStatusTags, getSeasonLabel } from "@/lib/utils";
 import { format } from "date-fns";
@@ -682,6 +683,7 @@ export default function Courses() {
                     <SortableTableHead sortKey="enrollments" currentSort={sortConfig} onSort={handleSort}>Iscritti</SortableTableHead>
                     <SortableTableHead sortKey="period" currentSort={sortConfig} onSort={handleSort}>Periodo</SortableTableHead>
                     <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
+                    <TableHead>Interno 🔒</TableHead>
                     <TableHead className="text-right">Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -769,6 +771,15 @@ export default function Courses() {
                             ) : (
                               <span className="text-xs italic text-muted-foreground">(Nessuno stato)</span>
                             )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1 items-start">
+                            {course.internalTags && course.internalTags.length > 0 ? (
+                                course.internalTags.map((tag: string) => (
+                                  <InternalBadge key={tag} name={tag} />
+                                ))
+                            ) : null}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
