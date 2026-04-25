@@ -60,8 +60,16 @@ export function ExportWizard({
     return rawData.map(row => {
       const filteredRow: any = {};
       selectedColumns.forEach(key => {
-        // Handle nested keys or direct keys
-        filteredRow[columns.find(c => c.key === key)?.label || key] = row[key];
+        let val = row[key];
+        if (val) {
+          const isDateString = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(val);
+          if (val instanceof Date || isDateString) {
+            try {
+              val = new Date(val).toLocaleString('it-IT', { dateStyle:'short', timeStyle:'short' });
+            } catch(e) {}
+          }
+        }
+        filteredRow[columns.find(c => c.key === key)?.label || key] = val;
       });
       return filteredRow;
     });
@@ -74,10 +82,9 @@ export function ExportWizard({
     }
     try {
       const filteredData = getFilteredData(data);
-      const ws = XLSX.utils.json_to_sheet(filteredData);
-      
       if (format === 'csv') {
-        const csv = XLSX.utils.sheet_to_csv(ws);
+        const wsCsv = XLSX.utils.json_to_sheet(filteredData);
+        const csv = XLSX.utils.sheet_to_csv(wsCsv);
         const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -86,6 +93,15 @@ export function ExportWizard({
         link.click();
         URL.revokeObjectURL(url);
       } else {
+        const ws = XLSX.utils.json_to_sheet([]);
+        XLSX.utils.sheet_add_aoa(ws, [
+          [`Esportazione: ${filename}`],
+          [`Data: ${new Date().toLocaleString('it-IT', { dateStyle:'short', timeStyle:'short' })}`],
+          [`Colonne: ${selectedColumns.length}`],
+          []
+        ], { origin: "A1" });
+        XLSX.utils.sheet_add_json(ws, filteredData, { origin: "A5" });
+
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Export");
         XLSX.writeFile(wb, getFormattedFilename(filename, 'xlsx'));
@@ -159,20 +175,28 @@ export function ExportWizard({
           <span className="hidden sm:inline">{triggerLabel}</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto pr-4 my-4">
           <div className="flex items-center justify-between mb-3">
             <Label className="block text-sm text-muted-foreground">Seleziona le colonne da esportare:</Label>
-            {expandable && (
-              <Button variant="ghost" size="sm" onClick={() => setShowAll(!showAll)} className="h-6 text-xs px-2">
-                {showAll ? "Mostra solo principali" : "Mostra tutti i campi"}
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setSelectedColumns(columns.map(c => c.key))} className="h-6 text-xs px-2">
+                Seleziona tutte
               </Button>
-            )}
+              <Button variant="ghost" size="sm" onClick={() => setSelectedColumns([])} className="h-6 text-xs px-2">
+                Deseleziona tutte
+              </Button>
+              {expandable && (
+                <Button variant="ghost" size="sm" onClick={() => setShowAll(!showAll)} className="h-6 text-xs px-2 border-l pl-3 ml-1">
+                  {showAll ? "Mostra solo principali" : "Mostra tutti i campi"}
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-2">
             {columns.filter(c => showAll || c.default !== false).map(col => (
               <div key={col.key} className="flex items-center space-x-2">
                 <Checkbox 
