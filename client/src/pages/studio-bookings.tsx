@@ -114,7 +114,7 @@ export default function StudioBookings() {
     const [newMemberForm, setNewMemberForm] = useState({
         firstName: "", lastName: "", email: "", mobile: "",
         fiscalCode: "", dateOfBirth: "", placeOfBirth: "", gender: "M",
-        streetAddress: "", city: "", province: "", notes: ""
+        address: "", city: "", province: "", notes: ""
     });
     const [newServiceForm, setNewServiceForm] = useState({ name: "", price: "0", color: "#3b82f6" });
 
@@ -1180,7 +1180,7 @@ export default function StudioBookings() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <Label>Indirizzo (Via/Piazza)</Label>
-                                <Input value={newMemberForm.streetAddress} onChange={e => setNewMemberForm(p => ({ ...p, streetAddress: e.target.value }))} />
+                                <Input value={newMemberForm.address} onChange={e => setNewMemberForm(p => ({ ...p, address: e.target.value }))} />
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 <div className="col-span-2 space-y-1">

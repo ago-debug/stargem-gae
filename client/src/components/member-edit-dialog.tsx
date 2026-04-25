@@ -319,12 +319,9 @@ export function MemberEditDialog() {
 
                             <div className="space-y-4">
                                 <h4 className="font-bold flex items-center gap-2"><MapPin className="w-4 h-4" /> Indirizzo</h4>
+
                                 <div className="space-y-2">
-                                    <Label htmlFor="streetAddress">Via/Piazza</Label>
-                                    <Input id="streetAddress" name="streetAddress" defaultValue={member?.streetAddress || ""} placeholder="Via Roma, 1" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="address">Indirizzo Note (es: palazzina, scala)</Label>
+                                    <Label htmlFor="address">Indirizzo</Label>
                                     <Input id="address" name="address" defaultValue={member?.address || ""} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">

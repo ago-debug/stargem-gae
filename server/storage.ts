@@ -1353,7 +1353,7 @@ export class DatabaseStorage implements IStorage {
       fatherEmail: row.father_email,
       fatherPhone: row.father_phone,
       fatherMobile: row.father_mobile,
-      streetAddress: row.street_address,
+
       city: row.city,
       province: row.province,
       postalCode: row.postal_code,

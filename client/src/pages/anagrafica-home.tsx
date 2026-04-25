@@ -45,7 +45,7 @@ interface MemberFormData {
   phone?: string;
   mobile?: string;
   // Indirizzo suddiviso
-  streetAddress?: string;
+  address?: string;
   city?: string;
   province?: string;
   postalCode?: string;
@@ -289,7 +289,7 @@ export default function AnagraficaHome() {
         email: selectedMember.email || "",
         phone: selectedMember.phone || "",
         mobile: selectedMember.mobile || "",
-        streetAddress: selectedMember.streetAddress || "",
+        address: selectedMember.address || "",
         city: selectedMember.city || "",
         province: selectedMember.province || "",
         postalCode: selectedMember.postalCode || "",
@@ -498,7 +498,7 @@ export default function AnagraficaHome() {
       email: normalizeEmpty(formData.email),
       phone: normalizeEmpty(formData.phone),
       mobile: normalizeEmpty(formData.mobile),
-      streetAddress: normalizeEmpty(formData.streetAddress),
+      address: normalizeEmpty(formData.address),
       city: normalizeEmpty(formData.city),
       province: normalizeEmpty(formData.province),
       postalCode: normalizeEmpty(formData.postalCode),
@@ -556,7 +556,7 @@ export default function AnagraficaHome() {
       email: member.email || "",
       phone: member.phone || "",
       mobile: member.mobile || "",
-      streetAddress: member.streetAddress || "",
+      address: member.address || "",
       city: member.city || "",
       province: member.province || "",
       postalCode: member.postalCode || "",
@@ -1015,8 +1015,8 @@ export default function AnagraficaHome() {
                     <Label>Via/Piazza</Label>
                     <Input
                       placeholder="Via Roma, 123"
-                      value={formData.streetAddress || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, streetAddress: e.target.value }))}
+                      value={formData.address || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                       data-testid="input-street-address"
                     />
                   </div>

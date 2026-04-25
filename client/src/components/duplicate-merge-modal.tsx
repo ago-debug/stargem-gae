@@ -176,7 +176,7 @@ export function DuplicateMergeModal({
       { key: "mobile", label: "Cellulare" },
       { key: "dateOfBirth", label: "Data Nascita" },
       { key: "placeOfBirth", label: "Luogo Nascita" },
-      { key: "streetAddress", label: "Indirizzo" },
+      { key: "address", label: "Indirizzo" },
       { key: "city", label: "Città" },
       { key: "postalCode", label: "CAP" },
       { key: "province", label: "Provincia" },

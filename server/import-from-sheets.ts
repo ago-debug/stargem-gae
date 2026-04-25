@@ -146,7 +146,7 @@ async function importMembersFromGoogleSheets() {
         dateOfBirth: parseDate(getValue(colDateOfBirth)),
         placeOfBirth: getValue(colPlaceOfBirth) || undefined,
         gender,
-        streetAddress: getValue(colStreet) || undefined,
+        address: getValue(colStreet) || undefined,
         city: getValue(colCity) || undefined,
         province: getValue(colProvince).toUpperCase().substring(0, 2) || undefined,
         postalCode: getValue(colPostalCode) || undefined,

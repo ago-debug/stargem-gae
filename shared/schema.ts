@@ -568,7 +568,7 @@ export const members = mysqlTable("members", {
   certificatoMedicoMetadata: json("certificato_medico_metadata"),
 
   // Indirizzo suddiviso
-  streetAddress: varchar("street_address", { length: 255 }), // Via/Piazza e numero civico
+
   city: varchar("city", { length: 100 }), // Città
   province: varchar("province", { length: 2 }), // Provincia (sigla 2 lettere)
   postalCode: varchar("postal_code", { length: 10 }), // CAP
