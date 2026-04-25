@@ -9701,6 +9701,56 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   // ==========================================
   // STRATEGIC EVENTS (PLANNING STAGIONALE)
   // ==========================================
+  app.get("/api/strategic-events/closed-days", isAuthenticated, async (req, res) => {
+    try {
+      const from = req.query.from as string;
+      const to = req.query.to as string;
+      const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
+      
+      if (!from || !to) {
+        return res.status(400).json({ error: "Missing from or to parameters" });
+      }
+
+      const allEvents = await storage.getStrategicEvents();
+      const activeSeason = await storage.getActiveSeason();
+      const targetSeasonId = seasonId || activeSeason?.id;
+
+      const closedEvents = allEvents.filter(e => {
+        const effSeasonId = e.seasonId || activeSeason?.id;
+        if (targetSeasonId && effSeasonId !== targetSeasonId) return false;
+        
+        const type = e.eventType?.toLowerCase() || '';
+        const isClosedType = type.includes('festivit') || type.includes('chiusura') || type.includes('ferie') || e.isPublicHoliday;
+        // The user says: affects_calendar = 1. Let's use == true
+        if (!isClosedType || e.affectsCalendar !== true) return false;
+
+        const eStart = new Date(e.startDate).toISOString().split('T')[0];
+        const eEnd = e.endDate ? new Date(e.endDate).toISOString().split('T')[0] : eStart;
+
+        return eStart <= to && eEnd >= from;
+      });
+
+      const closedDays = new Set<string>();
+      
+      closedEvents.forEach(e => {
+        const start = new Date(e.startDate);
+        const end = e.endDate ? new Date(e.endDate) : start;
+        
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dayStr = d.toISOString().split('T')[0];
+          if (dayStr >= from && dayStr <= to) {
+            closedDays.add(dayStr);
+          }
+        }
+      });
+
+      res.json({ closedDays: Array.from(closedDays).sort() });
+    } catch (err) {
+      console.error("Error fetching closed days:", err);
+      res.status(500).json({ message: "Failed to fetch closed days" });
+    }
+  });
+
   app.get("/api/strategic-events", isAuthenticated, async (req, res) => {
     try {
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : null;
