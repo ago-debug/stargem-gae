@@ -1946,26 +1946,26 @@ export default function MascheraInputGenerale() {
                 Importa
               </Button>
               <ExportWizard 
-                filename="membro"
+                filename={currentMember?.lastName && currentMember?.firstName ? `${currentMember.lastName}_${currentMember.firstName}` : 'membro'}
                 title="Esporta Membro"
-                data={formData ? [{
-                  ...formData,
-                  membershipNumber: bottomSectionsData.tessere.numero,
-                  membershipExpiry: bottomSectionsData.tessere.dataScad,
-                  membershipStatus: bottomSectionsData.tessere.dataScad ? (new Date(bottomSectionsData.tessere.dataScad) > new Date() ? 'ATTIVA' : 'SCADUTA') : '',
+                data={currentMember ? [{
+                  ...currentMember,
+                  membershipNumber: bottomSectionsData.tessere.numero || topTesseraNumero,
+                  membershipExpiry: bottomSectionsData.tessere.dataScad || (topTesseraMembership ? topTesseraMembership.expiryDate : ''),
+                  membershipStatus: bottomSectionsData.tessere.dataScad ? (new Date(bottomSectionsData.tessere.dataScad) > new Date() ? 'ATTIVA' : 'SCADUTA') : (topTesseraMembership ? (new Date(topTesseraMembership.expiryDate) > new Date() ? 'ATTIVA' : 'SCADUTA') : ''),
                   lastPaymentAmount: combinedPayments && combinedPayments.length > 0 ? [...combinedPayments].sort((a, b) => new Date(b.dataPagamento || b.createdAt).getTime() - new Date(a.dataPagamento || a.createdAt).getTime())[0].importo : '',
                   lastPaymentDate: combinedPayments && combinedPayments.length > 0 ? [...combinedPayments].sort((a, b) => new Date(b.dataPagamento || b.createdAt).getTime() - new Date(a.dataPagamento || a.createdAt).getTime())[0].dataPagamento : '',
-                  medicalCertExpiry: bottomSectionsData.certificatoMedico.dataScadenza,
-                  medicalCertStatus: bottomSectionsData.certificatoMedico.dataScadenza ? (new Date(bottomSectionsData.certificatoMedico.dataScadenza) > new Date() ? 'VALIDO' : 'SCADUTO') : '',
+                  medicalCertExpiry: bottomSectionsData.certificatoMedico.dataScadenza || (formData && formData.scadenzaCertificatoMedico ? formData.scadenzaCertificatoMedico : ''),
+                  medicalCertStatus: bottomSectionsData.certificatoMedico.dataScadenza ? (new Date(bottomSectionsData.certificatoMedico.dataScadenza) > new Date() ? 'VALIDO' : 'SCADUTO') : ((formData && formData.scadenzaCertificatoMedico) ? (new Date(formData.scadenzaCertificatoMedico) > new Date() ? 'VALIDO' : 'SCADUTO') : '')
                 }] : []}
                 expandable={true}
                 columns={[
                   { key: 'id', label: 'ID Database', default: true },
-                  { key: 'cognome', label: 'Cognome', default: true },
-                  { key: 'nome', label: 'Nome', default: true },
-                  { key: 'codiceFiscale', label: 'Codice Fiscale', default: true },
+                  { key: 'lastName', label: 'Cognome', default: true },
+                  { key: 'firstName', label: 'Nome', default: true },
+                  { key: 'fiscalCode', label: 'Codice Fiscale', default: true },
                   { key: 'email', label: 'Email', default: true },
-                  { key: 'telefono', label: 'Telefono', default: true },
+                  { key: 'phone', label: 'Telefono', default: true },
                   { key: 'membershipNumber', label: 'Numero Tessera', default: true },
                   { key: 'membershipExpiry', label: 'Scadenza Tessera', default: true },
                   { key: 'membershipStatus', label: 'Stato Tessera', default: true },
