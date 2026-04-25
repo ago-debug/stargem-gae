@@ -1,0 +1,26 @@
+**DIAGNOSI COMPLETATA — F2-PROTOCOLLO-011**
+
+Ho ispezionato i file ed esplorato dove viene generata la SKU per la visualizzazione nella colonna sinistra. 
+In `CourseDuplicationWizard.tsx` esiste una funzione helper chiamata `generateSKUForCourse` (a partire da riga 232) che viene invocata esplicitamente dentro la UI della riga della tabella:
+
+```tsx
+<div className="text-[10px] font-mono text-muted-foreground mt-1 bg-slate-100 p-0.5 px-1.5 rounded w-fit inline-block">
+   {generateSKUForCourse({ ...course, name: courseOverrides[course.id]?.name ?? course.name }, targetSeasonId)}
+</div>
+```
+
+All'interno di questa funzione `generateSKUForCourse`, il suffisso `codeE` (categoria) viene ancora calcolato e concatenato:
+```typescript
+let codeE = "X";
+const cat = categories?.find((c: any) => c.id?.toString() === courseData.categoryId?.toString());
+if (cat?.value) codeE = String(cat.value).toUpperCase().charAt(0);
+
+return `${codeA}${codeB}${codeC}${codeD}.${codeE}`; // <--- BUG DI VISUALIZZAZIONE
+```
+
+**SOLUZIONE CHE APPLICHERÒ (F2-011):**
+1. Rimuoverò il blocco di codice relativo a `codeE` da `generateSKUForCourse` in `CourseDuplicationWizard.tsx`.
+2. Aggiornerò il return in: `return \`\${codeA}\${codeB}\${codeC}\${codeD}\`;`
+3. Controllerò `CourseSingleDuplicateModal.tsx` per assicurarmi che non vi siano ulteriori tracce accidentali di `codeE` (nel fix precedente avevamo già aggiornato la riga di output, ma controllerò se posso pulire il codice inattivo rimasto).
+
+Attendo il tuo **"VAI"** per procedere con la pulizia, la compilazione e il commit!

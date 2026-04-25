@@ -1,0 +1,18 @@
+Il bug che nasconde i corsi durante le festività è localizzato alla riga 324 di `client/src/pages/planning.tsx`:
+
+```typescript
+// 2. Assign aggregated breakdown (repeated weekly within boundaries)
+const breakdown = getActivitiesBreakdownForDate(cellDate, cellDayOfWeek);
+if (!resolvedHolidayName) { // Optionally don't show normal daily routine on National Holidays
+    const dateStr = format(cellDate, "yyyy-MM-dd");
+    // ... rendering dei corsi e altre routine giornaliere ...
+}
+```
+
+La condizione `if (!resolvedHolidayName)` blocca intenzionalmente (era un comportamento "opzionale" rimasto nel codice) il rendering di qualsiasi aggregatore di routine (Corsi, Allenamenti, ecc.) qualora il giorno contenga una festività di sistema o da DB.
+
+**SOLUZIONE (F2-PROTOCOLLO-010)**:
+1. Rimuovere l'`if (!resolvedHolidayName)` (righe 324 e 352) in modo che i corsi e le routine giornaliere vengano *sempre* ciclati e aggiunti a `cellEvents` a prescindere dal fatto che ci sia o meno una festività.
+2. Mantenere l'istruzione `if (e.isPublicHoliday) return;` a riga 356, perché quella serve a non stampare due volte la card della festività strategica (dal momento che viene già disegnata come badge rosso nella fase 0).
+
+Attendo la tua conferma ("VAI") per procedere con la modifica!

@@ -393,6 +393,7 @@ export const courses = mysqlTable("courses", {
   startDate: date("start_date"),
   endDate: date("end_date"),
   totalOccurrences: int("total_occurrences"),
+  activeOnHolidays: tinyint('active_on_holidays').notNull().default(0),
   level: varchar("level", { length: 100 }), // Livello (es. Base, Intermedio, Avanzato)
   ageGroup: varchar("age_group", { length: 100 }), // Fascia d'età (es. Bambini 3-5 anni)
   lessonType: json("lesson_type").$type<string[]>().default([]), // Tipologia Multipla (es. [Preparazione Gara, Tecnica])
