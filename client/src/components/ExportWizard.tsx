@@ -53,7 +53,7 @@ export function ExportWizard({
   };
 
   const getFormattedFilename = (base: string, ext: string) => {
-    return `${base}_${new Date().toISOString().slice(0,16).replace('T','_').replace(':','-')}.${ext}`;
+    return `${new Date().toISOString().slice(0,16).replace('T','_').replace(':','-')}_${base}.${ext}`;
   };
 
   const getFilteredData = (rawData: any[]) => {
