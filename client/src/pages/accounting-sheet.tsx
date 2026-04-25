@@ -583,6 +583,7 @@ export default function AccountingSheet() {
       title="Esporta Estratto Conto"
       data={payments || []}
       columns={[
+              { key: 'id', label: 'ID Database', default: true },
         { key: 'date', label: 'Data', default: true },
         { key: 'description', label: 'Descrizione', default: true },
         { key: 'amount', label: 'Importo', default: true },

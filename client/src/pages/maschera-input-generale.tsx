@@ -1953,6 +1953,7 @@ export default function MascheraInputGenerale() {
       title="Esporta Membro"
       data={formData ? [formData] : []}
       columns={[
+              { key: 'id', label: 'ID Database', default: true },
         { key: 'lastName', label: 'Cognome', default: true },
         { key: 'firstName', label: 'Nome', default: true },
         { key: 'fiscalCode', label: 'Codice Fiscale', default: true },

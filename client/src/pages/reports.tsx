@@ -768,10 +768,19 @@ export default function Reports() {
             <Button variant="outline" onClick={() => setIsResultDialogOpen(false)}>
               Chiudi
             </Button>
-            <Button onClick={exportResultToCSV} disabled={!reportResult?.data.length} data-testid="button-export-result">
-              <Download className="w-4 h-4 mr-2" />
-              Esporta CSV
-            </Button>
+            <ExportWizard 
+              filename="report"
+              title="Esporta Report"
+              data={reportResult?.data || []}
+              columns={[
+                { key: 'id', label: 'ID Database', default: true },
+                { key: 'lastName', label: 'Cognome', default: true },
+                { key: 'firstName', label: 'Nome', default: true },
+                { key: 'amount', label: 'Importo', default: true },
+                { key: 'date', label: 'Data', default: true },
+                { key: 'status', label: 'Stato', default: true }
+              ]}
+            />
           </DialogFooter>
         </DialogContent>
       </Dialog>

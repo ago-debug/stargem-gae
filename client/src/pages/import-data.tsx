@@ -588,11 +588,11 @@ export default function ImportData() {
 
   const downloadTemplate = (type: string) => {
     const templates: Record<string, string> = {
-      members: "cognome,nome,codice_fiscale,email,telefono,cellulare,data_nascita,luogo_nascita,indirizzo,citta,cap,provincia,sesso,note\nRossi,Mario,RSSMRA90A15F205X,mario@email.com,021234567,3331234567,1990-01-15,Milano,Via Roma 1,Milano,20100,MI,M,\n",
-      payments: "codice_fiscale,tipo_pagamento,importo,importo_pagato,metodo_pagamento,data_pagamento,descrizione,codice_corso,codice_sconto,periodo\nRSSMRA90A15F205X,ISCRIZIONE,50.00,50.00,BONIFICO,2024-01-10,Quota iscrizione,YOGA-01,,MENSILE\n",
-      enrollments: "codice_fiscale,codice_corso,nome_corso,stato_iscrizione,data_iscrizione,importo\nRSSMRA90A15F205X,YOGA-01,Yoga Base,ATTIVA,2024-01-10,50.00\n",
-      memberships: "codice_fiscale,numero_tessera,tipo_tessera,data_emissione,data_scadenza,quota,rinnovo\nRSSMRA90A15F205X,CSEN-001,CSEN,2024-01-10,2024-12-31,10.00,0\n",
-      accounting: "data,descrizione,importo,tipo (entrata/uscita),conto,categoria,note\n2024-01-10,Stipendio insegnante,500.00,USCITA,BPM,STIPENDI,\n",
+      members: "id_db,cognome,nome,codice_fiscale,email,telefono,cellulare,whatsapp,data_nascita,luogo_nascita,provincia_nascita,indirizzo,citta,cap,provincia,sesso,tipo_partecipante,cf_tutore,nome_tutore,telefono_tutore,note,stato\n,Rossi,Mario,RSSMRA90A15F205X,mario@email.com,021234567,3331234567,,1990-01-15,Milano,MI,Via Roma 1,Milano,20100,MI,M,,,,,,ATTIVO\n",
+      payments: "id_db,codice_fiscale,cognome,nome,tipo_pagamento,importo,importo_pagato,metodo_pagamento,data_pagamento,descrizione,codice_corso,codice_sconto,valore_sconto,periodo,operatore,canale_vendita,data_accredito,numero_ricevute,acconto\n,RSSMRA90A15F205X,Rossi,Mario,ISCRIZIONE,50.00,50.00,BONIFICO,2024-01-10,Quota iscrizione,YOGA-01,,,MENSILE,Admin,,,1,\n",
+      enrollments: "id_db,codice_fiscale,cognome,nome,codice_corso,nome_corso,stato_iscrizione,tipo_partecipazione,data_iscrizione,stagione,note,fonte\n,RSSMRA90A15F205X,Rossi,Mario,YOGA-01,Yoga Base,ATTIVA,ALLIEVO,2024-01-10,2024-2025,,\n",
+      memberships: "id_db,codice_fiscale,cognome,nome,numero_tessera,tipo_tessera,ente,data_emissione,data_scadenza,quota,rinnovo,stagione,stato\n,RSSMRA90A15F205X,Rossi,Mario,CSEN-001,CSEN,CSEN,2024-01-10,2024-12-31,10.00,0,2024-2025,ATTIVA\n",
+      accounting: "id_db,data,descrizione,importo,tipo,conto,categoria,id_transazione_banca,note\n,2024-01-10,Stipendio insegnante,500.00,USCITA,BPM,STIPENDI,,\n",
     };
 
     const template = templates[type];

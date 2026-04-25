@@ -519,6 +519,7 @@ export default function StudioBookings() {
       title="Esporta Prenotazioni"
       data={bookings || []}
       columns={[
+              { key: 'id', label: 'ID Database', default: true },
         { key: 'room', label: 'Sala', default: true },
         { key: 'renterName', label: 'Affittuario', default: true },
         { key: 'date', label: 'Data', default: true },
