@@ -309,6 +309,32 @@ export default function ImportData() {
     },
   });
 
+  const [dryRunData, setDryRunData] = useState<any>(null);
+  
+  const dryRunMutation = useMutation({
+    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string; delimiter: string }) => {
+      const formData = new FormData();
+      formData.append('file', params.file);
+      formData.append('fieldMapping', JSON.stringify(params.fieldMapping));
+      formData.append('importKey', params.importKey);
+      formData.append('entityType', params.entityType);
+      formData.append('delimiter', params.delimiter);
+      formData.append('isDryRun', 'true');
+      const response = await fetch('/api/import/mapped', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Errore dry-run');
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      setDryRunData(data);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Errore Dry Run", description: error.message, variant: "destructive" });
+    },
+  });
+
   // File mapped import mutation
   const fileMappedImportMutation = useMutation({
     mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string; delimiter: string; autoCreateRecords?: boolean }) => {
@@ -763,7 +789,22 @@ export default function ImportData() {
             <Button variant="outline" onClick={handleBackToInput}>Indietro</Button>
             <Button variant="outline" onClick={handleSaveMapping}><Save className="w-4 h-4 mr-2" /> Salva questa mappatura</Button>
             <Button variant="outline" onClick={handleAutoMap}><Settings2 className="w-4 h-4 mr-2"/> Auto-Mappa tutto</Button>
-            <Button className="ml-auto" onClick={() => setWizardStep(3)}><ArrowRight className="w-4 h-4 mr-2"/> Continua allo Step 3</Button>
+            <Button className="ml-auto" onClick={() => {
+              setWizardStep(3);
+              if (sourceType === "file" && selectedFile) {
+                 const activeMapping: Record<string, number> = {};
+                 for (const [key, value] of Object.entries(fieldMapping)) {
+                   if (value !== null && value !== undefined && (value as number) >= 0) activeMapping[key] = value as number;
+                 }
+                 dryRunMutation.mutate({
+                   file: selectedFile,
+                   fieldMapping: activeMapping,
+                   importKey,
+                   entityType,
+                   delimiter: csvDelimiter,
+                 });
+              }
+            }}><ArrowRight className="w-4 h-4 mr-2"/> Continua allo Step 3</Button>
           </div>
 
           <Card>
@@ -885,15 +926,74 @@ export default function ImportData() {
             <CardContent className="text-center py-10 space-y-6">
               
               {!importResult && (
-                  <Button
-                    size="lg"
-                    className="h-14 px-8 text-lg"
-                    onClick={handleMappedImport}
-                    disabled={isImporting}
-                  >
-                    {isImporting ? <Loader2 className="w-6 h-6 mr-3 animate-spin" /> : <Settings2 className="w-6 h-6 mr-3" />}
-                    {isImporting ? "Elaborazione in corso... non chiudere questa finestra." : "CONFERMA E AVVIA IMPORTAZIONE"}
-                  </Button>
+                  <>
+                    {dryRunMutation.isPending ? (
+                       <div className="flex flex-col items-center justify-center p-8">
+                         <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
+                         <p className="text-muted-foreground">Generazione anteprima azioni (Dry-Run)...</p>
+                       </div>
+                    ) : dryRunData ? (
+                       <div className="animate-in fade-in space-y-6 text-left">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-green-50 p-4 rounded-xl text-center">
+                              <p className="text-3xl font-black text-green-600">{dryRunData.toInsert}</p>
+                              <p className="text-xs font-semibold text-green-700">DA INSERIRE</p>
+                            </div>
+                            <div className="bg-blue-50 p-4 rounded-xl text-center">
+                              <p className="text-3xl font-black text-blue-600">{dryRunData.toUpdate}</p>
+                              <p className="text-xs font-semibold text-blue-700">DA AGGIORNARE</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-xl text-center">
+                              <p className="text-3xl font-black text-gray-600">{dryRunData.unchanged}</p>
+                              <p className="text-xs font-semibold text-gray-700">INVARIATI</p>
+                            </div>
+                            <div className="bg-red-50 p-4 rounded-xl text-center">
+                              <p className="text-3xl font-black text-red-600">{dryRunData.errors}</p>
+                              <p className="text-xs font-semibold text-red-700">ERRORI/DA SALTARE</p>
+                            </div>
+                          </div>
+                          
+                          <div className="border rounded-md overflow-hidden max-h-60 overflow-y-auto text-sm">
+                            <Table>
+                              <TableHeader className="bg-muted sticky top-0">
+                                <TableRow>
+                                  <TableHead>CF</TableHead>
+                                  <TableHead>Nominativo</TableHead>
+                                  <TableHead>Azione</TableHead>
+                                  <TableHead>Dettaglio</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {dryRunData.preview?.slice(0, 50).map((r: any, i: number) => (
+                                  <TableRow key={i}>
+                                    <TableCell className="font-mono">{r.cf}</TableCell>
+                                    <TableCell>{r.cognome} {r.nome}</TableCell>
+                                    <TableCell>
+                                      <Badge variant={r.azione === 'INSERISCI' ? 'default' : r.azione === 'AGGIORNA' ? 'secondary' : r.azione === 'ERRORE' ? 'destructive' : 'outline'}>{r.azione}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">{r.campiModificati?.join(', ')}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div className="flex justify-center mt-6">
+                            <Button
+                              size="lg"
+                              className="h-14 px-8 text-lg"
+                              onClick={handleMappedImport}
+                              disabled={isImporting}
+                            >
+                              {isImporting ? <Loader2 className="w-6 h-6 mr-3 animate-spin" /> : <Settings2 className="w-6 h-6 mr-3" />}
+                              {isImporting ? "Elaborazione in corso..." : "CONFERMA E AVVIA IMPORTAZIONE REALE"}
+                            </Button>
+                          </div>
+                       </div>
+                    ) : (
+                       <Button size="lg" onClick={handleMappedImport}>Forza Importazione Diretta</Button>
+                    )}
+                  </>
               )}
 
               {importResult && (
@@ -945,6 +1045,19 @@ export default function ImportData() {
                       <>
                         <div className="inline-flex items-center justify-center text-green-600 font-medium bg-green-50 px-6 py-3 rounded-full">
                             <CheckCircle className="w-5 h-5 mr-2" /> Importazione conclusa con successo senza alcun errore.
+                        </div>
+                        <div className="flex justify-center mt-4">
+                           <Button variant="outline" className="gap-2" onClick={() => {
+                              const csv = "CF,Nome,Cognome,Azione,CampiModificati\n" + (dryRunData?.preview || []).map((r:any) => `${r.cf || ''},${r.nome || ''},${r.cognome || ''},${r.azione || ''},"${(r.campiModificati || []).join(',')}"`).join("\n");
+                              const blob = new Blob([csv], { type: 'text/csv' });
+                              const url = window.URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `report_import_${entityType}.csv`;
+                              a.click();
+                           }}>
+                              <Download className="w-4 h-4" /> Scarica Report CSV
+                           </Button>
                         </div>
                         <div className="mt-8">
                             <Button onClick={() => setWizardStep(1)}>Fai un altro import</Button>
