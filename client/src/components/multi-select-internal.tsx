@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { useLocation } from "wouter";
+import { ChevronDown, X, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export const INTERNAL_TAGS = [
@@ -34,6 +36,7 @@ interface MultiSelectInternalProps {
 export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInternalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -59,8 +62,22 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
   };
 
   return (
-    <div className="relative w-[180px]" ref={containerRef}>
-      <div
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Label>Interno</Label>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="h-5 w-5"
+          onClick={() => setLocation('/elenchi?tab=colorati')}
+          data-testid="button-edit-internal-tags"
+        >
+          <Edit className="w-3 h-3 sidebar-icon-gold" />
+        </Button>
+      </div>
+      <div className="relative w-[180px]" ref={containerRef}>
+        <div
         className="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors focus-within:ring-1 focus-within:ring-ring"
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -69,9 +86,9 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
             <span className="text-indigo-700 font-semibold text-xs truncate">
               {selectedTags.length} tag selezionati
             </span>
-          ) : (
-            <span className="text-muted-foreground">Interno 🔒</span>
-          )}
+            ) : (
+              <span className="text-muted-foreground">Seleziona tag...</span>
+            )}
         </div>
         <ChevronDown className={cn("h-4 w-4 opacity-50 shrink-0 transition-transform", isOpen && "rotate-180")} />
       </div>
@@ -110,6 +127,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

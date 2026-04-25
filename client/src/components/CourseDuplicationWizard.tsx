@@ -87,6 +87,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   const [searchFilter, setSearchFilter] = useState("");
   const [globalStartDate, setGlobalStartDate] = useState("");
   const [globalEndDate, setGlobalEndDate] = useState("");
+  const [userModifiedStartDate, setUserModifiedStartDate] = useState(false);
   const [closedDays, setClosedDays] = useState<string[]>([]);
   
   const { toast } = useToast();
@@ -169,6 +170,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
             const maxStr = `${endYear}-06-30`;
             setGlobalStartDate(minStr);
             setGlobalEndDate(maxStr);
+            setUserModifiedStartDate(false);
             
             // Auto applica a tutte le source courses per convenienza UX
             setCourseOverrides(prev => {
@@ -183,6 +185,51 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
         }
     }
   }, [targetSeasonId, seasons, sourceCourses]);
+
+  React.useEffect(() => {
+    if (!searchFilter.trim() || !globalStartDate || userModifiedStartDate) return;
+    
+    const DAY_ALIASES: Record<string, string[]> = {
+        "LUN": ["lun", "lunedì", "lunedi"],
+        "MAR": ["mar", "martedì", "martedi"],
+        "MER": ["mer", "mercoledì", "mercoledi"],
+        "GIO": ["gio", "giovedì", "giovedi"],
+        "VEN": ["ven", "venerdì", "venerdi"],
+        "SAB": ["sab", "sabato"],
+        "DOM": ["dom", "domenica"],
+    };
+    
+    const detectedDay = Object.entries(DAY_ALIASES).find(
+      ([code, aliases]) => aliases.some(a => searchFilter.toLowerCase().includes(a))
+    )?.[0];
+    
+    if (detectedDay) {
+        const selectedSeason = seasons?.find((s: any) => s.id?.toString() === targetSeasonId);
+        if (selectedSeason?.startDate) {
+            const startYear = new Date(selectedSeason.startDate).getFullYear();
+            const minStr = `${startYear}-09-01`;
+            
+            const getFirstDateForDay = (baseDateStr: string, targetDayCode: string) => {
+                const d = new Date(baseDateStr);
+                const dayMap: Record<string, number> = {
+                    'DOM': 0, 'LUN': 1, 'MAR': 2, 'MER': 3, 'GIO': 4, 'VEN': 5, 'SAB': 6
+                };
+                const target = dayMap[targetDayCode];
+                if (target === undefined) return baseDateStr;
+                let currentDay = d.getDay();
+                let diff = target - currentDay;
+                if (diff < 0) diff += 7;
+                d.setDate(d.getDate() + diff);
+                return d.toISOString().split('T')[0];
+            };
+            
+            const firstMatchingDate = getFirstDateForDay(minStr, detectedDay);
+            if (globalStartDate !== firstMatchingDate) {
+                setGlobalStartDate(firstMatchingDate);
+            }
+        }
+    }
+  }, [searchFilter, targetSeasonId, seasons, userModifiedStartDate, globalStartDate]);
 
   const toggleCourse = (courseId: number) => {
     const next = new Set(selectedCourseIds);
@@ -476,7 +523,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
                 </div>
                 <div className="space-y-1.5 min-w-[130px]">
                      <Label className="font-semibold text-slate-800">Data Inizio globale</Label>
-                     <Input type="date" value={globalStartDate} onChange={e => setGlobalStartDate(e.target.value)} className="bg-white" />
+                     <Input type="date" value={globalStartDate} onChange={e => { setGlobalStartDate(e.target.value); setUserModifiedStartDate(true); }} className="bg-white" />
                 </div>
                 <div className="space-y-1.5 min-w-[130px]">
                      <Label className="font-semibold text-slate-800">Data Fine globale</Label>
