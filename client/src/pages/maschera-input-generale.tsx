@@ -1878,8 +1878,7 @@ export default function MascheraInputGenerale() {
   // Duplicate functions have been moved up
 
   const handleImport = () => {
-    // Basic placeholder for import
-    toast({ title: "Importazione", description: "Funzionalità di importazione da file non ancora implementata.", variant: "default" });
+    setLocation('/importa');
   };
 
   const handleGSheets = () => {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { PriceList, PriceListItem, InsertPriceList, InsertPriceListItem, Course, BookingService, Quote, InsertQuote, insertQuoteSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -241,6 +241,7 @@ function PriceListForm({ onSubmit, initialData }: { onSubmit: (data: InsertPrice
 function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () => void }) {
     const { toast } = useToast();
     const [activeTab, setActiveTab] = useState("corsi");
+    const [, setLocation] = useLocation();
 
     const { data: items, isLoading: isLoadingItems } = useQuery<PriceListItem[]>({
         queryKey: [`/api/price-lists/${list.id}/items`],
@@ -298,7 +299,7 @@ function PriceListDetails({ list, onDelete }: { list: PriceList, onDelete: () =>
                     </p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="h-8 gap-2">
+                    <Button variant="outline" size="sm" className="h-8 gap-2" onClick={() => setLocation('/importa?type=listini')}>
                         <Plus className="w-3.5 h-3.5" /> Importa Quote
                     </Button>
                     <Button variant="destructive" size="sm" className="h-8 gap-2" onClick={() => {

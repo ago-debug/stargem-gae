@@ -599,6 +599,23 @@ export const members = mysqlTable("members", {
   companyProvince: varchar("company_province", { length: 10 }),
   companyPhone: varchar("company_phone", { length: 20 }),
   companyEmail: varchar("company_email", { length: 255 }),
+  pIva: varchar("p_iva", { length: 20 }),
+
+  // ALBO & PATENTE
+  alboTipo: varchar("albo_tipo", { length: 50 }),
+  alboSezione: varchar("albo_sezione", { length: 50 }),
+  alboNumero: varchar("albo_numero", { length: 50 }),
+  alboDataIscrizione: date("albo_data_iscrizione"),
+  patenteTipo: varchar("patente_tipo", { length: 20 }),
+  patenteRilasciataDa: varchar("patente_rilasciata_da", { length: 100 }),
+  patenteScadenza: date("patente_scadenza"),
+  carPlate: varchar("car_plate", { length: 20 }),
+
+  // TUTOR 2 EXTRA
+  tutor2FirstName: varchar("tutor2_first_name", { length: 100 }),
+  tutor2LastName: varchar("tutor2_last_name", { length: 100 }),
+  tutor2BirthDate: date("tutor2_birth_date"),
+  tutor2BirthPlace: varchar("tutor2_birth_place", { length: 100 }),
 
   // DOCUMENTO
   documentIssuedBy: varchar("document_issued_by", { length: 100 }),
@@ -1106,6 +1123,11 @@ export const payments = mysqlTable("payments", {
   seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   createdById: varchar("created_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   operatorName: varchar("operator_name", { length: 100 }), // Legacy operator import
+  gbrhNumero: varchar("gbrh_numero", { length: 50 }),
+  gbrhDataEmissione: date("gbrh_data_emissione"),
+  gbrhDataScadenza: date("gbrh_data_scadenza"),
+  gbrhDataUtilizzo: date("gbrh_data_utilizzo"),
+  gbrhIban: varchar("gbrh_iban", { length: 34 }),
   updatedById: varchar("updated_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   bookingId: int("booking_id").references(() => studioBookings.id, { onDelete: "cascade" }),
   membershipId: int("membership_id").references(() => memberships.id, { onDelete: "cascade" }),

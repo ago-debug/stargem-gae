@@ -7770,9 +7770,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         return res.status(400).json({ message: "Nessun file caricato" });
       }
 
-      const { fieldMapping, importKey, entityType, autoCreateRecords } = req.body;
+      const { fieldMapping, importKey, entityType, autoCreateRecords, isDryRun } = req.body;
       const mapping = typeof fieldMapping === 'string' ? JSON.parse(fieldMapping) : fieldMapping;
       const autoCreate = autoCreateRecords === 'true' || autoCreateRecords === true;
+      const dryRun = isDryRun === 'true' || isDryRun === true;
       const entity = entityType || 'members';
 
       const fileContent = req.file.buffer.toString('utf-8');
@@ -7800,7 +7801,9 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       let imported = 0;
       let updated = 0;
       let skipped = 0;
+      let unchanged = 0;
       const errors: { row: number; message: string }[] = [];
+      const previewRows: any[] = [];
 
       if (entity === 'members') {
         // Load all members once before the loop for efficiency
@@ -7923,15 +7926,76 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
             }
 
             if (existingMember) {
-              toUpdate.push({ id: existingMember.id, data: memberData });
+              const updatedData: any = {};
+              const campiModificati: string[] = [];
+              let hasChanges = false;
+              for (const key of Object.keys(memberData)) {
+                if (['id', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy', 'userId', 'photoUrl'].includes(key)) continue;
+                
+                let fileValue = memberData[key];
+                let dbValue = (existingMember as any)[key];
+                
+                if (fileValue instanceof Date) {
+                  const dStr1 = fileValue.toISOString().split('T')[0];
+                  const dStr2 = dbValue instanceof Date ? dbValue.toISOString().split('T')[0] : 
+                               (typeof dbValue === 'string' ? dbValue.split('T')[0] : null);
+                  if (dStr1 !== dStr2) {
+                    updatedData[key] = fileValue;
+                    campiModificati.push(key);
+                    hasChanges = true;
+                  }
+                } else if (fileValue !== null && fileValue !== undefined && String(fileValue) !== String(dbValue)) {
+                   updatedData[key] = fileValue;
+                   campiModificati.push(key);
+                   hasChanges = true;
+                }
+              }
+              
+              if (hasChanges) {
+                toUpdate.push({ id: existingMember.id, data: updatedData });
+                previewRows.push({
+                   cf: importKeyValue || memberData.fiscalCode,
+                   nome: memberData.firstName || existingMember.firstName,
+                   cognome: memberData.lastName || existingMember.lastName,
+                   azione: 'AGGIORNA',
+                   campiModificati
+                });
+              } else {
+                unchanged++;
+                previewRows.push({
+                   cf: importKeyValue || memberData.fiscalCode,
+                   nome: memberData.firstName || existingMember.firstName,
+                   cognome: memberData.lastName || existingMember.lastName,
+                   azione: 'INVARIATO',
+                   campiModificati: []
+                });
+              }
             } else {
               toInsert.push(memberData);
+              previewRows.push({
+                 cf: importKeyValue || memberData.fiscalCode,
+                 nome: memberData.firstName,
+                 cognome: memberData.lastName,
+                 azione: 'INSERISCI',
+                 campiModificati: Object.keys(memberData)
+              });
             }
           } catch (err: any) {
             console.error("[API Error] Caught explicitly:", err);
             errors.push({ row: rowNum, message: err.message || "Errore sconosciuto" });
             skipped++;
           }
+        }
+
+        if (dryRun) {
+          return res.json({
+            success: true,
+            toInsert: toInsert.length,
+            toUpdate: toUpdate.length,
+            unchanged,
+            errors: errors.length,
+            preview: previewRows
+          });
         }
 
         // Process inserts in batches of 100
@@ -7964,6 +8028,139 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
             }
           }
         }
+      } else if (entity === 'enrollments') {
+        const allMembers = await storage.getMembers();
+        const allCourses = await storage.getCourses();
+        const allEnrollments = await storage.getEnrollments();
+        
+        for (let i = 0; i < dataRows.length; i++) {
+          const row = dataRows[i];
+          const rowNum = i + 2;
+          try {
+            const rowData: any = {};
+            for (const [field, colIndex] of Object.entries(mapping)) {
+              if (colIndex !== null && colIndex !== undefined && (colIndex as number) >= 0) {
+                rowData[field] = row[colIndex as number]?.trim();
+              }
+            }
+            if (!rowData.fiscalCode || !rowData.courseCode) {
+               skipped++; continue;
+            }
+            
+            const member = allMembers.find(m => m.fiscalCode === rowData.fiscalCode);
+            const course = allCourses.find(c => c.sku === rowData.courseCode);
+            if (!member || !course) {
+               errors.push({ row: rowNum, message: "Membro o corso non trovato" });
+               previewRows.push({ cf: rowData.fiscalCode, nome: "-", cognome: "-", azione: "ERRORE", campiModificati: ["Membro o corso mancante"] });
+               skipped++; continue;
+            }
+            
+            const existing = allEnrollments.find(e => e.memberId === member.id && e.courseId === course.id);
+            if (existing) {
+               unchanged++; 
+               previewRows.push({ cf: rowData.fiscalCode, nome: member.firstName, cognome: member.lastName, azione: "INVARIATO", campiModificati: [] });
+               continue;
+            } else {
+               if (!dryRun) {
+                 await storage.createEnrollment({
+                   memberId: member.id,
+                   courseId: course.id,
+                   status: rowData.status || "active",
+                   sourceFile: "import",
+                 });
+               }
+               imported++;
+               previewRows.push({ cf: rowData.fiscalCode, nome: member.firstName, cognome: member.lastName, azione: "INSERISCI", campiModificati: ["Iscrizione creata"] });
+            }
+          } catch(e: any) {
+            errors.push({ row: rowNum, message: e.message });
+            previewRows.push({ cf: "-", nome: "-", cognome: "-", azione: "ERRORE", campiModificati: [e.message] });
+            skipped++;
+          }
+        }
+        
+        if (dryRun) {
+           return res.json({ success: true, toInsert: imported, toUpdate: 0, unchanged, errors: errors.length, preview: previewRows });
+        }
+      } else if (entity === 'memberships') {
+        const allMembers = await storage.getMembers();
+        const allMemberships = await storage.getMemberships();
+        const activeSeason = await storage.getActiveSeason();
+        const seasonId = activeSeason ? activeSeason.id : 1;
+
+        for (let i = 0; i < dataRows.length; i++) {
+          const row = dataRows[i];
+          const rowNum = i + 2;
+          try {
+            const rowData: any = {};
+            for (const [field, colIndex] of Object.entries(mapping)) {
+              if (colIndex !== null && colIndex !== undefined && (colIndex as number) >= 0) {
+                rowData[field] = row[colIndex as number]?.trim();
+              }
+            }
+            if (!rowData.fiscalCode) {
+               skipped++; continue;
+            }
+            
+            const member = allMembers.find(m => m.fiscalCode === rowData.fiscalCode);
+            if (!member) {
+               errors.push({ row: rowNum, message: "Membro non trovato" });
+               previewRows.push({ cf: rowData.fiscalCode, nome: "-", cognome: "-", azione: "ERRORE", campiModificati: ["Membro mancante"] });
+               skipped++; continue;
+            }
+            
+            const existing = allMemberships.find(m => m.memberId === member.id && m.seasonId === seasonId);
+            if (existing) {
+               const updateData: any = {};
+               const campiModificati: string[] = [];
+               if (rowData.expiryDate) {
+                  const dStr1 = new Date(rowData.expiryDate).toISOString().split('T')[0];
+                  const dStr2 = existing.expiryDate ? new Date(existing.expiryDate).toISOString().split('T')[0] : null;
+                  if (dStr1 !== dStr2) {
+                     updateData.expiryDate = new Date(rowData.expiryDate);
+                     campiModificati.push('expiryDate');
+                  }
+               }
+               if (rowData.status && existing.status !== rowData.status) {
+                  updateData.status = rowData.status;
+                  campiModificati.push('status');
+               }
+               
+               if (Object.keys(updateData).length > 0) {
+                 if (!dryRun) {
+                   await storage.updateMembership(existing.id, updateData);
+                 }
+                 updated++;
+                 previewRows.push({ cf: rowData.fiscalCode, nome: member.firstName, cognome: member.lastName, azione: "AGGIORNA", campiModificati });
+               } else {
+                 unchanged++;
+                 previewRows.push({ cf: rowData.fiscalCode, nome: member.firstName, cognome: member.lastName, azione: "INVARIATO", campiModificati: [] });
+               }
+            } else {
+               if (!dryRun) {
+                 await storage.createMembership({
+                   memberId: member.id,
+                   seasonId: seasonId,
+                   membershipNumber: rowData.cardNumber || `AUTO-${member.id}`,
+                   membershipType: rowData.cardType || "NUOVO",
+                   issueDate: rowData.issueDate ? new Date(rowData.issueDate) : new Date(),
+                   expiryDate: rowData.expiryDate ? new Date(rowData.expiryDate) : new Date(),
+                   status: "active"
+                 });
+               }
+               imported++;
+               previewRows.push({ cf: rowData.fiscalCode, nome: member.firstName, cognome: member.lastName, azione: "INSERISCI", campiModificati: ["Tessera creata"] });
+            }
+          } catch(e: any) {
+            errors.push({ row: rowNum, message: e.message });
+            previewRows.push({ cf: "-", nome: "-", cognome: "-", azione: "ERRORE", campiModificati: [e.message] });
+            skipped++;
+          }
+        }
+        
+        if (dryRun) {
+           return res.json({ success: true, toInsert: imported, toUpdate: updated, unchanged, errors: errors.length, preview: previewRows });
+        }
       } else if (entity === 'courses') {
         // Use shared helper for consistent validation
         const result = await importCoursesFromRows(dataRows, mapping, importKey || 'name', storage, autoCreate);
@@ -7985,6 +8182,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         imported,
         updated,
         skipped,
+        unchanged,
         total: dataRows.length,
         errors: errors.slice(0, 10)
       });

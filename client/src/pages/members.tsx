@@ -837,7 +837,7 @@ export default function Members() {
             onClick={() => setLocation("/importa")}
             data-testid="button-import-csv"
           >
-            <Upload className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 mr-2" />
             Importa CSV
           </Button>
           <Button
@@ -845,7 +845,7 @@ export default function Members() {
             onClick={exportToCSV}
             data-testid="button-export-csv"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Upload className="w-4 h-4 mr-2" />
             Esporta CSV
           </Button>
           <Button

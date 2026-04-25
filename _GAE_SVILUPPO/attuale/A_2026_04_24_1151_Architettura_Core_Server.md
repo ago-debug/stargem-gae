@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-22 14:35
+Aggiornato al: 2026-04-24 11:51
 
 # Master Document: Architettura e Database StarGem Manager (Stato Attuale)
 
@@ -38,10 +38,10 @@ I volumi di records presenti al termine delle bonifiche e mock dei dati sono i s
 
 | Entità / Modulo | Tabella Fisica DB | Ruolo e Funzione | Totale Record |
 | :--- | :--- | :--- | :---: |
-| **Membri e Anagrafiche** | `members` | Profilo centrale di iscritti e staff. | **9.504** |
-| **Corsi e Attività STI** | `courses` | Classi, Workshop e Campus fusi. | **296** |
-| **Iscrizioni (Enrollments)**| `enrollments` | Aggancio allievo (`member`) e classe (`course`). | **0** |
-| **Pagamenti (Mastro)** | `payments` | Registratore globale per ogni transazione economica| **30** |
+| **Membri e Anagrafiche** | `members` | Profilo centrale di iscritti e staff. | **4.489** |
+| **Corsi e Attività STI** | `courses` | Classi, Workshop e Campus fusi. | **581** |
+| **Iscrizioni (Enrollments)**| `enrollments` | Aggancio allievo (`member`) e classe (`course`). | **10.475** |
+| **Pagamenti (Mastro)** | `payments` | Registratore globale per ogni transazione economica| **3.775** |
 | **Regole e Promo** | `promo_rules` | Codici promozionali, sconti Black Friday. | **50** |
 | **Aule / Spazi Fisici** | `studios` | Le sale della struttura (es. Sala 1). | **13** |
 | **Accordi Insegnanti** | `instructor_agreements`| Relazione tra docenti, % paga e stagione. | **9** |
@@ -62,8 +62,9 @@ I volumi di records presenti al termine delle bonifiche e mock dei dati sono i s
 - **`studios`** e **`seasons`**: Definiscono lo spazio e il partizionamento temporale.
 
 ### C. Modulo Cassa Cost-Centers e Quote
-- La tabella universale è **`payments`**. Ė tassativo appoggiarsi su di essa per qualsiasi incasso futuro per non rompere i report di "Controllo di Gestione" (`cost_centers` e `journal_entries`).
+- La tabella universale è **`payments`**. Ė tassativo appoggiarsi su di essa per qualsiasi incasso futuro per non rompere i report di "Controllo di Gestione" (`cost_centers` e `journal_entries`). (NB: include ora la colonna `operator_name` per storicizzare gli operatori di import storici slegati dalle righe `users` attuali).
 - Estensioni per Engine Sconti: `company_agreements`, `staff_rates`, `pricing_rules`. Esiste un motore di ricarica per logiche massive asincrone.
+- **Note Import**: Il DB corrente contiene 3.257 record storici generati dall'import P5, che mappano campi finanziari legacy (sz1-sz4 e gbrh) incluse colonne come `total_quota`, `deposit`, `receipts_count`, salvando nel campo `source` (limitato a 20 char) il canale di 'vendita'.
 
 ---
 

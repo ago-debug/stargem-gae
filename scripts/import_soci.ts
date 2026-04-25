@@ -94,8 +94,8 @@ async function run() {
     console.log("File .env non trovato!");
     process.exit(1);
   }
-  if (passata < 1 || passata > 5) {
-    console.log("Specificare --passata=1 (o 2 o 3 o 4 o 5)");
+  if (![1, 2, 3, 4, 5, 6].includes(passata)) {
+    console.log("Specificare --passata=1 (o 2 o 3 o 4 o 5 o 6)");
     process.exit(1);
   }
 
@@ -131,6 +131,12 @@ async function run() {
   let countP5PagamentiSZ = 0;
   let countP5PagamentiGBRH = 0;
   let countP5SenzaEnrollment = 0;
+
+  let countP6Corsi = 0;
+  let countP6Prove = 0;
+  let countP6Duplicati = 0;
+  let countP6Placeholder = 0;
+  let countP6Welfare = 0;
 
   try {
     if (passata === 1) {
@@ -1125,6 +1131,126 @@ async function run() {
       }
     }
 
+    if (passata === 6) {
+      const file = 'temp_import/estrap_20260417_estrapolazione_Master_per_importazione_Bitrix.xlsx';
+      if (!fs.existsSync(file)) throw new Error(`File non trovato: ${file}`);
+      const wb = xlsx.read(fs.readFileSync(file), { cellDates: true });
+      const rows = xlsx.utils.sheet_to_json<any>(wb.Sheets['importazione'] || wb.Sheets[wb.SheetNames[0]]);
+      
+      const allCourses = await db.select().from(courses);
+      const allEnrollments = await db.select().from(enrollments);
+
+      for (const row of rows) {
+        countProcessed++;
+        const cfRaw = row['an_cod_fiscale'];
+        const cf = normalizeCF(cfRaw);
+        
+        if (!cf) {
+          countSkipped++;
+          continue;
+        }
+
+        let m: any = null;
+        const existing = await db.select().from(members).where(eq(members.fiscalCode, cf)).limit(1);
+        if (existing.length > 0) m = existing[0];
+
+        if (!m) {
+          if (!notFoundCFs.includes(cf)) notFoundCFs.push(cf);
+          countSkipped++;
+          continue;
+        }
+
+        let lastEnrollmentId: number | null = null;
+
+        const processSkus = async (skuString: string, typeStr: string) => {
+          if (!skuString) return;
+          const skus = skuString.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+          for (const sku of skus) {
+            let course = allCourses.find(c => c.sku === sku);
+            if (!course) {
+              const prefix = sku.substring(0, 15);
+              course = allCourses.find(c => c.sku && c.sku.startsWith(prefix));
+            }
+
+            let courseId = course?.id;
+            
+            if (!courseId) {
+              const baseName = sku.length > 4 ? sku.substring(4) : sku;
+              const newCourse: any = {
+                name: `Corso Storico: ${baseName}`,
+                sku: sku,
+                active: true,
+                activityType: 'storico',
+                maxCapacity: 50,
+              };
+              if (!dryRun) {
+                const [inserted] = await db.insert(courses).values(newCourse);
+                courseId = inserted.insertId;
+                allCourses.push({ id: courseId, sku: sku, name: newCourse.name, active: true } as any);
+              } else {
+                courseId = 999999 + countP6Placeholder; 
+              }
+              countP6Placeholder++;
+              logRow(cf, 'CREATE', `Placeholder corso storico creato per SKU ${sku}`);
+            }
+
+            const exists = allEnrollments.find(e => e.memberId === m.id && e.courseId === courseId);
+            if (exists) {
+              countP6Duplicati++;
+              lastEnrollmentId = exists.id;
+              continue;
+            }
+
+            let seasonId = 1;
+            if (sku.startsWith('2425')) seasonId = 3;
+            if (sku.startsWith('2526')) seasonId = 1;
+
+            const insertEnrollment: any = {
+              memberId: m.id,
+              courseId: courseId,
+              status: 'active',
+              participationType: typeStr,
+              sourceFile: 'gsheets_master_p6',
+              seasonId: seasonId
+            };
+
+            if (!dryRun) {
+              const [insertedE] = await db.insert(enrollments).values(insertEnrollment);
+              lastEnrollmentId = insertedE.insertId;
+              allEnrollments.push({ id: lastEnrollmentId, memberId: m.id, courseId: courseId } as any);
+            } else {
+              lastEnrollmentId = 888888;
+            }
+            if (typeStr === 'corso') countP6Corsi++;
+            if (typeStr === 'prova') countP6Prove++;
+            logRow(cf, 'INSERT', `Enrollment ${typeStr} creato per SKU: ${sku}`);
+          }
+        };
+
+        try {
+          await processSkus(row['codici_corso_iscrizioni'], 'corso');
+          await processSkus(row['codici_corso_prove_e_lezioni'], 'prova');
+
+          if (row['welfare_presenze']) {
+            countP6Welfare++;
+            const wText = `Welfare presenze: ${row['welfare_presenze']}`;
+            if (!dryRun) {
+              if (lastEnrollmentId) {
+                await db.update(enrollments).set({ notes: wText }).where(eq(enrollments.id, lastEnrollmentId));
+              } else {
+                const currentNotes = m.notes ? m.notes + '\n' + wText : wText;
+                await db.update(members).set({ notes: currentNotes }).where(eq(members.id, m.id));
+              }
+            }
+            logRow(cf, 'UPDATE', `Welfare presenze gestito (${row['welfare_presenze']})`);
+          }
+        } catch (e: any) {
+          countErrors++;
+          logRow(cf, 'ERROR', e.message);
+        }
+      }
+    }
+
   } catch (error: any) {
     console.error("ERRORE GENERALE:", error.message);
   } finally {
@@ -1175,6 +1301,16 @@ async function run() {
       console.log(`Pagamenti gbrh creati: ${countP5PagamentiGBRH}`);
       console.log(`Senza enrollment: ${countP5SenzaEnrollment}`);
     }
+    if (passata === 6) {
+      console.log(`--- Statistiche P6 (Corsi MASTER) ---`);
+      console.log(`Processati: ${countProcessed}`);
+      console.log(`Enrollment corso nuovi: ${countP6Corsi}`);
+      console.log(`Enrollment prova nuovi: ${countP6Prove}`);
+      console.log(`Duplicati saltati: ${countP6Duplicati}`);
+      console.log(`Placeholder creati: ${countP6Placeholder}`);
+      console.log(`Welfare tracciati: ${countP6Welfare}`);
+    }
   }
+
 }
 run();
