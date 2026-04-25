@@ -1,19 +1,19 @@
-Aggiornato al: 2026-04-24 11:44
+Aggiornato al: 2026-04-25 12:05
 
-# 📊 STATO DB REALE — 24/04/2026 11:44
+# 📊 STATO DB REALE — 25/04/2026 12:05
 ## Import completato — riepilogo
 
 ### Tabelle e record
 | Tabella | Record |
 | --- | --- |
-| `enrollments` | 10.475 |
+| `enrollments` | 13.584 |
 | `cities` | 8.062 |
 | `members` | 4.489 |
 | `payments` | 3.775 |
-| `memberships` | 3.700 |
+| `memberships` | 3.281 |
 | `medical_certificates` | 2.770 |
 | `user_activity_logs` | 2.084 |
-| `courses` | 581 |
+| `courses` | 586 |
 
 ### Dettaglio per tabella
 
@@ -76,3 +76,19 @@ Aggiornato al: 2026-04-24 11:44
 - **Tessere / GemPass**: Rendere visibili `issue_date`, `barcode`, `fee` e `previous_membership_number`.
 - **Iscritti**: Aggiungere colonne `status` (attivo/sospeso/cancellato) e `participation_type` nella tabella iscritti.
 - **Scheda Contabile**: Aggiungere le colonne `operator_name`, `source` (canale di vendita), `transfer_confirmation_date`, `receipts_count`, `deposit` e `total_quota` al Data Table contabile.
+
+
+## EXPORT WIZARD — implementato 25/04/2026
+Componente: ExportWizard.tsx
+Formati: CSV + Excel (XLSX streaming)
+PDF: in sviluppo futuro
+Sezioni con export:
+  members · payments · accounting-sheet
+  courses · workshops · studio-bookings
+  reports · gemteam · maschera-input
+  anagrafica-home
+Route backend: POST /api/export
+  (streaming ExcelJS per XLSX)
+Import unificato: /importa
+  con dry-run + logica aggiornamento
+  + report CSV post-import
