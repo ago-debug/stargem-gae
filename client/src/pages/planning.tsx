@@ -228,6 +228,15 @@ export default function Planning() {
         const map: Record<string, Record<string, number>> = {};
         if (!unifiedBridgeActivities) return map;
         
+        const isDayClosed = (dateStr: string) => {
+            return strategicEventsData?.some(e => {
+                const isClosedType = ['festivita','chiusura','ferie'].includes(e.eventType);
+                const eStart = e.startDate?.split('T')[0];
+                const eEnd = (e.endDate || e.startDate)?.split('T')[0];
+                return isClosedType && (e.affectsCalendar || e.affectsCalendar === 1) && dateStr >= eStart && dateStr <= eEnd;
+            }) ?? false;
+        };
+
         unifiedBridgeActivities.forEach((item: any) => {
             const raw = item.rawPayload || item;
             if (item.isActive !== false && raw.active !== false && item.startDatetime) {
@@ -243,11 +252,16 @@ export default function Planning() {
                 else if (key === 'studioBookings' || key === 'rentals') key = 'Affitti/Sale';
                 else key = 'Altre Attività';
                 
+                const activeOnHolidays = raw.activeOnHolidays === 1 || raw.activeOnHolidays === true;
+                if (key === 'Corsi' && !activeOnHolidays && isDayClosed(dateStr)) {
+                    return; // Salta l'incremento
+                }
+
                 map[dateStr][key] = (map[dateStr][key] || 0) + 1;
             }
         });
         return map;
-    }, [unifiedBridgeActivities]);
+    }, [unifiedBridgeActivities, strategicEventsData]);
 
     const getActivitiesBreakdownForDate = useCallback((cellDate: Date, cellDayOfWeek: number) => {
         const dateStr = format(cellDate, "yyyy-MM-dd");

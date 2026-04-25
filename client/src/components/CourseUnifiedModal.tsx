@@ -736,6 +736,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       startTime: selectedStartTime || null,
       endTime: selectedEndTime || null,
       recurrenceType: formData.recurrenceType || null,
+      activeOnHolidays: formData.activeOnHolidays ? 1 : 0,
       schedule: formData.schedule || null,
       startDate: formData.startDate ? new Date(formData.startDate) : null,
       endDate: formData.endDate ? new Date(formData.endDate) : null,
@@ -792,6 +793,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           startTime: safeStartTime || null,
           endTime: stripSeconds(formData.endTime) || null,
           recurrenceType: formData.recurrenceType || null,
+          activeOnHolidays: formData.activeOnHolidays ? 1 : 0,
           schedule: formData.schedule || null,
           startDate: formData.startDate ? new Date(formData.startDate) : null,
           endDate: formData.endDate ? new Date(formData.endDate) : null,
@@ -1255,6 +1257,18 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       {RECURRENCE_TYPES.map(r => <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  </div>
+                  <div className="flex items-center gap-3 mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <input
+                      type="checkbox"
+                      id="activeOnHolidays"
+                      checked={formData.activeOnHolidays === 1 || formData.activeOnHolidays === true}
+                      onChange={e => updateForm("activeOnHolidays", e.target.checked ? 1 : 0)}
+                      className="h-4 w-4 rounded"
+                    />
+                    <label htmlFor="activeOnHolidays" className="text-sm font-medium text-amber-800 cursor-pointer">
+                      🎄 Corso attivo anche durante festività e chiusure studio
+                    </label>
                   </div>
                 </div>
                 

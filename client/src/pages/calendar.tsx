@@ -1142,6 +1142,21 @@ export default function CalendarPage() {
                 const matchDay = normalizeDay(evt.dayOfWeek) === targetDayId;
                 if (!matchDay) return false;
 
+                // Nascondi corsi ricorrenti su giorni festivi/chiusure
+                const isRecurringCourse = evt.registryKey === 'courses' || evt.registryKey === 'corsi' || evt.sourceType === 'course' || evt.sourceType === 'courses';
+                const activeOnHolidays = evt.rawPayload?.activeOnHolidays === 1 || (evt as any).activeOnHolidays === 1 || evt.rawPayload?.activeOnHolidays === true;
+
+                if (isRecurringCourse && !activeOnHolidays) {
+                    const targetDateStr = isDayCol ? weekDatesMap[colId] : weekDatesMap[selectedDay];
+                    const isDayClosed = strategicEventsData?.some(e => {
+                        const isClosedType = ['festivita','chiusura','ferie'].includes(e.eventType);
+                        const eStart = e.startDate?.split('T')[0];
+                        const eEnd = (e.endDate || e.startDate)?.split('T')[0];
+                        return isClosedType && (e.affectsCalendar || e.affectsCalendar === 1) && targetDateStr >= eStart && targetDateStr <= eEnd;
+                    });
+                    if (isDayClosed) return false;
+                }
+
                 // Controllo universale sui limiti temporali (startDate / endDate)
                 if (evt.startDate || evt.endDate) {
                     const targetDateStr = isDayCol ? weekDatesMap[colId] : weekDatesMap[selectedDay];
