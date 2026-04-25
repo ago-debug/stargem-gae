@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download, Sheet, ArrowRight, Settings2, Key, Loader2, Save, Trash2, Users, BookOpen, CreditCard, BarChart2 } from "lucide-react";
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download, Sheet, ArrowRight, Settings2, Key, Loader2, Save, Trash2, Users, BookOpen, CreditCard, BarChart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -681,7 +681,7 @@ export default function ImportData() {
               { type: "payments", label: "Pagamenti", icon: CreditCard, desc: "Importa storico pagamenti da corsi, workshop e contanti", badge: "Solo inserimento · Mai modificare", fonti: "CSV · Excel (.xlsx) · Google Sheets", alert: "⚠ I pagamenti importati sono definitivi" },
               { type: "enrollments", label: "Iscrizioni ai Corsi", icon: BookOpen, desc: "Importa iscrizioni storiche ai corsi dalla piattaforma Athena", badge: "Aggiorna se esiste · Inserisce se nuovo", fonti: "CSV · Excel (.xlsx) — Athena" },
               { type: "memberships", label: "Tessere Associative", icon: CreditCard, desc: "Importa le tessere GemPass storiche e i rinnovi", badge: "Inserisce se non esiste", fonti: "CSV · Excel (.xlsx) — Athena", alert: "Max 10 tessere per persona (attività aperta dal 2016)" },
-              { type: "accounting", label: "Movimenti Contabili", icon: BarChart2, desc: "Importa estratti conto BPM, Poste, Soldo e PostePay", badge: "Solo inserimento · Storico immutabile", fonti: "Excel (.xlsx) — BPM · Poste · Soldo", alert: "Coordinare con la sezione Contabilità prima dell'import" }
+              { type: "accounting", label: "Movimenti Contabili", icon: BarChart, desc: "Importa estratti conto BPM, Poste, Soldo e PostePay", badge: "Solo inserimento · Storico immutabile", fonti: "Excel (.xlsx) — BPM · Poste · Soldo", alert: "Coordinare con la sezione Contabilità prima dell'import" }
             ].map(t => {
               const Icon = t.icon;
               return (
@@ -1099,9 +1099,12 @@ export default function ImportData() {
           <div>
             <h4 className="font-semibold mb-2">Sicurezza dei dati:</h4>
             <p className="text-muted-foreground">
-              I dati esistenti non vengono mai sovrascritti. Se una persona è già presente (stesso CF), 
-              vengono completati solo i campi vuoti. I pagamenti e i movimenti contabili non possono essere 
-              modificati dopo l'import.
+              {entityType === 'members' && "Se una persona esiste già (stesso CF), i suoi dati vengono aggiornati con quelli del file. Solo pagamenti e storico non vengono mai modificati."}
+              {entityType === 'payments' && "I pagamenti importati sono definitivi e non possono essere modificati dopo l'import."}
+              {entityType === 'enrollments' && "Se l'iscrizione esiste già (stessa persona + stesso corso), viene saltata automaticamente. Non vengono creati duplicati."}
+              {entityType === 'memberships' && "Se la tessera esiste già per quella stagione, viene aggiornata la data di scadenza e lo stato. Non vengono creati duplicati."}
+              {entityType === 'accounting' && "I movimenti contabili sono storico immutabile. Solo inserimento, mai modifica."}
+              {!['members', 'payments', 'enrollments', 'memberships', 'accounting'].includes(entityType) && "Verifica i dati prima di procedere."}
             </p>
           </div>
         </CardContent>
