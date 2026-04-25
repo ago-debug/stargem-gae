@@ -1117,6 +1117,19 @@ export default function MascheraInputGenerale() {
     enabled: !!selectedMemberId,
   });
 
+  const { data: memberMedicalCertificates } = useQuery<any[]>({
+    queryKey: ["/api/medical-certificates", "member", selectedMemberId],
+    queryFn: async () => {
+      const res = await fetch(`/api/medical-certificates?memberId=${selectedMemberId}`);
+      if (!res.ok) {
+        if (res.status === 404) return [];
+        throw new Error("Errore caricamento certificati medici");
+      }
+      return res.json();
+    },
+    enabled: !!selectedMemberId,
+  });
+
   const { data: currentMember, refetch: refetchCurrentMember } = useQuery<any>({
     queryKey: ["/api/members/current", selectedMemberId],
     queryFn: async () => {
@@ -1953,8 +1966,17 @@ export default function MascheraInputGenerale() {
                     ? [...combinedPayments].sort((a, b) => new Date(b.paidDate || b.paymentDate || b.dataPagamento || b.createdAt).getTime() - new Date(a.paidDate || a.paymentDate || a.dataPagamento || a.createdAt).getTime())[0] 
                     : null;
                   
-                  const certExpiry = bottomSectionsData.certificatoMedico?.dataScadenza || currentMember.medicalCertificateExpiry || currentMember.certificatoMedicoMetadata?.dataScadenza || (formData && (formData as any).scadenzaCertificatoMedico ? (formData as any).scadenzaCertificatoMedico : '');
-                  const certStatus = certExpiry ? (new Date(certExpiry) > new Date() ? 'VALIDO' : 'SCADUTO') : '';
+                  const latestCert = memberMedicalCertificates && memberMedicalCertificates.length > 0 
+                    ? [...memberMedicalCertificates].sort((a, b) => new Date(b.expiryDate).getTime() - new Date(a.expiryDate).getTime())[0] 
+                    : null;
+
+                  const certExpiry = latestCert?.expiryDate || bottomSectionsData.certificatoMedico?.dataScadenza || currentMember.medicalCertificateExpiry || currentMember.certificatoMedicoMetadata?.dataScadenza || (formData && (formData as any).scadenzaCertificatoMedico ? (formData as any).scadenzaCertificatoMedico : '');
+                  
+                  // Se abbiamo lo status dal DB usiamo quello (traducendolo in italiano), altrimenti calcoliamo dalla data
+                  let certStatus = '';
+                  if (latestCert?.status === 'valid') certStatus = 'VALIDO';
+                  else if (latestCert?.status === 'expired' || latestCert?.status === 'invalid') certStatus = 'SCADUTO';
+                  else if (certExpiry) certStatus = new Date(certExpiry) > new Date() ? 'VALIDO' : 'SCADUTO';
 
                   return [{
                     ...currentMember,
