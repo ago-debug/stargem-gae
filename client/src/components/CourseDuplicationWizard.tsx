@@ -247,11 +247,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
       const codeC = courseData.dayOfWeek ? String(courseData.dayOfWeek).toUpperCase().slice(0, 3) : "XXX";
       const codeD = courseData.startTime ? String(courseData.startTime).split(":")[0] : "XX";
       
-      let codeE = "X";
-      const cat = categories?.find((c: any) => c.id?.toString() === courseData.categoryId?.toString());
-      if (cat?.value) codeE = String(cat.value).toUpperCase().charAt(0);
-      
-      return `${codeA}${codeB}${codeC}${codeD}.${codeE}`;
+      return `${codeA}${codeB}${codeC}${codeD}`;
   };
 
   const handleDuplicate = async () => {
