@@ -399,6 +399,7 @@ export const courses = mysqlTable("courses", {
   lessonType: json("lesson_type").$type<string[]>().default([]), // Tipologia Multipla (es. [Preparazione Gara, Tecnica])
   numberOfPeople: varchar("number_of_people", { length: 50 }), // Numero Persone
   statusTags: json("status_tags").$type<string[]>().default([]),
+  internalTags: json("internal_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   googleEventId: varchar("google_event_id", { length: 255 }),
   seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),

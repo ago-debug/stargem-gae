@@ -1,0 +1,115 @@
+import { useState, useRef, useEffect } from "react";
+import { ChevronDown, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+export const INTERNAL_TAGS = [
+  { id: "spingere", name: "SPINGERE", color: "#4f46e5" },
+  { id: "chiudere", name: "CHIUDERE", color: "#6366f1" },
+  { id: "con_selezione", name: "CON SELEZIONE", color: "#8b5cf6" },
+  { id: "pagato", name: "PAGATO", color: "#7c3aed" },
+  { id: "privato", name: "PRIVATO", color: "#6d28d9" },
+  { id: "ultimi_posti", name: "ULTIMI POSTI", color: "#5b21b6" },
+];
+
+export function InternalBadge({ name }: { name: string }) {
+  const tag = INTERNAL_TAGS.find(t => t.name === name);
+  const color = tag?.color || "#4f46e5";
+  return (
+    <div
+      className="text-[10px] font-bold uppercase tracking-wider leading-none truncate px-1.5 py-[2px] rounded-[3px] border inline-flex items-center"
+      style={{ backgroundColor: `${color}15`, color, borderColor: `${color}40` }}
+      title={name}
+    >
+      {name}
+    </div>
+  );
+}
+
+interface MultiSelectInternalProps {
+  selectedTags: string[];
+  onChange: (tags: string[]) => void;
+}
+
+export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInternalProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggleTag = (name: string) => {
+    if (selectedTags.includes(name)) {
+      onChange(selectedTags.filter((t) => t !== name));
+    } else {
+      onChange([...selectedTags, name]);
+    }
+  };
+
+  const removeTag = (e: React.MouseEvent, name: string) => {
+    e.stopPropagation();
+    onChange(selectedTags.filter((t) => t !== name));
+  };
+
+  return (
+    <div className="relative w-[180px]" ref={containerRef}>
+      <div
+        className="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors focus-within:ring-1 focus-within:ring-ring"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex flex-wrap gap-1 items-center flex-1 pr-2 overflow-hidden">
+          {selectedTags.length > 0 ? (
+            <span className="text-indigo-700 font-semibold text-xs truncate">
+              {selectedTags.length} tag selezionati
+            </span>
+          ) : (
+            <span className="text-muted-foreground">Interno 🔒</span>
+          )}
+        </div>
+        <ChevronDown className={cn("h-4 w-4 opacity-50 shrink-0 transition-transform", isOpen && "rotate-180")} />
+      </div>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-slate-200 rounded-md shadow-xl z-[100] py-2 animate-in fade-in zoom-in-95 data-[side=bottom]:slide-in-from-top-2 overflow-hidden">
+          <div className="px-3 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-100 mb-1">
+            Tag Interni
+          </div>
+          <div className="max-h-60 overflow-y-auto px-1">
+            {INTERNAL_TAGS.map((tag) => {
+              const isSelected = selectedTags.includes(tag.name);
+              return (
+                <div
+                  key={tag.id}
+                  className={cn(
+                    "px-3 py-1.5 text-sm cursor-pointer rounded flex items-center justify-between gap-2 hover:bg-slate-100 transition-colors",
+                    isSelected && "bg-indigo-50/50"
+                  )}
+                  onClick={() => toggleTag(tag.name)}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: tag.color }} />
+                    <span className={cn(isSelected ? "font-semibold text-indigo-900" : "text-slate-700")}>
+                      {tag.name}
+                    </span>
+                  </div>
+                  {isSelected && (
+                    <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-1.5 rounded-sm">
+                      ✓
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

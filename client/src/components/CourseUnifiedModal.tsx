@@ -26,6 +26,7 @@ import { hasWritePermission } from "@/App";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { useCustomList, useCustomListValues } from "@/hooks/use-custom-list";
 import { MultiSelectStatus } from "@/components/multi-select-status";
+import { MultiSelectInternal } from "@/components/multi-select-internal";
 import { CustomListManagerDialog } from "@/components/custom-list-manager-dialog";
 import { MultiSelectCustomList } from "@/components/ui/multi-select-custom-list";
 import { QuickMemberAddModal } from "./QuickMemberAddModal";
@@ -419,9 +420,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
   // State della Form
   const [formData, setFormData] = useState<any>({});
-  
-  // State Operativo (Multi) e Flags Promo
   const [opStates, setOpStates] = useState<string[]>([]);
+  const [internalTags, setInternalTags] = useState<string[]>([]);
   const [promoFlags, setPromoFlags] = useState<string[]>([]);
   const [notifySms, setNotifySms] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState(false);
@@ -493,10 +493,14 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
             .catch(() => {});
         }
         // Estrazione Op State e Promos — SOLO i tag con prefisso STATE:
-        const tags = parseStatusTags(course.statusTags);
+        // Estrazione Op State e Promos — SOLO i tag con prefisso STATE:
+        const tags = parseStatusTags(course?.statusTags || []);
         const opTags = tags.filter(t => t.startsWith("STATE:")).map(t => t.replace("STATE:", ""));
         setOpStates(opTags); // se vuoto → nessuno stato selezionato di default
         setPromoFlags(tags.filter(t => t.startsWith("PROMO:")).map(t => t.replace("PROMO:", "")));
+        
+        // Estrazione tag interni
+        setInternalTags(course?.internalTags || []);
       } else {
         let defaultsToUse: any = { ...(defaultValues || {}) };
         
@@ -745,6 +749,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
       lessonType: formData.lessonType || [],
       numberOfPeople: formData.numberOfPeople || null,
       statusTags: mergedTags,
+      internalTags: internalTags,
       active: isActive,
       quoteId: formData.quoteId || null,
       googleEventId: null,
@@ -802,6 +807,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           lessonType: formData.lessonType || [],
           numberOfPeople: formData.numberOfPeople || null,
           statusTags: mergedTags,
+          internalTags: internalTags,
           active: isActive,
           quoteId: formData.quoteId || null,
           googleEventId: null,
@@ -896,7 +902,10 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           <TabsContent value="details" className="pt-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className={cn("flex justify-between items-center gap-2 flex-wrap p-3 rounded-md border text-sm", (isCopy && opStates.length > 0) ? "bg-red-50 border-red-400" : "bg-slate-50")}>
-                <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
+                <div className="flex gap-2">
+                    <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
+                    <MultiSelectInternal selectedTags={internalTags} onChange={setInternalTags} />
+                </div>
 
                 <div className="flex items-center gap-4 border-l border-slate-300 pl-4 shrink-0 flex-wrap">
                   <Label className="font-semibold text-slate-800">Flags Marketing:</Label>
