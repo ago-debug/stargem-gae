@@ -1720,135 +1720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/members/export-csv", isAuthenticated, checkPermission("/anagrafica_a_lista", "read"), async (req, res) => {
-    try {
-      const sep = req.query.sep === 'comma' ? ',' : ';';
-      
-      const activeMembers = await db.select()
-        .from(schema.members)
-        .where(eq(schema.members.active, true))
-        .orderBy(schema.members.lastName, schema.members.firstName);
 
-      const header = [
-        "id", "fiscal_code", "last_name", "first_name",
-        "gender", "date_of_birth", "place_of_birth",
-        "birth_province", "birth_nation",
-        "email", "secondary_email", "phone", "mobile",
-        "address", "city", "province", "postal_code",
-        "country", "region", "nationality",
-        "is_minor", "mother_first_name", "mother_last_name",
-        "mother_fiscal_code", "mother_email", "mother_phone",
-        "tutor1_fiscal_code", "tutor1_phone", "tutor1_email",
-        "tutor2_fiscal_code", "tutor2_phone", "tutor2_email",
-        "has_medical_certificate", "medical_certificate_expiry",
-        "privacy_accepted", "privacy_date", "consent_image",
-        "consent_marketing", "consent_newsletter",
-        "document_type", "document_expiry",
-        "enrollment_status", "season", "participant_type",
-        "internal_id", "insertion_date",
-        "health_notes", "food_alerts", "tags", "profession",
-        "admin_notes", "notes",
-        "residence_permit", "residence_permit_expiry",
-        "active", "created_at"
-      ];
-
-      const toCsvField = (val: any) => {
-        if (val === null || val === undefined) return '""';
-        let str = String(val);
-        if (val instanceof Date) str = val.toISOString().split('T')[0];
-        if (typeof val === 'boolean') str = val ? "1" : "0";
-        return `"${str.replace(/"/g, '""')}"`;
-      };
-
-      const rows = activeMembers.map(m => [
-        m.id, m.fiscalCode, m.lastName, m.firstName,
-        m.gender, m.dateOfBirth, m.placeOfBirth,
-        m.birthProvince, m.birthNation,
-        m.email, m.secondaryEmail, m.phone, m.mobile,
-        m.address, m.city, m.province, m.postalCode,
-        m.country, m.region, m.nationality,
-        m.isMinor, m.motherFirstName, m.motherLastName,
-        m.motherFiscalCode, m.motherEmail, m.motherPhone,
-        m.tutor1FiscalCode, m.tutor1Phone, m.tutor1Email,
-        m.tutor2FiscalCode, m.tutor2Phone, m.tutor2Email,
-        m.hasMedicalCertificate, m.medicalCertificateExpiry,
-        m.privacyAccepted, m.privacyDate, m.consentImage,
-        m.consentMarketing, m.consentNewsletter,
-        m.documentType, m.documentExpiry,
-        m.enrollmentStatus, m.season, m.participantType,
-        m.internalId, m.insertionDate,
-        m.healthNotes, m.foodAlerts, m.tags, m.profession,
-        m.adminNotes, m.notes,
-        m.residencePermit, m.residencePermitExpiry,
-        m.active, m.createdAt
-      ].map(toCsvField).join(sep));
-
-      const csvContent = [header.join(sep), ...rows].join("\n");
-      const bom = "\uFEFF";
-      const dateStr = new Date().toISOString().split('T')[0];
-      
-      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="members_${dateStr}.csv"`);
-      res.send(bom + csvContent);
-    } catch (e) {
-      console.error('Error generating CSV:', e);
-      res.status(500).send("Error generating CSV");
-    }
-  });
-
-  app.get("/api/members/export-csv-light", isAuthenticated, checkPermission("/anagrafica_a_lista", "read"), async (req, res) => {
-    try {
-      const sep = req.query.sep === 'comma' ? ',' : ';';
-      
-      const activeMembers = await db.select()
-        .from(schema.members)
-        .where(eq(schema.members.active, true))
-        .orderBy(schema.members.lastName, schema.members.firstName);
-
-      const header = [
-        "ID", "Codice Fiscale", "Cognome", "Nome", "Sesso",
-        "Data Nascita", "Luogo Nascita", "Email", "Telefono",
-        "Cellulare", "Indirizzo", "Città", "Provincia", "CAP",
-        "Nazionalità", "Minore",
-        "Nome Tutore 1", "CF Tutore 1", "Tel Tutore 1",
-        "N. Tessera", "Scad. Tessera",
-        "Scad. Cert. Medico", "Consenso Immagine",
-        "Stato Iscrizione", "Note"
-      ];
-
-      const toCsvField = (val: any) => {
-        if (val === null || val === undefined) return '""';
-        let str = String(val);
-        if (val instanceof Date) str = val.toISOString().split('T')[0];
-        if (typeof val === 'boolean') str = val ? "Sì" : "No";
-        return `"${str.replace(/"/g, '""')}"`;
-      };
-
-      const rows = activeMembers.map(m => [
-        m.id, m.fiscalCode, m.lastName, m.firstName, m.gender,
-        m.dateOfBirth, m.placeOfBirth, m.email, m.phone,
-        m.mobile, m.address, m.city, m.province, m.postalCode,
-        m.nationality, m.isMinor,
-        m.motherFirstName ? `${m.motherFirstName} ${m.motherLastName || ''}`.trim() : (m.tutor1Email ? "Tutore 1" : ""), 
-        m.motherFiscalCode || m.tutor1FiscalCode, 
-        m.motherPhone || m.tutor1Phone,
-        m.cardNumber, m.cardExpiryDate,
-        m.medicalCertificateExpiry, m.consentImage,
-        m.enrollmentStatus, m.notes
-      ].map(toCsvField).join(sep));
-
-      const csvContent = [header.join(sep), ...rows].join("\n");
-      const bom = "\uFEFF";
-      const dateStr = new Date().toISOString().split('T')[0];
-      
-      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="members_light_${dateStr}.csv"`);
-      res.send(bom + csvContent);
-    } catch (e) {
-      console.error('Error generating CSV (light):', e);
-      res.status(500).send("Error generating CSV");
-    }
-  });
 
   app.get("/api/members/:id", isAuthenticated, checkPermission("/membro", "read"), async (req, res) => {
     try {
@@ -7917,6 +7789,18 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
               continue;
             }
 
+            // --- INIZIO: F1-PROTOCOLLO-005 Sanitizzazione e Tracking ---
+            const rawMemberData = { ...memberData };
+            sanitizeMemberData(memberData);
+            
+            const modificheCasing: string[] = [];
+            for (const key of Object.keys(memberData)) {
+              if (rawMemberData[key] && memberData[key] && String(rawMemberData[key]) !== String(memberData[key])) {
+                modificheCasing.push(`${key}: ${rawMemberData[key]} -> ${memberData[key]}`);
+              }
+            }
+            // --- FINE ---
+
             // Check for existing member or duplicate in current import
             let existingMember = null;
             let importKeyValue = '';
@@ -7965,7 +7849,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
                    nome: memberData.firstName || existingMember.firstName,
                    cognome: memberData.lastName || existingMember.lastName,
                    azione: 'AGGIORNA',
-                   campiModificati
+                   campiModificati,
+                   modificheCasing
                 });
               } else {
                 unchanged++;
@@ -7974,7 +7859,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
                    nome: memberData.firstName || existingMember.firstName,
                    cognome: memberData.lastName || existingMember.lastName,
                    azione: 'INVARIATO',
-                   campiModificati: []
+                   campiModificati: [],
+                   modificheCasing
                 });
               }
             } else {
@@ -7984,7 +7870,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
                  nome: memberData.firstName,
                  cognome: memberData.lastName,
                  azione: 'INSERISCI',
-                 campiModificati: Object.keys(memberData)
+                 campiModificati: Object.keys(memberData),
+                 modificheCasing
               });
             }
           } catch (err: any) {
@@ -11630,12 +11517,109 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         return res.status(400).json({ error: "Tabella e colonne richieste." });
       }
 
+      const formatCell = (val: any, type: string | undefined) => {
+        if (val !== null && val !== undefined) {
+          if (type === 'boolean' || typeof val === 'boolean') {
+            return val ? 'Sì' : 'No';
+          } else {
+            const isJsDateString = typeof val === 'string' && val.includes('GMT');
+            const isIsoString = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val);
+            if (type === 'date' || val instanceof Date || isJsDateString || isIsoString) {
+              const d = new Date(val);
+              if (!isNaN(d.getTime())) {
+                return d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+              }
+            }
+          }
+        }
+        return val;
+      };
+
+      if (table === "members") {
+        const CHUNK_SIZE = 500;
+        
+        if (format === 'csv') {
+          res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+          res.setHeader('Content-Disposition', `attachment; filename="${table}_export.csv"`);
+          
+          const headerRow = columns.map((c: any) => typeof c === 'string' ? c : c.label).join(",") + "\n";
+          res.write("\ufeff" + headerRow);
+          
+          let offset = 0;
+          while (true) {
+            const chunk = await storage.getMembers(CHUNK_SIZE, offset);
+            if (!chunk || chunk.length === 0) break;
+            
+            for (const row of chunk) {
+              const line = columns.map((col: any) => {
+                const key = typeof col === 'string' ? col : col.key;
+                const type = typeof col === 'string' ? undefined : col.type;
+                let val = formatCell((row as any)[key], type);
+                val = val === null || val === undefined ? "" : String(val);
+                if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+                  val = `"${val.replace(/"/g, '""')}"`;
+                }
+                return val;
+              }).join(",");
+              res.write(line + "\n");
+            }
+            offset += CHUNK_SIZE;
+          }
+          res.end();
+        } else {
+          // XLSX Streaming
+          res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+          res.setHeader('Content-Disposition', `attachment; filename="${table}_export.xlsx"`);
+          
+          let ExcelJS;
+          try { ExcelJS = (await import('exceljs')).default || await import('exceljs'); } 
+          catch(e) { ExcelJS = require('exceljs'); }
+
+          const options = {
+            stream: res,
+            useStyles: true,
+            useSharedStrings: true
+          };
+          const workbook = new ExcelJS.stream.xlsx.WorkbookWriter(options);
+          const worksheet = workbook.addWorksheet('Export');
+          
+          const timeOffset = new Date().getTimezoneOffset() * 60000;
+          const localDateStr = new Date(Date.now() - timeOffset).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          
+          worksheet.addRow([`Esportazione: ${table}`]).commit();
+          worksheet.addRow([`Data: ${localDateStr}`]).commit();
+          worksheet.addRow([`Colonne: ${columns.length}`]).commit();
+          worksheet.addRow([]).commit();
+
+          const headerRow = columns.map((col: any) => typeof col === 'string' ? col : col.label);
+          worksheet.addRow(headerRow).commit();
+
+          let offset = 0;
+          while (true) {
+            const chunk = await storage.getMembers(CHUNK_SIZE, offset);
+            if (!chunk || chunk.length === 0) break;
+            
+            for (const row of chunk) {
+              const rowValues = columns.map((col: any) => {
+                const key = typeof col === 'string' ? col : col.key;
+                const type = typeof col === 'string' ? undefined : col.type;
+                return formatCell((row as any)[key], type);
+              });
+              worksheet.addRow(rowValues).commit();
+            }
+            offset += CHUNK_SIZE;
+          }
+          
+          worksheet.commit();
+          await workbook.commit();
+        }
+        return; // END members stream
+      }
+
+      // Legacy per altre tabelle (tutto in memoria)
       let rawData = [];
       
       switch (table) {
-        case "members":
-          rawData = await storage.getMembers();
-          break;
         case "payments":
           rawData = await storage.getPayments();
           break;
@@ -11664,23 +11648,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         columns.forEach((col: any) => {
           const key = typeof col === 'string' ? col : col.key;
           const label = typeof col === 'string' ? col : col.label;
-          let val = row[key];
-          
-          if (val !== null && val !== undefined) {
-            if (typeof val === 'boolean') {
-              val = val ? 'Sì' : 'No';
-            } else {
-              const isJsDateString = typeof val === 'string' && val.includes('GMT');
-              const isIsoString = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val);
-              if (val instanceof Date || isJsDateString || isIsoString) {
-                const d = new Date(val);
-                if (!isNaN(d.getTime())) {
-                  val = d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                }
-              }
-            }
-          }
-          obj[label] = val;
+          const type = typeof col === 'string' ? undefined : col.type;
+          obj[label] = formatCell(row[key], type);
         });
         return obj;
       });
@@ -11722,8 +11691,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         const worksheet = workbook.addWorksheet('Export');
         
         // Add header rows
-        const offset = new Date().getTimezoneOffset() * 60000;
-        const localDateStr = new Date(Date.now() - offset).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const timeOffset = new Date().getTimezoneOffset() * 60000;
+        const localDateStr = new Date(Date.now() - timeOffset).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         
         worksheet.addRow([`Esportazione: ${table}`]).commit();
         worksheet.addRow([`Data: ${localDateStr}`]).commit();

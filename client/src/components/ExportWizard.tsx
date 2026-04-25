@@ -11,6 +11,7 @@ export interface ExportColumn {
   key: string;
   label: string;
   default?: boolean;
+  type?: 'date' | 'boolean' | 'string' | 'number';
 }
 
 interface ExportWizardProps {
@@ -64,21 +65,34 @@ export function ExportWizard({
       const filteredRow: any = {};
       selectedColumns.forEach(key => {
         let val = row[key];
+        const colDef = columns.find(c => c.key === key);
         if (val !== null && val !== undefined) {
-          if (typeof val === 'boolean') {
+          if (colDef?.type === 'boolean') {
             val = val ? 'Sì' : 'No';
-          } else {
-            const isJsDateString = typeof val === 'string' && val.includes('GMT');
-            const isIsoString = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val);
-            if (val instanceof Date || isJsDateString || isIsoString) {
-              const d = new Date(val);
-              if (!isNaN(d.getTime())) {
-                val = d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          } else if (colDef?.type === 'date') {
+            const d = new Date(val);
+            if (!isNaN(d.getTime())) {
+              val = d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            } else {
+              val = '';
+            }
+          } else if (!colDef?.type) {
+            // TODO: aggiungere type
+            if (typeof val === 'boolean') {
+              val = val ? 'Sì' : 'No';
+            } else {
+              const isJsDateString = typeof val === 'string' && val.includes('GMT');
+              const isIsoString = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val);
+              if (val instanceof Date || isJsDateString || isIsoString) {
+                const d = new Date(val);
+                if (!isNaN(d.getTime())) {
+                  val = d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                }
               }
             }
           }
         }
-        filteredRow[columns.find(c => c.key === key)?.label || key] = val;
+        filteredRow[colDef?.label || key] = val;
       });
       return filteredRow;
     });
@@ -135,7 +149,7 @@ export function ExportWizard({
         body: JSON.stringify({
           columns: selectedColumns.map(k => {
             const colDef = columns.find(c => c.key === k);
-            return { key: k, label: colDef?.label || k };
+            return { key: k, label: colDef?.label || k, type: colDef?.type };
           }),
           format,
           ...apiParams

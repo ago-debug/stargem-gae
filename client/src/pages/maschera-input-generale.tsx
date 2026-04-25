@@ -1948,16 +1948,25 @@ export default function MascheraInputGenerale() {
               <ExportWizard 
                 filename={currentMember?.lastName && currentMember?.firstName ? `${currentMember.lastName}_${currentMember.firstName}` : 'membro'}
                 title="Esporta Membro"
-                data={currentMember ? [{
-                  ...currentMember,
-                  membershipNumber: bottomSectionsData.tessere.numero || topTesseraNumero,
-                  membershipExpiry: bottomSectionsData.tessere.dataScad || (topTesseraMembership ? topTesseraMembership.expiryDate : ''),
-                  membershipStatus: bottomSectionsData.tessere.dataScad ? (new Date(bottomSectionsData.tessere.dataScad) > new Date() ? 'ATTIVA' : 'SCADUTA') : (topTesseraMembership ? (new Date(topTesseraMembership.expiryDate) > new Date() ? 'ATTIVA' : 'SCADUTA') : ''),
-                  lastPaymentAmount: combinedPayments && combinedPayments.length > 0 ? [...combinedPayments].sort((a, b) => new Date(b.dataPagamento || b.createdAt).getTime() - new Date(a.dataPagamento || a.createdAt).getTime())[0].importo : '',
-                  lastPaymentDate: combinedPayments && combinedPayments.length > 0 ? [...combinedPayments].sort((a, b) => new Date(b.dataPagamento || b.createdAt).getTime() - new Date(a.dataPagamento || a.createdAt).getTime())[0].dataPagamento : '',
-                  medicalCertExpiry: bottomSectionsData.certificatoMedico.dataScadenza || (formData && formData.scadenzaCertificatoMedico ? formData.scadenzaCertificatoMedico : ''),
-                  medicalCertStatus: bottomSectionsData.certificatoMedico.dataScadenza ? (new Date(bottomSectionsData.certificatoMedico.dataScadenza) > new Date() ? 'VALIDO' : 'SCADUTO') : ((formData && formData.scadenzaCertificatoMedico) ? (new Date(formData.scadenzaCertificatoMedico) > new Date() ? 'VALIDO' : 'SCADUTO') : '')
-                }] : []}
+                data={currentMember ? (() => {
+                  const latestPayment = combinedPayments && combinedPayments.length > 0 
+                    ? [...combinedPayments].sort((a, b) => new Date(b.paidDate || b.paymentDate || b.dataPagamento || b.createdAt).getTime() - new Date(a.paidDate || a.paymentDate || a.dataPagamento || a.createdAt).getTime())[0] 
+                    : null;
+                  
+                  const certExpiry = bottomSectionsData.certificatoMedico?.dataScadenza || currentMember.medicalCertificateExpiry || currentMember.certificatoMedicoMetadata?.dataScadenza || (formData && (formData as any).scadenzaCertificatoMedico ? (formData as any).scadenzaCertificatoMedico : '');
+                  const certStatus = certExpiry ? (new Date(certExpiry) > new Date() ? 'VALIDO' : 'SCADUTO') : '';
+
+                  return [{
+                    ...currentMember,
+                    membershipNumber: bottomSectionsData.tessere.numero || topTesseraNumero,
+                    membershipExpiry: bottomSectionsData.tessere.dataScad || (topTesseraMembership ? topTesseraMembership.expiryDate : ''),
+                    membershipStatus: bottomSectionsData.tessere.dataScad ? (new Date(bottomSectionsData.tessere.dataScad) > new Date() ? 'ATTIVA' : 'SCADUTA') : (topTesseraMembership ? (new Date(topTesseraMembership.expiryDate) > new Date() ? 'ATTIVA' : 'SCADUTA') : ''),
+                    lastPaymentAmount: latestPayment ? (latestPayment.amount || latestPayment.importo || '') : '',
+                    lastPaymentDate: latestPayment ? (latestPayment.paidDate || latestPayment.paymentDate || latestPayment.dataPagamento || '') : '',
+                    medicalCertExpiry: certExpiry,
+                    medicalCertStatus: certStatus
+                  }];
+                })() : []}
                 expandable={true}
                 columns={[
                   { key: 'id', label: 'ID Database', default: true },
@@ -1967,11 +1976,11 @@ export default function MascheraInputGenerale() {
                   { key: 'email', label: 'Email', default: true },
                   { key: 'phone', label: 'Telefono', default: true },
                   { key: 'membershipNumber', label: 'Numero Tessera', default: true },
-                  { key: 'membershipExpiry', label: 'Scadenza Tessera', default: true },
+                  { key: 'membershipExpiry', label: 'Scadenza Tessera', default: true, type: 'date' },
                   { key: 'membershipStatus', label: 'Stato Tessera', default: true },
-                  { key: 'lastPaymentAmount', label: 'Importo Ultimo Pagamento', default: false },
-                  { key: 'lastPaymentDate', label: 'Data Ultimo Pagamento', default: false },
-                  { key: 'medicalCertExpiry', label: 'Scadenza Certificato', default: false },
+                  { key: 'lastPaymentAmount', label: 'Importo Ultimo Pagamento', default: false, type: 'number' },
+                  { key: 'lastPaymentDate', label: 'Data Ultimo Pagamento', default: false, type: 'date' },
+                  { key: 'medicalCertExpiry', label: 'Scadenza Certificato', default: false, type: 'date' },
                   { key: 'medicalCertStatus', label: 'Stato Certificato', default: false }
                 ]}
               />

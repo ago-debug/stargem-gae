@@ -271,7 +271,7 @@ export interface IStorage {
 
   // Paid Trials
   // Members
-  getMembers(): Promise<Member[]>;
+  getMembers(limit?: number, offset?: number): Promise<Member[]>;
   getMembersPaginated(
     page: number,
     pageSize: number,
@@ -1112,8 +1112,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Members ====
-  async getMembers(): Promise<Member[]> {
-    return await db.select().from(members).orderBy(desc(members.createdAt));
+  async getMembers(limit?: number, offset?: number): Promise<Member[]> {
+    let query = db.select().from(members).orderBy(desc(members.createdAt));
+    if (limit !== undefined) query = (query as any).limit(limit);
+    if (offset !== undefined) query = (query as any).offset(offset);
+    return await query as any;
   }
 
   async getMembersWithEntityCards(): Promise<Member[]> {

@@ -258,7 +258,7 @@ export default function Payments() {
         { key: 'fiscalCode', label: 'Codice Fiscale', default: true },
         { key: 'amount', label: 'Importo', default: true },
         { key: 'paymentMethod', label: 'Metodo', default: true },
-        { key: 'dueDate', label: 'Data', default: true },
+        { key: 'dueDate', label: 'Data', default: true, type: 'date' },
         { key: 'operator', label: 'Operatore', default: true },
         { key: 'period', label: 'Periodo', default: true },
         { key: 'description', label: 'Descrizione' },
