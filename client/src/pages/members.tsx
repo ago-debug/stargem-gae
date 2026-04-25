@@ -874,8 +874,8 @@ export default function Members() {
               { key: 'phone', label: 'Telefono', default: true },
               { key: 'mobile', label: 'Cellulare', default: true },
               { key: 'cardNumber', label: 'Numero Tessera', default: true },
-              { key: 'hasMedicalCertificate', label: 'Certificato Medico', default: true },
-              { key: 'dateOfBirth', label: 'Data di Nascita', default: true },
+              { key: 'hasMedicalCertificate', label: 'Certificato Medico', default: true, type: 'boolean' },
+              { key: 'dateOfBirth', label: 'Data di Nascita', default: true, type: 'date' },
               { key: 'city', label: 'Città', default: true },
               
               // CONTATTI (default false)
@@ -909,13 +909,13 @@ export default function Members() {
               { key: 'pIva', label: 'Partita IVA', default: false },
               { key: 'alboTipo', label: 'Albo Tipo', default: false },
               { key: 'alboNumero', label: 'N. Albo', default: false },
-              { key: 'alboDataIscrizione', label: 'Data Iscrizione Albo', default: false },
+              { key: 'alboDataIscrizione', label: 'Data Iscrizione Albo', default: false, type: 'date' },
               { key: 'patenteTipo', label: 'Tipo Patente', default: false },
-              { key: 'patentePendere', label: 'Patente Scadenza', default: false },
+              { key: 'patentePendere', label: 'Patente Scadenza', default: false, type: 'date' },
               { key: 'carPlate', label: 'Targa', default: false },
               { key: 'tutor2FirstName', label: 'Nome Tutore 2', default: false },
               { key: 'tutor2LastName', label: 'Cognome Tutore 2', default: false },
-              { key: 'tutor2BirthDate', label: 'Data Nascita Tutore 2', default: false },
+              { key: 'tutor2BirthDate', label: 'Data Nascita Tutore 2', default: false, type: 'date' },
               { key: 'emergencyContact1Name', label: 'Contatto Emergenza 1', default: false },
               { key: 'emergencyContact1Phone', label: 'Tel. Emergenza 1', default: false },
               { key: 'emergencyContact2Name', label: 'Contatto Emergenza 2', default: false },
@@ -932,9 +932,9 @@ export default function Members() {
               { key: 'dataQualityFlag', label: 'Data Quality Flag', default: false },
               { key: 'fromWhere', label: 'Origine Dato', default: false },
               { key: 'athenaId', label: 'ID Athena', default: false },
-              { key: 'fatturaFatta', label: 'Fattura Emessa', default: false },
-              { key: 'createdAt', label: 'Data Creazione', default: false },
-              { key: 'updatedAt', label: 'Ultima Modifica', default: false }
+              { key: 'fatturaFatta', label: 'Fattura Emessa', default: false, type: 'boolean' },
+              { key: 'createdAt', label: 'Data Creazione', default: false, type: 'date' },
+              { key: 'updatedAt', label: 'Ultima Modifica', default: false, type: 'date' }
             ]}
           />
           <Button

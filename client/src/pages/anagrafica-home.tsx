@@ -683,8 +683,8 @@ export default function AnagraficaHome() {
           { key: 'email', label: 'Email', default: true },
           { key: 'phone', label: 'Telefono', default: true },
           { key: 'cardNumber', label: 'Tessera', default: true },
-          { key: 'hasMedicalCertificate', label: 'Cert. Medico', default: true },
-          { key: 'dateOfBirth', label: 'Data di Nascita' },
+          { key: 'hasMedicalCertificate', label: 'Cert. Medico', default: true, type: 'boolean' },
+          { key: 'dateOfBirth', label: 'Data di Nascita', type: 'date' },
           { key: 'placeOfBirth', label: 'Luogo Nascita' },
           { key: 'city', label: 'Città' },
           { key: 'province', label: 'Provincia' }

@@ -961,6 +961,7 @@ export default function ImportData() {
                                   <TableHead>Nominativo</TableHead>
                                   <TableHead>Azione</TableHead>
                                   <TableHead>Dettaglio</TableHead>
+                                  <TableHead>Modifiche Applicate</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -972,6 +973,7 @@ export default function ImportData() {
                                       <Badge variant={r.azione === 'INSERISCI' ? 'default' : r.azione === 'AGGIORNA' ? 'secondary' : r.azione === 'ERRORE' ? 'destructive' : 'outline'}>{r.azione}</Badge>
                                     </TableCell>
                                     <TableCell className="text-xs text-muted-foreground">{r.campiModificati?.join(', ')}</TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">{r.modificheCasing?.length > 0 ? r.modificheCasing.join(' | ') : 'Nessuna'}</TableCell>
                                   </TableRow>
                                 ))}
                               </TableBody>
@@ -1048,7 +1050,7 @@ export default function ImportData() {
                         </div>
                         <div className="flex justify-center mt-4">
                            <Button variant="outline" className="gap-2" onClick={() => {
-                              const csv = "CF,Nome,Cognome,Azione,CampiModificati\n" + (dryRunData?.preview || []).map((r:any) => `${r.cf || ''},${r.nome || ''},${r.cognome || ''},${r.azione || ''},"${(r.campiModificati || []).join(',')}"`).join("\n");
+                              const csv = "CF,Nome,Cognome,Azione,CampiModificati,ModificheApplicate\n" + (dryRunData?.preview || []).map((r:any) => `${r.cf || ''},${r.nome || ''},${r.cognome || ''},${r.azione || ''},"${(r.campiModificati || []).join(',')}","${r.modificheCasing?.length > 0 ? r.modificheCasing.join(' | ') : 'Nessuna'}"`).join("\n");
                               const blob = new Blob([csv], { type: 'text/csv' });
                               const url = window.URL.createObjectURL(blob);
                               const a = document.createElement('a');
