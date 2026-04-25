@@ -1,3 +1,4 @@
+import { ExportWizard } from "@/components/ExportWizard";
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -669,19 +670,26 @@ export default function AnagraficaHome() {
                 <span className="hidden sm:inline">GSheets</span>
               </Button>
               <div className="hidden lg:flex gap-2">
-                <Button variant="default" size="sm" onClick={() => window.location.href = '/api/members/export-csv?sep=semicolon'}>
-                  <Upload className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Esporta Excel IT</span>
-                </Button>
-                <Button variant="default" size="sm" onClick={() => window.location.href = '/api/members/export-csv?sep=comma'}>
-                  <Upload className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Esporta CSV Standard</span>
-                </Button>
-                <Button variant="secondary" size="sm" onClick={() => window.location.href = '/api/members/export-csv-light?sep=semicolon'}>
-                  <Upload className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Vista Operativa</span>
-                </Button>
-              </div>
+      <ExportWizard 
+        filename="anagrafica_completa"
+        title="Esporta Anagrafica"
+        apiEndpoint="/api/export"
+        apiParams={{ table: 'members' }}
+        columns={[
+          { key: 'lastName', label: 'Cognome', default: true },
+          { key: 'firstName', label: 'Nome', default: true },
+          { key: 'fiscalCode', label: 'Codice Fiscale', default: true },
+          { key: 'email', label: 'Email', default: true },
+          { key: 'phone', label: 'Telefono', default: true },
+          { key: 'cardNumber', label: 'Tessera', default: true },
+          { key: 'hasMedicalCertificate', label: 'Cert. Medico', default: true },
+          { key: 'dateOfBirth', label: 'Data di Nascita' },
+          { key: 'placeOfBirth', label: 'Luogo Nascita' },
+          { key: 'city', label: 'Città' },
+          { key: 'province', label: 'Provincia' }
+        ]}
+      />
+    </div>
               <Button
                 variant="outline"
                 size="sm"

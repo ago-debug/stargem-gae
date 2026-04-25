@@ -1,3 +1,4 @@
+import { ExportWizard } from "@/components/ExportWizard";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -513,10 +514,19 @@ export default function StudioBookings() {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" className="gap-2 text-sm" onClick={downloadCSV}>
-                        <Download className="h-4 w-4" />
-                        Esporta CSV
-                    </Button>
+                    <ExportWizard 
+      filename="affitti"
+      title="Esporta Prenotazioni"
+      data={bookings || []}
+      columns={[
+        { key: 'room', label: 'Sala', default: true },
+        { key: 'renterName', label: 'Affittuario', default: true },
+        { key: 'date', label: 'Data', default: true },
+        { key: 'startTime', label: 'Ora Inizio', default: true },
+        { key: 'endTime', label: 'Ora Fine', default: true },
+        { key: 'amount', label: 'Importo', default: true }
+      ]}
+    />
                     <Button onClick={handleCreateBooking} className="gold-3d-button">
                         <Plus className="w-4 h-4 mr-2" /> Nuova Prenotazione
                     </Button>

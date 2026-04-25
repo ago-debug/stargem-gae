@@ -11,6 +11,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
 import { Search, Wallet, Check, ChevronsUpDown, Download, Printer, User, Plus, CreditCard, Edit } from "lucide-react";
+import { ExportWizard } from "@/components/ExportWizard";
 import type { Payment, Member, PaymentMethod, InsertPayment } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -577,10 +578,18 @@ export default function AccountingSheet() {
                             Nuovo Pagamento
                         </Button>
                     </Link>
-                    <Button variant="outline" onClick={handleExportCSV} disabled={!selectedMember}>
-                        <Download className="w-4 h-4 mr-2" />
-                        Esporta CSV
-                    </Button>
+                    <ExportWizard 
+      filename="estratto_conto"
+      title="Esporta Estratto Conto"
+      data={payments || []}
+      columns={[
+        { key: 'date', label: 'Data', default: true },
+        { key: 'description', label: 'Descrizione', default: true },
+        { key: 'amount', label: 'Importo', default: true },
+        { key: 'status', label: 'Stato', default: true },
+        { key: 'type', label: 'Tipo' }
+      ]}
+    />
                     <Button variant="outline" onClick={handlePrint} disabled={!selectedMember}>
                         <Printer className="w-4 h-4 mr-2" />
                         Stampa

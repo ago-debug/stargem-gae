@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, CreditCard, Check, ChevronsUpDown, X, Edit, Download, Filter, User, Wallet } from "lucide-react";
+import { ExportWizard } from "@/components/ExportWizard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -245,14 +246,24 @@ export default function Payments() {
             <Filter className="w-4 h-4 mr-2" />
             {showPendingOnly ? "Tutti" : "In Sospeso"}
           </Button>
-          <Button
-            variant="outline"
-            onClick={exportToCSV}
-            data-testid="button-export-csv"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Esporta CSV
-          </Button>
+          <ExportWizard 
+      filename="pagamenti"
+      title="Esporta Pagamenti"
+      apiEndpoint="/api/export"
+      apiParams={{ table: 'payments' }}
+      columns={[
+        { key: 'lastName', label: 'Cognome', default: true },
+        { key: 'firstName', label: 'Nome', default: true },
+        { key: 'fiscalCode', label: 'Codice Fiscale', default: true },
+        { key: 'amount', label: 'Importo', default: true },
+        { key: 'paymentMethod', label: 'Metodo', default: true },
+        { key: 'dueDate', label: 'Data', default: true },
+        { key: 'operator', label: 'Operatore', default: true },
+        { key: 'period', label: 'Periodo', default: true },
+        { key: 'description', label: 'Descrizione' },
+        { key: 'status', label: 'Stato' }
+      ]}
+    />
           <Button
             data-testid="button-add-payment"
             className="gold-3d-button"

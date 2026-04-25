@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Upload, Download, Paperclip, Search, Plus, Save, FileSpreadsheet, CheckCircle2, AlertCircle, RotateCcw, ArrowDown, Check, FileUp, X, Camera, Edit, Trash2, Copy, RefreshCw, Settings2, ShieldAlert, Info, UserPlus } from "lucide-react";
+import { ExportWizard } from "@/components/ExportWizard";
 import { useCFCheck, useEmailCheck, usePhoneCheck } from "@/hooks/useFieldConflictCheck";
 import { ConflictBadge } from "@/components/conflict-badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -1947,10 +1948,18 @@ export default function MascheraInputGenerale() {
                 <RotateCcw className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Pulisci
               </Button>
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-esporta" onClick={handleExport}>
-                <Upload className="w-3 h-3 mr-1 sidebar-icon-gold" />
-                Esporta
-              </Button>
+              <ExportWizard 
+      filename="membro"
+      title="Esporta Membro"
+      data={formData ? [formData] : []}
+      columns={[
+        { key: 'lastName', label: 'Cognome', default: true },
+        { key: 'firstName', label: 'Nome', default: true },
+        { key: 'fiscalCode', label: 'Codice Fiscale', default: true },
+        { key: 'email', label: 'Email', default: true },
+        { key: 'phone', label: 'Telefono', default: true }
+      ]}
+    />
               <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-importa" onClick={handleImport}>
                 <Download className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Importa
