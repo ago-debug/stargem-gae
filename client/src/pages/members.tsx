@@ -588,7 +588,7 @@ export default function Members() {
       entityCardNumber: formData.get("entityCardNumber") as string || null,
       entityCardIssueDate: formData.get("entityCardIssueDate") as string || null,
       entityCardExpiryDate: formData.get("entityCardExpiryDate") as string || null,
-      streetAddress: formData.get("streetAddress") as string || null,
+
       city: formData.get("city") as string || null,
       province: formData.get("province") as string || null,
       postalCode: formData.get("postalCode") as string || null,
@@ -692,7 +692,7 @@ export default function Members() {
         member.email || "",
         member.phone || "",
         member.mobile || "",
-        member.streetAddress || "",
+        member.address || "",
         member.city || "",
         member.province || "",
         member.postalCode || "",
@@ -1745,23 +1745,14 @@ export default function Members() {
                     data-testid="input-mobile"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">Indirizzo Note</Label>
-                  <Input
-                    id="address"
-                    name="address"
-                    defaultValue={editingMember?.address || ""}
-                    data-testid="input-address"
-                    placeholder="Note aggiuntive indirizzo"
-                  />
-                </div>
+
               </div>
 
               {/* Indirizzo Dettagliato */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="streetAddress">Via/Piazza</Label>
-                  <Input id="streetAddress" name="streetAddress" defaultValue={editingMember?.streetAddress || ""} placeholder="Es: Via Roma 1" />
+                  <Label htmlFor="address">Indirizzo</Label>
+                  <Input id="address" name="address" defaultValue={editingMember?.address || ""} placeholder="Via Roma 1" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">Città</Label>

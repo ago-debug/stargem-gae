@@ -1,5 +1,6 @@
 import { parseTurniXlsx } from "./scripts/import-turni";
 import { parsePresenzeXlsx } from "./scripts/import-presenze";
+import { sanitizeMemberData } from "./utils/sanitizer";
 import fs from "fs";
 import { createInsertSchema } from "drizzle-zod";
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
@@ -1733,7 +1734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "gender", "date_of_birth", "place_of_birth",
         "birth_province", "birth_nation",
         "email", "secondary_email", "phone", "mobile",
-        "street_address", "city", "province", "postal_code",
+        "address", "city", "province", "postal_code",
         "country", "region", "nationality",
         "is_minor", "mother_first_name", "mother_last_name",
         "mother_fiscal_code", "mother_email", "mother_phone",
@@ -1764,7 +1765,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         m.gender, m.dateOfBirth, m.placeOfBirth,
         m.birthProvince, m.birthNation,
         m.email, m.secondaryEmail, m.phone, m.mobile,
-        m.streetAddress, m.city, m.province, m.postalCode,
+        m.address, m.city, m.province, m.postalCode,
         m.country, m.region, m.nationality,
         m.isMinor, m.motherFirstName, m.motherLastName,
         m.motherFiscalCode, m.motherEmail, m.motherPhone,
@@ -1826,7 +1827,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rows = activeMembers.map(m => [
         m.id, m.fiscalCode, m.lastName, m.firstName, m.gender,
         m.dateOfBirth, m.placeOfBirth, m.email, m.phone,
-        m.mobile, m.streetAddress, m.city, m.province, m.postalCode,
+        m.mobile, m.address, m.city, m.province, m.postalCode,
         m.nationality, m.isMinor,
         m.motherFirstName ? `${m.motherFirstName} ${m.motherLastName || ''}`.trim() : (m.tutor1Email ? "Tutore 1" : ""), 
         m.motherFiscalCode || m.tutor1FiscalCode, 
@@ -1871,7 +1872,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return val;
       };
       const normalizedData: any = {};
-      for (const [key, value] of Object.entries(req.body)) {
+      const sanitizedBody = sanitizeMemberData(req.body);
+      for (const [key, value] of Object.entries(sanitizedBody)) {
         if (key === 'photoUrl') {
           normalizedData[key] = value;
         } else {
@@ -1990,7 +1992,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return val;
       };
       const normalizedData: any = {};
-      for (const [key, value] of Object.entries(req.body)) {
+      const sanitizedBody = sanitizeMemberData(req.body);
+      for (const [key, value] of Object.entries(sanitizedBody)) {
         if (key === 'photoUrl') {
           // Explicitly allow null/string for photoUrl
           normalizedData[key] = value;
@@ -2233,7 +2236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             : genderRaw === "F" || genderRaw === "FEMMINA" || genderRaw === "FEMALE" ? "F"
               : undefined;
 
-          const memberData: any = {
+          let memberData: any = {
             firstName: firstName || "Sconosciuto",
             lastName: lastName || "Sconosciuto",
             fiscalCode: fiscalCode || null,
@@ -2243,13 +2246,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             dateOfBirth: parseDate(getValue(colDateOfBirth)) ? new Date(parseDate(getValue(colDateOfBirth))!) : null,
             placeOfBirth: getValue(colPlaceOfBirth) || null,
             gender: gender || null,
-            streetAddress: getValue(colStreet) || null,
+            address: getValue(colStreet) || null,
             city: getValue(colCity) || null,
             province: getValue(colProvince).toUpperCase().substring(0, 2) || null,
             postalCode: getValue(colPostalCode) || null,
             cardNumber: getValue(colCardNumber) || null,
             active: true,
           };
+          memberData = sanitizeMemberData(memberData);
 
           if (fiscalCode && existingByFiscalCode.has(fiscalCode)) {
             const existingId = existingByFiscalCode.get(fiscalCode)!;
@@ -2539,7 +2543,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           memberData.email = memberData.email || null;
           memberData.phone = memberData.phone || null;
           memberData.mobile = memberData.mobile || null;
-          memberData.streetAddress = memberData.streetAddress || null;
+          memberData.address = memberData.address || null;
           memberData.city = memberData.city || null;
           memberData.province = memberData.province || null;
           memberData.postalCode = memberData.postalCode || null;
@@ -6016,7 +6020,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   // ==== Maschera Generale Save Endpoint ====
   app.post("/api/maschera-generale/save", isAuthenticated, async (req, res) => {
     try {
-      const { memberData, enrollments: enrollmentItems, payments: paymentItems } = req.body;
+      let { memberData, enrollments: enrollmentItems, payments: paymentItems } = req.body;
+      if (memberData) {
+        memberData = sanitizeMemberData(memberData);
+      }
 
       if (!memberData) {
         return res.status(400).json({ message: "Dati anagrafica mancanti" });
@@ -10702,13 +10709,14 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       let member = await db.select().from(members).where(eq(members.email, payload.billing.email)).limit(1);
       let memberId;
       if (member.length === 0) {
-        const [newMember] = await db.insert(members).values({
+        const newMemberData = sanitizeMemberData({
           firstName: payload.billing.first_name,
           lastName: payload.billing.last_name,
           email: payload.billing.email,
           participantType: 'ADULTO',
           notes: 'Creato automaticamente da ordine WooCommerce'
         });
+        const [newMember] = await db.insert(members).values(newMemberData);
         memberId = newMember.insertId;
       } else {
         memberId = member[0].id;

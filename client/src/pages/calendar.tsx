@@ -354,7 +354,7 @@ export default function CalendarPage() {
         email: "",
         phone: "",
         mobile: "",
-        streetAddress: "",
+        address: "",
         city: "",
         province: "",
         postalCode: "",
@@ -775,7 +775,7 @@ export default function CalendarPage() {
             // Reset form
             setNewMemberForm({
                 firstName: "", lastName: "", fiscalCode: "", dateOfBirth: "", placeOfBirth: "",
-                gender: "", email: "", phone: "", mobile: "", streetAddress: "",
+                gender: "", email: "", phone: "", mobile: "", address: "",
                 city: "", province: "", postalCode: "", notes: ""
             });
         },
@@ -3212,7 +3212,7 @@ export default function CalendarPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <Label>Indirizzo (Via/Piazza)</Label>
-                                <Input value={newMemberForm.streetAddress} onChange={e => setNewMemberForm(p => ({ ...p, streetAddress: e.target.value }))} />
+                                <Input value={newMemberForm.address} onChange={e => setNewMemberForm(p => ({ ...p, address: e.target.value }))} />
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 <div className="col-span-2 space-y-1">
