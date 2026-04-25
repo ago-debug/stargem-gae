@@ -36,6 +36,46 @@ const timeToMinutes = (timeStr?: string) => {
     return parts[0] * 60 + parts[1];
 };
 
+
+function getFirstDateForDay(fromDate: string, dayOfWeek: string): string {
+  if (!fromDate || !dayOfWeek) return '';
+  const dayMap: Record<string, number> = { 'LUN':1,'MAR':2,'MER':3,'GIO':4,'VEN':5,'SAB':6,'DOM':0 };
+  const target = dayMap[dayOfWeek];
+  const d = new Date(fromDate);
+  while (d.getDay() !== target) {
+    d.setDate(d.getDate() + 1);
+  }
+  return d.toISOString().split('T')[0];
+}
+
+function getLastDateForDay(toDate: string, dayOfWeek: string): string {
+  if (!toDate || !dayOfWeek) return '';
+  const dayMap: Record<string, number> = { 'LUN':1,'MAR':2,'MER':3,'GIO':4,'VEN':5,'SAB':6,'DOM':0 };
+  const target = dayMap[dayOfWeek];
+  const d = new Date(toDate);
+  while (d.getDay() !== target) {
+    d.setDate(d.getDate() - 1);
+  }
+  return d.toISOString().split('T')[0];
+}
+
+function countOccurrences(startDate: string, endDate: string, dayOfWeek: string, closedDays: string[]): number {
+  if (!startDate || !endDate || !dayOfWeek) return 0;
+  const dayMap: Record<string,number> = { 'LUN':1,'MAR':2,'MER':3,'GIO':4,'VEN':5,'SAB':6,'DOM':0 };
+  const target = dayMap[dayOfWeek];
+  const closedSet = new Set(closedDays);
+  let count = 0;
+  const d = new Date(startDate);
+  const end = new Date(endDate);
+  while (d <= end) {
+    if (d.getDay() === target && !closedSet.has(d.toISOString().split('T')[0])) {
+      count++;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
+
 export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuccess }: Props) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -47,6 +87,8 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
   const [dayOfWeek, setDayOfWeek] = useState<string>("");
   const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
+  const [closedDays, setClosedDays] = useState<string[]>([]);
+  const [totalOccurrences, setTotalOccurrences] = useState<number>(0);
 
   const { data: seasons } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
   const { data: instructors } = useQuery<any[]>({ queryKey: ["/api/instructors"] });
@@ -78,19 +120,54 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
     }
   }, [isOpen, course, seasons]);
 
+  // Fetch closed days when season or dates change
+  useEffect(() => {
+    if (!seasonId || !startDate || !endDate) return;
+    fetch(`/api/strategic-events/closed-days?from=${startDate}&to=${endDate}&seasonId=${seasonId}`)
+      .then(r => r.json())
+      .then(d => {
+         if (d.closedDays) setClosedDays(d.closedDays);
+      })
+      .catch(console.error);
+  }, [seasonId, startDate, endDate]);
+
+  
+  useEffect(() => {
+     if (dayOfWeek && seasonId) {
+         const selectedSeason = seasons?.find(s => s?.id?.toString() === seasonId);
+         if (selectedSeason?.startDate) {
+             const seasonStartYear = new Date(selectedSeason.startDate).getFullYear();
+             setStartDate(getFirstDateForDay(`${seasonStartYear}-09-01`, dayOfWeek));
+         }
+         if (selectedSeason?.endDate) {
+             const seasonEndYear = new Date(selectedSeason.endDate).getFullYear();
+             setEndDate(getLastDateForDay(`${seasonEndYear}-06-30`, dayOfWeek));
+         }
+     }
+  }, [dayOfWeek]);
+
+  // Recalculate occurrences
+  useEffect(() => {
+    if (startDate && endDate && dayOfWeek) {
+        setTotalOccurrences(countOccurrences(startDate, endDate, dayOfWeek, closedDays));
+    } else {
+        setTotalOccurrences(0);
+    }
+  }, [startDate, endDate, dayOfWeek, closedDays]);
+
   // Recalculate values when season changes
   useEffect(() => {
     try {
       if (!seasonId || !course || !isOpen || !seasons) return;
       
       const selectedSeason = seasons.find(s => s?.id?.toString() === seasonId);
-      if (selectedSeason?.startDate) {
+      if (selectedSeason?.startDate && dayOfWeek) {
           const seasonStartYear = new Date(selectedSeason.startDate).getFullYear();
-          setStartDate(`${seasonStartYear}-09-01`);
+          setStartDate(getFirstDateForDay(`${seasonStartYear}-09-01`, dayOfWeek));
       }
-      if (selectedSeason?.endDate) {
+      if (selectedSeason?.endDate && dayOfWeek) {
           const seasonEndYear = new Date(selectedSeason.endDate).getFullYear();
-          setEndDate(`${seasonEndYear}-06-30`);
+          setEndDate(getLastDateForDay(`${seasonEndYear}-06-30`, dayOfWeek));
       }
 
       // SKU Generation
@@ -132,7 +209,7 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
           }
       }
 
-      const calculatedSku = `${codeA}${codeB}${codeC}${codeD}.${codeE}`;
+      const calculatedSku = `${codeA}${codeB}${codeC}${codeD}`;
       setSku(calculatedSku);
 
     } catch (e) {
@@ -267,6 +344,7 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
              Crea una copia di "{course?.name || "sconosciuto"}" in un'altra stagione.
           </DialogDescription>
         </DialogHeader>
+          {totalOccurrences > 0 && (<div className="bg-blue-50 text-blue-700 text-sm font-semibold p-2 rounded flex items-center gap-2">📅 {totalOccurrences} lezioni previste ({totalOccurrences} settimane operative al netto delle festività)</div>)}
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
