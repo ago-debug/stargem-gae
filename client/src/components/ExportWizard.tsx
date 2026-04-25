@@ -23,6 +23,7 @@ interface ExportWizardProps {
   triggerLabel?: string;
   triggerIcon?: React.ReactNode;
   variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive";
+  expandable?: boolean;
 }
 
 export function ExportWizard({
@@ -34,10 +35,12 @@ export function ExportWizard({
   apiParams,
   triggerLabel = "Esporta",
   triggerIcon = <Upload className="w-4 h-4 mr-2 sidebar-icon-gold" />,
-  variant = "outline"
+  variant = "outline",
+  expandable = false
 }: ExportWizardProps) {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
     columns.filter(c => c.default !== false).map(c => c.key)
   );
@@ -50,13 +53,7 @@ export function ExportWizard({
   };
 
   const getFormattedFilename = (base: string, ext: string) => {
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    const hh = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
-    return `${base}_${yyyy}-${mm}-${dd}_${hh}-${min}.${ext}`;
+    return `${base}_${new Date().toISOString().slice(0,16).replace('T','_').replace(':','-')}.${ext}`;
   };
 
   const getFilteredData = (rawData: any[]) => {
@@ -111,7 +108,10 @@ export function ExportWizard({
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          columns: selectedColumns,
+          columns: selectedColumns.map(k => {
+            const colDef = columns.find(c => c.key === k);
+            return { key: k, label: colDef?.label || k };
+          }),
           format,
           ...apiParams
         })
@@ -164,9 +164,16 @@ export function ExportWizard({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto pr-4 my-4">
-          <Label className="mb-3 block text-sm text-muted-foreground">Seleziona le colonne da esportare:</Label>
+          <div className="flex items-center justify-between mb-3">
+            <Label className="block text-sm text-muted-foreground">Seleziona le colonne da esportare:</Label>
+            {expandable && (
+              <Button variant="ghost" size="sm" onClick={() => setShowAll(!showAll)} className="h-6 text-xs px-2">
+                {showAll ? "Mostra solo principali" : "Mostra tutti i campi"}
+              </Button>
+            )}
+          </div>
           <div className="space-y-3">
-            {columns.map(col => (
+            {columns.filter(c => showAll || c.default !== false).map(col => (
               <div key={col.key} className="flex items-center space-x-2">
                 <Checkbox 
                   id={`export-col-${col.key}`} 
@@ -188,8 +195,7 @@ export function ExportWizard({
             Scarica CSV
           </Button>
           <Button 
-            variant="default"
-            className="bg-green-600 hover:bg-green-700" 
+            variant="outline"
             onClick={() => handleExport('xlsx')}
             disabled={isExporting}
           >

@@ -11653,8 +11653,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       // Format data
       const formattedData = rawData.map((row: any) => {
         const obj: Record<string, any> = {};
-        columns.forEach((key: string) => {
-          obj[key] = row[key];
+        columns.forEach((col: any) => {
+          const key = typeof col === 'string' ? col : col.key;
+          const label = typeof col === 'string' ? col : col.label;
+          obj[label] = row[key];
         });
         return obj;
       });
@@ -11663,12 +11665,13 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="${table}_export.csv"`);
         
-        const headerRow = columns.join(",") + "\n";
+        const headerRow = columns.map((c: any) => typeof c === 'string' ? c : c.label).join(",") + "\n";
         res.write("\ufeff" + headerRow);
         
         for (const row of formattedData) {
-          const line = columns.map((col) => {
-            let val = row[col] === null || row[col] === undefined ? "" : String(row[col]);
+          const line = columns.map((col: any) => {
+            const label = typeof col === 'string' ? col : col.label;
+            let val = row[label] === null || row[label] === undefined ? "" : String(row[label]);
             if (val.includes(',') || val.includes('"') || val.includes('\n')) {
               val = `"${val.replace(/"/g, '""')}"`;
             }
@@ -11694,7 +11697,10 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
         const workbook = new ExcelJS.stream.xlsx.WorkbookWriter(options);
         const worksheet = workbook.addWorksheet('Export');
         
-        worksheet.columns = columns.map((col) => ({ header: col, key: col, width: 20 }));
+        worksheet.columns = columns.map((col: any) => {
+          const label = typeof col === 'string' ? col : col.label;
+          return { header: label, key: label, width: 20 };
+        });
         
         for (const row of formattedData) {
           worksheet.addRow(row).commit();
