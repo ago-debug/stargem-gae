@@ -201,14 +201,6 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
           codeD = String(startTime).split(":")[0] || "XX";
       }
 
-      let codeE = "X";
-      if (course?.categoryId && Array.isArray(categories)) {
-          const cat = categories.find(c => c?.id === course.categoryId);
-          if (cat && cat.value) {
-              codeE = String(cat.value).toUpperCase().charAt(0);
-          }
-      }
-
       const calculatedSku = `${codeA}${codeB}${codeC}${codeD}`;
       setSku(calculatedSku);
 
