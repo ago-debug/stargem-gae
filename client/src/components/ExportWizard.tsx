@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
+import { Download, Upload, FileSpreadsheet, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
 
@@ -33,7 +33,7 @@ export function ExportWizard({
   apiEndpoint,
   apiParams,
   triggerLabel = "Esporta",
-  triggerIcon = <Download className="w-4 h-4 mr-2" />,
+  triggerIcon = <Upload className="w-4 h-4 mr-2 sidebar-icon-gold" />,
   variant = "outline"
 }: ExportWizardProps) {
   const { toast } = useToast();
@@ -47,6 +47,16 @@ export function ExportWizard({
     setSelectedColumns(prev => 
       prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
     );
+  };
+
+  const getFormattedFilename = (base: string, ext: string) => {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    return `${base}_${yyyy}-${mm}-${dd}_${hh}-${min}.${ext}`;
   };
 
   const getFilteredData = (rawData: any[]) => {
@@ -75,13 +85,13 @@ export function ExportWizard({
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${filename}.csv`;
+        link.download = getFormattedFilename(filename, 'csv');
         link.click();
         URL.revokeObjectURL(url);
       } else {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Export");
-        XLSX.writeFile(wb, `${filename}.xlsx`);
+        XLSX.writeFile(wb, getFormattedFilename(filename, 'xlsx'));
       }
       toast({ title: "Esportazione completata" });
       setIsOpen(false);
@@ -99,6 +109,7 @@ export function ExportWizard({
       const res = await fetch(apiEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           columns: selectedColumns,
           format,
@@ -115,7 +126,7 @@ export function ExportWizard({
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${filename}.${format}`;
+      link.download = getFormattedFilename(filename, format);
       link.click();
       URL.revokeObjectURL(url);
       
@@ -143,7 +154,7 @@ export function ExportWizard({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant={variant} size="sm" data-testid="button-export-wizard">
+        <Button variant={variant} size="sm" data-testid="button-export-wizard" className="bg-white">
           {triggerIcon}
           <span className="hidden sm:inline">{triggerLabel}</span>
         </Button>

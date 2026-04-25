@@ -351,6 +351,7 @@ La palette di StarGem Manager prevede ruoli specifici per ciascun colore, al fin
     *   Card e Finestre Modali: `--card` e `--popover`. Devono *sempre* staccare visivamente dal background.
 *   **Destructive / Error (Red):** Colore per cancellazioni o errori bloccanti, mappato su `--destructive`.
 *   **Verde / Successo:** Da utilizzare in modo parsimonioso ed esclusivo per stati di conferma (es. transazione completata o tag "Saldato").
+*   **Pulsanti Standard e di Azione (Regola d'Oro):** Il colore di fondo per i bottoni standard deve essere **sempre bianco** (`bg-white` o derivati chiari). Il fondo grigio (o ereditato dal `bg-background` quando non puro bianco) è **riservato esclusivamente ai pulsanti di selezione a tendina** (che presentano una freccina per espandere il menu, es. i `<Select>`). Tutti gli altri bottoni (Pulisci, Importa, Esporta, GSheets, ecc.) devono "staccare" sul bianco, pur mantenendo stili come l'iconografia "Oro 3D" quando indicato.
 
 *Nota: Non utilizzare stringhe esadecimali grafiche hardcoded (es. `#ff0000`) nei componenti React, ma affidati sempre alle classi semantiche di Tailwind (es. `bg-primary`, `text-destructive`).*
 
