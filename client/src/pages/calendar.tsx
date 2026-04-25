@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback, useLayoutEffect } from "react";
+import { useState, ReactNode, FormEvent, useMemo, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -190,6 +190,64 @@ export const isEventOnDate = (evt: CalendarEvent, targetDateStr: string) => {
     const e = evt.endDate || s; 
     return targetDateStr >= s && targetDateStr <= e;
 };
+
+function ScrollableFilterBar({ children, className }: { children: ReactNode, className?: string }) {
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [showLeft, setShowLeft] = useState(false);
+    const [showRight, setShowRight] = useState(false);
+
+    const checkScroll = useCallback(() => {
+        if (!scrollRef.current) return;
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        setShowLeft(scrollLeft > 0);
+        setShowRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
+    }, []);
+
+    useEffect(() => {
+        checkScroll();
+        window.addEventListener('resize', checkScroll);
+        const timeout = setTimeout(checkScroll, 500);
+        return () => {
+            window.removeEventListener('resize', checkScroll);
+            clearTimeout(timeout);
+        };
+    }, [checkScroll]);
+
+    useEffect(() => {
+        if (!scrollRef.current) return;
+        const observer = new MutationObserver(checkScroll);
+        observer.observe(scrollRef.current, { childList: true, subtree: true, characterData: true });
+        return () => observer.disconnect();
+    }, [checkScroll]);
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollBy({ left: direction === 'left' ? -200 : 200, behavior: 'smooth' });
+        }
+    };
+
+    return (
+        <div className={`relative flex items-center min-w-0 group ${className || ''}`}>
+            {showLeft && (
+                <div className="absolute left-0 z-10 bg-gradient-to-r from-white via-white/90 to-transparent pr-4 py-1 h-full flex items-center pointer-events-none">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-white border border-slate-200 pointer-events-auto hover:bg-slate-100" onClick={() => scroll('left')}>
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
+            <div ref={scrollRef} onScroll={checkScroll} className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-nowrap w-full">
+                {children}
+            </div>
+            {showRight && (
+                <div className="absolute right-0 z-10 bg-gradient-to-l from-white via-white/90 to-transparent pl-4 py-1 h-full flex items-center pointer-events-none">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-white border border-slate-200 pointer-events-auto hover:bg-slate-100" onClick={() => scroll('right')}>
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function CalendarPage() {
     const [, setLocation] = useLocation();
@@ -1344,7 +1402,7 @@ export default function CalendarPage() {
         setEditForm(newCourse);
     };
 
-    const handleSaveEdit = (e: React.FormEvent) => {
+    const handleSaveEdit = (e: FormEvent) => {
         e.preventDefault();
 
         // VALIDAZIONE CONFLITTO D'ORARIO (FRONTEND SIDE)
@@ -1571,7 +1629,7 @@ export default function CalendarPage() {
         setEditForm(workshop);
     };
 
-    const handleSaveBooking = (e: React.FormEvent) => {
+    const handleSaveBooking = (e: FormEvent) => {
         e.preventDefault();
 
         // VALIDAZIONE CONFLITTO D'ORARIO BOOKING (FRONTEND SIDE)
@@ -1679,7 +1737,7 @@ export default function CalendarPage() {
                         <h1 className="text-3xl font-bold truncate">Calendario Attività</h1>
                     </div>
                     
-                    <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-nowrap w-full md:w-auto md:justify-end pb-1 md:pb-0">
+                    <ScrollableFilterBar className="w-full md:w-auto md:justify-end pb-1 md:pb-0">
                         <div className="shrink-0">
                             <Select value={selectedSeasonId} onValueChange={handleSeasonChange}>
                                 <SelectTrigger className="w-[180px] bg-transparent border-slate-300">
@@ -1805,13 +1863,13 @@ export default function CalendarPage() {
                         <div className="shrink-0 hidden md:block">
                             <ActivityColorLegend variant="popover" />
                         </div>
-                    </div>
+                    </ScrollableFilterBar>
                 </div>
 
                 {/* --- RIGA 2: Timeline Navigation e Micro Filtri/Ricerca --- */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     
-                    <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-nowrap shrink-0">
+                    <ScrollableFilterBar className="shrink-0 max-w-full">
                         {selectedDay === "all" ? (
                             isTodayInView && (
                                 <div className="hidden md:inline-flex items-center px-3 h-10 bg-yellow-100/80 border border-yellow-300 text-yellow-800 text-sm font-bold rounded-md shadow-sm shrink-0 whitespace-nowrap">
@@ -1987,9 +2045,9 @@ export default function CalendarPage() {
                                 </Popover>
                             );
                         })()}
-                    </div>
+                    </ScrollableFilterBar>
 
-                    <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar flex-nowrap w-full md:w-auto md:justify-end pb-1 md:pb-0">
+                    <ScrollableFilterBar className="w-full md:w-auto md:justify-end pb-1 md:pb-0">
                         <div className="shrink-0">
                             <CourseDuplicationWizard currentSeasonId={selectedSeasonId} />
                         </div>
@@ -2047,7 +2105,7 @@ export default function CalendarPage() {
                                 <RefreshCw className="w-4 h-4 text-slate-600" />
                             </Button>
                         )}
-                    </div>
+                    </ScrollableFilterBar>
                 </div>
             </div>
 
@@ -2214,7 +2272,7 @@ export default function CalendarPage() {
                                             const realTop = calendarLayout.cumulativeTops[startMin];
                                             const realHeight = calendarLayout.cumulativeTops[endMin] - realTop;
 
-                                            const handleEdit = (e: React.MouseEvent) => {
+                                            const handleEdit = (e: MouseEvent) => {
                                                 e.stopPropagation();
                                                 if (evt.sourceType === "course" || evt.sourceType === "courses") handleEditCourse(evt.rawPayload);
                                                 if (evt.sourceType === "workshop" || evt.sourceType === "workshops") handleEditWorkshop(evt.rawPayload);
@@ -2320,7 +2378,12 @@ export default function CalendarPage() {
                                                             );
                                                         })()}
                                                         <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full pr-[45px] text-slate-900">{evt.startTime} - {evt.endTime}</div>
-                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[45px] break-normal overflow-hidden text-slate-900">{evt.title}</div>
+                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[45px] break-normal overflow-hidden text-slate-900">
+                                                            {evt.title}
+                                                            {evt.rawPayload?.totalOccurrences && evt.rawPayload.totalOccurrences > 0 && (
+                                                                <span className="ml-1 text-[9px] font-bold text-slate-600 bg-slate-200 px-1 py-[1px] rounded-sm whitespace-nowrap">🔁 {evt.rawPayload.totalOccurrences}x</span>
+                                                            )}
+                                                        </div>
                                                         {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5 text-slate-800">{ins1}</div>}
                                                         {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90 text-slate-800">{ins2}</div>}
                                                         

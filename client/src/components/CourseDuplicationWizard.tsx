@@ -12,6 +12,68 @@ import { useToast } from "@/hooks/use-toast";
 import type { Course, Instructor, Studio } from "@shared/schema";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getSeasonLabel } from "@/lib/utils";
+
+function getFirstDateForDay(fromDate: string, dayOfWeek: string): string {
+  if (!fromDate || !dayOfWeek) return '';
+  const dayMap: Record<string, number> = { 'LUN':1,'MAR':2,'MER':3,'GIO':4,'VEN':5,'SAB':6,'DOM':0 };
+  const target = dayMap[dayOfWeek];
+  const d = new Date(fromDate);
+  while (d.getDay() !== target) {
+    d.setDate(d.getDate() + 1);
+  }
+  return d.toISOString().split('T')[0];
+}
+
+function getLastDateForDay(toDate: string, dayOfWeek: string): string {
+  if (!toDate || !dayOfWeek) return '';
+  const dayMap: Record<string, number> = { 'LUN':1,'MAR':2,'MER':3,'GIO':4,'VEN':5,'SAB':6,'DOM':0 };
+  const target = dayMap[dayOfWeek];
+  const d = new Date(toDate);
+  while (d.getDay() !== target) {
+    d.setDate(d.getDate() - 1);
+  }
+  return d.toISOString().split('T')[0];
+}
+
+function countOccurrences(startDate: string, endDate: string, dayOfWeek: string, closedDays: string[]): number {
+  if (!startDate || !endDate || !dayOfWeek) return 0;
+  const dayMap: Record<string,number> = { 'LUN':1,'MAR':2,'MER':3,'GIO':4,'VEN':5,'SAB':6,'DOM':0 };
+  const target = dayMap[dayOfWeek];
+  const closedSet = new Set(closedDays);
+  let count = 0;
+  const d = new Date(startDate);
+  const end = new Date(endDate);
+  while (d <= end) {
+    if (d.getDay() === target && !closedSet.has(d.toISOString().split('T')[0])) {
+      count++;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
+
+const DAY_ALIASES: Record<string, string[]> = {
+  'LUN': ['lun','lunedì','lunedi','monday','mon'],
+  'MAR': ['mar','martedì','martedi','tuesday','tue'],
+  'MER': ['mer','mercoledì','mercoledi','wednesday','wed'],
+  'GIO': ['gio','giovedì','giovedi','thursday','thu'],
+  'VEN': ['ven','venerdì','venerdi','friday','fri'],
+  'SAB': ['sab','sabato','saturday','sat'],
+  'DOM': ['dom','domenica','sunday','sun'],
+};
+
+function matchesFilter(course: any, filter: string, instructors: any[]): boolean {
+  const f = filter.toLowerCase().trim();
+  if (!f) return true;
+  if (course.name?.toLowerCase().includes(f)) return true;
+  const dayCode = course.dayOfWeek?.toUpperCase();
+  const aliases = DAY_ALIASES[dayCode] || [];
+  if (aliases.some(a => a.includes(f) || f.includes(a))) return true;
+  const instructorName = instructors?.find(i => i.id === course.instructorId)?.lastName || "";
+  if (instructorName.toLowerCase().includes(f)) return true;
+  return false;
+}
+
 interface CourseDuplicationWizardProps {
   currentSeasonId: string;
 }
@@ -25,6 +87,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   const [searchFilter, setSearchFilter] = useState("");
   const [globalStartDate, setGlobalStartDate] = useState("");
   const [globalEndDate, setGlobalEndDate] = useState("");
+  const [closedDays, setClosedDays] = useState<string[]>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -32,6 +95,16 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
   const { data: seasons } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
   const activeSeasonFallbackId = seasons?.find(s => s.active)?.id?.toString() || "";
   const effectiveSourceSeasonId = currentSeasonId === "active" ? activeSeasonFallbackId : currentSeasonId;
+
+  React.useEffect(() => {
+    if (!targetSeasonId || !globalStartDate || !globalEndDate) return;
+    fetch(`/api/strategic-events/closed-days?from=${globalStartDate}&to=${globalEndDate}&seasonId=${targetSeasonId}`)
+      .then(r => r.json())
+      .then(d => {
+         if (d.closedDays) setClosedDays(d.closedDays);
+      })
+      .catch(console.error);
+  }, [targetSeasonId, globalStartDate, globalEndDate]);
 
   const { data: courses, isLoading: loadingCourses } = useQuery<Course[]>({ 
       queryKey: [effectiveSourceSeasonId ? `/api/courses?seasonId=${effectiveSourceSeasonId}&activityType=course` : "/api/courses?activityType=course"],
@@ -53,13 +126,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
 
   const filteredSourceCourses = useMemo(() => {
     if (!searchFilter.trim()) return sourceCourses;
-    const lowerFilter = searchFilter.toLowerCase().trim();
-    return sourceCourses.filter(c => {
-        const matchName = c.name?.toLowerCase().includes(lowerFilter);
-        const matchDay = c.dayOfWeek?.toLowerCase().includes(lowerFilter);
-        const matchInstructor = (instructors?.find(i => i.id === c.instructorId)?.lastName || "").toLowerCase().includes(lowerFilter);
-        return matchName || matchDay || matchInstructor;
-    });
+    return sourceCourses.filter(c => matchesFilter(c, searchFilter, instructors || []));
   }, [sourceCourses, searchFilter, instructors]);
 
   const targetSeasons = useMemo(() => {
