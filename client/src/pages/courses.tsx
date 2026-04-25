@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { hasWritePermission } from "@/App";
 import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X, Download, Tag, ArrowLeft } from "lucide-react";
+import { ExportWizard } from "@/components/ExportWizard";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
@@ -521,14 +522,20 @@ export default function Courses() {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant="outline"
-                onClick={exportToCSV}
-                data-testid="button-export-csv"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Esporta CSV
-              </Button>
+              <ExportWizard 
+      filename="corsi"
+      title="Esporta Corsi"
+      apiEndpoint="/api/export"
+      apiParams={{ table: 'courses' }}
+      columns={[
+        { key: 'name', label: 'Nome Corso', default: true },
+        { key: 'sku', label: 'SKU', default: true },
+        { key: 'category', label: 'Categoria', default: true },
+        { key: 'location', label: 'Sede', default: true },
+        { key: 'capacity', label: 'Capienza', default: true },
+        { key: 'status', label: 'Stato', default: true }
+      ]}
+    />
               <Button
                 onClick={() => {
                   closeDialog();

@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart3, TrendingUp, Users, Calendar, Plus, Play, Trash2, Edit, Download, FileText, Save } from "lucide-react";
+import { ExportWizard } from "@/components/ExportWizard";
 import type { CustomReport } from "@shared/schema";
 
 interface FieldDefinition {

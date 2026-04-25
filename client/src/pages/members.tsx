@@ -1,3 +1,4 @@
+import { ExportWizard } from "@/components/ExportWizard";
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -840,14 +841,41 @@ export default function Members() {
             <Download className="w-4 h-4 mr-2" />
             Importa CSV
           </Button>
-          <Button
-            variant="outline"
-            onClick={exportToCSV}
-            data-testid="button-export-csv"
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            Esporta CSV
-          </Button>
+          <ExportWizard 
+            filename="anagrafica"
+            title="Esporta Anagrafica"
+            apiEndpoint="/api/export"
+            apiParams={{ 
+              table: 'members',
+              filters: {
+                search: searchQuery,
+                status: statusFilter,
+                gender: genderFilter,
+                hasMedicalCert: hasMedicalCertFilter,
+                isMinor: isMinorFilter,
+                participantType: participantTypeFilter,
+                hasCard: hasCardFilter,
+                hasEntityCard: hasEntityCardFilter,
+                hasEmail: hasEmailFilter,
+                hasPhone: hasPhoneFilter,
+                missingFiscalCode: missingFiscalCodeFilter,
+                issuesFilter: issuesFilter
+              }
+            }}
+            columns={[
+              { key: 'lastName', label: 'Cognome', default: true },
+              { key: 'firstName', label: 'Nome', default: true },
+              { key: 'fiscalCode', label: 'Codice Fiscale', default: true },
+              { key: 'email', label: 'Email', default: true },
+              { key: 'phone', label: 'Telefono', default: true },
+              { key: 'cardNumber', label: 'Tessera', default: true },
+              { key: 'hasMedicalCertificate', label: 'Cert. Medico', default: true },
+              { key: 'dateOfBirth', label: 'Data di Nascita' },
+              { key: 'placeOfBirth', label: 'Luogo Nascita' },
+              { key: 'city', label: 'Città' },
+              { key: 'province', label: 'Provincia' }
+            ]}
+          />
           <Button
             onClick={() => {
               resetForm();
