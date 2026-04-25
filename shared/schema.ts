@@ -392,6 +392,7 @@ export const courses = mysqlTable("courses", {
   schedule: text("schedule"), // JSON: {day: "LUN", startTime: "15:00", endTime: "16:30", repeat: "weekly"} - legacy
   startDate: date("start_date"),
   endDate: date("end_date"),
+  totalOccurrences: int("total_occurrences"),
   level: varchar("level", { length: 100 }), // Livello (es. Base, Intermedio, Avanzato)
   ageGroup: varchar("age_group", { length: 100 }), // Fascia d'età (es. Bambini 3-5 anni)
   lessonType: json("lesson_type").$type<string[]>().default([]), // Tipologia Multipla (es. [Preparazione Gara, Tecnica])
