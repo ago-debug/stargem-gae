@@ -310,15 +310,18 @@ export default function ImportData() {
   });
 
   const [dryRunData, setDryRunData] = useState<any>(null);
+  const [seasonOverride, setSeasonOverride] = useState<number | null>(null);
+  const [showOnlyMissingSeason, setShowOnlyMissingSeason] = useState(false);
   
   const dryRunMutation = useMutation({
-    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string; delimiter: string }) => {
+    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string; delimiter: string; seasonOverride?: number | null }) => {
       const formData = new FormData();
       formData.append('file', params.file);
       formData.append('fieldMapping', JSON.stringify(params.fieldMapping));
       formData.append('importKey', params.importKey);
       formData.append('entityType', params.entityType);
       formData.append('delimiter', params.delimiter);
+      if (params.seasonOverride) formData.append('seasonOverride', String(params.seasonOverride));
       formData.append('isDryRun', 'true');
       const response = await fetch('/api/import/mapped', {
         method: 'POST',
@@ -337,7 +340,7 @@ export default function ImportData() {
 
   // File mapped import mutation
   const fileMappedImportMutation = useMutation({
-    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string; delimiter: string; autoCreateRecords?: boolean }) => {
+    mutationFn: async (params: { file: File; fieldMapping: Record<string, number>; importKey: string; entityType: string; delimiter: string; autoCreateRecords?: boolean; seasonOverride?: number | null }) => {
       const formData = new FormData();
       formData.append('file', params.file);
       formData.append('fieldMapping', JSON.stringify(params.fieldMapping));
@@ -345,6 +348,7 @@ export default function ImportData() {
       formData.append('entityType', params.entityType);
       formData.append('delimiter', params.delimiter);
       formData.append('autoCreateRecords', String(params.autoCreateRecords || false));
+      if (params.seasonOverride) formData.append('seasonOverride', String(params.seasonOverride));
       const response = await fetch('/api/import/mapped', {
         method: 'POST',
         body: formData,
@@ -395,7 +399,7 @@ export default function ImportData() {
   });
 
   const mappedImportMutation = useMutation({
-    mutationFn: async (params: { spreadsheetId: string; range: string; fieldMapping: Record<string, number | null>; importKey: string; entityType: string; autoCreateRecords?: boolean }) => {
+    mutationFn: async (params: { spreadsheetId: string; range: string; fieldMapping: Record<string, number | null>; importKey: string; entityType: string; autoCreateRecords?: boolean; seasonOverride?: number | null }) => {
       return await apiRequest("POST", "/api/google-sheets/import-mapped", params);
     },
     onSuccess: (data: any) => {
@@ -519,6 +523,7 @@ export default function ImportData() {
         entityType,
         delimiter: csvDelimiter,
         autoCreateRecords,
+        seasonOverride,
       });
     } else {
       mappedImportMutation.mutate({
@@ -528,6 +533,7 @@ export default function ImportData() {
         importKey,
         entityType,
         autoCreateRecords,
+        seasonOverride,
       });
     }
   };
@@ -631,7 +637,24 @@ export default function ImportData() {
 
   // Render variables
   const isImporting = mappedImportMutation.isPending || fileMappedImportMutation.isPending;
-    const filteredConfigs = savedConfigs.filter(c => c.entityType === entityType);
+  const filteredConfigs = savedConfigs.filter(c => c.entityType === entityType);
+
+  const executeDryRun = (overrideSeasonId?: number) => {
+    if (sourceType === "file" && selectedFile) {
+       const activeMapping: Record<string, number> = {};
+       for (const [key, value] of Object.entries(fieldMapping)) {
+         if (value !== null && value !== undefined && (value as number) >= 0) activeMapping[key] = value as number;
+       }
+       dryRunMutation.mutate({
+         file: selectedFile,
+         fieldMapping: activeMapping,
+         importKey,
+         entityType,
+         delimiter: csvDelimiter,
+         seasonOverride: overrideSeasonId || seasonOverride,
+       });
+    }
+  };
 
   return (
     <div className="p-6 md:p-8 space-y-6 mx-auto">
@@ -791,19 +814,7 @@ export default function ImportData() {
             <Button variant="outline" onClick={handleAutoMap}><Settings2 className="w-4 h-4 mr-2"/> Auto-Mappa tutto</Button>
             <Button className="ml-auto" onClick={() => {
               setWizardStep(3);
-              if (sourceType === "file" && selectedFile) {
-                 const activeMapping: Record<string, number> = {};
-                 for (const [key, value] of Object.entries(fieldMapping)) {
-                   if (value !== null && value !== undefined && (value as number) >= 0) activeMapping[key] = value as number;
-                 }
-                 dryRunMutation.mutate({
-                   file: selectedFile,
-                   fieldMapping: activeMapping,
-                   importKey,
-                   entityType,
-                   delimiter: csvDelimiter,
-                 });
-              }
+              executeDryRun();
             }}><ArrowRight className="w-4 h-4 mr-2"/> Continua allo Step 3</Button>
           </div>
 
@@ -953,6 +964,65 @@ export default function ImportData() {
                             </div>
                           </div>
                           
+                          {/* SEZIONE A — CF mancante o invalido */}
+                          {(dryRunData.missingCfRecords?.length > 0 || dryRunData.invalidCfRecords?.length > 0) && (
+                            <Alert variant="destructive" className="bg-red-50 border-red-200">
+                              <AlertCircle className="h-4 w-4 text-red-600" />
+                              <AlertTitle className="text-red-800">
+                                {(dryRunData.missingCfRecords?.length || 0) + (dryRunData.invalidCfRecords?.length || 0)} record con CF mancante o non valido non verranno importati.
+                              </AlertTitle>
+                              <AlertDescription className="text-red-700 mt-2">
+                                Correggere i dati nel file CSV e reimportare.
+                                <details className="mt-2 cursor-pointer">
+                                  <summary className="font-medium">Visualizza i record bloccati</summary>
+                                  <ul className="mt-2 pl-4 list-disc text-xs max-h-40 overflow-auto">
+                                    {dryRunData.missingCfRecords?.map((r: any, i: number) => <li key={`m-${i}`}>{r.nome} {r.cognome} — CF Mancante</li>)}
+                                    {dryRunData.invalidCfRecords?.map((r: any, i: number) => <li key={`i-${i}`}>{r.nome} {r.cognome} — CF Invalido ({r.cf || 'n/d'})</li>)}
+                                  </ul>
+                                </details>
+                              </AlertDescription>
+                            </Alert>
+                          )}
+
+                          {/* SEZIONE B — Season_id mancante */}
+                          {dryRunData.missingSeasonRecords?.length > 0 && (
+                            <Alert className="bg-orange-50 border-orange-200">
+                              <AlertCircle className="h-4 w-4 text-orange-600" />
+                              <AlertTitle className="text-orange-800">
+                                {dryRunData.missingSeasonRecords.length} iscrizioni senza stagione associata.
+                              </AlertTitle>
+                              <AlertDescription className="text-orange-700 mt-2">
+                                Confermare prima di procedere.
+                                <div className="flex gap-3 mt-3">
+                                  <Button size="sm" className="bg-orange-600 hover:bg-orange-700 text-white" onClick={() => {
+                                    setSeasonOverride(1);
+                                    executeDryRun(1);
+                                  }}>
+                                    Assegna stagione 25/26 a tutti
+                                  </Button>
+                                  <Button size="sm" variant="outline" className="border-orange-300 text-orange-800 hover:bg-orange-100" onClick={() => setShowOnlyMissingSeason(!showOnlyMissingSeason)}>
+                                    {showOnlyMissingSeason ? "Mostra Tutti" : "Revisiona manualmente"}
+                                  </Button>
+                                </div>
+                              </AlertDescription>
+                            </Alert>
+                          )}
+
+                          {/* SEZIONE C — Smart Routing attivato */}
+                          {dryRunData.routingStats && (
+                            <Alert className="bg-blue-50 border-blue-200">
+                              <CheckCircle className="h-4 w-4 text-blue-600" />
+                              <AlertTitle className="text-blue-800">Smart Routing attivo:</AlertTitle>
+                              <AlertDescription className="text-blue-700 mt-2">
+                                <ul className="list-disc pl-4">
+                                  {dryRunData.routingStats.tessere > 0 && <li>{dryRunData.routingStats.tessere} tessere → memberships</li>}
+                                  {dryRunData.routingStats.certificati > 0 && <li>{dryRunData.routingStats.certificati} certificati → medical_certificates</li>}
+                                  {dryRunData.routingStats.iscrizioni > 0 && <li>{dryRunData.routingStats.iscrizioni} iscrizioni → enrollments</li>}
+                                </ul>
+                              </AlertDescription>
+                            </Alert>
+                          )}
+
                           <div className="border rounded-md overflow-hidden max-h-60 overflow-y-auto text-sm">
                             <Table>
                               <TableHeader className="bg-muted sticky top-0">
@@ -965,7 +1035,7 @@ export default function ImportData() {
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {dryRunData.preview?.slice(0, 50).map((r: any, i: number) => (
+                                {dryRunData.preview?.filter((r: any) => showOnlyMissingSeason ? (r.azione === 'ERRORE' || r.cf === 'MANCANTE') : true).slice(0, 50).map((r: any, i: number) => (
                                   <TableRow key={i}>
                                     <TableCell className="font-mono">{r.cf}</TableCell>
                                     <TableCell>{r.cognome} {r.nome}</TableCell>
