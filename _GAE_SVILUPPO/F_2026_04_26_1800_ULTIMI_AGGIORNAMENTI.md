@@ -31,3 +31,9 @@ Di seguito il riepilogo sintetico degli ultimi sviluppi architetturali e di boni
 * Disinnescata architettura a 11 silos in favore del modello a super-tabella `courses` e `enrollments`. DB ridotto a 72 tabelle stabili.
 
 *(Storico pregresso archiviato per snellimento documentazione).*
+
+### Aggiornamento 26/04/2026 18:00
+- **Refactoring /elenchi (F2-025, F2-026, F2-027, F2-028)**: Riprogettata completamente l'interfaccia con sidebar laterale per le aree (Corsi, Iscrizioni, ecc) e liste in Accordion (shadcn/ui). Uniformate le etichette modali ("Stato Corso", "Interno Corso"). Le liste vengono tutte attinte e gestite centralmente tramite `custom_lists`.
+- **Bugfix (F2-024)**: Risolto bug Planning su date festività UTC shift.
+- **DB Migrazione (F1-015, F1-016)**: Popolamento DB `custom_lists` dalle vecchie tabelle.
+- **Pulizia (PM1)**: Rimossi script di patch temporanei, output DB temporanei e backup intermedi per snellire la codebase.

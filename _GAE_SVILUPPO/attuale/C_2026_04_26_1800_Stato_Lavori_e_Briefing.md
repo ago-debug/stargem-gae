@@ -47,3 +47,8 @@ Questo documento fotografa lo stato di collaudo e di priorità delle singole sez
 ## 10. Import Dati e Routing
 **Stato Attuale:** 🟢 OPERATIVO
 **Sintesi:** È stato implementato lo "Smart Routing" per QUOTATESSERA e visite mediche con validatore Algoritmo Codice Fiscale e blocco `season_id`. Previene la corruzione della tabella iscritti al root level. Manca la connessione di tali errori UI nel banner dry-run.
+
+### Ultimi completamenti (18:00)
+- Centralizzazione UI Liste: La pagina `/elenchi` è ora il punto di verità assoluto diviso in 5 Aree Funzionali.
+- Sync Etichette: Le diciture tra maschera di modifica e pannello gestione liste sono allineate per evitare confusione.
+- Rimossi script throwaway e file temporanei di sessione.
