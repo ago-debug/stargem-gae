@@ -14,13 +14,13 @@ export const INTERNAL_TAGS = [
   { id: "ultimi_posti", name: "ULTIMI POSTI", color: "#5b21b6" },
 ];
 
-export function InternalBadge({ name }: { name: string }) {
+export function InternalBadge({ name, color }: { name: string; color?: string }) {
   const tag = INTERNAL_TAGS.find(t => t.name === name);
-  const color = tag?.color || "#4f46e5";
+  const finalColor = color || tag?.color || "#4f46e5";
   return (
     <div
       className="text-[10px] font-bold uppercase tracking-wider leading-none truncate px-1.5 py-[2px] rounded-[3px] border inline-flex items-center"
-      style={{ backgroundColor: `${color}15`, color, borderColor: `${color}40` }}
+      style={{ backgroundColor: `${finalColor}15`, color: finalColor, borderColor: `${finalColor}40` }}
       title={name}
     >
       {name}
@@ -78,17 +78,24 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
       </div>
       <div className="relative w-[180px]" ref={containerRef}>
         <div
-        className="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors focus-within:ring-1 focus-within:ring-ring"
+        className="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1.5 text-sm shadow-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors focus-within:ring-1 focus-within:ring-ring"
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex flex-wrap gap-1 items-center flex-1 pr-2 overflow-hidden">
-          {selectedTags.length > 0 ? (
-            <span className="text-indigo-700 font-semibold text-xs truncate">
-              {selectedTags.length} tag selezionati
-            </span>
-            ) : (
-              <span className="text-muted-foreground">Seleziona interno corso...</span>
-            )}
+          {selectedTags.length === 0 ? (
+            <span className="text-muted-foreground">Seleziona interno corso...</span>
+          ) : (
+            selectedTags.map((tagName) => {
+              const tag = activeTags.find((t: any) => t.name === tagName);
+              return (
+                <InternalBadge
+                  key={tagName}
+                  name={tagName}
+                  color={tag?.color}
+                />
+              );
+            })
+          )}
         </div>
         <ChevronDown className={cn("h-4 w-4 opacity-50 shrink-0 transition-transform", isOpen && "rotate-180")} />
       </div>
