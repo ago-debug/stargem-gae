@@ -893,17 +893,14 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           )}
 
           <TabsContent value="details" className="pt-2">
-            <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-              <div className={cn("relative flex flex-col items-center justify-center pt-8 pb-4 px-4 rounded-md border-2 mt-4", (isCopy && opStates.length > 0) ? "bg-red-50/50 border-red-400" : "border-yellow-400 bg-white")}>
-                
-                {/* Floating Pennini Box */}
-                <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-white px-6 py-2 rounded-md shadow-md border border-slate-200 flex gap-6 w-fit min-w-[500px] z-10">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className={cn("flex flex-col gap-4 p-4 rounded-md border-2", (isCopy && opStates.length > 0) ? "bg-red-50/50 border-red-400" : "border-yellow-400 bg-white")}>
+                <div className="flex gap-4 w-full">
                   <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
                   <MultiSelectInternal selectedTags={internalTags} onChange={setInternalTags} />
                 </div>
 
-                {/* Flags Marketing Centered */}
-                <div className="flex items-center gap-4 flex-wrap mt-2 justify-center w-full">
+                <div className="flex items-center gap-4 flex-wrap mt-1">
                   <Label className="font-semibold text-slate-800">Flags Marketing:</Label>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="promo-gratuita" checked={promoFlags.includes("GRATUITA")} onCheckedChange={(c) => handlePromoChange("GRATUITA", !!c)} />
