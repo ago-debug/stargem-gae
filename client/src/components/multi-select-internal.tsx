@@ -74,7 +74,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <Label>Tag Interni Corso</Label>
+        <Label>Interno Corso</Label>
         <Button
           type="button"
           size="icon"
@@ -97,7 +97,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
               {selectedTags.length} tag selezionati
             </span>
             ) : (
-              <span className="text-muted-foreground">Tag Interni Corso</span>
+              <span className="text-muted-foreground">Seleziona interno corso...</span>
             )}
         </div>
         <ChevronDown className={cn("h-4 w-4 opacity-50 shrink-0 transition-transform", isOpen && "rotate-180")} />
