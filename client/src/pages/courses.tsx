@@ -547,11 +547,11 @@ export default function Courses() {
                 <PopoverContent className="w-80 p-0" align="end">
                   <div className="p-4 space-y-4">
                     <div>
-                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Per Categoria</h4>
+                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Categoria</h4>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                         {Object.entries(
                             filteredCourses.reduce((acc, c) => {
-                              const cat = (c as any).categoryName || categories?.find(catObj => catObj.id === c.categoryId)?.name || "Senza categoria";
+                              const cat = (c as any).categoryName || categories?.find(catObj => Number(catObj.id) === Number(c.categoryId))?.name || "Senza categoria";
                               acc[cat] = (acc[cat] || 0) + 1;
                               return acc;
                             }, {} as Record<string, number>)
@@ -565,7 +565,7 @@ export default function Courses() {
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Per Nome</h4>
+                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Genere / Nome</h4>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs max-h-40 overflow-y-auto pr-1 custom-scrollbar">
                         {Object.entries(
                             filteredCourses.reduce((acc, c) => {
