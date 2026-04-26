@@ -88,7 +88,7 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
           <Plus className="w-4 h-4" />
         </Button>
       </div>
-      <div className="flex flex-col gap-1 mt-2 max-h-[250px] overflow-y-auto pr-1">
+      <div className="flex flex-col gap-1 mt-2 pr-1" style={{ maxHeight: "250px", overflowY: "auto", overscrollBehavior: "contain" }}>
         {listData.items?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(item => (
           <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-1">
             {showColors && item.color ? (
