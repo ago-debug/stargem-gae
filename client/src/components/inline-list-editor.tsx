@@ -1,5 +1,6 @@
-// PENNINO A: showColors=false (default) - lista semplice
-// PENNINO B: showColors=true - lista colorata multi
+// PENNINO A: showColors=false (default) | NO multi-selezione | lista semplice
+// PENNINO B: showColors=true | SÌ multi-selezione | lista colorata
+// PENNINO C: showColors=true | NO multi-selezione | colore assegnato
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
