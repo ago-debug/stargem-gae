@@ -11580,16 +11580,30 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   app.post("/api/gemteam/turni/apply-template", isAuthenticated, isMasterGuard, async (req, res) => {
     try {
       const { weekStart, settimana } = req.body;
+      
+      // Validazione stretta della data
+      if (!weekStart || !/^\d{4}-\d{2}-\d{2}$/.test(weekStart.split('T')[0])) {
+         return res.status(400).json({ error: "Data weekStart mancante o formato non valido (YYYY-MM-DD)" });
+      }
+
       const startD = new Date(weekStart);
-      const endD = new Date(weekStart);
+      if (isNaN(startD.getTime())) {
+         return res.status(400).json({ error: "Data weekStart non valida" });
+      }
+
+      const endD = new Date(startD);
       endD.setDate(endD.getDate() + 6); // Domenica della stessa settimana
 
-      // WIPE della settimana corrente su teamScheduledShifts
+      // Formattazione type-safe in YYYY-MM-DD per MySQL
+      const startStr = startD.toISOString().split('T')[0];
+      const endStr = endD.toISOString().split('T')[0];
+
+      // WIPE della settimana corrente su teamScheduledShifts (SAFE)
       await db.delete(schema.teamScheduledShifts)
         .where(
           and(
-            sql`DATE(${schema.teamScheduledShifts.data}) >= DATE(${startD})`,
-            sql`DATE(${schema.teamScheduledShifts.data}) <= DATE(${endD})`
+            gte(schema.teamScheduledShifts.data, new Date(startStr)),
+            lte(schema.teamScheduledShifts.data, new Date(endStr))
           )
         );
 
