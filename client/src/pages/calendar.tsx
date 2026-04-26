@@ -475,6 +475,14 @@ export default function CalendarPage() {
         color: item.color
     })) || [];
 
+    const { data: internalTagsResponse } = useQuery<any>({
+        queryKey: ["/api/custom-lists/tag_interni"],
+    });
+    const internalTagsList = internalTagsResponse?.items?.map((item: any) => ({
+        name: item.value,
+        color: item.color
+    })) || [];
+
     const { data: seasons } = useQuery<any[]>({
         queryKey: ["/api/seasons"],
     });
@@ -2361,7 +2369,7 @@ export default function CalendarPage() {
                                                 <div
                                                     key={evt.eventId}
                                                     onClick={handleCardClick}
-                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-xl z-20 hover:z-50 overflow-hidden ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 ring-2 ring-red-500 animate-pulse z-[90]' : ''}`}
+                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-xl z-20 hover:z-50 ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 ring-2 ring-red-500 animate-pulse z-[90]' : ''}`}
                                                     style={{
                                                         top: `${realTop + 2}px`,
                                                         minHeight: `${Math.max(realHeight - 4, 55)}px`,  // Elastic minimum height for short events
@@ -2493,14 +2501,14 @@ export default function CalendarPage() {
                                                                             </div>
                                                                         );
                                                                     })}
-                                                                    {internalLabels.length > 0 && internalLabels.map(tag => (
-                                                                      <span key={tag}
-                                                                        className="text-[9px] font-bold uppercase px-1 py-[1px]
-                                                                          rounded-[2px] bg-indigo-100 text-indigo-700 
-                                                                          border border-indigo-200 leading-none truncate">
-                                                                        {tag}
-                                                                      </span>
-                                                                    ))}
+                                                                    {internalLabels.length > 0 && internalLabels.map(tag => {
+                                                                      const color = getStatusColor(tag, internalTagsList);
+                                                                      return (
+                                                                        <div key={tag} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: `${color}15`, color, border: `0.5px solid ${color}40` } : { backgroundColor: '#e0e7ff', color: '#4338ca', border: '0.5px solid #c7d2fe' }}>
+                                                                            {tag}
+                                                                        </div>
+                                                                      );
+                                                                    })}
                                                                 </div>
                                                             </div>
                                                             

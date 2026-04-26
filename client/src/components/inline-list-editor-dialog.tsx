@@ -9,9 +9,10 @@ interface Props {
   listName: string;
   showColors?: boolean;
   trigger?: ReactNode;
+  penninoType?: string;
 }
 
-export function InlineListEditorDialog({ listCode, listName, showColors, trigger }: Props) {
+export function InlineListEditorDialog({ listCode, listName, showColors, trigger, penninoType }: Props) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -27,7 +28,7 @@ export function InlineListEditorDialog({ listCode, listName, showColors, trigger
           <DialogDescription>Aggiungi o rimuovi voci dalla lista.</DialogDescription>
         </DialogHeader>
         <div className="bg-background rounded-md w-full flex justify-center">
-          <InlineListEditor listCode={listCode} listName={listName} showColors={showColors} />
+          <InlineListEditor listCode={listCode} listName={listName} showColors={showColors} penninoType={penninoType} />
         </div>
       </DialogContent>
     </Dialog>

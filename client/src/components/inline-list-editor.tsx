@@ -11,9 +11,10 @@ interface InlineListEditorProps {
   listCode: string;
   listName: string;
   showColors?: boolean;
+  penninoType?: string;
 }
 
-export function InlineListEditor({ listCode, listName, showColors = false }: InlineListEditorProps) {
+export function InlineListEditor({ listCode, listName, showColors = false, penninoType }: InlineListEditorProps) {
   const { toast } = useToast();
   const [newValue, setNewValue] = useState("");
   const [newColor, setNewColor] = useState("#4f46e5");
@@ -56,7 +57,10 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
   return (
     <div className="flex flex-col gap-3 p-4 w-full">
       <h3 className="font-semibold text-base border-b pb-2 shrink-0 flex items-center justify-between">
-        <span>Gestisci {listName}</span>
+        <span className="flex items-center gap-2">
+          Gestisci {listName}
+          {penninoType && <span className="text-red-500 font-normal">{penninoType}</span>}
+        </span>
         <span className="text-slate-500 text-sm font-normal">({listData.items?.length || 0} voci)</span>
       </h3>
       <div className="flex gap-2 shrink-0 items-center">
@@ -92,7 +96,6 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
         {listData.items?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((item, index) => (
           <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-2 border border-transparent hover:border-slate-100">
             <div className="flex items-center truncate flex-1 pr-2">
-              <span className="text-xs text-muted-foreground mr-2 font-mono w-4">#{index + 1}</span>
               {showColors && item.color ? (
                 <div className="w-3 h-3 rounded-full shrink-0 mr-3 shadow-sm border border-black/10" style={{ backgroundColor: item.color }} />
               ) : null}

@@ -923,7 +923,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   <Label className="font-semibold text-slate-800 shrink-0">
                       {activityType === "allenamenti" ? "GENERE ALLENAMENTO" : activityType === "prenotazioni" ? "GENERE LEZIONE" : "GENERE / NOME CORSO"} *
                     </Label>
-                  <InlineListEditorDialog listCode={nameListType} listName="Genere Corso" showColors={false} />
+                  <InlineListEditorDialog listCode={nameListType} listName="Genere Corso" showColors={false} penninoType="tipo A" />
                 </div>
                   <div className={(isCopy && !!formData.name) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Combobox
@@ -964,7 +964,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="font-semibold text-slate-800 shrink-0">Categoria <span className="text-red-500 ml-1">*</span></Label>
-                    <InlineListEditorDialog listCode="categorie" listName="Categorie Corsi" showColors={true} />
+                    <InlineListEditorDialog listCode="categorie" listName="Categorie Corsi" showColors={true} penninoType="tipo C" />
                   </div>
                   <div className={(isCopy && !!formData.categoryId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Combobox

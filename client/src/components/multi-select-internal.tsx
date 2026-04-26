@@ -61,7 +61,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
     <div className="space-y-2 flex-1 min-w-0">
       <div className="flex items-center gap-2">
         <Label className="font-semibold text-slate-800 shrink-0 uppercase text-xs">Interno Corso</Label>
-        <InlineListEditorDialog listCode="tag_interni" listName="Interno Corso" showColors={true} />
+        <InlineListEditorDialog listCode="tag_interni" listName="Interno Corso" showColors={true} penninoType="tipo B" />
       </div>
       <div className="relative" ref={containerRef}>
         <div
@@ -112,8 +112,8 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
                     </span>
                   </div>
                   {isSelected && (
-                    <span className="text-xs text-muted-foreground">
-                      #{selectedTags.indexOf(tag.name) + 1}
+                    <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-1.5 rounded-sm">
+                      ✓
                     </span>
                   )}
                 </div>
