@@ -196,7 +196,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
                   <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link href={`/anagrafica_a_lista?search=${encodeURIComponent(`${enrollment.lastName} ${enrollment.firstName}`)}`}>
+                      <Link href={`/anagrafica/${enrollment.memberId}`}>
                         <Button variant="ghost" size="sm">Visualizza</Button>
                       </Link>
                       <Button variant="ghost" size="icon" onClick={() => { if (confirm("Sei sicuro di voler rimuovere questa iscrizione?")) { deleteEnrollmentMutation.mutate(enrollment.enrollmentId); } }} disabled={!canWrite}><X className="w-4 h-4" /></Button>

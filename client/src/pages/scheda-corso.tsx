@@ -164,6 +164,19 @@ export default function SchedaCorso() {
     };
     const sortedEnrolledMembersData = sortItems(enrolledMembersData, getSortValue);
 
+    const tessereScadute = enrolledMembersRaw?.filter(m => {
+        if (!m.membership_expiry_date) return false;
+        return new Date(m.membership_expiry_date) < new Date();
+    }).length || 0;
+
+    const certScaduti = enrolledMembersRaw?.filter(m =>
+        m.medical_status === 'expired'
+    ).length || 0;
+
+    const presenzeTotal = enrolledMembersRaw?.reduce(
+        (sum, m) => sum + (Number(m.presenze_count) || 0), 0
+    ) || 0;
+
     return (
         <div className="p-6 md:p-8 space-y-8 max-w-[1400px] mx-auto">
             {/* Header section with styling adapted from standard category pages */}
@@ -219,6 +232,19 @@ export default function SchedaCorso() {
                                 <Users className="w-3.5 h-3.5" />
                                 {enrolledMembersData.length} iscritti attivi
                             </Badge>
+                            {tessereScadute > 0 && (
+                                <span className="text-red-600 text-sm font-medium bg-red-50 px-2 py-1 rounded">
+                                    🔴 {tessereScadute} tessere scadute
+                                </span>
+                            )}
+                            {certScaduti > 0 && (
+                                <span className="text-orange-600 text-sm font-medium bg-orange-50 px-2 py-1 rounded">
+                                    🟡 {certScaduti} cert. scaduti
+                                </span>
+                            )}
+                            <span className="text-slate-600 text-sm bg-slate-50 px-2 py-1 rounded">
+                                ✅ {presenzeTotal} presenze
+                            </span>
                             {course.totalOccurrences && effettuate !== null && rimanenti !== null && (
                                 <>
                                     <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
