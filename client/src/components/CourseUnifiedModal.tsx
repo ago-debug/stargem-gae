@@ -500,7 +500,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         setPromoFlags(tags.filter(t => t.startsWith("PROMO:")).map(t => t.replace("PROMO:", "")));
         
         // Estrazione tag interni
-        setInternalTags(course?.internalTags || []);
+        setInternalTags(parseStatusTags(course?.internalTags));
       } else {
         let defaultsToUse: any = { ...(defaultValues || {}) };
         
