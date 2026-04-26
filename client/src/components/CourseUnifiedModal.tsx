@@ -925,7 +925,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     </Label>
                   <Popover>
                   <PopoverTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                    <Button type="button" size="icon" variant="ghost" className="h-5 w-5">
                       <Edit className="w-3 h-3 text-slate-500" />
                     </Button>
                   </PopoverTrigger>
@@ -980,7 +980,6 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                           size="icon"
                           variant="ghost"
                           className="h-5 w-5"
-                          onClick={(e) => { e.stopPropagation(); }}
                         >
                           <Edit className="w-3 h-3 sidebar-icon-gold" />
                         </Button>
@@ -1015,7 +1014,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       <Label className="font-semibold text-slate-800 shrink-0">NUMERO PERSONE</Label>
                       <Popover>
                       <PopoverTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                        <Button type="button" size="icon" variant="ghost" className="h-5 w-5">
                           <Edit className="w-3 h-3 text-slate-500" />
                         </Button>
                       </PopoverTrigger>
@@ -1122,7 +1121,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     <Label className="font-semibold text-slate-800 shrink-0">{activityType === "campus" ? "Gruppo" : "Livello"}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                        <Button type="button" size="icon" variant="ghost" className="h-5 w-5">
                           <Edit className="w-3 h-3 text-slate-500" />
                         </Button>
                       </PopoverTrigger>
@@ -1146,7 +1145,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     <Label className="font-semibold text-slate-800 shrink-0">Fascia d'età</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                        <Button type="button" size="icon" variant="ghost" className="h-5 w-5">
                           <Edit className="w-3 h-3 text-slate-500" />
                         </Button>
                       </PopoverTrigger>
@@ -1229,7 +1228,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     <Label htmlFor="maxCapacity" className="font-semibold text-slate-800 shrink-0">Posti Disponibili <span className="text-red-500 ml-1">*</span></Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                        <Button type="button" size="icon" variant="ghost" className="h-5 w-5">
                           <Edit className="w-3 h-3 text-slate-500" />
                         </Button>
                       </PopoverTrigger>

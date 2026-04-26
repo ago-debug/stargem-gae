@@ -87,7 +87,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
-            <InlineListEditor listCode="tag_interni" listName="Interno Corso" />
+            <InlineListEditor listCode="tag_interni" listName="Interno Corso" showColors={true} />
           </PopoverContent>
         </Popover>
       </div>
