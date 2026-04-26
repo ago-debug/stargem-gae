@@ -1,0 +1,3779 @@
+--- QUERY 1: I 32 QUOTATESSERA orfani ---
+[
+  {
+    "enrollment_id": 3616,
+    "member_id": 17900,
+    "last_name": "BARBAIANO DI BELGIOJOSO",
+    "first_name": "CATERINA",
+    "fiscal_code": "BRBCRN12P62F205B",
+    "email": null,
+    "enrollment_date": "2025-09-19 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 8852,
+    "member_id": 17618,
+    "last_name": "BARDAWIL",
+    "first_name": "MILLA SORAYA",
+    "fiscal_code": "BRDMLS06S56Z114C",
+    "email": null,
+    "enrollment_date": "2026-02-20 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 5368,
+    "member_id": 17893,
+    "last_name": "BAUTRO",
+    "first_name": "JEIDYN",
+    "fiscal_code": "BTRJYN99L52F205K",
+    "email": null,
+    "enrollment_date": "2025-10-09 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 2293,
+    "member_id": 18224,
+    "last_name": "BELLONI",
+    "first_name": "HELLEN",
+    "fiscal_code": null,
+    "email": null,
+    "enrollment_date": "2025-09-06 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 6711,
+    "member_id": 18351,
+    "last_name": "BENLIAN",
+    "first_name": "ELISA",
+    "fiscal_code": "BNLLSE06E51Z700E",
+    "email": null,
+    "enrollment_date": "2025-11-11 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 6448,
+    "member_id": 18014,
+    "last_name": "BOCCHETTI MALTSEVA",
+    "first_name": "EKATERINA",
+    "fiscal_code": null,
+    "email": null,
+    "enrollment_date": "2025-11-04 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 9540,
+    "member_id": 18363,
+    "last_name": "BURANI",
+    "first_name": "SARA",
+    "fiscal_code": null,
+    "email": null,
+    "enrollment_date": "2026-04-07 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 8813,
+    "member_id": 17585,
+    "last_name": "CAPASSO",
+    "first_name": "GRETA",
+    "fiscal_code": "CPSGRT13P70B300K",
+    "email": null,
+    "enrollment_date": "2026-02-18 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 9591,
+    "member_id": 18365,
+    "last_name": "CIONI",
+    "first_name": "BIANCA",
+    "fiscal_code": null,
+    "email": null,
+    "enrollment_date": "2026-04-10 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 5406,
+    "member_id": 17998,
+    "last_name": "CRENNA",
+    "first_name": "ILARY",
+    "fiscal_code": "CRNLRY05P64L746A",
+    "email": null,
+    "enrollment_date": "2025-10-09 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 8811,
+    "member_id": 18266,
+    "last_name": "CURTI",
+    "first_name": "PAOLA",
+    "fiscal_code": "CRTPLA93P56F205V",
+    "email": null,
+    "enrollment_date": "2026-02-18 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 1166,
+    "member_id": 17945,
+    "last_name": "DIAZ OLORTIGA",
+    "first_name": "ANTONELLA EILLEN",
+    "fiscal_code": null,
+    "email": null,
+    "enrollment_date": "2025-06-14 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 4212,
+    "member_id": 18090,
+    "last_name": "GARUFI",
+    "first_name": "MANUELA",
+    "fiscal_code": "GRFMNL81B50F205H",
+    "email": null,
+    "enrollment_date": "2025-09-25 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 4331,
+    "member_id": 16439,
+    "last_name": "GERARDI",
+    "first_name": "CARLOTTA",
+    "fiscal_code": "GRRCLT03L48A794B",
+    "email": "carlottagerardi15@gmail.com",
+    "enrollment_date": "2025-09-25 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 2250,
+    "member_id": 17872,
+    "last_name": "GIACOSA",
+    "first_name": "CHIARA",
+    "fiscal_code": null,
+    "email": null,
+    "enrollment_date": "2025-09-05 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 7084,
+    "member_id": 18242,
+    "last_name": "GULIZIA",
+    "first_name": "GABRIELE",
+    "fiscal_code": null,
+    "email": null,
+    "enrollment_date": "2025-11-22 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 8854,
+    "member_id": 17619,
+    "last_name": "KHOURY",
+    "first_name": "NOUR",
+    "fiscal_code": "KHRNRO06L46Z401M",
+    "email": null,
+    "enrollment_date": "2026-02-20 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 2117,
+    "member_id": 2,
+    "last_name": "MACCARI",
+    "first_name": "MARCO",
+    "fiscal_code": "MCCMRC83L09I156S",
+    "email": "marco.maccarimack@gmail.com",
+    "enrollment_date": "2025-09-02 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 2463,
+    "member_id": 17987,
+    "last_name": "MAZZITELLI",
+    "first_name": "SABRINA",
+    "fiscal_code": "MZZSRN98E63F839W",
+    "email": null,
+    "enrollment_date": "2025-09-09 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 7082,
+    "member_id": 18143,
+    "last_name": "MONTANI",
+    "first_name": "FRANCESCA",
+    "fiscal_code": null,
+    "email": null,
+    "enrollment_date": "2025-11-22 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 2371,
+    "member_id": 18058,
+    "last_name": "MOUTIQ",
+    "first_name": "JAMILIA",
+    "fiscal_code": null,
+    "email": null,
+    "enrollment_date": "2025-09-08 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 5159,
+    "member_id": 17992,
+    "last_name": "NOHMAN",
+    "first_name": "CLAUDIA",
+    "fiscal_code": "NHMCLD05E69A290H",
+    "email": null,
+    "enrollment_date": "2025-10-07 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 4890,
+    "member_id": 17864,
+    "last_name": "PANE",
+    "first_name": "GIULIA",
+    "fiscal_code": "PNAGLI00E65D883X",
+    "email": null,
+    "enrollment_date": "2025-10-02 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 5022,
+    "member_id": 17944,
+    "last_name": "PANETTA",
+    "first_name": "COSIMO ENRICO",
+    "fiscal_code": "PNTCMN84M24I725Z",
+    "email": null,
+    "enrollment_date": "2025-10-04 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 3858,
+    "member_id": 18309,
+    "last_name": "PAPETTI",
+    "first_name": "ISABEL",
+    "fiscal_code": "PPTSBL04C52F205A",
+    "email": null,
+    "enrollment_date": "2025-09-22 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 6484,
+    "member_id": 18355,
+    "last_name": "PETRICCIONE",
+    "first_name": "FILOMENA",
+    "fiscal_code": "PTRFMN70L68F205F",
+    "email": null,
+    "enrollment_date": "2025-11-05 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 8264,
+    "member_id": 17400,
+    "last_name": "PIERINI",
+    "first_name": "DANIELA",
+    "fiscal_code": "PRNDNL46P48F205I",
+    "email": "danielagpierini@yahoo.it",
+    "enrollment_date": "2026-01-26 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 9633,
+    "member_id": 18357,
+    "last_name": "PRICHARD SALARDI",
+    "first_name": "OLIVIA",
+    "fiscal_code": "PRCLSL17A46Z401Q",
+    "email": null,
+    "enrollment_date": "2026-04-13 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 2702,
+    "member_id": 15927,
+    "last_name": "SASSO",
+    "first_name": "ANTONELLA",
+    "fiscal_code": "SSSNNL87A66F784R",
+    "email": "sasso.antonella@gmail.com",
+    "enrollment_date": "2025-09-11 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 5408,
+    "member_id": 17867,
+    "last_name": "SEGAGNI",
+    "first_name": "AURORA",
+    "fiscal_code": "SGGRRA04E65F205K",
+    "email": null,
+    "enrollment_date": "2025-10-09 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 6149,
+    "member_id": 18133,
+    "last_name": "TERRUZZI",
+    "first_name": "ROSSANA",
+    "fiscal_code": "TRRRSN92B68F205W",
+    "email": null,
+    "enrollment_date": "2025-10-25 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 2803,
+    "member_id": 18287,
+    "last_name": "TORCOLI",
+    "first_name": "DANILA",
+    "fiscal_code": "TRCDNL52M65B157P",
+    "email": null,
+    "enrollment_date": "2025-09-13 00:00:00",
+    "season_id": 1
+  },
+  {
+    "enrollment_id": 155,
+    "member_id": 17931,
+    "last_name": "UDERZO",
+    "first_name": "SOFIA MARIA",
+    "fiscal_code": "DRZSMR11M60F205T",
+    "email": null,
+    "enrollment_date": "2025-05-19 00:00:00",
+    "season_id": 1
+  }
+]
+
+--- QUERY 2: I 97 DTYURI/DTNELLA orfani ---
+[
+  {
+    "enrollment_id": 1929,
+    "member_id": 17990,
+    "last_name": "ADDAVIDE",
+    "first_name": "MASSIMILIANO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-07-23 00:00:00"
+  },
+  {
+    "enrollment_id": 6224,
+    "member_id": 18095,
+    "last_name": "ALBERGONI",
+    "first_name": "ELIZABETH",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-10-28 00:00:00"
+  },
+  {
+    "enrollment_id": 7837,
+    "member_id": 17958,
+    "last_name": "ALBERTINI",
+    "first_name": "MARINA YUMI",
+    "fiscal_code": "LBRMNY72L50L781E",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2026-01-12 00:00:00"
+  },
+  {
+    "enrollment_id": 8404,
+    "member_id": 17922,
+    "last_name": "ALMEIDA DOS SANTOS",
+    "first_name": "RONALD",
+    "fiscal_code": "LMDRLD82L18Z602H",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2026-02-03 00:00:00"
+  },
+  {
+    "enrollment_id": 5278,
+    "member_id": 18255,
+    "last_name": "AMIGHETTI",
+    "first_name": "CATERINA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-08 00:00:00"
+  },
+  {
+    "enrollment_id": 4587,
+    "member_id": 17940,
+    "last_name": "ANDRIOLLO",
+    "first_name": "GIORGIA",
+    "fiscal_code": "NDRGRG14E54F205X",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-29 00:00:00"
+  },
+  {
+    "enrollment_id": 8350,
+    "member_id": 17937,
+    "last_name": "ANGIONE",
+    "first_name": "GIOVANNI ANTONIO",
+    "fiscal_code": "NGNGNN91D20F284O",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2026-01-29 00:00:00"
+  },
+  {
+    "enrollment_id": 7495,
+    "member_id": 18130,
+    "last_name": "ARAUJO CRUZ",
+    "first_name": "CARLOS WAGNER",
+    "fiscal_code": "RJCCLS77H06Z602R",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-12-09 00:00:00"
+  },
+  {
+    "enrollment_id": 6545,
+    "member_id": 18260,
+    "last_name": "ASENSIO SALINERO",
+    "first_name": "ANA MARIA",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-11-06 00:00:00"
+  },
+  {
+    "enrollment_id": 5548,
+    "member_id": 18276,
+    "last_name": "AVALOS",
+    "first_name": "ANGEL",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-13 00:00:00"
+  },
+  {
+    "enrollment_id": 8305,
+    "member_id": 17969,
+    "last_name": "AVILA LOZANO",
+    "first_name": "JORGE ALBERTO",
+    "fiscal_code": "VLLJGL79P30Z514L",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2026-01-28 00:00:00"
+  },
+  {
+    "enrollment_id": 7531,
+    "member_id": 17239,
+    "last_name": "BARTOLINI",
+    "first_name": "ELISA",
+    "fiscal_code": "BRTLSE01L46F257L",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-12-10 00:00:00"
+  },
+  {
+    "enrollment_id": 5100,
+    "member_id": 18308,
+    "last_name": "BASCELLI",
+    "first_name": "GIULIA",
+    "fiscal_code": "BSCGLI12A60F205W",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-10-06 00:00:00"
+  },
+  {
+    "enrollment_id": 5099,
+    "member_id": 17863,
+    "last_name": "BASCELLI",
+    "first_name": "CHIARA",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-10-06 00:00:00"
+  },
+  {
+    "enrollment_id": 6814,
+    "member_id": 17962,
+    "last_name": "BELMONTE",
+    "first_name": "ANTONIO",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-11-13 00:00:00"
+  },
+  {
+    "enrollment_id": 4574,
+    "member_id": 18177,
+    "last_name": "BEVILACQUA",
+    "first_name": "CAMILLA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-29 00:00:00"
+  },
+  {
+    "enrollment_id": 6752,
+    "member_id": 17941,
+    "last_name": "BONCRISTIANO",
+    "first_name": "ALESSANDRO LORIS",
+    "fiscal_code": "BNCLSN89H23F205B",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-11-12 00:00:00"
+  },
+  {
+    "enrollment_id": 2579,
+    "member_id": 18009,
+    "last_name": "BOSELLI",
+    "first_name": "ANDREA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-10 00:00:00"
+  },
+  {
+    "enrollment_id": 2578,
+    "member_id": 17916,
+    "last_name": "BOSELLI",
+    "first_name": "ALESSANDRO",
+    "fiscal_code": "BSLLSN13M09F205T",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-10 00:00:00"
+  },
+  {
+    "enrollment_id": 6352,
+    "member_id": 18065,
+    "last_name": "CANGIANO",
+    "first_name": "MATTEO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-30 00:00:00"
+  },
+  {
+    "enrollment_id": 6350,
+    "member_id": 18325,
+    "last_name": "CANGIANO",
+    "first_name": "EMANUELE",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-30 00:00:00"
+  },
+  {
+    "enrollment_id": 6349,
+    "member_id": 18064,
+    "last_name": "CANGIANO",
+    "first_name": "FRANCESCO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-30 00:00:00"
+  },
+  {
+    "enrollment_id": 6166,
+    "member_id": 9485,
+    "last_name": "CENZON",
+    "first_name": "ALICE",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-27 00:00:00"
+  },
+  {
+    "enrollment_id": 7263,
+    "member_id": 18298,
+    "last_name": "CIPRIANI",
+    "first_name": "ACHILE",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-11-28 00:00:00"
+  },
+  {
+    "enrollment_id": 9124,
+    "member_id": 17433,
+    "last_name": "CRIPPA",
+    "first_name": "FRANCESCA",
+    "fiscal_code": "CRPFNC00T45F205D",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2026-03-04 00:00:00"
+  },
+  {
+    "enrollment_id": 7094,
+    "member_id": 17129,
+    "last_name": "D'ARIENZO",
+    "first_name": "GIULIA",
+    "fiscal_code": "DRNGLI95E44H501A",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-11-22 00:00:00"
+  },
+  {
+    "enrollment_id": 8589,
+    "member_id": 18097,
+    "last_name": "DE ANGELIS",
+    "first_name": "NATHAN",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2026-02-10 00:00:00"
+  },
+  {
+    "enrollment_id": 3776,
+    "member_id": 9488,
+    "last_name": "DI CARLO",
+    "first_name": "ERICA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-22 00:00:00"
+  },
+  {
+    "enrollment_id": 5891,
+    "member_id": 17951,
+    "last_name": "DONADI",
+    "first_name": "GAIA GRACE",
+    "fiscal_code": "DNDGRC12L49Z404N",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-10-20 00:00:00"
+  },
+  {
+    "enrollment_id": 8427,
+    "member_id": 17910,
+    "last_name": "DUBINI",
+    "first_name": "NICOLETTA",
+    "fiscal_code": "DBNNLT05D41F205A",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2026-02-04 00:00:00"
+  },
+  {
+    "enrollment_id": 5101,
+    "member_id": 17943,
+    "last_name": "EPOMEO",
+    "first_name": "ANDREA",
+    "fiscal_code": "PMENDR04S30F205B",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-06 00:00:00"
+  },
+  {
+    "enrollment_id": 3747,
+    "member_id": 18103,
+    "last_name": "FACCIOLI",
+    "first_name": "MARTINA",
+    "fiscal_code": "FCCMTN94C57A944P",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-09-22 00:00:00"
+  },
+  {
+    "enrollment_id": 4716,
+    "member_id": 18271,
+    "last_name": "FRANCESCONI",
+    "first_name": "CINZIA",
+    "fiscal_code": "FRNCNZ60T55F205L",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-09-30 00:00:00"
+  },
+  {
+    "enrollment_id": 9120,
+    "member_id": 17993,
+    "last_name": "FUCCILLO",
+    "first_name": "ANNA MARGHERITA",
+    "fiscal_code": "FCCNMR05P44F205J",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2026-03-04 00:00:00"
+  },
+  {
+    "enrollment_id": 3641,
+    "member_id": 17963,
+    "last_name": "GALARDO",
+    "first_name": "CATERINA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-20 00:00:00"
+  },
+  {
+    "enrollment_id": 7000,
+    "member_id": 18328,
+    "last_name": "GATTO",
+    "first_name": "ILENIA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-11-19 00:00:00"
+  },
+  {
+    "enrollment_id": 7528,
+    "member_id": 9518,
+    "last_name": "GEDDO",
+    "first_name": "ERIKA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-12-10 00:00:00"
+  },
+  {
+    "enrollment_id": 8929,
+    "member_id": 17934,
+    "last_name": "GOGA",
+    "first_name": "GIULIA",
+    "fiscal_code": "GGOGLI15R60F205P",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2026-02-24 00:00:00"
+  },
+  {
+    "enrollment_id": 2485,
+    "member_id": 17999,
+    "last_name": "GONZALEZ",
+    "first_name": "FERNANDO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-09 00:00:00"
+  },
+  {
+    "enrollment_id": 2484,
+    "member_id": 18283,
+    "last_name": "GONZALEZ",
+    "first_name": "JULIA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-09 00:00:00"
+  },
+  {
+    "enrollment_id": 2483,
+    "member_id": 18028,
+    "last_name": "GONZALEZ",
+    "first_name": "LUISA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-09 00:00:00"
+  },
+  {
+    "enrollment_id": 5995,
+    "member_id": 9482,
+    "last_name": "GRANDE",
+    "first_name": "SILVIA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-22 00:00:00"
+  },
+  {
+    "enrollment_id": 5077,
+    "member_id": 15851,
+    "last_name": "GROSSI",
+    "first_name": "ELEONORA",
+    "fiscal_code": "GRSLNR95A57B157I",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-06 00:00:00"
+  },
+  {
+    "enrollment_id": 2332,
+    "member_id": 17912,
+    "last_name": "GUARINI",
+    "first_name": "GIULIA",
+    "fiscal_code": "GRNGLI14P44B180W",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-08 00:00:00"
+  },
+  {
+    "enrollment_id": 9079,
+    "member_id": 18340,
+    "last_name": "JALBAGAYEVA",
+    "first_name": "ZHANARA",
+    "fiscal_code": "JLBZNR82L60Z152F",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2026-03-03 00:00:00"
+  },
+  {
+    "enrollment_id": 6426,
+    "member_id": 17973,
+    "last_name": "JIMENEZ",
+    "first_name": "ELVIS",
+    "fiscal_code": "JMNLVS97D24F205F",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-11-03 00:00:00"
+  },
+  {
+    "enrollment_id": 7020,
+    "member_id": 18155,
+    "last_name": "KOSTINA",
+    "first_name": "ANNA",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-11-20 00:00:00"
+  },
+  {
+    "enrollment_id": 6800,
+    "member_id": 17895,
+    "last_name": "LA ROSA",
+    "first_name": "IRENE",
+    "fiscal_code": "LRSRNI97D42F205P",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-11-13 00:00:00"
+  },
+  {
+    "enrollment_id": 4089,
+    "member_id": 17950,
+    "last_name": "LANDI",
+    "first_name": "LORENZO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-24 00:00:00"
+  },
+  {
+    "enrollment_id": 9516,
+    "member_id": 17948,
+    "last_name": "LONGO",
+    "first_name": "MARIA VALERIA",
+    "fiscal_code": "LNGMVL82L60G273S",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2026-04-01 00:00:00"
+  },
+  {
+    "enrollment_id": 7521,
+    "member_id": 17952,
+    "last_name": "LORANS EDMONDS",
+    "first_name": "MAGALIE",
+    "fiscal_code": "LRNMGL12A63Z114A",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-12-10 00:00:00"
+  },
+  {
+    "enrollment_id": 4062,
+    "member_id": 16844,
+    "last_name": "MAGARRO",
+    "first_name": "ALDRIN",
+    "fiscal_code": "MGRLRN01S11F205Y",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-24 00:00:00"
+  },
+  {
+    "enrollment_id": 7553,
+    "member_id": 18024,
+    "last_name": "MAGNANINI",
+    "first_name": "NOEMI",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-12-11 00:00:00"
+  },
+  {
+    "enrollment_id": 2585,
+    "member_id": 18310,
+    "last_name": "MARENGO",
+    "first_name": "MARGHERITA",
+    "fiscal_code": "MRNMGH16L51F205X",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-10 00:00:00"
+  },
+  {
+    "enrollment_id": 5956,
+    "member_id": 9480,
+    "last_name": "MARINO",
+    "first_name": "ALESSANDRA",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-10-21 00:00:00"
+  },
+  {
+    "enrollment_id": 3754,
+    "member_id": 18270,
+    "last_name": "MARNI",
+    "first_name": "DANIELE",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-22 00:00:00"
+  },
+  {
+    "enrollment_id": 6866,
+    "member_id": 17874,
+    "last_name": "MASON",
+    "first_name": "SOFIA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-11-14 00:00:00"
+  },
+  {
+    "enrollment_id": 4686,
+    "member_id": 18263,
+    "last_name": "MERLO",
+    "first_name": "CLAUDIO",
+    "fiscal_code": "MRLCLD68P05F205G",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-30 00:00:00"
+  },
+  {
+    "enrollment_id": 5898,
+    "member_id": 18070,
+    "last_name": "MICILLO",
+    "first_name": "CHIARA",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-10-20 00:00:00"
+  },
+  {
+    "enrollment_id": 6093,
+    "member_id": 18061,
+    "last_name": "MORO",
+    "first_name": "ALESSANDRO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-24 00:00:00"
+  },
+  {
+    "enrollment_id": 2469,
+    "member_id": 847,
+    "last_name": "NEMBRI",
+    "first_name": "MASSIMILIANO VALENTINO",
+    "fiscal_code": "NMBMSM78M03M102F",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-09-09 00:00:00"
+  },
+  {
+    "enrollment_id": 2568,
+    "member_id": 18318,
+    "last_name": "NEMEG",
+    "first_name": "ELENA SOFIA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-10 00:00:00"
+  },
+  {
+    "enrollment_id": 2567,
+    "member_id": 18225,
+    "last_name": "NEMEG",
+    "first_name": "ELEONORA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-10 00:00:00"
+  },
+  {
+    "enrollment_id": 7356,
+    "member_id": 18076,
+    "last_name": "PALAZZARI",
+    "first_name": "GIOVANNI",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-12-02 00:00:00"
+  },
+  {
+    "enrollment_id": 7360,
+    "member_id": 17975,
+    "last_name": "PARIETTI",
+    "first_name": "IVAN",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-12-02 00:00:00"
+  },
+  {
+    "enrollment_id": 6703,
+    "member_id": 18154,
+    "last_name": "PETICCHI",
+    "first_name": "REBECCA",
+    "fiscal_code": "PTCRCC15A46F205V",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-11-11 00:00:00"
+  },
+  {
+    "enrollment_id": 5279,
+    "member_id": 18102,
+    "last_name": "PICCARRETA",
+    "first_name": "ROCCO",
+    "fiscal_code": "PCCRCC16E25F205J",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-08 00:00:00"
+  },
+  {
+    "enrollment_id": 5947,
+    "member_id": 17942,
+    "last_name": "PIGAZZI",
+    "first_name": "CRISTIANA",
+    "fiscal_code": "PGZCST96R46E507X",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-10-21 00:00:00"
+  },
+  {
+    "enrollment_id": 3755,
+    "member_id": 17955,
+    "last_name": "POLTRONIERI",
+    "first_name": "MARCO",
+    "fiscal_code": "PLTMRC83T18F205Z",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-22 00:00:00"
+  },
+  {
+    "enrollment_id": 5994,
+    "member_id": 17875,
+    "last_name": "PRUNALI",
+    "first_name": "RACHEL",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-22 00:00:00"
+  },
+  {
+    "enrollment_id": 4080,
+    "member_id": 18080,
+    "last_name": "RACO",
+    "first_name": "LAVINIA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-24 00:00:00"
+  },
+  {
+    "enrollment_id": 4081,
+    "member_id": 18185,
+    "last_name": "RACO",
+    "first_name": "LUDOVICA",
+    "fiscal_code": "RCALVC13L54F205A",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-24 00:00:00"
+  },
+  {
+    "enrollment_id": 5718,
+    "member_id": 16641,
+    "last_name": "RASO",
+    "first_name": "YUNA MATILDA",
+    "fiscal_code": "RSAYMT08R69L219O",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-15 00:00:00"
+  },
+  {
+    "enrollment_id": 8168,
+    "member_id": 17897,
+    "last_name": "RESEGOTTI",
+    "first_name": "ALESSANDRO ENRICO",
+    "fiscal_code": "RSGLSN10S24F205T",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2026-01-20 00:00:00"
+  },
+  {
+    "enrollment_id": 6057,
+    "member_id": 9525,
+    "last_name": "ROBERTI",
+    "first_name": "IRENE",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-23 00:00:00"
+  },
+  {
+    "enrollment_id": 7229,
+    "member_id": 18000,
+    "last_name": "ROSSI",
+    "first_name": "ELIO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-11-27 00:00:00"
+  },
+  {
+    "enrollment_id": 3135,
+    "member_id": 18214,
+    "last_name": "SANTAMARIA",
+    "first_name": "ARIEL",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-09-16 00:00:00"
+  },
+  {
+    "enrollment_id": 2046,
+    "member_id": 17961,
+    "last_name": "SARAIS",
+    "first_name": "ENRICO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-08-29 00:00:00"
+  },
+  {
+    "enrollment_id": 2045,
+    "member_id": 17906,
+    "last_name": "SARAIS",
+    "first_name": "CHIARA",
+    "fiscal_code": "SRSCHR14A46F205U",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-08-29 00:00:00"
+  },
+  {
+    "enrollment_id": 2337,
+    "member_id": 18256,
+    "last_name": "SCAVO",
+    "first_name": "CHRISTIAN",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-08 00:00:00"
+  },
+  {
+    "enrollment_id": 2338,
+    "member_id": 18165,
+    "last_name": "SCAVO",
+    "first_name": "ALLEGRA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-08 00:00:00"
+  },
+  {
+    "enrollment_id": 5277,
+    "member_id": 17984,
+    "last_name": "SEGATTO",
+    "first_name": "SIBILLA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-08 00:00:00"
+  },
+  {
+    "enrollment_id": 7593,
+    "member_id": 18116,
+    "last_name": "SEVIERI",
+    "first_name": "DIEGO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-12-12 00:00:00"
+  },
+  {
+    "enrollment_id": 3961,
+    "member_id": 18204,
+    "last_name": "SOSTERO",
+    "first_name": "GIULIA",
+    "fiscal_code": "SSTGLI06B46F205H",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-09-23 00:00:00"
+  },
+  {
+    "enrollment_id": 4359,
+    "member_id": 18314,
+    "last_name": "TAGLIATESTA",
+    "first_name": "MARIA VITTORIA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-26 00:00:00"
+  },
+  {
+    "enrollment_id": 1989,
+    "member_id": 9532,
+    "last_name": "TIUTINA",
+    "first_name": "VIKTORIIA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-08-25 00:00:00"
+  },
+  {
+    "enrollment_id": 3955,
+    "member_id": 17986,
+    "last_name": "TOLDO",
+    "first_name": "MARCO",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-09-23 00:00:00"
+  },
+  {
+    "enrollment_id": 6197,
+    "member_id": 18085,
+    "last_name": "TOPUNOVA",
+    "first_name": "OKSANA",
+    "fiscal_code": "TPNKSN59L70Z135D",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-27 00:00:00"
+  },
+  {
+    "enrollment_id": 4805,
+    "member_id": 18157,
+    "last_name": "TUCCIMEI",
+    "first_name": "UMA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-01 00:00:00"
+  },
+  {
+    "enrollment_id": 5363,
+    "member_id": 18063,
+    "last_name": "VALERA",
+    "first_name": "SILVIA",
+    "fiscal_code": "VLRSLV69T70F205L",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-09 00:00:00"
+  },
+  {
+    "enrollment_id": 6303,
+    "member_id": 18197,
+    "last_name": "VALSECCHI",
+    "first_name": "VIRGINIA",
+    "fiscal_code": "VLSVGN15B61F205M",
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-29 00:00:00"
+  },
+  {
+    "enrollment_id": 6347,
+    "member_id": 9531,
+    "last_name": "VASSALLO",
+    "first_name": "MARGHERITA",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-30 00:00:00"
+  },
+  {
+    "enrollment_id": 9065,
+    "member_id": 17890,
+    "last_name": "VIGO",
+    "first_name": "SONIA ELSA",
+    "fiscal_code": "VGISLS76A68F205R",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2026-03-03 00:00:00"
+  },
+  {
+    "enrollment_id": 5161,
+    "member_id": 18036,
+    "last_name": "WRIGHT",
+    "first_name": "BENJAMIN",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-10-07 00:00:00"
+  },
+  {
+    "enrollment_id": 4374,
+    "member_id": 18007,
+    "last_name": "ZACCARIELLO",
+    "first_name": "MATTIA",
+    "fiscal_code": "ZCCMTT18D09F205E",
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-09-26 00:00:00"
+  },
+  {
+    "enrollment_id": 4376,
+    "member_id": 18013,
+    "last_name": "ZACCARIELLO",
+    "first_name": "SOFIA",
+    "fiscal_code": null,
+    "sku": "2526DTNELLA",
+    "enrollment_date": "2025-09-26 00:00:00"
+  },
+  {
+    "enrollment_id": 6280,
+    "member_id": 17983,
+    "last_name": "ZOGHLAMI",
+    "first_name": "SARAH",
+    "fiscal_code": null,
+    "sku": "2526DTYURI",
+    "enrollment_date": "2025-10-29 00:00:00"
+  }
+]
+
+--- QUERY 3: Lista completa SKU feste/workshop ---
+[
+  {
+    "sku": "2526NATALE14DICFESTA",
+    "nome_corso": "festa serale",
+    "activity_type": "storico",
+    "tot_iscrizioni": 366,
+    "membri_unici": 190,
+    "prima_data": "2025-11-11 00:00:00",
+    "ultima_data": "2026-04-23 16:39:17"
+  },
+  {
+    "sku": "2526NATALE14DICSALSA",
+    "nome_corso": "Salsa, bachata,Rueda",
+    "activity_type": "storico",
+    "tot_iscrizioni": 222,
+    "membri_unici": 118,
+    "prima_data": "2025-11-11 00:00:00",
+    "ultima_data": "2026-04-23 16:39:17"
+  },
+  {
+    "sku": "2526BANANA19OTT",
+    "nome_corso": "WS Afrofusion",
+    "activity_type": "storico",
+    "tot_iscrizioni": 152,
+    "membri_unici": 77,
+    "prima_data": "2025-07-24 00:00:00",
+    "ultima_data": "2026-04-23 16:39:19"
+  },
+  {
+    "sku": "2526TIMOR26OTT",
+    "nome_corso": "Commercial",
+    "activity_type": "storico",
+    "tot_iscrizioni": 127,
+    "membri_unici": 67,
+    "prima_data": "2025-09-02 00:00:00",
+    "ultima_data": "2026-04-23 16:39:18"
+  },
+  {
+    "sku": "2526KUMO09NOV",
+    "nome_corso": "WS Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 122,
+    "membri_unici": 63,
+    "prima_data": "2025-07-24 00:00:00",
+    "ultima_data": "2026-04-23 16:39:18"
+  },
+  {
+    "sku": "2526EMANUELLO22FEB-A",
+    "nome_corso": "WS Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 120,
+    "membri_unici": 72,
+    "prima_data": "2025-12-15 00:00:00",
+    "ultima_data": "2026-04-23 16:39:16"
+  },
+  {
+    "sku": "2526ESPOSITO16NOV",
+    "nome_corso": "HEELS",
+    "activity_type": "storico",
+    "tot_iscrizioni": 117,
+    "membri_unici": 65,
+    "prima_data": "2025-03-13 00:00:00",
+    "ultima_data": "2026-04-23 16:39:18"
+  },
+  {
+    "sku": "2526OPENMATTINO",
+    "nome_corso": "Open Mattino",
+    "activity_type": "storico",
+    "tot_iscrizioni": 115,
+    "membri_unici": 115,
+    "prima_data": "2025-05-13 00:00:00",
+    "ultima_data": "2026-03-11 00:00:00"
+  },
+  {
+    "sku": "2526UNDIAENCUBA15MAR",
+    "nome_corso": "WS Rueda",
+    "activity_type": "storico",
+    "tot_iscrizioni": 100,
+    "membri_unici": 51,
+    "prima_data": "2026-02-10 00:00:00",
+    "ultima_data": "2026-04-23 16:39:15"
+  },
+  {
+    "sku": "2526ANAHITA01MAR-WS",
+    "nome_corso": "WS Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 81,
+    "membri_unici": 43,
+    "prima_data": "2026-02-04 00:00:00",
+    "ultima_data": "2026-04-23 16:39:15"
+  },
+  {
+    "sku": "2526DEANGELIS16NOV",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 72,
+    "membri_unici": 40,
+    "prima_data": "2025-09-09 00:00:00",
+    "ultima_data": "2026-04-23 16:39:19"
+  },
+  {
+    "sku": "2526OPENFITNESS",
+    "nome_corso": "Open Fitness",
+    "activity_type": "storico",
+    "tot_iscrizioni": 64,
+    "membri_unici": 64,
+    "prima_data": "2025-05-16 00:00:00",
+    "ultima_data": "2026-04-10 00:00:00"
+  },
+  {
+    "sku": "2526OPENDANZA",
+    "nome_corso": "Open Danza",
+    "activity_type": "storico",
+    "tot_iscrizioni": 49,
+    "membri_unici": 49,
+    "prima_data": "2025-05-12 00:00:00",
+    "ultima_data": "2026-07-07 00:00:00"
+  },
+  {
+    "sku": "2526OPENSABATO",
+    "nome_corso": "Open Sabato",
+    "activity_type": "storico",
+    "tot_iscrizioni": 49,
+    "membri_unici": 49,
+    "prima_data": "2025-05-13 00:00:00",
+    "ultima_data": "2026-04-11 00:00:00"
+  },
+  {
+    "sku": "2526LULU26OTT",
+    "nome_corso": "HEELS FUSION",
+    "activity_type": "storico",
+    "tot_iscrizioni": 48,
+    "membri_unici": 48,
+    "prima_data": "2025-08-19 00:00:00",
+    "ultima_data": "2025-10-25 00:00:00"
+  },
+  {
+    "sku": "2526CAVALIERE01FEB",
+    "nome_corso": "WS Urban",
+    "activity_type": "storico",
+    "tot_iscrizioni": 43,
+    "membri_unici": 22,
+    "prima_data": "2025-12-20 00:00:00",
+    "ultima_data": "2026-04-23 16:39:16"
+  },
+  {
+    "sku": "2526EMANUELLO22FEB-B",
+    "nome_corso": "WS Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 42,
+    "membri_unici": 23,
+    "prima_data": "2026-02-06 00:00:00",
+    "ultima_data": "2026-04-23 16:39:16"
+  },
+  {
+    "sku": "2526CUGGEGIO19",
+    "nome_corso": "Corso Storico: CUGGEGIO19.C",
+    "activity_type": "storico",
+    "tot_iscrizioni": 38,
+    "membri_unici": 38,
+    "prima_data": "2026-04-24 15:05:10",
+    "ultima_data": "2026-04-24 15:05:20"
+  },
+  {
+    "sku": "2526LEZINDIVIDUALE",
+    "nome_corso": "Lezione Individuale",
+    "activity_type": "storico",
+    "tot_iscrizioni": 37,
+    "membri_unici": 37,
+    "prima_data": "2025-09-03 00:00:00",
+    "ultima_data": "2026-03-28 00:00:00"
+  },
+  {
+    "sku": "2526CAMPUSS1",
+    "nome_corso": "Campus 1° settimana",
+    "activity_type": "storico",
+    "tot_iscrizioni": 36,
+    "membri_unici": 36,
+    "prima_data": "2026-02-12 00:00:00",
+    "ultima_data": "2026-04-12 00:00:00"
+  },
+  {
+    "sku": "2526AMBER-ALDRIN15MA",
+    "nome_corso": "WS Urban Coreografico",
+    "activity_type": "storico",
+    "tot_iscrizioni": 35,
+    "membri_unici": 18,
+    "prima_data": "2026-02-17 00:00:00",
+    "ultima_data": "2026-04-23 16:39:15"
+  },
+  {
+    "sku": "2526OPENWEEKEND",
+    "nome_corso": "Open Weekend",
+    "activity_type": "storico",
+    "tot_iscrizioni": 35,
+    "membri_unici": 35,
+    "prima_data": "2025-05-15 00:00:00",
+    "ultima_data": "2025-12-13 00:00:00"
+  },
+  {
+    "sku": "2526OPENBALLO",
+    "nome_corso": "Open Ballo",
+    "activity_type": "storico",
+    "tot_iscrizioni": 34,
+    "membri_unici": 34,
+    "prima_data": "2025-05-15 00:00:00",
+    "ultima_data": "2025-11-10 00:00:00"
+  },
+  {
+    "sku": "2526CAMPUSS2",
+    "nome_corso": "Campus 2° settimana",
+    "activity_type": "storico",
+    "tot_iscrizioni": 27,
+    "membri_unici": 27,
+    "prima_data": "2026-01-20 00:00:00",
+    "ultima_data": "2026-04-14 00:00:00"
+  },
+  {
+    "sku": "2526ALMEIDAGIO18",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 27,
+    "membri_unici": 27,
+    "prima_data": "2025-06-13 00:00:00",
+    "ultima_data": "2026-04-24 15:05:20"
+  },
+  {
+    "sku": "2526CUGGEGIO19",
+    "nome_corso": "Salsa y Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 25,
+    "membri_unici": 25,
+    "prima_data": "2025-06-14 00:00:00",
+    "ultima_data": "2026-02-19 00:00:00"
+  },
+  {
+    "sku": "2526FERGIELUN20",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 24,
+    "membri_unici": 24,
+    "prima_data": "2025-10-07 00:00:00",
+    "ultima_data": "2026-04-24 15:05:20"
+  },
+  {
+    "sku": "2526NEREA14DIC-2",
+    "nome_corso": "Pasitos",
+    "activity_type": "storico",
+    "tot_iscrizioni": 24,
+    "membri_unici": 14,
+    "prima_data": "2025-11-10 00:00:00",
+    "ultima_data": "2026-04-23 16:39:17"
+  },
+  {
+    "sku": "2526GIFT",
+    "nome_corso": "Gift Card",
+    "activity_type": "storico",
+    "tot_iscrizioni": 21,
+    "membri_unici": 21,
+    "prima_data": "2025-04-08 00:00:00",
+    "ultima_data": "2026-04-11 00:00:00"
+  },
+  {
+    "sku": "2526LELI09OTT",
+    "nome_corso": "Indian Fusion",
+    "activity_type": "storico",
+    "tot_iscrizioni": 19,
+    "membri_unici": 9,
+    "prima_data": "2025-09-12 00:00:00",
+    "ultima_data": "2026-04-23 16:39:17"
+  },
+  {
+    "sku": "2526BELLAYGIO20",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 19,
+    "membri_unici": 19,
+    "prima_data": "2025-06-12 00:00:00",
+    "ultima_data": "2026-04-24 15:05:20"
+  },
+  {
+    "sku": "PR2526PICCIRILLMER21",
+    "nome_corso": "heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 18,
+    "membri_unici": 18,
+    "prima_data": "2025-09-17 00:00:00",
+    "ultima_data": "2026-01-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BELLAYLUN20",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 18,
+    "membri_unici": 18,
+    "prima_data": "2025-09-14 00:00:00",
+    "ultima_data": "2025-12-01 00:00:00"
+  },
+  {
+    "sku": "2526OPENVENERDI",
+    "nome_corso": "Open Venerdi",
+    "activity_type": "storico",
+    "tot_iscrizioni": 18,
+    "membri_unici": 18,
+    "prima_data": "2025-05-27 00:00:00",
+    "ultima_data": "2026-02-17 00:00:00"
+  },
+  {
+    "sku": "PRO2526PUGGIONILUN21",
+    "nome_corso": "Cerchio e Tessuti",
+    "activity_type": "storico",
+    "tot_iscrizioni": 18,
+    "membri_unici": 18,
+    "prima_data": "2025-09-29 00:00:00",
+    "ultima_data": "2026-03-02 00:00:00"
+  },
+  {
+    "sku": "PROV2526GARIANOGIO18",
+    "nome_corso": "Break Dance",
+    "activity_type": "storico",
+    "tot_iscrizioni": 17,
+    "membri_unici": 17,
+    "prima_data": "2025-09-13 00:00:00",
+    "ultima_data": "2026-02-19 00:00:00"
+  },
+  {
+    "sku": "PRO2526CUGGEGIO19",
+    "nome_corso": "Salsa y Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 17,
+    "membri_unici": 17,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2025-11-20 00:00:00"
+  },
+  {
+    "sku": "2526ANDRIANO19APR",
+    "nome_corso": "WS Commercial",
+    "activity_type": "storico",
+    "tot_iscrizioni": 16,
+    "membri_unici": 10,
+    "prima_data": "2026-02-12 00:00:00",
+    "ultima_data": "2026-04-23 16:39:14"
+  },
+  {
+    "sku": "PROVA2526ILAGOULUN19",
+    "nome_corso": "Afrobeat",
+    "activity_type": "storico",
+    "tot_iscrizioni": 16,
+    "membri_unici": 16,
+    "prima_data": "2025-09-13 00:00:00",
+    "ultima_data": "2025-11-17 00:00:00"
+  },
+  {
+    "sku": "2526GARIANOGIO18",
+    "nome_corso": "Hip HoP",
+    "activity_type": "storico",
+    "tot_iscrizioni": 15,
+    "membri_unici": 15,
+    "prima_data": "2025-06-16 00:00:00",
+    "ultima_data": "2026-01-19 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BELLAYMER20",
+    "nome_corso": "Dancehall",
+    "activity_type": "storico",
+    "tot_iscrizioni": 14,
+    "membri_unici": 14,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2026-02-11 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CEGLIEMER21",
+    "nome_corso": "Video Dance",
+    "activity_type": "storico",
+    "tot_iscrizioni": 14,
+    "membri_unici": 14,
+    "prima_data": "2025-09-17 00:00:00",
+    "ultima_data": "2026-02-11 00:00:00"
+  },
+  {
+    "sku": "2526KUQI19OTT-A",
+    "nome_corso": "Domeniche in Movimento - Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 14,
+    "membri_unici": 14,
+    "prima_data": "2025-09-11 00:00:00",
+    "ultima_data": "2025-10-17 00:00:00"
+  },
+  {
+    "sku": "2526KUQI09NOV- B",
+    "nome_corso": "Domeniche in Movimento - PILATES",
+    "activity_type": "storico",
+    "tot_iscrizioni": 14,
+    "membri_unici": 14,
+    "prima_data": "2025-10-20 00:00:00",
+    "ultima_data": "2025-11-10 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIMAR21",
+    "nome_corso": "Salsa y Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 14,
+    "membri_unici": 14,
+    "prima_data": "2026-01-20 00:00:00",
+    "ultima_data": "2026-02-24 00:00:00"
+  },
+  {
+    "sku": "2526KUQI19OTT- B",
+    "nome_corso": "Domeniche in Movimento - Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 12,
+    "membri_unici": 12,
+    "prima_data": "2025-09-11 00:00:00",
+    "ultima_data": "2025-10-18 00:00:00"
+  },
+  {
+    "sku": "2526KUQI09NOV - A",
+    "nome_corso": "Domeniche in Movimento - TOTAL BODY",
+    "activity_type": "storico",
+    "tot_iscrizioni": 12,
+    "membri_unici": 12,
+    "prima_data": "2025-10-22 00:00:00",
+    "ultima_data": "2025-11-10 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BELLAYMER19",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 12,
+    "membri_unici": 12,
+    "prima_data": "2025-09-14 00:00:00",
+    "ultima_data": "2026-04-01 00:00:00"
+  },
+  {
+    "sku": "PROVA2526FERGIEVEN19",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 12,
+    "membri_unici": 12,
+    "prima_data": "2025-09-26 00:00:00",
+    "ultima_data": "2026-01-23 00:00:00"
+  },
+  {
+    "sku": "2526LEZPROVA",
+    "nome_corso": "Lezione di prova",
+    "activity_type": "storico",
+    "tot_iscrizioni": 11,
+    "membri_unici": 11,
+    "prima_data": "2025-09-15 00:00:00",
+    "ultima_data": "2025-10-31 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MALINLUN20",
+    "nome_corso": "Danza Contemporanea",
+    "activity_type": "storico",
+    "tot_iscrizioni": 11,
+    "membri_unici": 11,
+    "prima_data": "2025-09-21 00:00:00",
+    "ultima_data": "2026-01-26 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CEGLIEMAR21",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 11,
+    "membri_unici": 11,
+    "prima_data": "2025-09-13 00:00:00",
+    "ultima_data": "2026-01-27 00:00:00"
+  },
+  {
+    "sku": "2526KUQI23NOV- B",
+    "nome_corso": "Domeniche in Movimento - PILATES",
+    "activity_type": "storico",
+    "tot_iscrizioni": 11,
+    "membri_unici": 11,
+    "prima_data": "2025-10-20 00:00:00",
+    "ultima_data": "2025-11-23 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BONNIVEN19",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 11,
+    "membri_unici": 11,
+    "prima_data": "2025-09-24 00:00:00",
+    "ultima_data": "2025-10-16 00:00:00"
+  },
+  {
+    "sku": "PROVA2526ARUTAMER19",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 10,
+    "membri_unici": 10,
+    "prima_data": "2025-10-01 00:00:00",
+    "ultima_data": "2025-12-03 00:00:00"
+  },
+  {
+    "sku": "PRO2526SARACCHILUN21",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 10,
+    "membri_unici": 10,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2026-03-30 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLMAR18",
+    "nome_corso": "Girly",
+    "activity_type": "storico",
+    "tot_iscrizioni": 10,
+    "membri_unici": 10,
+    "prima_data": "2025-09-17 00:00:00",
+    "ultima_data": "2026-01-20 00:00:00"
+  },
+  {
+    "sku": "2526DOSSANTO09NOV-B",
+    "nome_corso": "Domeniche in Movimento - Gestualità",
+    "activity_type": "storico",
+    "tot_iscrizioni": 10,
+    "membri_unici": 10,
+    "prima_data": "2025-10-21 00:00:00",
+    "ultima_data": "2025-11-09 00:00:00"
+  },
+  {
+    "sku": "PR2526NEMBRIMER19",
+    "nome_corso": "Salsa y Bachata under 22",
+    "activity_type": "storico",
+    "tot_iscrizioni": 10,
+    "membri_unici": 10,
+    "prima_data": "2026-02-18 00:00:00",
+    "ultima_data": "2026-04-01 00:00:00"
+  },
+  {
+    "sku": "2526ALMEIDAGIO19",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 10,
+    "membri_unici": 10,
+    "prima_data": "2025-06-19 00:00:00",
+    "ultima_data": "2026-04-10 00:00:00"
+  },
+  {
+    "sku": "2526KUQI23NOV - A",
+    "nome_corso": "Domeniche in Movimento - TOTAL BODY",
+    "activity_type": "storico",
+    "tot_iscrizioni": 9,
+    "membri_unici": 9,
+    "prima_data": "2025-10-20 00:00:00",
+    "ultima_data": "2025-11-23 00:00:00"
+  },
+  {
+    "sku": "PRO2526FRANZINIGIO18",
+    "nome_corso": "DanceFit 80-90",
+    "activity_type": "storico",
+    "tot_iscrizioni": 9,
+    "membri_unici": 9,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2026-03-19 00:00:00"
+  },
+  {
+    "sku": "PRO2526MELEGIO20",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 9,
+    "membri_unici": 9,
+    "prima_data": "2025-09-23 00:00:00",
+    "ultima_data": "2026-01-15 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MIRAMGIO18",
+    "nome_corso": "Commercial",
+    "activity_type": "storico",
+    "tot_iscrizioni": 9,
+    "membri_unici": 9,
+    "prima_data": "2025-09-14 00:00:00",
+    "ultima_data": "2025-10-02 00:00:00"
+  },
+  {
+    "sku": "PROVA2526ILAGOULUN21",
+    "nome_corso": "Salsa y Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 9,
+    "membri_unici": 9,
+    "prima_data": "2025-09-21 00:00:00",
+    "ultima_data": "2025-11-24 00:00:00"
+  },
+  {
+    "sku": "2526SANTOROMAR18",
+    "nome_corso": "Corso Storico: SANTOROMAR18.F",
+    "activity_type": "storico",
+    "tot_iscrizioni": 8,
+    "membri_unici": 8,
+    "prima_data": "2026-04-24 15:05:10",
+    "ultima_data": "2026-04-24 15:05:19"
+  },
+  {
+    "sku": "PRO2526MAGARROSAB15",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 8,
+    "membri_unici": 8,
+    "prima_data": "2025-11-05 00:00:00",
+    "ultima_data": "2026-03-21 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLMAR21",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 8,
+    "membri_unici": 8,
+    "prima_data": "2025-09-18 00:00:00",
+    "ultima_data": "2025-10-07 00:00:00"
+  },
+  {
+    "sku": "PROV2526DUTTALUN21",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 8,
+    "membri_unici": 8,
+    "prima_data": "2026-02-16 00:00:00",
+    "ultima_data": "2026-04-13 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BONNIVEN20",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 8,
+    "membri_unici": 8,
+    "prima_data": "2025-09-26 00:00:00",
+    "ultima_data": "2026-02-27 00:00:00"
+  },
+  {
+    "sku": "PROV2526TODISCOSAB14",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 8,
+    "membri_unici": 8,
+    "prima_data": "2025-10-04 00:00:00",
+    "ultima_data": "2026-01-24 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRILUN19",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 8,
+    "membri_unici": 8,
+    "prima_data": "2025-09-22 00:00:00",
+    "ultima_data": "2026-02-02 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIGIO20",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 8,
+    "membri_unici": 8,
+    "prima_data": "2025-10-01 00:00:00",
+    "ultima_data": "2025-11-13 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLMER18",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 8,
+    "membri_unici": 8,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2026-03-25 00:00:00"
+  },
+  {
+    "sku": "PRO2526VASSALLOSAB12",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-20 00:00:00",
+    "ultima_data": "2026-02-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526FELLERMER21",
+    "nome_corso": "Tango Argentino",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-24 00:00:00",
+    "ultima_data": "2025-11-12 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLMER19",
+    "nome_corso": "Girly",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2026-03-04 00:00:00"
+  },
+  {
+    "sku": "PRO2526GALLUZZOMAR17",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-15 00:00:00",
+    "ultima_data": "2025-11-25 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIMER20",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-24 00:00:00",
+    "ultima_data": "2026-02-04 00:00:00"
+  },
+  {
+    "sku": "PRO2526DEPONTESLUN18",
+    "nome_corso": "Reggaeton",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-15 00:00:00",
+    "ultima_data": "2026-03-23 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLSAB13",
+    "nome_corso": "Portamento Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-10-07 00:00:00",
+    "ultima_data": "2026-01-24 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CEGLIEMER19",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2026-01-14 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BELLAYLUN19",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-08 00:00:00",
+    "ultima_data": "2026-02-02 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLMAR19",
+    "nome_corso": "Girly",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2026-02-04 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GEDDOMER18",
+    "nome_corso": "Urban Mix",
+    "activity_type": "storico",
+    "tot_iscrizioni": 7,
+    "membri_unici": 7,
+    "prima_data": "2025-09-13 00:00:00",
+    "ultima_data": "2025-11-05 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLSAB14",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-10-04 00:00:00",
+    "ultima_data": "2026-01-24 00:00:00"
+  },
+  {
+    "sku": "PRO2526DARIENZOSAB14",
+    "nome_corso": "Reggaeton",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-09-20 00:00:00",
+    "ultima_data": "2026-02-07 00:00:00"
+  },
+  {
+    "sku": "PROV2526ANAHITAVEN20",
+    "nome_corso": "Video Dance",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-09-26 00:00:00",
+    "ultima_data": "2026-03-27 00:00:00"
+  },
+  {
+    "sku": "PROVA2526SETTILUN18",
+    "nome_corso": "In Forma Ballando",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-05-26 00:00:00",
+    "ultima_data": "2026-03-09 00:00:00"
+  },
+  {
+    "sku": "PRO2526LUISETTOMER21",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-09-24 00:00:00",
+    "ultima_data": "2026-03-04 00:00:00"
+  },
+  {
+    "sku": "PRO2526LUISETTOGIO20",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2025-11-20 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZVEN19",
+    "nome_corso": "Samba",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-09-19 00:00:00",
+    "ultima_data": "2026-02-20 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BONULUN21",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-09-20 00:00:00",
+    "ultima_data": "2026-03-23 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZGIO17",
+    "nome_corso": "Brasilian Fit",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-09-18 00:00:00",
+    "ultima_data": "2026-03-12 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BLUEVEN19",
+    "nome_corso": "Afro",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-11-14 00:00:00",
+    "ultima_data": "2026-03-20 00:00:00"
+  },
+  {
+    "sku": "2526GRANDESAB09",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-05-30 00:00:00",
+    "ultima_data": "2025-09-13 00:00:00"
+  },
+  {
+    "sku": "PROV2526TIUTINAVEN20",
+    "nome_corso": "Pole Dance Gym",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-11-21 00:00:00",
+    "ultima_data": "2025-12-19 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BELLAYGIO20",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-10-23 00:00:00",
+    "ultima_data": "2026-03-05 00:00:00"
+  },
+  {
+    "sku": "PRO2526LOMBARDIGIO21",
+    "nome_corso": "Lindy Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 6,
+    "membri_unici": 6,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2026-02-12 00:00:00"
+  },
+  {
+    "sku": "PROV2526TODISCOMAR21",
+    "nome_corso": "Gestualità",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-09-30 00:00:00",
+    "ultima_data": "2025-11-04 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MARINOLUN18",
+    "nome_corso": "Flessibilità",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-10-11 00:00:00",
+    "ultima_data": "2025-10-20 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BELLAYMAR20",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-09-29 00:00:00",
+    "ultima_data": "2026-03-10 00:00:00"
+  },
+  {
+    "sku": "PROV2526PACILLOMER18",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-10-05 00:00:00",
+    "ultima_data": "2026-04-08 00:00:00"
+  },
+  {
+    "sku": "PROV2526ANAHITAVEN17",
+    "nome_corso": "Video Dance",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-10-03 00:00:00",
+    "ultima_data": "2026-02-06 00:00:00"
+  },
+  {
+    "sku": "2526NEREA14DIC-1",
+    "nome_corso": "Salsa Flamenco",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-11-02 00:00:00",
+    "ultima_data": "2025-12-04 00:00:00"
+  },
+  {
+    "sku": "PR2526ANTONUCCIMAR21",
+    "nome_corso": "Gestualità",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-10-12 00:00:00",
+    "ultima_data": "2025-11-25 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLSAB15",
+    "nome_corso": "Girly",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-06-21 00:00:00",
+    "ultima_data": "2025-12-20 00:00:00"
+  },
+  {
+    "sku": "PROVA2526DUTTAVEN20",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-09-26 00:00:00",
+    "ultima_data": "2026-02-20 00:00:00"
+  },
+  {
+    "sku": "2526RUSSO19OTT",
+    "nome_corso": "Domeniche in Movimento - Gestualità",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2025-10-16 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLMER20",
+    "nome_corso": "Afro Twerk",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-10-08 00:00:00",
+    "ultima_data": "2025-12-03 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BORRIMER19",
+    "nome_corso": "Danza Moderna",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2025-10-15 00:00:00"
+  },
+  {
+    "sku": "PROV2526GARIANOGIO19",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-09-26 00:00:00",
+    "ultima_data": "2026-02-26 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GEDDOVEN18",
+    "nome_corso": "Urban Mix",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-10-10 00:00:00",
+    "ultima_data": "2026-03-06 00:00:00"
+  },
+  {
+    "sku": "2526DOSSANTO09NOV-A",
+    "nome_corso": "Domeniche in Movimento - Afro Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-10-23 00:00:00",
+    "ultima_data": "2025-11-08 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MELEMER20",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-10-01 00:00:00",
+    "ultima_data": "2026-01-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZGIO18",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-09-15 00:00:00",
+    "ultima_data": "2026-04-09 00:00:00"
+  },
+  {
+    "sku": "PR2526PICCIRILLSAB16",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 5,
+    "membri_unici": 5,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2026-01-24 00:00:00"
+  },
+  {
+    "sku": "PROVA2526FERGIELUN19",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-07 00:00:00",
+    "ultima_data": "2025-10-27 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MARINOMAR19",
+    "nome_corso": "Cerchio e Tessuti",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-23 00:00:00",
+    "ultima_data": "2025-10-14 00:00:00"
+  },
+  {
+    "sku": "PRO2526MGRANDEMER18",
+    "nome_corso": "Reggaeton",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2026-02-18 00:00:00",
+    "ultima_data": "2026-03-18 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIGIO21",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-04 00:00:00",
+    "ultima_data": "2026-01-08 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BELLAYLUN18",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-29 00:00:00",
+    "ultima_data": "2026-02-23 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CEGLIEMAR19",
+    "nome_corso": "Street Jazz",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-01 00:00:00",
+    "ultima_data": "2025-11-04 00:00:00"
+  },
+  {
+    "sku": "PRO2526LOMBARDIGIO20",
+    "nome_corso": "Boogie Woogie",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2026-02-12 00:00:00"
+  },
+  {
+    "sku": "PR2526CARIZZONIMER18",
+    "nome_corso": "Combat Misto, Boxe, Kick Boxing, Muay Thai",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-15 00:00:00",
+    "ultima_data": "2025-10-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZGIO19",
+    "nome_corso": "Brasilian Fit",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-16 00:00:00",
+    "ultima_data": "2026-01-15 00:00:00"
+  },
+  {
+    "sku": "PROVA2526AVILALUN20",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-29 00:00:00",
+    "ultima_data": "2026-03-09 00:00:00"
+  },
+  {
+    "sku": "PROV2526DICARLOLUN19",
+    "nome_corso": "Contemporaneo Partnering",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-15 00:00:00",
+    "ultima_data": "2025-09-29 00:00:00"
+  },
+  {
+    "sku": "PROVA2526FERGIEVEN18",
+    "nome_corso": "Danza Moderna",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-26 00:00:00",
+    "ultima_data": "2026-03-06 00:00:00"
+  },
+  {
+    "sku": "PRO2526MIRAMGIO17",
+    "nome_corso": "Commercial Dance 13-17 anni",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-08 00:00:00",
+    "ultima_data": "2026-02-12 00:00:00"
+  },
+  {
+    "sku": "PROVA2526FERGIELUN18",
+    "nome_corso": "Urban Mix",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-22 00:00:00",
+    "ultima_data": "2025-09-29 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZSAB10",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-25 00:00:00",
+    "ultima_data": "2026-03-21 00:00:00"
+  },
+  {
+    "sku": "PROVA2526SETTIMAR20",
+    "nome_corso": "Gestualità",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-07-15 00:00:00",
+    "ultima_data": "2025-11-11 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GRANDEMER13",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-17 00:00:00",
+    "ultima_data": "2026-01-14 00:00:00"
+  },
+  {
+    "sku": "PROVA2526DUTTASAB13",
+    "nome_corso": "K-Pop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-04 00:00:00",
+    "ultima_data": "2026-02-07 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MIRAMMER18",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-06 00:00:00",
+    "ultima_data": "2025-10-29 00:00:00"
+  },
+  {
+    "sku": "PROV2526ANAHITAGIO19",
+    "nome_corso": "Voguing",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-09 00:00:00",
+    "ultima_data": "2026-03-05 00:00:00"
+  },
+  {
+    "sku": "PRO2526BONACINASAB10",
+    "nome_corso": "Danza del Ventre",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2025-10-25 00:00:00"
+  },
+  {
+    "sku": "PROVA2526DUTTAMER17",
+    "nome_corso": "K-pop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2026-02-18 00:00:00"
+  },
+  {
+    "sku": "PROVA2526AVILAMAR21",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-14 00:00:00",
+    "ultima_data": "2026-03-03 00:00:00"
+  },
+  {
+    "sku": "PRO2526ASSABIMAR20",
+    "nome_corso": "Lindy Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-30 00:00:00",
+    "ultima_data": "2025-11-11 00:00:00"
+  },
+  {
+    "sku": "PROVA2526KUQIGIO13",
+    "nome_corso": "Zumba",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2026-01-15 00:00:00"
+  },
+  {
+    "sku": "2526OPENBAMRAG",
+    "nome_corso": "Open Bambini e Ragazzi",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-06-10 00:00:00",
+    "ultima_data": "2025-10-02 00:00:00"
+  },
+  {
+    "sku": "PRO2526GALLUZZOMAR18",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-11-04 00:00:00",
+    "ultima_data": "2026-02-10 00:00:00"
+  },
+  {
+    "sku": "PROV2526DUTTALUN20",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-13 00:00:00",
+    "ultima_data": "2025-11-17 00:00:00"
+  },
+  {
+    "sku": "PRO2526PUGGIONIGIO21",
+    "nome_corso": "Cerchio e Tessuti",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2026-01-22 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BONULUN20",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-10-27 00:00:00",
+    "ultima_data": "2026-03-09 00:00:00"
+  },
+  {
+    "sku": "PR2526BATTISTELMER20",
+    "nome_corso": "Lindy Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2025-10-10 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MELEGIO21",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 4,
+    "membri_unici": 4,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2025-11-06 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZGIO13",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2026-01-08 00:00:00",
+    "ultima_data": "2026-03-05 00:00:00"
+  },
+  {
+    "sku": "2526MERCHANDISING",
+    "nome_corso": "Merchandising",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-12-01 00:00:00",
+    "ultima_data": "2026-03-05 00:00:00"
+  },
+  {
+    "sku": "PROVA2526SETTIMER20",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-12 00:00:00",
+    "ultima_data": "2026-01-14 00:00:00"
+  },
+  {
+    "sku": "PROVA2526SETTIMAR19",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-15 00:00:00",
+    "ultima_data": "2025-11-11 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZMER10",
+    "nome_corso": "Total body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-11-12 00:00:00",
+    "ultima_data": "2026-04-01 00:00:00"
+  },
+  {
+    "sku": "2526BONNILUN21",
+    "nome_corso": "Salsa y Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-07-04 00:00:00",
+    "ultima_data": "2025-09-15 00:00:00"
+  },
+  {
+    "sku": "PRO2526CENZONMAR19",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2026-03-24 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIGIO19",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2026-03-19 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GRANDEMAR20",
+    "nome_corso": "Danza Moderna",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-21 00:00:00",
+    "ultima_data": "2025-09-25 00:00:00"
+  },
+  {
+    "sku": "PROVA2526SETTIGIO18",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2025-09-17 00:00:00"
+  },
+  {
+    "sku": "PRO2526BONACINASAB11",
+    "nome_corso": "Danza Egiziana",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-17 00:00:00",
+    "ultima_data": "2025-09-20 00:00:00"
+  },
+  {
+    "sku": "PRO2526SARACCHIGIO20",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-03 00:00:00",
+    "ultima_data": "2026-01-22 00:00:00"
+  },
+  {
+    "sku": "PROVA2526ROSSISAB15",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2026-01-17 00:00:00",
+    "ultima_data": "2026-01-24 00:00:00"
+  },
+  {
+    "sku": "PRO2526ASSABIMAR21",
+    "nome_corso": "Boogie Woogie",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-30 00:00:00",
+    "ultima_data": "2025-10-21 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MELEMER21",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-01 00:00:00",
+    "ultima_data": "2025-11-12 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIVEN19",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-24 00:00:00",
+    "ultima_data": "2025-11-14 00:00:00"
+  },
+  {
+    "sku": "PRO2526VASSALLOVEN19",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-09 00:00:00",
+    "ultima_data": "2025-12-05 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MELELUN21",
+    "nome_corso": "Men Style",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-27 00:00:00",
+    "ultima_data": "2025-11-10 00:00:00"
+  },
+  {
+    "sku": "PROVA2526ARUTAMER20",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2026-01-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIMAR20",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-26 00:00:00",
+    "ultima_data": "2026-03-03 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZSAB12",
+    "nome_corso": "Brasilian Fit",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-11 00:00:00",
+    "ultima_data": "2026-03-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MARINOMAR17",
+    "nome_corso": "Cerchio e Tessuti",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-21 00:00:00",
+    "ultima_data": "2026-03-10 00:00:00"
+  },
+  {
+    "sku": "PROV2526BORRIMAR16",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-14 00:00:00",
+    "ultima_data": "2025-10-14 00:00:00"
+  },
+  {
+    "sku": "PRO2526DARIENZOSAB13",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-19 00:00:00",
+    "ultima_data": "2026-02-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MALINMER16",
+    "nome_corso": "Danza Moderna",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-07 00:00:00",
+    "ultima_data": "2026-01-21 00:00:00"
+  },
+  {
+    "sku": "2526CAMPUSDANZAS1",
+    "nome_corso": "Campus Danza 1° settimana",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2026-04-07 00:00:00",
+    "ultima_data": "2026-04-09 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BELLAYMAR18",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2025-11-11 00:00:00"
+  },
+  {
+    "sku": "2526GALLUZZOMAR17",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2025-10-07 00:00:00"
+  },
+  {
+    "sku": "PRO2526MAGARROSAB14",
+    "nome_corso": "Urban Mix",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-11 00:00:00",
+    "ultima_data": "2026-01-10 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZMAR20",
+    "nome_corso": "Samba",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-13 00:00:00",
+    "ultima_data": "2025-10-21 00:00:00"
+  },
+  {
+    "sku": "PROV2526GARIANOMAR19",
+    "nome_corso": "Hip Hop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-16 00:00:00",
+    "ultima_data": "2026-03-03 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GRANDELUN16",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2026-02-23 00:00:00"
+  },
+  {
+    "sku": "PROVA2526KUQIMER13",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-17 00:00:00",
+    "ultima_data": "2026-02-11 00:00:00"
+  },
+  {
+    "sku": "PR2526PALAZZOTTMAR16",
+    "nome_corso": "Gioco Ginnastica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2025-11-18 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BORRIMER17",
+    "nome_corso": "Danza Moderna",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-30 00:00:00",
+    "ultima_data": "2026-01-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZVEN18",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-08 00:00:00",
+    "ultima_data": "2026-02-19 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZGIO20",
+    "nome_corso": "Samba",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-05 00:00:00",
+    "ultima_data": "2026-03-12 00:00:00"
+  },
+  {
+    "sku": "PROVA2526AVILALUN21",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2026-02-16 00:00:00",
+    "ultima_data": "2026-03-23 00:00:00"
+  },
+  {
+    "sku": "PROVA2526ARUTAMER21",
+    "nome_corso": "Salsa y Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-09-20 00:00:00",
+    "ultima_data": "2025-10-15 00:00:00"
+  },
+  {
+    "sku": "PRO2526FRANZINISAB15",
+    "nome_corso": "Masala Bhangra Fit",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-11 00:00:00",
+    "ultima_data": "2025-12-04 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZSAB13",
+    "nome_corso": "Samba",
+    "activity_type": "storico",
+    "tot_iscrizioni": 3,
+    "membri_unici": 3,
+    "prima_data": "2025-10-11 00:00:00",
+    "ultima_data": "2025-11-15 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIMAR19",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2025-10-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZSAB11",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-11-08 00:00:00",
+    "ultima_data": "2026-03-21 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CONTIGIO21",
+    "nome_corso": "Pole Dance Gym",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2025-09-25 00:00:00"
+  },
+  {
+    "sku": "PRO2526STANISCIMAR13",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-30 00:00:00",
+    "ultima_data": "2026-04-07 00:00:00"
+  },
+  {
+    "sku": "PROV2526BORDONIMER17",
+    "nome_corso": "Acrobatica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-10-15 00:00:00",
+    "ultima_data": "2025-10-22 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRILUN20",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-22 00:00:00",
+    "ultima_data": "2026-03-02 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZMER13",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-11-05 00:00:00",
+    "ultima_data": "2026-01-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CEGLIEMER20",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2025-10-29 00:00:00"
+  },
+  {
+    "sku": "PROV2526TIUTINAVEN18",
+    "nome_corso": "Pole Dance Gym",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-23 00:00:00",
+    "ultima_data": "2025-11-07 00:00:00"
+  },
+  {
+    "sku": "PRO2526CUGGEGIO21",
+    "nome_corso": "Salsa y Bacahta",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-24 00:00:00",
+    "ultima_data": "2025-09-25 00:00:00"
+  },
+  {
+    "sku": "2526POZZOLIMER19",
+    "nome_corso": "Corso Storico: POZZOLIMER19.F",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2026-04-24 15:05:16",
+    "ultima_data": "2026-04-24 15:05:16"
+  },
+  {
+    "sku": "PROVA2526GRANDESAB11",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-10-25 00:00:00",
+    "ultima_data": "2026-02-14 00:00:00"
+  },
+  {
+    "sku": "PROVA2526DUTTASAB14",
+    "nome_corso": "Contemporaneo Contaminato",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-27 00:00:00",
+    "ultima_data": "2025-10-04 00:00:00"
+  },
+  {
+    "sku": "PROVA2526KUQISAB13",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-11-10 00:00:00",
+    "ultima_data": "2025-11-10 00:00:00"
+  },
+  {
+    "sku": "PROVA2526DUTTAMER18",
+    "nome_corso": "K-Pop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-10-11 00:00:00",
+    "ultima_data": "2026-01-21 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZMAR13",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-10-07 00:00:00",
+    "ultima_data": "2026-03-17 00:00:00"
+  },
+  {
+    "sku": "PROVA2526AVILAMAR20",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-10-14 00:00:00",
+    "ultima_data": "2025-12-02 00:00:00"
+  },
+  {
+    "sku": "PROV2526ALMEIDAGIO19",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2026-02-12 00:00:00",
+    "ultima_data": "2026-04-02 00:00:00"
+  },
+  {
+    "sku": "PROVA2526ILAGOUMAR21",
+    "nome_corso": "Afrobeat",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2026-02-10 00:00:00",
+    "ultima_data": "2026-02-24 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZVEN13",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2026-02-27 00:00:00",
+    "ultima_data": "2026-03-20 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MARINOVEN17",
+    "nome_corso": "Cerchio e Tessuti",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-30 00:00:00",
+    "ultima_data": "2025-10-01 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GRANDEVEN19",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-19 00:00:00",
+    "ultima_data": "2025-12-05 00:00:00"
+  },
+  {
+    "sku": "2526CARIZZONILUN18",
+    "nome_corso": "Combat Misto, Boxe, Kick Boxing, Muay Thai",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-15 00:00:00",
+    "ultima_data": "2025-09-17 00:00:00"
+  },
+  {
+    "sku": "PROVA2526TAZZIMER17",
+    "nome_corso": "Break Dance",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-11-26 00:00:00",
+    "ultima_data": "2026-01-14 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRILUN21",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-11-24 00:00:00",
+    "ultima_data": "2026-01-19 00:00:00"
+  },
+  {
+    "sku": "PRO2526MAGARROVEN20",
+    "nome_corso": "Urban mix",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-11-07 00:00:00",
+    "ultima_data": "2025-12-12 00:00:00"
+  },
+  {
+    "sku": "PRO2526STANISCILUN12",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-22 00:00:00",
+    "ultima_data": "2025-10-06 00:00:00"
+  },
+  {
+    "sku": "PROVA2526SETTIMAR18",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-11-11 00:00:00",
+    "ultima_data": "2026-03-31 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MALINLUN19",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-17 00:00:00",
+    "ultima_data": "2025-09-17 00:00:00"
+  },
+  {
+    "sku": "PROVA2526SETTIGIO21",
+    "nome_corso": "Pasitos",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-30 00:00:00",
+    "ultima_data": "2025-10-02 00:00:00"
+  },
+  {
+    "sku": "PRO2526CENZONLUN17",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-11-03 00:00:00",
+    "ultima_data": "2026-03-16 00:00:00"
+  },
+  {
+    "sku": "PRO2526LUISETTOGIO21",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-22 00:00:00",
+    "ultima_data": "2025-09-23 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIVEN20",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2025-11-28 00:00:00"
+  },
+  {
+    "sku": "PROVA2526NEMBRIMER21",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-27 00:00:00",
+    "ultima_data": "2026-03-03 00:00:00"
+  },
+  {
+    "sku": "PR2526SILVESTRILUN20",
+    "nome_corso": "Pole Dance Gym",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-05-19 00:00:00",
+    "ultima_data": "2025-10-13 00:00:00"
+  },
+  {
+    "sku": "PRO2526VASSALLOSAB14",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-09-22 00:00:00",
+    "ultima_data": "2026-02-14 00:00:00"
+  },
+  {
+    "sku": "PROV2526DICARLOLUN18",
+    "nome_corso": "Danza Moderna",
+    "activity_type": "storico",
+    "tot_iscrizioni": 2,
+    "membri_unici": 2,
+    "prima_data": "2025-10-17 00:00:00",
+    "ultima_data": "2025-10-20 00:00:00"
+  },
+  {
+    "sku": "PRO2526DEPONTESLUN19",
+    "nome_corso": "Reggaeton",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2025-10-13 00:00:00"
+  },
+  {
+    "sku": "PROV2526DICARLOGIO17",
+    "nome_corso": "Danza Moderna",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2025-10-13 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GRANDEVEN18",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-01-09 00:00:00",
+    "ultima_data": "2026-01-09 00:00:00"
+  },
+  {
+    "sku": "PRO2526MARINOGIO18",
+    "nome_corso": "Cerchio e Tessuti",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-13 00:00:00",
+    "ultima_data": "2025-10-13 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GRANDEVEN15",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-08 00:00:00",
+    "ultima_data": "2025-10-08 00:00:00"
+  },
+  {
+    "sku": "2526CAMPUSDANZAS2",
+    "nome_corso": "Campus Danza 2° settimana",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-04-13 00:00:00",
+    "ultima_data": "2026-04-13 00:00:00"
+  },
+  {
+    "sku": "PRO2526STANISCILUN13",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-20 00:00:00",
+    "ultima_data": "2025-10-20 00:00:00"
+  },
+  {
+    "sku": "PROVA2526DUTTASAB16",
+    "nome_corso": "Commercial",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-04 00:00:00",
+    "ultima_data": "2025-10-04 00:00:00"
+  },
+  {
+    "sku": "PRO2526STANISCILUN11",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-15 00:00:00",
+    "ultima_data": "2025-10-15 00:00:00"
+  },
+  {
+    "sku": "PROVA2526KUQIVEN13",
+    "nome_corso": "Tabata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2025-09-25 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZMAR19",
+    "nome_corso": "Brasilian Fit",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-12-02 00:00:00",
+    "ultima_data": "2025-12-02 00:00:00"
+  },
+  {
+    "sku": "PROV2526GARIANOMAR17",
+    "nome_corso": "Break Dance",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-12-16 00:00:00",
+    "ultima_data": "2025-12-16 00:00:00"
+  },
+  {
+    "sku": "PROVA2526MIRAMGIO19",
+    "nome_corso": "Commercial",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-01-22 00:00:00",
+    "ultima_data": "2026-01-22 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GEDDOVEN20",
+    "nome_corso": "Fusion",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-09 00:00:00",
+    "ultima_data": "2025-10-09 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BELLAYGIO19",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-02 00:00:00",
+    "ultima_data": "2025-10-02 00:00:00"
+  },
+  {
+    "sku": "PROV2526ANAHITAGIO18",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-25 00:00:00",
+    "ultima_data": "2025-09-25 00:00:00"
+  },
+  {
+    "sku": "PROVA2526BORRIMER18",
+    "nome_corso": "Danza Moderna",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-22 00:00:00",
+    "ultima_data": "2025-10-22 00:00:00"
+  },
+  {
+    "sku": "PROVA2526KUQILUN13",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-01-26 00:00:00",
+    "ultima_data": "2026-01-26 00:00:00"
+  },
+  {
+    "sku": "PR2526PALAZZOTTLUN17",
+    "nome_corso": "Acrobatica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-11-03 00:00:00",
+    "ultima_data": "2025-11-03 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GEDDOMER19",
+    "nome_corso": "Urban Female",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-20 00:00:00",
+    "ultima_data": "2025-09-20 00:00:00"
+  },
+  {
+    "sku": "2526KUQI15MAR- B",
+    "nome_corso": "Domeniche in Movimento Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-03-15 00:00:00",
+    "ultima_data": "2026-03-15 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZLUN13",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-22 00:00:00",
+    "ultima_data": "2025-10-22 00:00:00"
+  },
+  {
+    "sku": "PRO2526PUGGIONILUN20",
+    "nome_corso": "Cerchio e Tessuti",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-02 00:00:00",
+    "ultima_data": "2025-10-02 00:00:00"
+  },
+  {
+    "sku": "PR2526SILVESTRILUN21",
+    "nome_corso": "Pole Gym Dance",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-06-23 00:00:00",
+    "ultima_data": "2025-06-23 00:00:00"
+  },
+  {
+    "sku": "PROVA2526FERGIEVEN20",
+    "nome_corso": "Heels",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-11-28 00:00:00",
+    "ultima_data": "2025-11-28 00:00:00"
+  },
+  {
+    "sku": "2526KUQI15FEB - A",
+    "nome_corso": "Domeniche in Movimento Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-02-15 00:00:00",
+    "ultima_data": "2026-02-15 00:00:00"
+  },
+  {
+    "sku": "PRO2526PUGGIONIGIO20",
+    "nome_corso": "Cerchio e Tessuti",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-23 00:00:00",
+    "ultima_data": "2025-09-23 00:00:00"
+  },
+  {
+    "sku": "PR2526SILVESTRILUN18",
+    "nome_corso": "Pole Dance Gym",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-06 00:00:00",
+    "ultima_data": "2025-10-06 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZVEN10",
+    "nome_corso": "Total body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-03-06 00:00:00",
+    "ultima_data": "2026-03-06 00:00:00"
+  },
+  {
+    "sku": "PRO2526VASSALLOSAB13",
+    "nome_corso": "Sbarra a Terra",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-23 00:00:00",
+    "ultima_data": "2025-09-23 00:00:00"
+  },
+  {
+    "sku": "PROV2526DICARLOLUN17",
+    "nome_corso": "Danza Moderna",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-27 00:00:00",
+    "ultima_data": "2025-10-27 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZGIO11",
+    "nome_corso": "Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-30 00:00:00",
+    "ultima_data": "2025-10-30 00:00:00"
+  },
+  {
+    "sku": "PRO2526TODISCOLUN17",
+    "nome_corso": "Salsa y Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-03-23 00:00:00",
+    "ultima_data": "2026-03-23 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GRANDEVEN16",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-08 00:00:00",
+    "ultima_data": "2025-10-08 00:00:00"
+  },
+  {
+    "sku": "2526GEDDOVEN20",
+    "nome_corso": "Corso Storico: GEDDOVEN20.D",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-04-24 15:05:18",
+    "ultima_data": "2026-04-24 15:05:18"
+  },
+  {
+    "sku": "PRO2526STANISCIMAR09",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-14 00:00:00",
+    "ultima_data": "2025-10-14 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GRANDEVEN13",
+    "nome_corso": "Danza Classica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-26 00:00:00",
+    "ultima_data": "2025-09-26 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZMER12",
+    "nome_corso": "Brasilian Fit",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-30 00:00:00",
+    "ultima_data": "2025-09-30 00:00:00"
+  },
+  {
+    "sku": "PROV2526BORDONIMER16",
+    "nome_corso": "Gioco Ginnastica",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-11-05 00:00:00",
+    "ultima_data": "2025-11-05 00:00:00"
+  },
+  {
+    "sku": "PROV2526PACILLOMER19",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-13 00:00:00",
+    "ultima_data": "2025-09-13 00:00:00"
+  },
+  {
+    "sku": "PROVA2526DUTTASAB15",
+    "nome_corso": "K-Pop",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-04 00:00:00",
+    "ultima_data": "2025-10-04 00:00:00"
+  },
+  {
+    "sku": "2526BONNILUN21",
+    "nome_corso": "Corso Storico: BONNILUN21.C",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-04-24 15:05:13",
+    "ultima_data": "2026-04-24 15:05:13"
+  },
+  {
+    "sku": "PROV2526ANAHITAVEN19",
+    "nome_corso": "Voguing",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-03 00:00:00",
+    "ultima_data": "2025-10-03 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CEGLIEMAR20",
+    "nome_corso": "Video Dance",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-01-13 00:00:00",
+    "ultima_data": "2026-01-13 00:00:00"
+  },
+  {
+    "sku": "PRO2526STANISCIGIO13",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-02 00:00:00",
+    "ultima_data": "2025-10-02 00:00:00"
+  },
+  {
+    "sku": "PROVA2526KUQIVEN12",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-12 00:00:00",
+    "ultima_data": "2025-09-12 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZMAR17",
+    "nome_corso": "Brasilian Fit",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-12-22 00:00:00",
+    "ultima_data": "2025-12-22 00:00:00"
+  },
+  {
+    "sku": "PRO2526SARACCHIGIO21",
+    "nome_corso": "Salsa",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-02 00:00:00",
+    "ultima_data": "2025-10-02 00:00:00"
+  },
+  {
+    "sku": "PROVA2526ROSSISAB16",
+    "nome_corso": "Bachata",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-10-11 00:00:00",
+    "ultima_data": "2025-10-11 00:00:00"
+  },
+  {
+    "sku": "2526KUQI18GEN - A",
+    "nome_corso": "Domeniche in Movimento - Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-01-18 00:00:00",
+    "ultima_data": "2026-01-18 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZMAR12",
+    "nome_corso": "Pilates",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-03-31 00:00:00",
+    "ultima_data": "2026-03-31 00:00:00"
+  },
+  {
+    "sku": "PROV2526ALMEIDASAB14",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-02-14 00:00:00",
+    "ultima_data": "2026-02-14 00:00:00"
+  },
+  {
+    "sku": "PROV2526GARIANOGIO17",
+    "nome_corso": "Break Dance",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-18 00:00:00",
+    "ultima_data": "2025-09-18 00:00:00"
+  },
+  {
+    "sku": "2526KUQI15MAR - A",
+    "nome_corso": "Domeniche in Movimento Total Body",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-03-14 00:00:00",
+    "ultima_data": "2026-03-14 00:00:00"
+  },
+  {
+    "sku": "PROV2526ALMEIDAGIO18",
+    "nome_corso": "Functional Training",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-04-09 00:00:00",
+    "ultima_data": "2026-04-09 00:00:00"
+  },
+  {
+    "sku": "PROVA2526CRUZVEN12",
+    "nome_corso": "Brasilian Fit",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2026-02-13 00:00:00",
+    "ultima_data": "2026-02-13 00:00:00"
+  },
+  {
+    "sku": "PRO2526PUGGIONIGIO19",
+    "nome_corso": "Cerchio e Tessuti",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-09-20 00:00:00",
+    "ultima_data": "2025-09-20 00:00:00"
+  },
+  {
+    "sku": "PROVA2526GRANDEVEN20",
+    "nome_corso": "Tecnica Punte",
+    "activity_type": "storico",
+    "tot_iscrizioni": 1,
+    "membri_unici": 1,
+    "prima_data": "2025-12-05 00:00:00",
+    "ultima_data": "2025-12-05 00:00:00"
+  }
+]

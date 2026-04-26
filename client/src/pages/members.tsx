@@ -1303,6 +1303,9 @@ export default function Members() {
                                 </Tooltip>
                               </TooltipProvider>
                             )}
+                            {member.dataQualityFlag === 'mancano_dati_obbligatori' && (
+                              <Badge variant="destructive" className="ml-2 py-0 h-5 text-[10px]">CF MANCANTE</Badge>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className={cn(isSortedColumn("firstName") && "sorted-column-cell")}>
