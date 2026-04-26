@@ -2867,6 +2867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           m.first_name,
           m.last_name,
           m.email,
+          m.gender,
           mem.membership_number,
           mem.expiry_date as membership_expiry_date,
           mem.status as membership_status,
