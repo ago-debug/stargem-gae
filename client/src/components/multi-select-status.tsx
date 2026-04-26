@@ -132,7 +132,7 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
-            <InlineListEditor listCode="stato_corso" listName="Stato Corso" />
+            <InlineListEditor listCode="stato_corso" listName="Stato Corso" showColors={true} />
           </PopoverContent>
         </Popover>
       </div>
