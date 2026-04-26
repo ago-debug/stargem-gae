@@ -467,9 +467,13 @@ export default function CalendarPage() {
         queryKey: [workshopsQueryKey],
     });
 
-    const { data: activityStatuses } = useQuery<ActivityStatus[]>({
-        queryKey: ["/api/activity-statuses"],
+    const { data: activityStatusesResponse } = useQuery<any>({
+        queryKey: ["/api/custom-lists/stato_corso"],
     });
+    const activityStatuses = activityStatusesResponse?.items?.map((item: any) => ({
+        name: item.value,
+        color: item.color
+    })) || [];
 
     const { data: seasons } = useQuery<any[]>({
         queryKey: ["/api/seasons"],
@@ -2437,8 +2441,8 @@ export default function CalendarPage() {
                                                                 </div>
                                                             )}
                                                             
-                                                            <div className="flex w-full items-center justify-between mt-1 gap-1">
-                                                                <div className="flex items-center gap-1 flex-wrap">
+                                                            <div className="flex flex-col w-full mt-1 gap-1">
+                                                                <div className="flex w-full items-center justify-between">
                                                                     {(() => {
                                                                         let remainingOccurrences = evt.rawPayload?.totalOccurrences || null;
                                                                         if (remainingOccurrences && evt.rawPayload?.endDate && evt.dayOfWeek) {
@@ -2467,10 +2471,21 @@ export default function CalendarPage() {
                                                                             <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
                                                                                 {remainingOccurrences} Lez
                                                                             </span>
-                                                                        ) : null;
+                                                                        ) : <span className="w-4"></span>;
                                                                     })()}
-                                                                    <div className="flex flex-wrap gap-1" title={statusLabels.join(", ")}>
-                                                                        {statusLabels.map(s => {
+                                                                    <div className="flex gap-1 shrink-0">
+                                                                        {(evt.sourceType === "course" || evt.sourceType === "courses") && (
+                                                                            <button onClick={(e) => { e.stopPropagation(); handleDuplicateSingle(evt.rawPayload as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-indigo-600 transition-colors shadow-sm border border-black/5" title="Duplica Corso">
+                                                                                <Copy className="w-2.5 h-2.5" />
+                                                                            </button>
+                                                                        )}
+                                                                        <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm border border-black/5" title="Modifica rapida">
+                                                                            <Edit2 className="w-2.5 h-2.5" />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex flex-wrap gap-1 mt-0.5">
+                                                                    {statusLabels.map(s => {
                                                                         const color = getStatusColor(s, activityStatuses);
                                                                         return (
                                                                             <div key={s} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: `${color}15`, color, border: `0.5px solid ${color}40` } : { color: s === "ATTIVO" ? "#15803d" : "#b91c1c" }}>
@@ -2486,17 +2501,6 @@ export default function CalendarPage() {
                                                                         {tag}
                                                                       </span>
                                                                     ))}
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex gap-1 shrink-0">
-                                                                    {(evt.sourceType === "course" || evt.sourceType === "courses") && (
-                                                                        <button onClick={(e) => { e.stopPropagation(); handleDuplicateSingle(evt.rawPayload as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-indigo-600 transition-colors shadow-sm border border-black/5" title="Duplica Corso">
-                                                                            <Copy className="w-2.5 h-2.5" />
-                                                                        </button>
-                                                                    )}
-                                                                    <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm border border-black/5" title="Modifica rapida">
-                                                                        <Edit2 className="w-2.5 h-2.5" />
-                                                                    </button>
                                                                 </div>
                                                             </div>
                                                             
