@@ -317,7 +317,8 @@ export default function CalendarPage() {
         const dayIdx = initialDate.getDay();
         return WEEKDAYS[dayIdx === 0 ? 6 : dayIdx - 1].id;
     });
-    const [searchQuery, setSearchQuery] = useState("");
+    const params = new URLSearchParams(window.location.search);
+    const [searchQuery, setSearchQuery] = useState(params.get("search") || "");
     
     // --- Configurazione Dinamica Orari Centro ---
     const { data: centerHoursConfig } = useQuery<{ start: string, end: string, days: string[] }>({ queryKey: ["/api/config/center-hours"] });
