@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { InlineListEditor } from "@/components/inline-list-editor";
+import { InlineListEditorDialog } from "@/components/inline-list-editor-dialog";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -3505,7 +3505,7 @@ export default function MascheraInputGenerale() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start" onInteractOutside={(e) => e.stopPropagation()}>
-                      <InlineListEditor listCode="canale_acquisizione" listName="Canale Acquisizione" showColors={false} />
+                      <InlineListEditorDialog listCode="canale_acquisizione" listName="Canale Acquisizione" showColors={false} />
                     </PopoverContent>
                   </Popover>
                 </div>
