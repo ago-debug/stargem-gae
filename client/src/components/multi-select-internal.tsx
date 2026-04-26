@@ -33,10 +33,20 @@ interface MultiSelectInternalProps {
   onChange: (tags: string[]) => void;
 }
 
+import { useQuery } from "@tanstack/react-query";
+
 export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInternalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [, setLocation] = useLocation();
+
+  const { data: customList } = useQuery<any>({
+    queryKey: ["/api/custom-lists/tag_interni"],
+  });
+
+  const activeTags = customList?.items?.length > 0 
+    ? customList.items.map((i: any) => ({ id: i.id, name: i.value, color: i.color })) 
+    : INTERNAL_TAGS;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -99,7 +109,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
             Tag Interni
           </div>
           <div className="max-h-60 overflow-y-auto px-1">
-            {INTERNAL_TAGS.map((tag) => {
+            {activeTags.map((tag: any) => {
               const isSelected = selectedTags.includes(tag.name);
               return (
                 <div
