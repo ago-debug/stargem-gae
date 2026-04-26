@@ -895,7 +895,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           <TabsContent value="details" className="pt-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className={cn("flex justify-between items-center gap-2 flex-wrap p-3 rounded-md border text-sm", (isCopy && opStates.length > 0) ? "bg-red-50 border-red-400" : "bg-slate-50")}>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap flex-1">
                     <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
                     <MultiSelectInternal selectedTags={internalTags} onChange={setInternalTags} />
                 </div>

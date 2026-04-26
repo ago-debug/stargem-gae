@@ -58,12 +58,12 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 flex-1 min-w-[200px]">
       <div className="flex items-center gap-2">
         <Label>Interno Corso</Label>
         <InlineListEditorDialog listCode="tag_interni" listName="Interno Corso" showColors={true} />
       </div>
-      <div className="relative w-[180px]" ref={containerRef}>
+      <div className="relative min-w-[200px]" ref={containerRef}>
         <div
         className="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm hover:bg-accent/50 cursor-pointer transition-colors focus-within:ring-1 focus-within:ring-ring"
         onClick={() => setIsOpen(!isOpen)}
