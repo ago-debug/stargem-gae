@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { InlineListEditor } from "@/components/inline-list-editor";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
@@ -983,19 +984,22 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="font-semibold text-slate-800 shrink-0">Categoria <span className="text-red-500 ml-1">*</span></Label>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="h-5 w-5"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsCategoriaModalOpen(true);
-                      }}
-                    >
-                      <Edit className="w-3 h-3 sidebar-icon-gold" />
-                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="h-5 w-5"
+                          onClick={(e) => { e.stopPropagation(); }}
+                        >
+                          <Edit className="w-3 h-3 sidebar-icon-gold" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <InlineListEditor listCode="categorie" listName="Categorie Corsi" showColors={true} />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <div className={(isCopy && !!formData.categoryId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Combobox
