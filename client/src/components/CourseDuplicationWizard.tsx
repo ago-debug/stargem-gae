@@ -81,6 +81,7 @@ interface CourseDuplicationWizardProps {
 export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWizardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [targetSeasonId, setTargetSeasonId] = useState<string>("");
+  const [tableSourceSeasonId, setTableSourceSeasonId] = useState<string>("");
   const [selectedCourseIds, setSelectedCourseIds] = useState<Set<number>>(new Set());
   const [courseOverrides, setCourseOverrides] = useState<Record<number, any>>({});
   const [targetCourses, setTargetCourses] = useState<Course[]>([]);
@@ -99,7 +100,8 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
 
   const { data: seasons } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
   const activeSeasonFallbackId = seasons?.find(s => s.active)?.id?.toString() || "";
-  const effectiveSourceSeasonId = currentSeasonId === "active" ? activeSeasonFallbackId : currentSeasonId;
+  const initialSourceSeasonId = currentSeasonId === "active" ? activeSeasonFallbackId : currentSeasonId;
+  const effectiveSourceSeasonId = tableSourceSeasonId || initialSourceSeasonId;
 
   React.useEffect(() => {
     if (!targetSeasonId || !globalStartDate || !globalEndDate) return;
@@ -136,15 +138,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
 
   const targetSeasons = useMemo(() => {
     if (!seasons || !seasons.length) return [];
-    const sourceSeason = seasons.find(s => s.id.toString() === effectiveSourceSeasonId);
-    if (!sourceSeason) return [];
-    
-    // Mostra solo le stagioni successive (con id o data inizio maggiore)
-    return seasons.filter(s => {
-       const isDifferent = s.id.toString() !== effectiveSourceSeasonId;
-       const isSuccessive = new Date(s.startDate) > new Date(sourceSeason.startDate);
-       return isDifferent && isSuccessive;
-    });
+    return seasons.filter(s => s.id.toString() !== effectiveSourceSeasonId);
   }, [seasons, effectiveSourceSeasonId]);
 
   React.useEffect(() => {
@@ -529,6 +523,19 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
 
         <div className="space-y-6 py-4">
             <div className="flex items-center gap-4 border p-4 rounded-lg bg-slate-50 flex-wrap">
+                <div className="space-y-1.5 w-[250px]">
+                    <Label className="font-semibold text-slate-800">Stagione Origine</Label>
+                    <Select value={effectiveSourceSeasonId} onValueChange={setTableSourceSeasonId}>
+                        <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Seleziona la stagione..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {seasons?.map((s: any) => (
+                                <SelectItem key={s.id} value={s.id.toString()}>{getSeasonLabel(s, seasons)}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
                 <div className="space-y-1.5 w-[250px]">
                     <Label className="font-semibold text-slate-800">Stagione Destinazione</Label>
                     <Select value={targetSeasonId} onValueChange={setTargetSeasonId}>
