@@ -117,7 +117,7 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <Label>Stato</Label>
+        <Label>Stato Corso</Label>
         <Button
           type="button"
           size="icon"
@@ -137,7 +137,7 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
           data-testid={`select-${testIdPrefix}-trigger`}
         >
           {selectedStatuses.length === 0 ? (
-            <span className="text-muted-foreground">Seleziona stato...</span>
+            <span className="text-muted-foreground">Seleziona stato corso...</span>
           ) : (
             selectedStatuses.map((statusName) => {
               const color = getStatusColor(statusName, statuses);

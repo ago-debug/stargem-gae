@@ -1,0 +1,61 @@
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+=== 1a. Tabelle legacy esistenti ===
+┌─────────┬─────────────────────┐
+│ (index) │ table_name          │
+├─────────┼─────────────────────┤
+│ 0       │ 'payment_methods'   │
+│ 1       │ 'participant_types' │
+└─────────┴─────────────────────┘
+
+=== 1b. Record Count ===
+payment_methods: 1 records
+participant_types: 7 records
+
+=== 1c. Contenuto custom_lists ===
+┌─────────┬────┬─────────────────────────────────┬───────────────────┐
+│ (index) │ id │ name                            │ system_code       │
+├─────────┼────┼─────────────────────────────────┼───────────────────┤
+│ 0       │ 4  │ 'Come ci ha conosciuto'         │ 'come_conosciuto' │
+│ 1       │ 5  │ 'Livello'                       │ 'livello'         │
+│ 2       │ 6  │ 'Fascia età'                    │ 'fascia_eta'      │
+│ 3       │ 7  │ 'Tessera ente'                  │ 'tessera_ente'    │
+│ 4       │ 8  │ 'Cosa portare'                  │ 'cosa_portare'    │
+│ 5       │ 14 │ 'Posti Disponibili'             │ null              │
+│ 6       │ 15 │ 'Generi Corsi'                  │ 'genere'          │
+│ 7       │ 18 │ 'Canale di Acquisizione'        │ null              │
+│ 8       │ 19 │ 'Livello CRM'                   │ null              │
+│ 9       │ 21 │ 'Generi Workshop'               │ null              │
+│ 10      │ 22 │ 'Campus'                        │ null              │
+│ 11      │ 23 │ 'Categorie'                     │ 'CAT'             │
+│ 12      │ 24 │ 'Tipologie Lezioni Individuali' │ null              │
+│ 13      │ 25 │ 'Numero Persone (Individuali)'  │ null              │
+│ 14      │ 26 │ 'Generi Lezioni Individuali'    │ null              │
+│ 15      │ 27 │ 'generi_allenamenti'            │ null              │
+│ 16      │ 28 │ 'Tipologie Allenamenti'         │ null              │
+│ 17      │ 29 │ 'Tipi Carnet'                   │ null              │
+│ 18      │ 30 │ 'Categorie Anagrafica'          │ null              │
+│ 19      │ 31 │ 'Categorie Affitti'             │ null              │
+│ 20      │ 32 │ 'Categorie Booking'             │ null              │
+│ 21      │ 33 │ 'Categorie Merchandising'       │ null              │
+│ 22      │ 34 │ 'Stato Corso'                   │ 'stato_corso'     │
+│ 23      │ 35 │ 'Tag Interni Corso'             │ 'tag_interni'     │
+└─────────┴────┴─────────────────────────────────┴───────────────────┘
+
+=== 1d. Voci in stato_corso ===
+┌─────────┬─────────────────┐
+│ (index) │ value           │
+├─────────┼─────────────────┤
+│ 0       │ 'APERTO'        │
+│ 1       │ 'CHIUDERE'      │
+│ 2       │ 'COMPLETO'      │
+│ 3       │ 'CON SELEZIONE' │
+│ 4       │ 'IN PROG.'      │
+│ 5       │ 'ISCRIVITI'     │
+│ 6       │ 'NUOVO'         │
+│ 7       │ 'PAGATO'        │
+│ 8       │ 'POSTO DONNA'   │
+│ 9       │ 'POSTO UOMO'    │
+│ 10      │ 'PRIVATO'       │
+│ 11      │ 'SPINGERE'      │
+│ 12      │ 'ULTIMI POSTI'  │
+└─────────┴─────────────────┘

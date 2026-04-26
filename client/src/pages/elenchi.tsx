@@ -455,7 +455,7 @@ function SimpleListSection({ list, showColors }: SimpleListSectionProps & { show
 
 const AREA_MAP: Record<string, { label: string, lists: string[] }> = {
   corsi: { label: '🎓 Corsi', lists: ['stato_corso','tag_interni','categorie'] },
-  iscrizioni: { label: '📝 Iscrizioni', lists: ['tipo_partecipante','stato','dettaglio_iscrizione'] },
+  iscrizioni: { label: '📝 Iscrizioni', lists: ['tipo_partecipante','stato_iscrizione','dettaglio_iscrizione'] },
   pagamenti: { label: '💳 Pagamenti', lists: ['metodi_pagamento','note_pagamento','tipi_carnet'] },
   anagrafica: { label: '👤 Anagrafica', lists: ['categorie_anagrafica','canale_acquisizione','tessera_ente'] },
   altro: { label: '⚙️ Altro', lists: ['categorie_affitti','categorie_booking','categorie_merchandising','campus'] }
@@ -466,7 +466,7 @@ const USED_IN_MAP: Record<string, string[]> = {
   tag_interni: ['Modifica Corso (solo staff)'],
   categorie: ['Corsi','Filtri Calendario'],
   tipo_partecipante: ['Iscrizioni','Anagrafica'],
-  stato: ['Iscrizioni','Maschera Input'],
+  stato_iscrizione: ['Iscrizioni','Maschera Input'],
   dettaglio_iscrizione: ['Iscrizioni'],
   metodi_pagamento: ['Pagamenti','Maschera Input'],
   note_pagamento: ['Pagamenti'],
