@@ -55,15 +55,18 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
 
   return (
     <div className="flex flex-col gap-3 p-4 w-full">
-      <h3 className="font-semibold text-base border-b pb-2 shrink-0">Gestisci {listName}</h3>
-      <div className="flex gap-2 shrink-0">
+      <h3 className="font-semibold text-base border-b pb-2 shrink-0 flex items-center justify-between">
+        <span>Gestisci {listName}</span>
+        <span className="text-slate-500 text-sm font-normal">({listData.items?.length || 0} voci)</span>
+      </h3>
+      <div className="flex gap-2 shrink-0 items-center">
         {showColors && (
           <Input 
             type="color" 
             value={newColor} 
             onChange={(e) => setNewColor(e.target.value)}
-            className="w-8 h-8 p-0 border-0 cursor-pointer shrink-0"
-            title="Colore"
+            className="w-9 h-9 p-0.5 border rounded-md cursor-pointer shrink-0"
+            title="Scegli Colore"
           />
         )}
         <Input 
@@ -74,36 +77,30 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
           onKeyDown={(e) => {
             if (e.key === 'Enter' && newValue.trim()) createMutation.mutate(newValue.trim());
           }}
-          className="h-8 text-sm"
+          className="h-9 text-sm flex-1"
         />
         <Button 
           size="sm" 
           onClick={() => { if (newValue.trim()) createMutation.mutate(newValue.trim()) }}
           disabled={!newValue.trim() || createMutation.isPending}
-          className="h-8 px-2"
+          className="h-9 px-3"
         >
           <Plus className="w-4 h-4" />
         </Button>
       </div>
       <div className="flex flex-col gap-1 mt-2 max-h-[50vh] overflow-y-auto pr-2">
         {listData.items?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(item => (
-          <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-2">
-            {showColors && item.color ? (
-              <div 
-                className="w-3 h-3 rounded-full shrink-0 mr-2" 
-                style={{ backgroundColor: item.color }} 
-              />
-            ) : null}
-            <div className="flex items-center truncate">
+          <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-2 border border-transparent hover:border-slate-100">
+            <div className="flex items-center truncate flex-1 pr-2">
               {showColors && item.color ? (
-                <div className="w-3 h-3 rounded-full shrink-0 mr-2" style={{ backgroundColor: item.color }} />
+                <div className="w-3 h-3 rounded-full shrink-0 mr-3 shadow-sm border border-black/10" style={{ backgroundColor: item.color }} />
               ) : null}
               <span className="text-sm truncate font-medium">{item.value}</span>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50"
+              className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"
               onClick={() => { if (confirm(`Eliminare "${item.value}"?`)) deleteMutation.mutate(item.id) }}
               disabled={deleteMutation.isPending}
             >
@@ -112,7 +109,7 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
           </div>
         ))}
         {(!listData.items || listData.items.length === 0) && (
-           <p className="text-xs text-muted-foreground text-center py-4">Nessuna voce.</p>
+           <p className="text-xs text-muted-foreground text-center py-4">Nessuna voce in questa lista.</p>
         )}
       </div>
     </div>
