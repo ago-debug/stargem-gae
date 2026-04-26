@@ -721,7 +721,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
     }
 
     // Costruiamo statusTags in formato consistente multi-stato
-    const mergedTags = [...opStates.map(s => `STATE:${s}`), ...promoFlags.map(p => `PROMO:${p}`)];
+    const mergedTags = Array.from(new Set([...opStates.map(s => `STATE:${s}`), ...promoFlags.map(p => `PROMO:${p}`)]));
     const isActive = !opStates.includes("ANNULLATO");
 
     const payload: any = {
@@ -780,7 +780,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         const safeDayOfWeek = normalizeDay(formData.dayOfWeek);
         const safeStartTime = stripSeconds(formData.startTime);
 
-        const mergedTags = [...opStates.map(s => `STATE:${s}`), ...promoFlags.map(p => `PROMO:${p}`)];
+        const mergedTags = Array.from(new Set([...opStates.map(s => `STATE:${s}`), ...promoFlags.map(p => `PROMO:${p}`)]));
         const isActive = !opStates.includes("ANNULLATO");
         
         const payload: any = {

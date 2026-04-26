@@ -231,8 +231,9 @@ export default function Planning() {
         const isDayClosed = (dateStr: string) => {
             return strategicEventsData?.some(e => {
                 const isClosedType = ['festivita','chiusura','ferie'].includes(e.eventType);
-                const eStart = e.startDate?.split('T')[0];
-                const eEnd = (e.endDate || e.startDate)?.split('T')[0];
+                if (!e.startDate) return false;
+                const eStart = format(new Date(e.startDate), 'yyyy-MM-dd');
+                const eEnd = format(new Date(e.endDate || e.startDate), 'yyyy-MM-dd');
                 return isClosedType && (e.affectsCalendar || e.affectsCalendar === 1 || e.affectsPlanning || e.affectsPlanning === 1) && dateStr >= eStart && dateStr <= eEnd;
             }) ?? false;
         };
