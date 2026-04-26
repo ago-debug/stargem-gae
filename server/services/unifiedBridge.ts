@@ -153,9 +153,7 @@ function expandCourseRecurrence(
   });
 
   if (!course.dayOfWeek || !course.startTime) {
-    const fallbackStart = course.startDate ? new Date(course.startDate) : new Date();
-    const fallbackEnd = course.endDate ? new Date(course.endDate) : new Date(fallbackStart.getTime() + 3600000);
-    return [buildBaseDTO(fallbackStart, fallbackEnd, `course_${course.id}`)];
+    return []; // corso non schedulato - non renderizzare
   }
 
   const DAY_MAP: Record<string, number> = {
@@ -170,9 +168,7 @@ function expandCourseRecurrence(
   const targetDay = DAY_MAP[targetDayStr];
 
   if (targetDay === undefined) {
-    const fallbackStart = course.startDate ? new Date(course.startDate) : new Date();
-    const fallbackEnd = course.endDate ? new Date(course.endDate) : new Date(fallbackStart.getTime() + 3600000);
-    return [buildBaseDTO(fallbackStart, fallbackEnd, `course_${course.id}`)];
+    return []; // giorno della settimana non riconosciuto - non renderizzare
   }
 
   const expanded: UnifiedCalendarEventDTO[] = [];

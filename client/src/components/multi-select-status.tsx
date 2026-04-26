@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { X, Edit } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { InlineListEditor } from "@/components/inline-list-editor";
 
 export const STATUS_OPTIONS = [
   { id: 1, name: "APERTO", color: "#22c55e", sortOrder: 1, active: true },
@@ -82,10 +83,10 @@ interface MultiSelectStatusProps {
 export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "status" }: MultiSelectStatusProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [, setLocation] = useLocation();
-
+  
   const { data: customList } = useQuery<any>({
     queryKey: ["/api/custom-lists/stato_corso"],
+    staleTime: 0,
   });
 
   const statuses = customList?.items?.length > 0
@@ -118,16 +119,22 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Label>Stato Corso</Label>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="h-5 w-5"
-          onClick={() => setLocation('/elenchi?area=corsi')}
-          data-testid={`button-${testIdPrefix}-edit-statuses`}
-        >
-          <Edit className="w-3 h-3 sidebar-icon-gold" />
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-5 w-5"
+              data-testid={`button-${testIdPrefix}-edit-statuses`}
+            >
+              <Edit className="w-3 h-3 sidebar-icon-gold" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <InlineListEditor listCode="stato_corso" listName="Stato Corso" />
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="relative" ref={containerRef}>
