@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useLocation } from "wouter";
 import { ChevronDown, X, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { InlineListEditor } from "@/components/inline-list-editor";
 export const INTERNAL_TAGS = [
   { id: "spingere", name: "SPINGERE", color: "#4f46e5" },
   { id: "chiudere", name: "CHIUDERE", color: "#6366f1" },
@@ -38,8 +38,7 @@ import { useQuery } from "@tanstack/react-query";
 export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInternalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [, setLocation] = useLocation();
-
+  
   const { data: customList } = useQuery<any>({
     queryKey: ["/api/custom-lists/tag_interni"],
   });
@@ -75,16 +74,22 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Label>Interno Corso</Label>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="h-5 w-5"
-          onClick={() => setLocation('/elenchi?area=corsi')}
-          data-testid="button-edit-internal-tags"
-        >
-          <Edit className="w-3 h-3 sidebar-icon-gold" />
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-5 w-5"
+              data-testid="button-edit-internal-tags"
+            >
+              <Edit className="w-3 h-3 sidebar-icon-gold" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <InlineListEditor listCode="tag_interni" listName="Interno Corso" />
+          </PopoverContent>
+        </Popover>
       </div>
       <div className="relative w-[180px]" ref={containerRef}>
         <div
