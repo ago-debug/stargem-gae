@@ -2334,6 +2334,7 @@ export default function CalendarPage() {
                                             let statusLabels: string[] = parseStatusTags(evt.rawPayload?.statusTags)
                                                 .map(t => t.replace(/^STATE:/i, ""))
                                                 .filter(t => t.length > 0);
+                                            const internalLabels = parseStatusTags(evt.rawPayload?.internalTags);
                                             const ins1 = evt.instructorName || (evt.registryKey === "studioBookings" && evt.rawPayload?.title ? evt.rawPayload.title : "");
                                             const ins2Item = instructors?.find((i: any) => i.id === evt.rawPayload?.secondaryInstructor1Id);
                                             const ins2 = ins2Item ? `${ins2Item.lastName} ${ins2Item.firstName}` : "";
@@ -2437,7 +2438,7 @@ export default function CalendarPage() {
                                                             )}
                                                             
                                                             <div className="flex w-full items-center justify-between mt-1 gap-1">
-                                                                <div className="flex items-center gap-1 overflow-hidden">
+                                                                <div className="flex items-center gap-1 flex-wrap">
                                                                     {(() => {
                                                                         let remainingOccurrences = evt.rawPayload?.totalOccurrences || null;
                                                                         if (remainingOccurrences && evt.rawPayload?.endDate && evt.dayOfWeek) {
@@ -2477,6 +2478,14 @@ export default function CalendarPage() {
                                                                             </div>
                                                                         );
                                                                     })}
+                                                                    {internalLabels.length > 0 && internalLabels.map(tag => (
+                                                                      <span key={tag}
+                                                                        className="text-[9px] font-bold uppercase px-1 py-[1px]
+                                                                          rounded-[2px] bg-indigo-100 text-indigo-700 
+                                                                          border border-indigo-200 leading-none truncate">
+                                                                        {tag}
+                                                                      </span>
+                                                                    ))}
                                                                     </div>
                                                                 </div>
                                                                 <div className="flex gap-1 shrink-0">
