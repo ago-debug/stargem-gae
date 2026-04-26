@@ -319,6 +319,7 @@ export default function CalendarPage() {
     });
     const params = new URLSearchParams(window.location.search);
     const [searchQuery, setSearchQuery] = useState(params.get("search") || "");
+    const highlightCourseId = params.get("highlightCourseId");
     
     // --- Configurazione Dinamica Orari Centro ---
     const { data: centerHoursConfig } = useQuery<{ start: string, end: string, days: string[] }>({ queryKey: ["/api/config/center-hours"] });
@@ -2369,8 +2370,9 @@ export default function CalendarPage() {
                                             return (
                                                 <div
                                                     key={evt.eventId}
+                                                    id={`event-card-${evt.sourceType}-${evt.sourceId}`}
                                                     onClick={handleCardClick}
-                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-xl z-20 hover:z-50 ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 ring-2 ring-red-500 animate-pulse z-[90]' : ''}`}
+                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-xl z-20 hover:z-50 ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 ring-2 ring-red-500 animate-pulse z-[90]' : ''} ${highlightCourseId && Number(highlightCourseId) === evt.sourceId && (evt.sourceType === "course" || evt.sourceType === "courses") ? 'ring-4 ring-amber-400 z-[100] scale-[1.05] shadow-2xl' : ''}`}
                                                     style={{
                                                         top: `${realTop + 2}px`,
                                                         minHeight: `${Math.max(realHeight - 4, 55)}px`,  // Elastic minimum height for short events
