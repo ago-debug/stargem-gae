@@ -54,7 +54,6 @@ import WebhookStatus from "@/pages/webhook-status";
 import WcMapping from "@/pages/wc-mapping";
 import Attivita from "@/pages/attivita";
 import IscrittiPerAttivita from "@/pages/iscritti_per_attivita";
-import Elenchi from "@/pages/elenchi";
 import TodoList from "@/pages/todo-list";
 import Commenti from "@/pages/commenti";
 import SchedaCorso from "@/pages/scheda-corso";
@@ -266,8 +265,7 @@ function Router() {
       <Route path="/listini-home"><Redirect to="/quote-promo" /></Route>
       <Route path="/listini"><Redirect to="/quote-promo" /></Route>
       <Route path="/listini-base/:activityType"><Redirect to="/quote-promo" /></Route>
-      <ProtectedRoute path="/elenchi" component={Elenchi} />
-      <ProtectedRoute path="/todo-list" component={TodoList} />
+            <ProtectedRoute path="/todo-list" component={TodoList} />
       <ProtectedRoute path="/knowledge-base" component={KnowledgeBase} />
       <ProtectedRoute path="/commenti" component={Commenti} />
       <Route component={NotFound} />

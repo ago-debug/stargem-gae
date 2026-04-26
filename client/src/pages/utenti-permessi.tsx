@@ -82,7 +82,6 @@ const MENU_PATHS = [
 
   // AMMINISTRATORE
   { path: "/admin", title: "25. Pannello Admin Global" },
-  { path: "/elenchi", title: "26. Elenchi Custom" },
   { path: "/importa", title: "27. Importazione Dati" },
   { path: "/utenti-permessi", title: "28. Utenti e Permessi" },
   { path: "/audit-logs", title: "29. Storico Log ed Eliminazioni" },

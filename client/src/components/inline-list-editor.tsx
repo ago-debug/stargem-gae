@@ -57,7 +57,7 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
   if (!listData) return <div className="p-4 text-sm text-red-500">Lista non trovata</div>;
 
   return (
-    <div className="flex flex-col gap-3 p-2 w-72 max-h-96">
+    <div className="flex flex-col gap-3 p-2 w-72">
       <h3 className="font-semibold text-sm border-b pb-2 shrink-0">{listName}</h3>
       <div className="flex gap-2 shrink-0">
         {showColors && (
@@ -88,7 +88,7 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
           <Plus className="w-4 h-4" />
         </Button>
       </div>
-      <div className="flex flex-col gap-1 mt-2 flex-1 overflow-y-auto min-h-0 pr-1">
+      <div className="flex flex-col gap-1 mt-2 max-h-[280px] overflow-y-auto pr-1">
         {listData.items?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(item => (
           <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-1">
             {showColors && item.color ? (
