@@ -251,11 +251,6 @@ const adminItems = [
     icon: Settings,
   },
   {
-    title: "Elenchi Custom",
-    url: "/elenchi",
-    icon: List,
-  },
-  {
     title: "Importazione Dati",
     url: "/importa",
     icon: Upload,

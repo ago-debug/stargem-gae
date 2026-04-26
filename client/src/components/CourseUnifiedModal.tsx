@@ -28,7 +28,6 @@ import { SortableTableHead, useSortableTable } from "@/components/sortable-table
 import { useCustomList, useCustomListValues } from "@/hooks/use-custom-list";
 import { MultiSelectStatus } from "@/components/multi-select-status";
 import { MultiSelectInternal } from "@/components/multi-select-internal";
-import { CustomListManagerDialog } from "@/components/custom-list-manager-dialog";
 import { MultiSelectCustomList } from "@/components/ui/multi-select-custom-list";
 import { QuickMemberAddModal } from "./QuickMemberAddModal";
 import { MessageSquare, Mail, Phone } from "lucide-react";
@@ -385,14 +384,8 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const isDuplicatingRef = useRef(false);
   const isEdit = !!course?.id;
 
-  const [isGenereModalOpen, setIsGenereModalOpen] = useState(false);
-  const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
-  const [isNumeroPersoneModalOpen, setIsNumeroPersoneModalOpen] = useState(false);
-  const [isPostiModalOpen, setIsPostiModalOpen] = useState(false);
-  const [isLivelloModalOpen, setIsLivelloModalOpen] = useState(false);
-  const [isFasciaEtaModalOpen, setIsFasciaEtaModalOpen] = useState(false);
-  const [isGruppiCampusModalOpen, setIsGruppiCampusModalOpen] = useState(false);
-  const [isQuickMemberAddOpen, setIsQuickMemberAddOpen] = useState(false);
+    const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
+            const [isQuickMemberAddOpen, setIsQuickMemberAddOpen] = useState(false);
   const [quickMemberTarget, setQuickMemberTarget] = useState<"member1" | "member2" | "instructor" | "secondaryInstructor">("member1");
 
   // Dati da Liste e DB
@@ -417,8 +410,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
   const pacchettiPrenotazioni = useCustomListValues("pacchetti_prenotazioni");
   const { data: membersData } = useQuery<{ members: Member[], total: number }>({ queryKey: ["/api/members"] });
   const membersList = membersData?.members || [];
-  const [isPacchettiModalOpen, setIsPacchettiModalOpen] = useState(false);
-
+  
   // State della Form
   const [formData, setFormData] = useState<any>({});
   const [opStates, setOpStates] = useState<string[]>([]);
@@ -931,19 +923,16 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   <Label className="font-semibold text-slate-800 shrink-0">
                       {activityType === "allenamenti" ? "GENERE ALLENAMENTO" : activityType === "prenotazioni" ? "GENERE LEZIONE" : "GENERE / NOME CORSO"} *
                     </Label>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="h-5 w-5"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setIsGenereModalOpen(true);
-                    }}
-                  >
-                    <Edit className="w-3 h-3 sidebar-icon-gold" />
-                  </Button>
+                  <Popover>
+                  <PopoverTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                      <Edit className="w-3 h-3 text-slate-500" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <InlineListEditor listCode={nameListType} listName="Genere Corso" showColors={false} />
+                  </PopoverContent>
+                </Popover>
                 </div>
                   <div className={(isCopy && !!formData.name) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Combobox
@@ -1024,7 +1013,16 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Label className="font-semibold text-slate-800 shrink-0">NUMERO PERSONE</Label>
-                      <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsNumeroPersoneModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button>
+                      <Popover>
+                      <PopoverTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                          <Edit className="w-3 h-3 text-slate-500" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <InlineListEditor listCode="numero_persone" listName="Numero Persone" showColors={false} />
+                      </PopoverContent>
+                    </Popover>
                     </div>
                     <div className={(isCopy && !!formData.numberOfPeople && formData.numberOfPeople !== "none") ? "rounded-md border border-red-400 bg-red-50" : ""}>
                     <Combobox
@@ -1122,7 +1120,16 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="font-semibold text-slate-800 shrink-0">{activityType === "campus" ? "Gruppo" : "Livello"}</Label>
-                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (activityType === "campus") { setIsGruppiCampusModalOpen(true); } else { setIsLivelloModalOpen(true); } }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                          <Edit className="w-3 h-3 text-slate-500" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <InlineListEditor listCode={activityType === "campus" ? "campus" : "livello"} listName={activityType === "campus" ? "Gruppo Campus" : "Livello"} showColors={false} />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <Combobox
                     name="level"
@@ -1137,7 +1144,16 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="font-semibold text-slate-800 shrink-0">Fascia d'età</Label>
-                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsFasciaEtaModalOpen(true); }}><Edit className="w-3 h-3 sidebar-icon-gold" /></Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                          <Edit className="w-3 h-3 text-slate-500" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <InlineListEditor listCode="fascia_eta" listName="Fascia d'Età" showColors={false} />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <Combobox
                     name="ageGroup"
@@ -1211,19 +1227,16 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="maxCapacity" className="font-semibold text-slate-800 shrink-0">Posti Disponibili <span className="text-red-500 ml-1">*</span></Label>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="h-5 w-5"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsPostiModalOpen(true);
-                      }}
-                    >
-                      <Edit className="w-3 h-3 sidebar-icon-gold" />
-                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                          <Edit className="w-3 h-3 text-slate-500" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <InlineListEditor listCode="posti_disponibili" listName="Posti Disponibili" showColors={false} />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <Select value={formData.maxCapacity?.toString() || "none"} onValueChange={v => updateForm("maxCapacity", v === "none" ? null : parseInt(v))}>
                     <SelectTrigger><SelectValue placeholder="Posti" /></SelectTrigger>
@@ -1353,14 +1366,14 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
         </Tabs>
       </DialogContent>
     </Dialog>
-    <CustomListManagerDialog listType={nameListType} title={activityType === "prenotazioni" ? "Gestione Generi Lezioni Individuali" : activityType === "allenamenti" ? "Gestione Generi Allenamenti" : activityType === "campus" ? "Gestione Nomi Campus" : activityType === "workshop" ? "Gestione Nomi Workshop" : "Gestione Generi / Nomi Corsi"} open={isGenereModalOpen} onOpenChange={setIsGenereModalOpen} />
-    <CustomListManagerDialog listType="categorie" title="Gestione Categorie" open={isCategoriaModalOpen} onOpenChange={setIsCategoriaModalOpen} />
-    <CustomListManagerDialog listType="posti_disponibili" title="Gestione Posti Disponibili" open={isPostiModalOpen} onOpenChange={setIsPostiModalOpen} />
-    <CustomListManagerDialog listType="livello" title="Gestione Livelli" open={isLivelloModalOpen} onOpenChange={setIsLivelloModalOpen} />
-    <CustomListManagerDialog listType="fascia_eta" title="Gestione Fasce d'Età" open={isFasciaEtaModalOpen} onOpenChange={setIsFasciaEtaModalOpen} />
-    <CustomListManagerDialog listType="campus" title="Gestione Gruppi Campus" open={isGruppiCampusModalOpen} onOpenChange={setIsGruppiCampusModalOpen} />
-    <CustomListManagerDialog listType="pacchetti_prenotazioni" title="Gestione Pacchetti Prenotazioni" open={isPacchettiModalOpen} onOpenChange={setIsPacchettiModalOpen} />
-    <CustomListManagerDialog listType="numero_persone" title="Gestione Numero Persone" open={isNumeroPersoneModalOpen} onOpenChange={setIsNumeroPersoneModalOpen} />
+    
+    
+    
+    
+    
+    
+    
+    
     <QuickMemberAddModal isOpen={isQuickMemberAddOpen} onOpenChange={setIsQuickMemberAddOpen} defaultRole={quickMemberTarget.includes('instructor') ? "Staff/Insegnanti" : "Non Tesserato"} onSuccess={(id) => {
         if (quickMemberTarget === "member1") updateForm("member1Id", id);
         else if (quickMemberTarget === "member2") updateForm("member2Id", id);
