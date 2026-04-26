@@ -1,6 +1,3 @@
-// PENNINO A: showColors=false (default) | NO multi-selezione | lista semplice
-// PENNINO B: showColors=true | SÌ multi-selezione | lista colorata
-// PENNINO C: showColors=true | NO multi-selezione | colore assegnato
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -57,8 +54,8 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
   if (!listData) return <div className="p-4 text-sm text-red-500">Lista non trovata</div>;
 
   return (
-    <div className="flex flex-col gap-3 p-2 w-72">
-      <h3 className="font-semibold text-sm border-b pb-2 shrink-0">{listName}</h3>
+    <div className="flex flex-col gap-3 p-4 w-full">
+      <h3 className="font-semibold text-base border-b pb-2 shrink-0">Gestisci {listName}</h3>
       <div className="flex gap-2 shrink-0">
         {showColors && (
           <Input 
@@ -88,9 +85,9 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
           <Plus className="w-4 h-4" />
         </Button>
       </div>
-      <div className="h-48 overflow-y-scroll mt-2 pr-1" style={{ overscrollBehavior: "contain", borderBottom: "1px solid #eee", borderTop: "1px solid #eee" }}>
+      <div className="flex flex-col gap-1 mt-2 max-h-[50vh] overflow-y-auto pr-2">
         {listData.items?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(item => (
-          <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-1 mb-1">
+          <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-2">
             {showColors && item.color ? (
               <div 
                 className="w-3 h-3 rounded-full shrink-0 mr-2" 
@@ -101,12 +98,12 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
               {showColors && item.color ? (
                 <div className="w-3 h-3 rounded-full shrink-0 mr-2" style={{ backgroundColor: item.color }} />
               ) : null}
-              <span className="text-sm truncate">{item.value}</span>
+              <span className="text-sm truncate font-medium">{item.value}</span>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 hover:bg-red-50"
+              className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50"
               onClick={() => { if (confirm(`Eliminare "${item.value}"?`)) deleteMutation.mutate(item.id) }}
               disabled={deleteMutation.isPending}
             >
@@ -115,11 +112,9 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
           </div>
         ))}
         {(!listData.items || listData.items.length === 0) && (
-           <p className="text-xs text-muted-foreground text-center py-2">Nessuna voce.</p>
+           <p className="text-xs text-muted-foreground text-center py-4">Nessuna voce.</p>
         )}
       </div>
     </div>
   );
 }
-
-console.log("INLINE LIST EDITOR LOADED v5");

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { InlineListEditor } from "@/components/inline-list-editor";
+import { InlineListEditorDialog } from "@/components/inline-list-editor-dialog";
 import { Edit } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -106,7 +106,7 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start" onInteractOutside={(e) => e.stopPropagation()}>
-                  <InlineListEditor listCode="metodi_pagamento" listName="Metodi Pagamento" showColors={false} />
+                  <InlineListEditorDialog listCode="metodi_pagamento" listName="Metodi Pagamento" showColors={false} />
                 </PopoverContent>
               </Popover>
             </div>

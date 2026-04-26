@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { InlineListEditor } from "@/components/inline-list-editor";
+import { InlineListEditorDialog } from "@/components/inline-list-editor-dialog";
 export const INTERNAL_TAGS = [
   { id: "spingere", name: "SPINGERE", color: "#4f46e5" },
   { id: "chiudere", name: "CHIUDERE", color: "#6366f1" },
@@ -74,22 +74,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Label>Interno Corso</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="h-5 w-5"
-              data-testid="button-edit-internal-tags"
-            >
-              <Edit className="w-3 h-3 sidebar-icon-gold" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start" style={{ maxHeight: 'var(--radix-popover-content-available-height)' }}>
-            <InlineListEditor listCode="tag_interni" listName="Interno Corso" showColors={true} />
-          </PopoverContent>
-        </Popover>
+        <InlineListEditorDialog listCode="tag_interni" listName="Interno Corso" showColors={true} />
       </div>
       <div className="relative w-[180px]" ref={containerRef}>
         <div
