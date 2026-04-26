@@ -557,7 +557,7 @@ export default function Elenchi() {
               {AREA_MAP[activeArea].label}
             </h2>
             
-            <Accordion type="single" collapsible defaultValue={activeLists[0]} key={activeArea} className="space-y-4">
+            <Accordion type="single" collapsible key={activeArea} className="space-y-4">
               {activeLists.map(listCode => {
                 const listData = lists?.find(l => l.systemName === listCode || l.systemCode === listCode);
                 if (!listData) {
