@@ -89,9 +89,10 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
         </Button>
       </div>
       <div className="flex flex-col gap-1 mt-2 max-h-[50vh] overflow-y-auto pr-2">
-        {listData.items?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(item => (
+        {listData.items?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((item, index) => (
           <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-2 border border-transparent hover:border-slate-100">
             <div className="flex items-center truncate flex-1 pr-2">
+              <span className="text-xs text-muted-foreground mr-2 font-mono w-4">#{index + 1}</span>
               {showColors && item.color ? (
                 <div className="w-3 h-3 rounded-full shrink-0 mr-3 shadow-sm border border-black/10" style={{ backgroundColor: item.color }} />
               ) : null}
