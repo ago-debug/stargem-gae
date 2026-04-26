@@ -196,10 +196,10 @@ export function MultiSelectPaymentNotes({ selectedNotes, onChange, testIdPrefix 
                       <span>{note.name}</span>
                     </div>
                     {isSelected && (
-                      <span className="text-xs text-muted-foreground">
-                        #{selectedNotes.indexOf(note.name) + 1}
-                      </span>
-                    )}
+                    <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-1.5 rounded-sm">
+                      ✓
+                    </span>
+                  )}
                   </div>
                 );
               })}

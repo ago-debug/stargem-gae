@@ -119,7 +119,7 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
     <div className="space-y-2 flex-1 min-w-0">
       <div className="flex items-center gap-2">
         <Label className="font-semibold text-slate-800 shrink-0 uppercase text-xs">Stato Corso</Label>
-        <InlineListEditorDialog listCode="stato_corso" listName="Stato Corso" showColors={true} />
+        <InlineListEditorDialog listCode="stato_corso" listName="Stato Corso" showColors={true} penninoType="tipo B" />
       </div>
 
       <div className="relative" ref={containerRef}>
@@ -200,10 +200,10 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
                         <span>{status.name}</span>
                       </div>
                       {isSelected && (
-                        <span className="text-xs text-muted-foreground">
-                          #{selectedStatuses.indexOf(status.name) + 1}
-                        </span>
-                      )}
+                    <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-1.5 rounded-sm">
+                      ✓
+                    </span>
+                  )}
                     </div>
                   );
               })}
