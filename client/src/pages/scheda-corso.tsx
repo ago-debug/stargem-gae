@@ -20,12 +20,14 @@ import { SortableTableHead, useSortableTable } from "@/components/sortable-table
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import type { Course, Member, Enrollment, Payment, Attendance } from "@shared/schema";
 import { buildEnrolledMembersData } from "@/lib/enrollments";
 
 export default function SchedaCorso() {
     const [location, setLocation] = useLocation();
     const [genderFilter, setGenderFilter] = useState<"all" | "M" | "F">("all");
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const searchParams = new URLSearchParams(window.location.search);
     const courseIdRaw = searchParams.get("courseId");
     const courseId = Number(courseIdRaw);
@@ -214,7 +216,7 @@ export default function SchedaCorso() {
                             <Button 
                                 variant="outline" 
                                 className="gap-2 shrink-0 border-slate-200 hover:bg-slate-50 text-slate-600"
-                                onClick={() => setLocation(`/attivita/corsi?editId=${course.id}`)}
+                                onClick={() => setIsEditModalOpen(true)}
                             >
                                 <Edit2 className="w-4 h-4" /> Modifica
                             </Button>
@@ -223,7 +225,11 @@ export default function SchedaCorso() {
 
                     {course && (
                         <div className="flex flex-wrap gap-3 pt-2">
-                            <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
+                            <Badge 
+                                variant="outline" 
+                                className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                                onClick={() => { if(course.sku) setLocation(`/calendario-attivita?search=${encodeURIComponent(course.sku)}`) }}
+                            >
                                 <Tag className="w-3.5 h-3.5" />
                                 SKU: {course.sku || 'N/A'}
                             </Badge>
