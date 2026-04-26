@@ -893,26 +893,29 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           )}
 
           <TabsContent value="details" className="pt-2">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className={cn("flex justify-between items-center gap-2 flex-wrap p-3 rounded-md border text-sm", (isCopy && opStates.length > 0) ? "bg-red-50 border-red-400" : "bg-slate-50")}>
-                <div className="flex gap-2 flex-1 min-w-0">
-                    <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
-                    <MultiSelectInternal selectedTags={internalTags} onChange={setInternalTags} />
+            <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+              <div className={cn("relative flex flex-col items-center justify-center pt-8 pb-4 px-4 rounded-md border-2 mt-4", (isCopy && opStates.length > 0) ? "bg-red-50/50 border-red-400" : "border-yellow-400 bg-white")}>
+                
+                {/* Floating Pennini Box */}
+                <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-white px-6 py-2 rounded-md shadow-md border border-slate-200 flex gap-6 w-fit min-w-[500px] z-10">
+                  <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
+                  <MultiSelectInternal selectedTags={internalTags} onChange={setInternalTags} />
                 </div>
 
-                <div className="flex items-center gap-4 border-l border-slate-300 pl-4 shrink-0 flex-wrap">
+                {/* Flags Marketing Centered */}
+                <div className="flex items-center gap-4 flex-wrap mt-2 justify-center w-full">
                   <Label className="font-semibold text-slate-800">Flags Marketing:</Label>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="promo-gratuita" checked={promoFlags.includes("GRATUITA")} onCheckedChange={(c) => handlePromoChange("GRATUITA", !!c)} />
-                    <label htmlFor="promo-gratuita" className="text-xs leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">Prova Gratuita</label>
+                    <label htmlFor="promo-gratuita" className="text-xs leading-none font-medium cursor-pointer text-slate-600 uppercase">Prova Gratuita</label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="promo-online" checked={promoFlags.includes("ONLINE")} onCheckedChange={(c) => handlePromoChange("ONLINE", !!c)} />
-                    <label htmlFor="promo-online" className="text-xs leading-none cursor-pointer">Iscrizione Online</label>
+                    <label htmlFor="promo-online" className="text-xs leading-none font-medium cursor-pointer text-slate-600 uppercase">Iscrizione Online</label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="promo-attiva" checked={promoFlags.includes("PROMO")} onCheckedChange={(c) => handlePromoChange("PROMO", !!c)} />
-                    <label htmlFor="promo-attiva" className="text-xs text-[#d4af37] font-semibold leading-none cursor-pointer">PROMO</label>
+                    <Checkbox id="promo-badge" checked={promoFlags.includes("PROMO")} onCheckedChange={(c) => handlePromoChange("PROMO", !!c)} />
+                    <label htmlFor="promo-badge" className="text-xs font-bold leading-none text-yellow-600 cursor-pointer uppercase">PROMO</label>
                   </div>
                 </div>
               </div>
