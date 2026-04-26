@@ -131,7 +131,7 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
               <Edit className="w-3 h-3 sidebar-icon-gold" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0" align="start" style={{ maxHeight: 'var(--radix-popover-content-available-height)' }}>
             <InlineListEditor listCode="stato_corso" listName="Stato Corso" showColors={true} />
           </PopoverContent>
         </Popover>

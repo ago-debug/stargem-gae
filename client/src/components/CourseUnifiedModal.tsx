@@ -929,7 +929,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       <Edit className="w-3 h-3 text-slate-500" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0" align="start" style={{ maxHeight: 'var(--radix-popover-content-available-height)' }}>
                     <InlineListEditor listCode={nameListType} listName="Genere Corso" showColors={false} />
                   </PopoverContent>
                 </Popover>
@@ -984,7 +984,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                           <Edit className="w-3 h-3 sidebar-icon-gold" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0" align="start" style={{ maxHeight: 'var(--radix-popover-content-available-height)' }}>
                         <InlineListEditor listCode="categorie" listName="Categorie Corsi" showColors={true} />
                       </PopoverContent>
                     </Popover>
@@ -1018,7 +1018,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                           <Edit className="w-3 h-3 text-slate-500" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0" align="start" style={{ maxHeight: 'var(--radix-popover-content-available-height)' }}>
                         <InlineListEditor listCode="numero_persone" listName="Numero Persone" showColors={false} />
                       </PopoverContent>
                     </Popover>
@@ -1125,7 +1125,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                           <Edit className="w-3 h-3 text-slate-500" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0" align="start" style={{ maxHeight: 'var(--radix-popover-content-available-height)' }}>
                         <InlineListEditor listCode={activityType === "campus" ? "campus" : "livello"} listName={activityType === "campus" ? "Gruppo Campus" : "Livello"} showColors={false} />
                       </PopoverContent>
                     </Popover>
@@ -1149,7 +1149,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                           <Edit className="w-3 h-3 text-slate-500" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0" align="start" style={{ maxHeight: 'var(--radix-popover-content-available-height)' }}>
                         <InlineListEditor listCode="fascia_eta" listName="Fascia d'Età" showColors={false} />
                       </PopoverContent>
                     </Popover>
@@ -1232,7 +1232,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                           <Edit className="w-3 h-3 text-slate-500" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0" align="start" style={{ maxHeight: 'var(--radix-popover-content-available-height)' }}>
                         <InlineListEditor listCode="posti_disponibili" listName="Posti Disponibili" showColors={false} />
                       </PopoverContent>
                     </Popover>
