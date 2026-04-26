@@ -5,6 +5,9 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { InlineListEditorDialog } from "@/components/inline-list-editor-dialog";
+import { useQuery } from "@tanstack/react-query";
+import { StatusBadge } from "./multi-select-status";
+
 export const INTERNAL_TAGS = [
   { id: "spingere", name: "SPINGERE", color: "#4f46e5" },
   { id: "chiudere", name: "CHIUDERE", color: "#6366f1" },
@@ -14,26 +17,10 @@ export const INTERNAL_TAGS = [
   { id: "ultimi_posti", name: "ULTIMI POSTI", color: "#5b21b6" },
 ];
 
-export function InternalBadge({ name, color }: { name: string; color?: string }) {
-  const tag = INTERNAL_TAGS.find(t => t.name === name);
-  const finalColor = color || tag?.color || "#4f46e5";
-  return (
-    <div
-      className="text-[10px] font-bold uppercase tracking-wider leading-none truncate px-1.5 py-[2px] rounded-[3px] border inline-flex items-center"
-      style={{ backgroundColor: `${finalColor}15`, color: finalColor, borderColor: `${finalColor}40` }}
-      title={name}
-    >
-      {name}
-    </div>
-  );
-}
-
 interface MultiSelectInternalProps {
   selectedTags: string[];
   onChange: (tags: string[]) => void;
 }
-
-import { useQuery } from "@tanstack/react-query";
 
 export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInternalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -78,7 +65,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
       </div>
       <div className="relative w-[180px]" ref={containerRef}>
         <div
-        className="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1.5 text-sm shadow-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors focus-within:ring-1 focus-within:ring-ring"
+        className="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm hover:bg-accent/50 cursor-pointer transition-colors focus-within:ring-1 focus-within:ring-ring"
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex flex-wrap gap-1 items-center flex-1 pr-2 overflow-hidden">
@@ -88,10 +75,11 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
             selectedTags.map((tagName) => {
               const tag = activeTags.find((t: any) => t.name === tagName);
               return (
-                <InternalBadge
+                <StatusBadge
                   key={tagName}
                   name={tagName}
                   color={tag?.color}
+                  className="flex items-center gap-1"
                 />
               );
             })
