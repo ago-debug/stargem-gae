@@ -228,7 +228,7 @@ export default function SchedaCorso() {
                             <Badge 
                                 variant="outline" 
                                 className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 transition-colors"
-                                onClick={() => { if(course.sku) setLocation(`/calendario-attivita?search=${encodeURIComponent(course.sku)}`) }}
+                                onClick={() => { if(course.sku) setLocation(`/calendario-attivita?highlightCourseId=${course.id}`) }}
                             >
                                 <Tag className="w-3.5 h-3.5" />
                                 SKU: {course.sku || 'N/A'}
@@ -384,6 +384,14 @@ export default function SchedaCorso() {
                     </Table>
                 </div>
             </Card>
+            {course && (
+                <CourseUnifiedModal 
+                    isOpen={isEditModalOpen} 
+                    onOpenChange={setIsEditModalOpen} 
+                    course={course} 
+                    activityType="course" 
+                />
+            )}
         </div>
     );
 }
