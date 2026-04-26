@@ -1,3 +1,5 @@
+// PENNINO A: showColors=false (default) - lista semplice
+// PENNINO B: showColors=true - lista colorata multi
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -10,11 +12,13 @@ import type { CustomList, CustomListItem } from "@shared/schema";
 interface InlineListEditorProps {
   listCode: string;
   listName: string;
+  showColors?: boolean;
 }
 
-export function InlineListEditor({ listCode, listName }: InlineListEditorProps) {
+export function InlineListEditor({ listCode, listName, showColors = false }: InlineListEditorProps) {
   const { toast } = useToast();
   const [newValue, setNewValue] = useState("");
+  const [newColor, setNewColor] = useState("#4f46e5");
 
   const { data: lists, isLoading } = useQuery<(CustomList & { items: CustomListItem[] })[]>({
     queryKey: ["/api/custom-lists"],
@@ -27,7 +31,7 @@ export function InlineListEditor({ listCode, listName }: InlineListEditorProps) 
     mutationFn: async (val: string) => {
       if (!listData) throw new Error("List not found");
       const maxOrder = listData.items?.reduce((max, i) => Math.max(max, i.sortOrder || 0), 0) || 0;
-      await apiRequest("POST", `/api/custom-lists/${listData.id}/items`, { value: val, sortOrder: maxOrder + 1, active: true });
+      await apiRequest("POST", `/api/custom-lists/${listData.id}/items`, { value: val, sortOrder: maxOrder + 1, active: true, color: showColors ? newColor : null });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/custom-lists"] });
@@ -55,6 +59,15 @@ export function InlineListEditor({ listCode, listName }: InlineListEditorProps) 
     <div className="flex flex-col gap-3 p-2 w-72 max-h-96 overflow-y-auto">
       <h3 className="font-semibold text-sm border-b pb-2">{listName}</h3>
       <div className="flex gap-2">
+        {showColors && (
+          <Input 
+            type="color" 
+            value={newColor} 
+            onChange={(e) => setNewColor(e.target.value)}
+            className="w-8 h-8 p-0 border-0 cursor-pointer shrink-0"
+            title="Colore"
+          />
+        )}
         <Input 
           size={1}
           placeholder="Nuova voce..." 
@@ -77,7 +90,18 @@ export function InlineListEditor({ listCode, listName }: InlineListEditorProps) 
       <div className="flex flex-col gap-1 mt-2">
         {listData.items?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(item => (
           <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-1">
-            <span className="text-sm truncate">{item.value}</span>
+            {showColors && item.color ? (
+              <div 
+                className="w-3 h-3 rounded-full shrink-0 mr-2" 
+                style={{ backgroundColor: item.color }} 
+              />
+            ) : null}
+            <div className="flex items-center truncate">
+              {showColors && item.color ? (
+                <div className="w-3 h-3 rounded-full shrink-0 mr-2" style={{ backgroundColor: item.color }} />
+              ) : null}
+              <span className="text-sm truncate">{item.value}</span>
+            </div>
             <Button
               variant="ghost"
               size="icon"
