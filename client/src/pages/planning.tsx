@@ -233,7 +233,7 @@ export default function Planning() {
                 const isClosedType = ['festivita','chiusura','ferie'].includes(e.eventType);
                 const eStart = e.startDate?.split('T')[0];
                 const eEnd = (e.endDate || e.startDate)?.split('T')[0];
-                return isClosedType && (e.affectsCalendar || e.affectsCalendar === 1) && dateStr >= eStart && dateStr <= eEnd;
+                return isClosedType && (e.affectsCalendar || e.affectsCalendar === 1 || e.affectsPlanning || e.affectsPlanning === 1) && dateStr >= eStart && dateStr <= eEnd;
             }) ?? false;
         };
 
