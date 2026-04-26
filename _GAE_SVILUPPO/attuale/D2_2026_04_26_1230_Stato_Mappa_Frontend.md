@@ -1,5 +1,7 @@
+Aggiornato al: 2026-04-26 12:30
+
 # MAPPA FRONTEND ↔ DATABASE
-## StarGem Suite — 24/04/2026
+## StarGem Suite
 
 Questo documento mappa le relazioni tra ogni pagina/componente del frontend e le tabelle/colonne del DB.
 
@@ -73,6 +75,7 @@ Questo documento mappa le relazioni tra ogni pagina/componente del frontend e le
 | last_name | members (JOIN) | ✅ | |
 | status | enrollments | ❌ | nascosto, utile per vedere chi è sospeso |
 | participation_type | enrollments | ⚠️ | mancante, da aggiungere |
+| season_id | enrollments | ❌ | |
 | notes | enrollments | ❌ | |
 
 ---
