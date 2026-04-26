@@ -123,7 +123,7 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
           size="icon"
           variant="ghost"
           className="h-5 w-5"
-          onClick={() => setLocation('/elenchi?tab=status')}
+          onClick={() => setLocation('/elenchi?area=corsi')}
           data-testid={`button-${testIdPrefix}-edit-statuses`}
         >
           <Edit className="w-3 h-3 sidebar-icon-gold" />

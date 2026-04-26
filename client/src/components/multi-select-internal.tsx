@@ -80,7 +80,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
           size="icon"
           variant="ghost"
           className="h-5 w-5"
-          onClick={() => setLocation('/elenchi?tab=colorati')}
+          onClick={() => setLocation('/elenchi?area=corsi')}
           data-testid="button-edit-internal-tags"
         >
           <Edit className="w-3 h-3 sidebar-icon-gold" />
