@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { X, Edit } from "lucide-react";
+import { X, Edit, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { InlineListEditorDialog } from "@/components/inline-list-editor-dialog";
@@ -124,10 +124,11 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
 
       <div className="relative" ref={containerRef}>
         <div
-          className="min-h-9 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm cursor-pointer flex items-center flex-wrap gap-1"
+          className="flex min-h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm hover:bg-accent/50 cursor-pointer transition-colors focus-within:ring-1 focus-within:ring-ring"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           data-testid={`select-${testIdPrefix}-trigger`}
         >
+          <div className="flex flex-wrap gap-1 items-center flex-1 pr-2 overflow-hidden">
           {selectedStatuses.length === 0 ? (
             <span className="text-muted-foreground">Seleziona stato corso...</span>
           ) : (
@@ -143,6 +144,7 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
               );
             })
           )}
+          </div>
           {selectedStatuses.length > 0 && (
             <div className="flex items-center ml-auto">
               {selectedStatuses.map((statusName) => (
@@ -161,6 +163,7 @@ export function MultiSelectStatus({ selectedStatuses, onChange, testIdPrefix = "
               ))}
             </div>
           )}
+          <ChevronDown className={cn("h-4 w-4 opacity-50 shrink-0 transition-transform", isDropdownOpen && "rotate-180")} />
         </div>
 
         {isDropdownOpen && (
