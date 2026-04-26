@@ -25,6 +25,7 @@ import { buildEnrolledMembersData } from "@/lib/enrollments";
 
 export default function SchedaCorso() {
     const [location, setLocation] = useLocation();
+    const [genderFilter, setGenderFilter] = useState<"all" | "M" | "F">("all");
     const searchParams = new URLSearchParams(window.location.search);
     const courseIdRaw = searchParams.get("courseId");
     const courseId = Number(courseIdRaw);
@@ -136,6 +137,9 @@ export default function SchedaCorso() {
         }
     }
 
+    const donneCount = enrolledMembersRaw?.filter(m => m.gender === 'F').length || 0;
+    const uominiCount = enrolledMembersRaw?.filter(m => m.gender === 'M').length || 0;
+
     const enrolledMembersData = (enrolledMembersRaw || []).map((data: any) => {
         const hasPaidPayments = payments?.some((p: Payment) => p.status === 'paid' && Number(p.enrollmentId) === Number(data.enrollment_id));
         const hasAnyPayments = payments?.some((p: Payment) => Number(p.enrollmentId) === Number(data.enrollment_id));
@@ -162,7 +166,8 @@ export default function SchedaCorso() {
             default: return null;
         }
     };
-    const sortedEnrolledMembersData = sortItems(enrolledMembersData, getSortValue);
+    const filteredEnrolledMembersData = genderFilter === "all" ? enrolledMembersData : enrolledMembersData.filter((data: any) => data.gender === genderFilter);
+    const sortedEnrolledMembersData = sortItems(filteredEnrolledMembersData, getSortValue);
 
     const tessereScadute = enrolledMembersRaw?.filter(m => {
         if (!m.membership_expiry_date) return false;
@@ -255,6 +260,18 @@ export default function SchedaCorso() {
                                     </Badge>
                                 </>
                             )}
+                            <button 
+                                onClick={() => setGenderFilter(prev => prev === "F" ? "all" : "F")}
+                                className={`text-sm font-medium px-3 py-1 rounded transition-colors ${genderFilter === "F" ? "bg-pink-100 text-pink-700 ring-1 ring-pink-400" : "bg-pink-50 text-pink-600 hover:bg-pink-100"}`}
+                            >
+                                Donne {donneCount}
+                            </button>
+                            <button 
+                                onClick={() => setGenderFilter(prev => prev === "M" ? "all" : "M")}
+                                className={`text-sm font-medium px-3 py-1 rounded transition-colors ${genderFilter === "M" ? "bg-blue-100 text-blue-700 ring-1 ring-blue-400" : "bg-blue-50 text-blue-600 hover:bg-blue-100"}`}
+                            >
+                                Uomini {uominiCount}
+                            </button>
                         </div>
                     )}
                 </div>
