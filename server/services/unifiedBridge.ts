@@ -201,6 +201,7 @@ function expandCourseRecurrence(
   const currentIter = new Date(windowStart);
 
   while (currentIter <= windowEnd) {
+    currentIter.setHours(12, 0, 0, 0);
     if (currentIter.getDay() === targetDay) {
       const evtStart = new Date(currentIter);
       evtStart.setHours(startH || 0, startM || 0, 0, 0);

@@ -39,6 +39,28 @@ export default function SchedaCorso() {
         const { data: strategicEventsData, isLoading: strategicEventsLoading } = useQuery<any[]>({ queryKey: ["/api/strategic-events"] });
 
     const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
+
+    const closedDaysMap = useMemo(() => {
+        const map: Record<string, boolean> = {};
+        if (!strategicEventsData) return map;
+        strategicEventsData.forEach(e => {
+            const isClosedType = ['festivita','chiusura','ferie'].includes(e.eventType);
+            if (isClosedType && (e.affectsCalendar || e.affectsCalendar === 1)) {
+                const eStart = e.startDate?.split('T')[0];
+                const eEnd = (e.endDate || e.startDate)?.split('T')[0];
+                if (eStart && eEnd) {
+                    let d = new Date(eStart);
+                    const end = new Date(eEnd);
+                    while (d <= end) {
+                        map[d.toISOString().split('T')[0]] = true;
+                        d.setDate(d.getDate() + 1);
+                    }
+                }
+            }
+        });
+        return map;
+    }, [strategicEventsData]);
+
     if (coursesLoading || enrolledMembersLoading || paymentsLoading || strategicEventsLoading) {
         return (
             <div className="p-6 md:p-8 space-y-6 mx-auto">
@@ -81,27 +103,6 @@ export default function SchedaCorso() {
             </div>
         );
     }
-
-    const closedDaysMap = useMemo(() => {
-        const map: Record<string, boolean> = {};
-        if (!strategicEventsData) return map;
-        strategicEventsData.forEach(e => {
-            const isClosedType = ['festivita','chiusura','ferie'].includes(e.eventType);
-            if (isClosedType && (e.affectsCalendar || e.affectsCalendar === 1)) {
-                const eStart = e.startDate?.split('T')[0];
-                const eEnd = (e.endDate || e.startDate)?.split('T')[0];
-                if (eStart && eEnd) {
-                    let d = new Date(eStart);
-                    const end = new Date(eEnd);
-                    while (d <= end) {
-                        map[d.toISOString().split('T')[0]] = true;
-                        d.setDate(d.getDate() + 1);
-                    }
-                }
-            }
-        });
-        return map;
-    }, [strategicEventsData]);
 
     let effettuate: number | null = null;
     let rimanenti: number | null = null;
