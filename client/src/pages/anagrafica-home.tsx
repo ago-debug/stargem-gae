@@ -763,6 +763,17 @@ export default function AnagraficaHome() {
                   <User className="w-5 h-5" />
                   Anagrafica
                 </CardTitle>
+                {selectedMember?.dataQualityFlag === 'mancano_dati_obbligatori' && (
+                  <div className="bg-red-50 border-l-4 border-red-600 p-4 mt-4 rounded-md shadow-sm">
+                    <div className="flex items-center">
+                      <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+                      <div>
+                        <span className="text-sm font-bold text-red-800 block">CF MANCANTE — Tessera non assegnabile</span>
+                        <span className="text-xs text-red-700">Impossibile completare il tesseramento senza un Codice Fiscale valido.</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Foto Profilo */}

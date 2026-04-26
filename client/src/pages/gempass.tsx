@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MembershipRecord {
   id: number;
@@ -789,13 +790,35 @@ export default function GemPass() {
                        <p className="text-xs text-emerald-700 font-medium">Validazione digitale del documento: {format(new Date(), 'dd/MM/yyyy')}</p>
                      </div>
                    </div>
-                   <Button 
-                     onClick={handleSubmit} 
-                     disabled={!canSubmit || createTesseraMutation.isPending}
-                     className="bg-primary hover:bg-primary/90 min-w-[200px]"
-                   >
-                     {createTesseraMutation.isPending ? 'Creazione in corso...' : 'Crea Tessera e Iscrivi'}
-                   </Button>
+                   <div className="flex flex-col items-end gap-1">
+                     {memberFound?.dataQualityFlag === 'mancano_dati_obbligatori' ? (
+                       <TooltipProvider>
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <div className="cursor-not-allowed">
+                               <Button 
+                                 disabled
+                                 className="bg-primary hover:bg-primary/90 min-w-[200px]"
+                               >
+                                 Crea Tessera e Iscrivi
+                               </Button>
+                             </div>
+                           </TooltipTrigger>
+                           <TooltipContent side="top" className="bg-red-600 text-white font-medium border-red-700">
+                             Codice Fiscale mancante — impossibile emettere tessera. Aggiornare l'anagrafica prima di procedere.
+                           </TooltipContent>
+                         </Tooltip>
+                       </TooltipProvider>
+                     ) : (
+                       <Button 
+                         onClick={handleSubmit} 
+                         disabled={!canSubmit || createTesseraMutation.isPending}
+                         className="bg-primary hover:bg-primary/90 min-w-[200px]"
+                       >
+                         {createTesseraMutation.isPending ? 'Creazione in corso...' : 'Crea Tessera e Iscrivi'}
+                       </Button>
+                     )}
+                   </div>
                  </div>
                </div>
             </div>
