@@ -1087,7 +1087,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="font-semibold text-slate-800 shrink-0">{activityType === "campus" ? "Gruppo" : "Livello"}</Label>
-                    <InlineListEditorDialog listCode={activityType === "campus" ? "campus" : "livello"} listName={activityType === "campus" ? "Gruppo Campus" : "Livello"} showColors={false} />
+                    <InlineListEditorDialog listCode={activityType === "campus" ? "campus" : "livello"} listName={activityType === "campus" ? "Gruppo Campus" : "Livello"} showColors={false} penninoType="tipo A" />
                   </div>
                   <Combobox
                     name="level"
@@ -1102,7 +1102,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="font-semibold text-slate-800 shrink-0">Fascia d'età</Label>
-                    <InlineListEditorDialog listCode="fascia_eta" listName="Fascia d'Età" showColors={false} />
+                    <InlineListEditorDialog listCode="fascia_eta" listName="Fascia d'Età" showColors={false} penninoType="tipo A" />
                   </div>
                   <Combobox
                     name="ageGroup"
@@ -1176,7 +1176,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="maxCapacity" className="font-semibold text-slate-800 shrink-0">Posti Disponibili <span className="text-red-500 ml-1">*</span></Label>
-                    <InlineListEditorDialog listCode="posti_disponibili" listName="Posti Disponibili" showColors={false} />
+                    <InlineListEditorDialog listCode="posti_disponibili" listName="Posti Disponibili" showColors={false} penninoType="tipo A" />
                   </div>
                   <Select value={formData.maxCapacity?.toString() || "none"} onValueChange={v => updateForm("maxCapacity", v === "none" ? null : parseInt(v))}>
                     <SelectTrigger><SelectValue placeholder="Posti" /></SelectTrigger>
