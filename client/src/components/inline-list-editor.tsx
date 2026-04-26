@@ -88,9 +88,9 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
           <Plus className="w-4 h-4" />
         </Button>
       </div>
-      <div className="flex flex-col gap-1 mt-2 pr-1" style={{ maxHeight: "250px", overflowY: "auto", overscrollBehavior: "contain" }}>
+      <div className="h-48 overflow-y-scroll mt-2 pr-1" style={{ overscrollBehavior: "contain", borderBottom: "1px solid #eee", borderTop: "1px solid #eee" }}>
         {listData.items?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(item => (
-          <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-1">
+          <div key={item.id} className="flex justify-between items-center group rounded-md hover:bg-slate-50 px-2 py-1 mb-1">
             {showColors && item.color ? (
               <div 
                 className="w-3 h-3 rounded-full shrink-0 mr-2" 
@@ -121,3 +121,5 @@ export function InlineListEditor({ listCode, listName, showColors = false }: Inl
     </div>
   );
 }
+
+console.log("INLINE LIST EDITOR LOADED v5");
