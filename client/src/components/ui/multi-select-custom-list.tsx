@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X, Edit } from "lucide-react";
 import { useCustomListValues } from "@/hooks/use-custom-list";
-import { CustomListManagerDialog } from "@/components/custom-list-manager-dialog";
+import { InlineListEditorDialog } from "@/components/inline-list-editor-dialog";
 
 interface MultiSelectCustomListProps {
   systemName: string;
@@ -15,7 +15,6 @@ interface MultiSelectCustomListProps {
 
 export function MultiSelectCustomList({ systemName, listName, selectedValues, onChange, className = "" }: MultiSelectCustomListProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isManagerOpen, setIsManagerOpen] = useState(false);
   const values = useCustomListValues(systemName);
 
   const toggleValue = (value: string) => {
@@ -34,15 +33,22 @@ export function MultiSelectCustomList({ systemName, listName, selectedValues, on
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center gap-2">
         <label className="font-semibold text-slate-800 shrink-0 uppercase">{listName}</label>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="h-5 w-5"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsManagerOpen(true); }}
-        >
-          <Edit className="w-3 h-3 sidebar-icon-gold" />
-        </Button>
+        <InlineListEditorDialog 
+          listCode={systemName} 
+          listName={listName} 
+          showColors={false} 
+          penninoType="tipo A"
+          trigger={
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-5 w-5"
+            >
+              <Edit className="w-3 h-3 sidebar-icon-gold" />
+            </Button>
+          }
+        />
       </div>
 
       <div className="relative">
@@ -98,15 +104,7 @@ export function MultiSelectCustomList({ systemName, listName, selectedValues, on
       {isDropdownOpen && (
         <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
       )}
-
-      {isManagerOpen && (
-        <CustomListManagerDialog
-            listType={systemName}
-            open={isManagerOpen}
-            onOpenChange={setIsManagerOpen}
-            title={`Gestione ${listName}`}
-        />
-      )}
     </div>
   );
 }
+

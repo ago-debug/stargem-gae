@@ -100,6 +100,7 @@ export default function Courses() {
   const [instructorFilter, setInstructorFilter] = useState<string>("all");
   const [dayOfWeekFilter, setDayOfWeekFilter] = useState<string>("all");
   const [nameFilter, setNameFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [statusTags, setStatusTags] = useState<string[]>([]);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -121,6 +122,11 @@ export default function Courses() {
   const { data: courses, isLoading } = useQuery<Course[]>({
     queryKey: [`/api/courses?activityType=course&seasonId=${selectedSeasonId}${instructorFilter !== 'all' ? `&instructorId=${instructorFilter}` : ''}${dayOfWeekFilter !== 'all' ? `&dayOfWeek=${dayOfWeekFilter}` : ''}`],
   });
+
+  const { data: statusList } = useQuery<any>({
+    queryKey: ["/api/custom-lists/stato_corso"],
+  });
+  const statuses = statusList?.items?.filter((i: any) => i.active) || [];
 
   const editId = urlParams.get('editId') || urlParams.get('courseId');
 
@@ -360,6 +366,14 @@ export default function Courses() {
 
     if (dayOfWeekFilter !== "all" && course.dayOfWeek !== dayOfWeekFilter) {
       return false;
+    }
+
+    if (statusFilter !== "all") {
+      const tags = parseStatusTags(course.statusTags);
+      const opTags = tags.filter((t: string) => t.startsWith("STATE:")).map((t: string) => t.replace("STATE:", ""));
+      if (!opTags.includes(statusFilter)) {
+        return false;
+      }
     }
 
     if (!query) return true;
@@ -685,7 +699,20 @@ export default function Courses() {
                   ))}
                 </SelectContent>
               </Select>
-              {(categoryFilter !== "all" || instructorFilter !== "all" || dayOfWeekFilter !== "all" || nameFilter !== "all" || searchQuery) && (
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtra per stato" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tutti gli stati</SelectItem>
+                  {statuses.map((status: any) => (
+                    <SelectItem key={status.id} value={status.value}>
+                      {status.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {(categoryFilter !== "all" || instructorFilter !== "all" || dayOfWeekFilter !== "all" || nameFilter !== "all" || statusFilter !== "all" || searchQuery) && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -694,6 +721,7 @@ export default function Courses() {
                     setInstructorFilter("all");
                     setDayOfWeekFilter("all");
                     setNameFilter("all");
+                    setStatusFilter("all");
                     setSearchQuery("");
                   }}
                   data-testid="button-clear-filters"
