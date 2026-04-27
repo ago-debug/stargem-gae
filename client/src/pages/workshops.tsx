@@ -815,7 +815,7 @@ export default function Workshops() {
           onOpenChange={(open) => { 
             if (!open) closeDialog();
           }} 
-          course={editingWorkshop || (isFormOpen ? {} as any : null)} 
+          course={editingWorkshop || null} 
           onDelete={(id) => deleteMutation.mutate(id)}
         />
 

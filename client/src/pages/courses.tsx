@@ -822,8 +822,8 @@ export default function Courses() {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-1 items-start">
-                            {course.internalTags && course.internalTags.length > 0 ? (
-                                course.internalTags.map((tag: string) => (
+                            {parseStatusTags(course.internalTags).length > 0 ? (
+                                parseStatusTags(course.internalTags).map((tag: string) => (
                                   <StatusBadge key={tag} name={tag} color="#4f46e5" className="flex items-center gap-1" />
                                 ))
                             ) : null}
@@ -961,7 +961,7 @@ export default function Courses() {
           onOpenChange={(open) => { 
             if (!open) closeDialog();
           }} 
-          course={editingCourse || (isFormOpen ? {} as any : null)} 
+          course={editingCourse || null} 
           onDelete={(id) => deleteMutation.mutate(id)}
         />
 
