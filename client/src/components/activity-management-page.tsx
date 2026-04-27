@@ -121,6 +121,8 @@ export default function ActivityManagementPage({
   const [instructorFilter, setInstructorFilter] = useState<string>("all");
   const [memberFilter, setMemberFilter] = useState<string>("all");
   const [nameFilter, setNameFilter] = useState<string>("all");
+  const [dayOfWeekFilter, setDayOfWeekFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => {
     if (actionParam === "create" || draftMode === "true") {
@@ -181,6 +183,11 @@ export default function ActivityManagementPage({
   const { data: activityStatuses } = useQuery<ActivityStatus[]>({
     queryKey: ["/api/activity-statuses"],
   });
+
+  const { data: statusList } = useQuery<any>({
+    queryKey: ["/api/custom-lists/stato_corso"],
+  });
+  const statuses = statusList?.items?.filter((i: any) => i.active) || [];
 
   const generi = useCustomListValues("genere");
 
@@ -321,6 +328,7 @@ export default function ActivityManagementPage({
   const distinctInstructors = Array.from(new Set(items?.map(i => i.instructorId).filter(Boolean)));
   const distinctMembers = Array.from(new Set(items?.map(i => (i as any).memberId).filter(Boolean)));
   const distinctNames = Array.from(new Set(items?.map(i => i.name).filter(Boolean))).sort();
+  const distinctDays = Array.from(new Set(items?.map(i => i.dayOfWeek).filter(Boolean)));
 
   const filteredItems = items?.filter((item) => {
     const query = searchQuery.toLowerCase().trim();
@@ -335,6 +343,18 @@ export default function ActivityManagementPage({
 
     if (instructorFilter !== "all" && item.instructorId?.toString() !== instructorFilter) {
       return false;
+    }
+
+    if (dayOfWeekFilter !== "all" && item.dayOfWeek !== dayOfWeekFilter) {
+      return false;
+    }
+
+    if (statusFilter !== "all") {
+      const tags = parseStatusTags(item.statusTags);
+      const opTags = tags.filter((t: string) => t.startsWith("STATE:")).map((t: string) => t.replace("STATE:", ""));
+      if (!opTags.includes(statusFilter)) {
+        return false;
+      }
     }
 
     if (memberFilter !== "all" && (item as any).memberId?.toString() !== memberFilter) {
@@ -853,6 +873,34 @@ export default function ActivityManagementPage({
                   </SelectContent>
                 </Select>
 
+                <Select value={dayOfWeekFilter} onValueChange={setDayOfWeekFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filtra per giorno" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti i giorni</SelectItem>
+                    {WEEKDAYS.filter(d => distinctDays.includes(d.id)).map((day) => (
+                      <SelectItem key={day.id} value={day.id}>
+                        {day.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filtra per stato" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti gli stati</SelectItem>
+                    {statuses.map((status: any) => (
+                      <SelectItem key={status.id} value={status.value}>
+                        {status.value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 {activityType === "prenotazioni" && (
                   <div className="w-[220px]">
                     <Combobox
@@ -865,15 +913,17 @@ export default function ActivityManagementPage({
                   </div>
                 )}
                 
-                {(categoryFilter !== "all" || instructorFilter !== "all" || memberFilter !== "all" || nameFilter !== "all" || selectedSeasonId !== "active" || searchQuery) && (
+                {(categoryFilter !== "all" || instructorFilter !== "all" || dayOfWeekFilter !== "all" || memberFilter !== "all" || nameFilter !== "all" || statusFilter !== "all" || selectedSeasonId !== "active" || searchQuery) && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => {
                       setCategoryFilter("all");
                       setInstructorFilter("all");
+                      setDayOfWeekFilter("all");
                       setMemberFilter("all");
                       setNameFilter("all");
+                      setStatusFilter("all");
                       setSelectedSeasonId("active");
                       setSearchQuery("");
                     }}
