@@ -369,20 +369,6 @@ export default function CalendarPage() {
     const { toast } = useToast();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (scrollContainerRef.current) {
-            const currentHour = new Date().getHours();
-            if (currentHour >= 7 && currentHour <= 23) {
-                // Calcola l'offset basandosi su ROW_HEIGHT = 120 e griglia in partenza dalle 07:00
-                const targetScroll = Math.max(0, (currentHour - 7 - 1) * 120);
-                // Utilizza un timeout leggermente più lungo per assicurarsi che l'API sia finita e le card montate prima di scrollare
-                setTimeout(() => {
-                    scrollContainerRef.current?.scrollTo({ top: targetScroll, behavior: 'smooth' });
-                }, 400);
-            }
-        }
-    }, [selectedDay, viewDate]);
-
     const currentWeekStart = startOfWeek(viewDate, { weekStartsOn: 1 });
     const currentWeekEnd = addDays(currentWeekStart, 6);
 
@@ -443,6 +429,52 @@ export default function CalendarPage() {
     const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
         queryKey: [coursesQueryKey],
     });
+
+    useEffect(() => {
+        if (highlightCourseId && courses && courses.length > 0) {
+            const course = courses.find(c => c.id.toString() === highlightCourseId);
+            if (course && course.dayOfWeek) {
+                const raw = course.dayOfWeek.toUpperCase().trim();
+                let norm = raw;
+                if (raw.startsWith("LUN")) norm = "LUN";
+                else if (raw.startsWith("MAR")) norm = "MAR";
+                else if (raw.startsWith("MER")) norm = "MER";
+                else if (raw.startsWith("GIO")) norm = "GIO";
+                else if (raw.startsWith("VEN")) norm = "VEN";
+                else if (raw.startsWith("SAB")) norm = "SAB";
+                else if (raw.startsWith("DOM")) norm = "DOM";
+
+                if (norm !== selectedDay && selectedDay !== "all") {
+                    setSelectedDay(norm);
+                }
+            }
+        }
+    }, [highlightCourseId, courses, selectedDay]);
+
+    useEffect(() => {
+        if (scrollContainerRef.current) {
+            if (highlightCourseId) {
+                setTimeout(() => {
+                    const el = document.getElementById(`event-card-course-${highlightCourseId}`) || 
+                               document.getElementById(`event-card-courses-${highlightCourseId}`);
+                    if (el && scrollContainerRef.current) {
+                        const containerRect = scrollContainerRef.current.getBoundingClientRect();
+                        const elRect = el.getBoundingClientRect();
+                        const targetScroll = scrollContainerRef.current.scrollTop + (elRect.top - containerRect.top) - 100;
+                        scrollContainerRef.current.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+                    }
+                }, 800);
+            } else {
+                const currentHour = new Date().getHours();
+                if (currentHour >= 7 && currentHour <= 23) {
+                    const targetScroll = Math.max(0, (currentHour - 7 - 1) * 120);
+                    setTimeout(() => {
+                        scrollContainerRef.current?.scrollTo({ top: targetScroll, behavior: 'smooth' });
+                    }, 400);
+                }
+            }
+        }
+    }, [selectedDay, viewDate, highlightCourseId]);
 
     const { data: studios, isLoading: studiosLoading } = useQuery<Studio[]>({
         queryKey: ["/api/studios"],
