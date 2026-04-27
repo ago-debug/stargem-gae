@@ -911,11 +911,11 @@ export default function CalendarPage() {
     const getCourseStats = (courseId: number) => {
         const courseEnrollments = enrollments?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status)) || [];
         const men = courseEnrollments.filter(e => {
-            const g = e.memberGender?.toUpperCase();
+            const g = e.memberGender?.trim().toUpperCase();
             return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
         }).length;
         const women = courseEnrollments.filter(e => {
-            const g = e.memberGender?.toUpperCase();
+            const g = e.memberGender?.trim().toUpperCase();
             return g === 'D' || g === 'F' || g === 'DONNA' || g === 'FEMMINA';
         }).length;
         return { men, women, total: courseEnrollments.length };
@@ -924,11 +924,11 @@ export default function CalendarPage() {
     const getWorkshopStats = (workshopId: number) => {
         const enrolls = enrollments?.filter(e => e.courseId === workshopId && (e.status === 'active' || !e.status)) || [];
         const men = enrolls.filter(e => {
-            const g = e.memberGender?.toUpperCase();
+            const g = e.memberGender?.trim().toUpperCase();
             return g === 'U' || g === 'M' || g === 'UOMO' || g === 'MASCHIO';
         }).length;
         const women = enrolls.filter(e => {
-            const g = e.memberGender?.toUpperCase();
+            const g = e.memberGender?.trim().toUpperCase();
             return g === 'D' || g === 'F' || g === 'DONNA' || g === 'FEMMINA';
         }).length;
         return { men, women, total: enrolls.length };

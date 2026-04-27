@@ -139,8 +139,8 @@ export default function SchedaCorso() {
         }
     }
 
-    const donneCount = enrolledMembersRaw?.filter(m => m.gender === 'F').length || 0;
-    const uominiCount = enrolledMembersRaw?.filter(m => m.gender === 'M').length || 0;
+    const donneCount = enrolledMembersRaw?.filter(m => m.gender?.trim().toUpperCase() === 'F' || m.gender?.trim().toUpperCase() === 'D' || m.gender?.trim().toUpperCase() === 'DONNA').length || 0;
+    const uominiCount = enrolledMembersRaw?.filter(m => m.gender?.trim().toUpperCase() === 'M' || m.gender?.trim().toUpperCase() === 'U' || m.gender?.trim().toUpperCase() === 'UOMO' || m.gender?.trim().toUpperCase() === 'MASCHIO').length || 0;
 
     const enrolledMembersData = (enrolledMembersRaw || []).map((data: any) => {
         const hasPaidPayments = payments?.some((p: Payment) => p.status === 'paid' && Number(p.enrollmentId) === Number(data.enrollment_id));
@@ -150,7 +150,7 @@ export default function SchedaCorso() {
             <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0">Regolare</Badge> :
             (hasAnyPayments ?
                 <Badge variant="destructive" className="bg-red-500/10 text-red-700 hover:bg-red-500/20 shadow-none border-0">In Sospeso</Badge> :
-                <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30 shadow-none">Dati Assenti</Badge>);
+                <Badge variant="outline" className="text-red-500 border-red-200 bg-red-50 shadow-none">Dati Assenti</Badge>);
 
         return {
             ...data,
@@ -253,9 +253,12 @@ export default function SchedaCorso() {
                                     🟡 {certScaduti} cert. scaduti
                                 </span>
                             )}
-                            <span className="text-slate-600 text-sm bg-slate-50 px-2 py-1 rounded">
+                            <button 
+                                onClick={() => alert('Il Modulo Presenze sarà disponibile prossimamente.')}
+                                className="text-slate-600 text-sm bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-colors px-2.5 py-1 rounded-md flex items-center gap-1"
+                            >
                                 ✅ {presenzeTotal} presenze
-                            </span>
+                            </button>
                             {course.totalOccurrences && effettuate !== null && rimanenti !== null && (
                                 <>
                                     <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
