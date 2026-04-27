@@ -68,35 +68,35 @@ export default function IscrittiPerAttivita() {
 
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({ queryKey: ["/api/courses?activityType=course"] });
   // @ts-ignore // TODO: STI-cleanup
-  const { data: workshops, isLoading: workshopsLoading } = useQuery<Workshop[]>({ queryKey: ["/api/workshops"] });
+  const { data: workshops, isLoading: workshopsLoading } = useQuery<Workshop[]>({ queryKey: ["/api/courses?activityType=workshop"] });
   const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=course"] });
-  const { data: wsEnrollments, isLoading: wsEnrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/workshop-enrollments"] });
+  const { data: wsEnrollments, isLoading: wsEnrollmentsLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=workshop"] });
 
-  const { data: bookingServices, isLoading: servLoading } = useQuery<BookingService[]>({ queryKey: ["/api/booking-services"] });
+  const { data: bookingServices, isLoading: servLoading } = useQuery<BookingService[]>({ queryKey: ["/api/courses?activityType=servizi"] });
   // @ts-ignore // TODO: STI-cleanup
-  const { data: paidTrials, isLoading: ptLoading } = useQuery<PaidTrial[]>({ queryKey: ["/api/paid-trials"] });
+  const { data: paidTrials, isLoading: ptLoading } = useQuery<PaidTrial[]>({ queryKey: ["/api/courses?activityType=prova_pagamento"] });
   // @ts-ignore // TODO: STI-cleanup
-  const { data: freeTrials, isLoading: ftLoading } = useQuery<FreeTrial[]>({ queryKey: ["/api/free-trials"] });
+  const { data: freeTrials, isLoading: ftLoading } = useQuery<FreeTrial[]>({ queryKey: ["/api/courses?activityType=prova_gratuita"] });
   // @ts-ignore // TODO: STI-cleanup
-  const { data: singleLessons, isLoading: slLoading } = useQuery<SingleLesson[]>({ queryKey: ["/api/single-lessons"] });
-  const { data: sundayActivities, isLoading: saLoading } = useQuery<any[]>({ queryKey: ["/api/sunday-activities"] });
+  const { data: singleLessons, isLoading: slLoading } = useQuery<SingleLesson[]>({ queryKey: ["/api/courses?activityType=lezione_singola"] });
+  const { data: sundayActivities, isLoading: saLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=domenica_movimento"] });
   const { data: trainings, isLoading: trLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=allenamenti"] });
-  const { data: individualLessons, isLoading: ilLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=prenotazioni"] });
+  const { data: individualLessons, isLoading: ilLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=lezione_individuale"] });
   const { data: campusActivities, isLoading: caLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=campus"] });
-  const { data: recitals, isLoading: recLoading } = useQuery<any[]>({ queryKey: ["/api/"] });
+  const { data: recitals, isLoading: recLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=saggio"] });
   // @ts-ignore // TODO: STI-cleanup
-  const { data: vacationStudies, isLoading: vsLoading } = useQuery<VacationStudy[]>({ queryKey: ["/api/vacation-studies"] });
+  const { data: vacationStudies, isLoading: vsLoading } = useQuery<VacationStudy[]>({ queryKey: ["/api/courses?activityType=vacanza_studio"] });
 
-  const { data: servEnrollments, isLoading: servEnrLoading } = useQuery<any[]>({ queryKey: ["/api/booking-service-enrollments"] });
-  const { data: ptEnrollments, isLoading: ptEnrLoading } = useQuery<any[]>({ queryKey: ["/api/paid-trial-enrollments"] });
-  const { data: ftEnrollments, isLoading: ftEnrLoading } = useQuery<any[]>({ queryKey: ["/api/free-trial-enrollments"] });
-  const { data: slEnrollments, isLoading: slEnrLoading } = useQuery<any[]>({ queryKey: ["/api/single-lesson-enrollments"] });
-  const { data: saEnrollments, isLoading: saEnrLoading } = useQuery<any[]>({ queryKey: ["/api/sunday-activity-enrollments"] });
+  const { data: servEnrollments, isLoading: servEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=servizi"] });
+  const { data: ptEnrollments, isLoading: ptEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=prova_pagamento"] });
+  const { data: ftEnrollments, isLoading: ftEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=prova_gratuita"] });
+  const { data: slEnrollments, isLoading: slEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=lezione_singola"] });
+  const { data: saEnrollments, isLoading: saEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=domenica_movimento"] });
   const { data: allenamentiEnrollments, isLoading: trEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=allenamenti"] });
-  const { data: lezioniIndividualiEnrollments, isLoading: ilEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=prenotazioni"] });
-  const { data: caEnrollments, isLoading: caEnrLoading } = useQuery<any[]>({ queryKey: ["/api/campus-enrollments"] });
-  const { data: recEnrollments, isLoading: recEnrLoading } = useQuery<any[]>({ queryKey: ["/api/recital-enrollments"] });
-  const { data: vsEnrollments, isLoading: vsEnrLoading } = useQuery<any[]>({ queryKey: ["/api/vacation-study-enrollments"] });
+  const { data: lezioniIndividualiEnrollments, isLoading: ilEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=lezione_individuale"] });
+  const { data: caEnrollments, isLoading: caEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=campus"] });
+  const { data: recEnrollments, isLoading: recEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=saggio"] });
+  const { data: vsEnrollments, isLoading: vsEnrLoading } = useQuery<any[]>({ queryKey: ["/api/enrollments?activityType=vacanza_studio"] });
 
   interface ExtraDataConfig {
     data: any[] | undefined;
@@ -108,18 +108,18 @@ export default function IscrittiPerAttivita() {
   }
 
   const extraActivitiesMap: Record<string, ExtraDataConfig> = {
-    "servizi": { data: bookingServices, loading: servLoading, link: "/gestione-attivita-stub", enrollments: servEnrollments, enrollLoading: servEnrLoading, foreignKey: "serviceId" },
-    "prove-pagamento": { data: paidTrials, loading: ptLoading, link: "/scheda-prova-pagamento", enrollments: ptEnrollments, enrollLoading: ptEnrLoading, foreignKey: "paidTrialId" },
-    "prove-gratuite": { data: freeTrials, loading: ftLoading, link: "/scheda-prova-gratuita", enrollments: ftEnrollments, enrollLoading: ftEnrLoading, foreignKey: "freeTrialId" },
-    "lezioni-singole": { data: singleLessons, loading: slLoading, link: "/scheda-lezione-singola", enrollments: slEnrollments, enrollLoading: slEnrLoading, foreignKey: "singleLessonId" },
-    "domeniche-movimento": { data: sundayActivities, loading: saLoading, link: "/scheda-domenica", enrollments: saEnrollments, enrollLoading: saEnrLoading, foreignKey: "sundayActivityId" },
+    "servizi": { data: bookingServices, loading: servLoading, link: "/gestione-attivita-stub", enrollments: servEnrollments, enrollLoading: servEnrLoading, foreignKey: "courseId" },
+    "prove-pagamento": { data: paidTrials, loading: ptLoading, link: "/scheda-prova-pagamento", enrollments: ptEnrollments, enrollLoading: ptEnrLoading, foreignKey: "courseId" },
+    "prove-gratuite": { data: freeTrials, loading: ftLoading, link: "/scheda-prova-gratuita", enrollments: ftEnrollments, enrollLoading: ftEnrLoading, foreignKey: "courseId" },
+    "lezioni-singole": { data: singleLessons, loading: slLoading, link: "/scheda-lezione-singola", enrollments: slEnrollments, enrollLoading: slEnrLoading, foreignKey: "courseId" },
+    "domeniche-movimento": { data: sundayActivities, loading: saLoading, link: "/scheda-domenica", enrollments: saEnrollments, enrollLoading: saEnrLoading, foreignKey: "courseId" },
     "allenamenti": { data: trainings, loading: trLoading, link: "/scheda-allenamento", enrollments: allenamentiEnrollments, enrollLoading: trEnrLoading, foreignKey: "courseId" },
     "affitti": { data: [], loading: false, link: "/prenotazioni-sale", enrollments: [], enrollLoading: false, foreignKey: "id" },
     "lezioni-individuali": { data: individualLessons, loading: ilLoading, link: "/scheda-lezione-individuale", enrollments: lezioniIndividualiEnrollments, enrollLoading: ilEnrLoading, foreignKey: "courseId" },
     "campus": { data: campusActivities, loading: caLoading, link: "/scheda-campus", enrollments: caEnrollments, enrollLoading: caEnrLoading, foreignKey: "courseId" },
-    "saggi": { data: recitals, loading: recLoading, link: "/scheda-saggio", enrollments: recEnrollments, enrollLoading: recEnrLoading, foreignKey: "recitalId" },
-    "vacanze-studio": { data: vacationStudies, loading: vsLoading, link: "/scheda-vacanza-studio", enrollments: vsEnrollments, enrollLoading: vsEnrLoading, foreignKey: "vacationStudyId" },
-    "merchandising": { data: [], loading: false, link: "/gestione-attivita-stub", enrollments: [], enrollLoading: false, foreignKey: "merchandisingId" },
+    "saggi": { data: recitals, loading: recLoading, link: "/scheda-saggio", enrollments: recEnrollments, enrollLoading: recEnrLoading, foreignKey: "courseId" },
+    "vacanze-studio": { data: vacationStudies, loading: vsLoading, link: "/scheda-vacanza-studio", enrollments: vsEnrollments, enrollLoading: vsEnrLoading, foreignKey: "courseId" },
+    "merchandising": { data: [], loading: false, link: "/gestione-attivita-stub", enrollments: [], enrollLoading: false, foreignKey: "courseId" },
   };
 
   const isExtraLoading = Object.values(extraActivitiesMap).some(config => config.loading || config.enrollLoading);
@@ -133,7 +133,7 @@ export default function IscrittiPerAttivita() {
   const totalCourseEnrollments = Array.isArray(activeEnrollments) ? (activeEnrollments as any[]).filter(e => e.courseId && Array.isArray(courses) && (courses as Course[]).some(c => c.id === e.courseId && c.active)).length : 0;
   // Calculate specific workshop enrollments by checking the workshop-enrollments endpoint specifically
   // @ts-ignore // TODO: STI-cleanup
-  const totalWsEnrollments = Array.isArray(wsEnrollments) ? (wsEnrollments as any[]).filter(e => (e.status === 'active' || !e.status) && Array.isArray(workshops) && (workshops as Workshop[]).some(w => w.id === e.workshopId && w.active)).length : 0;
+  const totalWsEnrollments = Array.isArray(wsEnrollments) ? (wsEnrollments as any[]).filter(e => (e.status === 'active' || !e.status) && Array.isArray(workshops) && (workshops as Workshop[]).some(w => w.id === e.courseId && w.active)).length : 0;
 
   const totalActiveEnrollmentsCount = totalCourseEnrollments + totalWsEnrollments;
 
@@ -159,7 +159,7 @@ export default function IscrittiPerAttivita() {
 
     return (relevantEnrollments as any[])
       .filter(e => e.status === 'active' || !e.status)
-      .filter(e => isWorkshop ? e.workshopId === activityId : e.courseId === activityId)
+      .filter(e => isWorkshop ? e.courseId === activityId : e.courseId === activityId)
       .map(e => ({
         enrollmentId: e.id,
         memberId: e.memberId,
