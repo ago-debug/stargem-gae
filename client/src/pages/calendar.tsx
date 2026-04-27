@@ -11,6 +11,19 @@ import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 import { useCustomListValues } from "@/hooks/use-custom-list";
 import { Combobox } from "@/components/ui/combobox";
 import { getStatusColor } from "@/components/multi-select-status";
+
+function getContrastYIQ(hexcolor: string) {
+    if (!hexcolor) return '#000000';
+    hexcolor = hexcolor.replace("#", "");
+    if (hexcolor.length === 3) hexcolor = hexcolor.split('').map((c: string) => c+c).join('');
+    if (hexcolor.length !== 6) return '#000000';
+    var r = parseInt(hexcolor.substr(0,2),16);
+    var g = parseInt(hexcolor.substr(2,2),16);
+    var b = parseInt(hexcolor.substr(4,2),16);
+    var yiq = ((r*299)+(g*587)+(b*114))/1000;
+    return (yiq >= 128) ? '#000000' : '#ffffff';
+}
+
 import type { ActivityStatus } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -2407,8 +2420,8 @@ export default function CalendarPage() {
                                                                         <div className="px-1 py-[2px] rounded text-[6.5px] font-extrabold uppercase truncate shadow-sm border border-black/5" 
                                                                             style={
                                                                                 currentActType === "course" 
-                                                                                    ? { backgroundColor: '#f1f5f9', color: (evt.colorProps as any).badgeColor || '#64748b' } 
-                                                                                    : { backgroundColor: '#f1f5f9', color: ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"] }
+        ? { backgroundColor: (evt.colorProps as any).badgeColor || '#64748b', color: getContrastYIQ((evt.colorProps as any).badgeColor || '#64748b') } 
+        : { backgroundColor: ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"], color: getContrastYIQ(ACTIVITY_TYPE_COLORS[currentActType] || ACTIVITY_TYPE_COLORS["course"]) }
                                                                             } 
                                                                             title={evt.categoryName}>
                                                                             {evt.categoryName}
@@ -2499,7 +2512,7 @@ export default function CalendarPage() {
                                                                     {statusLabels.map(s => {
                                                                         const color = getStatusColor(s, activityStatuses);
                                                                         return (
-                                                                            <div key={s} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: `${color}15`, color, border: `0.5px solid ${color}40` } : { color: s === "ATTIVO" ? "#15803d" : "#b91c1c" }}>
+                                                                            <div key={s} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: color, color: getContrastYIQ(color), border: `0.5px solid ${color}` } : { backgroundColor: s === "ATTIVO" ? "#15803d" : "#b91c1c", color: "#ffffff", border: '0.5px solid transparent' }}>
                                                                                 {s}
                                                                             </div>
                                                                         );
@@ -2507,7 +2520,7 @@ export default function CalendarPage() {
                                                                     {internalLabels.length > 0 && internalLabels.map(tag => {
                                                                       const color = getStatusColor(tag, internalTagsList);
                                                                       return (
-                                                                        <div key={tag} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: `${color}15`, color, border: `0.5px solid ${color}40` } : { backgroundColor: '#e0e7ff', color: '#4338ca', border: '0.5px solid #c7d2fe' }}>
+                                                                        <div key={tag} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: color, color: getContrastYIQ(color), border: `0.5px solid ${color}` } : { backgroundColor: '#4338ca', color: '#ffffff', border: '0.5px solid #4338ca' }}>
                                                                             {tag}
                                                                         </div>
                                                                       );
