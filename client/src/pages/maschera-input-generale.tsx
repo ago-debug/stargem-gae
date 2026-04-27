@@ -134,11 +134,11 @@ export const defaultBottomSectionsState: BottomSectionsState = {
   certificatoMedico: { dataScadenza: "", dataRinnovo: "", rilasciatoDa: "", pagamento: "", aNoi: "", tipo: "" }
 };
 
-export default function MascheraInputGenerale() {
+export default function MascheraInputGenerale(props?: any) {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
-  const memberIdFromUrl = urlParams.get('memberId') || urlParams.get('editMemberId');
+  const memberIdFromUrl = props?.params?.id || urlParams.get('memberId') || urlParams.get('editMemberId');
   const actionFromUrl = urlParams.get('action');
   const { user } = useAuth();
   

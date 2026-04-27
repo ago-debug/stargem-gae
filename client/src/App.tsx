@@ -34,7 +34,7 @@ import ImportData from "@/pages/import-data";
 import UtentiPermessi from "@/pages/utenti-permessi";
 import ResetStagione from "@/pages/reset-stagione";
 import AuditLogs from "@/pages/audit-logs";
-import MemberDashboard from "@/pages/member-dashboard";
+
 import AnagraficaHome from "@/pages/anagrafica-home";
 import CardGenerator from "@/pages/card-generator";
 import AdminPanel from "@/pages/admin-panel";
@@ -203,7 +203,7 @@ function Router() {
       <ProtectedRoute path="/utenti-permessi" component={UtentiPermessi} />
       <ProtectedRoute path="/reset-stagione" component={ResetStagione} />
       <ProtectedRoute path="/audit-logs" component={AuditLogs} />
-      <ProtectedRoute path="/membro/:id" component={MemberDashboard} />
+      <ProtectedRoute path="/membro/:id" component={MascheraInputGenerale} />
       <ProtectedRoute path="/gempass" component={GemPass} />
       <ProtectedRoute path="/gemstaff" component={GemStaff} />
       <ProtectedRoute path="/gemstaff/me" component={GemStaffMe} />
