@@ -9,6 +9,7 @@ import { Sparkles, Bot } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { LiveClock } from "@/components/live-clock";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth, AuthProvider } from "@/hooks/use-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -336,7 +337,7 @@ function AppContent() {
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
           <header className="flex items-center justify-between h-10 px-4 border-b border-border bg-background flex-shrink-0 z-20">
-            <SidebarTrigger data-testid="button-sidebar-toggle" />
+            <div className="flex items-center"><SidebarTrigger data-testid="button-sidebar-toggle" /><LiveClock /></div>
             <div className="flex items-center gap-6 h-full">
               {!isInsegnante && <ActiveUserAvatars />}
               <div className="flex items-center gap-4">
