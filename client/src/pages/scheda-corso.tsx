@@ -288,9 +288,10 @@ export default function SchedaCorso() {
                     <Table>
                         <TableHeader className="bg-slate-50/80 border-b">
                             <TableRow className="hover:bg-transparent">
-                                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Nome</SortableTableHead>
                                 <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Cognome</SortableTableHead>
+                                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Nome</SortableTableHead>
                                 <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Email</SortableTableHead>
+                                <SortableTableHead sortKey="enrollment_date" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4 text-center">Iscrizione</SortableTableHead>
                                 <TableHead className="font-semibold text-slate-700 py-4">Scadenza Tessera</TableHead>
                                 <TableHead className="font-semibold text-slate-700 py-4">Certificato Medico</TableHead>
                                 <SortableTableHead sortKey="attendances" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4 text-center">Presenze</SortableTableHead>
@@ -301,7 +302,7 @@ export default function SchedaCorso() {
                         <TableBody>
                             {sortedEnrolledMembersData.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                                    <TableCell colSpan={9} className="text-center py-12 text-slate-500">
                                         <div className="flex flex-col items-center gap-2">
                                             <Users className="h-8 w-8 text-slate-300" />
                                             <p>Nessun iscritto trovato per questo corso.</p>
@@ -311,7 +312,7 @@ export default function SchedaCorso() {
                             ) : (
                                 sortedEnrolledMembersData.map((data: any) => {
                                     const {
-                                        member_id, first_name, last_name, email,
+                                        member_id, first_name, last_name, email, enrollment_date,
                                         membership_expiry_date, membership_status,
                                         medical_expiry_date, medical_status,
                                         presenze_count, paymentStatusBadge
@@ -348,17 +349,20 @@ export default function SchedaCorso() {
 
                                     return (
                                         <TableRow key={member_id} className="hover:bg-slate-50/80 transition-colors">
-                                            <TableCell className={cn("font-medium text-slate-900", isSortedColumn("firstName") && "sorted-column-cell")}>
-                                                <Link href={`/anagrafica/${member_id}`} className="hover:underline cursor-pointer">
-                                                    {first_name}
-                                                </Link>
-                                            </TableCell>
                                             <TableCell className={cn("font-medium text-slate-900", isSortedColumn("lastName") && "sorted-column-cell")}>
-                                                <Link href={`/anagrafica/${member_id}`} className="hover:underline cursor-pointer">
+                                                <Link href={`/membro/${member_id}`} className="hover:underline cursor-pointer">
                                                     {last_name}
                                                 </Link>
                                             </TableCell>
+                                            <TableCell className={cn("font-medium text-slate-900", isSortedColumn("firstName") && "sorted-column-cell")}>
+                                                <Link href={`/membro/${member_id}`} className="hover:underline cursor-pointer">
+                                                    {first_name}
+                                                </Link>
+                                            </TableCell>
                                             <TableCell className={cn("text-slate-600 text-sm", isSortedColumn("email") && "sorted-column-cell")}>{email || '-'}</TableCell>
+                                            <TableCell className={cn("text-center text-slate-500 text-xs", isSortedColumn("enrollment_date") && "sorted-column-cell")}>
+                                                {enrollment_date ? new Date(enrollment_date).toLocaleString("it-IT", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                                            </TableCell>
                                             <TableCell>{cardExpiryText}</TableCell>
                                             <TableCell>{certExpiryText}</TableCell>
                                             <TableCell className={cn("text-center", isSortedColumn("attendances") && "sorted-column-cell")}>
@@ -370,7 +374,7 @@ export default function SchedaCorso() {
                                                 {paymentStatusBadge}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/anagrafica/${member_id}`}>
+                                                <Link href={`/membro/${member_id}`}>
                                                     <Button variant="ghost" size="sm" className="text-gold hover:text-gold-foreground hover:bg-gold/10 font-medium">
                                                         Profilo Completo <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                                                     </Button>
