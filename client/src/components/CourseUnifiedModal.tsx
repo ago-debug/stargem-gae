@@ -182,8 +182,8 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
                 <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
+                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
                 <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
                 <TableHead className="text-right">Azioni</TableHead>
               </TableRow>
@@ -191,12 +191,12 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
             <TableBody>
               {sortedEnrollments.map((enrollment) => (
                 <TableRow key={enrollment.enrollmentId}>
-                  <TableCell className={cn("font-medium", isSortedColumn("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
-                  <TableCell className={cn(isSortedColumn("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
+                  <TableCell className={cn("font-medium", isSortedColumn("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
+                  <TableCell className={cn(isSortedColumn("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
                   <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link href={`/anagrafica/${enrollment.memberId}`}>
+                      <Link href={`/membro/${enrollment.memberId}`}>
                         <Button variant="ghost" size="sm">Visualizza</Button>
                       </Link>
                       <Button variant="ghost" size="icon" onClick={() => { if (confirm("Sei sicuro di voler rimuovere questa iscrizione?")) { deleteEnrollmentMutation.mutate(enrollment.enrollmentId); } }} disabled={!canWrite}><X className="w-4 h-4" /></Button>
