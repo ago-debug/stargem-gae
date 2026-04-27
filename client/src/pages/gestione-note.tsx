@@ -197,7 +197,7 @@ export default function GestioneNote() {
                                 </Select>
                                 <Input 
                                     className="mt-2 text-xs" 
-                                    placeholder="Oppure incolla un URL personalizzato (es: /membro/1)..." 
+                                    placeholder="Oppure incolla un URL personalizzato (es: /utente/1)..." 
                                     value={customTargetUrl}
                                     onChange={e => setCustomTargetUrl(e.target.value)}
                                 />

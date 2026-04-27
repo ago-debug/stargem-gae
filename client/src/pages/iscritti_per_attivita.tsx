@@ -279,7 +279,7 @@ export default function IscrittiPerAttivita() {
                   <CardContent className="py-12 text-center text-muted-foreground">
                     <Users className="w-12 h-12 mx-auto mb-4 opacity-20" />
                     <p className="text-lg font-medium">Nessuna iscrizione attiva trovata</p>
-                    <p className="text-sm">Inizia a iscrivere membri ai corsi o workshop per vedere qui il riepilogo.</p>
+                    <p className="text-sm">Inizia a iscrivere utenti ai corsi o workshop per vedere qui il riepilogo.</p>
                   </CardContent>
                 </Card>
               )}

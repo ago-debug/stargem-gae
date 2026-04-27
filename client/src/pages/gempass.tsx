@@ -375,7 +375,7 @@ export default function GemPass() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Cerca numero o nome membro..."
+                placeholder="Cerca numero o nome utente..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 bg-white"
@@ -417,7 +417,7 @@ export default function GemPass() {
               <TableHeader>
                 <TableRow>
                   <TableHead>N. Tessera</TableHead>
-                  <TableHead>Membro</TableHead>
+                  <TableHead>Utente</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Stagione</TableHead>
                   <TableHead>Scadenza</TableHead>
@@ -911,7 +911,7 @@ export default function GemPass() {
                        <TableCell className="font-medium whitespace-nowrap">
                          {f.memberFirstName && f.memberLastName 
                            ? `${f.memberLastName} ${f.memberFirstName}`
-                           : `Membro ID: ${f.memberId}`}
+                           : `Utente ID: ${f.memberId}`}
                        </TableCell>
                        <TableCell>
                          <Badge variant="outline" className="font-normal bg-slate-100 text-slate-800 border-none">

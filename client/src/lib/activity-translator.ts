@@ -1,7 +1,7 @@
 const entityMap: Record<string, string> = {
   "courses": "Corso",
   "users": "Utente",
-  "members": "Membro / Anagrafica",
+  "members": "Utente / Anagrafica",
   "enrollments": "Iscrizione",
   "payments": "Pagamento",
   "payments-methods": "Metodo di Pagamento",

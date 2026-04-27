@@ -448,7 +448,7 @@ export default function UtentiPermessi() {
                   setIsNewUserDialogOpen(true);
                 }}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Nuovo {category === 'utenti' ? 'Utente' : category === 'staff' ? 'Membro Staff' : 'Membro Team'}
+                  Nuovo {category === 'utenti' ? 'Utente' : category === 'staff' ? 'Utente Staff' : 'Utente Team'}
                 </Button>
               </div>
 
@@ -498,7 +498,7 @@ export default function UtentiPermessi() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  title={`Modifica ${category === 'utenti' ? 'Utente' : 'Membro'}`}
+                                  title={`Modifica ${category === 'utenti' ? 'Utente' : 'Utente'}`}
                                   onClick={() => {
                                     setSelectedUser(u);
                                     setEditUserImageBase64(u.profileImageUrl || null);
@@ -528,7 +528,7 @@ export default function UtentiPermessi() {
                                   variant="ghost"
                                   size="icon"
                                   className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                  title={`Elimina ${category === 'utenti' ? 'Utente' : 'Membro'} in modo irreversibile`}
+                                  title={`Elimina ${category === 'utenti' ? 'Utente' : 'Utente'} in modo irreversibile`}
                                   disabled={u.id === currentUser?.id}
                                   onClick={() => {
                                     if (confirm(`Attenzione: Vuoi eliminare in modo irreversibile l'anagrafica di ${u.username} e revocarne l'accesso al sistema?`)) {

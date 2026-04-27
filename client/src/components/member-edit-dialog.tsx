@@ -58,7 +58,7 @@ export function MemberEditDialog() {
         queryKey: ["/api/members", editMemberId],
         queryFn: async () => {
             const res = await fetch(`/api/members/${editMemberId}`, { credentials: "include" });
-            if (!res.ok) throw new Error("Membro non trovato");
+            if (!res.ok) throw new Error("Utente non trovato");
             return res.json();
         },
         enabled: !!editMemberId,

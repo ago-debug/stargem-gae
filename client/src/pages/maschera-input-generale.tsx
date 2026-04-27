@@ -1004,7 +1004,7 @@ export default function MascheraInputGenerale(props?: any) {
     if (!selectedMemberId) {
       return (
         <div className="text-center p-4 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
-          Seleziona un membro per gestire {entityLabel}
+          Seleziona un utente per gestire {entityLabel}
         </div>
       );
     }
@@ -1136,7 +1136,7 @@ export default function MascheraInputGenerale(props?: any) {
     queryKey: ["/api/members/current", selectedMemberId],
     queryFn: async () => {
       const res = await fetch(`/api/members/${selectedMemberId}`);
-      if (!res.ok) throw new Error("Membro non trovato");
+      if (!res.ok) throw new Error("Utente non trovato");
       return res.json();
     },
     enabled: !!selectedMemberId
@@ -1303,7 +1303,7 @@ export default function MascheraInputGenerale(props?: any) {
         fetch(`/api/members/${id}`)
           .then(res => {
             if (res.ok) return res.json();
-            throw new Error('Membro non trovato');
+            throw new Error('Utente non trovato');
           })
           .then(member => {
             handleSelectMember(member);
@@ -1321,7 +1321,7 @@ export default function MascheraInputGenerale(props?: any) {
               }, 500); // Piccolo delay per attendere il render dei dati
             }
           })
-          .catch(err => console.error("Errore auto-loading membro da URL", err));
+          .catch(err => console.error("Errore auto-loading utente da URL", err));
       }
     }
   }, [memberIdFromUrl, actionFromUrl]);
@@ -1961,8 +1961,8 @@ export default function MascheraInputGenerale(props?: any) {
                 Importa
               </Button>
               <ExportWizard 
-                filename={currentMember?.lastName && currentMember?.firstName ? `${currentMember.lastName}_${currentMember.firstName}` : 'membro'}
-                title="Esporta Membro"
+                filename={currentMember?.lastName && currentMember?.firstName ? `${currentMember.lastName}_${currentMember.firstName}` : 'utente'}
+                title="Esporta Utente"
                 data={currentMember ? (() => {
                   const latestPayment = combinedPayments && combinedPayments.length > 0 
                     ? [...combinedPayments].sort((a, b) => new Date(b.paidDate || b.paymentDate || b.dataPagamento || b.createdAt).getTime() - new Date(a.paidDate || a.paymentDate || a.dataPagamento || a.createdAt).getTime())[0] 
@@ -4099,7 +4099,7 @@ export default function MascheraInputGenerale(props?: any) {
 
               {!selectedMemberId ? (
                 <div className="text-center p-4 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
-                  Seleziona un membro per gestire le iscrizioni ai corsi
+                  Seleziona un utente per gestire le iscrizioni ai corsi
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -4355,7 +4355,7 @@ export default function MascheraInputGenerale(props?: any) {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              I seguenti codici fiscali sono presenti in più di un membro. Clicca sul nome per visualizzare e modificare il membro.
+              I seguenti codici fiscali sono presenti in più di un utente. Clicca sul nome per visualizzare e modificare il utente.
             </p>
             {duplicateFiscalCodes?.map((duplicate) => (
               <Card key={duplicate.fiscalCode} className="p-4">

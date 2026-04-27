@@ -173,7 +173,7 @@ export default function Dashboard() {
                             </div>
                           </div>
 
-                          {/* Tendina per gli altri membri del team */}
+                          {/* Tendina per gli altri utenti del team */}
                           {otherRevenues.length > 0 && (
                             <Collapsible className="w-full">
                               <CollapsibleTrigger asChild>

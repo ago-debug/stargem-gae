@@ -120,7 +120,7 @@ export function hasPermission(user: SelectUser | null, path: string) {
   // Check direct match
   if (perms[path] === "read" || perms[path] === "write") return true;
 
-  // Check parent path match (e.g. /membro/1 matches /membro)
+  // Check parent path match (e.g. /utente/1 matches /utente)
   const segments = path.split('/').filter(Boolean);
   if (segments.length > 0) {
     const parentPath = `/${segments[0]}`;
@@ -204,7 +204,7 @@ function Router() {
       <ProtectedRoute path="/utenti-permessi" component={UtentiPermessi} />
       <ProtectedRoute path="/reset-stagione" component={ResetStagione} />
       <ProtectedRoute path="/audit-logs" component={AuditLogs} />
-      <ProtectedRoute path="/membro/:id" component={MascheraInputGenerale} />
+      <ProtectedRoute path="/utente/:id" component={MascheraInputGenerale} />
       <ProtectedRoute path="/gempass" component={GemPass} />
       <ProtectedRoute path="/gemstaff" component={GemStaff} />
       <ProtectedRoute path="/gemstaff/me" component={GemStaffMe} />

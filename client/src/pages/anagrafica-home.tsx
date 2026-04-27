@@ -180,7 +180,7 @@ export default function AnagraficaHome() {
   });
 
 
-  // Query per dati collegati al membro selezionato
+  // Query per dati collegati al utente selezionato
   const { data: memberPayments, isLoading: loadingPayments, error: errorPayments } = useQuery<any[]>({
     queryKey: ["/api/payments", "member", selectedMemberId],
     queryFn: async () => {
@@ -341,7 +341,7 @@ export default function AnagraficaHome() {
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/members/duplicates"] });
-      toast({ title: selectedMemberId ? "Dati salvati con successo" : "Nuovo membro creato" });
+      toast({ title: selectedMemberId ? "Dati salvati con successo" : "Nuovo utente creato" });
       if (!selectedMemberId && data?.id) {
         setSelectedMemberId(data.id);
       }
@@ -1356,7 +1356,7 @@ export default function AnagraficaHome() {
                 </CardHeader>
                 <CardContent>
                   {!selectedMemberId ? (
-                    <p className="text-sm text-muted-foreground">Seleziona un membro per visualizzare le tessere collegate</p>
+                    <p className="text-sm text-muted-foreground">Seleziona un utente per visualizzare le tessere collegate</p>
                   ) : loadingMemberships ? (
                     <Skeleton className="h-16 w-full" />
                   ) : errorMemberships ? (
@@ -1420,7 +1420,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare i pagamenti</p>
+                  <p className="text-muted-foreground">Seleziona un utente per visualizzare i pagamenti</p>
                 ) : loadingPayments ? (
                   <div className="space-y-2">
                     <Skeleton className="h-16 w-full" />
@@ -1465,7 +1465,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare i corsi</p>
+                  <p className="text-muted-foreground">Seleziona un utente per visualizzare i corsi</p>
                 ) : (
                   <div className="space-y-8">
                     {/* Sezione Corsi Regolari */}
@@ -1554,7 +1554,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground text-center py-8">Seleziona un membro per gestire i workshop</p>
+                  <p className="text-muted-foreground text-center py-8">Seleziona un utente per gestire i workshop</p>
                 ) : (
                   <div className="space-y-4">
                     <div className="flex gap-2 items-end">
@@ -1636,7 +1636,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare i certificati</p>
+                  <p className="text-muted-foreground">Seleziona un utente per visualizzare i certificati</p>
                 ) : loadingCertificates ? (
                   <div className="space-y-2">
                     <Skeleton className="h-16 w-full" />
@@ -1684,7 +1684,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare gli abbonamenti</p>
+                  <p className="text-muted-foreground">Seleziona un utente per visualizzare gli abbonamenti</p>
                 ) : loadingMemberships ? (
                   <div className="space-y-2">
                     <Skeleton className="h-16 w-full" />
@@ -1723,7 +1723,7 @@ export default function AnagraficaHome() {
               </CardHeader>
               <CardContent>
                 {!selectedMemberId ? (
-                  <p className="text-muted-foreground">Seleziona un membro per visualizzare le presenze</p>
+                  <p className="text-muted-foreground">Seleziona un utente per visualizzare le presenze</p>
                 ) : loadingAttendances ? (
                   <div className="space-y-2">
                     <Skeleton className="h-16 w-full" />
@@ -1765,7 +1765,7 @@ export default function AnagraficaHome() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Nessun buono registrato per questo membro</p>
+                <p className="text-muted-foreground">Nessun buono registrato per questo utente</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1780,7 +1780,7 @@ export default function AnagraficaHome() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Nessuna gara registrata per questo membro</p>
+                <p className="text-muted-foreground">Nessuna gara registrata per questo utente</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1795,7 +1795,7 @@ export default function AnagraficaHome() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Nessuna vacanza registrata per questo membro</p>
+                <p className="text-muted-foreground">Nessuna vacanza registrata per questo utente</p>
               </CardContent>
             </Card>
           </TabsContent>
