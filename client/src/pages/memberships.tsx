@@ -94,7 +94,7 @@ export default function Memberships() {
         fetch(`/api/members/${id}`)
           .then(res => {
             if (res.ok) return res.json();
-            throw new Error('Membro non passato o non trovato');
+            throw new Error('Utente non passato o non trovato');
           })
           .then((member: Member) => {
             setSelectedMembershipMember(member);

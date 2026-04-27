@@ -154,7 +154,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Membri Iscritti ({courseEnrollments.length})</h3>
+        <h3 className="text-lg font-medium">Utenti Iscritti ({courseEnrollments.length})</h3>
         <Popover open={isAddingEnrollment} onOpenChange={setIsAddingEnrollment}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" disabled={!canWrite}><UserPlus className="w-4 h-4 mr-2" />Aggiungi Iscritto</Button>
@@ -163,7 +163,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
             <Command shouldFilter={false}>
               <CommandInput placeholder="Cerca per cognome, nome o CF (min. 3 caratteri)..." value={memberSearchQuery} onValueChange={setMemberSearchQuery} />
               <CommandList>
-                {memberSearchQuery.length < 3 ? <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty> : !searchResults?.members?.length ? <CommandEmpty>Nessun membro trovato</CommandEmpty> : (
+                {memberSearchQuery.length < 3 ? <CommandEmpty>Digita almeno 3 caratteri per cercare</CommandEmpty> : !searchResults?.members?.length ? <CommandEmpty>Nessun utente trovato</CommandEmpty> : (
                   <CommandGroup>
                     {searchResults.members.filter(m => !courseEnrollments.some(e => e.memberId === m.id)).map(member => (
                         <CommandItem key={member.id} value={member.id.toString()} onSelect={() => { setSelectedMemberId(member.id); createEnrollmentMutation.mutate({ memberId: member.id, activityId }); setMemberSearchQuery(""); }}>
@@ -177,7 +177,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
           </PopoverContent>
         </Popover>
       </div>
-      {courseEnrollments.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nessun membro iscritto a questa attività</p> : (
+      {courseEnrollments.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nessun utente iscritto a questa attività</p> : (
         <div className="border rounded-lg">
           <Table>
             <TableHeader>
@@ -196,7 +196,7 @@ function EnrollmentsTab({ activityId, activityType }: EnrollmentsTabProps) {
                   <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link href={`/membro/${enrollment.memberId}`}>
+                      <Link href={`/utente/${enrollment.memberId}`}>
                         <Button variant="ghost" size="sm">Visualizza</Button>
                       </Link>
                       <Button variant="ghost" size="icon" onClick={() => { if (confirm("Sei sicuro di voler rimuovere questa iscrizione?")) { deleteEnrollmentMutation.mutate(enrollment.enrollmentId); } }} disabled={!canWrite}><X className="w-4 h-4" /></Button>
@@ -283,12 +283,12 @@ function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
         <Dialog open={isAddingAttendance} onOpenChange={setIsAddingAttendance}>
           <Button variant="outline" size="sm" onClick={() => setIsAddingAttendance(true)} disabled={!canWrite}><CalendarPlus className="w-4 h-4 mr-2" />Registra Presenza</Button>
           <DialogContent>
-            <DialogHeader><DialogTitle>Registra Presenza</DialogTitle><DialogDescription>Seleziona il membro e la data della presenza</DialogDescription></DialogHeader>
+            <DialogHeader><DialogTitle>Registra Presenza</DialogTitle><DialogDescription>Seleziona il utente e la data della presenza</DialogDescription></DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="member">Membro *</Label>
+                <Label htmlFor="member">Utente *</Label>
                 <Select value={selectedMemberId?.toString() || ""} onValueChange={(v) => setSelectedMemberId(parseInt(v))}>
-                  <SelectTrigger><SelectValue placeholder="Seleziona membro" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Seleziona utente" /></SelectTrigger>
                   <SelectContent>
                     {enrolledMembers.map(member => <SelectItem key={member.id} value={member.id.toString()}>{member.lastName} {member.firstName}</SelectItem>)}
                   </SelectContent>
@@ -301,7 +301,7 @@ function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddingAttendance(false)}>Annulla</Button>
-              <Button onClick={() => { if (!selectedMemberId) { toast({ title: "Errore", description: "Seleziona un membro", variant: "destructive" }); return; } createAttendanceMutation.mutate({ memberId: selectedMemberId, activityId, attendanceDate }); }} disabled={!selectedMemberId || createAttendanceMutation.isPending}>Registra</Button>
+              <Button onClick={() => { if (!selectedMemberId) { toast({ title: "Errore", description: "Seleziona un utente", variant: "destructive" }); return; } createAttendanceMutation.mutate({ memberId: selectedMemberId, activityId, attendanceDate }); }} disabled={!selectedMemberId || createAttendanceMutation.isPending}>Registra</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -311,7 +311,7 @@ function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Membro</SortableTableHead>
+                <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Utente</SortableTableHead>
                 <SortableTableHead sortKey="attendanceDate" currentSort={sortConfig} onSort={handleSort}>Data e Ora</SortableTableHead>
                 <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
                 <TableHead className="text-right">Azioni</TableHead>

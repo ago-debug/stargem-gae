@@ -984,7 +984,7 @@ export default function GemStaff() {
           ) : (
              <Alert className="text-muted-foreground w-full py-8 text-center border-dashed">
                <FileCheck className="w-8 h-8 mx-auto mb-2 opacity-30" />
-               Seleziona un membro dello staff per visualizzarne lo stato di compliance documentale.
+               Seleziona un utente dello staff per visualizzarne lo stato di compliance documentale.
              </Alert>
           )}
         </TabsContent>

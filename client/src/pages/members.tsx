@@ -977,7 +977,7 @@ export default function Members() {
                   setManualMergeMember1(m1);
                   setManualMergeMember2(m2);
                 } catch (e) {
-                  toast({ title: "Errore", description: "Impossibile recuperare i dati dei membri.", variant: "destructive" });
+                  toast({ title: "Errore", description: "Impossibile recuperare i dati dei utenti.", variant: "destructive" });
                   setIsMergeDialogOpen(false);
                 }
               }}
@@ -2053,7 +2053,7 @@ export default function Members() {
               </>
             )}
 
-            {/* Corsi Iscritti - Solo per membri esistenti */}
+            {/* Corsi Iscritti - Solo per utenti esistenti */}
             {editingMember && (
               <>
                 <Separator />
@@ -2170,7 +2170,7 @@ export default function Members() {
               </>
             )}
 
-            {/* Workshop Iscritti - Solo per membri esistenti */}
+            {/* Workshop Iscritti - Solo per utenti esistenti */}
             {editingMember && (
               <>
                 <Separator />
@@ -2286,7 +2286,7 @@ export default function Members() {
               </>
             )}
 
-            {/* Presenze - Solo per membri esistenti */}
+            {/* Presenze - Solo per utenti esistenti */}
             {editingMember && (
               <>
                 <Separator />

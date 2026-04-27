@@ -350,12 +350,12 @@ export default function SchedaCorso() {
                                     return (
                                         <TableRow key={member_id} className="hover:bg-slate-50/80 transition-colors">
                                             <TableCell className={cn("font-medium text-slate-900", isSortedColumn("lastName") && "sorted-column-cell")}>
-                                                <Link href={`/membro/${member_id}`} className="hover:underline cursor-pointer">
+                                                <Link href={`/utente/${member_id}`} className="hover:underline cursor-pointer">
                                                     {last_name}
                                                 </Link>
                                             </TableCell>
                                             <TableCell className={cn("font-medium text-slate-900", isSortedColumn("firstName") && "sorted-column-cell")}>
-                                                <Link href={`/membro/${member_id}`} className="hover:underline cursor-pointer">
+                                                <Link href={`/utente/${member_id}`} className="hover:underline cursor-pointer">
                                                     {first_name}
                                                 </Link>
                                             </TableCell>
@@ -374,7 +374,7 @@ export default function SchedaCorso() {
                                                 {paymentStatusBadge}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/membro/${member_id}`}>
+                                                <Link href={`/utente/${member_id}`}>
                                                     <Button variant="ghost" size="sm" className="text-gold hover:text-gold-foreground hover:bg-gold/10 font-medium">
                                                         Profilo Completo <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                                                     </Button>
