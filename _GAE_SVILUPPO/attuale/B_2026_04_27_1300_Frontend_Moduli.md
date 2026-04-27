@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-26 12:30
+Aggiornato al: 2026-04-27 13:00
 
 # Master Document: Moduli Frontend, UI e Interfacce (Stato Attuale)
 
@@ -74,3 +74,18 @@ L'audit UI ha ripulito i Dropdown, dividendoli in 3 macro categorie:
 - **Color Consistency:** I colori delle card in Calendario obbediscono prima alla Macro-Attività (es. IND = Viola, ALL = Blu) e solo in seconda battuta al badge di Sotto-Categoria. Mai usare classi CSS Tailwind purgate dinamicamente; usare esadecimali statici o inline style sui badge.
 - **Error Handling Maschere:** Disattivare gli errori "rossi" di form invalid al boot-up. La mappa di validazione (es. Zod) deve innescarsi solo allo sfioro del campo (onChange) o al tentativo di Submit.
 - **D.R.Y. su Liste:** Qualsiasi tendina selettiva futura non va cablata in HTML statico. Deve interrogare `/api/custom-lists/{nome}` per garantire la traduzione immediata o la correzione errori via pannello admin SysAdmin.
+
+## Hack CSS e Pattern UI da memorizzare (Aggiunto 27/04/2026)
+### 1. Scroll interno per componente `<Table>` (shadcn/ui) con Sticky Header
+Quando si inserisce una tabella e si vuole che la pagina rimanga ferma (layout Dashboard) mentre solo la tabella scorre, è necessario bypassare il `div` auto-generato dal componente `Table` di shadcn.
+Per farlo, racchiudere il `<Table>` in un container flessibile e utilizzare questo override CSS:
+```tsx
+<div className="flex-1 min-h-0 relative [&>div]:absolute [&>div]:inset-0 [&>div]:overflow-y-auto">
+   <Table>
+     <TableHeader className="sticky top-0 z-10 bg-white">
+```
+In questo modo:
+1. Il blocco superiore (titoli, filtri) non scorre.
+2. La tabella ottiene lo scorrimento indipendente.
+3. Il `TableHeader` rimane agganciato (`sticky`) in cima al `div` interno scorrevole.
+Da usare ogni volta che sistemiamo "le altre attività" per ottenere il vero effetto finestra fissa.

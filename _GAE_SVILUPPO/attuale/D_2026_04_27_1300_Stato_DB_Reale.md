@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-26 12:30
+Aggiornato al: 2026-04-27 13:00
 
 # 📊 STATO DB REALE — 26/04/2026 12:30
 ## Import e Bonifica completata — riepilogo

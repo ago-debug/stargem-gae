@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-26 12:30
+Aggiornato al: 2026-04-27 13:00
 
 # MAPPA FRONTEND ↔ DATABASE
 ## StarGem Suite

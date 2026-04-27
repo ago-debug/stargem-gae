@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-26 12:30
+Aggiornato al: 2026-04-27 13:00
 
 # Ultimi Aggiornamenti Progetto "StarGem Manager"
 **Periodo di riferimento:** 23 Febbraio 2026 - 26 Aprile 2026
@@ -32,8 +32,12 @@ Di seguito il riepilogo sintetico degli ultimi sviluppi architetturali e di boni
 
 *(Storico pregresso archiviato per snellimento documentazione).*
 
-### Aggiornamento 26/04/2026 18:00
+### Aggiornamento 27/04/2026 13:00
 - **Refactoring /elenchi (F2-025, F2-026, F2-027, F2-028)**: Riprogettata completamente l'interfaccia con sidebar laterale per le aree (Corsi, Iscrizioni, ecc) e liste in Accordion (shadcn/ui). Uniformate le etichette modali ("Stato Corso", "Interno Corso"). Le liste vengono tutte attinte e gestite centralmente tramite `custom_lists`.
 - **Bugfix (F2-024)**: Risolto bug Planning su date festività UTC shift.
 - **DB Migrazione (F1-015, F1-016)**: Popolamento DB `custom_lists` dalle vecchie tabelle.
 - **Pulizia (PM1)**: Rimossi script di patch temporanei, output DB temporanei e backup intermedi per snellire la codebase.
+
+### Aggiornamento 27/04/2026 13:00
+- **Scheda Corso (UI & Layout):** Stabilizzato completamente il layout in stile "Dashboard". Applicato hack CSS specifico (`[&>div]:absolute [&>div]:inset-0 [&>div]:overflow-y-auto`) sul componente shadcn `Table` per confinare lo scroll all'interno della tabella e garantire il corretto funzionamento dello `sticky top-0` sull'intestazione delle colonne, mantenendo i badge e il titolo superiori completamente immobili.
+- **Bugfix Calendario Attività:** Risolto un `ReferenceError` di caricamento e implementato il redirect intelligente con scroll automatico verso la card dell'evento selezionato quando si naviga dalla Scheda Corso.
