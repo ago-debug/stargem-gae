@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion } from "@/components/ui/accordion";
 import { ActivityAccordionCard } from "@/components/activity-accordion-card";
-import { cn } from "@/lib/utils";
+import { cn, getSeasonLabel } from "@/lib/utils";
 import {
   Calendar,
   Sparkles,
@@ -193,9 +193,6 @@ export default function IscrittiPerAttivita() {
     return true;
   }) : [];
 
-    return true;
-  }) : [];
-
   // @ts-ignore // TODO: STI-cleanup
   const filteredWorkshops = Array.isArray(workshops) ? (workshops as Workshop[]).filter(workshop => {
     const matchesSearch = workshop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -219,6 +216,27 @@ export default function IscrittiPerAttivita() {
     const dateB = new Date(b.startDate || b.createdAt || 0).getTime();
     return dateB - dateA; // Ordine decrescente
   }) : [];
+
+  let headerCounterText = `${dynamicEnrollmentsCount} iscrizioni attive`;
+  switch (activeTab) {
+    case 'workshop': {
+      const activeWs = filteredWorkshops.filter(w => w.active);
+      if (activeWs.length > 0) {
+        const activeEnrolls = activeWs.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
+        headerCounterText = `${activeWs.length} attivi / ${filteredWorkshops.length} totali \u00B7 ${activeEnrolls} iscritti`;
+      } else {
+        const totalEnrolls = filteredWorkshops.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
+        headerCounterText = `${filteredWorkshops.length} workshop \u00B7 ${totalEnrolls} iscritti`;
+      }
+      break;
+    }
+    case 'corsi':
+      headerCounterText = `${dynamicEnrollmentsCount} iscrizioni attive`;
+      break;
+    default:
+      headerCounterText = `${dynamicEnrollmentsCount} iscrizioni attive`;
+      break;
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -246,20 +264,7 @@ export default function IscrittiPerAttivita() {
                 data-testid="button-toggle-active-enrollments"
               >
                 <Users className={`w-4 h-4 ${showOnlyWithEnrollments ? "text-white" : "sidebar-icon-gold"}`} />
-                {activeTab === 'workshop' ? (
-                  (() => {
-                    const activeWs = filteredWorkshops.filter(w => w.active);
-                    if (activeWs.length > 0) {
-                      const activeEnrolls = activeWs.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
-                      return `${activeWs.length} attivi / ${filteredWorkshops.length} totali · ${activeEnrolls} iscritti`;
-                    } else {
-                      const totalEnrolls = filteredWorkshops.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
-                      return `${filteredWorkshops.length} workshop · ${totalEnrolls} iscritti`;
-                    }
-                  })()
-                ) : (
-                  `${dynamicEnrollmentsCount} iscrizioni attive`
-                )}
+                {headerCounterText}
               </Button>
             </div>
           </div>
@@ -524,12 +529,14 @@ export default function IscrittiPerAttivita() {
                           <SelectValue placeholder="Seleziona Stagione" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="active">
-                            Stagione corrente {activeSeason?.name ? `(${activeSeason.name})` : ''}
-                          </SelectItem>
-                          {seasons?.map((s) => (
-                            <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
-                          ))}
+                          {seasons?.map((s: any, idx: number) => {
+                            const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
+                            return (
+                              <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
+                                {getSeasonLabel(s, seasons)}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                       <div className="flex items-center space-x-2">
