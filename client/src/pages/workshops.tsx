@@ -117,7 +117,7 @@ export default function Workshops() {
 
   // @ts-ignore // TODO: STI-cleanup
   const { data: workshops, isLoading } = useQuery<Workshop[]>({
-    queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`],
+    queryKey: [`/api/courses?activityType=workshop&seasonId=${selectedSeasonId}`],
   });
 
   const editId = urlParams.get('editId') || urlParams.get('workshopId');
@@ -221,11 +221,11 @@ export default function Workshops() {
     // @ts-ignore // TODO: STI-cleanup
     mutationFn: async (data: InsertWorkshop) => {
       try {
-        await apiRequest("POST", "/api/workshops", data);
+        await apiRequest("POST", "/api/courses?activityType=workshop", data);
       } catch (err: any) {
         if (err.status === 409) {
           if (confirm(err.message)) {
-            await apiRequest("POST", "/api/workshops", { ...data, force: true });
+            await apiRequest("POST", "/api/courses?activityType=workshop", { ...data, force: true });
             return;
           }
           throw new Error("Operazione annullata");
@@ -234,7 +234,7 @@ export default function Workshops() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?activityType=workshop&seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/courses?activityType=workshop"] });
       toast({ title: "Workshop creato con successo" });
       setIsFormOpen(false);
       setEditingWorkshop(null);
@@ -251,11 +251,11 @@ export default function Workshops() {
     // @ts-ignore // TODO: STI-cleanup
     mutationFn: async ({ id, data }: { id: number; data: InsertWorkshop }) => {
       try {
-        await apiRequest("PATCH", `/api/workshops/${id}`, data);
+        await apiRequest("PATCH", `/api/courses?activityType=workshop/${id}`, data);
       } catch (err: any) {
         if (err.status === 409) {
           if (confirm(err.message)) {
-            await apiRequest("PATCH", `/api/workshops/${id}`, { ...data, force: true });
+            await apiRequest("PATCH", `/api/courses?activityType=workshop/${id}`, { ...data, force: true });
             return;
           }
           throw new Error("Operazione annullata");
@@ -264,7 +264,7 @@ export default function Workshops() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?activityType=workshop&seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/courses?activityType=workshop"] });
       toast({ title: "Workshop aggiornato con successo" });
       setIsFormOpen(false);
       setEditingWorkshop(null);
@@ -279,10 +279,10 @@ export default function Workshops() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/workshops/${id}`, undefined);
+      await apiRequest("DELETE", `/api/courses?activityType=workshop/${id}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?activityType=workshop&seasonId=${selectedSeasonId}`] }); queryClient.invalidateQueries({ queryKey: ["/api/courses?activityType=workshop"] });
       toast({ title: "Workshop eliminato con successo" });
     },
     onError: (error: Error) => {
@@ -418,10 +418,10 @@ export default function Workshops() {
   const handleBulkDelete = async () => {
     if (!confirm(`Sei sicuro di voler eliminare i ${selectedIds.size} elementi selezionati?`)) return;
     try {
-      await Promise.all(Array.from(selectedIds).map(id => apiRequest("DELETE", `/api/workshops/${id}`)));
+      await Promise.all(Array.from(selectedIds).map(id => apiRequest("DELETE", `/api/courses?activityType=workshop/${id}`)));
       import("@/hooks/use-toast").then(({ toast }) => toast({ title: "Eliminazione completata" }));
       setSelectedIds(new Set());
-      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${selectedSeasonId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?activityType=workshop&seasonId=${selectedSeasonId}`] });
     } catch (e) {
       import("@/hooks/use-toast").then(({ toast }) => toast({ title: "Errore durante l'eliminazione", variant: "destructive" }));
     }
@@ -439,12 +439,12 @@ export default function Workshops() {
         (insertData as any).seasonId = parseInt(targetSeasonId);
         (insertData as any).sku = null;
         (insertData as any).price = "0.00"; 
-        return apiRequest("POST", "/api/workshops", insertData);
+        return apiRequest("POST", "/api/courses?activityType=workshop", insertData);
       }));
       import("@/hooks/use-toast").then(({ toast }) => toast({ title: "Duplicazione massiva completata" }));
       setShowBulkDuplicateDialog(false);
       setSelectedIds(new Set());
-      queryClient.invalidateQueries({ queryKey: [`/api/workshops?seasonId=${targetSeasonId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/courses?activityType=workshop&seasonId=${targetSeasonId}`] });
     } catch (e) {
       import("@/hooks/use-toast").then(({ toast }) => toast({ title: "Errore duplicazione", variant: "destructive" }));
     }
