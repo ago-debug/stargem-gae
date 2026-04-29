@@ -76,13 +76,41 @@ function matchesFilter(course: any, filter: string, instructors: any[]): boolean
 
 interface CourseDuplicationWizardProps {
   currentSeasonId: string;
+  preSelectedCourseIds?: Set<number>;
+  triggerElement?: React.ReactNode;
+  openState?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWizardProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function CourseDuplicationWizard({ 
+  currentSeasonId, 
+  preSelectedCourseIds, 
+  triggerElement, 
+  openState, 
+  onOpenChange 
+}: CourseDuplicationWizardProps) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = openState !== undefined ? openState : internalIsOpen;
+  
+  const handleOpenChange = (open: boolean) => {
+    setInternalIsOpen(open);
+    if (onOpenChange) onOpenChange(open);
+  };
+
   const [targetSeasonId, setTargetSeasonId] = useState<string>("");
   const [tableSourceSeasonId, setTableSourceSeasonId] = useState<string>("");
   const [selectedCourseIds, setSelectedCourseIds] = useState<Set<number>>(new Set());
+
+  React.useEffect(() => {
+    if (isOpen && preSelectedCourseIds && preSelectedCourseIds.size > 0) {
+      setSelectedCourseIds(new Set(preSelectedCourseIds));
+      if (!tableSourceSeasonId) {
+          const fallbackId = currentSeasonId === "active" ? "" : currentSeasonId;
+          if (fallbackId) setTableSourceSeasonId(fallbackId);
+      }
+    }
+  }, [isOpen, preSelectedCourseIds, currentSeasonId, tableSourceSeasonId]);
+
   const [courseOverrides, setCourseOverrides] = useState<Record<number, any>>({});
   const [targetCourses, setTargetCourses] = useState<Course[]>([]);
   const [searchFilter, setSearchFilter] = useState("");
@@ -400,7 +428,7 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
         
         const targetName = targetSeasons.find(s => s.id.toString() === targetSeasonId)?.name || 'la nuova stagione';
         toast({ title: "Operazione completata", description: `${selectedCourseIds.size} corsi duplicati con successo nella stagione ${targetName}.` });
-        setIsOpen(false);
+        handleOpenChange(false);
         setSelectedCourseIds(new Set());
         setCourseOverrides({});
     } catch (error: any) {
@@ -493,12 +521,14 @@ export function CourseDuplicationWizard({ currentSeasonId }: CourseDuplicationWi
 
   return (
     <>
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-10 gap-2 font-medium bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100/80 transition-colors">
-          <Copy className="h-4 w-4" />
-          <span className="hidden sm:inline">Duplica Corsi</span>
-        </Button>
+        {triggerElement || (
+          <Button variant="outline" className="h-10 gap-2 font-medium bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100/80 transition-colors">
+            <Copy className="h-4 w-4" />
+            <span className="hidden sm:inline">Duplica Corsi</span>
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-[1400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between gap-6 pe-4 border-b pb-4">

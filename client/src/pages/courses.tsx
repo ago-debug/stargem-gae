@@ -20,6 +20,7 @@ import { Plus, Search, Edit, Trash2, Users, Calendar, UserPlus, CalendarPlus, X,
 import { ExportWizard } from "@/components/ExportWizard";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
+import { CourseDuplicationWizard } from "@/components/CourseDuplicationWizard";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { MultiSelectStatus, StatusBadge, getStatusColor } from "@/components/multi-select-status";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -94,8 +95,6 @@ export default function Courses() {
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>("active");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const [showBulkDuplicateDialog, setShowBulkDuplicateDialog] = useState(false);
-  const [targetSeasonId, setTargetSeasonId] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [instructorFilter, setInstructorFilter] = useState<string>("all");
   const [dayOfWeekFilter, setDayOfWeekFilter] = useState<string>("all");
@@ -448,31 +447,6 @@ export default function Courses() {
     }
   };
 
-  const handleBulkDuplicate = async () => {
-    if (!targetSeasonId) {
-      toast({ title: "Seleziona una stagione", variant: "destructive" });
-      return;
-    }
-    try {
-      const selectedCourses = filteredCourses.filter(c => selectedIds.has(c.id));
-      await Promise.all(selectedCourses.map(course => {
-        const insertData = { ...course };
-        delete (insertData as any).id;
-        delete (insertData as any).createdAt;
-        delete (insertData as any).updatedAt;
-        (insertData as any).seasonId = parseInt(targetSeasonId);
-        (insertData as any).sku = null;
-        (insertData as any).price = "0.00"; 
-        return apiRequest("POST", "/api/courses", insertData);
-      }));
-      toast({ title: "Duplicazione massiva completata" });
-      setShowBulkDuplicateDialog(false);
-      setSelectedIds(new Set());
-      queryClient.invalidateQueries({ queryKey: [`/api/courses?activityType=course&seasonId=${targetSeasonId}`] });
-    } catch (e) {
-      toast({ title: "Errore duplicazione", variant: "destructive" });
-    }
-  };
 
   const exportToCSV = () => {
     if (!filteredCourses.length) return;
@@ -913,31 +887,6 @@ export default function Courses() {
           </CardContent>
         </Card>
 
-        
-        {/* Bulk Dialog */}
-        <Dialog open={showBulkDuplicateDialog} onOpenChange={setShowBulkDuplicateDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Duplica {selectedIds.size} Corsi</DialogTitle>
-              <DialogDescription>
-                Seleziona la stagione di destinazione. I corsi clonati avranno il prezzo azzerato e il codice vuoto, preservando nome, staff e pianificazione.
-              </DialogDescription>
-            </DialogHeader>
-            <Select value={targetSeasonId} onValueChange={setTargetSeasonId}>
-              <SelectTrigger>
-                 <SelectValue placeholder="Seleziona la stagione di destinazione" />
-              </SelectTrigger>
-              <SelectContent>
-                 {seasons?.map(s => (
-                    <SelectItem key={s.id} value={s.id.toString()}>{s.name} {s.active ? '(Attiva)' : ''}</SelectItem>
-                 ))}
-              </SelectContent>
-            </Select>
-            <DialogFooter>
-               <Button onClick={handleBulkDuplicate} disabled={!targetSeasonId}>Conferma Duplicazione</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
         {/* Selected Toolbar */}
         {selectedIds.size > 0 && (
@@ -975,9 +924,15 @@ export default function Courses() {
                    </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-              <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setShowBulkDuplicateDialog(true)}>
-                <CalendarPlus className="w-4 h-4 mr-2" /> Duplica
-              </Button>
+              <CourseDuplicationWizard
+                currentSeasonId={selectedSeasonId}
+                preSelectedCourseIds={selectedIds}
+                triggerElement={
+                  <Button size="sm" className="bg-primary hover:bg-primary/90">
+                    <CalendarPlus className="w-4 h-4 mr-2" /> Duplica
+                  </Button>
+                }
+              />
             </div>
             <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100" onClick={() => setSelectedIds(new Set())}>
               <X className="w-4 h-4" />
