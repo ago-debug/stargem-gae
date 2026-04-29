@@ -56,21 +56,21 @@ export default function IscrittiPerAttivita() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showOnlyWithEnrollments, setShowOnlyWithEnrollments] = useState(false);
   const [expandedWorkshops, setExpandedWorkshops] = useState<string[]>([]);
-  const [selectedSeasonIdWS, setSelectedSeasonIdWS] = useState<string>("active");
+  const [selectedSeasonIdWS, setSelectedSeasonIdWS] = useState<string>("");
   const [showConcludedSeasonsWS, setShowConcludedSeasonsWS] = useState(false);
   const [expandedCourses, setExpandedCourses] = useState<string[]>([]);
-  const [selectedSeasonIdCourses, setSelectedSeasonIdCourses] = useState<string>("active");
+  const [selectedSeasonIdCourses, setSelectedSeasonIdCourses] = useState<string>("");
   const [showConcludedSeasonsCourses, setShowConcludedSeasonsCourses] = useState(false);
   const [expandedAllenamenti, setExpandedAllenamenti] = useState<string[]>([]);
-  const [selectedSeasonIdAL, setSelectedSeasonIdAL] = useState<string>("active");
+  const [selectedSeasonIdAL, setSelectedSeasonIdAL] = useState<string>("");
   const [showConcludedSeasonsAL, setShowConcludedSeasonsAL] = useState(false);
   const [searchQueryAL, setSearchQueryAL] = useState("");
   const [expandedDomeniche, setExpandedDomeniche] = useState<string[]>([]);
-  const [selectedSeasonIdDM, setSelectedSeasonIdDM] = useState<string>("active");
+  const [selectedSeasonIdDM, setSelectedSeasonIdDM] = useState<string>("");
   const [showConcludedSeasonsDM, setShowConcludedSeasonsDM] = useState(false);
   const [searchQueryDM, setSearchQueryDM] = useState("");
   const [expandedLezioniIndividuali, setExpandedLezioniIndividuali] = useState<string[]>([]);
-  const [selectedSeasonIdLI, setSelectedSeasonIdLI] = useState<string>("active");
+  const [selectedSeasonIdLI, setSelectedSeasonIdLI] = useState<string>("");
   const [showConcludedSeasonsLI, setShowConcludedSeasonsLI] = useState(false);
   const [searchQueryLI, setSearchQueryLI] = useState("");
   const [, setLocation] = useLocation();
@@ -90,6 +90,12 @@ export default function IscrittiPerAttivita() {
   };
 
   const { data: seasons } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
+
+  const sortedSeasons = [...(seasons || [])].sort((a: any, b: any) => {
+    if (a.active && !b.active) return -1;
+    if (!a.active && b.active) return 1;
+    return new Date(b.startDate || 0).getTime() - new Date(a.startDate || 0).getTime();
+  });
   const { data: activeSeason } = useQuery<any>({ queryKey: ["/api/seasons/active"] });
 
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({ queryKey: ["/api/courses?activityType=course"] });
@@ -205,8 +211,10 @@ export default function IscrittiPerAttivita() {
 
     // Filtro Stagione
     if (!showConcludedSeasonsCourses) {
-      const targetSeasonId = selectedSeasonIdCourses === "active" ? activeSeason?.id : parseInt(selectedSeasonIdCourses);
-      const courseSeasonId = course.seasonId || activeSeason?.id;
+      const fallbackSeasonId = seasons?.find((s: any) => s.active)?.id?.toString() || "";
+      const effectiveSeasonId = selectedSeasonIdCourses || fallbackSeasonId;
+      const targetSeasonId = effectiveSeasonId === "all" ? null : parseInt(effectiveSeasonId);
+      const courseSeasonId = course.seasonId || seasons?.find((s: any) => s.active)?.id;
       if (targetSeasonId && courseSeasonId !== targetSeasonId) return false;
     }
 
@@ -229,8 +237,10 @@ export default function IscrittiPerAttivita() {
 
     // Filtro Stagione
     if (!showConcludedSeasonsWS) {
-      const targetSeasonId = selectedSeasonIdWS === "active" ? activeSeason?.id : parseInt(selectedSeasonIdWS);
-      const wsSeasonId = workshop.seasonId || activeSeason?.id;
+      const fallbackSeasonId = seasons?.find((s: any) => s.active)?.id?.toString() || "";
+      const effectiveSeasonId = selectedSeasonIdWS || fallbackSeasonId;
+      const targetSeasonId = effectiveSeasonId === "all" ? null : parseInt(effectiveSeasonId);
+      const wsSeasonId = workshop.seasonId || seasons?.find((s: any) => s.active)?.id;
       if (targetSeasonId && wsSeasonId !== targetSeasonId) return false;
     }
 
@@ -238,9 +248,6 @@ export default function IscrittiPerAttivita() {
       return getEnrollmentsForActivity(workshop.id, true).length > 0;
     }
     return true;
-  }).sort((a, b) => {
-    const dateA = new Date(a.startDate || a.createdAt || 0).getTime();
-    const dateB = new Date(b.startDate || b.createdAt || 0).getTime();
   }).sort((a, b) => {
     const dateA = new Date(a.startDate || a.createdAt || 0).getTime();
     const dateB = new Date(b.startDate || b.createdAt || 0).getTime();
@@ -255,8 +262,10 @@ export default function IscrittiPerAttivita() {
 
     // Filtro Stagione
     if (!showConcludedSeasonsAL) {
-      const targetSeasonId = selectedSeasonIdAL === "active" ? activeSeason?.id : parseInt(selectedSeasonIdAL);
-      const alSeasonId = al.seasonId || activeSeason?.id;
+      const fallbackSeasonId = seasons?.find((s: any) => s.active)?.id?.toString() || "";
+      const effectiveSeasonId = selectedSeasonIdAL || fallbackSeasonId;
+      const targetSeasonId = effectiveSeasonId === "all" ? null : parseInt(effectiveSeasonId);
+      const alSeasonId = al.seasonId || seasons?.find((s: any) => s.active)?.id;
       if (targetSeasonId && alSeasonId !== targetSeasonId) return false;
     }
 
@@ -278,8 +287,10 @@ export default function IscrittiPerAttivita() {
 
     // Filtro Stagione
     if (!showConcludedSeasonsLI) {
-      const targetSeasonId = selectedSeasonIdLI === "active" ? activeSeason?.id : parseInt(selectedSeasonIdLI);
-      const liSeasonId = li.seasonId || activeSeason?.id;
+      const fallbackSeasonId = seasons?.find((s: any) => s.active)?.id?.toString() || "";
+      const effectiveSeasonId = selectedSeasonIdLI || fallbackSeasonId;
+      const targetSeasonId = effectiveSeasonId === "all" ? null : parseInt(effectiveSeasonId);
+      const liSeasonId = li.seasonId || seasons?.find((s: any) => s.active)?.id;
       if (targetSeasonId && liSeasonId !== targetSeasonId) return false;
     }
 
@@ -301,8 +312,10 @@ export default function IscrittiPerAttivita() {
 
     // Filtro Stagione
     if (!showConcludedSeasonsDM) {
-      const targetSeasonId = selectedSeasonIdDM === "active" ? activeSeason?.id : parseInt(selectedSeasonIdDM);
-      const dmSeasonId = dm.seasonId || activeSeason?.id;
+      const fallbackSeasonId = seasons?.find((s: any) => s.active)?.id?.toString() || "";
+      const effectiveSeasonId = selectedSeasonIdDM || fallbackSeasonId;
+      const targetSeasonId = effectiveSeasonId === "all" ? null : parseInt(effectiveSeasonId);
+      const dmSeasonId = dm.seasonId || seasons?.find((s: any) => s.active)?.id;
       if (targetSeasonId && dmSeasonId !== targetSeasonId) return false;
     }
 
@@ -503,23 +516,19 @@ export default function IscrittiPerAttivita() {
               </div>
               <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
                 <div className="flex items-center gap-4">
-                  <Select value={selectedSeasonIdLI} onValueChange={setSelectedSeasonIdLI} disabled={showConcludedSeasonsLI}>
-                    <SelectTrigger className="w-[250px]">
-                      <SelectValue placeholder="Seleziona Stagione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Stagione Attiva</SelectItem>
-                      <SelectItem value="all">Tutte le Stagioni</SelectItem>
-                      {seasons?.map((s: any, idx: number) => {
-                        const seasonLabel = `${s.name} ${s.active ? '(Attiva)' : ''}`;
-                        return (
-                          <SelectItem key={`li-season-${s.id}-${idx}`} value={s.id.toString()}>
-                            {seasonLabel}
+                  <Select value={selectedSeasonIdLI || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdLI} disabled={showConcludedSeasonsLI}>
+                      <SelectTrigger className="w-full sm:w-[250px]">
+                        <SelectValue placeholder="Seleziona Stagione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sortedSeasons.map((s: any) => (
+                          <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
+                            {s.name} {s.active ? "(Attiva)" : ""}
                           </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
+                        ))}
+                        <SelectItem value="all">Tutte le Stagioni</SelectItem>
+                      </SelectContent>
+                    </Select>
                   <div className="flex items-center space-x-2">
                     <Checkbox 
                        id="show-concluded-li" 
@@ -691,19 +700,17 @@ export default function IscrittiPerAttivita() {
                   </div>
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
-                      <Select value={selectedSeasonIdCourses} onValueChange={setSelectedSeasonIdCourses} disabled={showConcludedSeasonsCourses}>
+                      <Select value={selectedSeasonIdCourses || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdCourses} disabled={showConcludedSeasonsCourses}>
                         <SelectTrigger className="w-[250px]">
                           <SelectValue placeholder="Seleziona Stagione" />
                         </SelectTrigger>
                         <SelectContent>
-                          {seasons?.map((s: any, idx: number) => {
-                            const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
-                            return (
-                              <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
-                                {getSeasonLabel(s, seasons)}
-                              </SelectItem>
-                            );
-                          })}
+                          {sortedSeasons.map((s: any) => (
+                            <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
+                              {s.name} {s.active ? "(Attiva)" : ""}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="all">Tutte le Stagioni</SelectItem>
                         </SelectContent>
                       </Select>
                       <div className="flex items-center space-x-2">
@@ -847,19 +854,17 @@ export default function IscrittiPerAttivita() {
                   </div>
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
-                      <Select value={selectedSeasonIdWS} onValueChange={setSelectedSeasonIdWS} disabled={showConcludedSeasonsWS}>
+                      <Select value={selectedSeasonIdWS || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdWS} disabled={showConcludedSeasonsWS}>
                         <SelectTrigger className="w-[250px]">
                           <SelectValue placeholder="Seleziona Stagione" />
                         </SelectTrigger>
                         <SelectContent>
-                          {seasons?.map((s: any, idx: number) => {
-                            const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
-                            return (
-                              <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
-                                {getSeasonLabel(s, seasons)}
-                              </SelectItem>
-                            );
-                          })}
+                          {sortedSeasons.map((s: any) => (
+                            <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
+                              {s.name} {s.active ? "(Attiva)" : ""}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="all">Tutte le Stagioni</SelectItem>
                         </SelectContent>
                       </Select>
                       <div className="flex items-center space-x-2">
@@ -994,21 +999,19 @@ export default function IscrittiPerAttivita() {
               </div>
               <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
                 <div className="flex items-center gap-4">
-                  <Select value={selectedSeasonIdAL} onValueChange={setSelectedSeasonIdAL} disabled={showConcludedSeasonsAL}>
-                    <SelectTrigger className="w-[250px]">
-                      <SelectValue placeholder="Seleziona Stagione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {seasons?.map((s: any, idx: number) => {
-                        const seasonLabel = `${s.name} ${s.active ? '(Attiva)' : ''}`;
-                        return (
-                          <SelectItem key={`al-season-${s.id}-${idx}`} value={s.id.toString()}>
-                            {seasonLabel}
+                  <Select value={selectedSeasonIdAL || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdAL} disabled={showConcludedSeasonsAL}>
+                      <SelectTrigger className="w-[250px]">
+                        <SelectValue placeholder="Seleziona Stagione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sortedSeasons.map((s: any) => (
+                          <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
+                            {s.name} {s.active ? "(Attiva)" : ""}
                           </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
+                        ))}
+                        <SelectItem value="all">Tutte le Stagioni</SelectItem>
+                      </SelectContent>
+                    </Select>
                   <div className="flex items-center space-x-2">
                     <Checkbox 
                        id="show-concluded-al" 
@@ -1139,21 +1142,17 @@ export default function IscrittiPerAttivita() {
               </div>
               <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
                 <div className="flex items-center gap-4">
-                  <Select value={selectedSeasonIdDM} onValueChange={setSelectedSeasonIdDM} disabled={showConcludedSeasonsDM}>
+                  <Select value={selectedSeasonIdDM || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdDM} disabled={showConcludedSeasonsDM}>
                     <SelectTrigger className="w-[250px]">
                       <SelectValue placeholder="Seleziona Stagione" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Stagione Attiva</SelectItem>
+                      {sortedSeasons.map((s: any) => (
+                        <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
+                          {s.name} {s.active ? "(Attiva)" : ""}
+                        </SelectItem>
+                      ))}
                       <SelectItem value="all">Tutte le Stagioni</SelectItem>
-                      {seasons?.map((s: any, idx: number) => {
-                        const seasonLabel = `${s.name} ${s.active ? '(Attiva)' : ''}`;
-                        return (
-                          <SelectItem key={`dm-season-${s.id}-${idx}`} value={s.id.toString()}>
-                            {seasonLabel}
-                          </SelectItem>
-                        );
-                      })}
                     </SelectContent>
                   </Select>
                   <div className="flex items-center space-x-2">
@@ -1297,18 +1296,17 @@ export default function IscrittiPerAttivita() {
                     />
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <Select value={selectedSeasonIdLI} onValueChange={setSelectedSeasonIdLI}>
-                      <SelectTrigger className="w-full sm:w-[200px]">
+                    <Select value={selectedSeasonIdLI || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdLI} disabled={showConcludedSeasonsLI}>
+                      <SelectTrigger className="w-full sm:w-[250px]">
                         <SelectValue placeholder="Seleziona Stagione" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="active">Stagione Attiva</SelectItem>
-                        <SelectItem value="all">Tutte le Stagioni</SelectItem>
-                        {seasons?.map((season) => (
-                          <SelectItem key={season.id} value={season.id.toString()}>
-                            {season.name} {season.isCurrent ? "(Attiva)" : ""}
+                        {sortedSeasons.map((s: any) => (
+                          <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
+                            {s.name} {s.active ? "(Attiva)" : ""}
                           </SelectItem>
                         ))}
+                        <SelectItem value="all">Tutte le Stagioni</SelectItem>
                       </SelectContent>
                     </Select>
                     
