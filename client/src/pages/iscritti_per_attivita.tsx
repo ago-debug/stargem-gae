@@ -61,6 +61,10 @@ export default function IscrittiPerAttivita() {
   const [expandedCourses, setExpandedCourses] = useState<string[]>([]);
   const [selectedSeasonIdCourses, setSelectedSeasonIdCourses] = useState<string>("active");
   const [showConcludedSeasonsCourses, setShowConcludedSeasonsCourses] = useState(false);
+  const [expandedAllenamenti, setExpandedAllenamenti] = useState<string[]>([]);
+  const [selectedSeasonIdAL, setSelectedSeasonIdAL] = useState<string>("active");
+  const [showConcludedSeasonsAL, setShowConcludedSeasonsAL] = useState(false);
+  const [searchQueryAL, setSearchQueryAL] = useState("");
   const [, setLocation] = useLocation();
 
   const { sortConfig: courseSort, handleSort: handleCourseSort, sortItems: sortCourseItems, isSortedColumn: isCourseSorted } = useSortableTable<any>("lastName");
@@ -229,6 +233,32 @@ export default function IscrittiPerAttivita() {
   }).sort((a, b) => {
     const dateA = new Date(a.startDate || a.createdAt || 0).getTime();
     const dateB = new Date(b.startDate || b.createdAt || 0).getTime();
+  }).sort((a, b) => {
+    const dateA = new Date(a.startDate || a.createdAt || 0).getTime();
+    const dateB = new Date(b.startDate || b.createdAt || 0).getTime();
+    return dateB - dateA; // Ordine decrescente
+  }) : [];
+
+  const filteredAllenamenti = Array.isArray(trainings) ? (trainings as any[]).filter(al => {
+    const matchesSearch = al.name.toLowerCase().includes(searchQueryAL.toLowerCase()) ||
+      al.sku?.toLowerCase().includes(searchQueryAL.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    // Filtro Stagione
+    if (!showConcludedSeasonsAL) {
+      const targetSeasonId = selectedSeasonIdAL === "active" ? activeSeason?.id : parseInt(selectedSeasonIdAL);
+      const alSeasonId = al.seasonId || activeSeason?.id;
+      if (targetSeasonId && alSeasonId !== targetSeasonId) return false;
+    }
+
+    if (showOnlyWithEnrollments) {
+      return allenamentiEnrollments && allenamentiEnrollments.filter(e => e.courseId === al.id && (e.status === 'active' || !e.status)).length > 0;
+    }
+    return true;
+  }).sort((a, b) => {
+    const dateA = new Date(a.startDate || a.createdAt || 0).getTime();
+    const dateB = new Date(b.startDate || b.createdAt || 0).getTime();
     return dateB - dateA; // Ordine decrescente
   }) : [];
 
@@ -253,6 +283,17 @@ export default function IscrittiPerAttivita() {
       } else {
         const totalEnrolls = filteredCourses.reduce((acc, c) => acc + getEnrollmentsForActivity(c.id, false).length, 0);
         headerCounterText = `${filteredCourses.length} corsi \u00B7 ${totalEnrolls} iscritti`;
+      }
+      break;
+    }
+    case 'allenamenti': {
+      const activeAl = filteredAllenamenti.filter(a => a.active);
+      if (activeAl.length > 0) {
+        const activeEnrolls = activeAl.reduce((acc, a) => acc + (allenamentiEnrollments?.filter(e => e.courseId === a.id && (e.status === 'active' || !e.status)).length || 0), 0);
+        headerCounterText = `${activeAl.length} attivi / ${filteredAllenamenti.length} totali \u00B7 ${activeEnrolls} iscritti`;
+      } else {
+        const totalEnrolls = filteredAllenamenti.reduce((acc, a) => acc + (allenamentiEnrollments?.filter(e => e.courseId === a.id && (e.status === 'active' || !e.status)).length || 0), 0);
+        headerCounterText = `${filteredAllenamenti.length} allenamenti \u00B7 ${totalEnrolls} iscritti`;
       }
       break;
     }
@@ -685,7 +726,157 @@ export default function IscrittiPerAttivita() {
             </Card>
           </TabsContent>
 
-          {activityMenuItems.filter(i => i.id !== "panoramica" && i.id !== "corsi" && i.id !== "workshop").map((item) => {
+        <TabsContent value="allenamenti" className="space-y-6 mt-0">
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col md:flex-row justify-between gap-4">
+                <div className="space-y-1">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                    <Activity className="w-6 h-6 text-primary" />
+                    Allenamenti
+                  </CardTitle>
+                  <CardDescription>
+                    {filteredAllenamenti?.length || 0} allenamenti {showOnlyWithEnrollments && " con iscrizioni attive"}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cerca per nome o SKU..."
+                      className="w-[300px] pl-9"
+                      value={searchQueryAL}
+                      onChange={(e) => setSearchQueryAL(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
+                <div className="flex items-center gap-4">
+                  <Select value={selectedSeasonIdAL} onValueChange={setSelectedSeasonIdAL} disabled={showConcludedSeasonsAL}>
+                    <SelectTrigger className="w-[250px]">
+                      <SelectValue placeholder="Seleziona Stagione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons?.map((s: any, idx: number) => {
+                        const seasonLabel = `${s.name} ${s.active ? '(Attiva)' : ''}`;
+                        return (
+                          <SelectItem key={`al-season-${s.id}-${idx}`} value={s.id.toString()}>
+                            {seasonLabel}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                       id="show-concluded-al" 
+                       checked={showConcludedSeasonsAL}
+                       onCheckedChange={(checked) => setShowConcludedSeasonsAL(checked as boolean)}
+                    />
+                    <Label htmlFor="show-concluded-al" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
+                  </div>
+                </div>
+                
+                {filteredAllenamenti && filteredAllenamenti.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setExpandedAllenamenti(filteredAllenamenti.map(a => a.id.toString()))}>Espandi tutto</Button>
+                    <Button variant="outline" size="sm" onClick={() => setExpandedAllenamenti([])}>Comprimi tutto</Button>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex flex-col space-y-3">
+                      <Skeleton className="h-8 w-full" />
+                      <Skeleton className="h-24 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : filteredAllenamenti && filteredAllenamenti.length > 0 ? (
+                <Accordion 
+                  type="multiple" 
+                  className="w-full space-y-4"
+                  value={expandedAllenamenti}
+                  onValueChange={setExpandedAllenamenti}
+                >
+                  {filteredAllenamenti.map((al) => {
+                    const alEnrollments = allenamentiEnrollments?.filter(e => e.courseId === al.id && (e.status === 'active' || !e.status)) || [];
+                    return (
+                      <ActivityAccordionCard
+                        key={al.id}
+                        id={al.id.toString()}
+                        icon={Activity}
+                        title={al.name}
+                        sku={al.sku}
+                        dayOfWeek={al.dayOfWeek}
+                        startTime={al.startTime}
+                        endTime={al.endTime}
+                        enrollmentsCount={alEnrollments.length}
+                        badgeLabelPlural="iscritti"
+                        badgeLabelSingular="iscritto"
+                        linkHref={`/scheda-allenamento?id=${al.id}`}
+                        testIdPrefix="al"
+                        isActive={al.active}
+                      >
+                        <div className="bg-white rounded-md border shadow-sm overflow-hidden">
+                          <Table>
+                            <TableHeader className="bg-muted/30">
+                              <TableRow>
+                                <SortableTableHead sortKey="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableTableHead>
+                                <SortableTableHead sortKey="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableTableHead>
+                                <SortableTableHead sortKey="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableTableHead>
+                                <TableHead>Insegnante</TableHead>
+                                <SortableTableHead sortKey="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableTableHead>
+                                <TableHead className="text-right">Azioni</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {sortActivityItems(alEnrollments, getSortValue).map((enroll: any) => {
+                                const instructorName = enroll.courseInstructorName?.trim() || al.courseInstructorName?.trim() || al.instructorName?.trim() || '-';
+                                return (
+                                  <TableRow key={enroll.id}>
+                                    <TableCell className={cn("font-medium", isActivitySorted("lastName") && "sorted-column-cell")}>{enroll.memberLastName || '-'}</TableCell>
+                                    <TableCell className={cn(isActivitySorted("firstName") && "sorted-column-cell")}>{enroll.memberFirstName || '-'}</TableCell>
+                                    <TableCell className={cn(isActivitySorted("email") && "sorted-column-cell")}>{enroll.memberEmail || '-'}</TableCell>
+                                    <TableCell>
+                                      <span className="text-xs text-muted-foreground">{instructorName}</span>
+                                    </TableCell>
+                                    <TableCell className={cn(isActivitySorted("date") && "sorted-column-cell")}>
+                                      {enroll.enrollmentDate ? new Date(enroll.enrollmentDate).toLocaleDateString('it-IT') : '-'}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <Link href={`/anagrafica_a_lista?search=${enroll.memberLastName || ''}`}>
+                                        <Button variant="ghost" size="sm">Profilo Completo</Button>
+                                      </Link>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </ActivityAccordionCard>
+                    );
+                  })}
+                </Accordion>
+              ) : (
+                <div className="text-center py-12">
+                    <Sparkles className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">
+                      {searchQueryAL ? "Nessun allenamento trovato" : "Nessun allenamento disponibile"}
+                      {showOnlyWithEnrollments && " con iscrizioni attive"}
+                    </p>
+                  </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+          {activityMenuItems.filter(i => i.id !== "panoramica" && i.id !== "corsi" && i.id !== "workshop" && i.id !== "allenamenti").map((item) => {
             const config = extraActivitiesMap[item.id];
             if (!config) return null;
 
