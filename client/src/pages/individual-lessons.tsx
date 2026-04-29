@@ -10,8 +10,9 @@ export default function IndividualLessons() {
       itemLabel="lezione individuale"
       itemLabelPlural="lezioni individuali"
       baseRoute="/scheda-lezione-individuale"
+      idParamName="courseId"
       testIdPrefix="individual-lesson"
-      activityType="lezione_individuale"
+      activityType="individual_lesson"
     />
   );
 }
