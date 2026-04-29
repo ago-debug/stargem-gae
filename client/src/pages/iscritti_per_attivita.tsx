@@ -65,6 +65,10 @@ export default function IscrittiPerAttivita() {
   const [selectedSeasonIdAL, setSelectedSeasonIdAL] = useState<string>("active");
   const [showConcludedSeasonsAL, setShowConcludedSeasonsAL] = useState(false);
   const [searchQueryAL, setSearchQueryAL] = useState("");
+  const [expandedDomeniche, setExpandedDomeniche] = useState<string[]>([]);
+  const [selectedSeasonIdDM, setSelectedSeasonIdDM] = useState<string>("active");
+  const [showConcludedSeasonsDM, setShowConcludedSeasonsDM] = useState(false);
+  const [searchQueryDM, setSearchQueryDM] = useState("");
   const [, setLocation] = useLocation();
 
   const { sortConfig: courseSort, handleSort: handleCourseSort, sortItems: sortCourseItems, isSortedColumn: isCourseSorted } = useSortableTable<any>("lastName");
@@ -262,6 +266,29 @@ export default function IscrittiPerAttivita() {
     return dateB - dateA; // Ordine decrescente
   }) : [];
 
+  const filteredDomeniche = Array.isArray(sundayActivities) ? (sundayActivities as any[]).filter(dm => {
+    const matchesSearch = dm.name.toLowerCase().includes(searchQueryDM.toLowerCase()) ||
+      dm.sku?.toLowerCase().includes(searchQueryDM.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    // Filtro Stagione
+    if (!showConcludedSeasonsDM) {
+      const targetSeasonId = selectedSeasonIdDM === "active" ? activeSeason?.id : parseInt(selectedSeasonIdDM);
+      const dmSeasonId = dm.seasonId || activeSeason?.id;
+      if (targetSeasonId && dmSeasonId !== targetSeasonId) return false;
+    }
+
+    if (showOnlyWithEnrollments) {
+      return saEnrollments && saEnrollments.filter(e => e.courseId === dm.id && (e.status === 'active' || !e.status)).length > 0;
+    }
+    return true;
+  }).sort((a, b) => {
+    const dateA = new Date(a.startDate || a.createdAt || 0).getTime();
+    const dateB = new Date(b.startDate || b.createdAt || 0).getTime();
+    return dateB - dateA; // Ordine decrescente
+  }) : [];
+
   let headerCounterText = `${dynamicEnrollmentsCount} iscrizioni attive`;
   switch (activeTab) {
     case 'workshop': {
@@ -294,6 +321,17 @@ export default function IscrittiPerAttivita() {
       } else {
         const totalEnrolls = filteredAllenamenti.reduce((acc, a) => acc + (allenamentiEnrollments?.filter(e => e.courseId === a.id && (e.status === 'active' || !e.status)).length || 0), 0);
         headerCounterText = `${filteredAllenamenti.length} allenamenti \u00B7 ${totalEnrolls} iscritti`;
+      }
+      break;
+    }
+    case 'domeniche-movimento': {
+      const activeDm = filteredDomeniche.filter(d => d.active);
+      if (activeDm.length > 0) {
+        const activeEnrolls = activeDm.reduce((acc, d) => acc + (saEnrollments?.filter(e => e.courseId === d.id && (e.status === 'active' || !e.status)).length || 0), 0);
+        headerCounterText = `${activeDm.length} attivi / ${filteredDomeniche.length} totali \u00B7 ${activeEnrolls} iscritti`;
+      } else {
+        const totalEnrolls = filteredDomeniche.reduce((acc, d) => acc + (saEnrollments?.filter(e => e.courseId === d.id && (e.status === 'active' || !e.status)).length || 0), 0);
+        headerCounterText = `${filteredDomeniche.length} domeniche \u00B7 ${totalEnrolls} iscritti`;
       }
       break;
     }
@@ -876,7 +914,152 @@ export default function IscrittiPerAttivita() {
           </Card>
         </TabsContent>
 
-          {activityMenuItems.filter(i => i.id !== "panoramica" && i.id !== "corsi" && i.id !== "workshop" && i.id !== "allenamenti").map((item) => {
+        <TabsContent value="domeniche-movimento" className="space-y-6 mt-0">
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col md:flex-row justify-between gap-4">
+                <div className="space-y-1">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                    <Activity className="w-6 h-6 text-primary" />
+                    Domeniche in Movimento
+                  </CardTitle>
+                  <CardDescription>
+                    {filteredDomeniche?.length || 0} domeniche {showOnlyWithEnrollments && " con iscrizioni attive"}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cerca per nome o SKU..."
+                      className="w-[300px] pl-9"
+                      value={searchQueryDM}
+                      onChange={(e) => setSearchQueryDM(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
+                <div className="flex items-center gap-4">
+                  <Select value={selectedSeasonIdDM} onValueChange={setSelectedSeasonIdDM} disabled={showConcludedSeasonsDM}>
+                    <SelectTrigger className="w-[250px]">
+                      <SelectValue placeholder="Seleziona Stagione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons?.map((s: any, idx: number) => {
+                        const seasonLabel = `${s.name} ${s.active ? '(Attiva)' : ''}`;
+                        return (
+                          <SelectItem key={`dm-season-${s.id}-${idx}`} value={s.id.toString()}>
+                            {seasonLabel}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                       id="show-concluded-dm" 
+                       checked={showConcludedSeasonsDM}
+                       onCheckedChange={(checked) => setShowConcludedSeasonsDM(checked as boolean)}
+                    />
+                    <Label htmlFor="show-concluded-dm" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
+                  </div>
+                </div>
+                
+                {filteredDomeniche && filteredDomeniche.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setExpandedDomeniche(filteredDomeniche.map(d => d.id.toString()))}>Espandi tutto</Button>
+                    <Button variant="outline" size="sm" onClick={() => setExpandedDomeniche([])}>Comprimi tutto</Button>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex flex-col space-y-3">
+                      <Skeleton className="h-8 w-full" />
+                      <Skeleton className="h-24 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : filteredDomeniche && filteredDomeniche.length > 0 ? (
+                <Accordion 
+                  type="multiple" 
+                  className="w-full space-y-4"
+                  value={expandedDomeniche}
+                  onValueChange={setExpandedDomeniche}
+                >
+                  {filteredDomeniche.map((dm) => {
+                    const dmEnrollments = saEnrollments?.filter(e => e.courseId === dm.id && (e.status === 'active' || !e.status)) || [];
+                    return (
+                      <ActivityAccordionCard
+                        key={dm.id}
+                        id={dm.id.toString()}
+                        icon={Activity}
+                        title={dm.name}
+                        sku={dm.sku}
+                        dayOfWeek={dm.dayOfWeek}
+                        startTime={dm.startTime}
+                        endTime={dm.endTime}
+                        enrollmentsCount={dmEnrollments.length}
+                        badgeLabelPlural="iscritti"
+                        badgeLabelSingular="iscritto"
+                        linkHref={`/scheda-domenica?id=${dm.id}`}
+                        testIdPrefix="dm"
+                        isActive={dm.active}
+                      >
+                        <div className="bg-white rounded-md border shadow-sm overflow-hidden">
+                          <Table>
+                            <TableHeader className="bg-muted/30">
+                              <TableRow>
+                                <SortableTableHead sortKey="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableTableHead>
+                                <SortableTableHead sortKey="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableTableHead>
+                                <SortableTableHead sortKey="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableTableHead>
+                                <SortableTableHead sortKey="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableTableHead>
+                                <TableHead className="text-right">Azioni</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {sortActivityItems(dmEnrollments, getSortValue).map((enroll: any) => {
+                                return (
+                                  <TableRow key={enroll.id}>
+                                    <TableCell className={cn("font-medium", isActivitySorted("lastName") && "sorted-column-cell")}>{enroll.memberLastName || '-'}</TableCell>
+                                    <TableCell className={cn(isActivitySorted("firstName") && "sorted-column-cell")}>{enroll.memberFirstName || '-'}</TableCell>
+                                    <TableCell className={cn(isActivitySorted("email") && "sorted-column-cell")}>{enroll.memberEmail || '-'}</TableCell>
+                                    <TableCell className={cn(isActivitySorted("date") && "sorted-column-cell")}>
+                                      {enroll.enrollmentDate ? new Date(enroll.enrollmentDate).toLocaleDateString('it-IT') : '-'}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <Link href={`/anagrafica_a_lista?search=${enroll.memberLastName || ''}`}>
+                                        <Button variant="ghost" size="sm">Profilo Completo</Button>
+                                      </Link>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </ActivityAccordionCard>
+                    );
+                  })}
+                </Accordion>
+              ) : (
+                <div className="text-center py-12">
+                    <Sparkles className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">
+                      {searchQueryDM ? "Nessuna domenica trovata" : "Nessuna domenica disponibile"}
+                      {showOnlyWithEnrollments && " con iscrizioni attive"}
+                    </p>
+                  </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+          {activityMenuItems.filter(i => i.id !== "panoramica" && i.id !== "corsi" && i.id !== "workshop" && i.id !== "allenamenti" && i.id !== "domeniche-movimento").map((item) => {
             const config = extraActivitiesMap[item.id];
             if (!config) return null;
 
