@@ -144,10 +144,10 @@ export default function IscrittiPerAttivita() {
   const activeWorkshops = Array.isArray(workshops) ? (workshops as Workshop[]).filter(w => w.active) : [];
 
   const activeEnrollments = Array.isArray(enrollments) ? (enrollments as any[]).filter(e => e.status === 'active' || !e.status) : [];
-  const totalCourseEnrollments = Array.isArray(activeEnrollments) ? (activeEnrollments as any[]).filter(e => e.courseId && Array.isArray(courses) && (courses as Course[]).some(c => c.id === e.courseId && c.active)).length : 0;
+  const totalCourseEnrollments = Array.isArray(activeEnrollments) ? (activeEnrollments as any[]).filter(e => e.courseId && Array.isArray(courses) && (courses as Course[]).some(c => c.id === e.courseId)).length : 0;
   // Calculate specific workshop enrollments by checking the workshop-enrollments endpoint specifically
   // @ts-ignore // TODO: STI-cleanup
-  const totalWsEnrollments = Array.isArray(wsEnrollments) ? (wsEnrollments as any[]).filter(e => (e.status === 'active' || !e.status) && Array.isArray(workshops) && (workshops as Workshop[]).some(w => w.id === e.courseId && w.active)).length : 0;
+  const totalWsEnrollments = Array.isArray(wsEnrollments) ? (wsEnrollments as any[]).filter(e => (e.status === 'active' || !e.status) && Array.isArray(workshops) && (workshops as Workshop[]).some(w => w.id === e.courseId)).length : 0;
 
   const totalActiveEnrollmentsCount = totalCourseEnrollments + totalWsEnrollments;
 
