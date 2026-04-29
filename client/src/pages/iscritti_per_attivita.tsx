@@ -58,6 +58,9 @@ export default function IscrittiPerAttivita() {
   const [expandedWorkshops, setExpandedWorkshops] = useState<string[]>([]);
   const [selectedSeasonIdWS, setSelectedSeasonIdWS] = useState<string>("active");
   const [showConcludedSeasonsWS, setShowConcludedSeasonsWS] = useState(false);
+  const [expandedCourses, setExpandedCourses] = useState<string[]>([]);
+  const [selectedSeasonIdCourses, setSelectedSeasonIdCourses] = useState<string>("active");
+  const [showConcludedSeasonsCourses, setShowConcludedSeasonsCourses] = useState(false);
   const [, setLocation] = useLocation();
 
   const { sortConfig: courseSort, handleSort: handleCourseSort, sortItems: sortCourseItems, isSortedColumn: isCourseSorted } = useSortableTable<any>("lastName");
@@ -187,10 +190,22 @@ export default function IscrittiPerAttivita() {
       course.sku?.toLowerCase().includes(searchQuery.toLowerCase());
 
     if (!matchesSearch) return false;
+
+    // Filtro Stagione
+    if (!showConcludedSeasonsCourses) {
+      const targetSeasonId = selectedSeasonIdCourses === "active" ? activeSeason?.id : parseInt(selectedSeasonIdCourses);
+      const courseSeasonId = course.seasonId || activeSeason?.id;
+      if (targetSeasonId && courseSeasonId !== targetSeasonId) return false;
+    }
+
     if (showOnlyWithEnrollments) {
       return getEnrollmentsForActivity(course.id, false).length > 0;
     }
     return true;
+  }).sort((a, b) => {
+    const dateA = new Date(a.startDate || a.createdAt || 0).getTime();
+    const dateB = new Date(b.startDate || b.createdAt || 0).getTime();
+    return dateB - dateA; // Ordine decrescente
   }) : [];
 
   // @ts-ignore // TODO: STI-cleanup
@@ -230,9 +245,17 @@ export default function IscrittiPerAttivita() {
       }
       break;
     }
-    case 'corsi':
-      headerCounterText = `${dynamicEnrollmentsCount} iscrizioni attive`;
+    case 'corsi': {
+      const activeCourses = filteredCourses.filter(c => c.active);
+      if (activeCourses.length > 0) {
+        const activeEnrolls = activeCourses.reduce((acc, c) => acc + getEnrollmentsForActivity(c.id, false).length, 0);
+        headerCounterText = `${activeCourses.length} attivi / ${filteredCourses.length} totali \u00B7 ${activeEnrolls} iscritti`;
+      } else {
+        const totalEnrolls = filteredCourses.reduce((acc, c) => acc + getEnrollmentsForActivity(c.id, false).length, 0);
+        headerCounterText = `${filteredCourses.length} corsi \u00B7 ${totalEnrolls} iscritti`;
+      }
       break;
+    }
     default:
       headerCounterText = `${dynamicEnrollmentsCount} iscrizioni attive`;
       break;
@@ -372,15 +395,51 @@ export default function IscrittiPerAttivita() {
           <TabsContent value="corsi" className="space-y-6 mt-0">
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Cerca corso per nome o SKU..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        placeholder="Cerca corso per nome o SKU..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-4">
+                      <Select value={selectedSeasonIdCourses} onValueChange={setSelectedSeasonIdCourses} disabled={showConcludedSeasonsCourses}>
+                        <SelectTrigger className="w-[250px]">
+                          <SelectValue placeholder="Seleziona Stagione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {seasons?.map((s: any, idx: number) => {
+                            const isActiveFallback = s.active || (!seasons.find((x: any) => x.active) && idx === 0);
+                            return (
+                              <SelectItem key={s.id} value={isActiveFallback ? "active" : s.id.toString()} className={isActiveFallback ? "font-semibold" : ""}>
+                                {getSeasonLabel(s, seasons)}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                           id="show-concluded-courses" 
+                           checked={showConcludedSeasonsCourses}
+                           onCheckedChange={(checked) => setShowConcludedSeasonsCourses(checked as boolean)}
+                        />
+                        <Label htmlFor="show-concluded-courses" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
+                      </div>
+                    </div>
+                    
+                    {filteredCourses && filteredCourses.length > 0 && (
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setExpandedCourses(filteredCourses.map(c => c.id.toString()))}>Espandi tutto</Button>
+                        <Button variant="outline" size="sm" onClick={() => setExpandedCourses([])}>Comprimi tutto</Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -395,105 +454,24 @@ export default function IscrittiPerAttivita() {
                     ))}
                   </div>
                 ) : filteredCourses && filteredCourses.length > 0 ? (
-                  <div className="space-y-6">
-                    {filteredCourses.map((course) => {
-                      const courseEnrollments = getEnrollmentsForActivity(course.id, false);
-                      return (
-                        <Card key={course.id} className="overflow-hidden">
-                          <CardHeader className="bg-muted/50">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                  <GraduationCap className="w-5 h-5 text-primary" />
-                                </div>
-                                <div>
-                                  <h3 className="text-lg font-semibold">{course.name}</h3>
-                                  {course.sku && (
-                                    <p className="text-sm text-muted-foreground">SKU: {course.sku}</p>
-                                  )}
-                                  {course.dayOfWeek && course.startTime && (
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                      {course.dayOfWeek} • {course.startTime}
-                                      {course.endTime && ` - ${course.endTime}`}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary">
-                                  {courseEnrollments.length} {courseEnrollments.length === 1 ? 'iscritto' : 'iscritti'}
-                                </Badge>
-                                <Link href={`/scheda-corso?courseId=${course.id}`}>
-                                  <Button size="sm" className="bg-[#2c3e50] text-[#e0e0e0] hover:bg-[#34495e]" data-testid={`button-scheda-corso-${course.id}`}>
-                                    Scheda
-                                  </Button>
-                                </Link>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="pt-4">
-                            {courseEnrollments.length === 0 ? (
-                              <p className="text-sm text-muted-foreground text-center py-4">
-                                Nessun iscritto per questo corso
-                              </p>
-                            ) : (
-                              <div className="border rounded-lg overflow-hidden">
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <SortableTableHead sortKey="lastName" currentSort={courseSort} onSort={handleCourseSort}>Cognome</SortableTableHead>
-                                      <SortableTableHead sortKey="firstName" currentSort={courseSort} onSort={handleCourseSort}>Nome</SortableTableHead>
-                                      <SortableTableHead sortKey="email" currentSort={courseSort} onSort={handleCourseSort}>Email</SortableTableHead>
-                                      <TableHead>Dettagli</TableHead>
-                                      <SortableTableHead sortKey="date" currentSort={courseSort} onSort={handleCourseSort}>Data Iscrizione</SortableTableHead>
-                                      <TableHead className="text-right">Azioni</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {sortCourseItems(courseEnrollments, getSortValue).map((enrollment) => (
-                                      <TableRow key={enrollment.enrollmentId}>
-                                        <TableCell className={cn("font-medium", isCourseSorted("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
-                                        <TableCell className={cn(isCourseSorted("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
-                                        <TableCell className={cn(isCourseSorted("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
-                                        <TableCell>
-                                          <div className="flex flex-wrap gap-1">
-                                            {Array.isArray(enrollment.details) ? enrollment.details.map((detail: string) => (
-                                              <EnrollmentDetailBadge key={detail} name={detail} />
-                                            )) : null}
-                                          </div>
-                                        </TableCell>
-                                        <TableCell className={cn(isCourseSorted("date") && "sorted-column-cell")}>
-                                          {enrollment.startDate
-                                            ? new Date(enrollment.startDate).toLocaleDateString('it-IT')
-                                            : '-'}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-primary hover:text-primary hover:bg-primary/10"
-                                            onClick={() => setLocation(`/anagrafica_a_lista?editMemberId=${enrollment.memberId}`)}
-                                          >
-                                            <Edit className="w-4 h-4 mr-1" />
-                                            Modifica Anagrafica
-                                          </Button>
-                                          <Link href={`/anagrafica_a_lista?search=${enrollment.lastName}`}>
-                                            <Button variant="ghost" size="sm">
-                                              Profilo Completo
-                                            </Button>
-                                          </Link>
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
+                  <Accordion 
+                    type="multiple" 
+                    className="w-full space-y-4"
+                    value={expandedCourses}
+                    onValueChange={setExpandedCourses}
+                  >
+                    {filteredCourses.map((course) => (
+                      <ActivityAccordionCard
+                        key={course.id}
+                        activity={course}
+                        enrollments={getEnrollmentsForActivity(course.id, false)}
+                        instructors={instructors || []}
+                        studios={studios || []}
+                        categories={categories || []}
+                        activeTab="corsi"
+                      />
+                    ))}
+                  </Accordion>
                 ) : (
                   <div className="text-center py-12">
                     <GraduationCap className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
