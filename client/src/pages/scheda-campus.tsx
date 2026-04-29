@@ -101,48 +101,28 @@ export default function SchedaCampus() {
     }
 
 
-    const enrolledMembersData = (enrolledMembersRaw || []).map((data: { member: Member, enrollment: Enrollment, payments: Payment[], attendances: Attendance[] }) => {
-        const hasPaidPayments = data?.payments?.some((p: Payment) => p.status === 'paid');
+        const enrolledMembersData = (enrolledMembersRaw || []).map((data: any) => {
+        const hasPaidPayments = payments?.some((p: any) => p.status === 'paid' && Number(p.enrollmentId) === Number(data.enrollment_id));
+        const hasAnyPayments = payments?.some((p: any) => Number(p.enrollmentId) === Number(data.enrollment_id));
         const paymentStatusBadge = hasPaidPayments ?
-            <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none">Regolare</Badge> :
-            (data?.payments?.length > 0 ?
-                <Badge className="bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 shadow-none">Parziale/In Sospeso</Badge> :
+            <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0">Regolare</Badge> :
+            (hasAnyPayments ?
+                <Badge className="bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 shadow-none border-0">In Sospeso</Badge> :
                 <Badge variant="outline" className="bg-slate-50 text-slate-500 shadow-none border-slate-200">Non Pagato</Badge>
             );
 
-        let medicalCertStatus = 'missing';
-        let medicalCertFormattedDate = '';
-        if (data.member.medicalCertificateExpiry) {
-            const certDate = new Date(data.member.medicalCertificateExpiry);
-            if (!Number.isNaN(certDate.getTime())) {
-                medicalCertFormattedDate = certDate.toLocaleDateString("it-IT");
-                const today = new Date();
-                const warningDate = new Date();
-                warningDate.setDate(today.getDate() + 30);
-                if (certDate < today) {
-                    medicalCertStatus = 'expired';
-                } else if (certDate <= warningDate) {
-                    medicalCertStatus = 'warning';
-                } else {
-                    medicalCertStatus = 'valid';
-                }
-            }
-        }
-
         return {
             ...data,
-            paymentStatusBadge,
-            medicalCertStatus,
-            medicalCertFormattedDate
+            paymentStatusBadge
         };
     });
 
     const getSortValue = (data: any, key: string) => {
         switch (key) {
-            case "firstName": return data?.member?.firstName || "";
-            case "lastName": return data?.member?.lastName || "";
-            case "email": return data?.member?.email || "";
-            case "attendances": return data?.attendances?.length || 0;
+            case "firstName": return data?.first_name || "";
+            case "lastName": return data?.last_name || "";
+            case "email": return data?.email || "";
+            case "attendances": return Number(data?.presenze_count) || 0;
             default: return null;
         }
     };
@@ -233,14 +213,26 @@ export default function SchedaCampus() {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                sortedEnrolledMembersData.map(({ member, attendances, paymentStatusBadge, medicalCertStatus, medicalCertFormattedDate }: any) => {
+                                                                sortedEnrolledMembersData.map((data: any) => {
+                                    const {
+                                      member_id,
+                                      first_name,
+                                      last_name,
+                                      email,
+                                      membership_expiry_date,
+                                      membership_status,
+                                      medical_expiry_date,
+                                      medical_status,
+                                      presenze_count,
+                                      paymentStatusBadge,
+                                    } = data;
                                     const today = new Date();
 
                                     let cardExpiryText = <span className="text-slate-500 text-sm italic">Assente</span>;
-                                    if (member.cardExpiryDate) {
-                                        const expiryDate = new Date(member.cardExpiryDate);
+                                    if (membership_expiry_date) {
+                                        const expiryDate = new Date(membership_expiry_date);
                                         const isValidCardDate = !Number.isNaN(expiryDate.getTime());
-                                        const isExpired = isValidCardDate && expiryDate < today;
+                                        const isExpired = membership_status === "expired" || expiryDate < today;
                                         cardExpiryText = (
                                             <span className={`inline-flex items-center gap-1.5 font-medium ${isExpired ? 'text-red-600' : 'text-slate-700'}`}>
                                                 {isExpired ? <XCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
@@ -250,32 +242,39 @@ export default function SchedaCampus() {
                                     }
 
                                     let certExpiryText = <Badge variant="outline" className="bg-slate-100 text-slate-500 hover:bg-slate-200 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Assente</Badge>;
-                                    if (medicalCertStatus === 'valid') {
-                                        certExpiryText = <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0 gap-1"><CheckCircle2 className="w-3.5 h-3.5"/> Valido ({medicalCertFormattedDate})</Badge>;
-                                    } else if (medicalCertStatus === 'warning') {
-                                        certExpiryText = <Badge className="bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 shadow-none border-0 gap-1"><AlertTriangle className="w-3.5 h-3.5"/> In Scadenza ({medicalCertFormattedDate})</Badge>;
-                                    } else if (medicalCertStatus === 'expired') {
-                                        certExpiryText = <Badge variant="destructive" className="bg-red-500/10 text-red-700 hover:bg-red-500/20 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> {medicalCertFormattedDate ? `Scaduto (${medicalCertFormattedDate})` : 'Data non valida'}</Badge>;
+                                    if (medical_expiry_date) {
+                                        const expiryDate = new Date(medical_expiry_date);
+                                        const isValidCertDate = !Number.isNaN(expiryDate.getTime());
+                                        const isExpired = medical_status === "expired" || expiryDate < today;
+                                        const warningDate = new Date();
+                                        warningDate.setDate(today.getDate() + 30);
+                                        const isWarning = !isExpired && expiryDate <= warningDate;
+
+                                        if (isExpired) {
+                                            certExpiryText = <Badge variant="destructive" className="bg-red-500/10 text-red-700 hover:bg-red-500/20 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Scaduto ({isValidCertDate ? expiryDate.toLocaleDateString("it-IT") : 'Data non valida'})</Badge>;
+                                        } else if (isWarning) {
+                                            certExpiryText = <Badge className="bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 shadow-none border-0 gap-1"><AlertTriangle className="w-3.5 h-3.5"/> In Scadenza ({isValidCertDate ? expiryDate.toLocaleDateString("it-IT") : 'Data non valida'})</Badge>;
+                                        } else {
+                                            certExpiryText = <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0 gap-1"><CheckCircle2 className="w-3.5 h-3.5"/> Valido ({isValidCertDate ? expiryDate.toLocaleDateString("it-IT") : 'Data non valida'})</Badge>;
+                                        }
                                     }
 
                                     return (
-                                        <TableRow key={member.id} className="hover:bg-slate-50/80 transition-colors">
+                                        <TableRow key={member_id} className="hover:bg-slate-50/80 transition-colors">
                                             <TableCell className={cn("font-medium text-slate-900", isSortedColumn("firstName") && "sorted-column-cell")}>
-                                                <Link href={`/?memberId=${member.id}`} className="hover:underline cursor-pointer">
-                                                    {member.firstName}
+                                                <Link href={`/?memberId=${member_id}`} className="hover:underline cursor-pointer">
+                                                    {first_name}
                                                 </Link>
                                             </TableCell>
                                             <TableCell className={cn("font-medium text-slate-900", isSortedColumn("lastName") && "sorted-column-cell")}>
-                                                <Link href={`/?memberId=${member.id}`} className="hover:underline cursor-pointer">
-                                                    {member.lastName}
+                                                <Link href={`/?memberId=${member_id}`} className="hover:underline cursor-pointer">
+                                                    {last_name}
                                                 </Link>
                                             </TableCell>
 
-                                            <TableCell>
+                                            <TableCell className={cn("text-slate-600 text-sm", isSortedColumn("email") && "sorted-column-cell")}>
                                                 <div className="flex flex-col">
-                                                    <span className="text-xs text-slate-500">Età: {member.dateOfBirth ? Math.floor((today.getTime() - new Date(member.dateOfBirth).getTime()) / 31557600000) : 'N/A'}</span>
-                                                    <span className="text-xs font-medium">{member.motherFirstName || member.fatherFirstName || ''}</span>
-                                                    <span className="text-xs text-slate-500">{member.motherPhone || member.phone || member.mobile || ''}</span>
+                                                    <span>{email || '-'}</span>
                                                 </div>
                                             </TableCell>
 
@@ -283,14 +282,14 @@ export default function SchedaCampus() {
                                             <TableCell>{certExpiryText}</TableCell>
                                             <TableCell className={cn("text-center", isSortedColumn("attendances") && "sorted-column-cell")}>
                                                 <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5">
-                                                    {attendances.length}
+                                                    {Number(presenze_count) || 0}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 {paymentStatusBadge}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/?memberId=${member.id}`}>
+                                                <Link href={`/?memberId=${member_id}`}>
                                                     <Button variant="ghost" size="sm" className="text-gold hover:text-gold-foreground hover:bg-gold/10 font-medium">
                                                         Profilo <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                                                     </Button>
