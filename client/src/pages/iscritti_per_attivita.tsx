@@ -460,17 +460,80 @@ export default function IscrittiPerAttivita() {
                     value={expandedCourses}
                     onValueChange={setExpandedCourses}
                   >
-                    {filteredCourses.map((course) => (
-                      <ActivityAccordionCard
-                        key={course.id}
-                        activity={course}
-                        enrollments={getEnrollmentsForActivity(course.id, false)}
-                        instructors={instructors || []}
-                        studios={studios || []}
-                        categories={categories || []}
-                        activeTab="corsi"
-                      />
-                    ))}
+                    {filteredCourses.map((course) => {
+                      const courseEnrollments = getEnrollmentsForActivity(course.id, false);
+                      return (
+                        <ActivityAccordionCard
+                          key={course.id}
+                          id={course.id.toString()}
+                          activity={course}
+                          icon={GraduationCap}
+                          enrollmentsCount={courseEnrollments.length}
+                          badgeLabelPlural="iscritti"
+                          badgeLabelSingular="iscritto"
+                          linkHref={`/scheda-corso?courseId=${course.id}`}
+                          testIdPrefix="scheda-corso"
+                        >
+                          {courseEnrollments.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-4">
+                              Nessun iscritto per questo corso
+                            </p>
+                          ) : (
+                            <div className="border rounded-lg overflow-hidden">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <SortableTableHead sortKey="lastName" currentSort={courseSort} onSort={handleCourseSort}>Cognome</SortableTableHead>
+                                    <SortableTableHead sortKey="firstName" currentSort={courseSort} onSort={handleCourseSort}>Nome</SortableTableHead>
+                                    <SortableTableHead sortKey="email" currentSort={courseSort} onSort={handleCourseSort}>Email</SortableTableHead>
+                                    <TableHead>Dettagli</TableHead>
+                                    <SortableTableHead sortKey="date" currentSort={courseSort} onSort={handleCourseSort}>Data Iscrizione</SortableTableHead>
+                                    <TableHead className="text-right">Azioni</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {sortCourseItems(courseEnrollments, getSortValue).map((enrollment) => (
+                                    <TableRow key={enrollment.enrollmentId}>
+                                      <TableCell className={cn("font-medium", isCourseSorted("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
+                                      <TableCell className={cn(isCourseSorted("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
+                                      <TableCell className={cn(isCourseSorted("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
+                                      <TableCell>
+                                        <div className="flex flex-wrap gap-1">
+                                          {Array.isArray(enrollment.details) ? enrollment.details.map((detail: string) => (
+                                            <EnrollmentDetailBadge key={detail} name={detail} />
+                                          )) : null}
+                                        </div>
+                                      </TableCell>
+                                      <TableCell className={cn(isCourseSorted("date") && "sorted-column-cell")}>
+                                        {enrollment.startDate
+                                          ? new Date(enrollment.startDate).toLocaleDateString('it-IT')
+                                          : '-'}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-primary hover:text-primary hover:bg-primary/10"
+                                          onClick={() => setLocation(`/anagrafica_a_lista?editMemberId=${enrollment.memberId}`)}
+                                        >
+                                          <Edit className="w-4 h-4 mr-1" />
+                                          Modifica Anagrafica
+                                        </Button>
+                                        <Link href={`/anagrafica_a_lista?search=${enrollment.lastName}`}>
+                                          <Button variant="ghost" size="sm">
+                                            Profilo Completo
+                                          </Button>
+                                        </Link>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
+                        </ActivityAccordionCard>
+                      );
+                    })}
                   </Accordion>
                 ) : (
                   <div className="text-center py-12">
