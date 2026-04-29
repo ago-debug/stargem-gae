@@ -10,6 +10,7 @@ export default function CampusActivities() {
       itemLabel="campus/centro estivo"
       itemLabelPlural="campus e centri estivi"
       baseRoute="/scheda-campus"
+      idParamName="courseId"
       testIdPrefix="campus-activity"
       activityType="campus"
     />
