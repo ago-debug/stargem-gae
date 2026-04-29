@@ -302,7 +302,7 @@ export default function Attivita() {
 
   const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
   // @ts-ignore // TODO: STI-cleanup
-  const { data: workshops } = useQuery<Course[]>({ queryKey: ["/api/workshops"] });
+  const { data: workshops } = useQuery<Course[]>({ queryKey: ["/api/courses?activityType=workshop"] });
   const { data: categorieList } = useCustomList("categorie");
   const categories = categorieList?.items ? [...categorieList.items].filter((i: any) => i.active !== false).map((i: any) => ({ id: i.id, name: i.value, color: i.color } as Category)) : [];
   const { data: workshopCategories } = useQuery<Category[]>({ queryKey: ["/api/workshop-categories"] });

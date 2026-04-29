@@ -9841,6 +9841,9 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       };
 
       const { sql } = await import("drizzle-orm");
+      const activeSeason = await storage.getActiveSeason();
+      const seasonIdParam = req.query.seasonId as string | undefined;
+      const targetSeasonId = seasonIdParam === "all" ? null : (parseInt(seasonIdParam as string) || activeSeason?.id);
 
       const coursesSummary = await db.execute(sql`
         SELECT 
@@ -9848,6 +9851,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
           COUNT(*) as total, 
           SUM(CASE WHEN active = 1 THEN 1 ELSE 0 END) as active
         FROM courses
+        ${targetSeasonId ? sql`WHERE season_id = ${targetSeasonId}` : sql``}
         GROUP BY activity_type
       `);
 
