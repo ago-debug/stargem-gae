@@ -32,6 +32,7 @@ import {
   ArrowLeft,
   Search,
   GraduationCap,
+  Presentation,
   Edit,
   Database,
   Building2,
@@ -55,7 +56,7 @@ export default function IscrittiPerAttivita() {
   const [activeTab, setActiveTab] = useState("panoramica");
   const [searchQuery, setSearchQuery] = useState("");
   const [showOnlyWithEnrollments, setShowOnlyWithEnrollments] = useState(false);
-  const [expandedWorkshopss, setExpandedWorkshopss] = useState<string[]>([]);
+  const [expandedWorkshops, setExpandedWorkshops] = useState<string[]>([]);
   const [selectedSeasonIdWS, setSelectedSeasonIdWS] = useState<string>("");
   const [showConcludedSeasonsWS, setShowConcludedSeasonsWS] = useState(false);
   const [expandedCourses, setExpandedCourses] = useState<string[]>([]);
@@ -233,7 +234,7 @@ export default function IscrittiPerAttivita() {
   }) : [];
 
   // @ts-ignore // TODO: STI-cleanup
-  const filteredWorkshopss = Array.isArray(workshops) ? (workshops as Workshop[]).filter(workshop => {
+  const filteredWorkshops = Array.isArray(workshops) ? (workshops as Workshop[]).filter(workshop => {
     const matchesSearch = workshop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       workshop.sku?.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -360,13 +361,13 @@ export default function IscrittiPerAttivita() {
   let headerCounterText = `${dynamicEnrollmentsCount} iscrizioni attive`;
   switch (activeTab) {
     case 'workshop': {
-      const activeWs = filteredWorkshopss.filter(w => w.active);
+      const activeWs = filteredWorkshops.filter(w => w.active);
       if (activeWs.length > 0) {
         const activeEnrolls = activeWs.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
-        headerCounterText = `${activeWs.length} attivi / ${filteredWorkshopss.length} totali \u00B7 ${activeEnrolls} iscritti`;
+        headerCounterText = `${activeWs.length} attivi / ${filteredWorkshops.length} totali \u00B7 ${activeEnrolls} iscritti`;
       } else {
-        const totalEnrolls = filteredWorkshopss.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
-        headerCounterText = `${filteredWorkshopss.length} workshop \u00B7 ${totalEnrolls} iscritti`;
+        const totalEnrolls = filteredWorkshops.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
+        headerCounterText = `${filteredWorkshops.length} workshop \u00B7 ${totalEnrolls} iscritti`;
       }
       break;
     }
@@ -633,8 +634,8 @@ export default function IscrittiPerAttivita() {
                   <Input
                     placeholder="Cerca per nome o SKU..."
                     className="w-full sm:w-[300px] pl-9"
-                    value={searchQueryCourses}
-                    onChange={(e) => setSearchQueryCourses(e.target.value)}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
               </div>
@@ -815,8 +816,8 @@ export default function IscrittiPerAttivita() {
                   <Input
                     placeholder="Cerca per nome o SKU..."
                     className="w-full sm:w-[300px] pl-9"
-                    value={searchQueryWS}
-                    onChange={(e) => setSearchQueryWS(e.target.value)}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
               </div>
@@ -831,9 +832,9 @@ export default function IscrittiPerAttivita() {
                       </div>
                     ))}
                   </div>
-                ) : filteredWorkshopss && filteredWorkshopss.length > 0 ? (
-                  <Accordion type="multiple" value={expandedWorkshopss} onValueChange={setExpandedWorkshopss} className="space-y-4">
-                    {filteredWorkshopss.map((workshop) => {
+                ) : filteredWorkshops && filteredWorkshops.length > 0 ? (
+                  <Accordion type="multiple" value={expandedWorkshops} onValueChange={setExpandedWorkshops} className="space-y-4">
+                    {filteredWorkshops.map((workshop) => {
                       const workshopEnrollments = getEnrollmentsForActivity(workshop.id, true);
                       return (
                         <ActivityAccordionCard
