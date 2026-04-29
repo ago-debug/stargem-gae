@@ -55,7 +55,7 @@ export default function IscrittiPerAttivita() {
   const [activeTab, setActiveTab] = useState("panoramica");
   const [searchQuery, setSearchQuery] = useState("");
   const [showOnlyWithEnrollments, setShowOnlyWithEnrollments] = useState(false);
-  const [expandedWorkshops, setExpandedWorkshops] = useState<string[]>([]);
+  const [expandedWorkshopss, setExpandedWorkshopss] = useState<string[]>([]);
   const [selectedSeasonIdWS, setSelectedSeasonIdWS] = useState<string>("");
   const [showConcludedSeasonsWS, setShowConcludedSeasonsWS] = useState(false);
   const [expandedCourses, setExpandedCourses] = useState<string[]>([]);
@@ -233,7 +233,7 @@ export default function IscrittiPerAttivita() {
   }) : [];
 
   // @ts-ignore // TODO: STI-cleanup
-  const filteredWorkshops = Array.isArray(workshops) ? (workshops as Workshop[]).filter(workshop => {
+  const filteredWorkshopss = Array.isArray(workshops) ? (workshops as Workshop[]).filter(workshop => {
     const matchesSearch = workshop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       workshop.sku?.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -360,13 +360,13 @@ export default function IscrittiPerAttivita() {
   let headerCounterText = `${dynamicEnrollmentsCount} iscrizioni attive`;
   switch (activeTab) {
     case 'workshop': {
-      const activeWs = filteredWorkshops.filter(w => w.active);
+      const activeWs = filteredWorkshopss.filter(w => w.active);
       if (activeWs.length > 0) {
         const activeEnrolls = activeWs.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
-        headerCounterText = `${activeWs.length} attivi / ${filteredWorkshops.length} totali \u00B7 ${activeEnrolls} iscritti`;
+        headerCounterText = `${activeWs.length} attivi / ${filteredWorkshopss.length} totali \u00B7 ${activeEnrolls} iscritti`;
       } else {
-        const totalEnrolls = filteredWorkshops.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
-        headerCounterText = `${filteredWorkshops.length} workshop \u00B7 ${totalEnrolls} iscritti`;
+        const totalEnrolls = filteredWorkshopss.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
+        headerCounterText = `${filteredWorkshopss.length} workshop \u00B7 ${totalEnrolls} iscritti`;
       }
       break;
     }
@@ -572,22 +572,22 @@ export default function IscrittiPerAttivita() {
                     Corsi
                   </CardTitle>
                   <CardDescription>
-                    {filteredCorsi?.length || 0} corsi {showOnlyWithEnrollments && " con iscrizioni attive"}
+                    {filteredCourses?.length || 0} corsi {showOnlyWithEnrollments && " con iscrizioni attive"}
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
                     variant="outline" 
                     onClick={() => {
-                      if (expandedCorsi.length === filteredCorsi.length && filteredCorsi.length > 0) {
-                        setExpandedCorsi([]);
+                      if (expandedCourses.length === filteredCourses.length && filteredCourses.length > 0) {
+                        setExpandedCourses([]);
                       } else {
-                        setExpandedCorsi(filteredCorsi.map((item: any) => item.id.toString()));
+                        setExpandedCourses(filteredCourses.map((item: any) => item.id.toString()));
                       }
                     }}
                     className="whitespace-nowrap"
                   >
-                    {expandedCorsi.length === filteredCorsi.length && filteredCorsi.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
+                    {expandedCourses.length === filteredCourses.length && filteredCourses.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
                   </Button>
                 </div>
               </div>
@@ -754,22 +754,22 @@ export default function IscrittiPerAttivita() {
                     Workshop
                   </CardTitle>
                   <CardDescription>
-                    {filteredWorkshop?.length || 0} workshop {showOnlyWithEnrollments && " con iscrizioni attive"}
+                    {filteredWorkshops?.length || 0} workshop {showOnlyWithEnrollments && " con iscrizioni attive"}
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
                     variant="outline" 
                     onClick={() => {
-                      if (expandedWorkshop.length === filteredWorkshop.length && filteredWorkshop.length > 0) {
-                        setExpandedWorkshop([]);
+                      if (expandedWorkshops.length === filteredWorkshops.length && filteredWorkshops.length > 0) {
+                        setExpandedWorkshops([]);
                       } else {
-                        setExpandedWorkshop(filteredWorkshop.map((item: any) => item.id.toString()));
+                        setExpandedWorkshops(filteredWorkshops.map((item: any) => item.id.toString()));
                       }
                     }}
                     className="whitespace-nowrap"
                   >
-                    {expandedWorkshop.length === filteredWorkshop.length && filteredWorkshop.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
+                    {expandedWorkshops.length === filteredWorkshops.length && filteredWorkshops.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
                   </Button>
                 </div>
               </div>
@@ -831,9 +831,9 @@ export default function IscrittiPerAttivita() {
                       </div>
                     ))}
                   </div>
-                ) : filteredWorkshops && filteredWorkshops.length > 0 ? (
-                  <Accordion type="multiple" value={expandedWorkshops} onValueChange={setExpandedWorkshops} className="space-y-4">
-                    {filteredWorkshops.map((workshop) => {
+                ) : filteredWorkshopss && filteredWorkshopss.length > 0 ? (
+                  <Accordion type="multiple" value={expandedWorkshopss} onValueChange={setExpandedWorkshopss} className="space-y-4">
+                    {filteredWorkshopss.map((workshop) => {
                       const workshopEnrollments = getEnrollmentsForActivity(workshop.id, true);
                       return (
                         <ActivityAccordionCard
