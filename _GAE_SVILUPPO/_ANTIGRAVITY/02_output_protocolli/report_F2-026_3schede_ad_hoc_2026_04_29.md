@@ -70,3 +70,35 @@ Analizzando l'item, è emerso che SKU `2526ALLENAMENTO` (o `2526GENERICO`) rappr
 - L'ordinamento alfabetico e la gestione badge (pagamento/certificati) sono identici alla tabella centrale.
 - L'applicazione compila senza errori in TypeScript.
 - Tutte le richieste sono state completate senza toccare né refactorizzare `scheda-corso` e `scheda-allenamento`.
+
+## INTEGRAZIONE: GESTIONE PLACEHOLDER PER CAMPI NULL
+A seguito dell'audit `F1-021` che ha certificato la presenza massiva di campi NULL per le attività anomale (Domenica, Lezioni Individuali e Campus), è stata implementata una rigorosa logica di "Graceful Degradation" visiva per evitare di stampare "null", "undefined" o spazi bianchi spezzati.
+
+**Regola Applicata:**
+Se un campo è presente a database, viene mostrato il valore reale.
+Se il campo è NULL/vuoto, viene mostrato il placeholder testuale `— Da popolare` (in corsivo, `text-muted-foreground`) con l'esplicito tooltip `"Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi."`.
+
+### Lista Placeholder Applicati
+Per **Domenica**:
+- **Data Domenica**: `— Da popolare`
+- **Tipo (Nome)**: `— Da popolare`
+- **Insegnante Assegnato**: `— Insegnante da assegnare`
+- **Sala**: `— Sala da assegnare`
+- **Presenze (TODO Strutturale)**: `— Modulo presenze in attesa di configurazione (Chat_Analisi)`
+
+Per **Lezione Individuale**:
+- **Insegnante, Giorno, Sala**: `— Configurabile da iscrizione (TODO Chat_Analisi)`
+- **Pacchetto**: `— Modulo pacchetti da implementare (TODO Chat_Analisi)`
+- **Prossima Lezione**: `— Modulo booking lezioni da implementare (TODO Chat_Analisi)`
+- **Storico Lezioni**: Mostra `N presenze (storico strisciate)` calcolato dinamicamente dalle presenze. Se `0`, mostra `— Da popolare`.
+
+Per **Campus**:
+- **Settimana (Data Start-End)**: `— Da popolare`
+- **Tipo Campus (Nome)**: `— Da popolare`
+- **Orari Giornalieri**: `— Da popolare`
+- **Pasti/Extra**: `— Modulo pasti da implementare (TODO Chat_Analisi)`
+- **Gruppo/Classe**: `— Modulo gruppi da implementare (TODO Chat_Analisi)`
+*(Il Genitore Accompagnatore, invece, preleva regolarmente i dati da `members` se presenti)*.
+
+**Esito Verifica Globale:**
+Il comando `grep "Da popolare" client/src/pages/scheda-*.tsx` ha confermato la corretta applicazione dei tag Placeholder. Nessuna stringa "null" o "undefined" appare più all'utente. Tutti i campi mancanti o strutturalmente non implementati per i "contenitori" mostrano l'esplicito badge di attesa analisi.

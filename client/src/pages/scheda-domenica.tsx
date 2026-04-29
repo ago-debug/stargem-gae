@@ -174,26 +174,29 @@ export default function SchedaDomenica() {
                     </div>
                     {item && (
                         
-                    <div className="flex flex-wrap gap-3 pt-2">
+                                        <div className="flex flex-wrap gap-3 pt-2">
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Calendar className="w-3.5 h-3.5" />
-                            Data: {item.startDate ? new Date(item.startDate).toLocaleDateString('it-IT') : 'N/A'}
+                            Data: {item.startDate ? new Date(item.startDate).toLocaleDateString('it-IT') : <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Da popolare</span>}
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Tag className="w-3.5 h-3.5" />
-                            Tipo: {item.name || 'N/A'}
+                            Tipo: {item.name || <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Da popolare</span>}
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Users className="w-3.5 h-3.5" />
-                            Insegnante: {item.instructorId || 'Da assegnare'} 
+                            {/* TODO Chat_Analisi: insegnante domenica — colonna esiste ma valore NULL nei record reali */}
+                            Insegnante: {item.instructorId || <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Insegnante da assegnare</span>} 
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Building2 className="w-3.5 h-3.5" />
-                            Studio/Sala: {item.studioId || 'Da assegnare'}
+                            {/* TODO Chat_Analisi: sala domenica — colonna esiste ma valore NULL nei record reali */}
+                            Studio/Sala: {item.studioId || <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Sala da assegnare</span>}
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5" title="Da configurare — vedi Chat_Analisi">
                             <CheckCircle2 className="w-3.5 h-3.5" />
-                            Presenze: {/* TODO Chat_Analisi: stato presenze domenica — richiede tabella attendances o struttura dedicata */} Da configurare
+                            Presenze: {/* TODO Chat_Analisi: stato presenze domenica — richiede tabella attendances o struttura dedicata */} 
+                            <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Modulo presenze in attesa di configurazione (Chat_Analisi)</span>
                         </Badge>
                     </div>
 

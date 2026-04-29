@@ -174,26 +174,30 @@ export default function SchedaCampus() {
                     </div>
                     {item && (
                         
-                    <div className="flex flex-wrap gap-3 pt-2">
+                                        <div className="flex flex-wrap gap-3 pt-2">
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Calendar className="w-3.5 h-3.5" />
-                            Settimana: {item.startDate ? new Date(item.startDate).toLocaleDateString('it-IT') : 'N/A'} - {item.endDate ? new Date(item.endDate).toLocaleDateString('it-IT') : 'N/A'}
+                            {/* TODO Chat_Analisi: settimana campus — colonna esiste ma valore NULL nei record reali */}
+                            Settimana: {(item.startDate || item.endDate) ? `${item.startDate ? new Date(item.startDate).toLocaleDateString('it-IT') : ''} - ${item.endDate ? new Date(item.endDate).toLocaleDateString('it-IT') : ''}` : <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Da popolare</span>}
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Tag className="w-3.5 h-3.5" />
-                            Tipo Campus: {item.name || 'N/A'}
+                            Tipo Campus: {item.name || <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Da popolare</span>}
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" />
-                            Orari: {item.startTime || 'N/A'} - {item.endTime || 'N/A'}
+                            {/* TODO Chat_Analisi: orari giornalieri campus — colonna esiste ma valore NULL nei record reali */}
+                            Orari: {(item.startTime || item.endTime) ? `${item.startTime || 'N/A'} - ${item.endTime || 'N/A'}` : <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Da popolare</span>}
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5" title="Da configurare — vedi Chat_Analisi">
                             <Info className="w-3.5 h-3.5" />
-                            Pasti/Extra: {/* TODO Chat_Analisi: pasti/extra Campus — richiede DB structure */} Da configurare
+                            Pasti/Extra: {/* TODO Chat_Analisi: pasti/extra Campus — richiede DB structure */}
+                            <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Modulo pasti da implementare (TODO Chat_Analisi)</span>
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5" title="Da configurare — vedi Chat_Analisi">
                             <Users className="w-3.5 h-3.5" />
-                            Gruppo: {/* TODO Chat_Analisi: gruppo bambino Campus — richiede DB structure o uso di courses.level */} Da configurare
+                            Gruppo: {/* TODO Chat_Analisi: gruppo bambino Campus — richiede DB structure o uso di courses.level */}
+                            <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Modulo gruppi da implementare (TODO Chat_Analisi)</span>
                         </Badge>
                     </div>
 
