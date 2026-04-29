@@ -26,18 +26,21 @@ import { buildEnrolledMembersData } from "@/lib/enrollments";
 export default function SchedaAllenamento() {
     const [location, setLocation] = useLocation();
     const searchParams = new URLSearchParams(window.location.search);
-    const activeIdRaw = searchParams.get("activityId");
-    const activeId = Number(activeIdRaw);
-    const hasValidId = Number.isFinite(activeId) && activeId > 0;
+    const courseIdRaw = searchParams.get("courseId");
+    const courseId = Number(courseIdRaw);
+    const hasValidId = Number.isFinite(courseId) && courseId > 0;
 
-    const { data: items, isLoading: itemsLoading } = useQuery<any[]>({ queryKey: ["/api/courses?activityType=allenamenti"] });
-    const { data: members, isLoading: membersLoading } = useQuery<{ members: Member[] }>({ queryKey: ["/api/members"] });
-    const { data: enrollments, isLoading: enrollmentsLoading } = useQuery<Enrollment[]>({ queryKey: ["/api/enrollments?type=allenamento"] });
+    const { data: courses, isLoading: coursesLoading } = useQuery<any[]>({ queryKey: ["/api/courses"] });
+    const { data: enrolledMembersRaw, isLoading: enrolledMembersLoading } =
+        useQuery<any[]>({
+            queryKey: [`/api/courses/${courseId}/enrolled-members`],
+            enabled: !!courseId,
+        });
     const { data: payments, isLoading: paymentsLoading } = useQuery<Payment[]>({ queryKey: ["/api/payments"] });
-    const { data: attendances, isLoading: attendancesLoading } = useQuery<Attendance[]>({ queryKey: ["/api/attendances"] });
 
     const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
-    if (itemsLoading || membersLoading || enrollmentsLoading || paymentsLoading || attendancesLoading) {
+    
+    if (coursesLoading || enrolledMembersLoading || paymentsLoading) {
         return (
             <div className="p-6 md:p-8 space-y-6 mx-auto">
                 <Skeleton className="h-12 w-64" />
@@ -46,15 +49,17 @@ export default function SchedaAllenamento() {
         );
     }
 
-    if (!hasValidId) {
+    const item = courses?.find(c => c.id === courseId);
+
+    if (!item || !hasValidId) {
         return (
             <div className="p-6 md:p-8 mx-auto">
                 <div className="bg-white p-6 rounded-xl border shadow-sm">
                     <h1 className="text-2xl font-bold text-slate-800">Scheda Allenamento</h1>
-                    <p className="text-slate-600 mt-2">Parametro <code>activeId</code> mancante o non valido nell’URL.</p>
+                    <p className="text-slate-600 mt-2">Parametro <code>courseId</code> mancante o non valido nell’URL, oppure allenamento non trovato.</p>
                     <div className="mt-4">
-                        <Button variant="outline" onClick={() => setLocation("/iscritti_per_attivita")}>
-                            Torna a Iscritti per Attività
+                        <Button variant="outline" onClick={() => window.history.back()}>
+                            <ArrowLeft className="w-4 h-4 mr-2" /> Torna Indietro
                         </Button>
                     </div>
                 </div>
@@ -62,35 +67,7 @@ export default function SchedaAllenamento() {
         );
     }
 
-    const item = items?.find(c => c.id === activeId);
-
-    if (!item) {
-        return (
-            <div className="p-6 md:p-8 mx-auto">
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
-                    <h1 className="text-2xl font-bold text-slate-800">Scheda Allenamento</h1>
-                    <p className="text-slate-600 mt-2">Attività non trovata per <code>activityId={String(activeId)}</code>.</p>
-                    <div className="mt-4">
-                        <Button variant="outline" onClick={() => setLocation("/iscritti_per_attivita")}>
-                            Torna a Iscritti per Attività
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-    const enrichedData = buildEnrolledMembersData({
-        activityId: activeId,
-        isWorkshop: false,
-        idField: 'courseId',
-        enrollments: enrollments || [],
-        membersData: members || [],
-        payments: payments || [],
-        attendances: attendances || []
-    });
-
-    const enrolledMembersData = enrichedData.map((data: { member: Member, enrollment: Enrollment, payments: Payment[], attendances: Attendance[] }) => {
-        // Simple payment status logic: check if there's at least one paid payment (can be refined based on actual requirements)
+    const enrolledMembersData = (enrolledMembersRaw || []).map((data: { member: Member, enrollment: Enrollment, payments: Payment[], attendances: Attendance[] }) => {
         const hasPaidPayments = data?.payments?.some((p: Payment) => p.status === 'paid');
         const paymentStatusBadge = hasPaidPayments ?
             <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none">Regolare</Badge> :
