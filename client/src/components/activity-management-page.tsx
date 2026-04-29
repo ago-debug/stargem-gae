@@ -172,6 +172,14 @@ export default function ActivityManagementPage({
     queryKey: [queryUrlStr],
   });
 
+  const { data: enrollments } = useQuery<any[]>({
+    queryKey: ["/api/enrollments"],
+  });
+
+  const getEnrollmentCount = (courseId: number) => {
+    return enrollments?.filter(e => e.courseId === courseId && (e.status === 'active' || !e.status)).length || 0;
+  };
+
   const { data: instructors } = useQuery<Instructor[]>({
     queryKey: ["/api/instructors"],
   });
@@ -379,7 +387,7 @@ export default function ActivityManagementPage({
       }
       case "price": return Number(item.price) || 0;
       case "capacity": return item.maxCapacity || 0;
-      case "enrollment": return item.currentEnrollment || 0;
+      case "enrollment": return getEnrollmentCount(item.id);
       case "period": return item.startDate;
       case "status": return parseStatusTags(item.statusTags).join(", ");
       default: return null;
@@ -405,7 +413,7 @@ export default function ActivityManagementPage({
         category?.name || "",
         instructor ? `${instructor.lastName} ${instructor.firstName}` : "",
         item.price || "",
-        item.currentEnrollment?.toString() || "0",
+        getEnrollmentCount(item.id).toString(),
         item.maxCapacity || "",
         dayLabel,
         item.startTime || "",
@@ -982,7 +990,7 @@ export default function ActivityManagementPage({
                       </TableCell>
                       <TableCell className={isSortedColumn("price") ? "sorted-column-cell" : undefined}>{item.price ? `€${item.price}` : "€0.00"}</TableCell>
                       <TableCell className={cn("text-center", isSortedColumn("enrollment") && "sorted-column-cell")}>
-                        <Badge variant="secondary">{item.currentEnrollment || 0}</Badge>
+                        <Badge variant="secondary">{getEnrollmentCount(item.id)}</Badge>
                       </TableCell>
                       <TableCell className={isSortedColumn("capacity") ? "sorted-column-cell" : undefined}>{item.maxCapacity || "∞"}</TableCell>
                       <TableCell className={cn("text-sm", isSortedColumn("period") && "sorted-column-cell")}>
