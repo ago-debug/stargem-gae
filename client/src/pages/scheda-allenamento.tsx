@@ -66,33 +66,45 @@ export default function SchedaAllenamento() {
             </div>
         );
     }
+    if (item.sku === '2526ALLENAMENTO' || (item.sku && item.sku.startsWith('2526GENERICO'))) {
+        return (
+            <div className="p-6 md:p-8 mx-auto">
+                <div className="bg-white p-6 rounded-xl border shadow-sm">
+                    <h1 className="text-2xl font-bold text-slate-800">Scheda Allenamento</h1>
+                    <p className="text-slate-600 mt-2">Nessun dato relazionale per questo contenitore generico ({item.sku}).</p>
+                    <div className="mt-4">
+                        <Button variant="outline" onClick={() => window.history.back()}>
+                            <ArrowLeft className="w-4 h-4 mr-2" /> Torna Indietro
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
-    const enrolledMembersData = (enrolledMembersRaw || []).map((data: { member: Member, enrollment: Enrollment, payments: Payment[], attendances: Attendance[] }) => {
-        const hasPaidPayments = data?.payments?.some((p: Payment) => p.status === 'paid');
+
+        const enrolledMembersData = (enrolledMembersRaw || []).map((data: any) => {
+        const hasPaidPayments = payments?.some((p: any) => p.status === 'paid' && Number(p.enrollmentId) === Number(data.enrollment_id));
+        const hasAnyPayments = payments?.some((p: any) => Number(p.enrollmentId) === Number(data.enrollment_id));
         const paymentStatusBadge = hasPaidPayments ?
-            <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none">Regolare</Badge> :
-            (data?.payments?.length > 0 ?
+            <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0">Regolare</Badge> :
+            (hasAnyPayments ?
                 <Badge variant="destructive" className="bg-red-500/10 text-red-700 hover:bg-red-500/20 shadow-none border-0">In Sospeso</Badge> :
-                <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30 shadow-none">Dati Assenti</Badge>);
+                <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30 shadow-none">Dati Assenti</Badge>
+            );
 
         return {
             ...data,
             paymentStatusBadge
         };
-    }) as Array<{
-        member: Member,
-        enrollment: Enrollment,
-        payments: Payment[],
-        attendances: Attendance[],
-        paymentStatusBadge: ReactNode
-    }>;
+    });
 
     const getSortValue = (data: any, key: string) => {
         switch (key) {
-            case "firstName": return data?.member?.firstName || "";
-            case "lastName": return data?.member?.lastName || "";
-            case "email": return data?.member?.email || "";
-            case "attendances": return data?.attendances?.length || 0;
+            case "firstName": return data?.first_name || "";
+            case "lastName": return data?.last_name || "";
+            case "email": return data?.email || "";
+            case "attendances": return Number(data?.presenze_count) || 0;
             default: return null;
         }
     };
@@ -174,15 +186,26 @@ export default function SchedaAllenamento() {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                sortedEnrolledMembersData.map(({ member, attendances, paymentStatusBadge, medicalCertStatus, medicalCertFormattedDate }: any) => {
+                                                                sortedEnrolledMembersData.map((data: any) => {
+                                    const {
+                                      member_id,
+                                      first_name,
+                                      last_name,
+                                      email,
+                                      membership_expiry_date,
+                                      membership_status,
+                                      medical_expiry_date,
+                                      medical_status,
+                                      presenze_count,
+                                      paymentStatusBadge,
+                                    } = data;
                                     const today = new Date();
 
-                                    // Check card expiry
                                     let cardExpiryText = <span className="text-slate-500 text-sm italic">Assente</span>;
-                                    if (member.cardExpiryDate) {
-                                        const expiryDate = new Date(member.cardExpiryDate);
+                                    if (membership_expiry_date) {
+                                        const expiryDate = new Date(membership_expiry_date);
                                         const isValidCardDate = !Number.isNaN(expiryDate.getTime());
-                                        const isExpired = isValidCardDate && expiryDate < today;
+                                        const isExpired = membership_status === "expired" || expiryDate < today;
                                         cardExpiryText = (
                                             <span className={`inline-flex items-center gap-1.5 font-medium ${isExpired ? 'text-red-600' : 'text-slate-700'}`}>
                                                 {isExpired ? <XCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
@@ -191,41 +214,49 @@ export default function SchedaAllenamento() {
                                         );
                                     }
 
-                                    // Check med cert expiry using pre-calculated status
                                     let certExpiryText = <Badge variant="outline" className="bg-slate-100 text-slate-500 hover:bg-slate-200 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Assente</Badge>;
-                                    if (medicalCertStatus === 'valid') {
-                                        certExpiryText = <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0 gap-1"><CheckCircle2 className="w-3.5 h-3.5"/> Valido ({medicalCertFormattedDate})</Badge>;
-                                    } else if (medicalCertStatus === 'warning') {
-                                        certExpiryText = <Badge className="bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 shadow-none border-0 gap-1"><AlertTriangle className="w-3.5 h-3.5"/> In Scadenza ({medicalCertFormattedDate})</Badge>;
-                                    } else if (medicalCertStatus === 'expired') {
-                                        certExpiryText = <Badge variant="destructive" className="bg-red-500/10 text-red-700 hover:bg-red-500/20 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> {medicalCertFormattedDate ? `Scaduto (${medicalCertFormattedDate})` : 'Data non valida'}</Badge>;
+                                    if (medical_expiry_date) {
+                                        const expiryDate = new Date(medical_expiry_date);
+                                        const isValidCertDate = !Number.isNaN(expiryDate.getTime());
+                                        const isExpired = medical_status === "expired" || expiryDate < today;
+                                        const warningDate = new Date();
+                                        warningDate.setDate(today.getDate() + 30);
+                                        const isWarning = !isExpired && expiryDate <= warningDate;
+
+                                        if (isExpired) {
+                                            certExpiryText = <Badge variant="destructive" className="bg-red-500/10 text-red-700 hover:bg-red-500/20 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Scaduto ({isValidCertDate ? expiryDate.toLocaleDateString("it-IT") : 'Data non valida'})</Badge>;
+                                        } else if (isWarning) {
+                                            certExpiryText = <Badge className="bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 shadow-none border-0 gap-1"><AlertTriangle className="w-3.5 h-3.5"/> In Scadenza ({isValidCertDate ? expiryDate.toLocaleDateString("it-IT") : 'Data non valida'})</Badge>;
+                                        } else {
+                                            certExpiryText = <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0 gap-1"><CheckCircle2 className="w-3.5 h-3.5"/> Valido ({isValidCertDate ? expiryDate.toLocaleDateString("it-IT") : 'Data non valida'})</Badge>;
+                                        }
                                     }
 
                                     return (
-                                        <TableRow key={member.id} className="hover:bg-slate-50/80 transition-colors">
+                                        <TableRow key={member_id} className="hover:bg-slate-50/80 transition-colors">
                                             <TableCell className={cn("font-medium text-slate-900", isSortedColumn("firstName") && "sorted-column-cell")}>
-                                                <Link href={`/?memberId=${member.id}`} className="hover:underline cursor-pointer">
-                                                    {member.firstName}
+                                                <Link href={`/?memberId=${member_id}`} className="hover:underline cursor-pointer">
+                                                    {first_name}
                                                 </Link>
                                             </TableCell>
                                             <TableCell className={cn("font-medium text-slate-900", isSortedColumn("lastName") && "sorted-column-cell")}>
-                                                <Link href={`/?memberId=${member.id}`} className="hover:underline cursor-pointer">
-                                                    {member.lastName}
+                                                <Link href={`/?memberId=${member_id}`} className="hover:underline cursor-pointer">
+                                                    {last_name}
                                                 </Link>
                                             </TableCell>
-                                            <TableCell className={cn("text-slate-600 text-sm", isSortedColumn("email") && "sorted-column-cell")}>{member.email || '-'}</TableCell>
+                                            <TableCell className={cn("text-slate-600 text-sm", isSortedColumn("email") && "sorted-column-cell")}>{email || '-'}</TableCell>
                                             <TableCell>{cardExpiryText}</TableCell>
                                             <TableCell>{certExpiryText}</TableCell>
                                             <TableCell className={cn("text-center", isSortedColumn("attendances") && "sorted-column-cell")}>
                                                 <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5">
-                                                    {attendances.length}
+                                                    {Number(presenze_count) || 0}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 {paymentStatusBadge}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/?memberId=${member.id}`}>
+                                                <Link href={`/?memberId=${member_id}`}>
                                                     <Button variant="ghost" size="sm" className="text-gold hover:text-gold-foreground hover:bg-gold/10 font-medium">
                                                         Profilo Completo <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                                                     </Button>
