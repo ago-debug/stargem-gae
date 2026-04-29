@@ -9826,6 +9826,75 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     }
   });
 
+  // ==== DASHBOARD PANORAMICA ====
+  app.get("/api/dashboard/attivita-panoramica", isAuthenticated, async (req, res) => {
+    try {
+      const startMs = Date.now();
+      const [
+        insegnantiRes,
+        ptRes,
+        saleRes,
+        categorieRes,
+        iscrizioniRes,
+        tesseratiRes,
+        corsiRes,
+        stagioneRes
+      ] = await Promise.all([
+        pool.execute(`SELECT COUNT(*) as count FROM members WHERE active=1 AND (LOWER(participant_type) LIKE '%insegnante%' OR LOWER(participant_type) LIKE '%staff%')`),
+        pool.execute(`SELECT COUNT(*) as count FROM members WHERE active=1 AND LOWER(participant_type) LIKE '%personal_trainer%'`),
+        pool.execute(`SELECT COUNT(*) as totali, SUM(CASE WHEN active=1 THEN 1 ELSE 0 END) as attivi FROM studios`),
+        pool.execute(`
+          SELECT COUNT(*) as count 
+          FROM custom_list_items i
+          JOIN custom_lists l ON i.list_id = l.id
+          WHERE l.system_name = 'categorie' AND i.active = 1
+        `),
+        pool.execute(`SELECT COUNT(*) as count FROM enrollments WHERE (status='active' OR status IS NULL)`),
+        pool.execute(`SELECT COUNT(*) as count FROM memberships m JOIN seasons s ON m.season_id=s.id WHERE s.active=1`),
+        pool.execute(`SELECT COUNT(*) as count FROM courses c JOIN seasons s ON c.season_id=s.id WHERE s.active=1 AND c.active=1`),
+        pool.execute(`SELECT name FROM seasons WHERE active=1 LIMIT 1`)
+      ]);
+
+      const extractCount = (res: any) => res[0]?.[0]?.count ? Number(res[0][0].count) : 0;
+
+      const insegnanti = extractCount(insegnantiRes);
+      const personalTrainer = extractCount(ptRes);
+      const saleTotali = saleRes[0]?.[0]?.totali ? Number(saleRes[0][0].totali) : 0;
+      const saleAttive = saleRes[0]?.[0]?.attivi ? Number(saleRes[0][0].attivi) : 0;
+      const categorieConfigurate = extractCount(categorieRes);
+
+      const iscrizioniAttive = extractCount(iscrizioniRes);
+      const tesseratiAttivi = extractCount(tesseratiRes);
+      const corsiAttivi = extractCount(corsiRes);
+      const mediaIscrizioniPerCorso = corsiAttivi > 0 ? Number((iscrizioniAttive / corsiAttivi).toFixed(1)) : 0;
+      
+      const stagioneNomeRaw = stagioneRes[0]?.[0]?.name || "N/A";
+      const stagioneNome = stagioneNomeRaw.replace(/Stagione\s+/i, '').trim();
+
+      res.setHeader('X-Response-Time', `${Date.now() - startMs}ms`);
+
+      res.json({
+        oggi: null,
+        risorse: {
+          insegnanti,
+          personalTrainer,
+          saleAttive: `${saleAttive}/${saleTotali}`,
+          categorieConfigurate
+        },
+        saluteDati: null,
+        stagione: {
+          iscrizioniAttive,
+          tesseratiAttivi,
+          mediaIscrizioniPerCorso,
+          stagioneNome
+        }
+      });
+    } catch (error) {
+      console.error("[API Error] /api/dashboard/attivita-panoramica:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard data" });
+    }
+  });
+
   app.get("/api/activities-summary", isAuthenticated, async (req, res) => {
     try {
       const summaries: Record<string, { total: number, active: number }> = {
