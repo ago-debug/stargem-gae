@@ -10,6 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useLocation } from "wouter";
 import { EnrollmentDetailBadge } from "@/components/multi-select-enrollment-details";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion } from "@/components/ui/accordion";
+import { ActivityAccordionCard } from "@/components/activity-accordion-card";
 import { cn } from "@/lib/utils";
 import {
   Calendar,
@@ -50,6 +55,9 @@ export default function IscrittiPerAttivita() {
   const [activeTab, setActiveTab] = useState("panoramica");
   const [searchQuery, setSearchQuery] = useState("");
   const [showOnlyWithEnrollments, setShowOnlyWithEnrollments] = useState(false);
+  const [expandedWorkshops, setExpandedWorkshops] = useState<string[]>([]);
+  const [selectedSeasonIdWS, setSelectedSeasonIdWS] = useState<string>("active");
+  const [showConcludedSeasonsWS, setShowConcludedSeasonsWS] = useState(false);
   const [, setLocation] = useLocation();
 
   const { sortConfig: courseSort, handleSort: handleCourseSort, sortItems: sortCourseItems, isSortedColumn: isCourseSorted } = useSortableTable<any>("lastName");
@@ -65,6 +73,9 @@ export default function IscrittiPerAttivita() {
       default: return null;
     }
   };
+
+  const { data: seasons } = useQuery<any[]>({ queryKey: ["/api/seasons"] });
+  const { data: activeSeason } = useQuery<any>({ queryKey: ["/api/seasons/active"] });
 
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({ queryKey: ["/api/courses?activityType=course"] });
   // @ts-ignore // TODO: STI-cleanup
@@ -182,16 +193,31 @@ export default function IscrittiPerAttivita() {
     return true;
   }) : [];
 
+    return true;
+  }) : [];
+
   // @ts-ignore // TODO: STI-cleanup
   const filteredWorkshops = Array.isArray(workshops) ? (workshops as Workshop[]).filter(workshop => {
     const matchesSearch = workshop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       workshop.sku?.toLowerCase().includes(searchQuery.toLowerCase());
 
     if (!matchesSearch) return false;
+
+    // Filtro Stagione
+    if (!showConcludedSeasonsWS) {
+      const targetSeasonId = selectedSeasonIdWS === "active" ? activeSeason?.id : parseInt(selectedSeasonIdWS);
+      const wsSeasonId = workshop.seasonId || activeSeason?.id;
+      if (targetSeasonId && wsSeasonId !== targetSeasonId) return false;
+    }
+
     if (showOnlyWithEnrollments) {
       return getEnrollmentsForActivity(workshop.id, true).length > 0;
     }
     return true;
+  }).sort((a, b) => {
+    const dateA = new Date(a.startDate || a.createdAt || 0).getTime();
+    const dateB = new Date(b.startDate || b.createdAt || 0).getTime();
+    return dateB - dateA; // Ordine decrescente
   }) : [];
 
   return (
@@ -220,7 +246,20 @@ export default function IscrittiPerAttivita() {
                 data-testid="button-toggle-active-enrollments"
               >
                 <Users className={`w-4 h-4 ${showOnlyWithEnrollments ? "text-white" : "sidebar-icon-gold"}`} />
-                {dynamicEnrollmentsCount} iscrizioni attive
+                {activeTab === 'workshop' ? (
+                  (() => {
+                    const activeWs = filteredWorkshops.filter(w => w.active);
+                    if (activeWs.length > 0) {
+                      const activeEnrolls = activeWs.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
+                      return `${activeWs.length} attivi / ${filteredWorkshops.length} totali · ${activeEnrolls} iscritti`;
+                    } else {
+                      const totalEnrolls = filteredWorkshops.reduce((acc, w) => acc + getEnrollmentsForActivity(w.id, true).length, 0);
+                      return `${filteredWorkshops.length} workshop · ${totalEnrolls} iscritti`;
+                    }
+                  })()
+                ) : (
+                  `${dynamicEnrollmentsCount} iscrizioni attive`
+                )}
               </Button>
             </div>
           </div>
@@ -466,15 +505,49 @@ export default function IscrittiPerAttivita() {
           <TabsContent value="workshop" className="space-y-6 mt-0">
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Cerca workshop per nome o SKU..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        placeholder="Cerca workshop per nome o SKU..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-4">
+                      <Select value={selectedSeasonIdWS} onValueChange={setSelectedSeasonIdWS} disabled={showConcludedSeasonsWS}>
+                        <SelectTrigger className="w-[250px]">
+                          <SelectValue placeholder="Seleziona Stagione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">
+                            Stagione corrente {activeSeason?.name ? `(${activeSeason.name})` : ''}
+                          </SelectItem>
+                          {seasons?.map((s) => (
+                            <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                           id="show-concluded-ws" 
+                           checked={showConcludedSeasonsWS}
+                           onCheckedChange={(checked) => setShowConcludedSeasonsWS(checked as boolean)}
+                        />
+                        <Label htmlFor="show-concluded-ws" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
+                      </div>
+                    </div>
+                    
+                    {filteredWorkshops && filteredWorkshops.length > 0 && (
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setExpandedWorkshops(filteredWorkshops.map(w => w.id.toString()))}>Espandi tutto</Button>
+                        <Button variant="outline" size="sm" onClick={() => setExpandedWorkshops([])}>Comprimi tutto</Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -489,91 +562,68 @@ export default function IscrittiPerAttivita() {
                     ))}
                   </div>
                 ) : filteredWorkshops && filteredWorkshops.length > 0 ? (
-                  <div className="space-y-6">
+                  <Accordion type="multiple" value={expandedWorkshops} onValueChange={setExpandedWorkshops} className="space-y-4">
                     {filteredWorkshops.map((workshop) => {
                       const workshopEnrollments = getEnrollmentsForActivity(workshop.id, true);
                       return (
-                        <Card key={workshop.id} className="overflow-hidden">
-                          <CardHeader className="bg-muted/50">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                  <Sparkles className="w-5 h-5 text-primary" />
-                                </div>
-                                <div>
-                                  <h3 className="text-lg font-semibold">{workshop.name}</h3>
-                                  {workshop.sku && (
-                                    <p className="text-sm text-muted-foreground">SKU: {workshop.sku}</p>
-                                  )}
-                                  {workshop.dayOfWeek && workshop.startTime && (
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                      {workshop.dayOfWeek} • {workshop.startTime}
-                                      {workshop.endTime && ` - ${workshop.endTime}`}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary">
-                                  {workshopEnrollments.length} {workshopEnrollments.length === 1 ? 'iscritto' : 'iscritti'}
-                                </Badge>
-                                <Link href={`/scheda-workshop?workshopId=${workshop.id}`}>
-                                  <Button size="sm" className="bg-[#2c3e50] text-[#e0e0e0] hover:bg-[#34495e]" data-testid={`button-scheda-workshop-${workshop.id}`}>
-                                    Scheda
-                                  </Button>
-                                </Link>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="pt-4">
-                            {workshopEnrollments.length === 0 ? (
-                              <p className="text-sm text-muted-foreground text-center py-4">
-                                Nessun iscritto per questo workshop
-                              </p>
-                            ) : (
-                              <div className="border rounded-lg overflow-hidden">
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <SortableTableHead sortKey="lastName" currentSort={workshopSort} onSort={handleWorkshopSort}>Cognome</SortableTableHead>
-                                      <SortableTableHead sortKey="firstName" currentSort={workshopSort} onSort={handleWorkshopSort}>Nome</SortableTableHead>
-                                      <SortableTableHead sortKey="email" currentSort={workshopSort} onSort={handleWorkshopSort}>Email</SortableTableHead>
-                                      <TableHead className="text-right">Azioni</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {sortWorkshopItems(workshopEnrollments, getSortValue).map((enrollment) => (
-                                      <TableRow key={enrollment.enrollmentId}>
-                                        <TableCell className={cn("font-medium", isWorkshopSorted("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
-                                        <TableCell className={cn(isWorkshopSorted("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
-                                        <TableCell className={cn(isWorkshopSorted("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
-                                        <TableCell className="text-right">
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-primary hover:text-primary hover:bg-primary/10"
-                                            onClick={() => setLocation(`/anagrafica_a_lista?editMemberId=${enrollment.memberId}`)}
-                                          >
-                                            <Edit className="w-4 h-4 mr-1" />
-                                            Modifica Anagrafica
+                        <ActivityAccordionCard
+                          key={workshop.id}
+                          id={workshop.id.toString()}
+                          activity={workshop}
+                          icon={Sparkles}
+                          enrollmentsCount={workshopEnrollments.length}
+                          badgeLabelPlural="iscritti"
+                          badgeLabelSingular="iscritto"
+                          linkHref={`/scheda-workshop?workshopId=${workshop.id}`}
+                          testIdPrefix="scheda-workshop"
+                        >
+                          {workshopEnrollments.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-4">
+                              Nessun iscritto per questo workshop
+                            </p>
+                          ) : (
+                            <div className="border rounded-lg overflow-hidden">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <SortableTableHead sortKey="lastName" currentSort={workshopSort} onSort={handleWorkshopSort}>Cognome</SortableTableHead>
+                                    <SortableTableHead sortKey="firstName" currentSort={workshopSort} onSort={handleWorkshopSort}>Nome</SortableTableHead>
+                                    <SortableTableHead sortKey="email" currentSort={workshopSort} onSort={handleWorkshopSort}>Email</SortableTableHead>
+                                    <TableHead className="text-right">Azioni</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {sortWorkshopItems(workshopEnrollments, getSortValue).map((enrollment) => (
+                                    <TableRow key={enrollment.enrollmentId}>
+                                      <TableCell className={cn("font-medium", isWorkshopSorted("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
+                                      <TableCell className={cn(isWorkshopSorted("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
+                                      <TableCell className={cn(isWorkshopSorted("email") && "sorted-column-cell")}>{enrollment.email || '-'}</TableCell>
+                                      <TableCell className="text-right">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-primary hover:text-primary hover:bg-primary/10"
+                                          onClick={() => setLocation(`/anagrafica_a_lista?editMemberId=${enrollment.memberId}`)}
+                                        >
+                                          <Edit className="w-4 h-4 mr-1" />
+                                          Modifica Anagrafica
+                                        </Button>
+                                        <Link href={`/anagrafica_a_lista?search=${enrollment.lastName}`}>
+                                          <Button variant="ghost" size="sm">
+                                            Profilo Completo
                                           </Button>
-                                          <Link href={`/anagrafica_a_lista?search=${enrollment.lastName}`}>
-                                            <Button variant="ghost" size="sm">
-                                              Profilo Completo
-                                            </Button>
-                                          </Link>
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
+                                        </Link>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
+                        </ActivityAccordionCard>
                       );
                     })}
-                  </div>
+                  </Accordion>
                 ) : (
                   <div className="text-center py-12">
                     <Sparkles className="w-12 h-12 mx-auto text-muted-foreground mb-4" />

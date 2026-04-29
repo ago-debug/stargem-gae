@@ -10,14 +10,15 @@ Regole di progetto:
 2. Non toccare pagamenti e tessere (core sensibile).
 3. Rispetta struttura a silos esistente.
 4. Non eliminare mai UI o logiche esistenti senza richiesta esplicita.
-5. **CONVENZIONE NOMI E AGGIORNAMENTO FILE**: Quando modifichi un file (in particolare la documentazione in `_GAE_SVILUPPO`), è **OBBLIGATORIO** aggiornare la data e l'orario nel **nome del file** (es. `A_YYYY_MM_DD_HHMM_nomefile.md`) e inserire la **stessa data e orario di aggiornamento all'inizio del file** come intestazione testuale.
-6. Aggiorna sempre i file in `_GAE_SVILUPPO`. **REGOLA TASSATIVA DOCUMENTAZIONE:** È assolutamente vietato superare il limite di 10 file totali all'interno della cartella `_GAE_SVILUPPO` (2 master, 4 attuale, 4 futuro). Qualsiasi nuova scoperta, refactoring o istruzione deve essere fusa e aggiornata *all'interno* di questi 10 file esistenti. Mai crearne di nuovi per non creare frammentazione.
+5. **CONVENZIONE NOMI E BACKUP**: I file di status continuo in `_GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/` hanno un **nome fisso** (senza timestamp). Prima di sovrascriverli, DEVI obbligatoriamente copiare la versione precedente in `_GAE_SVILUPPO/99_archivio/` anteponendo il timestamp (`YYYY_MM_DD_HHMM_nomefile.md`).
+6. **TERRITORI SEVERI**: Non hai limite al numero di file, ma non puoi MAI modificare nulla in `_GAE_SVILUPPO/_CLAUDE/`. Scrivi i report e gli audit strutturati in `_GAE_SVILUPPO/_ANTIGRAVITY/02_output_protocolli/`, e gli snapshot in `03_codice_in_lettura/`.
 7. La Maschera Input è il centro del sistema.
 8. Il CRM è tecnicamente pronto ma non validato senza dati reali.
 9. Clarissa è fase futura (non sviluppare ora).
 10. Ogni modifica deve essere verificabile, non teorica.
 11. Ogni task deve essere affrontato con questo flusso:
-12. **AGGIORNAMENTO STATO DB**: Alla fine di ogni lavoro/task, DEVI sempre calcolare o aggiornare lo "Stato DB Reale" e sovrascrivere/inserire questa mappatura nel file designato all'interno di `_GAE_SVILUPPO` (es. `Mappa_Database` o `Stato_DB_Reale`), rispettando il limite globale dei file e aggiornando il timestamp nel nome e nell'header.
+12. **AGGIORNAMENTO STATO DB**: Alla fine di ogni lavoro/task, DEVI sempre calcolare o aggiornare lo "Stato DB Reale" e sovrascrivere/inserire questa mappatura in `_GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/D_Mappa_Dati_e_Frontend.md`, previo backup.
+13. **LETTURA INIZIO SESSIONE**: Quando apri una sessione operativa con Gaetano, leggi sempre prima: `00_LEGGIMI.md`, `MASTER_STATUS.md` in `_CLAUDE/01_canonici/`, il RECAP della chat attiva in `_CLAUDE/03_recap_chat/`, e la cartella `_CLAUDE/04_per_antigravity/`.
 
 FASE 1 — ANALISI
 - Comprendere lo stato attuale reale
