@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
@@ -781,6 +782,53 @@ export default function ActivityManagementPage({
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="border-gold text-gold-foreground font-semibold bg-white/50 hover:bg-gold/10 px-3">
+                    📋 {filteredItems.length} {itemLabelPlural.charAt(0).toUpperCase() + itemLabelPlural.slice(1)} ▼
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="end">
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Categoria</h4>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                        {Object.entries(
+                            filteredItems.reduce((acc, c) => {
+                              const cat = (c as any).categoryName || categories?.find(catObj => Number(catObj.id) === Number(c.categoryId))?.name || "Senza categoria";
+                              acc[cat] = (acc[cat] || 0) + 1;
+                              return acc;
+                            }, {} as Record<string, number>)
+                          ).sort((a,b) => b[1] - a[1])
+                          .map(([cat, count]) => (
+                            <div key={cat} className="flex justify-between text-slate-600">
+                              <span className="truncate pr-2">{cat}</span>
+                              <span className="font-semibold">{count}</span>
+                            </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Tipologia / Nome</h4>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                        {Object.entries(
+                            filteredItems.reduce((acc, c) => {
+                              const name = c.name || "Senza nome";
+                              acc[name] = (acc[name] || 0) + 1;
+                              return acc;
+                            }, {} as Record<string, number>)
+                          ).sort((a,b) => b[1] - a[1])
+                          .map(([name, count]) => (
+                            <div key={name} className="flex justify-between text-slate-600">
+                              <span className="truncate pr-2">{name}</span>
+                              <span className="font-semibold">{count}</span>
+                            </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Button
                 variant="outline"
                 onClick={exportToCSV}
