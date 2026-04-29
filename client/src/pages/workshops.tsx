@@ -768,7 +768,7 @@ export default function Workshops() {
                             <Button
                               size="sm"
                               className="bg-[#2c3e50] text-[#e0e0e0] hover:bg-[#34495e]"
-                              onClick={() => setLocation(`/scheda-corso?workshopId=${workshop.id}`)}
+                              onClick={() => setLocation(`/scheda-corso?courseId=${workshop.id}`)}
                               data-testid={`button-scheda-${workshop.id}`}
                             >
                               Scheda
