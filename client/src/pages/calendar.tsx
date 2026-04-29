@@ -1941,10 +1941,13 @@ export default function CalendarPage() {
                             </Popover>
                         </div>
 
-                        <div className="shrink-0">
+                        <div className="shrink-0 flex items-center gap-1">
                             <Select value={selectedEventType} onValueChange={setSelectedEventType}>
-                                <SelectTrigger className="w-[160px] h-10 border-slate-300">
-                                    <SelectValue placeholder="Tutte le Attività" />
+                                <SelectTrigger className={`w-[180px] h-10 transition-colors ${selectedEventType !== 'all' ? 'bg-amber-100 border-amber-400 text-amber-800 font-semibold' : 'border-slate-300'}`}>
+                                    <div className="flex items-center">
+                                        <Filter className={`w-4 h-4 mr-2 ${selectedEventType !== 'all' ? 'text-amber-600' : 'text-slate-500'}`} />
+                                        <SelectValue placeholder="Tutte le Attività" />
+                                    </div>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Tutte le Attività</SelectItem>
@@ -1953,6 +1956,11 @@ export default function CalendarPage() {
                                     ))}
                                 </SelectContent>
                             </Select>
+                            {selectedEventType !== 'all' && (
+                                <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-500 hover:text-red-600 hover:bg-red-50" onClick={() => setSelectedEventType('all')} title="Resetta filtro">
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
                         </div>
                         <div className="shrink-0 hidden md:block">
                             <ActivityColorLegend variant="popover" />
@@ -2033,25 +2041,35 @@ export default function CalendarPage() {
                                 <PopoverTrigger asChild>
                                     <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-slate-100 hover:bg-slate-200 cursor-pointer text-slate-700 border border-slate-300 shadow-sm rounded-md md:rounded-lg transition-colors">
                                         <span className="font-extrabold text-sm tracking-tight">{totalRenderedCards.total}</span>
-                                        <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">Card</span>
+                                        <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">{selectedDay === "all" ? "Sessioni della settimana" : "Sessioni di oggi"}</span>
                                     </div>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-56 p-3" align="end">
-                                    <h4 className="font-semibold text-sm mb-2 pb-1 border-b text-slate-800">Dettaglio Card Mostrate</h4>
+                                    <h4 className="font-semibold text-sm mb-2 pb-1 border-b text-slate-800">Filtra per Tipologia</h4>
                                     <div className="space-y-1">
-                                        {Object.entries(totalRenderedCards.breakdown).map(([key, count]) => (
-                                            <div key={key} className="flex justify-between items-center text-sm">
+                                        {Object.entries(totalRenderedCards.breakdown).map(([key, count]) => {
+                                            const typeMapping: Record<string, string> = {
+                                                'Corsi': 'corsi',
+                                                'Allenamenti': 'allenamenti',
+                                                'Lezioni Individuali': 'lezioni-individuali',
+                                                'Workshop': 'workshop',
+                                                'Domeniche': 'domeniche-movimento',
+                                                'Affitti/Sale': 'affitti',
+                                                'Altro': 'all'
+                                            };
+                                            return (
+                                            <div key={key} className="flex justify-between items-center text-sm cursor-pointer hover:bg-slate-100 p-1 -mx-1 px-1 rounded transition-colors" onClick={() => setSelectedEventType(typeMapping[key] || 'all')}>
                                                 <span className="text-slate-600 font-medium">{key}</span>
                                                 <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full text-xs">{count}</span>
                                             </div>
-                                        ))}
+                                        )})}
                                     </div>
                                 </PopoverContent>
                             </Popover>
                         ) : (
                             <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-slate-50 text-slate-400 border border-slate-200 shadow-sm rounded-md md:rounded-lg">
                                 <span className="font-extrabold text-sm tracking-tight">0</span>
-                                <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">Card</span>
+                                <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">{selectedDay === "all" ? "Sessioni della settimana" : "Sessioni di oggi"}</span>
                             </div>
                         )}
 
