@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-27 13:00
+Aggiornato al: 2026-04-28 11:50
 
 # 📝 Checklist Operativa StarGem Manager (Roadmap Fase 2)
 *(Documento snellito: task storici completati prima di Aprile sono stati archiviati per pulizia).*
@@ -43,3 +43,6 @@ Aggiornato al: 2026-04-27 13:00
 - [ ] Ricezione Push e Opt-out.
 
 *(Le attività relative alla UI legacy "Calendario/Planning" sono considerate stabilizzate e qui omesse).*
+
+## Cruscotto Amministrativo (DB Monitor)
+- [ ] Implementazione Cruscotto DB Monitor — **🟡 IN PAUSA** (Chat_24 audit completato, ripresa programmata nei tempi morti).

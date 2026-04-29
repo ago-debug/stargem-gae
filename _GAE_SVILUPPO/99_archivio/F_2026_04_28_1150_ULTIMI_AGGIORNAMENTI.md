@@ -1,9 +1,19 @@
-Aggiornato al: 2026-04-27 13:00
+Aggiornato al: 2026-04-28 11:50
 
 # Ultimi Aggiornamenti Progetto "StarGem Manager"
 **Periodo di riferimento:** 23 Febbraio 2026 - 26 Aprile 2026
 
 Di seguito il riepilogo sintetico degli ultimi sviluppi architetturali e di bonifica:
+
+
+### Aggiornamento 28/04/2026 (Chat_24_DB_Monitor)
+- **Audit Completato:** F1-001 (Backend) e F2-001 (Frontend) sul monitoraggio DB e UI in tempo reale.
+- **Decisioni architetturali (Approvate):**
+  - **Cattura modifiche AG:** Strategia IBRIDA (wrapper DB Pool + tentativo lettura binary log se IONOS lo permette, con fallback al wrapper puro).
+  - **Mappa Frontend↔DB:** Strategia IBRIDA (`db-map-config.ts` statico in RAM per lo schema + script di verifica notturna asincrona per non caricare il DB).
+  - **Modernizzazioni Fase 1:** Implementazione *Schema Diff* automatico e calcolo *Health Score* per le tabelle.
+  - **Modernizzazioni Fase 2:** Integrazione *AI Natural Query* (lettura) e *Command Palette Cmd+K* per l'Admin.
+- **Stato Chat_24:** 🟡 IN PAUSA (Ripresa programmata nei tempi morti).
 
 ---
 

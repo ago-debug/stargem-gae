@@ -17,7 +17,7 @@ Regole:
 - non modificare nulla senza approvazione esplicita
 - non fare refactor largo
 - non inventare task completati
-- se il task impatta davvero stato, checklist, mapping o architettura, considera anche aggiornamento `_GAE_SVILUPPO`
+- Se il task impatta lo stato/architettura/mappa, aggiorna i file a nome fisso in _GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/ (previo backup in 99_archivio/), oppure scrivi report strutturati in _ANTIGRAVITY/02_output_protocolli/
 - chiudi sempre con:
   - FILE VERIFICATI
   - FILE MODIFICATI

@@ -20,7 +20,7 @@ Prima di modificare, dammi sempre:
 Regole:
 - non toccare pagamenti o tessere se non richiesto esplicitamente
 - non allargarti a refactor massivi
-- se cambi logica, valuta aggiornamento `_GAE_SVILUPPO`
+- Se il task impatta lo stato/architettura/mappa, aggiorna i file a nome fisso in _GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/ (previo backup in 99_archivio/), oppure scrivi report strutturati in _ANTIGRAVITY/02_output_protocolli/
 - attendi approvazione prima di modificare
 - chiudi sempre con:
   - FILE VERIFICATI

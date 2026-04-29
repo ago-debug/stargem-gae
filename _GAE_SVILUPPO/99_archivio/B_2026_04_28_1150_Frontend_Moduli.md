@@ -1,4 +1,4 @@
-Aggiornato al: 2026-04-27 13:00
+Aggiornato al: 2026-04-28 11:50
 
 # Master Document: Moduli Frontend, UI e Interfacce (Stato Attuale)
 
