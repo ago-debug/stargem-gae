@@ -147,6 +147,7 @@ export default function SchedaLezioneIndividuale() {
         }
     };
     const sortedEnrolledMembersData = sortItems(enrolledMembersData, getSortValue);
+    const attendancesCount = enrolledMembersData.reduce((acc: number, curr: any) => acc + (curr.attendances?.length || 0), 0);
 
     return (
         <div className="p-6 md:p-8 space-y-8 max-w-[1400px] mx-auto">
@@ -174,30 +175,36 @@ export default function SchedaLezioneIndividuale() {
                     </div>
                     {item && (
                         
-                    <div className="flex flex-wrap gap-3 pt-2">
+                                        <div className="flex flex-wrap gap-3 pt-2">
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Users className="w-3.5 h-3.5" />
-                            Insegnante: {item.instructorId || 'Da assegnare'}
+                            {/* TODO Chat_Analisi: insegnante LI — colonna esiste ma valore NULL nei record reali */}
+                            Insegnante: {item.instructorId || <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Configurabile da iscrizione (TODO Chat_Analisi)</span>}
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" />
-                            Giorno/Ora: {item.dayOfWeek || 'N/A'} {item.startTime || ''}
+                            {/* TODO Chat_Analisi: orario fisso LI — colonna esiste ma valore NULL nei record reali */}
+                            Giorno/Ora: {(item.dayOfWeek || item.startTime) ? `${item.dayOfWeek || ''} ${item.startTime || ''}` : <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Configurabile da iscrizione (TODO Chat_Analisi)</span>}
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
                             <Building2 className="w-3.5 h-3.5" />
-                            Studio/Sala: {item.studioId || 'Da assegnare'}
+                            {/* TODO Chat_Analisi: sala LI — colonna esiste ma valore NULL nei record reali */}
+                            Studio/Sala: {item.studioId || <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Configurabile da iscrizione (TODO Chat_Analisi)</span>}
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5" title="Da configurare — vedi Chat_Analisi">
                             <Tag className="w-3.5 h-3.5" />
-                            Pacchetto: {/* TODO Chat_Analisi: pacchetto LI residue — richiede tabella packages o campo enrollments dedicato */} Da configurare
+                            Pacchetto: {/* TODO Chat_Analisi: pacchetto LI residue — richiede tabella packages o campo enrollments dedicato */}
+                            <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Modulo pacchetti da implementare (TODO Chat_Analisi)</span>
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5" title="Da configurare — vedi Chat_Analisi">
                             <CalendarRange className="w-3.5 h-3.5" />
-                            Prossima: {/* TODO Chat_Analisi: prossima lezione LI — richiede enrollments.targetDate o logica custom */} Da configurare
+                            Prossima: {/* TODO Chat_Analisi: prossima lezione LI — richiede enrollments.targetDate o logica custom */}
+                            <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Modulo booking lezioni da implementare (TODO Chat_Analisi)</span>
                         </Badge>
                         <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5" title="Da configurare — vedi Chat_Analisi">
                             <FileText className="w-3.5 h-3.5" />
-                            Storico: {/* TODO Chat_Analisi: storico lezioni svolte LI — richiede UI tabella o modale storico attendances */} Da configurare
+                            Storico: {/* TODO Chat_Analisi: storico lezioni svolte LI — richiede UI tabella o modale storico attendances */}
+                            {attendancesCount > 0 ? `${attendancesCount} presenze (storico strisciate)` : <span className="text-muted-foreground italic" title="Campo presente nello schema DB ma non popolato. Smistare a Chat_Analisi.">— Da popolare</span>}
                         </Badge>
                     </div>
 
