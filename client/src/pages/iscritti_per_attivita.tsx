@@ -528,341 +528,7 @@ export default function IscrittiPerAttivita() {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         
-        <TabsContent value="lezioni-individuali" className="space-y-6 mt-0">
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row justify-between gap-4">
-                <div className="space-y-1">
-                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                    <UserCheck className="w-6 h-6 text-primary" />
-                    Lezioni Individuali
-                  </CardTitle>
-                  <CardDescription>
-                    {filteredLezioniIndividuali?.length || 0} lezioni individuali {showOnlyWithEnrollments && " con iscrizioni attive"}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Cerca per nome o SKU..."
-                      className="w-[300px] pl-9"
-                      value={searchQueryLI}
-                      onChange={(e) => setSearchQueryLI(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
-                <div className="flex items-center gap-4">
-                  <Select value={selectedSeasonIdLI || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdLI} disabled={showConcludedSeasonsLI}>
-                      <SelectTrigger className="w-full sm:w-[250px]">
-                        <SelectValue placeholder="Seleziona Stagione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sortedSeasons.map((s: any) => (
-                          <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
-                            {s.name} {s.active ? "(Attiva)" : ""}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="all">Tutte le Stagioni</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                       id="show-concluded-li" 
-                       checked={showConcludedSeasonsLI}
-                       onCheckedChange={(checked) => setShowConcludedSeasonsLI(checked as boolean)}
-                    />
-                    <Label htmlFor="show-concluded-li" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
-                  </div>
-                </div>
-                
-                {filteredLezioniIndividuali && filteredLezioniIndividuali.length > 0 && (
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setExpandedLezioniIndividuali(filteredLezioniIndividuali.map(li => li.id.toString()))}>Espandi tutto</Button>
-                    <Button variant="outline" size="sm" onClick={() => setExpandedLezioniIndividuali([])}>Comprimi tutto</Button>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              {ilLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="space-y-2">
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-24 w-full" />
-                    </div>
-                  ))}
-                </div>
-              ) : filteredLezioniIndividuali && filteredLezioniIndividuali.length > 0 ? (
-                <Accordion 
-                  type="multiple" 
-                  className="w-full space-y-4"
-                  value={expandedLezioniIndividuali}
-                  onValueChange={setExpandedLezioniIndividuali}
-                >
-                  {filteredLezioniIndividuali.map((li) => {
-                    const liEnrollments = lezioniIndividualiEnrollments?.filter(e => e.courseId === li.id && (e.status === 'active' || !e.status)) || [];
-                    return (
-                      <ActivityAccordionCard
-                        key={li.id}
-                        id={li.id.toString()}
-                        activity={li}
-                        icon={UserCheck}
-                        enrollmentsCount={liEnrollments.length}
-                        badgeLabelPlural="iscritti"
-                        badgeLabelSingular="iscritto"
-                        linkHref={`/scheda-lezione-individuale?id=${li.id}`}
-                        testIdPrefix="li"
-                      >
-                        <div className="bg-white rounded-md border shadow-sm overflow-hidden">
-                          <Table>
-                            <TableHeader className="bg-muted/30">
-                              <TableRow>
-                                <TableHead className="w-[180px]">Data Iscrizione</TableHead>
-                                <TableHead className="w-[300px]">Iscritto</TableHead>
-                                <TableHead className="w-[150px]">Stato</TableHead>
-                                <TableHead className="w-[200px]">Livello</TableHead>
-                                <TableHead className="text-right">Azioni</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {liEnrollments.length > 0 ? (
-                                liEnrollments.sort((a, b) => {
-                                  const dateA = new Date(a.enrollmentDate || a.createdAt).getTime();
-                                  const dateB = new Date(b.enrollmentDate || b.createdAt).getTime();
-                                  return dateB - dateA;
-                                }).map((enroll) => (
-                                  <TableRow key={enroll.id}>
-                                    <TableCell className="font-medium text-muted-foreground whitespace-nowrap">
-                                      {new Date(enroll.enrollmentDate || enroll.createdAt).toLocaleDateString('it-IT')}
-                                    </TableCell>
-                                    <TableCell>
-                                      <div className="flex flex-col">
-                                        <span className="font-medium">
-                                          {enroll.memberLastName} {enroll.memberFirstName}
-                                        </span>
-                                      </div>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                        Attivo
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Badge variant="secondary" className="font-normal">
-                                        {enroll.enrollmentType || "Base"}
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                      <Link href={`/tesserato?id=${enroll.memberId}`}>
-                                        <Button variant="ghost" size="sm" className="h-8 px-2 text-primary hover:text-primary/80">
-                                          Vedi
-                                        </Button>
-                                      </Link>
-                                    </TableCell>
-                                  </TableRow>
-                                ))
-                              ) : (
-                                <TableRow>
-                                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                                    Nessun iscritto trovato per questa lezione individuale.
-                                  </TableCell>
-                                </TableRow>
-                              )}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </ActivityAccordionCard>
-                    );
-                  })}
-                </Accordion>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
-                  Nessuna lezione individuale trovata con i filtri attuali.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-
-        <TabsContent value="campus" className="space-y-6 mt-0">
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row justify-between gap-4">
-                <div className="space-y-1">
-                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                    <Users className="w-6 h-6 text-primary" />
-                    Campus
-                  </CardTitle>
-                  <CardDescription>
-                    {filteredCampus?.length || 0} campus {showOnlyWithEnrollments && " con iscrizioni attive"}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Cerca per nome o SKU..."
-                      className="w-[300px] pl-9"
-                      value={searchQueryCampus}
-                      onChange={(e) => setSearchQueryCampus(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
-                <div className="flex items-center gap-4">
-                  <Select value={selectedSeasonIdCampus || (seasons?.find((s: any) => s.active)?.id?.toString() || "")} onValueChange={setSelectedSeasonIdCampus} disabled={showConcludedSeasonsCampus}>
-                    <SelectTrigger className="w-[250px]">
-                      <SelectValue placeholder="Caricamento..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {seasons && (() => {
-                        const activeS = seasons.find((s: any) => s.active);
-                        const otherS = seasons.filter((s: any) => !s.active).sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
-                        return (
-                          <>
-                            {activeS && (
-                              <SelectItem value={activeS.id.toString()}>
-                                Stagione {activeS.name.replace('Stagione ', '')} (Attiva)
-                              </SelectItem>
-                            )}
-                            {otherS.map((s: any) => (
-                              <SelectItem key={s.id} value={s.id.toString()}>
-                                Stagione {s.name.replace('Stagione ', '')}
-                              </SelectItem>
-                            ))}
-                            <SelectItem value="all">Tutte le Stagioni</SelectItem>
-                          </>
-                        );
-                      })()}
-                    </SelectContent>
-                  </Select>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                       id="show-concluded-campus" 
-                       checked={showConcludedSeasonsCampus}
-                       onCheckedChange={(checked) => setShowConcludedSeasonsCampus(checked as boolean)}
-                    />
-                    <Label htmlFor="show-concluded-campus" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
-                  </div>
-                </div>
-                
-                {filteredCampus && filteredCampus.length > 0 && (
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setExpandedCampus(filteredCampus.map(c => c.id.toString()))}>Espandi tutto</Button>
-                    <Button variant="outline" size="sm" onClick={() => setExpandedCampus([])}>Comprimi tutto</Button>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              {caLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="space-y-2">
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-24 w-full" />
-                    </div>
-                  ))}
-                </div>
-              ) : filteredCampus && filteredCampus.length > 0 ? (
-                <Accordion 
-                  type="multiple" 
-                  className="w-full space-y-4"
-                  value={expandedCampus}
-                  onValueChange={setExpandedCampus}
-                >
-                  {filteredCampus.map((campus) => {
-                    const cEnrollments = caEnrollments?.filter(e => e.courseId === campus.id && (e.status === 'active' || !e.status)) || [];
-                    return (
-                      <ActivityAccordionCard
-                        key={campus.id}
-                        id={campus.id.toString()}
-                        activity={campus}
-                        icon={Users}
-                        enrollmentsCount={cEnrollments.length}
-                        badgeLabelPlural="iscritti"
-                        badgeLabelSingular="iscritto"
-                        linkHref={`/scheda-campus?id=${campus.id}`}
-                        testIdPrefix="campus"
-                      >
-                        <div className="bg-white rounded-md border shadow-sm overflow-hidden">
-                          <Table>
-                            <TableHeader className="bg-muted/30">
-                              <TableRow>
-                                <TableHead className="w-[180px]">Data Iscrizione</TableHead>
-                                <TableHead className="w-[300px]">Iscritto</TableHead>
-                                <TableHead className="w-[150px]">Stato</TableHead>
-                                <TableHead className="w-[200px]">Livello</TableHead>
-                                <TableHead className="text-right">Azioni</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {cEnrollments.length > 0 ? (
-                                cEnrollments.sort((a, b) => {
-                                  const dateA = new Date(a.enrollmentDate || a.createdAt).getTime();
-                                  const dateB = new Date(b.enrollmentDate || b.createdAt).getTime();
-                                  return dateB - dateA;
-                                }).map((enroll) => (
-                                  <TableRow key={enroll.id}>
-                                    <TableCell className="font-medium text-muted-foreground whitespace-nowrap">
-                                      {new Date(enroll.enrollmentDate || enroll.createdAt).toLocaleDateString('it-IT')}
-                                    </TableCell>
-                                    <TableCell>
-                                      <div className="flex flex-col">
-                                        <span className="font-medium">
-                                          {enroll.memberLastName} {enroll.memberFirstName}
-                                        </span>
-                                      </div>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                        Attivo
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Badge variant="secondary" className="font-normal">
-                                        {enroll.enrollmentType || "Base"}
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                      <Link href={`/tesserato?id=${enroll.memberId}`}>
-                                        <Button variant="ghost" size="sm" className="h-8 px-2 text-primary hover:text-primary/80">
-                                          Vedi
-                                        </Button>
-                                      </Link>
-                                    </TableCell>
-                                  </TableRow>
-                                ))
-                              ) : (
-                                <TableRow>
-                                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                                    Nessun iscritto trovato per questo campus.
-                                  </TableCell>
-                                </TableRow>
-                              )}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </ActivityAccordionCard>
-                    );
-                  })}
-                </Accordion>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
-                  Nessun campus trovato con i filtri attuali.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-          {activityMenuItems.filter(i => i.id !== "panoramica").map((item) => {
+                          {activityMenuItems.filter(i => i.id !== "panoramica").map((item) => {
                     let enrollCount = 0;
                     if (item.id === "corsi") {
                       enrollCount = totalCourseEnrollments;
@@ -897,54 +563,82 @@ export default function IscrittiPerAttivita() {
           </TabsContent>
 
           <TabsContent value="corsi" className="space-y-6 mt-0">
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input
-                        placeholder="Cerca corso per nome o SKU..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-4">
-                      <Select value={selectedSeasonIdCourses || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdCourses} disabled={showConcludedSeasonsCourses}>
-                        <SelectTrigger className="w-[250px]">
-                          <SelectValue placeholder="Seleziona Stagione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sortedSeasons.map((s: any) => (
-                            <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
-                              {s.name} {s.active ? "(Attiva)" : ""}
-                            </SelectItem>
-                          ))}
-                          <SelectItem value="all">Tutte le Stagioni</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                           id="show-concluded-courses" 
-                           checked={showConcludedSeasonsCourses}
-                           onCheckedChange={(checked) => setShowConcludedSeasonsCourses(checked as boolean)}
-                        />
-                        <Label htmlFor="show-concluded-courses" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
-                      </div>
-                    </div>
-                    
-                    {filteredCourses && filteredCourses.length > 0 && (
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setExpandedCourses(filteredCourses.map(c => c.id.toString()))}>Espandi tutto</Button>
-                        <Button variant="outline" size="sm" onClick={() => setExpandedCourses([])}>Comprimi tutto</Button>
-                      </div>
-                    )}
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col md:flex-row justify-between gap-4">
+                <div className="space-y-1">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                    <GraduationCap className="w-6 h-6 text-primary" />
+                    Corsi
+                  </CardTitle>
+                  <CardDescription>
+                    {filteredCorsi?.length || 0} corsi {showOnlyWithEnrollments && " con iscrizioni attive"}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      if (expandedCorsi.length === filteredCorsi.length && filteredCorsi.length > 0) {
+                        setExpandedCorsi([]);
+                      } else {
+                        setExpandedCorsi(filteredCorsi.map((item: any) => item.id.toString()));
+                      }
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    {expandedCorsi.length === filteredCorsi.length && filteredCorsi.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+                <div className="flex items-center gap-4 w-full sm:w-auto">
+                  <Select value={selectedSeasonIdCourses || (seasons?.find((s: any) => s.active)?.id?.toString() || "")} onValueChange={setSelectedSeasonIdCourses} disabled={showConcludedSeasonsCourses}>
+                    <SelectTrigger className="w-full sm:w-[250px]">
+                      <SelectValue placeholder="Seleziona Stagione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons && (() => {
+                        const activeS = seasons.find((s: any) => s.active);
+                        const otherS = seasons.filter((s: any) => !s.active).sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+                        return (
+                          <>
+                            {activeS && (
+                              <SelectItem value={activeS.id.toString()} className="font-semibold">
+                                {getSeasonLabel(activeS, seasons)}
+                              </SelectItem>
+                            )}
+                            {otherS.map((s: any) => (
+                              <SelectItem key={s.id} value={s.id.toString()}>
+                                {getSeasonLabel(s, seasons)}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="all">Tutte le Stagioni</SelectItem>
+                          </>
+                        );
+                      })()}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <Checkbox 
+                       id="show-concluded-corsi" 
+                       checked={showConcludedSeasonsCourses}
+                       onCheckedChange={(checked) => setShowConcludedSeasonsCourses(checked as boolean)}
+                    />
+                    <Label htmlFor="show-concluded-corsi" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
                   </div>
                 </div>
-              </CardHeader>
+                <div className="relative w-full sm:w-auto">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cerca per nome o SKU..."
+                    className="w-full sm:w-[300px] pl-9"
+                    value={searchQueryCourses}
+                    onChange={(e) => setSearchQueryCourses(e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardHeader>
               <CardContent>
                 {isLoading ? (
                   <div className="space-y-4">
@@ -1051,54 +745,82 @@ export default function IscrittiPerAttivita() {
           </TabsContent>
 
           <TabsContent value="workshop" className="space-y-6 mt-0">
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input
-                        placeholder="Cerca workshop per nome o SKU..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-4">
-                      <Select value={selectedSeasonIdWS || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdWS} disabled={showConcludedSeasonsWS}>
-                        <SelectTrigger className="w-[250px]">
-                          <SelectValue placeholder="Seleziona Stagione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sortedSeasons.map((s: any) => (
-                            <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
-                              {s.name} {s.active ? "(Attiva)" : ""}
-                            </SelectItem>
-                          ))}
-                          <SelectItem value="all">Tutte le Stagioni</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                           id="show-concluded-ws" 
-                           checked={showConcludedSeasonsWS}
-                           onCheckedChange={(checked) => setShowConcludedSeasonsWS(checked as boolean)}
-                        />
-                        <Label htmlFor="show-concluded-ws" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
-                      </div>
-                    </div>
-                    
-                    {filteredWorkshops && filteredWorkshops.length > 0 && (
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setExpandedWorkshops(filteredWorkshops.map(w => w.id.toString()))}>Espandi tutto</Button>
-                        <Button variant="outline" size="sm" onClick={() => setExpandedWorkshops([])}>Comprimi tutto</Button>
-                      </div>
-                    )}
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col md:flex-row justify-between gap-4">
+                <div className="space-y-1">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                    <Presentation className="w-6 h-6 text-primary" />
+                    Workshop
+                  </CardTitle>
+                  <CardDescription>
+                    {filteredWorkshop?.length || 0} workshop {showOnlyWithEnrollments && " con iscrizioni attive"}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      if (expandedWorkshop.length === filteredWorkshop.length && filteredWorkshop.length > 0) {
+                        setExpandedWorkshop([]);
+                      } else {
+                        setExpandedWorkshop(filteredWorkshop.map((item: any) => item.id.toString()));
+                      }
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    {expandedWorkshop.length === filteredWorkshop.length && filteredWorkshop.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+                <div className="flex items-center gap-4 w-full sm:w-auto">
+                  <Select value={selectedSeasonIdWS || (seasons?.find((s: any) => s.active)?.id?.toString() || "")} onValueChange={setSelectedSeasonIdWS} disabled={showConcludedSeasonsWS}>
+                    <SelectTrigger className="w-full sm:w-[250px]">
+                      <SelectValue placeholder="Seleziona Stagione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons && (() => {
+                        const activeS = seasons.find((s: any) => s.active);
+                        const otherS = seasons.filter((s: any) => !s.active).sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+                        return (
+                          <>
+                            {activeS && (
+                              <SelectItem value={activeS.id.toString()} className="font-semibold">
+                                {getSeasonLabel(activeS, seasons)}
+                              </SelectItem>
+                            )}
+                            {otherS.map((s: any) => (
+                              <SelectItem key={s.id} value={s.id.toString()}>
+                                {getSeasonLabel(s, seasons)}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="all">Tutte le Stagioni</SelectItem>
+                          </>
+                        );
+                      })()}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <Checkbox 
+                       id="show-concluded-workshop" 
+                       checked={showConcludedSeasonsWS}
+                       onCheckedChange={(checked) => setShowConcludedSeasonsWS(checked as boolean)}
+                    />
+                    <Label htmlFor="show-concluded-workshop" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
                   </div>
                 </div>
-              </CardHeader>
+                <div className="relative w-full sm:w-auto">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cerca per nome o SKU..."
+                    className="w-full sm:w-[300px] pl-9"
+                    value={searchQueryWS}
+                    onChange={(e) => setSearchQueryWS(e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardHeader>
               <CardContent>
                 {isLoading ? (
                   <div className="space-y-4">
@@ -1198,49 +920,68 @@ export default function IscrittiPerAttivita() {
                     {filteredAllenamenti?.length || 0} allenamenti {showOnlyWithEnrollments && " con iscrizioni attive"}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Cerca per nome o SKU..."
-                      className="w-[300px] pl-9"
-                      value={searchQueryAL}
-                      onChange={(e) => setSearchQueryAL(e.target.value)}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      if (expandedAllenamenti.length === filteredAllenamenti.length && filteredAllenamenti.length > 0) {
+                        setExpandedAllenamenti([]);
+                      } else {
+                        setExpandedAllenamenti(filteredAllenamenti.map((item: any) => item.id.toString()));
+                      }
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    {expandedAllenamenti.length === filteredAllenamenti.length && filteredAllenamenti.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
-                <div className="flex items-center gap-4">
-                  <Select value={selectedSeasonIdAL || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdAL} disabled={showConcludedSeasonsAL}>
-                      <SelectTrigger className="w-[250px]">
-                        <SelectValue placeholder="Seleziona Stagione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sortedSeasons.map((s: any) => (
-                          <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
-                            {s.name} {s.active ? "(Attiva)" : ""}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="all">Tutte le Stagioni</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+                <div className="flex items-center gap-4 w-full sm:w-auto">
+                  <Select value={selectedSeasonIdAL || (seasons?.find((s: any) => s.active)?.id?.toString() || "")} onValueChange={setSelectedSeasonIdAL} disabled={showConcludedSeasonsAL}>
+                    <SelectTrigger className="w-full sm:w-[250px]">
+                      <SelectValue placeholder="Seleziona Stagione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons && (() => {
+                        const activeS = seasons.find((s: any) => s.active);
+                        const otherS = seasons.filter((s: any) => !s.active).sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+                        return (
+                          <>
+                            {activeS && (
+                              <SelectItem value={activeS.id.toString()} className="font-semibold">
+                                {getSeasonLabel(activeS, seasons)}
+                              </SelectItem>
+                            )}
+                            {otherS.map((s: any) => (
+                              <SelectItem key={s.id} value={s.id.toString()}>
+                                {getSeasonLabel(s, seasons)}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="all">Tutte le Stagioni</SelectItem>
+                          </>
+                        );
+                      })()}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center space-x-2 shrink-0">
                     <Checkbox 
-                       id="show-concluded-al" 
+                       id="show-concluded-allenamenti" 
                        checked={showConcludedSeasonsAL}
                        onCheckedChange={(checked) => setShowConcludedSeasonsAL(checked as boolean)}
                     />
-                    <Label htmlFor="show-concluded-al" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
+                    <Label htmlFor="show-concluded-allenamenti" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
                   </div>
                 </div>
-                
-                {filteredAllenamenti && filteredAllenamenti.length > 0 && (
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setExpandedAllenamenti(filteredAllenamenti.map(a => a.id.toString()))}>Espandi tutto</Button>
-                    <Button variant="outline" size="sm" onClick={() => setExpandedAllenamenti([])}>Comprimi tutto</Button>
-                  </div>
-                )}
+                <div className="relative w-full sm:w-auto">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cerca per nome o SKU..."
+                    className="w-full sm:w-[300px] pl-9"
+                    value={searchQueryAL}
+                    onChange={(e) => setSearchQueryAL(e.target.value)}
+                  />
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -1341,49 +1082,68 @@ export default function IscrittiPerAttivita() {
                     {filteredDomeniche?.length || 0} domeniche {showOnlyWithEnrollments && " con iscrizioni attive"}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Cerca per nome o SKU..."
-                      className="w-[300px] pl-9"
-                      value={searchQueryDM}
-                      onChange={(e) => setSearchQueryDM(e.target.value)}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      if (expandedDomeniche.length === filteredDomeniche.length && filteredDomeniche.length > 0) {
+                        setExpandedDomeniche([]);
+                      } else {
+                        setExpandedDomeniche(filteredDomeniche.map((item: any) => item.id.toString()));
+                      }
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    {expandedDomeniche.length === filteredDomeniche.length && filteredDomeniche.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
-                <div className="flex items-center gap-4">
-                  <Select value={selectedSeasonIdDM || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdDM} disabled={showConcludedSeasonsDM}>
-                    <SelectTrigger className="w-[250px]">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+                <div className="flex items-center gap-4 w-full sm:w-auto">
+                  <Select value={selectedSeasonIdDM || (seasons?.find((s: any) => s.active)?.id?.toString() || "")} onValueChange={setSelectedSeasonIdDM} disabled={showConcludedSeasonsDM}>
+                    <SelectTrigger className="w-full sm:w-[250px]">
                       <SelectValue placeholder="Seleziona Stagione" />
                     </SelectTrigger>
                     <SelectContent>
-                      {sortedSeasons.map((s: any) => (
-                        <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
-                          {s.name} {s.active ? "(Attiva)" : ""}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="all">Tutte le Stagioni</SelectItem>
+                      {seasons && (() => {
+                        const activeS = seasons.find((s: any) => s.active);
+                        const otherS = seasons.filter((s: any) => !s.active).sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+                        return (
+                          <>
+                            {activeS && (
+                              <SelectItem value={activeS.id.toString()} className="font-semibold">
+                                {getSeasonLabel(activeS, seasons)}
+                              </SelectItem>
+                            )}
+                            {otherS.map((s: any) => (
+                              <SelectItem key={s.id} value={s.id.toString()}>
+                                {getSeasonLabel(s, seasons)}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="all">Tutte le Stagioni</SelectItem>
+                          </>
+                        );
+                      })()}
                     </SelectContent>
                   </Select>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 shrink-0">
                     <Checkbox 
-                       id="show-concluded-dm" 
+                       id="show-concluded-domeniche-movimento" 
                        checked={showConcludedSeasonsDM}
                        onCheckedChange={(checked) => setShowConcludedSeasonsDM(checked as boolean)}
                     />
-                    <Label htmlFor="show-concluded-dm" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
+                    <Label htmlFor="show-concluded-domeniche-movimento" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
                   </div>
                 </div>
-                
-                {filteredDomeniche && filteredDomeniche.length > 0 && (
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setExpandedDomeniche(filteredDomeniche.map(d => d.id.toString()))}>Espandi tutto</Button>
-                    <Button variant="outline" size="sm" onClick={() => setExpandedDomeniche([])}>Comprimi tutto</Button>
-                  </div>
-                )}
+                <div className="relative w-full sm:w-auto">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cerca per nome o SKU..."
+                    className="w-full sm:w-[300px] pl-9"
+                    value={searchQueryDM}
+                    onChange={(e) => setSearchQueryDM(e.target.value)}
+                  />
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -1469,71 +1229,78 @@ export default function IscrittiPerAttivita() {
 
         <TabsContent value="lezioni-individuali" className="space-y-6 mt-0">
           <Card>
-            <CardHeader>
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                      <UserCheck className="w-6 h-6 text-primary" />
-                      Lezioni Individuali
-                    </CardTitle>
-                    <CardDescription>
-                      {filteredLezioniIndividuali?.length || 0} lezioni individuali {showOnlyWithEnrollments && " con iscrizioni attive"}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        if (expandedLezioniIndividuali.length === filteredLezioniIndividuali.length) {
-                          setExpandedLezioniIndividuali([]);
-                        } else {
-                          setExpandedLezioniIndividuali(filteredLezioniIndividuali.map(li => li.id.toString()));
-                        }
-                      }}
-                      className="whitespace-nowrap"
-                    >
-                      {expandedLezioniIndividuali.length === filteredLezioniIndividuali.length ? "Comprimi tutto" : "Espandi tutto"}
-                    </Button>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col md:flex-row justify-between gap-4">
+                <div className="space-y-1">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                    <UserCheck className="w-6 h-6 text-primary" />
+                    Lezioni Individuali
+                  </CardTitle>
+                  <CardDescription>
+                    {filteredLezioniIndividuali?.length || 0} lezioni individuali {showOnlyWithEnrollments && " con iscrizioni attive"}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      if (expandedLezioniIndividuali.length === filteredLezioniIndividuali.length && filteredLezioniIndividuali.length > 0) {
+                        setExpandedLezioniIndividuali([]);
+                      } else {
+                        setExpandedLezioniIndividuali(filteredLezioniIndividuali.map((item: any) => item.id.toString()));
+                      }
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    {expandedLezioniIndividuali.length === filteredLezioniIndividuali.length && filteredLezioniIndividuali.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+                <div className="flex items-center gap-4 w-full sm:w-auto">
+                  <Select value={selectedSeasonIdLI || (seasons?.find((s: any) => s.active)?.id?.toString() || "")} onValueChange={setSelectedSeasonIdLI} disabled={showConcludedSeasonsLI}>
+                    <SelectTrigger className="w-full sm:w-[250px]">
+                      <SelectValue placeholder="Seleziona Stagione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons && (() => {
+                        const activeS = seasons.find((s: any) => s.active);
+                        const otherS = seasons.filter((s: any) => !s.active).sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+                        return (
+                          <>
+                            {activeS && (
+                              <SelectItem value={activeS.id.toString()} className="font-semibold">
+                                {getSeasonLabel(activeS, seasons)}
+                              </SelectItem>
+                            )}
+                            {otherS.map((s: any) => (
+                              <SelectItem key={s.id} value={s.id.toString()}>
+                                {getSeasonLabel(s, seasons)}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="all">Tutte le Stagioni</SelectItem>
+                          </>
+                        );
+                      })()}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <Checkbox 
+                       id="show-concluded-lezioni-individuali" 
+                       checked={showConcludedSeasonsLI}
+                       onCheckedChange={(checked) => setShowConcludedSeasonsLI(checked as boolean)}
+                    />
+                    <Label htmlFor="show-concluded-lezioni-individuali" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
                   </div>
                 </div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
-                  <div className="relative flex-1 w-full">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Cerca per nome o SKU..."
-                      value={searchQueryLI}
-                      onChange={(e) => setSearchQueryLI(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <Select value={selectedSeasonIdLI || seasons?.find((s: any) => s.active)?.id?.toString() || ""} onValueChange={setSelectedSeasonIdLI} disabled={showConcludedSeasonsLI}>
-                      <SelectTrigger className="w-full sm:w-[250px]">
-                        <SelectValue placeholder="Seleziona Stagione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sortedSeasons.map((s: any) => (
-                          <SelectItem key={s.id} value={s.id.toString()} className={s.active ? "font-semibold" : ""}>
-                            {s.name} {s.active ? "(Attiva)" : ""}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="all">Tutte le Stagioni</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    
-                    <div className="flex items-center gap-2 min-w-max border rounded-md px-3 h-10">
-                      <Checkbox 
-                        id="show-concluded-li" 
-                        checked={showConcludedSeasonsLI}
-                        onCheckedChange={(checked) => setShowConcludedSeasonsLI(checked as boolean)}
-                      />
-                      <label htmlFor="show-concluded-li" className="text-sm cursor-pointer select-none">
-                        Mostra storiche
-                      </label>
-                    </div>
-                  </div>
+                <div className="relative w-full sm:w-auto">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cerca per nome o SKU..."
+                    className="w-full sm:w-[300px] pl-9"
+                    value={searchQueryLI}
+                    onChange={(e) => setSearchQueryLI(e.target.value)}
+                  />
                 </div>
               </div>
             </CardHeader>
@@ -1653,23 +1420,27 @@ export default function IscrittiPerAttivita() {
                     {filteredCampus?.length || 0} campus {showOnlyWithEnrollments && " con iscrizioni attive"}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Cerca per nome o SKU..."
-                      className="w-[300px] pl-9"
-                      value={searchQueryCampus}
-                      onChange={(e) => setSearchQueryCampus(e.target.value)}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      if (expandedCampus.length === filteredCampus.length && filteredCampus.length > 0) {
+                        setExpandedCampus([]);
+                      } else {
+                        setExpandedCampus(filteredCampus.map((item: any) => item.id.toString()));
+                      }
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    {expandedCampus.length === filteredCampus.length && filteredCampus.length > 0 ? "Comprimi tutto" : "Espandi tutto"}
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center justify-between flex-wrap gap-4 mt-4">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+                <div className="flex items-center gap-4 w-full sm:w-auto">
                   <Select value={selectedSeasonIdCampus || (seasons?.find((s: any) => s.active)?.id?.toString() || "")} onValueChange={setSelectedSeasonIdCampus} disabled={showConcludedSeasonsCampus}>
-                    <SelectTrigger className="w-[250px]">
-                      <SelectValue placeholder="Caricamento..." />
+                    <SelectTrigger className="w-full sm:w-[250px]">
+                      <SelectValue placeholder="Seleziona Stagione" />
                     </SelectTrigger>
                     <SelectContent>
                       {seasons && (() => {
@@ -1678,13 +1449,13 @@ export default function IscrittiPerAttivita() {
                         return (
                           <>
                             {activeS && (
-                              <SelectItem value={activeS.id.toString()}>
-                                Stagione {activeS.name.replace('Stagione ', '')} (Attiva)
+                              <SelectItem value={activeS.id.toString()} className="font-semibold">
+                                {getSeasonLabel(activeS, seasons)}
                               </SelectItem>
                             )}
                             {otherS.map((s: any) => (
                               <SelectItem key={s.id} value={s.id.toString()}>
-                                Stagione {s.name.replace('Stagione ', '')}
+                                {getSeasonLabel(s, seasons)}
                               </SelectItem>
                             ))}
                             <SelectItem value="all">Tutte le Stagioni</SelectItem>
@@ -1693,7 +1464,7 @@ export default function IscrittiPerAttivita() {
                       })()}
                     </SelectContent>
                   </Select>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 shrink-0">
                     <Checkbox 
                        id="show-concluded-campus" 
                        checked={showConcludedSeasonsCampus}
@@ -1702,13 +1473,15 @@ export default function IscrittiPerAttivita() {
                     <Label htmlFor="show-concluded-campus" className="cursor-pointer text-sm font-normal">Mostra stagioni concluse</Label>
                   </div>
                 </div>
-                
-                {filteredCampus && filteredCampus.length > 0 && (
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setExpandedCampus(filteredCampus.map(c => c.id.toString()))}>Espandi tutto</Button>
-                    <Button variant="outline" size="sm" onClick={() => setExpandedCampus([])}>Comprimi tutto</Button>
-                  </div>
-                )}
+                <div className="relative w-full sm:w-auto">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cerca per nome o SKU..."
+                    className="w-full sm:w-[300px] pl-9"
+                    value={searchQueryCampus}
+                    onChange={(e) => setSearchQueryCampus(e.target.value)}
+                  />
+                </div>
               </div>
             </CardHeader>
             <CardContent>
