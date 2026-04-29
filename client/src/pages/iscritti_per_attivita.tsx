@@ -847,18 +847,13 @@ export default function IscrittiPerAttivita() {
                       <ActivityAccordionCard
                         key={al.id}
                         id={al.id.toString()}
+                        activity={al}
                         icon={Activity}
-                        title={al.name}
-                        sku={al.sku}
-                        dayOfWeek={al.dayOfWeek}
-                        startTime={al.startTime}
-                        endTime={al.endTime}
                         enrollmentsCount={alEnrollments.length}
                         badgeLabelPlural="iscritti"
                         badgeLabelSingular="iscritto"
                         linkHref={`/scheda-allenamento?id=${al.id}`}
                         testIdPrefix="al"
-                        isActive={al.active}
                       >
                         <div className="bg-white rounded-md border shadow-sm overflow-hidden">
                           <Table>
@@ -997,18 +992,13 @@ export default function IscrittiPerAttivita() {
                       <ActivityAccordionCard
                         key={dm.id}
                         id={dm.id.toString()}
+                        activity={dm}
                         icon={Activity}
-                        title={dm.name}
-                        sku={dm.sku}
-                        dayOfWeek={dm.dayOfWeek}
-                        startTime={dm.startTime}
-                        endTime={dm.endTime}
                         enrollmentsCount={dmEnrollments.length}
                         badgeLabelPlural="iscritti"
                         badgeLabelSingular="iscritto"
                         linkHref={`/scheda-domenica?id=${dm.id}`}
                         testIdPrefix="dm"
-                        isActive={dm.active}
                       >
                         <div className="bg-white rounded-md border shadow-sm overflow-hidden">
                           <Table>
