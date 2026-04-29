@@ -3,10 +3,10 @@ import ActivityManagementPage from "@/components/activity-management-page";
 export default function SundayActivities() {
   return (
     <ActivityManagementPage
-      activityType="domeniche"
+      activityType="domenica_movimento"
       title="Riepilogo Domeniche in Movimento"
       subtitle="Gestisci le attività domenicali speciali"
-      apiEndpoint="/api/sunday-activities"
+      apiEndpoint="/api/courses?activityType=domenica_movimento"
       categoryApiEndpoint="/api/sunday-categories"
       itemLabel="attività domenicale"
       itemLabelPlural="attività domenicali"
