@@ -9860,7 +9860,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       rows.forEach(row => {
         let key = row.activity_type;
         if (key === 'course') key = 'corsi';
-        if (key === 'prenotazioni') key = 'lezioni-individuali';
+        if (key === 'lezione_individuale') key = 'lezioni-individuali';
         if (key === 'domeniche') key = 'domeniche-movimento';
         if (key === 'vacanze') key = 'vacanze-studio';
         

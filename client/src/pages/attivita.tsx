@@ -372,13 +372,13 @@ export default function Attivita() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold">{courses?.length || 0}</span>
+                    <span className="text-3xl font-bold">{summary?.corsi?.total || 0}</span>
                     <span className="text-sm text-muted-foreground">totali</span>
                   </div>
                   <div className="flex items-center gap-3 mt-2">
-                    <Badge variant="outline" className="status-badge-gold">{activeCourses.length} attivi</Badge>
-                    {inactiveCourses.length > 0 && (
-                      <Badge variant="outline" className="status-badge-gold">{inactiveCourses.length} inattivi</Badge>
+                    <Badge variant="outline" className="status-badge-gold">{summary?.corsi?.active || 0} attivi</Badge>
+                    {((summary?.corsi?.total || 0) - (summary?.corsi?.active || 0)) > 0 && (
+                      <Badge variant="outline" className="status-badge-gold">{((summary?.corsi?.total || 0) - (summary?.corsi?.active || 0))} inattivi</Badge>
                     )}
                   </div>
                 </CardContent>
@@ -390,13 +390,13 @@ export default function Attivita() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold">{workshops?.length || 0}</span>
+                    <span className="text-3xl font-bold">{summary?.workshop?.total || 0}</span>
                     <span className="text-sm text-muted-foreground">totali</span>
                   </div>
                   <div className="flex items-center gap-3 mt-2">
-                    <Badge variant="outline" className="status-badge-gold">{activeWorkshops.length} attivi</Badge>
-                    {inactiveWorkshops.length > 0 && (
-                      <Badge variant="outline" className="status-badge-gold">{inactiveWorkshops.length} inattivi</Badge>
+                    <Badge variant="outline" className="status-badge-gold">{summary?.workshop?.active || 0} attivi</Badge>
+                    {((summary?.workshop?.total || 0) - (summary?.workshop?.active || 0)) > 0 && (
+                      <Badge variant="outline" className="status-badge-gold">{((summary?.workshop?.total || 0) - (summary?.workshop?.active || 0))} inattivi</Badge>
                     )}
                   </div>
                 </CardContent>
