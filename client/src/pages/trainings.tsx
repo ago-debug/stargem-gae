@@ -10,6 +10,7 @@ export default function Trainings() {
       itemLabel="allenamento"
       itemLabelPlural="allenamenti"
       baseRoute="/scheda-allenamento"
+      idParamName="courseId"
       testIdPrefix="training"
       activityType="allenamenti"
     />

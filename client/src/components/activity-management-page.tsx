@@ -83,6 +83,7 @@ interface ActivityManagementPageProps {
   itemLabel: string;
   itemLabelPlural: string;
   baseRoute: string; // The route prefix for the detail page
+  idParamName?: string; // Optional query param name for the ID (default is activityId)
   testIdPrefix: string;
   activityType?: "prenotazioni" | "allenamenti" | "individual_lesson" | "training" | "other" | "campus" | "domeniche" | "workshop" | "saggi" | "vacanze" | "affitti"; // Identificatore per il Modale Operativo Condiviso
 }
@@ -95,6 +96,7 @@ export default function ActivityManagementPage({
   itemLabel,
   itemLabelPlural,
   baseRoute,
+  idParamName = "activityId",
   testIdPrefix,
   activityType = "other",
 }: ActivityManagementPageProps) {
@@ -782,6 +784,14 @@ export default function ActivityManagementPage({
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                onClick={exportToCSV}
+                data-testid={`button-${testIdPrefix}-export-csv`}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Esporta CSV
+              </Button>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="border-gold text-gold-foreground font-semibold bg-white/50 hover:bg-gold/10 px-3">
@@ -829,14 +839,6 @@ export default function ActivityManagementPage({
                   </div>
                 </PopoverContent>
               </Popover>
-              <Button
-                variant="outline"
-                onClick={exportToCSV}
-                data-testid={`button-${testIdPrefix}-export-csv`}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Esporta CSV
-              </Button>
               <Button
                 className="gold-3d-button"
                 onClick={() => {
@@ -1068,7 +1070,7 @@ export default function ActivityManagementPage({
                           <Button
                             size="sm"
                             className="bg-[#2c3e50] text-[#e0e0e0] hover:bg-[#34495e]"
-                            onClick={() => setLocation(`${baseRoute}?activityId=${item.id}`)}
+                            onClick={() => setLocation(`${baseRoute}?${idParamName}=${item.id}`)}
                             data-testid={`button-${testIdPrefix}-scheda-${item.id}`}
                           >
                             Scheda
