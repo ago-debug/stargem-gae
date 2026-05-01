@@ -134,7 +134,7 @@ function TelemetryCard() {
                             <div className="flex items-center gap-2">
                                 <span className="font-semibold text-sm">PostHog (Analytics)</span>
                                 {isPostHogConfigured ? (
-                                    <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100">Attivo</Badge>
+                                    <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:bg-emerald-900/30">Attivo</Badge>
                                 ) : (
                                     <Badge variant="outline" className="text-muted-foreground">Inattivo</Badge>
                                 )}
@@ -164,7 +164,7 @@ function TelemetryCard() {
                             <div className="flex items-center gap-2">
                                 <span className="font-semibold text-sm">Sentry (Error Tracking)</span>
                                 {isSentryConfigured ? (
-                                    <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100">Attivo</Badge>
+                                    <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:bg-emerald-900/30">Attivo</Badge>
                                 ) : (
                                     <Badge variant="outline" className="text-muted-foreground">Inattivo</Badge>
                                 )}
@@ -178,7 +178,7 @@ function TelemetryCard() {
                     <Button 
                         variant="outline" 
                         size="sm" 
-                        className="w-full justify-start border-red-200 hover:bg-red-50 text-red-700" 
+                        className="w-full justify-start border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:bg-red-950/20 text-red-700" 
                         onClick={testSentry}
                         disabled={!isSentryConfigured}
                     >
@@ -373,7 +373,7 @@ export default function AdminPanel() {
                         </Button>
 
                         {syncStatus && (
-                            <div className={`mt-4 p-4 rounded-lg border ${syncStatus.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                            <div className={`mt-4 p-4 rounded-lg border ${syncStatus.success ? 'bg-green-50 border-green-200' : 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50'}`}>
                                 <div className="flex items-center gap-2 mb-2">
                                     {syncStatus.success ? (
                                         <CheckCircle2 className="w-5 h-5 text-green-600" />
@@ -436,7 +436,7 @@ export default function AdminPanel() {
                             )}
                         </Button>
                         {seedMethodsStatus && (
-                            <div className={`mt-4 p-4 rounded-lg border ${seedMethodsStatus.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                            <div className={`mt-4 p-4 rounded-lg border ${seedMethodsStatus.success ? 'bg-green-50 border-green-200' : 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50'}`}>
                                 <div className="flex items-center gap-2 mb-2">
                                     {seedMethodsStatus.success ? (
                                         <CheckCircle2 className="w-5 h-5 text-green-600" />
@@ -572,7 +572,7 @@ export default function AdminPanel() {
                             </ul>
                         </div>
 
-                        <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                        <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 rounded-lg">
                             <p className="text-xs text-blue-800 leading-relaxed">
                                 <strong>Configurazione:</strong> Clicca su "Connetti Account" per scegliere l'account Google da utilizzare.
                                 Assicurati di aver configurato <code>GOOGLE_CLIENT_ID</code> e <code>GOOGLE_CLIENT_SECRET</code> nel file <code>.env</code>.

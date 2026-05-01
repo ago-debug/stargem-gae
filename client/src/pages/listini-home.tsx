@@ -75,7 +75,7 @@ export default function ListiniHome() {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                 <div className="flex justify-center border-b pb-4">
-                    <TabsList className="bg-slate-100 p-1 h-14">
+                    <TabsList className="bg-slate-100 dark:bg-slate-800 p-1 h-14">
                         <TabsTrigger value="q1c" className="px-8 flex items-center gap-2 text-base data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
                             <Table className="w-5 h-5" /> Quote Q1C Mensili
                         </TabsTrigger>

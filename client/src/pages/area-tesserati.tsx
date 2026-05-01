@@ -62,11 +62,11 @@ export default function AreaTesserati() {
         
         {/* SX COL - 4/12 */}
         <div className="md:col-span-4 space-y-6">
-          <Card className="border-amber-200 shadow-sm relative overflow-hidden">
+          <Card className="border-amber-200 dark:border-amber-900/50 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600"></div>
-            <CardHeader className="bg-amber-50/50 pb-4 border-b pt-6">
+            <CardHeader className="bg-amber-50 dark:bg-amber-950/20/50 pb-4 border-b pt-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-bold text-xl uppercase shadow-sm border border-amber-200">
+                <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 font-bold text-xl uppercase shadow-sm border border-amber-200 dark:border-amber-900/50">
                   {user?.firstName?.charAt(0) || user?.username?.charAt(0)}
                   {user?.lastName?.charAt(0) || ""}
                 </div>
@@ -111,14 +111,14 @@ export default function AreaTesserati() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-muted rounded-lg border border-slate-100">
                   <span className="text-sm font-medium text-foreground/80">Regolamento Generale</span>
-                  <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 text-[10px] uppercase font-bold tracking-wider">FIRMATO</Badge>
+                  <Badge variant="outline" className="text-emerald-600 border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 text-[10px] uppercase font-bold tracking-wider">FIRMATO</Badge>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-muted rounded-lg border border-slate-100">
                   <span className="text-sm font-medium text-foreground/80">Certificato Medico</span>
                   {documents.find((d:any) => d.type === 'medical') ? (
-                    <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 text-[10px] uppercase font-bold tracking-wider">CARICATO</Badge>
+                    <Badge variant="outline" className="text-emerald-600 border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 text-[10px] uppercase font-bold tracking-wider">CARICATO</Badge>
                   ) : (
-                    <Button variant="outline" size="sm" className="h-7 text-xs border-dashed border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+                    <Button variant="outline" size="sm" className="h-7 text-xs border-dashed border-red-200 dark:border-red-900/50 text-red-600 hover:bg-red-50 dark:bg-red-950/20 hover:text-red-700">
                        Carica file
                     </Button>
                   )}
@@ -149,14 +149,14 @@ export default function AreaTesserati() {
                       <div>
                         <p className="font-semibold text-foreground text-base">{enr.courseName}</p>
                         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                          <span className="bg-slate-100 px-2 py-0.5 rounded text-muted-foreground font-medium">{enr.schedule}</span>
+                          <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-muted-foreground font-medium">{enr.schedule}</span>
                           <span>•</span>
                           <span>{enr.instructor}</span>
                           <span>•</span>
                           <span>{enr.room}</span>
                         </p>
                       </div>
-                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 uppercase tracking-widest text-[9px] font-bold">ISCRITTO</Badge>
+                      <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 border-emerald-200 dark:border-emerald-900/50 uppercase tracking-widest text-[9px] font-bold">ISCRITTO</Badge>
                     </div>
                   ))}
                 </div>
@@ -184,7 +184,7 @@ export default function AreaTesserati() {
                         <p className="text-sm font-medium text-foreground">{pay.description || 'Quota'}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {new Date(pay.date).toLocaleDateString()}
-                          {pay.method && <span className="ml-2 px-1.5 py-0.5 bg-slate-100 rounded border text-[10px] uppercase font-semibold">{pay.method}</span>}
+                          {pay.method && <span className="ml-2 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border text-[10px] uppercase font-semibold">{pay.method}</span>}
                         </p>
                       </div>
                       <span className="font-bold text-foreground">€ {Number(pay.amount).toFixed(2)}</span>
@@ -195,8 +195,8 @@ export default function AreaTesserati() {
             </CardContent>
           </Card>
 
-          <Card id="chat" className="border-amber-200 overflow-hidden flex flex-col h-[400px] shadow-sm">
-            <CardHeader className="bg-amber-50/50 border-b py-3 px-4">
+          <Card id="chat" className="border-amber-200 dark:border-amber-900/50 overflow-hidden flex flex-col h-[400px] shadow-sm">
+            <CardHeader className="bg-amber-50 dark:bg-amber-950/20/50 border-b py-3 px-4">
               <CardTitle className="text-lg flex items-center gap-2 text-foreground">
                 <MessageCircle className="w-5 h-5 text-amber-600" />
                 GemChat Segreteria
@@ -205,7 +205,7 @@ export default function AreaTesserati() {
             <CardContent className="flex-1 p-0 flex flex-col overflow-hidden bg-muted focus-within:bg-background transition-colors duration-300">
               {!activeConversation ? (
                 <div className="flex-1 flex flex-col justify-center items-center p-6 text-center">
-                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(252,211,77,0.5)]">
+                  <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(252,211,77,0.5)]">
                     <MessageCircle className="w-8 h-8 text-amber-500" />
                   </div>
                   <p className="text-foreground font-bold mb-1 text-lg">Hai bisogno di aiuto?</p>

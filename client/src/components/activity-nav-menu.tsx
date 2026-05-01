@@ -39,7 +39,7 @@ export function ActivityNavMenu() {
             variant="outline"
             size="sm"
             onClick={() => navigate(item.url)}
-            className={`relative text-xs h-8 whitespace-nowrap flex-shrink-0 ${location === item.url ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : ""}`}
+            className={`relative text-xs h-8 whitespace-nowrap flex-shrink-0 ${location === item.url ? "border-amber-500 bg-amber-50 dark:bg-amber-950/20 dark:bg-amber-950/30" : ""}`}
             data-testid={`nav-activity-${item.id}`}
           >
             <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />

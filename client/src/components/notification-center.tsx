@@ -33,7 +33,7 @@ export function NotificationCenter() {
                 size="icon"
                 className={cn(
                     "relative h-12 w-12 mt-2 transition-colors",
-                    unreadCount > 0 && "text-red-600 hover:text-red-700 hover:bg-red-50"
+                    unreadCount > 0 && "text-red-600 hover:text-red-700 hover:bg-red-50 dark:bg-red-950/20"
                 )}
                 data-testid="button-notification-center"
             >

@@ -542,7 +542,7 @@ export function CourseDuplicationWizard({
             <div className="text-[10px] sm:text-xs text-yellow-700 bg-yellow-50 px-3 py-2 rounded-md border border-yellow-200 max-w-[600px] text-left leading-snug">
               <strong className="mr-1">Sicurezza:</strong> I corsi selezionati verranno clonati vergini (no pagamenti/iscritti). La logica oraria originale verrà mantenuta, con nuove date inizio/fine limitate alla stagione considerata.
             </div>
-            <Button onClick={handleBulkDeleteRequest} variant="outline" className="border-red-500 text-red-600 hover:bg-red-50 min-w-[150px] h-11" disabled={selectedCourseIds.size === 0}>
+            <Button onClick={handleBulkDeleteRequest} variant="outline" className="border-red-500 text-red-600 hover:bg-red-50 dark:bg-red-950/20 min-w-[150px] h-11" disabled={selectedCourseIds.size === 0}>
                 Elimina Selezione
             </Button>
             <Button onClick={handleDuplicate} className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[180px] whitespace-nowrap h-11" disabled={createMutation.isPending || selectedCourseIds.size === 0}>
@@ -641,7 +641,7 @@ export function CourseDuplicationWizard({
                                     </TableCell>
                                     <TableCell className="align-top pt-4">
                                         <div className="font-semibold text-foreground line-clamp-1 truncate" title={course.name}>{course.name}</div>
-                                        <div className="text-[10px] font-mono text-muted-foreground mt-1 bg-slate-100 p-0.5 px-1.5 rounded w-fit inline-block">
+                                        <div className="text-[10px] font-mono text-muted-foreground mt-1 bg-slate-100 dark:bg-slate-800 p-0.5 px-1.5 rounded w-fit inline-block">
                                            {generateSKUForCourse({
                                                ...course, 
                                                name: courseOverrides[course.id]?.name ?? course.name,
@@ -739,14 +739,14 @@ export function CourseDuplicationWizard({
                                             <Input
                                                 type="date"
                                                 disabled={!isSelected}
-                                                className={`h-7 text-[10px] px-2 ${isSelected && !(courseOverrides[course.id]?.startDate || course.startDate) ? "border-red-400 bg-red-50" : "bg-background"}`}
+                                                className={`h-7 text-[10px] px-2 ${isSelected && !(courseOverrides[course.id]?.startDate || course.startDate) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : "bg-background"}`}
                                                 value={courseOverrides[course.id]?.startDate || (course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : "")}
                                                 onChange={(e) => updateOverride(course.id, "startDate", e.target.value)}
                                             />
                                             <Input
                                                 type="date"
                                                 disabled={!isSelected}
-                                                className={`h-7 text-[10px] px-2 ${isSelected && !(courseOverrides[course.id]?.endDate || course.endDate) ? "border-red-400 bg-red-50" : "bg-background"}`}
+                                                className={`h-7 text-[10px] px-2 ${isSelected && !(courseOverrides[course.id]?.endDate || course.endDate) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : "bg-background"}`}
                                                 value={courseOverrides[course.id]?.endDate || (course.endDate ? new Date(course.endDate).toISOString().split('T')[0] : "")}
                                                 onChange={(e) => updateOverride(course.id, "endDate", e.target.value)}
                                             />

@@ -12,12 +12,12 @@ import type { PromoRule } from "@shared/schema";
 
 const getTargetBadgeColor = (target: string) => {
   switch (target) {
-    case "public": return "bg-blue-100 text-blue-800";
+    case "public": return "bg-blue-100 dark:bg-blue-900/30 text-blue-800";
     case "company": return "bg-purple-100 text-purple-800";
     case "staff": return "bg-orange-100 text-orange-800";
-    case "personal": return "bg-red-100 text-red-800";
+    case "personal": return "bg-red-100 dark:bg-red-900/30 text-red-800";
     case "welfare": return "bg-green-100 text-green-800";
-    default: return "bg-slate-100 text-foreground";
+    default: return "bg-slate-100 dark:bg-slate-800 text-foreground";
   }
 };
 
@@ -137,7 +137,7 @@ export function PromoTab({ seasonId }: PromoTabProps) {
                       <div className="flex flex-col gap-1 w-24">
                         <span className="text-xs text-muted-foreground">{promo.usedCount || 0} / {promo.maxUses || '∞'}</span>
                         {promo.maxUses && (
-                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                             <div className="h-full bg-primary" style={{ width: progressWidth }}></div>
                           </div>
                         )}
@@ -145,15 +145,15 @@ export function PromoTab({ seasonId }: PromoTabProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
-                        {promo.excludeOpen && <Badge variant="outline" className="w-fit text-[9px] h-4 bg-red-50 text-red-700 border-red-200">NO OPEN</Badge>}
-                        {promo.notCumulative && <Badge variant="outline" className="w-fit text-[9px] h-4 bg-amber-50 text-amber-700 border-amber-200">NO CUMULO</Badge>}
+                        {promo.excludeOpen && <Badge variant="outline" className="w-fit text-[9px] h-4 bg-red-50 dark:bg-red-950/20 text-red-700 border-red-200 dark:border-red-900/50">NO OPEN</Badge>}
+                        {promo.notCumulative && <Badge variant="outline" className="w-fit text-[9px] h-4 bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50">NO CUMULO</Badge>}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" onClick={() => { setEditingPromo(promo); setIsModalOpen(true); }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-red-50" onClick={() => {
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-red-50 dark:bg-red-950/20" onClick={() => {
                          if (confirm("Vuoi davvero disattivare questa regole promozionale?")) {
                             deleteMutation.mutate(promo.id);
                          }

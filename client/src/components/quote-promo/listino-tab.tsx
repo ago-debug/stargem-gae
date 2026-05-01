@@ -87,7 +87,7 @@ export function ListinoTab({ seasonId }: ListinoTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex bg-slate-100 p-1 rounded-md w-fit mx-auto mb-4">
+      <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-md w-fit mx-auto mb-4">
         <Button 
           variant={viewMode === "mensile" ? "default" : "ghost"} 
           size="sm" 

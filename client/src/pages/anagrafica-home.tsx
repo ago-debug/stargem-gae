@@ -764,7 +764,7 @@ export default function AnagraficaHome() {
                   Anagrafica
                 </CardTitle>
                 {selectedMember?.dataQualityFlag === 'mancano_dati_obbligatori' && (
-                  <div className="bg-red-50 border-l-4 border-red-600 p-4 mt-4 rounded-md shadow-sm">
+                  <div className="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-600 p-4 mt-4 rounded-md shadow-sm">
                     <div className="flex items-center">
                       <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
                       <div>

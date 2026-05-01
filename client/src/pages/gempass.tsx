@@ -512,18 +512,18 @@ export default function GemPass() {
               </div>
 
               {memberFound && (
-                 <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-md flex items-center gap-3">
+                 <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-md flex items-center gap-3">
                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                   <p className="text-sm font-medium text-emerald-800">
+                   <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">
                      Socio trovato in anagrafica: <span className="font-bold">{memberFound.lastName} {memberFound.firstName}</span>. I dati sono stati pre-compilati.
                    </p>
                  </div>
               )}
 
               {isNewMember && (
-                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-md flex items-center gap-3">
+                 <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-md flex items-center gap-3">
                    <AlertCircle className="w-5 h-5 text-amber-600" />
-                   <p className="text-sm font-medium text-amber-800">
+                   <p className="text-sm font-medium text-amber-800 dark:text-amber-400">
                      Socio non trovato. Verrà creata una nuova anagrafica — compila tutti i campi obbligatori.
                    </p>
                  </div>
@@ -774,7 +774,7 @@ export default function GemPass() {
 
             {/* SEZIONE E - Firma e Invio */}
             <div className="space-y-4 pt-4">
-               <div className="p-4 border border-emerald-200 bg-emerald-50 rounded-lg space-y-4">
+               <div className="p-4 border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg space-y-4">
                  <div className="flex items-center justify-between">
                    <div className="flex items-center space-x-3">
                      <Checkbox 
@@ -784,7 +784,7 @@ export default function GemPass() {
                        className="border-emerald-600 data-[state=checked]:bg-emerald-600"
                      />
                      <div className="grid gap-1 leading-none">
-                       <Label htmlFor="doc-firma" className="font-bold text-emerald-900 cursor-pointer">
+                       <Label htmlFor="doc-firma" className="font-bold text-emerald-900 dark:text-emerald-300 cursor-pointer">
                          Confermo che il socio HA FIRMATO la Domanda Cartacea <span className="text-red-500">*</span>
                        </Label>
                        <p className="text-xs text-emerald-700 font-medium">Validazione digitale del documento: {format(new Date(), 'dd/MM/yyyy')}</p>
@@ -914,7 +914,7 @@ export default function GemPass() {
                            : `Utente ID: ${f.memberId}`}
                        </TableCell>
                        <TableCell>
-                         <Badge variant="outline" className="font-normal bg-slate-100 text-foreground border-none">
+                         <Badge variant="outline" className="font-normal bg-slate-100 dark:bg-slate-800 text-foreground border-none">
                            {f.formType.replace('_', ' ')}
                          </Badge>
                        </TableCell>
@@ -926,11 +926,11 @@ export default function GemPass() {
                        </TableCell>
                        <TableCell className="text-right">
                          {f.signedAt ? (
-                           <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none px-3">
+                           <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-100 dark:bg-emerald-900/30 border-none px-3">
                              FIRMATO
                            </Badge>
                          ) : (
-                           <Badge variant="outline" className="bg-slate-100 text-muted-foreground hover:bg-slate-100 border-none px-3">
+                           <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-muted-foreground hover:bg-slate-100 dark:bg-slate-800 border-none px-3">
                              DA FIRMARE
                            </Badge>
                          )}
@@ -945,17 +945,17 @@ export default function GemPass() {
 
         <TabsContent value="statistiche" className="mt-4 min-h-[400px]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
+            <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
               <CheckCircle className="w-8 h-8 text-emerald-500 mb-3" />
               <div className="text-4xl font-bold text-emerald-700">{statAttive}</div>
               <p className="text-sm font-medium text-emerald-600 mt-1 uppercase tracking-wide">Tessere Attive</p>
             </div>
-            <div className="bg-amber-50 border border-amber-100 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
               <Clock className="w-8 h-8 text-amber-500 mb-3" />
               <div className="text-4xl font-bold text-amber-700">{statScadenza}</div>
               <p className="text-sm font-medium text-amber-600 mt-1 uppercase tracking-wide">In Scadenza (30 gg)</p>
             </div>
-            <div className="bg-red-50 border border-red-100 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
+            <div className="bg-red-50 dark:bg-red-950/20 border border-red-100 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
               <XCircle className="w-8 h-8 text-red-500 mb-3" />
               <div className="text-4xl font-bold text-red-700">{statScadute}</div>
               <p className="text-sm font-medium text-red-600 mt-1 uppercase tracking-wide">Scadute</p>

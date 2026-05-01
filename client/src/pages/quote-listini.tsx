@@ -28,12 +28,12 @@ const PERIODS = [
 
 const CATEGORY_COLORS: Record<string, string> = {
     "OPEN": "bg-green-100 text-green-800 border-green-300",
-    "ADULTI": "bg-blue-100 text-blue-800 border-blue-300",
+    "ADULTI": "bg-blue-100 dark:bg-blue-900/30 text-blue-800 border-blue-300",
     "AEREAL": "bg-pink-100 text-pink-800 border-pink-300",
     "BAMBINI": "bg-orange-100 text-orange-800 border-orange-300",
     "TEEN": "bg-orange-100 text-orange-800 border-orange-300",
     "PROVE": "bg-gray-100 text-foreground border-border",
-    "DEFAULT": "bg-slate-100 text-foreground border-border"
+    "DEFAULT": "bg-slate-100 dark:bg-slate-800 text-foreground border-border"
 };
 
 interface QuoteListiniProps {
@@ -233,9 +233,9 @@ export default function QuoteListini(props: QuoteListiniProps) {
                 </div>
             )}
 
-            <Alert className="mb-4 bg-amber-50 border-amber-200 shrink-0">
+            <Alert className="mb-4 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50 shrink-0">
                 <Info className="h-4 w-4 text-amber-600" />
-                <AlertTitle className="text-amber-800 font-semibold">ATTENZIONE</AlertTitle>
+                <AlertTitle className="text-amber-800 dark:text-amber-400 font-semibold">ATTENZIONE</AlertTitle>
                 <AlertDescription className="text-amber-700">
                     Tutte le quote indicate in questo listino sono calcolate <strong>SENZA i €25,00</strong> per Quota Tessera/Assicurazione.
                 </AlertDescription>
@@ -245,38 +245,38 @@ export default function QuoteListini(props: QuoteListiniProps) {
             <div className="flex-1 bg-background border border-border rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div className="overflow-auto max-h-full">
                     <Table className="relative min-w-max text-xs sm:text-sm">
-                        <TableHeader className="sticky top-0 z-20 bg-slate-100 outline outline-1 outline-slate-200">
+                        <TableHeader className="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 outline outline-1 outline-slate-200">
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="bg-slate-100 z-30 font-semibold min-w-24 border-r border-border sticky left-0">Categoria</TableHead>
-                                <TableHead className="bg-slate-100 z-30 font-semibold min-w-48 border-r border-border sticky left-[96px]">Descrizione</TableHead>
-                                <TableHead className="bg-slate-100 font-semibold min-w-48 border-r border-border">Dettagli</TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 z-30 font-semibold min-w-24 border-r border-border sticky left-0">Categoria</TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 z-30 font-semibold min-w-48 border-r border-border sticky left-[96px]">Descrizione</TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 font-semibold min-w-48 border-r border-border">Dettagli</TableHead>
 
                                 {/* C-V: Colonne Mesi (2 colonne per ogni mese: Quota / Lezioni) */}
                                 {PERIODS.map(p => (
-                                    <TableHead key={`head-${p}`} colSpan={2} className="bg-slate-100 text-center font-bold border-r border-border border-b">
+                                    <TableHead key={`head-${p}`} colSpan={2} className="bg-slate-100 dark:bg-slate-800 text-center font-bold border-r border-border border-b">
                                         {p}
                                     </TableHead>
                                 ))}
 
-                                <TableHead className="bg-slate-100 font-bold min-w-24 text-center border-r border-border" rowSpan={2}>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 font-bold min-w-24 text-center border-r border-border" rowSpan={2}>
                                     Corsi/Sett.<br /><span className="text-muted-foreground font-normal">(Par. W)</span>
                                 </TableHead>
 
                                 {/* X-AG: Calcolo Costo per Corso (10 periodi) */}
                                 {PERIODS.map(p => (
-                                    <TableHead key={`calc-head-${p}`} className="bg-emerald-50 text-center font-bold text-emerald-800 border-r border-emerald-200">
+                                    <TableHead key={`calc-head-${p}`} className="bg-emerald-50 dark:bg-emerald-950/20 text-center font-bold text-emerald-800 dark:text-emerald-400 border-r border-emerald-200 dark:border-emerald-900/50">
                                         Costo / Corso<br /><span className="text-emerald-600/80 font-normal text-xs">{p}</span>
                                     </TableHead>
                                 ))}
-                                <TableHead className="bg-slate-100 text-center font-bold min-w-16">Azioni</TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 text-center font-bold min-w-16">Azioni</TableHead>
                             </TableRow>
 
                             {/* Second Level Header for Quota / Lezioni */}
                             <TableRow className="hover:bg-transparent shadow-sm">
                                 {/* Vuoti per le prime 3 colonne fisse che usano sticky in the first row implicitly (Wait, HTML table non gestisce bene rowSpan\colSpan con sticky left, per semplicità abbiamo un solo thead row o thead fix) */}
-                                <TableHead className="bg-slate-100 z-30 border-r border-border sticky left-0 p-0 top-[40px]"></TableHead>
-                                <TableHead className="bg-slate-100 z-30 border-r border-border sticky left-[96px] p-0 top-[40px]"></TableHead>
-                                <TableHead className="bg-slate-100 border-r border-border top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 z-30 border-r border-border sticky left-0 p-0 top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 z-30 border-r border-border sticky left-[96px] p-0 top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 border-r border-border top-[40px]"></TableHead>
 
                                 {PERIODS.map(p => (
                                     <React.Fragment key={`subhead-${p}`}>
@@ -285,12 +285,12 @@ export default function QuoteListini(props: QuoteListiniProps) {
                                     </React.Fragment>
                                 ))}
 
-                                <TableHead className="bg-slate-100 border-r border-border top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 border-r border-border top-[40px]"></TableHead>
 
                                 {PERIODS.map(p => (
-                                    <TableHead key={`calcr-${p}`} className="bg-emerald-50 border-r border-emerald-200 min-w-[90px] top-[40px]"></TableHead>
+                                    <TableHead key={`calcr-${p}`} className="bg-emerald-50 dark:bg-emerald-950/20 border-r border-emerald-200 dark:border-emerald-900/50 min-w-[90px] top-[40px]"></TableHead>
                                 ))}
-                                <TableHead className="bg-slate-100 top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 top-[40px]"></TableHead>
                             </TableRow>
                         </TableHeader>
 
@@ -374,14 +374,14 @@ export default function QuoteListini(props: QuoteListiniProps) {
                                             }
 
                                             return (
-                                                <TableCell key={`calcval-${p}`} className="p-2 border-r border-emerald-100 bg-emerald-50/30 text-right font-medium text-emerald-700">
+                                                <TableCell key={`calcval-${p}`} className="p-2 border-r border-emerald-100 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20/30 text-right font-medium text-emerald-700">
                                                     {costo}
                                                 </TableCell>
                                             );
                                         })}
 
                                         <TableCell className="p-2 text-center">
-                                            <Button variant="ghost" size="icon" onClick={() => removeRow(rowIndex)} className="text-red-500 hover:bg-red-50 hover:text-red-700 h-8 w-8">
+                                            <Button variant="ghost" size="icon" onClick={() => removeRow(rowIndex)} className="text-red-500 hover:bg-red-50 dark:bg-red-950/20 hover:text-red-700 h-8 w-8">
                                                 <AlertCircle className="w-4 h-4" />
                                             </Button>
                                         </TableCell>

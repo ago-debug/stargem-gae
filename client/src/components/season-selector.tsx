@@ -30,7 +30,7 @@ export function SeasonSelector({ selectedSeasonId, onSeasonChange, showLabel = f
         return (
             <div className="flex flex-col gap-1.5">
                 {showLabel && <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest px-1">Stagione</span>}
-                <div className="w-[180px] h-10 bg-slate-100 animate-pulse rounded-md"></div>
+                <div className="w-[180px] h-10 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-md"></div>
             </div>
         );
     }

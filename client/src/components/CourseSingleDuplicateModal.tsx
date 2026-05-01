@@ -336,7 +336,7 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
              Crea una copia di "{course?.name || "sconosciuto"}" in un'altra stagione.
           </DialogDescription>
         </DialogHeader>
-          {totalOccurrences > 0 && (<div className="bg-blue-50 text-blue-700 text-sm font-semibold p-2 rounded flex items-center gap-2">📅 {totalOccurrences} lezioni previste ({totalOccurrences} settimane operative al netto delle festività)</div>)}
+          {totalOccurrences > 0 && (<div className="bg-blue-50 dark:bg-blue-950/20 text-blue-700 text-sm font-semibold p-2 rounded flex items-center gap-2">📅 {totalOccurrences} lezioni previste ({totalOccurrences} settimane operative al netto delle festività)</div>)}
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">

@@ -138,7 +138,7 @@ export default function WcMapping() {
         </CardHeader>
         <CardContent className="p-0">
            {is404 && (
-              <div className="bg-amber-50 p-4 border-b border-amber-100 text-sm text-amber-800 flex justify-between items-center">
+              <div className="bg-amber-50 dark:bg-amber-950/20 p-4 border-b border-amber-100 dark:border-amber-900/50 text-sm text-amber-800 dark:text-amber-400 flex justify-between items-center">
                  <span>ATTENZIONE: Endpoint `/api/wc-product-mapping` non implementato sul server backend. Dati prototipali.</span>
               </div>
            )}

@@ -104,7 +104,7 @@ export function InlineListEditor({ listCode, listName, showColors = false, penni
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"
+              className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:bg-red-950/20 shrink-0"
               onClick={() => { if (confirm(`Eliminare "${item.value}"?`)) deleteMutation.mutate(item.id) }}
               disabled={deleteMutation.isPending}
             >

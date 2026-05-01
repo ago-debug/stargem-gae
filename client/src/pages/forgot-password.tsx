@@ -60,13 +60,13 @@ export default function ForgotPassword() {
            <CardContent className="mt-4">
              {success ? (
                 <div className="space-y-6 flex flex-col items-center text-center">
-                   <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
+                   <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-2">
                       <MailCheck className="w-8 h-8 text-emerald-600" />
                    </div>
-                   <div className="bg-emerald-50 text-emerald-800 text-sm font-medium p-4 rounded-xl border border-emerald-200">
+                   <div className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 text-sm font-medium p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/50">
                       ✅ Se l'email è registrata, riceverai il codice a breve. Controlla la tua casella email.
                    </div>
-                   <Link href="/first-login" className="text-amber-600 hover:text-amber-800 font-bold underline text-sm block mt-4">
+                   <Link href="/first-login" className="text-amber-600 hover:text-amber-800 dark:text-amber-400 font-bold underline text-sm block mt-4">
                       Hai già il codice? &rarr; Vai a impostare la password
                    </Link>
                 </div>

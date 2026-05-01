@@ -241,7 +241,7 @@ export default function SchedaCampus() {
                                         );
                                     }
 
-                                    let certExpiryText = <Badge variant="outline" className="bg-slate-100 text-muted-foreground hover:bg-slate-200 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Assente</Badge>;
+                                    let certExpiryText = <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-muted-foreground hover:bg-slate-200 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Assente</Badge>;
                                     if (medical_expiry_date) {
                                         const expiryDate = new Date(medical_expiry_date);
                                         const isValidCertDate = !Number.isNaN(expiryDate.getTime());
@@ -281,7 +281,7 @@ export default function SchedaCampus() {
                                             <TableCell>{cardExpiryText}</TableCell>
                                             <TableCell>{certExpiryText}</TableCell>
                                             <TableCell className={cn("text-center", isSortedColumn("attendances") && "sorted-column-cell")}>
-                                                <Badge variant="secondary" className="bg-slate-100 text-foreground/80 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5">
+                                                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-foreground/80 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5">
                                                     {Number(presenze_count) || 0}
                                                 </Badge>
                                             </TableCell>

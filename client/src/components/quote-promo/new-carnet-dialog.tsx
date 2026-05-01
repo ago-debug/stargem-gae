@@ -136,7 +136,7 @@ export function NewCarnetDialog() {
   return (
     <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="border-amber-200 text-amber-700 hover:bg-amber-50">
+        <Button variant="outline" className="border-amber-200 dark:border-amber-900/50 text-amber-700 hover:bg-amber-50 dark:bg-amber-950/20">
           <Layers className="w-4 h-4 mr-2" /> Nuovo Carnet
         </Button>
       </DialogTrigger>

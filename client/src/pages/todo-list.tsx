@@ -172,7 +172,7 @@ export default function TodoList() {
                       variant="ghost"
                       size="icon"
                       onClick={() => deleteMutation.mutate(todo.id)}
-                      className="text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50"
+                      className="text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:bg-red-950/20 dark:hover:bg-red-950/50"
                       data-testid={`button-delete-${todo.id}`}
                       disabled={deleteMutation.isPending}
                     >

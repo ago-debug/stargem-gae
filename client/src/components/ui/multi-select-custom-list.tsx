@@ -60,7 +60,7 @@ export function MultiSelectCustomList({ systemName, listName, selectedValues, on
             <span className="text-muted-foreground">Seleziona {listName.toLowerCase()}...</span>
           ) : (
             selectedValues.map((val) => (
-              <Badge key={val} variant="outline" className="text-xs bg-slate-100 flex items-center gap-1">
+              <Badge key={val} variant="outline" className="text-xs bg-slate-100 dark:bg-slate-800 flex items-center gap-1">
                 {val}
                 <button
                   type="button"
@@ -78,7 +78,7 @@ export function MultiSelectCustomList({ systemName, listName, selectedValues, on
           <div className="absolute z-50 mt-1 w-full rounded-md border border-input bg-popover shadow-md">
             <div className="max-h-48 overflow-y-auto p-1">
               <div
-                className="px-3 py-1.5 text-sm cursor-pointer rounded hover:bg-slate-100 text-muted-foreground italic"
+                className="px-3 py-1.5 text-sm cursor-pointer rounded hover:bg-slate-100 dark:bg-slate-800 text-muted-foreground italic"
                 onClick={() => { onChange([]); setIsDropdownOpen(false); }}
               >
                 (Nessuna)
@@ -88,7 +88,7 @@ export function MultiSelectCustomList({ systemName, listName, selectedValues, on
                 return (
                   <div
                     key={val}
-                    className={`px-3 py-1.5 text-sm cursor-pointer rounded hover:bg-slate-100 flex items-center justify-between gap-2 ${isSelected ? "bg-accent/50 font-medium" : ""}`}
+                    className={`px-3 py-1.5 text-sm cursor-pointer rounded hover:bg-slate-100 dark:bg-slate-800 flex items-center justify-between gap-2 ${isSelected ? "bg-accent/50 font-medium" : ""}`}
                     onClick={() => toggleValue(val)}
                   >
                     <span>{val}</span>

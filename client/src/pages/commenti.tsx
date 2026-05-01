@@ -219,7 +219,7 @@ export default function Commenti() {
             <div className="flex items-center gap-2 ml-auto">
               <Button
                 variant="outline"
-                className="border-blue-300 hover:bg-blue-50 text-blue-700 font-medium"
+                className="border-blue-300 hover:bg-blue-50 dark:bg-blue-950/20 text-blue-700 font-medium"
                 onClick={() => copilotMutation.mutate()}
                 disabled={copilotMutation.isPending}
                 data-testid="button-copilot"
@@ -228,7 +228,7 @@ export default function Commenti() {
                 {copilotMutation.isPending ? "Analizzo..." : "CoPilot"}
               </Button>
               <Button
-                className="bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 text-amber-950 hover:from-amber-300 hover:to-amber-600 border border-amber-300 shadow-sm transition-all"
+                className="bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 text-amber-950 hover:from-amber-300 hover:to-amber-600 border border-amber-300 dark:border-amber-800/50 shadow-sm transition-all"
                 onClick={handleSubmit}
                 disabled={!newComment.trim() || createMutation.isPending}
                 data-testid="button-send-comment"

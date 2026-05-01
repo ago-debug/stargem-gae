@@ -144,14 +144,14 @@ export default function GemTeamMe() {
         <div className="md:col-span-8">
           <Card className={`border-4 shadow-xl overflow-hidden rounded-[2rem] transition-all duration-500 ${
             checkInState === "NOT_STARTED" ? "border-border bg-background" :
-            checkInState === "IN_PROGRESS" ? "border-emerald-500 bg-emerald-50" :
-            "border-blue-500 bg-blue-50"
+            checkInState === "IN_PROGRESS" ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20" :
+            "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
           }`}>
             <CardContent className="p-8 md:p-12 flex flex-col items-center justify-center text-center min-h-[400px]">
               
               {checkInState === "NOT_STARTED" && (
                 <>
-                  <Badge variant="outline" className="mb-8 text-lg px-4 py-1.5 bg-slate-100 text-muted-foreground border-2 rounded-xl">Inizio Turno</Badge>
+                  <Badge variant="outline" className="mb-8 text-lg px-4 py-1.5 bg-slate-100 dark:bg-slate-800 text-muted-foreground border-2 rounded-xl">Inizio Turno</Badge>
                   <Button 
                     onClick={handleAction}
                     className="w-full max-w-sm h-32 text-3xl font-black rounded-3xl bg-emerald-500 hover:bg-emerald-600 shadow-[0_8px_30px_rgb(16,185,129,0.3)] transition-transform active:scale-95"
@@ -166,7 +166,7 @@ export default function GemTeamMe() {
 
               {checkInState === "IN_PROGRESS" && (
                 <>
-                  <Badge variant="outline" className="mb-8 text-lg px-4 py-1.5 bg-emerald-100 text-emerald-800 border-emerald-300 border-2 rounded-xl animate-pulse">In Sede</Badge>
+                  <Badge variant="outline" className="mb-8 text-lg px-4 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 border-2 rounded-xl animate-pulse">In Sede</Badge>
                   
                   <div className="text-6xl md:text-7xl font-black text-emerald-700 tracking-tighter mb-8 tabular-nums">
                     {elapsedText()}
@@ -217,7 +217,7 @@ export default function GemTeamMe() {
             <CardContent className="p-6">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Il mio turno oggi</h3>
               <div className="bg-muted border-2 border-slate-100 rounded-2xl p-5">
-                <span className="inline-block bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-lg text-sm mb-3">RECEPTION</span>
+                <span className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-800 font-bold px-3 py-1 rounded-lg text-sm mb-3">RECEPTION</span>
                 <div className="text-3xl font-black text-foreground/80 tracking-tight">08:30 <span className="text-slate-300">→</span> 14:30</div>
               </div>
             </CardContent>
@@ -321,7 +321,7 @@ export default function GemTeamMe() {
                         <div key={index} className="flex justify-between items-center bg-background border-2 border-slate-100 p-5 rounded-2xl shadow-sm hover:border-blue-100 hover:shadow-md transition-all">
                           <div>
                             <div className="flex items-center gap-3 mb-1">
-                              <Badge variant="outline" className="bg-slate-100 font-black text-foreground/80">{req.tipo}</Badge>
+                              <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 font-black text-foreground/80">{req.tipo}</Badge>
                               <span className="text-sm font-semibold text-muted-foreground">
                                 {req.data_inizio ? new Date(req.data_inizio).toLocaleDateString('it-IT') : ''}
                                 {req.data_fine && req.data_fine !== req.data_inizio ? ` → ${new Date(req.data_fine).toLocaleDateString('it-IT')}` : ''}
@@ -331,7 +331,7 @@ export default function GemTeamMe() {
                           </div>
                           <div>
                             {isPending && <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 font-bold border-0 px-3 py-1">IN ATTESA</Badge>}
-                            {isApproved && <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold border-0 px-3 py-1">APPROVATA</Badge>}
+                            {isApproved && <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-200 font-bold border-0 px-3 py-1">APPROVATA</Badge>}
                             {isRejected && <Badge className="bg-rose-100 text-rose-800 hover:bg-rose-200 font-bold border-0 px-3 py-1">RIFIUTATA</Badge>}
                           </div>
                         </div>

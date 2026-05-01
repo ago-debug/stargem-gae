@@ -136,12 +136,12 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-emerald-200 bg-emerald-50/20 shadow-sm relative overflow-hidden">
+            <Card className="border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20/20 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <TrendingUp className="h-24 w-24" />
               </div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-emerald-100 bg-emerald-50/50">
-                <CardTitle className="text-sm font-bold text-emerald-800">Incasso Globale (Mese)</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-emerald-100 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20/50">
+                <CardTitle className="text-sm font-bold text-emerald-800 dark:text-emerald-400">Incasso Globale (Mese)</CardTitle>
                 <TrendingUp className="h-4 w-4 text-emerald-600" />
               </CardHeader>
               <CardContent className="pt-4">
@@ -152,7 +152,7 @@ export default function Dashboard() {
                 </div>
                 
                 {stats?.revenueByMember && stats.revenueByMember.length > 0 && (
-                  <div className="space-y-4 mt-4 pt-4 border-t border-emerald-100">
+                  <div className="space-y-4 mt-4 pt-4 border-t border-emerald-100 dark:border-emerald-900/50">
                     
                     {/* Incasso Personale dell'operatore connesso */}
                     {(() => {
@@ -164,9 +164,9 @@ export default function Dashboard() {
                         <>
                           <div className="space-y-2">
                             <p className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">Il tuo Incasso Mensile</p>
-                            <div className="flex items-center justify-between text-sm p-2 rounded bg-emerald-100/50 border border-emerald-200">
+                            <div className="flex items-center justify-between text-sm p-2 rounded bg-emerald-100 dark:bg-emerald-900/30/50 border border-emerald-200 dark:border-emerald-900/50">
                               <div className="flex flex-col">
-                                <span className="font-semibold text-emerald-900">{myRevenue ? myRevenue.name : "Tu"}</span>
+                                <span className="font-semibold text-emerald-900 dark:text-emerald-300">{myRevenue ? myRevenue.name : "Tu"}</span>
                                 <span className="text-[10px] text-emerald-700">{myRevenue ? myRevenue.count : 0} operazioni</span>
                               </div>
                               <span className="font-bold text-emerald-700">€{myRevenue ? myRevenue.amount.toFixed(2) : "0.00"}</span>
@@ -177,7 +177,7 @@ export default function Dashboard() {
                           {otherRevenues.length > 0 && (
                             <Collapsible className="w-full">
                               <CollapsibleTrigger asChild>
-                                <Button variant="ghost" size="sm" className="w-full flex justify-between items-center text-xs text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 h-8 px-2 -mx-2">
+                                <Button variant="ghost" size="sm" className="w-full flex justify-between items-center text-xs text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 hover:bg-emerald-50 dark:bg-emerald-950/20 h-8 px-2 -mx-2">
                                   <span>Visualizza incasso altri operatori</span>
                                   <ChevronDown className="h-4 w-4" />
                                 </Button>
@@ -284,9 +284,9 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-amber-200 bg-amber-50 md:col-span-3">
+            <Card className="border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 md:col-span-3">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-amber-800 flex items-center gap-2">
+                <CardTitle className="text-amber-800 dark:text-amber-400 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5" />
                   Iscrizioni online da completare in sede
                 </CardTitle>
@@ -306,21 +306,21 @@ export default function Dashboard() {
                 ) : (
                   <ul className="space-y-3 mt-2">
                     {pendingEnrollments.map((e: any) => (
-                      <li key={e.id} className="flex flex-col sm:flex-row sm:items-center justify-between text-sm bg-background p-3 rounded-md border border-amber-100 shadow-sm gap-3">
+                      <li key={e.id} className="flex flex-col sm:flex-row sm:items-center justify-between text-sm bg-background p-3 rounded-md border border-amber-100 dark:border-amber-900/50 shadow-sm gap-3">
                         <span className="font-semibold text-foreground uppercase">{e.memberName}</span>
                         <div className="flex items-center flex-wrap gap-2">
                           {e.pendingMedicalCert &&
-                            <Badge variant="outline" className="text-amber-700 bg-amber-100 border-amber-300">
+                            <Badge variant="outline" className="text-amber-700 bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-800/50">
                               Cert. Medico
                             </Badge>
                           }
                           {e.pendingMembership &&
-                            <Badge variant="outline" className="text-red-700 bg-red-100 border-red-300">
+                            <Badge variant="outline" className="text-red-700 bg-red-100 dark:bg-red-900/30 border-red-300">
                               Quota Tessera
                             </Badge>
                           }
                           {e.pendingDocuments &&
-                            <Badge variant="outline" className="text-blue-700 bg-blue-100 border-blue-300">
+                            <Badge variant="outline" className="text-blue-700 bg-blue-100 dark:bg-blue-900/30 border-blue-300">
                               Firme Privacy
                             </Badge>
                           }
@@ -356,7 +356,7 @@ export default function Dashboard() {
             </>
           ) : (
             <>
-              <Card className={(alerts?.expiringCourses ?? 0) > 0 ? "border-amber-200 bg-amber-50/30" : ""}>
+              <Card className={(alerts?.expiringCourses ?? 0) > 0 ? "border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20/30" : ""}>
                 <CardHeader>
                   <CardTitle className="text-lg">Corsi in Avvicinamento Fine</CardTitle>
                   <CardDescription>Terminano entro 14 giorni</CardDescription>
@@ -368,7 +368,7 @@ export default function Dashboard() {
                       variant="outline"
                       size="sm"
                       onClick={() => setLocation('/corsi')}
-                      className={(alerts?.expiringCourses ?? 0) > 0 ? "text-amber-700 border-amber-300 hover:bg-amber-100" : ""}
+                      className={(alerts?.expiringCourses ?? 0) > 0 ? "text-amber-700 border-amber-300 dark:border-amber-800/50 hover:bg-amber-100 dark:bg-amber-900/30" : ""}
                     >
                       Pianifica Rinnovi
                     </Button>
@@ -376,7 +376,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className={(alerts?.expiringWorkshops ?? 0) > 0 ? "border-amber-200 bg-amber-50/30" : ""}>
+              <Card className={(alerts?.expiringWorkshops ?? 0) > 0 ? "border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20/30" : ""}>
                 <CardHeader>
                   <CardTitle className="text-lg">Workshop Imminenti / in Scadenza</CardTitle>
                   <CardDescription>Eventi attivi nei prossimi 14 giorni</CardDescription>
@@ -388,7 +388,7 @@ export default function Dashboard() {
                       variant="outline"
                       size="sm"
                       onClick={() => setLocation('/workshop')}
-                      className={(alerts?.expiringWorkshops ?? 0) > 0 ? "text-amber-700 border-amber-300 hover:bg-amber-100" : ""}
+                      className={(alerts?.expiringWorkshops ?? 0) > 0 ? "text-amber-700 border-amber-300 dark:border-amber-800/50 hover:bg-amber-100 dark:bg-amber-900/30" : ""}
                     >
                       Verifica Partecipanti
                     </Button>

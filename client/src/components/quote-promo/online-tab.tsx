@@ -55,16 +55,16 @@ export function OnlineTab() {
 
   const getSourceBadge = (source: string) => {
     switch(source) {
-      case "online": return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200">Web</Badge>;
+      case "online": return <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 hover:bg-emerald-200">Web</Badge>;
       case "woocommerce": return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200">WooCommerce</Badge>;
       case "webhook_woocommerce": return <Badge className="bg-fuchsia-100 text-fuchsia-700 hover:bg-fuchsia-200">Webhook WC</Badge>;
-      case "webhook_stripe": return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">Stripe</Badge>;
-      default: return <Badge className="bg-slate-100 text-foreground/80 hover:bg-slate-200">Sede</Badge>;
+      case "webhook_stripe": return <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 hover:bg-blue-200">Stripe</Badge>;
+      default: return <Badge className="bg-slate-100 dark:bg-slate-800 text-foreground/80 hover:bg-slate-200">Sede</Badge>;
     }
   };
 
   const getStatusBadge = (status: string) => {
-    if (status === "pending") return <Badge variant="outline" className="text-amber-600 border-amber-300">Da completare</Badge>;
+    if (status === "pending") return <Badge variant="outline" className="text-amber-600 border-amber-300 dark:border-amber-800/50">Da completare</Badge>;
     if (status === "completed") return <Badge variant="outline" className="text-emerald-600 border-emerald-300">Completato</Badge>;
     return <Badge variant="outline">{status}</Badge>;
   };

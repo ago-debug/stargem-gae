@@ -413,7 +413,7 @@ export function PaymentDialog({
                         {memberId && (
                             <div className="space-y-3">
                                 {isLoadingDebts ? (
-                                    <div className="h-20 bg-slate-100 animate-pulse rounded-md w-full border border-border"></div>
+                                    <div className="h-20 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-md w-full border border-border"></div>
                                 ) : pendingDebts && pendingDebts.length > 0 ? (
                                     <div className="border rounded-md divide-y overflow-hidden shadow-sm">
                                         {pendingDebts.map((debt, idx) => (
@@ -589,7 +589,7 @@ export function PaymentDialog({
                                     <span className="bg-primary/10 text-primary w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
                                     Sconti e Agevolazioni
                                 </div>
-                                <span className="text-xs font-normal text-muted-foreground bg-slate-100 px-2 py-1 rounded">
+                                <span className="text-xs font-normal text-muted-foreground bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
                                     Formula: (Prezzo × (1 - Sc.1)) × (1 - Sc.2)
                                 </span>
                             </h3>
@@ -598,29 +598,29 @@ export function PaymentDialog({
                                 {/* Blocco Sconto 1 */}
                                 <div className="space-y-1">
                                     <Label className="text-xs text-blue-700 truncate">Cod. Sconto 1 (T)</Label>
-                                    <Input className="h-9 bg-blue-50/30 font-mono text-xs uppercase" placeholder="Cod. Campagna" value={formData.codiceSconto} onChange={(e) => handleChange("codiceSconto", e.target.value)} />
+                                    <Input className="h-9 bg-blue-50 dark:bg-blue-950/20/30 font-mono text-xs uppercase" placeholder="Cod. Campagna" value={formData.codiceSconto} onChange={(e) => handleChange("codiceSconto", e.target.value)} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-xs text-blue-700 truncate">Valore (U)</Label>
-                                    <Input type="number" className="h-9 bg-blue-50/30 text-right" placeholder="€ 0.00" value={formData.valoreSconto || ''} onChange={(e) => handleChange("valoreSconto", parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="h-9 bg-blue-50 dark:bg-blue-950/20/30 text-right" placeholder="€ 0.00" value={formData.valoreSconto || ''} onChange={(e) => handleChange("valoreSconto", parseFloat(e.target.value) || 0)} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-xs text-blue-700 truncate">% Sconto (V)</Label>
-                                    <Input type="number" step="0.01" className="h-9 bg-blue-50/30 text-right" placeholder="%" value={formData.percentualeSconto || ''} onChange={(e) => handleChange("percentualeSconto", parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" step="0.01" className="h-9 bg-blue-50 dark:bg-blue-950/20/30 text-right" placeholder="%" value={formData.percentualeSconto || ''} onChange={(e) => handleChange("percentualeSconto", parseFloat(e.target.value) || 0)} />
                                 </div>
 
                                 {/* Blocco Sconto 2 */}
                                 <div className="space-y-1">
                                     <Label className="text-xs text-emerald-700 truncate">Cod. Promo 2 (W)</Label>
-                                    <Input className="h-9 bg-emerald-50/30 font-mono text-xs uppercase" placeholder="Cod. Personale" value={formData.codiciPromo} onChange={(e) => handleChange("codiciPromo", e.target.value)} />
+                                    <Input className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 font-mono text-xs uppercase" placeholder="Cod. Personale" value={formData.codiciPromo} onChange={(e) => handleChange("codiciPromo", e.target.value)} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-xs text-emerald-700 truncate">Valore (X)</Label>
-                                    <Input type="number" className="h-9 bg-emerald-50/30 text-right" placeholder="€ 0.00" value={formData.valorePromo || ''} onChange={(e) => handleChange("valorePromo", parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 text-right" placeholder="€ 0.00" value={formData.valorePromo || ''} onChange={(e) => handleChange("valorePromo", parseFloat(e.target.value) || 0)} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-xs text-emerald-700 truncate">% Promo</Label>
-                                    <Input type="number" step="0.01" className="h-9 bg-emerald-50/30 text-right" placeholder="%" value={formData.percentualePromo || ''} onChange={(e) => handleChange("percentualePromo", parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" step="0.01" className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 text-right" placeholder="%" value={formData.percentualePromo || ''} onChange={(e) => handleChange("percentualePromo", parseFloat(e.target.value) || 0)} />
                                 </div>
                             </div>
                         </div>
@@ -729,7 +729,7 @@ export function PaymentDialog({
                         </div>
 
                         <div className="flex flex-col space-y-4 border-t pt-4">
-                            <div className="flex items-center gap-2 border p-3 rounded-md bg-red-50/50">
+                            <div className="flex items-center gap-2 border p-3 rounded-md bg-red-50 dark:bg-red-950/20/50">
                                 <Checkbox
                                     id="gratuita"
                                     checked={isGratuito}
@@ -741,7 +741,7 @@ export function PaymentDialog({
                                 </Label>
                             </div>
                             {isGratuito && (
-                                <div className="space-y-2 max-w-sm p-4 border border-red-200 rounded-md bg-red-50">
+                                <div className="space-y-2 max-w-sm p-4 border border-red-200 dark:border-red-900/50 rounded-md bg-red-50 dark:bg-red-950/20">
                                     <Label className="text-red-700">Codice Admin per autorizzazione</Label>
                                     <Input
                                         type="password"
@@ -759,7 +759,7 @@ export function PaymentDialog({
 
                             {/* === AVVISO PIENO E FORZATURA ADMIN === */}
                             {isCourseFull && (
-                                <div className="bg-red-50 p-4 rounded-lg border border-red-200 mt-4 space-y-4">
+                                <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-900/50 mt-4 space-y-4">
                                     <div className="flex items-start gap-3">
                                         <AlertTriangle className="text-red-600 animate-pulse mt-0.5" size={20} />
                                         <div>
@@ -793,7 +793,7 @@ export function PaymentDialog({
                             )}
 
                             {error && !error.includes("Codice Admin non valido per la gratuità") && (
-                                <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm font-medium">
+                                <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-700 rounded-md text-sm font-medium">
                                     {error}
                                 </div>
                             )}

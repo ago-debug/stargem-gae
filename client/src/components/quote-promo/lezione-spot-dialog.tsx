@@ -225,7 +225,7 @@ export function LezioneSpotDialog() {
              <div className="grid grid-cols-3 gap-4 pb-2">
                 <div className="space-y-2">
                    <Label>Importo da Saldo Pagato (€) *</Label>
-                   <Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-emerald-50 border-emerald-200 font-bold text-emerald-900" />
+                   <Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 font-bold text-emerald-900 dark:text-emerald-300" />
                 </div>
                 <div className="space-y-2">
                    <Label>Metodo *</Label>

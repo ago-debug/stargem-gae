@@ -239,7 +239,7 @@ export default function SchedaCorso() {
     ) : (
       <Badge
         variant="outline"
-        className="text-red-500 border-red-200 bg-red-50 shadow-none"
+        className="text-red-500 border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 shadow-none"
       >
         Dati Assenti
       </Badge>
@@ -334,7 +334,7 @@ export default function SchedaCorso() {
             <div className="flex flex-wrap gap-3 pt-2">
               <Badge
                 variant="outline"
-                className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 dark:bg-slate-800 transition-colors"
                 onClick={() => { if(course.sku) setLocation(`/calendario-attivita?highlightCourseId=${course.id}`) }}
               >
                 <Tag className="w-3.5 h-3.5" />
@@ -350,7 +350,7 @@ export default function SchedaCorso() {
                 </Badge>
               )}
               {tessereScadute > 0 && (
-                <span className="text-red-600 text-sm font-medium bg-red-50 px-2 py-1 rounded">
+                <span className="text-red-600 text-sm font-medium bg-red-50 dark:bg-red-950/20 px-2 py-1 rounded">
                   🔴 {tessereScadute} tessere scadute
                 </span>
               )}
@@ -363,7 +363,7 @@ export default function SchedaCorso() {
                 onClick={() =>
                   alert("Il Modulo Presenze sarà disponibile prossimamente.")
                 }
-                className="text-muted-foreground text-sm bg-muted border border-border hover:bg-slate-100 hover:border-border transition-colors px-2.5 py-1 rounded-md flex items-center gap-1"
+                className="text-muted-foreground text-sm bg-muted border border-border hover:bg-slate-100 dark:bg-slate-800 hover:border-border transition-colors px-2.5 py-1 rounded-md flex items-center gap-1"
               >
                 ✅ {presenzeTotal} presenze
               </button>
@@ -373,7 +373,7 @@ export default function SchedaCorso() {
                   <>
                     <Badge
                       variant="outline"
-                      className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 dark:bg-slate-800 transition-colors"
                       onClick={() => { if(course.sku) setLocation(`/calendario-attivita?highlightCourseId=${course.id}`) }}
                     >
                       📅 {effettuate} / {course.totalOccurrences} lezioni
@@ -398,7 +398,7 @@ export default function SchedaCorso() {
                 onClick={() =>
                   setGenderFilter((prev) => (prev === "M" ? "all" : "M"))
                 }
-                className={`text-sm font-medium px-3 py-1 rounded transition-colors ${genderFilter === "M" ? "bg-blue-100 text-blue-700 ring-1 ring-blue-400" : "bg-blue-50 text-blue-600 hover:bg-blue-100"}`}
+                className={`text-sm font-medium px-3 py-1 rounded transition-colors ${genderFilter === "M" ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 ring-1 ring-blue-400" : "bg-blue-50 dark:bg-blue-950/20 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30"}`}
               >
                 Uomini {uominiCount}
               </button>
@@ -548,7 +548,7 @@ export default function SchedaCorso() {
                     let certExpiryText = (
                       <Badge
                         variant="outline"
-                        className="bg-slate-100 text-muted-foreground hover:bg-slate-200 shadow-none border-0 gap-1"
+                        className="bg-slate-100 dark:bg-slate-800 text-muted-foreground hover:bg-slate-200 shadow-none border-0 gap-1"
                       >
                         <XCircle className="w-3.5 h-3.5" /> Assente
                       </Badge>
@@ -657,7 +657,7 @@ export default function SchedaCorso() {
                         >
                           <Badge
                             variant="secondary"
-                            className="bg-slate-100 text-foreground/80 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5"
+                            className="bg-slate-100 dark:bg-slate-800 text-foreground/80 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5"
                           >
                             {presenze_count}
                           </Badge>

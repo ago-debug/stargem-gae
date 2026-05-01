@@ -719,7 +719,7 @@ export default function ImportData() {
                     <div className="text-xs text-muted-foreground min-h-[32px]">{t.desc}</div>
                     <Badge variant={t.type === 'members' || t.type === 'enrollments' ? 'default' : 'secondary'} className="text-[10px] w-full justify-center whitespace-normal text-center">{t.badge}</Badge>
                     {t.alert && (
-                       <div className="text-[10px] font-medium text-amber-700 mt-2 bg-amber-50 p-1 rounded w-full line-clamp-2">{t.alert}</div>
+                       <div className="text-[10px] font-medium text-amber-700 mt-2 bg-amber-50 dark:bg-amber-950/20 p-1 rounded w-full line-clamp-2">{t.alert}</div>
                     )}
                     <div className="mt-auto pt-4 w-full">
                         <div className="text-[10px] text-muted-foreground mb-2">{t.fonti}</div>
@@ -950,7 +950,7 @@ export default function ImportData() {
                               <p className="text-3xl font-black text-green-600">{dryRunData.toInsert}</p>
                               <p className="text-xs font-semibold text-green-700">DA INSERIRE</p>
                             </div>
-                            <div className="bg-blue-50 p-4 rounded-xl text-center">
+                            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-xl text-center">
                               <p className="text-3xl font-black text-blue-600">{dryRunData.toUpdate}</p>
                               <p className="text-xs font-semibold text-blue-700">DA AGGIORNARE</p>
                             </div>
@@ -958,7 +958,7 @@ export default function ImportData() {
                               <p className="text-3xl font-black text-muted-foreground">{dryRunData.unchanged}</p>
                               <p className="text-xs font-semibold text-foreground/80">INVARIATI</p>
                             </div>
-                            <div className="bg-red-50 p-4 rounded-xl text-center">
+                            <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-xl text-center">
                               <p className="text-3xl font-black text-red-600">{dryRunData.errors}</p>
                               <p className="text-xs font-semibold text-red-700">ERRORI/DA SALTARE</p>
                             </div>
@@ -966,7 +966,7 @@ export default function ImportData() {
                           
                           {/* SEZIONE A — CF mancante o invalido */}
                           {(dryRunData.missingCfRecords?.length > 0 || dryRunData.invalidCfRecords?.length > 0) && (
-                            <Alert variant="destructive" className="bg-red-50 border-red-200">
+                            <Alert variant="destructive" className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
                               <AlertCircle className="h-4 w-4 text-red-600" />
                               <AlertTitle className="text-red-800">
                                 {(dryRunData.missingCfRecords?.length || 0) + (dryRunData.invalidCfRecords?.length || 0)} record con CF mancante o non valido non verranno importati.
@@ -1010,7 +1010,7 @@ export default function ImportData() {
 
                           {/* SEZIONE C — Smart Routing attivato */}
                           {dryRunData.routingStats && (
-                            <Alert className="bg-blue-50 border-blue-200">
+                            <Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200">
                               <CheckCircle className="h-4 w-4 text-blue-600" />
                               <AlertTitle className="text-blue-800">Smart Routing attivo:</AlertTitle>
                               <AlertDescription className="text-blue-700 mt-2">

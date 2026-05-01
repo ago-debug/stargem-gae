@@ -125,9 +125,9 @@ export default function AuthPage() {
             {/* Wrapper principale Unificato Form + Animazione */}
             <div className="relative w-full max-w-4xl mx-4 z-10 animate-in fade-in zoom-in-95 duration-500 mt-10">
                 {new URLSearchParams(window.location.search).get('hint') === 'staff' && (
-                    <div className="bg-amber-50 text-amber-800 text-sm font-medium p-4 rounded-xl mb-4 border border-amber-200 shadow-sm flex items-center justify-center text-center gap-2">
+                    <div className="bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-400 text-sm font-medium p-4 rounded-xl mb-4 border border-amber-200 dark:border-amber-900/50 shadow-sm flex items-center justify-center text-center gap-2">
                         <span>Sei un insegnante di Studio Gem? Se è il tuo primo accesso &rarr;</span>
-                        <Link href="/first-login" className="font-bold underline text-amber-700 hover:text-amber-900">
+                        <Link href="/first-login" className="font-bold underline text-amber-700 hover:text-amber-900 dark:text-amber-300">
                           Clicca qui per impostare la password
                         </Link>
                     </div>
@@ -208,7 +208,7 @@ export default function AuthPage() {
                 </div>
 
                 {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
-                <div className="flex flex-1 w-full h-full relative items-center justify-center border-t lg:border-t-0 lg:border-l border-border/60 bg-gradient-to-b lg:bg-gradient-to-r from-white/10 to-white/50 min-h-[320px] lg:min-h-[400px] rounded-b-xl lg:rounded-b-none lg:rounded-r-xl">
+                <div className="flex flex-1 w-full h-full relative items-center justify-center border-t lg:border-t-0 lg:border-l border-border/60 bg-gradient-to-b lg:bg-gradient-to-r from-white/10 to-white dark:to-background/50 min-h-[320px] lg:min-h-[400px] rounded-b-xl lg:rounded-b-none lg:rounded-r-xl">
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group" onClick={handleVideoClick}>
                         <video 
                             key={teoVideo} /* Forza il reload del video quando cambia il src per browser più vecchi */
@@ -222,7 +222,7 @@ export default function AuthPage() {
                         {/* Audio Toggle Button */}
                         <button 
                             onClick={toggleAudio}
-                            className="absolute bottom-4 right-4 p-2.5 bg-slate-100 hover:bg-slate-200 text-muted-foreground hover:text-foreground/80 rounded-full shadow-md transition-colors z-50 border border-border"
+                            className="absolute bottom-4 right-4 p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-muted-foreground hover:text-foreground/80 rounded-full shadow-md transition-colors z-50 border border-border"
                             title={isMuted ? "Attiva audio" : "Disattiva audio"}
                         >
                             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}

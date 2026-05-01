@@ -7,7 +7,7 @@ export default function NotFound() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 dark:from-background to-slate-100 p-4">
       <Card className="w-full max-w-lg mx-4 border-none shadow-2xl relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
@@ -17,7 +17,7 @@ export default function NotFound() {
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl animate-pulse" />
-              <div className="bg-gradient-to-br from-red-100 to-red-300 p-4 rounded-full relative border border-red-200 shadow-inner">
+              <div className="bg-gradient-to-br from-red-100 to-red-300 p-4 rounded-full relative border border-red-200 dark:border-red-900/50 shadow-inner">
                 <AlertTriangle className="h-10 w-10 text-red-600" />
               </div>
             </div>
@@ -31,7 +31,7 @@ export default function NotFound() {
           </p>
           
           <div className="flex flex-col items-center gap-3">
-             <div className="flex items-center gap-1.5 text-xs font-semibold text-red-700 bg-red-50 px-3 py-1.5 rounded-full mb-2 border border-red-200">
+             <div className="flex items-center gap-1.5 text-xs font-semibold text-red-700 bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-full mb-2 border border-red-200 dark:border-red-900/50">
                 Errore 404
              </div>
              

@@ -74,7 +74,7 @@ const isSystemEmployee = (d: GemTeamMember): boolean => {
 const TEAM_COLORS: Record<string, string> = {
   'segreteria': 'bg-pink-100 text-pink-700',
   'ass_manutenzione': 'bg-orange-100 text-orange-700',
-  'ufficio': 'bg-blue-100 text-blue-700',
+  'ufficio': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700',
   'amministrazione': 'bg-purple-100 text-purple-700',
   'collaboratori': 'bg-slate-200 text-foreground'
 };
@@ -99,17 +99,17 @@ const TIME_SLOTS = Array.from({length: 31}, (_, i) => {
 
 const SHIFT_COLORS: Record<string, string> = {
   "RECEPTION": "bg-green-100 text-green-800 border-green-200",
-  "PRIMO": "bg-blue-100 text-blue-800 border-blue-200",
+  "PRIMO": "bg-blue-100 dark:bg-blue-900/30 text-blue-800 border-blue-200",
   "SECONDO": "bg-sky-100 text-sky-800 border-sky-200",
   "UFFICIO": "bg-orange-100 text-orange-800 border-orange-200",
   "AMM.ZIONE": "bg-purple-100 text-purple-800 border-purple-200",
   "WORKSHOP": "bg-yellow-100 text-yellow-800 border-yellow-200",
-  "PAUSA": "bg-slate-100 text-muted-foreground border-border",
+  "PAUSA": "bg-slate-100 dark:bg-slate-800 text-muted-foreground border-border",
   "RIPOSO": "bg-slate-300 text-foreground border-slate-400 font-bold",
-  "RIUNIONE": "bg-amber-100 text-amber-800 border-amber-200",
+  "RIUNIONE": "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-200 dark:border-amber-900/50",
   "STUDIO_1": "bg-cyan-100 text-cyan-800 border-cyan-200",
   "STUDIO_2": "bg-cyan-100 text-cyan-800 border-cyan-200",
-  "MALATTIA": "bg-red-100 text-red-800 border-red-200",
+  "MALATTIA": "bg-red-100 dark:bg-red-900/30 text-red-800 border-red-200 dark:border-red-900/50",
   "PERMESSO": "bg-orange-100 text-orange-800 border-orange-200",
 };
 
@@ -129,7 +129,7 @@ const PRESENZE_COLORS: Record<string, string> = {
   "PE": "bg-yellow-100 text-yellow-800",
   "ML": "bg-orange-100 text-orange-800",
   "F": "bg-purple-100 text-purple-800",
-  "AI": "bg-red-100 text-red-800"
+  "AI": "bg-red-100 dark:bg-red-900/30 text-red-800"
 };
 
 function fmtOre(ore: number | null): string {
@@ -144,7 +144,7 @@ function SortableDipendente({ id, dipendente }: { id: number, dipendente: GemTea
   const style = { transform: CSS.Transform.toString(transform), transition };
   return (
     <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-2 bg-background border border-border rounded-md shadow-sm mb-2 z-50 relative">
-      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:bg-slate-100 p-1.5 rounded text-slate-400">
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:bg-slate-100 dark:bg-slate-800 p-1.5 rounded text-slate-400">
         <GripVertical className="w-4 h-4" />
       </div>
       <div className="font-semibold text-sm text-foreground/80">{dipendente.cognome} {dipendente.nome}</div>
@@ -702,7 +702,7 @@ export default function GemTeam() {
       {/* TABS */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="px-6 md:px-8 max-w-7xl mx-auto w-full">
-          <TabsList className="grid w-full grid-flow-auto grid-cols-3 md:grid-cols-6 h-auto p-1.5 gap-1.5 bg-slate-100 rounded-xl mb-4">
+          <TabsList className="grid w-full grid-flow-auto grid-cols-3 md:grid-cols-6 h-auto p-1.5 gap-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4">
           <TabsTrigger value="dashboard" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">
             <Home className="w-4 h-4 mr-2" /> Dashboard
           </TabsTrigger>
@@ -736,19 +736,19 @@ export default function GemTeam() {
             
             {/* KPI Cards */}
             <div className="grid grid-cols-2 xl:grid-cols-5 gap-4">
-              <Card className="bg-emerald-50 border-emerald-200 shadow-sm">
+              <Card className="bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <span className="text-3xl font-black text-emerald-600 mb-1">{checkInStats.inSede}</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">In Sede</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">In Sede</span>
                 </CardContent>
               </Card>
-              <Card className="bg-blue-50 border-blue-200 shadow-sm">
+              <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <span className="text-3xl font-black text-blue-600 mb-1">{checkInStats.online}</span>
                   <span className="text-xs font-bold uppercase tracking-wider text-blue-800">Connessi</span>
                 </CardContent>
               </Card>
-              <Card className="bg-slate-100 border-border shadow-sm">
+              <Card className="bg-slate-100 dark:bg-slate-800 border-border shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <span className="text-3xl font-black text-muted-foreground mb-1">{checkInStats.usciti}</span>
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Usciti</span>
@@ -826,8 +826,8 @@ export default function GemTeam() {
                         const oreOnline = presenceInfo?.lavoroOggiMinuti ? fmtMin(presenceInfo.lavoroOggiMinuti) : "—";
                         
                         const statoColors: Record<string, string> = {
-                          "IN": "bg-emerald-100 text-emerald-800 border-emerald-200",
-                          "OUT": "bg-slate-100 text-foreground/80 border-border",
+                          "IN": "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50",
+                          "OUT": "bg-slate-100 dark:bg-slate-800 text-foreground/80 border-border",
                           "ATTESO": "bg-yellow-100 text-yellow-800 border-yellow-200",
                           "ASSENTE": "bg-rose-100 text-rose-800 border-rose-200"
                         };
@@ -847,17 +847,17 @@ export default function GemTeam() {
                             </td>
                             <td className="p-4">
                               {presenceInfo?.stato === 'online' ? (
-                                 <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 font-bold shadow-sm">
+                                 <Badge variant="outline" className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 font-bold shadow-sm">
                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block"></span>
                                    ONLINE
                                  </Badge>
                               ) : presenceInfo?.stato === 'pausa' ? (
-                                 <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 font-bold shadow-sm">
+                                 <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-200 dark:border-amber-900/50 font-bold shadow-sm">
                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 inline-block"></span>
                                    IN PAUSA
                                  </Badge>
                               ) : (
-                                 <Badge variant="outline" className="bg-slate-100 text-muted-foreground border-transparent">
+                                 <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-muted-foreground border-transparent">
                                    OFFLINE
                                  </Badge>
                               )}
@@ -892,7 +892,7 @@ export default function GemTeam() {
                 <ToggleGroupItem value="tutti" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-slate-800 data-[state=on]:text-white">Tutti</ToggleGroupItem>
                 <ToggleGroupItem value="segreteria" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-pink-100 data-[state=on]:text-pink-800">Segreteria</ToggleGroupItem>
                 <ToggleGroupItem value="ass_manutenzione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-orange-100 data-[state=on]:text-orange-800">Manutenzione</ToggleGroupItem>
-                <ToggleGroupItem value="ufficio" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800">Ufficio</ToggleGroupItem>
+                <ToggleGroupItem value="ufficio" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-blue-100 dark:bg-blue-900/30 data-[state=on]:text-blue-800">Ufficio</ToggleGroupItem>
                 <ToggleGroupItem value="amministrazione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-purple-100 data-[state=on]:text-purple-800">Amministrazione</ToggleGroupItem>
                 <ToggleGroupItem value="collaboratori" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-slate-200 data-[state=on]:text-foreground">Collaboratori</ToggleGroupItem>
               </ToggleGroup>
@@ -904,7 +904,7 @@ export default function GemTeam() {
                  {[1,2,3,4,5,6].map(sk => <Skeleton key={sk} className="h-48 rounded-xl" />)}
                </div>
             ) : isErrorDipendenti ? (
-               <div className="col-span-full py-12 text-center bg-red-50 border border-red-200 rounded-xl text-red-600 font-semibold">
+               <div className="col-span-full py-12 text-center bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl text-red-600 font-semibold">
                   Errore di connessione al database Team.
                </div>
             ) : (
@@ -926,7 +926,7 @@ export default function GemTeam() {
                           IN SERVIZIO
                         </div>
                       ) : (
-                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-slate-100 text-muted-foreground px-2 py-0.5 rounded-full text-[10px] font-bold border border-border">
+                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-muted-foreground px-2 py-0.5 rounded-full text-[10px] font-bold border border-border">
                           <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                           FUORI SERVIZIO
                         </div>
@@ -1113,10 +1113,10 @@ export default function GemTeam() {
                                 
                                 if (presenceInfo.stato === 'online') {
                                     statoStr = "ONLINE";
-                                    badgeStyle = "bg-emerald-100 text-emerald-800 border-emerald-200";
+                                    badgeStyle = "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50";
                                 } else if (presenceInfo.stato === 'pausa') {
                                     statoStr = "IN PAUSA";
-                                    badgeStyle = "bg-amber-100 text-amber-800 border-amber-200";
+                                    badgeStyle = "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-200 dark:border-amber-900/50";
                                 }
                                 
                                 if (presenceInfo.lastSeenAt) {
@@ -1172,7 +1172,7 @@ export default function GemTeam() {
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
                           <ClipboardList className="w-4 h-4" /> Turno Oggi
                         </h4>
-                        <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100 border-dashed text-center">
+                        <div className="bg-blue-50 dark:bg-blue-950/20/50 rounded-xl p-6 border border-blue-100 border-dashed text-center">
                           <p className="text-sm text-blue-700 font-medium">Dato disponibile dopo F1-003.</p>
                         </div>
                       </section>
@@ -1199,7 +1199,7 @@ export default function GemTeam() {
                       
                       {/* ACTION BUTTON */}
                       <div className="pt-4 border-t border-slate-100">
-                        <Button variant="outline" className="w-full h-11 border-blue-200 text-blue-700 hover:bg-blue-50 font-bold bg-background shadow-sm">
+                        <Button variant="outline" className="w-full h-11 border-blue-200 text-blue-700 hover:bg-blue-50 dark:bg-blue-950/20 font-bold bg-background shadow-sm">
                           <ShieldCheck className="w-4 h-4 mr-2" /> Crea Account di Sistema
                         </Button>
                       </div>
@@ -1234,7 +1234,7 @@ export default function GemTeam() {
                         </Button>
                       </>
                     ) : (
-                      <div className="flex bg-slate-100 rounded-lg p-1 border border-border shadow-inner">
+                      <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-border shadow-inner">
                         {[0,1,2,3,4,5,6].map(offset => {
                           const d = addDays(startOfWeek(turniDate, { weekStartsOn: 1 }), offset);
                           const isSelected = format(d, 'yyyy-MM-dd') === format(turniDate, 'yyyy-MM-dd');
@@ -1286,13 +1286,13 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     {isSameDay(turniDate, new Date()) ? (
         <Badge onClick={() => setTurniDate(new Date())} className="bg-emerald-500 hover:bg-emerald-600 text-[10px] cursor-pointer">OGGI</Badge>
     ) : (
-        <Badge onClick={() => setTurniDate(new Date())} variant="outline" className="text-emerald-600 border-emerald-500 hover:bg-emerald-50 text-[10px] cursor-pointer bg-background">OGGI</Badge>
+        <Badge onClick={() => setTurniDate(new Date())} variant="outline" className="text-emerald-600 border-emerald-500 hover:bg-emerald-50 dark:bg-emerald-950/20 text-[10px] cursor-pointer bg-background">OGGI</Badge>
     )}
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center bg-slate-100 p-1 rounded-md border border-border overflow-x-auto">
+                  <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-md border border-border overflow-x-auto">
                     <Button variant={turniViewMode === 'giornaliera' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-bold shadow-sm" onClick={() => setTurniViewMode('giornaliera')}>Giornaliera★</Button>
                     <Button variant={turniViewMode === 'settimanale' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-muted-foreground" onClick={() => setTurniViewMode('settimanale')}>Settimanale</Button>
                     <Button variant={turniViewMode === 'collettiva' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-muted-foreground" onClick={() => setTurniViewMode('collettiva')}>Collettiva</Button>
@@ -1341,7 +1341,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                         </SheetContent>
                       </Sheet>
 
-                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-background text-emerald-700 border-emerald-200 hover:bg-emerald-50">
+                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-background text-emerald-700 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-50 dark:bg-emerald-950/20">
                         <Plus className="h-3 w-3 mr-1" /> Aggiungi turno
                       </Button>
                       <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-background text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => {
@@ -1373,7 +1373,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
   <SheetTitle>Gestione Postazioni</SheetTitle>
 </SheetHeader>
 <div className="mt-6 flex flex-col gap-4">
-  <div className="bg-slate-100 rounded-md p-3">
+  <div className="bg-slate-100 dark:bg-slate-800 rounded-md p-3">
     <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Aggiungi nuova</div>
     <form className="flex gap-2" onSubmit={async (e: any) => { 
         e.preventDefault(); 
@@ -1511,7 +1511,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
             {/* SEZIONE C: GRIGLIA ORARIA GIORNALIERA / COLLETTIVA / SINGOLA */}
             {turniViewMode !== 'settimanale' && (
-              <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
+              <div className="flex-1 overflow-auto bg-slate-100 dark:bg-slate-800/50 relative" style={{ maxHeight: '60vh' }}>
                 <table id="griglia-turni" className={`border-collapse bg-background ${turniViewMode === 'singola' ? 'w-full table-fixed' : 'min-w-max'}`}>
                 <thead className="sticky top-0 z-20 shadow-sm border-b border-border">
                   {/* Raggruppamento Team */}
@@ -1527,7 +1527,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
                   {/* Nomi Dipendenti */}
                   <tr>
-                    <th className="bg-slate-100 border-r border-border text-[10px] text-muted-foreground font-bold p-1 w-20 min-w-[80px]">ORA</th>
+                    <th className="bg-slate-100 dark:bg-slate-800 border-r border-border text-[10px] text-muted-foreground font-bold p-1 w-20 min-w-[80px]">ORA</th>
                     {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
                       <th key={dip.id} className={`bg-background border-r border-border p-1.5 group ${turniViewMode === 'singola' ? 'w-full' : 'w-28 min-w-[112px]'}`}>
                          <div className="flex items-center justify-center gap-1">
@@ -1647,7 +1647,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                         }}
                                         title={hasConflict ? "Conflitto registrato" : ""} 
                                         style={postInfo?.colore ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}} 
-                                        className={`${hasConflict ? 'bg-red-100 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} ${selectedShifts.some(s => s.shiftId === turniFiltrato.id && s.hour === hour) ? 'ring-2 ring-indigo-600 ring-offset-1' : ''} w-full h-full min-h-[20px] rounded border flex flex-col items-center justify-center p-0.5 shadow-sm hover:brightness-95 relative group`}
+                                        className={`${hasConflict ? 'bg-red-100 dark:bg-red-900/30 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} ${selectedShifts.some(s => s.shiftId === turniFiltrato.id && s.hour === hour) ? 'ring-2 ring-indigo-600 ring-offset-1' : ''} w-full h-full min-h-[20px] rounded border flex flex-col items-center justify-center p-0.5 shadow-sm hover:brightness-95 relative group`}
                                       >
                                         {isMaster && (
                                           <div className="absolute top-0 right-0 p-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
@@ -1928,7 +1928,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
                 <tfoot className="sticky bottom-0 z-20 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] bg-background border-t-2 border-border">
                   <tr>
-                    <td className="bg-slate-100 border-r border-border text-center text-[10px] font-extrabold text-muted-foreground p-2 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 tracking-widest uppercase">
+                    <td className="bg-slate-100 dark:bg-slate-800 border-r border-border text-center text-[10px] font-extrabold text-muted-foreground p-2 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 tracking-widest uppercase">
                       TOT ORE
                     </td>
                     {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
@@ -1960,7 +1960,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
             
             {/* GRIGLIA SETTIMANALE */}
             {turniViewMode === 'settimanale' && (
-              <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
+              <div className="flex-1 overflow-auto bg-slate-100 dark:bg-slate-800/50 relative" style={{ maxHeight: '60vh' }}>
                 <table id="griglia-settimanale" className="w-full border-collapse min-w-max bg-background table-fixed">
                   <thead className="sticky top-0 z-20 shadow-sm border-b border-border">
                     <tr>
@@ -1979,7 +1979,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {dipendenti.filter(d => !isSystemEmployee(d)).map((dip, idx) => (
-                        <tr key={dip.id} className={`hover:bg-slate-100 transition-colors border-b-2 border-border ${idx % 2 === 0 ? 'bg-background' : 'bg-muted/50'}`}>
+                        <tr key={dip.id} className={`hover:bg-slate-100 dark:bg-slate-800 transition-colors border-b-2 border-border ${idx % 2 === 0 ? 'bg-background' : 'bg-muted/50'}`}>
                             <td className="p-2 border-r border-border font-semibold text-[11px] text-foreground/80 sticky left-0 z-10 shadow-[1px_0_0_rgba(200,200,200,0.5)] truncate max-w-[160px] bg-inherit align-top">
                                <div className="sticky top-0">{dip.nome} {dip.cognome}</div>
                             </td>
@@ -1995,7 +1995,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                           const postInfo = postazioniApi.find((p:any) => p.nome === t.postazione);
                                           const hasConflict = t.hasConflict || false;
                                           return (
-                                              <div key={t.id} title={hasConflict ? "Conflitto registrato" : ""} className={`w-full min-h-[30px] rounded border flex flex-col items-center justify-center p-1 shadow-sm text-center ${hasConflict ? 'bg-red-100 text-red-800 border-red-300 ring-2 ring-red-500/30' : ''}`} style={(!hasConflict && postInfo?.colore) ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}}>
+                                              <div key={t.id} title={hasConflict ? "Conflitto registrato" : ""} className={`w-full min-h-[30px] rounded border flex flex-col items-center justify-center p-1 shadow-sm text-center ${hasConflict ? 'bg-red-100 dark:bg-red-900/30 text-red-800 border-red-300 ring-2 ring-red-500/30' : ''}`} style={(!hasConflict && postInfo?.colore) ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}}>
                                                   <span className="text-[9px] font-bold uppercase truncate max-w-full">
                                                      {hasConflict && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
                                                      {t.postazione}
@@ -2085,8 +2085,8 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                         }
 
                         return (
-                          <tr key={dip.id} className="hover:bg-blue-50/40 relative group border-b border-border">
-                            <td className="sticky left-0 bg-background border-r border-border p-2 text-left font-semibold text-foreground/80 whitespace-nowrap shadow-[1px_0_0_0_#e2e8f0] z-10 group-hover:bg-blue-50/40 flex items-center justify-between">
+                          <tr key={dip.id} className="hover:bg-blue-50 dark:bg-blue-950/20/40 relative group border-b border-border">
+                            <td className="sticky left-0 bg-background border-r border-border p-2 text-left font-semibold text-foreground/80 whitespace-nowrap shadow-[1px_0_0_0_#e2e8f0] z-10 group-hover:bg-blue-50 dark:bg-blue-950/20/40 flex items-center justify-between">
                               <span>{dip.cognome} {dip.nome.charAt(0)}.</span>
                               <div className={`w-2 h-2 rounded-full ml-2 ${TEAM_COLORS[dip.team]?.split(' ')[0]}`} />
                             </td>
@@ -2097,10 +2097,10 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                               const val = presenzeData[dip.id]?.[day] || "";
                               const isEdited = presenzeEdited[dip.id]?.[day];
                               
-                              const badgeColor = PRESENZE_COLORS[val] || (val ? 'bg-background font-bold' : (isWeekend ? 'bg-slate-100' : 'bg-muted'));
+                              const badgeColor = PRESENZE_COLORS[val] || (val ? 'bg-background font-bold' : (isWeekend ? 'bg-slate-100 dark:bg-slate-800' : 'bg-muted'));
 
                               return (
-                                <td key={day} className={`border border-slate-100 ${isWeekend ? 'bg-slate-100' : 'bg-background'}`}>
+                                <td key={day} className={`border border-slate-100 ${isWeekend ? 'bg-slate-100 dark:bg-slate-800' : 'bg-background'}`}>
                                   <Popover>
                                     <PopoverTrigger asChild>
                                       <div className={`w-full h-8 flex items-center justify-center cursor-pointer relative hover:ring-1 hover:ring-inset hover:ring-blue-400 hover:z-10 transition-all ${badgeColor}`}>
@@ -2181,7 +2181,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                 <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-yellow-100 text-yellow-800">PE - Permesso</Badge>
                 <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-orange-100 text-orange-800">ML - Malattia</Badge>
                 <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-purple-100 text-purple-800">F - Festività</Badge>
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-red-100 text-red-800">AI - Ass. Ingiustificata</Badge>
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-800">AI - Ass. Ingiustificata</Badge>
               </div>
 
             </CardContent>
@@ -2271,7 +2271,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     </tr>
 
                     {/* Inline Form Mock per Aggiunta */}
-                    <tr className="bg-slate-100 border-t-2 border-border">
+                    <tr className="bg-slate-100 dark:bg-slate-800 border-t-2 border-border">
                       <td className="p-2">
                         <Input placeholder="Ora..." defaultValue="11:30 - 12:30" className="h-8 text-xs bg-background" />
                       </td>

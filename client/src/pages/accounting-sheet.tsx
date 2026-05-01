@@ -724,12 +724,12 @@ export default function AccountingSheet() {
                                                 ) : m.paid > 0.01 ? (
                                                     <Badge variant="outline" className="font-bold px-3 text-orange-700 border-orange-300 bg-orange-100">PARZIALE</Badge>
                                                 ) : (
-                                                    <Badge variant="outline" className="font-bold px-3 text-muted-foreground border-border bg-slate-100">DA SALDARE</Badge>
+                                                    <Badge variant="outline" className="font-bold px-3 text-muted-foreground border-border bg-slate-100 dark:bg-slate-800">DA SALDARE</Badge>
                                                 )}
                                             </TableCell>
                                             <TableCell className="text-right print:hidden">
                                                 <div className="flex justify-end gap-1">
-                                                    <Button size="sm" variant="ghost" className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => { setDetailsItem(m); setIsDetailsDialogOpen(true); }} title="Dettagli pagamenti">
+                                                    <Button size="sm" variant="ghost" className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:bg-blue-950/20" onClick={() => { setDetailsItem(m); setIsDetailsDialogOpen(true); }} title="Dettagli pagamenti">
                                                         <Search className="w-4 h-4 mr-1" />
                                                         Dettagli
                                                     </Button>

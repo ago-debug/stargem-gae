@@ -288,12 +288,12 @@ export default function StrategicProgrammingTable() {
             <Card className="flex-1 overflow-hidden flex flex-col shadow-xl">
                 <div className="flex-1 overflow-auto bg-background p-0 relative">
                     <table className="w-full text-xs text-left border-collapse border-border">
-                        <thead className="sticky top-0 bg-slate-100 shadow-sm z-10">
+                        <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 shadow-sm z-10">
                             <tr>
                                 <th className="border p-2 w-[50px] text-center text-muted-foreground">Sett</th>
                                 <th className="border p-2 min-w-[120px] text-muted-foreground">Periodo</th>
                                 {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(d => (
-                                    <th key={d} className={`border p-2 min-w-[150px] text-center font-bold uppercase ${d === 'Dom' ? 'bg-red-50 text-red-700/80 tracking-wide' : 'text-foreground/80'}`}>{d}</th>
+                                    <th key={d} className={`border p-2 min-w-[150px] text-center font-bold uppercase ${d === 'Dom' ? 'bg-red-50 dark:bg-red-950/20 text-red-700/80 tracking-wide' : 'text-foreground/80'}`}>{d}</th>
                                 ))}
                                 <th className="border p-2 min-w-[250px]">Note (Chiusure / Eventi)</th>
                             </tr>
@@ -325,14 +325,14 @@ export default function StrategicProgrammingTable() {
                                             const isSunday = getDay(day) === 0;
                                             
                                             // Determine background color based on events
-                                            let bgColor = isSunday ? 'bg-red-50/40' : '';
+                                            let bgColor = isSunday ? 'bg-red-50 dark:bg-red-950/20/40' : '';
                                             let cellContent = format(day, "d MMM", { locale: it });
 
                                             if (dayEvts.length > 0) {
                                                 const hasSystemHoliday = dayEvts.some(e => e.isPublicHoliday === true || e.isPublicHoliday === 1);
                                                 
                                                 if (hasSystemHoliday) {
-                                                    bgColor = 'bg-red-50 text-red-700 border-x border-red-200';
+                                                    bgColor = 'bg-red-50 dark:bg-red-950/20 text-red-700 border-x border-red-200 dark:border-red-900/50';
                                                 }
                                             }
 
@@ -368,7 +368,7 @@ export default function StrategicProgrammingTable() {
                                                                                 else if (type === 'campus' || t.includes('CAM')) color = 'bg-sky-100 text-sky-800 border-l border-sky-400';
                                                                                 else if (type === 'saggio' || t.includes('SAG')) color = 'bg-pink-100 text-pink-800 border-l border-pink-400';
                                                                                 else if (t.includes('WS')) color = 'bg-orange-100 text-orange-800 border-l border-orange-400';
-                                                                                else if (t.includes('VAC')) color = 'bg-emerald-100 text-emerald-800 border-l border-emerald-400';
+                                                                                else if (t.includes('VAC')) color = 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-l border-emerald-400';
                                                                                 else if (type === 'nota' || t.includes('PROMO')) color = 'bg-yellow-100 text-yellow-800 border-l border-yellow-400';
                                                                                 else if (type === 'evento') color = 'bg-indigo-50 text-indigo-800 border-l border-indigo-400';
                                                                                 else if (t.includes('AFT')) color = 'bg-slate-200 text-foreground border-l border-slate-400';
@@ -439,7 +439,7 @@ export default function StrategicProgrammingTable() {
                                                                 <Button 
                                                                     size="icon" 
                                                                     variant="ghost" 
-                                                                    className="h-6 w-6 text-slate-400 hover:text-muted-foreground hover:bg-slate-100" 
+                                                                    className="h-6 w-6 text-slate-400 hover:text-muted-foreground hover:bg-slate-100 dark:bg-slate-800" 
                                                                     onClick={() => openEditModal(evt)} 
                                                                     title="Modifica Data Strategica"
                                                                 >
@@ -455,7 +455,7 @@ export default function StrategicProgrammingTable() {
                                 );
                             })}
                         </tbody>
-                        <tfoot className="sticky bottom-0 bg-slate-100 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-10">
+                        <tfoot className="sticky bottom-0 bg-slate-100 dark:bg-slate-800 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-10">
                             <tr>
                                 <td colSpan={2} className="border p-2 font-bold text-foreground/80 text-right">Totale Lezioni (Adulti)</td>
                                 {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((d, index) => {
@@ -473,7 +473,7 @@ export default function StrategicProgrammingTable() {
                                     });
                                     return <td key={d} className="border p-2 text-center font-bold text-foreground bg-background">{totalWeeks - excluded}</td>;
                                 })}
-                                <td className="border p-2 bg-slate-100"></td>
+                                <td className="border p-2 bg-slate-100 dark:bg-slate-800"></td>
                             </tr>
                             <tr>
                                 <td colSpan={2} className="border p-2 font-bold text-foreground/80 text-right">Totale Lezioni (Bambini)</td>
@@ -493,7 +493,7 @@ export default function StrategicProgrammingTable() {
                                     });
                                     return <td key={`kids-${d}`} className="border p-2 text-center font-bold text-foreground bg-teal-50">{totalWeeks - excluded}</td>;
                                 })}
-                                <td className="border p-2 bg-slate-100"></td>
+                                <td className="border p-2 bg-slate-100 dark:bg-slate-800"></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -543,7 +543,7 @@ export default function StrategicProgrammingTable() {
                     </div>
                     <DialogFooter className="flex justify-between sm:justify-between w-full">
                         {modalEventId ? (
-                            <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600" onClick={() => deleteEventMutation.mutate(modalEventId)} disabled={deleteEventMutation.isPending}>
+                            <Button variant="outline" className="text-red-500 border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:bg-red-950/20 hover:text-red-600" onClick={() => deleteEventMutation.mutate(modalEventId)} disabled={deleteEventMutation.isPending}>
                                 Elimina
                             </Button>
                         ) : (

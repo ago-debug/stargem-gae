@@ -100,7 +100,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
                 <div
                   key={tag.id}
                   className={cn(
-                    "px-3 py-1.5 text-sm cursor-pointer rounded flex items-center justify-between gap-2 hover:bg-slate-100 transition-colors",
+                    "px-3 py-1.5 text-sm cursor-pointer rounded flex items-center justify-between gap-2 hover:bg-slate-100 dark:bg-slate-800 transition-colors",
                     isSelected && "bg-indigo-50/50"
                   )}
                   onClick={() => toggleTag(tag.name)}

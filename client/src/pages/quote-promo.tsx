@@ -54,7 +54,7 @@ export default function QuotePromo() {
 
       <Tabs defaultValue="listino" className="w-full">
         <div className="flex justify-start border-b pb-4 mb-4">
-          <TabsList className="bg-slate-100 p-1 h-12 flex-wrap sm:flex-nowrap justify-start overflow-x-auto">
+          <TabsList className="bg-slate-100 dark:bg-slate-800 p-1 h-12 flex-wrap sm:flex-nowrap justify-start overflow-x-auto">
             <TabsTrigger value="listino" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
               Listino prezzi
             </TabsTrigger>
@@ -73,7 +73,7 @@ export default function QuotePromo() {
             <TabsTrigger value="accordi" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
               Accordi maestri
             </TabsTrigger>
-            <TabsTrigger value="online" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm">
+            <TabsTrigger value="online" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-emerald-50 dark:bg-emerald-950/20 data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm">
               Pagamenti online
             </TabsTrigger>
           </TabsList>
@@ -89,7 +89,7 @@ export default function QuotePromo() {
           </Alert>
         )}
         {isFuture && (
-          <Alert variant="default" className="mb-6 bg-blue-50/50 border-blue-200 text-blue-800">
+          <Alert variant="default" className="mb-6 bg-blue-50 dark:bg-blue-950/20/50 border-blue-200 text-blue-800">
             <InfoIcon className="h-4 w-4 text-blue-600" />
             <AlertDescription className="font-medium">
               Stai configurando una stagione futura — {selectedSeason?.name}. Le modifiche saranno attive dal {new Date(selectedSeason?.startDate).toLocaleDateString()}.

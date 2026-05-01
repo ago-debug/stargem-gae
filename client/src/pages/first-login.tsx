@@ -76,9 +76,9 @@ export default function FirstLogin() {
   if (success) {
      return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-muted">
-           <Card className="w-full max-w-md shadow-lg border-emerald-200">
+           <Card className="w-full max-w-md shadow-lg border-emerald-200 dark:border-emerald-900/50">
               <CardContent className="pt-10 pb-10 flex flex-col items-center justify-center space-y-4 text-center">
-                 <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
+                 <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-2">
                     <PartyPopper className="w-8 h-8 text-emerald-600" />
                  </div>
                  <h2 className="text-2xl font-bold text-foreground">Account Attivato!</h2>
@@ -98,7 +98,7 @@ export default function FirstLogin() {
         <Card className="shadow-2xl border-none bg-background/95 backdrop-blur-sm rounded-xl">
            <CardHeader className="text-center pb-4">
               <div className="flex justify-center mb-4">
-                  <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center shadow-inner">
+                  <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center shadow-inner">
                      <Lock className="w-8 h-8 text-amber-600" />
                   </div>
               </div>
@@ -116,7 +116,7 @@ export default function FirstLogin() {
                     value={email} 
                     onChange={(e) => setEmail(e.target.value)} 
                     readOnly={!!emailParam}
-                    className={emailParam ? "bg-slate-100" : ""}
+                    className={emailParam ? "bg-slate-100 dark:bg-slate-800" : ""}
                     required
                   />
                </div>
