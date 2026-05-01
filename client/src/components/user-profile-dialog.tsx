@@ -14,7 +14,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Upload, Loader2, Camera } from "lucide-react";
+import { Upload, Loader2, Camera, Moon, Sun, Monitor } from "lucide-react";
+import { useTheme } from "next-themes";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface UserProfileDialogProps {
   children: React.ReactNode;
@@ -37,6 +39,7 @@ export function UserProfileDialog({ children, targetUser }: UserProfileDialogPro
   const [phone, setPhone] = useState(user?.phone || "");
   const [uploading, setUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const { theme, setTheme } = useTheme();
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: { phone?: string; profileImageUrl?: string }) => {
@@ -145,6 +148,31 @@ export function UserProfileDialog({ children, targetUser }: UserProfileDialogPro
                 placeholder="es. +39 333..." 
               />
             </div>
+
+            {/* Impostazioni Tema (Visibile solo per il proprio profilo) */}
+            {!targetUser && (
+              <div className="grid gap-2 pt-4 border-t border-slate-100">
+                <Label className="text-muted-foreground mb-1">Aspetto applicazione</Label>
+                <ToggleGroup 
+                  type="single" 
+                  value={theme} 
+                  onValueChange={(val) => {
+                    if (val) setTheme(val);
+                  }}
+                  className="justify-start gap-2"
+                >
+                  <ToggleGroupItem value="light" aria-label="Tema Chiaro" className="gap-2 px-3 data-[state=on]:bg-primary/10 data-[state=on]:text-primary border">
+                    <Sun className="h-4 w-4" /> Chiaro
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="dark" aria-label="Tema Scuro" className="gap-2 px-3 data-[state=on]:bg-primary/10 data-[state=on]:text-primary border">
+                    <Moon className="h-4 w-4" /> Scuro
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="system" aria-label="Automatico" className="gap-2 px-3 data-[state=on]:bg-primary/10 data-[state=on]:text-primary border">
+                    <Monitor className="h-4 w-4" /> Auto
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            )}
           </div>
         </div>
 
