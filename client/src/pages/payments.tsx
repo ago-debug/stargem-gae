@@ -336,12 +336,12 @@ export default function Payments() {
               ))}
             </div>
           ) : !filteredPayments || filteredPayments.length === 0 ? (
-            <div className="text-center py-16 px-4 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl animate-in fade-in zoom-in-95 duration-500 m-4 flex flex-col items-center justify-center">
+            <div className="text-center py-16 px-4 bg-muted/50 border border-dashed border-border rounded-2xl animate-in fade-in zoom-in-95 duration-500 m-4 flex flex-col items-center justify-center">
               <div className="bg-primary/5 p-4 rounded-full mb-4 ring-1 ring-primary/10 shadow-sm">
                 <CreditCard className="w-10 h-10 text-primary/60" />
               </div>
-              <p className="text-xl font-bold tracking-tight text-slate-800 mb-1">Nessun pagamento trovato</p>
-              <p className="text-sm text-slate-500 max-w-[280px]">Le tue liste d'attesa e transazioni appariranno qui. Inizia cliccando su "Nuovo Pagamento".</p>
+              <p className="text-xl font-bold tracking-tight text-foreground mb-1">Nessun pagamento trovato</p>
+              <p className="text-sm text-muted-foreground max-w-[280px]">Le tue liste d'attesa e transazioni appariranno qui. Inizia cliccando su "Nuovo Pagamento".</p>
             </div>
           ) : (
             <Table>

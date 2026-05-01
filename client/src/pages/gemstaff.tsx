@@ -52,7 +52,7 @@ function CompliancePanel({ memberId, complianceData, isAdmin }: { memberId: stri
 
    return (
      <div className="space-y-6">
-       <div className="bg-white border rounded-md p-4 flex items-center justify-between">
+       <div className="bg-background border rounded-md p-4 flex items-center justify-between">
           <div>
             <h3 className="font-bold text-lg">Stato Avanzamento Compliance</h3>
             <p className="text-sm text-muted-foreground">{presentCount} su {totalCount} documenti inseriti</p>
@@ -77,7 +77,7 @@ function CompliancePanel({ memberId, complianceData, isAdmin }: { memberId: stri
             }
 
             return (
-              <Card key={k} className={!isPresent ? 'bg-slate-50/50' : ''}>
+              <Card key={k} className={!isPresent ? 'bg-muted/50' : ''}>
                  <CardContent className="p-4 space-y-3">
                    <div className="flex items-start justify-between">
                       <span className="font-semibold text-sm capitalize">{k.replace(/_/g, " ")}</span>
@@ -143,11 +143,11 @@ function PresenzeTab({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <div className="space-y-4">
-       <div className="flex items-center gap-4 bg-slate-50 p-4 border rounded-md">
+       <div className="flex items-center gap-4 bg-muted p-4 border rounded-md">
           <div className="flex flex-col gap-1 w-32">
             <Label>Mese</Label>
             <Select value={month.toString()} onValueChange={(v) => setMonth(parseInt(v))}>
-              <SelectTrigger className="bg-white"><SelectValue/></SelectTrigger>
+              <SelectTrigger className="bg-background"><SelectValue/></SelectTrigger>
               <SelectContent>
                 {Array.from({length: 12}).map((_, i) => (
                   <SelectItem key={i+1} value={(i+1).toString()}>{i+1}</SelectItem>
@@ -158,7 +158,7 @@ function PresenzeTab({ isAdmin }: { isAdmin: boolean }) {
           <div className="flex flex-col gap-1 w-32">
             <Label>Anno</Label>
             <Select value={year.toString()} onValueChange={(v) => setYear(parseInt(v))}>
-              <SelectTrigger className="bg-white"><SelectValue/></SelectTrigger>
+              <SelectTrigger className="bg-background"><SelectValue/></SelectTrigger>
               <SelectContent>
                 {[...Array(5)].map((_, i) => (
                   <SelectItem key={i} value={(new Date().getFullYear() - 2 + i).toString()}>{new Date().getFullYear() - 2 + i}</SelectItem>
@@ -181,7 +181,7 @@ function PresenzeTab({ isAdmin }: { isAdmin: boolean }) {
                <Button onClick={handleConfermaMese} className="bg-emerald-600 hover:bg-emerald-700">CONFERMA MESE</Button>
              )}
            </div>
-           <div className="border rounded-md bg-white overflow-hidden">
+           <div className="border rounded-md bg-background overflow-hidden">
              <Table>
                 <TableHeader>
                    <TableRow>
@@ -211,7 +211,7 @@ function PresenzeTab({ isAdmin }: { isAdmin: boolean }) {
            <div className="flex justify-end">
              <Button variant="outline">Registra sostituzione</Button>
            </div>
-           <div className="border rounded-md bg-white overflow-hidden">
+           <div className="border rounded-md bg-background overflow-hidden">
              <Table>
                 <TableHeader>
                    <TableRow>
@@ -309,11 +309,11 @@ function DisciplinareTab({ staffList }: { staffList: any[] }) {
          </AlertDescription>
        </Alert>
 
-       <div className="bg-slate-50 p-4 border rounded-md flex items-center justify-between">
+       <div className="bg-muted p-4 border rounded-md flex items-center justify-between">
           <div className="w-1/2">
              <Label>Seleziona Insegnante</Label>
              <Select value={memberId} onValueChange={setMemberId}>
-               <SelectTrigger className="mt-2 bg-white"><SelectValue placeholder="Scegli..."/></SelectTrigger>
+               <SelectTrigger className="mt-2 bg-background"><SelectValue placeholder="Scegli..."/></SelectTrigger>
                <SelectContent>
                  {staffList.map(s => <SelectItem key={s.id || s.firstName} value={s.id?.toString() || s.firstName}>{s.lastName} {s.firstName}</SelectItem>)}
                </SelectContent>
@@ -363,7 +363,7 @@ function DisciplinareTab({ staffList }: { staffList: any[] }) {
        )}
 
        {memberId && (
-         <div className="border rounded-md bg-white overflow-hidden">
+         <div className="border rounded-md bg-background overflow-hidden">
            <Table>
              <TableHeader>
                <TableRow>
@@ -379,18 +379,18 @@ function DisciplinareTab({ staffList }: { staffList: any[] }) {
                   <TableRow><TableCell colSpan={3} className="text-center py-6 text-muted-foreground">Nessun evento disciplinare censito per questo staff.</TableCell></TableRow>
                 ) : eventiList.map((ev) => (
                   <Fragment key={ev.id}>
-                    <TableRow className="cursor-pointer hover:bg-slate-50" onClick={() => setExpandedId(expandedId === ev.id ? null : ev.id)}>
+                    <TableRow className="cursor-pointer hover:bg-muted" onClick={() => setExpandedId(expandedId === ev.id ? null : ev.id)}>
                       <TableCell>{ev.data_evento ? new Date(ev.data_evento).toLocaleDateString() : '—'}</TableCell>
                       <TableCell><Badge className={`text-white ${getBadgeType(ev.event_type)}`}>{getBadgeLabel(ev.event_type)}</Badge></TableCell>
                       <TableCell>{ev.stato || 'APERTURA'}</TableCell>
                     </TableRow>
                     {expandedId === ev.id && (
-                      <TableRow className="bg-slate-50 border-b">
+                      <TableRow className="bg-muted border-b">
                          <TableCell colSpan={3} className="p-4">
                            <div className="space-y-4">
                               <div>
                                 <Label className="text-xs text-muted-foreground">Descrizione Operativa</Label>
-                                <p className="text-sm p-2 bg-white border rounded-md">{ev.descrizione}</p>
+                                <p className="text-sm p-2 bg-background border rounded-md">{ev.descrizione}</p>
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -677,7 +677,7 @@ export default function GemStaff() {
   }
 
   const PlaceholderContent = ({ title }: { title: string }) => (
-    <div className="flex flex-col items-center justify-center p-12 bg-slate-50/50 border rounded-lg border-dashed mt-4 text-center">
+    <div className="flex flex-col items-center justify-center p-12 bg-muted/50 border rounded-lg border-dashed mt-4 text-center">
       <div className="bg-primary/10 p-4 rounded-full mb-4">
         <Briefcase className="w-8 h-8 text-primary" />
       </div>
@@ -739,19 +739,19 @@ export default function GemStaff() {
 
         <TabsContent value="anagrafica" className="mt-4">
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3 items-end bg-slate-50/50 p-4 rounded-lg border border-slate-100">
+            <div className="flex flex-col sm:flex-row gap-3 items-end bg-muted/50 p-4 rounded-lg border border-slate-100">
                <div className="relative flex-1 min-w-[200px]">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                  <Input
                    placeholder="Cerca per nome..."
                    value={searchName}
                    onChange={(e) => setSearchName(e.target.value)}
-                   className="pl-9 bg-white"
+                   className="pl-9 bg-background"
                  />
                </div>
                <div className="w-full sm:w-[180px]">
                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                   <SelectTrigger className="bg-white">
+                   <SelectTrigger className="bg-background">
                      <SelectValue placeholder="Categoria Corsi" />
                    </SelectTrigger>
                    <SelectContent>
@@ -766,7 +766,7 @@ export default function GemStaff() {
                </div>
                <div className="w-full sm:w-[150px]">
                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                   <SelectTrigger className="bg-white">
+                   <SelectTrigger className="bg-background">
                      <SelectValue placeholder="Stato" />
                    </SelectTrigger>
                    <SelectContent>
@@ -795,7 +795,7 @@ export default function GemStaff() {
                 )}
              </div>
 
-            <div className="border rounded-md bg-white overflow-hidden">
+            <div className="border rounded-md bg-background overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -835,7 +835,7 @@ export default function GemStaff() {
                     filteredStaff.map((s) => {
                        const assignedCourses = getInstructorCourses(s.instructorId);
                        return (
-                       <TableRow key={s.id || s.firstName} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedStaff(s)}>
+                       <TableRow key={s.id || s.firstName} className="cursor-pointer hover:bg-muted" onClick={() => setSelectedStaff(s)}>
                          <TableCell className={cn("font-medium", isSortedColumn("lastName") && "sorted-column-cell")}>{s.lastName}</TableCell>
                          <TableCell className={cn("font-medium", isSortedColumn("firstName") && "sorted-column-cell")}>{s.firstName}</TableCell>
                          <TableCell className={cn(isSortedColumn("specialization") && "sorted-column-cell")}>{s.specialization || '—'}</TableCell>
@@ -920,9 +920,9 @@ export default function GemStaff() {
 
         <TabsContent value="pt" className="mt-4">
            {isLoadingPt ? (
-              <div className="border rounded-md bg-white overflow-hidden p-6 text-center text-muted-foreground">Caricamento...</div>
+              <div className="border rounded-md bg-background overflow-hidden p-6 text-center text-muted-foreground">Caricamento...</div>
            ) : ptList.length === 0 ? (
-              <Alert className="bg-slate-50 border-dashed text-slate-600 mt-4">
+              <Alert className="bg-muted border-dashed text-muted-foreground mt-4">
                 <Briefcase className="h-4 w-4" />
                 <AlertTitle>Nessun Personal Trainer censito.</AlertTitle>
                 <AlertDescription>
@@ -930,7 +930,7 @@ export default function GemStaff() {
                 </AlertDescription>
               </Alert>
            ) : (
-              <div className="border rounded-md bg-white overflow-hidden">
+              <div className="border rounded-md bg-background overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -943,7 +943,7 @@ export default function GemStaff() {
                 </TableHeader>
                 <TableBody>
                    {ptListSorted.map((pt: any) => (
-                      <TableRow key={pt.id || pt.firstName} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedStaff(pt)}>
+                      <TableRow key={pt.id || pt.firstName} className="cursor-pointer hover:bg-muted" onClick={() => setSelectedStaff(pt)}>
                          <TableCell className="font-semibold">{pt.lastName} {pt.firstName}</TableCell>
                          <TableCell>{pt.specializzazione || 'Personal Trainer'}</TableCell>
                          <TableCell>{pt.phone || '—'}</TableCell>
@@ -962,10 +962,10 @@ export default function GemStaff() {
         </TabsContent>
 
         <TabsContent value="compliance" className="mt-4 space-y-6">
-          <div className="bg-slate-50 p-4 border rounded-md">
+          <div className="bg-muted p-4 border rounded-md">
              <Label>Seleziona Insegnante/PT</Label>
              <Select value={complianceMemberId} onValueChange={setComplianceMemberId}>
-               <SelectTrigger className="w-full sm:w-72 mt-2 bg-white">
+               <SelectTrigger className="w-full sm:w-72 mt-2 bg-background">
                  <SelectValue placeholder="Seleziona dallo staff..." />
                </SelectTrigger>
                <SelectContent>
@@ -991,7 +991,7 @@ export default function GemStaff() {
 
         <TabsContent value="accordi" className="mt-4">
           {isAdmin ? (
-             <div className="border rounded-md bg-white overflow-hidden">
+             <div className="border rounded-md bg-background overflow-hidden">
                 <Table>
                   <TableHeader>
                      <TableRow>
@@ -1102,9 +1102,9 @@ export default function GemStaff() {
             <div className="space-y-1 pt-4 border-t">
               <p className="text-sm text-muted-foreground font-medium mb-3">Tessera GemPass</p>
               {selectedStaff?.tessera ? (
-                 <div className="bg-slate-50 border p-3 rounded-md text-sm space-y-2">
+                 <div className="bg-muted border p-3 rounded-md text-sm space-y-2">
                     <div className="flex items-center justify-between">
-                       <span className="font-semibold text-slate-700">Tessera #{selectedStaff.tessera.numero || 'N/A'}</span>
+                       <span className="font-semibold text-foreground/80">Tessera #{selectedStaff.tessera.numero || 'N/A'}</span>
                        <Badge className={
                          selectedStaff.tessera.stato === 'ATTIVA' ? 'bg-emerald-500' :
                          selectedStaff.tessera.stato === 'IN SCADENZA' ? 'bg-amber-500' :
@@ -1122,7 +1122,7 @@ export default function GemStaff() {
                     )}
                  </div>
               ) : (
-                 <div className="bg-slate-50 border p-3 rounded-md text-sm flex items-center justify-between">
+                 <div className="bg-muted border p-3 rounded-md text-sm flex items-center justify-between">
                     <Badge variant="destructive">NESSUNA TESSERA</Badge>
                     <a href="/gempass" target="_blank" rel="noreferrer" className="text-xs text-primary font-bold hover:underline">
                       Vai a GemPass
@@ -1139,7 +1139,7 @@ export default function GemStaff() {
                     da: {selectedStaff.autorizzato_da || 'Direzione'}
                  </div>
               ) : (
-                 <div className="bg-slate-100 border text-slate-600 p-3 rounded-md text-sm">
+                 <div className="bg-slate-100 border text-muted-foreground p-3 rounded-md text-sm">
                     Non autorizzato
                  </div>
               )}
@@ -1147,7 +1147,7 @@ export default function GemStaff() {
 
             <div className="space-y-1 pt-4 border-t">
               <p className="text-sm text-muted-foreground font-medium mb-3">Documenti Compliance</p>
-              <div className="flex items-center gap-2 p-3 bg-slate-50 border rounded-md">
+              <div className="flex items-center gap-2 p-3 bg-muted border rounded-md">
                  <FileCheck className="w-4 h-4 text-primary" />
                  <span className="text-sm font-medium">Vedi tab Compliance</span>
                  <button onClick={() => { 
@@ -1163,7 +1163,7 @@ export default function GemStaff() {
             {isAdmin && (
               <div className="space-y-1 pt-4 border-t">
                 <p className="text-sm text-muted-foreground font-medium mb-3">Firme e Accordi</p>
-                <div className="flex items-center gap-2 p-3 bg-slate-50 border rounded-md">
+                <div className="flex items-center gap-2 p-3 bg-muted border rounded-md">
                    <Landmark className="w-4 h-4 text-primary" />
                    <span className="text-sm font-medium">Contratti Tab Accordi</span>
                    <button onClick={() => { setSelectedStaff(null); setActiveTab('accordi'); }} className="ml-auto text-xs text-primary font-bold hover:underline">
@@ -1292,7 +1292,7 @@ export default function GemStaff() {
               </div>
               
               {isPrivateLessonsAuth && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 border rounded-md">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted p-4 border rounded-md">
                    <div className="space-y-2">
                       <Label htmlFor="lezioniPrivateAutorizzateBy">Autorizzato da</Label>
                       <Input id="lezioniPrivateAutorizzateBy" name="lezioniPrivateAutorizzateBy" defaultValue={editingInstructor?.lezioni_private_autorizzate_by} />
@@ -1308,7 +1308,7 @@ export default function GemStaff() {
             {editingInstructor && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold border-b pb-2">Compliance</h3>
-              <div className="bg-slate-50 p-4 border rounded-md flex justify-between items-center gap-4 flex-wrap">
+              <div className="bg-muted p-4 border rounded-md flex justify-between items-center gap-4 flex-wrap">
                  <div className="flex items-center gap-4 text-sm font-medium">
                     <span>CI: {editingInstructor?.documenti?.carta_identita?.presente ? '✓' : '✗'}</span>
                     <span>CF: {editingInstructor?.documenti?.codice_fiscale?.presente ? '✓' : '✗'}</span>

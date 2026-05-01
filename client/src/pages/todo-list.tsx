@@ -121,7 +121,7 @@ export default function TodoList() {
                   key={todo.id}
                   className={`flex flex-col gap-2 p-4 rounded-lg border transition-colors ${todo.completed
                     ? "bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800/50"
-                    : "bg-white border-gray-200 dark:bg-gray-800/50 dark:border-gray-700"
+                    : "bg-background border-border dark:bg-gray-800/50 dark:border-gray-700"
                     }`}
                   data-testid={`todo-item-${todo.id}`}
                 >

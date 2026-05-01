@@ -110,9 +110,9 @@ export default function SchedaCorso() {
   if (!hasValidCourseId) {
     return (
       <div className="p-6 md:p-8 mx-auto">
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-          <h1 className="text-2xl font-bold text-slate-800">Scheda Corso</h1>
-          <p className="text-slate-600 mt-2">
+        <div className="bg-background p-6 rounded-xl border shadow-sm">
+          <h1 className="text-2xl font-bold text-foreground">Scheda Corso</h1>
+          <p className="text-muted-foreground mt-2">
             Parametro <code>courseId</code> mancante o non valido nell’URL.
           </p>
           <div className="mt-4">
@@ -133,9 +133,9 @@ export default function SchedaCorso() {
   if (!course) {
     return (
       <div className="p-6 md:p-8 mx-auto">
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-          <h1 className="text-2xl font-bold text-slate-800">Scheda Corso</h1>
-          <p className="text-slate-600 mt-2">
+        <div className="bg-background p-6 rounded-xl border shadow-sm">
+          <h1 className="text-2xl font-bold text-foreground">Scheda Corso</h1>
+          <p className="text-muted-foreground mt-2">
             Corso non trovato per <code>courseId={String(courseId)}</code>.
           </p>
           <div className="mt-4">
@@ -310,10 +310,10 @@ export default function SchedaCorso() {
                 <Users className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-800 flex items-center gap-3">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
                   Scheda Corso {course ? `- ${course.name}` : ""}
                 </h1>
-                <p className="text-slate-500 mt-1 flex items-center gap-2">
+                <p className="text-muted-foreground mt-1 flex items-center gap-2">
                   <span className="inline-flex h-2 w-2 rounded-full bg-gold"></span>
                   Visualizza presenze, pagamenti e scadenze degli iscritti
                 </p>
@@ -322,7 +322,7 @@ export default function SchedaCorso() {
             {course && (
               <Button
                 variant="outline"
-                className="gap-2 shrink-0 border-slate-200 hover:bg-slate-50 text-slate-600"
+                className="gap-2 shrink-0 border-border hover:bg-muted text-muted-foreground"
                 onClick={() => setIsEditModalOpen(true)}
               >
                 <Edit2 className="w-4 h-4" /> Modifica
@@ -334,7 +334,7 @@ export default function SchedaCorso() {
             <div className="flex flex-wrap gap-3 pt-2">
               <Badge
                 variant="outline"
-                className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 transition-colors"
                 onClick={() => { if(course.sku) setLocation(`/calendario-attivita?highlightCourseId=${course.id}`) }}
               >
                 <Tag className="w-3.5 h-3.5" />
@@ -343,7 +343,7 @@ export default function SchedaCorso() {
               {course.dayOfWeek && course.startTime && (
                 <Badge
                   variant="outline"
-                  className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5"
+                  className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5"
                 >
                   <Clock className="w-3.5 h-3.5" />
                   {course.dayOfWeek} {course.startTime} - {course.endTime}
@@ -363,7 +363,7 @@ export default function SchedaCorso() {
                 onClick={() =>
                   alert("Il Modulo Presenze sarà disponibile prossimamente.")
                 }
-                className="text-slate-600 text-sm bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-colors px-2.5 py-1 rounded-md flex items-center gap-1"
+                className="text-muted-foreground text-sm bg-muted border border-border hover:bg-slate-100 hover:border-border transition-colors px-2.5 py-1 rounded-md flex items-center gap-1"
               >
                 ✅ {presenzeTotal} presenze
               </button>
@@ -373,14 +373,14 @@ export default function SchedaCorso() {
                   <>
                     <Badge
                       variant="outline"
-                      className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 transition-colors"
                       onClick={() => { if(course.sku) setLocation(`/calendario-attivita?highlightCourseId=${course.id}`) }}
                     >
                       📅 {effettuate} / {course.totalOccurrences} lezioni
                     </Badge>
                     <Badge
                       variant="outline"
-                      className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5"
+                      className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5"
                     >
                       🔁 {rimanenti} rimanenti
                     </Badge>
@@ -414,17 +414,17 @@ export default function SchedaCorso() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col px-4 pb-4 md:px-6 md:pb-6 bg-slate-50/50 pt-0 min-h-0">
-        <Card className="border shadow-sm rounded-b-xl rounded-t-none overflow-hidden h-full flex flex-col bg-white border-t-0">
+      <div className="flex-1 flex flex-col px-4 pb-4 md:px-6 md:pb-6 bg-muted/50 pt-0 min-h-0">
+        <Card className="border shadow-sm rounded-b-xl rounded-t-none overflow-hidden h-full flex flex-col bg-background border-t-0">
           <div className="flex-1 min-h-0 relative [&>div]:absolute [&>div]:inset-0 [&>div]:overflow-y-auto">
             <Table>
-              <TableHeader className="sticky top-0 z-10 bg-slate-50 border-b shadow-sm">
+              <TableHeader className="sticky top-0 z-10 bg-muted border-b shadow-sm">
                 <TableRow className="hover:bg-transparent">
                   <SortableTableHead
                     sortKey="lastName"
                     currentSort={sortConfig}
                     onSort={handleSort}
-                    className="font-semibold text-slate-700 py-4"
+                    className="font-semibold text-foreground/80 py-4"
                   >
                     Cognome
                   </SortableTableHead>
@@ -432,7 +432,7 @@ export default function SchedaCorso() {
                     sortKey="firstName"
                     currentSort={sortConfig}
                     onSort={handleSort}
-                    className="font-semibold text-slate-700 py-4"
+                    className="font-semibold text-foreground/80 py-4"
                   >
                     Nome
                   </SortableTableHead>
@@ -440,7 +440,7 @@ export default function SchedaCorso() {
                     sortKey="email"
                     currentSort={sortConfig}
                     onSort={handleSort}
-                    className="font-semibold text-slate-700 py-4"
+                    className="font-semibold text-foreground/80 py-4"
                   >
                     Email
                   </SortableTableHead>
@@ -448,28 +448,28 @@ export default function SchedaCorso() {
                     sortKey="enrollment_date"
                     currentSort={sortConfig}
                     onSort={handleSort}
-                    className="font-semibold text-slate-700 py-4 text-center"
+                    className="font-semibold text-foreground/80 py-4 text-center"
                   >
                     Iscrizione
                   </SortableTableHead>
-                  <TableHead className="font-semibold text-slate-700 py-4">
+                  <TableHead className="font-semibold text-foreground/80 py-4">
                     Scadenza Tessera
                   </TableHead>
-                  <TableHead className="font-semibold text-slate-700 py-4">
+                  <TableHead className="font-semibold text-foreground/80 py-4">
                     Certificato Medico
                   </TableHead>
                   <SortableTableHead
                     sortKey="attendances"
                     currentSort={sortConfig}
                     onSort={handleSort}
-                    className="font-semibold text-slate-700 py-4 text-center"
+                    className="font-semibold text-foreground/80 py-4 text-center"
                   >
                     Presenze
                   </SortableTableHead>
-                  <TableHead className="font-semibold text-slate-700 py-4 text-center">
+                  <TableHead className="font-semibold text-foreground/80 py-4 text-center">
                     Pagamenti
                   </TableHead>
-                  <TableHead className="font-semibold text-slate-700 py-4 text-right">
+                  <TableHead className="font-semibold text-foreground/80 py-4 text-right">
                     Azioni
                   </TableHead>
                 </TableRow>
@@ -479,7 +479,7 @@ export default function SchedaCorso() {
                   <TableRow>
                     <TableCell
                       colSpan={9}
-                      className="text-center py-12 text-slate-500"
+                      className="text-center py-12 text-muted-foreground"
                     >
                       <div className="flex flex-col items-center gap-2">
                         <Users className="h-8 w-8 text-slate-300" />
@@ -506,7 +506,7 @@ export default function SchedaCorso() {
 
                     // Check card expiry
                     let cardExpiryText = (
-                      <span className="text-slate-500 text-sm italic">
+                      <span className="text-muted-foreground text-sm italic">
                         Assente
                       </span>
                     );
@@ -548,7 +548,7 @@ export default function SchedaCorso() {
                     let certExpiryText = (
                       <Badge
                         variant="outline"
-                        className="bg-slate-100 text-slate-500 hover:bg-slate-200 shadow-none border-0 gap-1"
+                        className="bg-slate-100 text-muted-foreground hover:bg-slate-200 shadow-none border-0 gap-1"
                       >
                         <XCircle className="w-3.5 h-3.5" /> Assente
                       </Badge>
@@ -590,11 +590,11 @@ export default function SchedaCorso() {
                     return (
                       <TableRow
                         key={member_id}
-                        className="hover:bg-slate-50/80 transition-colors"
+                        className="hover:bg-muted/80 transition-colors"
                       >
                         <TableCell
                           className={cn(
-                            "font-medium text-slate-900",
+                            "font-medium text-foreground",
                             isSortedColumn("lastName") && "sorted-column-cell",
                           )}
                         >
@@ -607,7 +607,7 @@ export default function SchedaCorso() {
                         </TableCell>
                         <TableCell
                           className={cn(
-                            "font-medium text-slate-900",
+                            "font-medium text-foreground",
                             isSortedColumn("firstName") && "sorted-column-cell",
                           )}
                         >
@@ -620,7 +620,7 @@ export default function SchedaCorso() {
                         </TableCell>
                         <TableCell
                           className={cn(
-                            "text-slate-600 text-sm",
+                            "text-muted-foreground text-sm",
                             isSortedColumn("email") && "sorted-column-cell",
                           )}
                         >
@@ -628,7 +628,7 @@ export default function SchedaCorso() {
                         </TableCell>
                         <TableCell
                           className={cn(
-                            "text-center text-slate-500 text-xs",
+                            "text-center text-muted-foreground text-xs",
                             isSortedColumn("enrollment_date") &&
                               "sorted-column-cell",
                           )}
@@ -657,7 +657,7 @@ export default function SchedaCorso() {
                         >
                           <Badge
                             variant="secondary"
-                            className="bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5"
+                            className="bg-slate-100 text-foreground/80 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5"
                           >
                             {presenze_count}
                           </Badge>

@@ -57,9 +57,9 @@ const getStrategicColor = (type: string, title?: string) => {
     if (t.includes('VAC')) return 'bg-emerald-100 text-emerald-800 border-l border-emerald-400';
     if (type === 'nota' || t.includes('PROMO')) return 'bg-yellow-100 text-yellow-800 border-l border-yellow-400';
     if (type === 'evento') return 'bg-indigo-50 text-indigo-800 border-l border-indigo-400';
-    if (t.includes('AFT')) return 'bg-slate-200 text-slate-800 border-l border-slate-400';
+    if (t.includes('AFT')) return 'bg-slate-200 text-foreground border-l border-slate-400';
     
-    return 'bg-white/95 text-slate-800';
+    return 'bg-background/95 text-foreground';
 };
 
 // Innesco HMR per Vite (Bypass cache Subagent)
@@ -344,11 +344,11 @@ export default function Planning() {
         
         Object.entries(breakdown).forEach(([key, count]) => {
             if (count > 0) {
-                let colorClass = "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:border-slate-300";
+                let colorClass = "bg-muted border-border text-muted-foreground hover:bg-slate-100 hover:border-border";
                 if (key === 'Corsi') {
                     colorClass = isPastMonthCell 
-                        ? "bg-slate-200 border-slate-300 text-slate-700 hover:bg-slate-300" 
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100";
+                        ? "bg-slate-200 border-border text-foreground/80 hover:bg-slate-300" 
+                        : "bg-muted border-border text-foreground/80 hover:bg-slate-100";
                 }
                 else if (key === 'Allenamenti') colorClass = "bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100";
                 else if (key === 'Lez. Individuali') colorClass = "bg-green-50 border-green-200 text-green-600 hover:bg-green-100";
@@ -458,18 +458,18 @@ export default function Planning() {
         const days = Array.from({ length: totalDays }, (_, i) => i + 1);
         
         return (
-             <div className="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200">
+             <div className="grid grid-cols-7 gap-px bg-slate-200 border border-border">
                 {['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'].map(d => (
-                    <div key={d} className="bg-slate-100 p-2 text-center text-xs font-bold uppercase text-slate-500">{d}</div>
+                    <div key={d} className="bg-slate-100 p-2 text-center text-xs font-bold uppercase text-muted-foreground">{d}</div>
                 ))}
-                {blanks.map(b => <div key={`blank-${b}`} className="bg-white min-h-[120px]"></div>)}
+                {blanks.map(b => <div key={`blank-${b}`} className="bg-background min-h-[120px]"></div>)}
                 {days.map(d => {
                     const cellEvents = getEventsForDay(d, month, year);
                     const isToday = isSameDay(new Date(year, month, d), today);
                     return (
                         <div 
                             key={d} 
-                            className={`bg-white min-h-[120px] p-2 hover:bg-slate-50 cursor-pointer transition-colors ${isToday ? 'bg-yellow-50/50' : ''}`}
+                            className={`bg-background min-h-[120px] p-2 hover:bg-muted cursor-pointer transition-colors ${isToday ? 'bg-yellow-50/50' : ''}`}
                             onClick={() => {
                                 const dateStr = format(new Date(year, month, d), "yyyy-MM-dd");
                                 setStrategicEventId(null);
@@ -481,7 +481,7 @@ export default function Planning() {
                                 setStrategicModalOpen(true);
                             }}
                         >
-                            <div className={`text-right font-bold text-sm mb-2 ${isToday ? 'text-yellow-600 underline text-base' : 'text-slate-700'}`}>{d}</div>
+                            <div className={`text-right font-bold text-sm mb-2 ${isToday ? 'text-yellow-600 underline text-base' : 'text-foreground/80'}`}>{d}</div>
                             <div className="flex flex-col gap-1">
                                 {cellEvents}
                             </div>
@@ -515,9 +515,9 @@ export default function Planning() {
                     const isToday = isSameDay(wd, today);
                     
                     return (
-                        <div key={wd.toISOString()} className={`flex border rounded-md overflow-hidden bg-white shadow-sm ${isToday ? 'border-yellow-400 bg-yellow-50/30' : 'border-slate-200'}`}>
+                        <div key={wd.toISOString()} className={`flex border rounded-md overflow-hidden bg-background shadow-sm ${isToday ? 'border-yellow-400 bg-yellow-50/30' : 'border-border'}`}>
                             {/* Day Header */}
-                            <div className={`w-32 shrink-0 p-4 border-r flex flex-col justify-center items-center ${isToday ? 'bg-yellow-100 text-yellow-800' : 'bg-slate-50'}`}>
+                            <div className={`w-32 shrink-0 p-4 border-r flex flex-col justify-center items-center ${isToday ? 'bg-yellow-100 text-yellow-800' : 'bg-muted'}`}>
                                 <span className="text-sm font-semibold uppercase">{format(wd, "EEEE", { locale: it })}</span>
                                 <span className="text-3xl font-extrabold">{format(wd, "d")}</span>
                                 <span className="text-xs text-muted-foreground">{format(wd, "MMMM", { locale: it })}</span>
@@ -544,8 +544,8 @@ export default function Planning() {
                         <CalendarRange className="w-8 h-8 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Planning Strategico</h1>
-                        <p className="text-sm text-slate-500 mt-1">
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground">Planning Strategico</h1>
+                        <p className="text-sm text-muted-foreground mt-1">
                             Mappa Plurimensile e Multi-Stagione. I corsi sono mostrati in forma sintetica.
                         </p>
                     </div>
@@ -553,14 +553,14 @@ export default function Planning() {
                 
                 <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar flex-nowrap w-full md:w-auto pb-1 md:pb-0">
                     {/* Navigatore Temporale Centrale */}
-                    <div className="flex items-center bg-white rounded-md border shadow-sm p-1 h-9 shrink-0">
-                        <Button variant="ghost" size="sm" onClick={prevTimeSpan} className="text-slate-500 hover:text-slate-900 h-7">&larr; Prec.</Button>
-                        <div className="px-4 text-sm font-bold text-slate-800 min-w-[160px] text-center uppercase tracking-wide">
+                    <div className="flex items-center bg-background rounded-md border shadow-sm p-1 h-9 shrink-0">
+                        <Button variant="ghost" size="sm" onClick={prevTimeSpan} className="text-muted-foreground hover:text-foreground h-7">&larr; Prec.</Button>
+                        <div className="px-4 text-sm font-bold text-foreground min-w-[160px] text-center uppercase tracking-wide">
                             {viewMode === 'annuale' ? `Stagione ${startYear.toString().slice(-2)}-${(startYear + 1).toString().slice(-2)}` : 
                              viewMode === 'mensile' ? format(currentDateParam, "MMMM yyyy", { locale: it }) : 
                              `Settimana ${format(currentDateParam, "d MMM yyyy", { locale: it })}`}
                         </div>
-                        <Button variant="ghost" size="sm" onClick={nextTimeSpan} disabled={isNextDisabled} className="text-slate-500 hover:text-slate-900 h-7 disabled:opacity-30 disabled:hover:text-slate-500">Succ. &rarr;</Button>
+                        <Button variant="ghost" size="sm" onClick={nextTimeSpan} disabled={isNextDisabled} className="text-muted-foreground hover:text-foreground h-7 disabled:opacity-30 disabled:hover:text-muted-foreground">Succ. &rarr;</Button>
                     </div>
 
                     <div className="text-xs font-semibold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors h-9 flex items-center shrink-0"
@@ -574,7 +574,7 @@ export default function Planning() {
                     </div>
 
                     {/* View Mode Toggle */}
-                    <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 h-9 shrink-0">
+                    <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-border h-9 shrink-0">
                         <Button variant={viewMode === 'annuale' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('annuale')} className="rounded-md h-7">Annuale</Button>
                         <Button variant={viewMode === 'mensile' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('mensile')} className="rounded-md h-7">Mensile</Button>
                         <Button variant={viewMode === 'settimanale' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('settimanale')} className="rounded-md h-7">Settimanale</Button>
@@ -594,7 +594,7 @@ export default function Planning() {
                     {viewMode === 'annuale' && (
                         <div className="min-w-[1200px] flex flex-col relative w-fit">
                             {/* Header Mesi */}
-                            <div className="sticky top-0 z-40 bg-white shadow-sm border-b">
+                            <div className="sticky top-0 z-40 bg-background shadow-sm border-b">
                                 <div className="grid grid-cols-12 bg-muted/50">
                                 {MONTHS_ORDERED.map((monthObj, idx) => {
                                     const cellYearHeader = monthObj.monthIndex < 8 ? startYear + 1 : startYear;
@@ -605,7 +605,7 @@ export default function Planning() {
                                     const isCurrentMonth = monthObj.monthIndex === currentMonthIndex && 
                                         (monthObj.monthIndex < 8 ? startYear + 1 === today.getFullYear() : startYear === today.getFullYear());
                                     
-                                    const themeStyle = isMonthPast ? "bg-slate-200 text-slate-800" : "bg-slate-50/80 text-slate-600";
+                                    const themeStyle = isMonthPast ? "bg-slate-200 text-foreground" : "bg-muted/80 text-muted-foreground";
                                     const highlightStyle = isCurrentMonth ? "border-b-4 border-b-yellow-400 bg-yellow-100/50" : "";
                                     
                                     return (
@@ -623,7 +623,7 @@ export default function Planning() {
                             {daysArray.map(day => {
                                 const isTodayRow = day === today.getDate() && startYear === (today.getMonth() < 8 ? today.getFullYear() - 1 : today.getFullYear());
                                 return (
-                                <div key={day} ref={isTodayRow ? activeRowRef : null} className={`grid grid-cols-12 border-b group hover:bg-slate-50 duration-150 transition-colors ${isTodayRow ? 'bg-yellow-50/30' : ''}`}>
+                                <div key={day} ref={isTodayRow ? activeRowRef : null} className={`grid grid-cols-12 border-b group hover:bg-muted duration-150 transition-colors ${isTodayRow ? 'bg-yellow-50/30' : ''}`}>
                                     {MONTHS_ORDERED.map((monthObj, monthColIndex) => {
                                         // Determiniamo se è anno successivo (da Gennaio in poi, avendo shiftato Set-Ago)
                                         const cellYear = monthObj.monthIndex < 8 ? startYear + 1 : startYear;
@@ -661,12 +661,12 @@ export default function Planning() {
                                                     }
                                                 }}
                                                 className={`relative min-h-[50px] p-1 text-xs transition-opacity duration-300 ${isValidDay ? 'border-r cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
-                                                    !isValidDay ? (isPastBodyMonth ? 'bg-slate-100/80 border-transparent' : 'bg-white border-transparent') : 
+                                                    !isValidDay ? (isPastBodyMonth ? 'bg-slate-100/80 border-transparent' : 'bg-background border-transparent') : 
                                                     (isToday ? 'bg-yellow-200 border-2 border-yellow-500 z-10 shadow-md scale-[1.02] transition-transform' : 
                                                     (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100/80' : 'bg-red-50/50') : 
                                                     (isCurrentMonthCol ? 'bg-yellow-50/20' : 
                                                     (isSaturday ? (isPastBodyMonth ? 'bg-slate-200/50' : 'bg-slate-100/50') : 
-                                                    (isPastBodyMonth ? 'bg-slate-100/80 border-slate-300/50' : 'bg-white')))))
+                                                    (isPastBodyMonth ? 'bg-slate-100/80 border-border/50' : 'bg-background')))))
                                                 } ${isPastBodyMonth && !isToday ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0' : ''}`}
                                             >
                                                 {isValidDay && cellDate && (
@@ -694,13 +694,13 @@ export default function Planning() {
                         </div>
                     )}
                     {viewMode === 'settimanale' && (
-                        <div className="p-4 bg-slate-50">
+                        <div className="p-4 bg-muted">
                             {renderWeeklyGrid()}
                         </div>
                     )}
                 </CardContent>
                 {/* Bordino FISSATO (fuori dallo scroll container) */}
-                <div className="h-5 w-full bg-[#f6f6f9] border-t border-slate-200 shrink-0"></div>
+                <div className="h-5 w-full bg-[#f6f6f9] border-t border-border shrink-0"></div>
             </Card>
 
             {/* Strategic Event Draft Modal */}
@@ -749,7 +749,7 @@ export default function Planning() {
                         <div className="space-y-2 text-sm flex items-center justify-between border rounded p-3">
                             <div>
                                 <p className="font-semibold">Tutto il giorno</p>
-                                <p className="text-slate-500 text-xs text-muted-foreground">L'evento copre per intero le date indicate</p>
+                                <p className="text-muted-foreground text-xs text-muted-foreground">L'evento copre per intero le date indicate</p>
                             </div>
                             <Switch checked={strategicAllDay} onCheckedChange={setStrategicAllDay} />
                         </div>

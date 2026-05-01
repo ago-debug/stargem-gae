@@ -63,7 +63,7 @@ export default function ListiniHome() {
                         <ArrowLeft className="w-4 h-4 text-white" />
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-1" data-testid="text-page-title">
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-1" data-testid="text-page-title">
                             Listini per Attività
                         </h1>
                         <p className="text-muted-foreground text-sm">

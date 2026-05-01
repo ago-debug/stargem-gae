@@ -1956,7 +1956,7 @@ export default function AnagraficaHome() {
 
       {/* Membership Card Dialog */}
       <Dialog open={isCardDialogOpen} onOpenChange={setIsCardDialogOpen}>
-        <DialogContent className="max-w-md bg-white border-2 max-h-[95vh] overflow-y-auto">
+        <DialogContent className="max-w-md bg-background border-2 max-h-[95vh] overflow-y-auto">
           <DialogHeader className="border-b pb-4 mb-4">
             <DialogTitle className="text-2xl font-black italic tracking-tighter">Anteprima Card</DialogTitle>
           </DialogHeader>

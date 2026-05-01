@@ -60,7 +60,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
   return (
     <div className="space-y-2 flex-1 min-w-0">
       <div className="flex items-center gap-2">
-        <Label className="font-semibold text-slate-800 shrink-0 uppercase text-xs">Interno Corso</Label>
+        <Label className="font-semibold text-foreground shrink-0 uppercase text-xs">Interno Corso</Label>
         <InlineListEditorDialog listCode="tag_interni" listName="Interno Corso" showColors={true} penninoType="tipo B" />
       </div>
       <div className="relative" ref={containerRef}>
@@ -89,8 +89,8 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-slate-200 rounded-md shadow-xl z-[100] py-2 animate-in fade-in zoom-in-95 data-[side=bottom]:slide-in-from-top-2 overflow-hidden">
-          <div className="px-3 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-100 mb-1">
+        <div className="absolute top-full left-0 mt-1 w-64 bg-background border border-border rounded-md shadow-xl z-[100] py-2 animate-in fade-in zoom-in-95 data-[side=bottom]:slide-in-from-top-2 overflow-hidden">
+          <div className="px-3 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-slate-100 mb-1">
             Tag Interni
           </div>
           <div className="max-h-60 overflow-y-auto px-1">
@@ -107,7 +107,7 @@ export function MultiSelectInternal({ selectedTags, onChange }: MultiSelectInter
                 >
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: tag.color }} />
-                    <span className={cn(isSelected ? "font-semibold text-indigo-900" : "text-slate-700")}>
+                    <span className={cn(isSelected ? "font-semibold text-indigo-900" : "text-foreground/80")}>
                       {tag.name}
                     </span>
                   </div>

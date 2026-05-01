@@ -76,7 +76,7 @@ const TEAM_COLORS: Record<string, string> = {
   'ass_manutenzione': 'bg-orange-100 text-orange-700',
   'ufficio': 'bg-blue-100 text-blue-700',
   'amministrazione': 'bg-purple-100 text-purple-700',
-  'collaboratori': 'bg-slate-200 text-slate-800'
+  'collaboratori': 'bg-slate-200 text-foreground'
 };
 
 const TEAM_LABELS: Record<string, string> = {
@@ -104,8 +104,8 @@ const SHIFT_COLORS: Record<string, string> = {
   "UFFICIO": "bg-orange-100 text-orange-800 border-orange-200",
   "AMM.ZIONE": "bg-purple-100 text-purple-800 border-purple-200",
   "WORKSHOP": "bg-yellow-100 text-yellow-800 border-yellow-200",
-  "PAUSA": "bg-slate-100 text-slate-600 border-slate-200",
-  "RIPOSO": "bg-slate-300 text-slate-800 border-slate-400 font-bold",
+  "PAUSA": "bg-slate-100 text-muted-foreground border-border",
+  "RIPOSO": "bg-slate-300 text-foreground border-slate-400 font-bold",
   "RIUNIONE": "bg-amber-100 text-amber-800 border-amber-200",
   "STUDIO_1": "bg-cyan-100 text-cyan-800 border-cyan-200",
   "STUDIO_2": "bg-cyan-100 text-cyan-800 border-cyan-200",
@@ -143,11 +143,11 @@ function SortableDipendente({ id, dipendente }: { id: number, dipendente: GemTea
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-md shadow-sm mb-2 z-50 relative">
+    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-2 bg-background border border-border rounded-md shadow-sm mb-2 z-50 relative">
       <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:bg-slate-100 p-1.5 rounded text-slate-400">
         <GripVertical className="w-4 h-4" />
       </div>
-      <div className="font-semibold text-sm text-slate-700">{dipendente.cognome} {dipendente.nome}</div>
+      <div className="font-semibold text-sm text-foreground/80">{dipendente.cognome} {dipendente.nome}</div>
     </div>
   );
 }
@@ -677,13 +677,13 @@ export default function GemTeam() {
               </Button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-56 p-3">
-              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 border-b pb-1">Dettaglio Connessioni</h4>
+              <h4 className="text-xs font-bold text-foreground uppercase tracking-wider mb-2 border-b pb-1">Dettaglio Connessioni</h4>
               <div className="flex justify-between text-xs py-1">
-                <span className="text-slate-600">Dipendenti (On/Pausa):</span>
+                <span className="text-muted-foreground">Dipendenti (On/Pausa):</span>
                 <span className="font-bold">{activeUsers.filter((u:any) => (u.stato === 'online' || u.stato === 'pausa') && dipendenti.some(d => d.userId === u.id && d.team !== 'collaboratori' && !isSystemEmployee(d))).length}</span>
               </div>
               <div className="flex justify-between text-xs py-1">
-                <span className="text-slate-600">Collaboratori (On/Pausa):</span>
+                <span className="text-muted-foreground">Collaboratori (On/Pausa):</span>
                 <span className="font-bold">{activeUsers.filter((u:any) => (u.stato === 'online' || u.stato === 'pausa') && dipendenti.some(d => d.userId === u.id && d.team === 'collaboratori')).length}</span>
               </div>
               <div className="flex justify-between text-xs py-1 text-primary">
@@ -691,7 +691,7 @@ export default function GemTeam() {
                 <span className="font-bold">{activeUsers.filter((u:any) => (u.stato === 'online' || u.stato === 'pausa') && (!dipendenti.some(d => d.userId === u.id) || isSystemEmployee(dipendenti.find(d => d.userId === u.id)!))).length}</span>
               </div>
               <div className="border-t mt-2 pt-2 flex justify-between text-xs">
-                <span className="font-bold text-slate-800">Totale Dispositivi:</span>
+                <span className="font-bold text-foreground">Totale Dispositivi:</span>
                 <span className="font-black text-blue-600">{activeUsers.filter((u:any)=>u.stato==='online' || u.stato==='pausa').length}</span>
               </div>
             </PopoverContent>
@@ -703,22 +703,22 @@ export default function GemTeam() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="px-6 md:px-8 max-w-7xl mx-auto w-full">
           <TabsList className="grid w-full grid-flow-auto grid-cols-3 md:grid-cols-6 h-auto p-1.5 gap-1.5 bg-slate-100 rounded-xl mb-4">
-          <TabsTrigger value="dashboard" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+          <TabsTrigger value="dashboard" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">
             <Home className="w-4 h-4 mr-2" /> Dashboard
           </TabsTrigger>
-          <TabsTrigger value="dipendenti" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+          <TabsTrigger value="dipendenti" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">
             <Users2 className="w-4 h-4 mr-2" /> Team
           </TabsTrigger>
-          <TabsTrigger value="turni" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+          <TabsTrigger value="turni" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">
             <ShieldCheck className="w-4 h-4 mr-2" /> Turni
           </TabsTrigger>
-          <TabsTrigger value="presenze" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+          <TabsTrigger value="presenze" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">
             <ClipboardList className="w-4 h-4 mr-2" /> Presenze
           </TabsTrigger>
-          <TabsTrigger value="diario" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+          <TabsTrigger value="diario" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">
             <PenTool className="w-4 h-4 mr-2" /> Diario
           </TabsTrigger>
-          <TabsTrigger value="report" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2">
+          <TabsTrigger value="report" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2">
             <PieChart className="w-4 h-4 mr-2" /> Report
           </TabsTrigger>
         </TabsList>
@@ -726,7 +726,7 @@ export default function GemTeam() {
 
         <TabsContent value="dashboard">
           <div className="px-6 md:px-8 max-w-7xl mx-auto space-y-6">
-            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <span className="relative flex h-3 w-3 mr-1">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
@@ -748,10 +748,10 @@ export default function GemTeam() {
                   <span className="text-xs font-bold uppercase tracking-wider text-blue-800">Connessi</span>
                 </CardContent>
               </Card>
-              <Card className="bg-slate-100 border-slate-200 shadow-sm">
+              <Card className="bg-slate-100 border-border shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
-                  <span className="text-3xl font-black text-slate-500 mb-1">{checkInStats.usciti}</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Usciti</span>
+                  <span className="text-3xl font-black text-muted-foreground mb-1">{checkInStats.usciti}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Usciti</span>
                 </CardContent>
               </Card>
               <Card className="bg-yellow-50 border-yellow-200 shadow-sm">
@@ -769,10 +769,10 @@ export default function GemTeam() {
             </div>
 
             {/* List */}
-            <Card className="border-slate-200 shadow-sm bg-white overflow-hidden">
+            <Card className="border-border shadow-sm bg-background overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <thead className="bg-muted border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     <tr>
                       <th className="p-4 font-bold">TEAM</th>
                       <th className="p-4 font-bold">SEDE</th>
@@ -783,7 +783,7 @@ export default function GemTeam() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {dipendenti.length === 0 && isLoadingDipendenti && (
-                      <tr><td colSpan={5} className="p-8 text-center text-slate-500">Caricamento dipendenti...</td></tr>
+                      <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Caricamento dipendenti...</td></tr>
                     )}
                     {(() => {
                       const sortedDip = [...dipendenti].sort((a, b) => {
@@ -827,15 +827,15 @@ export default function GemTeam() {
                         
                         const statoColors: Record<string, string> = {
                           "IN": "bg-emerald-100 text-emerald-800 border-emerald-200",
-                          "OUT": "bg-slate-100 text-slate-700 border-slate-200",
+                          "OUT": "bg-slate-100 text-foreground/80 border-border",
                           "ATTESO": "bg-yellow-100 text-yellow-800 border-yellow-200",
                           "ASSENTE": "bg-rose-100 text-rose-800 border-rose-200"
                         };
                         const statoLabel = stato === "IN" ? "🟢 IN SEDE" : (stato === "OUT" && chk?.lastTimestamp) ? "⚪ USCITO" : (stato === "ASSENTE") ? "🔴 ASSENTE" : "🟡 ATTESO";
 
                         return (
-                          <tr key={dip.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="p-4 font-bold text-slate-800 flex items-center gap-3">
+                          <tr key={dip.id} className="hover:bg-muted/50 transition-colors">
+                            <td className="p-4 font-bold text-foreground flex items-center gap-3">
                               <Avatar className={`w-8 h-8 border ring-1 ring-offset-1 ${dip.team === 'segreteria' ? 'ring-pink-100' : 'ring-slate-100'}`}>
                                 {dip.photo_url ? <AvatarImage src={dip.photo_url} /> : null}
                                 <AvatarFallback className={`text-[10px] ${TEAM_COLORS[dip.team]}`}>{dip.nome.charAt(0)}{dip.cognome.charAt(0)}</AvatarFallback>
@@ -857,13 +857,13 @@ export default function GemTeam() {
                                    IN PAUSA
                                  </Badge>
                               ) : (
-                                 <Badge variant="outline" className="bg-slate-100 text-slate-500 border-transparent">
+                                 <Badge variant="outline" className="bg-slate-100 text-muted-foreground border-transparent">
                                    OFFLINE
                                  </Badge>
                               )}
                             </td>
-                            <td className="p-4 text-right font-bold text-slate-700">{oreSede}</td>
-                            <td className="p-4 text-right font-bold text-slate-700">{oreOnline}</td>
+                            <td className="p-4 text-right font-bold text-foreground/80">{oreSede}</td>
+                            <td className="p-4 text-right font-bold text-foreground/80">{oreOnline}</td>
                           </tr>
                         );
                       });
@@ -888,13 +888,13 @@ export default function GemTeam() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <ToggleGroup type="single" value={teamFilter} onValueChange={(val) => {if(val) setTeamFilter(val)}} className="bg-white border rounded-lg p-1 overflow-x-auto w-full justify-start md:w-auto">
+              <ToggleGroup type="single" value={teamFilter} onValueChange={(val) => {if(val) setTeamFilter(val)}} className="bg-background border rounded-lg p-1 overflow-x-auto w-full justify-start md:w-auto">
                 <ToggleGroupItem value="tutti" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-slate-800 data-[state=on]:text-white">Tutti</ToggleGroupItem>
                 <ToggleGroupItem value="segreteria" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-pink-100 data-[state=on]:text-pink-800">Segreteria</ToggleGroupItem>
                 <ToggleGroupItem value="ass_manutenzione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-orange-100 data-[state=on]:text-orange-800">Manutenzione</ToggleGroupItem>
                 <ToggleGroupItem value="ufficio" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800">Ufficio</ToggleGroupItem>
                 <ToggleGroupItem value="amministrazione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-purple-100 data-[state=on]:text-purple-800">Amministrazione</ToggleGroupItem>
-                <ToggleGroupItem value="collaboratori" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-slate-200 data-[state=on]:text-slate-800">Collaboratori</ToggleGroupItem>
+                <ToggleGroupItem value="collaboratori" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-slate-200 data-[state=on]:text-foreground">Collaboratori</ToggleGroupItem>
               </ToggleGroup>
             </div>
 
@@ -912,7 +912,7 @@ export default function GemTeam() {
                 {filteredDipendenti.map(dip => (
                   <Card 
                     key={dip.id} 
-                    className="hover:shadow-md transition-shadow cursor-pointer border-slate-200"
+                    className="hover:shadow-md transition-shadow cursor-pointer border-border"
                     onClick={() => {
                       setSelectedSheetDip(dip);
                       setIsSheetOpen(true);
@@ -926,7 +926,7 @@ export default function GemTeam() {
                           IN SERVIZIO
                         </div>
                       ) : (
-                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-[10px] font-bold border border-slate-200">
+                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-slate-100 text-muted-foreground px-2 py-0.5 rounded-full text-[10px] font-bold border border-border">
                           <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                           FUORI SERVIZIO
                         </div>
@@ -936,20 +936,20 @@ export default function GemTeam() {
                         {dip.photo_url ? (
                           <AvatarImage src={dip.photo_url} alt={dip.nome} className="object-cover" />
                         ) : null}
-                        <AvatarFallback className={`text-lg font-bold ${TEAM_COLORS[dip.team] || 'bg-slate-200 text-slate-800'}`}>
+                        <AvatarFallback className={`text-lg font-bold ${TEAM_COLORS[dip.team] || 'bg-slate-200 text-foreground'}`}>
                           {dip.nome.charAt(0)}{dip.cognome ? dip.cognome.charAt(0) : ''}
                         </AvatarFallback>
                       </Avatar>
                       
-                      <h3 className="font-bold text-slate-800 truncate w-full px-2">{dip.cognome} {dip.nome}</h3>
-                      <Badge variant="secondary" className={`mt-1 mb-3 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[dip.team] || 'bg-slate-200 text-slate-800'}`}>
+                      <h3 className="font-bold text-foreground truncate w-full px-2">{dip.cognome} {dip.nome}</h3>
+                      <Badge variant="secondary" className={`mt-1 mb-3 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[dip.team] || 'bg-slate-200 text-foreground'}`}>
                         {TEAM_LABELS[dip.team] || (dip.team === 'Staff' || dip.team === 'staff' ? 'COLLABORATORE EXT' : dip.team)}
                       </Badge>
                       
-                      <div className="w-full bg-slate-50 rounded-lg p-2 mt-auto border border-slate-100">
+                      <div className="w-full bg-muted rounded-lg p-2 mt-auto border border-slate-100">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="text-slate-500 font-medium truncate pr-2">{dip.ruolo}</span>
-                          <span className="font-bold text-slate-700 bg-white px-1.5 py-0.5 rounded border shadow-sm shrink-0">
+                          <span className="text-muted-foreground font-medium truncate pr-2">{dip.ruolo}</span>
+                          <span className="font-bold text-foreground/80 bg-background px-1.5 py-0.5 rounded border shadow-sm shrink-0">
                             {dip.fisso ? "Fisso" : dip.tariffa ? `€${dip.tariffa}/h` : "—"}
                           </span>
                         </div>
@@ -959,7 +959,7 @@ export default function GemTeam() {
                 ))}
                 
                 {filteredDipendenti.length === 0 && (
-                  <div className="col-span-full py-12 text-center bg-slate-50 border-dashed border-2 rounded-xl text-slate-400">
+                  <div className="col-span-full py-12 text-center bg-muted border-dashed border-2 rounded-xl text-slate-400">
                     <Users2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     Nessun dipendente trovato per i filtri correnti.
                   </div>
@@ -983,7 +983,7 @@ export default function GemTeam() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <SheetTitle className="text-2xl text-slate-800 m-0 p-0 leading-none">
+                          <SheetTitle className="text-2xl text-foreground m-0 p-0 leading-none">
                             {selectedSheetDip.cognome} {selectedSheetDip.nome}
                           </SheetTitle>
                           {isMaster ? (
@@ -1011,7 +1011,7 @@ export default function GemTeam() {
                           )}
                         </div>
                       </div>
-                      <SheetDescription className="pt-2 text-slate-500">
+                      <SheetDescription className="pt-2 text-muted-foreground">
                         {isMaster ? (
                           <Input 
                             defaultValue={selectedSheetDip.ruolo || ""} 
@@ -1020,7 +1020,7 @@ export default function GemTeam() {
                                 updateTeamMutation.mutate({ id: selectedSheetDip.id, ruolo: e.target.value });
                               }
                             }}
-                            className="h-8 text-xs font-medium w-64 mb-2 bg-white"
+                            className="h-8 text-xs font-medium w-64 mb-2 bg-background"
                             placeholder="Inserisci mansione/ruolo..."
                           />
                         ) : (
@@ -1038,9 +1038,9 @@ export default function GemTeam() {
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-green-600" /> Presenza in Sede Oggi
                         </h4>
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col gap-4">
+                        <div className="bg-muted rounded-xl p-4 border border-slate-100 flex flex-col gap-4">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-slate-600">Stato:</span>
+                            <span className="text-sm font-semibold text-muted-foreground">Stato:</span>
                             <span className="text-sm font-bold">
                               {!sheetCheckinStatus || (sheetCheckinStatus.lastEvent === 'SCONOSCIUTO' || (sheetCheckinStatus.lastEvent === 'OUT' && !sheetCheckinStatus.checkInOggi)) 
                                 ? "⚪ Non registrato" 
@@ -1076,16 +1076,16 @@ export default function GemTeam() {
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
                           <UserPlus className="w-4 h-4" /> Anagrafica e Recapiti
                         </h4>
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
-                          <div className="flex items-center gap-3 text-sm text-slate-600">
+                        <div className="bg-muted rounded-xl p-4 border border-slate-100 space-y-3">
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
                             <Mail className="w-4 h-4 text-slate-400" />
                             <span>{selectedSheetDip.email || "—"}</span>
                           </div>
-                          <div className="flex items-center gap-3 text-sm text-slate-600">
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
                             <Phone className="w-4 h-4 text-slate-400" />
                             <span>{selectedSheetDip.phone || "—"}</span>
                           </div>
-                          <div className="flex items-center gap-3 text-sm text-slate-600">
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
                             <MapPin className="w-4 h-4 text-slate-400" />
                             <span>—</span>
                           </div>
@@ -1097,14 +1097,14 @@ export default function GemTeam() {
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
                           <Activity className="w-4 h-4" /> Attività Recente
                         </h4>
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col gap-3">
+                        <div className="bg-muted rounded-xl p-4 border border-slate-100 flex flex-col gap-3">
                           {(() => {
                             const presenceInfo = activeUsers.find((u: any) => u.id === selectedSheetDip.userId);
                             
                             let lavoroMins = 0;
                             let pausaMins = 0;
                             let statoStr = "OFFLINE";
-                            let badgeStyle = "bg-slate-200 text-slate-500 border-slate-300";
+                            let badgeStyle = "bg-slate-200 text-muted-foreground border-border";
                             let lastSeenStr = "Mai";
 
                             if (presenceInfo) {
@@ -1134,7 +1134,7 @@ export default function GemTeam() {
                             return (
                               <>
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-500">Stato:</span>
+                                  <span className="text-muted-foreground">Stato:</span>
                                   <Badge variant="outline" className={`${badgeStyle} font-bold`}>
                                     {statoStr === "ONLINE" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block"></span>}
                                     {statoStr === "IN PAUSA" && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 inline-block"></span>}
@@ -1142,24 +1142,24 @@ export default function GemTeam() {
                                   </Badge>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-500">Lavoro online oggi:</span>
-                                  <span className="font-semibold text-slate-700">{fmtMin(lavoroMins)}</span>
+                                  <span className="text-muted-foreground">Lavoro online oggi:</span>
+                                  <span className="font-semibold text-foreground/80">{fmtMin(lavoroMins)}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-500">Presenza fisica:</span>
-                                  <span className="font-semibold text-slate-700">
+                                  <span className="text-muted-foreground">Presenza fisica:</span>
+                                  <span className="font-semibold text-foreground/80">
                                     {sheetCheckinStatus && Number(sheetCheckinStatus.oreOggi) > 0 
                                       ? fmtMin(Math.round(Number(sheetCheckinStatus.oreOggi) * 60)) 
                                       : "0m"}
                                   </span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-500">Pausa oggi:</span>
-                                  <span className="font-semibold text-slate-700">{fmtMin(pausaMins)}</span>
+                                  <span className="text-muted-foreground">Pausa oggi:</span>
+                                  <span className="font-semibold text-foreground/80">{fmtMin(pausaMins)}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-slate-500">Ultimo accesso:</span>
-                                  <span className="font-semibold text-slate-700">{lastSeenStr}</span>
+                                  <span className="text-muted-foreground">Ultimo accesso:</span>
+                                  <span className="font-semibold text-foreground/80">{lastSeenStr}</span>
                                 </div>
                               </>
                             );
@@ -1182,8 +1182,8 @@ export default function GemTeam() {
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
                           <ShieldCheck className="w-4 h-4" /> Presenze Mese
                         </h4>
-                        <div className="bg-slate-50 rounded-xl p-6 border border-slate-200 border-dashed text-center">
-                          <p className="text-sm text-slate-500 font-medium">Integrazione in corso.</p>
+                        <div className="bg-muted rounded-xl p-6 border border-border border-dashed text-center">
+                          <p className="text-sm text-muted-foreground font-medium">Integrazione in corso.</p>
                         </div>
                       </section>
                       
@@ -1192,14 +1192,14 @@ export default function GemTeam() {
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
                           <PenTool className="w-4 h-4" /> Documenti
                         </h4>
-                        <div className="bg-slate-50 rounded-xl p-6 border border-slate-200 border-dashed text-center">
-                          <p className="text-sm text-slate-500 font-medium">Fascicolo digitale vuoto.</p>
+                        <div className="bg-muted rounded-xl p-6 border border-border border-dashed text-center">
+                          <p className="text-sm text-muted-foreground font-medium">Fascicolo digitale vuoto.</p>
                         </div>
                       </section>
                       
                       {/* ACTION BUTTON */}
                       <div className="pt-4 border-t border-slate-100">
-                        <Button variant="outline" className="w-full h-11 border-blue-200 text-blue-700 hover:bg-blue-50 font-bold bg-white shadow-sm">
+                        <Button variant="outline" className="w-full h-11 border-blue-200 text-blue-700 hover:bg-blue-50 font-bold bg-background shadow-sm">
                           <ShieldCheck className="w-4 h-4 mr-2" /> Crea Account di Sistema
                         </Button>
                       </div>
@@ -1214,10 +1214,10 @@ export default function GemTeam() {
         
         
         <TabsContent value="turni" className="w-full relative">
-          <div className="border-y border-slate-200 shadow-sm overflow-hidden bg-slate-50 w-full mb-4 flex flex-col">
+          <div className="border-y border-border shadow-sm overflow-hidden bg-muted w-full mb-4 flex flex-col">
             
             {/* SEZIONE A: HEADER */}
-            <div className="bg-white border-b border-slate-200 py-2 px-4 sticky top-0 z-30">
+            <div className="bg-background border-b border-border py-2 px-4 sticky top-0 z-30">
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center gap-3">
@@ -1226,7 +1226,7 @@ export default function GemTeam() {
                         <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTurniDate(subDays(turniDate, 1))}>
                           <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <div className="text-base sm:text-lg font-bold text-slate-800 tracking-tight min-w-[200px] text-center capitalize">
+                        <div className="text-base sm:text-lg font-bold text-foreground tracking-tight min-w-[200px] text-center capitalize">
                           {format(turniDate, "EEEE d MMMM yyyy", { locale: it })}
                         </div>
                         <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTurniDate(addDays(turniDate, 1))}>
@@ -1234,7 +1234,7 @@ export default function GemTeam() {
                         </Button>
                       </>
                     ) : (
-                      <div className="flex bg-slate-100 rounded-lg p-1 border border-slate-200 shadow-inner">
+                      <div className="flex bg-slate-100 rounded-lg p-1 border border-border shadow-inner">
                         {[0,1,2,3,4,5,6].map(offset => {
                           const d = addDays(startOfWeek(turniDate, { weekStartsOn: 1 }), offset);
                           const isSelected = format(d, 'yyyy-MM-dd') === format(turniDate, 'yyyy-MM-dd');
@@ -1243,7 +1243,7 @@ export default function GemTeam() {
                               key={offset} 
                               variant={isSelected ? "default" : "ghost"} 
                               size="sm" 
-                              className={`h-8 px-3 text-xs font-bold ${!isSelected && 'text-slate-500'}`}
+                              className={`h-8 px-3 text-xs font-bold ${!isSelected && 'text-muted-foreground'}`}
                               onClick={() => setTurniDate(d)}
                             >
                               {format(d, 'EEEE', { locale: it })}
@@ -1264,7 +1264,7 @@ export default function GemTeam() {
                           </PopoverTrigger>
   {isMaster && (
     <PopoverContent className="w-auto p-3">
-      <h4 className="text-xs font-bold text-slate-500 mb-2 uppercase text-center">Settimana Tipo</h4>
+      <h4 className="text-xs font-bold text-muted-foreground mb-2 uppercase text-center">Settimana Tipo</h4>
       <div className="flex gap-1.5">
         {['A', 'B', 'C', 'D', 'E'].map(l => (
           <Button key={l} variant={weekAssignment?.settimana === l ? "default" : "outline"} size="sm" className="h-8 w-8 p-0" onClick={() => {
@@ -1286,20 +1286,20 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     {isSameDay(turniDate, new Date()) ? (
         <Badge onClick={() => setTurniDate(new Date())} className="bg-emerald-500 hover:bg-emerald-600 text-[10px] cursor-pointer">OGGI</Badge>
     ) : (
-        <Badge onClick={() => setTurniDate(new Date())} variant="outline" className="text-emerald-600 border-emerald-500 hover:bg-emerald-50 text-[10px] cursor-pointer bg-white">OGGI</Badge>
+        <Badge onClick={() => setTurniDate(new Date())} variant="outline" className="text-emerald-600 border-emerald-500 hover:bg-emerald-50 text-[10px] cursor-pointer bg-background">OGGI</Badge>
     )}
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center bg-slate-100 p-1 rounded-md border border-slate-200 overflow-x-auto">
+                  <div className="flex items-center bg-slate-100 p-1 rounded-md border border-border overflow-x-auto">
                     <Button variant={turniViewMode === 'giornaliera' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-bold shadow-sm" onClick={() => setTurniViewMode('giornaliera')}>Giornaliera★</Button>
-                    <Button variant={turniViewMode === 'settimanale' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-slate-500" onClick={() => setTurniViewMode('settimanale')}>Settimanale</Button>
-                    <Button variant={turniViewMode === 'collettiva' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-slate-500" onClick={() => setTurniViewMode('collettiva')}>Collettiva</Button>
-                    <Button variant={turniViewMode === 'singola' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-slate-500" onClick={() => setTurniViewMode('singola')}>Singola</Button>
+                    <Button variant={turniViewMode === 'settimanale' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-muted-foreground" onClick={() => setTurniViewMode('settimanale')}>Settimanale</Button>
+                    <Button variant={turniViewMode === 'collettiva' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-muted-foreground" onClick={() => setTurniViewMode('collettiva')}>Collettiva</Button>
+                    <Button variant={turniViewMode === 'singola' ? "default" : "ghost"} size="sm" className="h-7 text-xs font-medium text-muted-foreground" onClick={() => setTurniViewMode('singola')}>Singola</Button>
                     {turniViewMode === 'singola' && (
                       <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                        <SelectTrigger className="h-7 w-40 text-xs font-semibold bg-white border-transparent">
+                        <SelectTrigger className="h-7 w-40 text-xs font-semibold bg-background border-transparent">
                           <SelectValue placeholder="Seleziona dipendente" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1315,7 +1315,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     <div className="flex items-center gap-2 flex-wrap">
                       <Sheet open={ordinaOpen} onOpenChange={setOrdinaOpen}>
                         <SheetTrigger asChild>
-                          <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white">
+                          <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-background">
                             <GripVertical className="h-3 w-3 mr-1 opacity-50" /> Ordina colonne
                           </Button>
                         </SheetTrigger>
@@ -1341,10 +1341,10 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                         </SheetContent>
                       </Sheet>
 
-                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50">
+                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-background text-emerald-700 border-emerald-200 hover:bg-emerald-50">
                         <Plus className="h-3 w-3 mr-1" /> Aggiungi turno
                       </Button>
-                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => {
+                      <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-background text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => {
     const el = document.getElementById('griglia-turni');
     if (!el) return;
     html2canvas(el, { scale: 2 }).then(canvas => {
@@ -1363,7 +1363,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                       
                       <Sheet>
                         <SheetTrigger asChild>
-                          <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-slate-600 border-slate-200 hover:bg-slate-50">
+                          <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-background text-muted-foreground border-border hover:bg-muted">
                             ⚙ Postazioni
                           </Button>
                         </SheetTrigger>
@@ -1374,7 +1374,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 </SheetHeader>
 <div className="mt-6 flex flex-col gap-4">
   <div className="bg-slate-100 rounded-md p-3">
-    <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Aggiungi nuova</div>
+    <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Aggiungi nuova</div>
     <form className="flex gap-2" onSubmit={async (e: any) => { 
         e.preventDefault(); 
         await fetch('/api/gemteam/postazioni', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ nome: e.target.nome.value, contaOre: true, attiva: true }) });
@@ -1387,8 +1387,8 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
   </div>
   <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2">
     {postazioniApi.map((p: any) => (
-      <div key={p.id} className="flex items-center justify-between p-2 border rounded-md shadow-sm opacity-100 bg-white hover:border-blue-200">
-        <span className="text-xs font-bold text-slate-800 uppercase">{p.nome}</span>
+      <div key={p.id} className="flex items-center justify-between p-2 border rounded-md shadow-sm opacity-100 bg-background hover:border-blue-200">
+        <span className="text-xs font-bold text-foreground uppercase">{p.nome}</span>
         <Button disabled variant="outline" size="sm" className="h-6 text-[10px]">Attiva</Button>
       </div>
     ))}
@@ -1403,10 +1403,10 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Legenda</Button>
+                        <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-background text-muted-foreground border-border hover:bg-muted">Legenda</Button>
                       </PopoverTrigger>
                       <PopoverContent align="end" className="w-[300px] p-4">
-                        <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Colori Postazioni</div>
+                        <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Colori Postazioni</div>
                         <div className="flex flex-wrap gap-3">
                           {postazioniApi.filter((p:any) => p.attiva === 1 || p.attiva === true || p.attiva).map((p:any) => (
                             <div key={p.id} className="flex items-center gap-1.5 w-[120px]">
@@ -1419,18 +1419,18 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     </Popover>
 
                     {isTemplateMode && (
-                        <div className="flex items-center gap-2 border-l border-r border-slate-200 px-3 h-8 bg-violet-50 rounded-md">
+                        <div className="flex items-center gap-2 border-l border-r border-border px-3 h-8 bg-violet-50 rounded-md">
                            <span className="text-[10px] font-bold text-violet-600 uppercase">Stai editando:</span>
                            <div className="flex gap-1">
                              {['A', 'B', 'C', 'D', 'E'].map(l => (
-                                <Button key={l} variant={templatePreset === l ? "default" : "outline"} size="sm" className={`h-6 w-6 p-0 text-[10px] ${templatePreset === l ? 'bg-violet-600 hover:bg-violet-700 text-white' : 'border-violet-200 text-violet-700 bg-white hover:bg-violet-100'}`} onClick={() => setTemplatePreset(l)}>{l}</Button>
+                                <Button key={l} variant={templatePreset === l ? "default" : "outline"} size="sm" className={`h-6 w-6 p-0 text-[10px] ${templatePreset === l ? 'bg-violet-600 hover:bg-violet-700 text-white' : 'border-violet-200 text-violet-700 bg-background hover:bg-violet-100'}`} onClick={() => setTemplatePreset(l)}>{l}</Button>
                              ))}
                            </div>
                         </div>
                     )}
 
                     {isMaster && (
-                       <Button variant={isTemplateMode ? "default" : "outline"} size="sm" className={`h-8 text-xs font-semibold ${isTemplateMode ? 'bg-violet-600 hover:bg-violet-700 text-white border-violet-700' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`} onClick={() => {
+                       <Button variant={isTemplateMode ? "default" : "outline"} size="sm" className={`h-8 text-xs font-semibold ${isTemplateMode ? 'bg-violet-600 hover:bg-violet-700 text-white border-violet-700' : 'bg-background text-muted-foreground border-border hover:bg-muted'}`} onClick={() => {
                            if (!isTemplateMode && weekAssignment?.settimana) {
                                setTemplatePreset(weekAssignment.settimana);
                            }
@@ -1442,13 +1442,13 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     {isMaster && !isTemplateMode && (
                        <Dialog open={isCopiaWeekOpen} onOpenChange={setIsCopiaWeekOpen}>
                          <DialogTrigger asChild>
-                           <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50">
+                           <Button variant="outline" size="sm" className="h-8 text-xs font-semibold bg-background text-indigo-600 border-indigo-200 hover:bg-indigo-50">
                              <Copy className="h-3 w-3 mr-1" /> Copia settimana
                            </Button>
                          </DialogTrigger>
                          <DialogContent className="max-w-[440px] p-4 flex flex-col items-center zoom-in-95 max-h-[90vh] overflow-hidden">
                             <h3 className="font-bold text-sm mb-2">Copia su un'altra settimana</h3>
-                            <p className="text-xs text-slate-500 mb-2 leading-tight text-center">Copia da: <strong>{format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'dd/MM/yyyy')}</strong>. Seleziona chi copiare e la settimana d'arrivo.</p>
+                            <p className="text-xs text-muted-foreground mb-2 leading-tight text-center">Copia da: <strong>{format(startOfWeek(turniDate, { weekStartsOn: 1 }), 'dd/MM/yyyy')}</strong>. Seleziona chi copiare e la settimana d'arrivo.</p>
                             
                             <div className="w-full flex gap-4 h-full min-h-0 overflow-hidden">
                               <div className="flex-1 border rounded-md p-2 overflow-y-auto space-y-2 h-[280px]">
@@ -1475,7 +1475,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                 ))}
                               </div>
                               <div className="flex-1 flex flex-col pt-1">
-                                <Calendar mode="single" selected={targetCopiaWeekDate} onSelect={(date) => { if(date) setTargetCopiaWeekDate(startOfWeek(date, { weekStartsOn: 1 })) }} weekStartsOn={1} className="bg-slate-50 rounded-md border border-slate-200 self-center" />
+                                <Calendar mode="single" selected={targetCopiaWeekDate} onSelect={(date) => { if(date) setTargetCopiaWeekDate(startOfWeek(date, { weekStartsOn: 1 })) }} weekStartsOn={1} className="bg-muted rounded-md border border-border self-center" />
                               </div>
                             </div>
 
@@ -1512,27 +1512,27 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
             {/* SEZIONE C: GRIGLIA ORARIA GIORNALIERA / COLLETTIVA / SINGOLA */}
             {turniViewMode !== 'settimanale' && (
               <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
-                <table id="griglia-turni" className={`border-collapse bg-white ${turniViewMode === 'singola' ? 'w-full table-fixed' : 'min-w-max'}`}>
-                <thead className="sticky top-0 z-20 shadow-sm border-b border-slate-300">
+                <table id="griglia-turni" className={`border-collapse bg-background ${turniViewMode === 'singola' ? 'w-full table-fixed' : 'min-w-max'}`}>
+                <thead className="sticky top-0 z-20 shadow-sm border-b border-border">
                   {/* Raggruppamento Team */}
                   <tr>
-                    <th className="w-20 min-w-[80px] bg-slate-50 border-r border-slate-300"></th>
-                    {filteredSegreteria.length > 0 && <th colSpan={filteredSegreteria.length} style={{backgroundColor: '#EAF3DE', color: '#3B6D11'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Segreteria</th>}
-                    {filteredManutenzione.length > 0 && <th colSpan={filteredManutenzione.length} style={{backgroundColor: '#FAEEDA', color: '#633806'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Manutenzione</th>}
-                    {filteredUfficio.length > 0 && <th colSpan={filteredUfficio.length} style={{backgroundColor: '#E6F1FB', color: '#185FA5'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Ufficio</th>}
-                    {filteredAmministrazione.length > 0 && <th colSpan={filteredAmministrazione.length} style={{backgroundColor: '#E1F5EE', color: '#0F6E56'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Amministrazione</th>}
-                    {filteredComunicazione.length > 0 && <th colSpan={filteredComunicazione.length} style={{backgroundColor: '#FAECE7', color: '#993C1D'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Comunicazione</th>}
-                    {filteredDirezione.length > 0 && <th colSpan={filteredDirezione.length} style={{backgroundColor: '#EEEDFE', color: '#3C3489'}} className="border-r border-slate-300 py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Direzione</th>}
+                    <th className="w-20 min-w-[80px] bg-muted border-r border-border"></th>
+                    {filteredSegreteria.length > 0 && <th colSpan={filteredSegreteria.length} style={{backgroundColor: '#EAF3DE', color: '#3B6D11'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Segreteria</th>}
+                    {filteredManutenzione.length > 0 && <th colSpan={filteredManutenzione.length} style={{backgroundColor: '#FAEEDA', color: '#633806'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Manutenzione</th>}
+                    {filteredUfficio.length > 0 && <th colSpan={filteredUfficio.length} style={{backgroundColor: '#E6F1FB', color: '#185FA5'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Ufficio</th>}
+                    {filteredAmministrazione.length > 0 && <th colSpan={filteredAmministrazione.length} style={{backgroundColor: '#E1F5EE', color: '#0F6E56'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Amministrazione</th>}
+                    {filteredComunicazione.length > 0 && <th colSpan={filteredComunicazione.length} style={{backgroundColor: '#FAECE7', color: '#993C1D'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Comunicazione</th>}
+                    {filteredDirezione.length > 0 && <th colSpan={filteredDirezione.length} style={{backgroundColor: '#EEEDFE', color: '#3C3489'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Direzione</th>}
                   </tr>
 
                   {/* Nomi Dipendenti */}
                   <tr>
-                    <th className="bg-slate-100 border-r border-slate-300 text-[10px] text-slate-500 font-bold p-1 w-20 min-w-[80px]">ORA</th>
+                    <th className="bg-slate-100 border-r border-border text-[10px] text-muted-foreground font-bold p-1 w-20 min-w-[80px]">ORA</th>
                     {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
-                      <th key={dip.id} className={`bg-white border-r border-slate-200 p-1.5 group ${turniViewMode === 'singola' ? 'w-full' : 'w-28 min-w-[112px]'}`}>
+                      <th key={dip.id} className={`bg-background border-r border-border p-1.5 group ${turniViewMode === 'singola' ? 'w-full' : 'w-28 min-w-[112px]'}`}>
                          <div className="flex items-center justify-center gap-1">
                             {isMaster && <GripVertical className="h-3 w-3 text-slate-300 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity" />}
-                            <span className="text-[10px] font-bold text-slate-700 uppercase truncate" title={dip.nome + ' ' + dip.cognome}>
+                            <span className="text-[10px] font-bold text-foreground/80 uppercase truncate" title={dip.nome + ' ' + dip.cognome}>
       {dip.nome.split(' ')[0]} {dip.cognome ? dip.cognome.charAt(0) + '.' : ''}
     </span>
                          </div>
@@ -1543,8 +1543,8 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                 
                 <tbody className="divide-y divide-slate-100">
                   {HOURS.map(hour => (
-                    <tr key={hour} className="group hover:bg-slate-50/50 transition-colors">
-                      <td className="bg-slate-50 border-r border-b border-slate-200 text-center text-[11px] font-semibold text-slate-600 p-1 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 w-20 h-[22px]">
+                    <tr key={hour} className="group hover:bg-muted/50 transition-colors">
+                      <td className="bg-muted border-r border-b border-border text-center text-[11px] font-semibold text-muted-foreground p-1 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 w-20 h-[22px]">
                         {hour}
                       </td>
                       {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => {
@@ -1565,7 +1565,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                          return (
                            <td 
                              key={`${dip.id}-${hour}`} 
-                             className={`border-r border-b ${hasConflict ? 'border-red-400 ring-2 ring-inset ring-red-500/30' : 'border-slate-200'} p-0.5 relative cursor-pointer min-h-[22px] ${turniViewMode==='singola'?'min-w-[200px] w-full':''}`}
+                             className={`border-r border-b ${hasConflict ? 'border-red-400 ring-2 ring-inset ring-red-500/30' : 'border-border'} p-0.5 relative cursor-pointer min-h-[22px] ${turniViewMode==='singola'?'min-w-[200px] w-full':''}`}
                              onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
                              onDragEnter={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
                              onDragStart={(e) => { 
@@ -1674,15 +1674,15 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                                 <h5 className="font-bold text-indigo-800 text-xs mb-3">Azione Massiva ({selectedShifts.length} slot)</h5>
                                                 <div className="flex flex-col gap-3">
                                                    <div className="space-y-1">
-                                                     <label className="text-[10px] font-semibold text-slate-500 uppercase">Copia/Sposta verso:</label>
+                                                     <label className="text-[10px] font-semibold text-muted-foreground uppercase">Copia/Sposta verso:</label>
                                                      <div className="flex flex-col gap-2">
-                                                       <select id="mass-emp-select" className="w-full h-8 rounded-md border border-input bg-white px-2 text-[10px] uppercase shadow-sm">
+                                                       <select id="mass-emp-select" className="w-full h-8 rounded-md border border-input bg-background px-2 text-[10px] uppercase shadow-sm">
                                                           <option value={dip.id}>👉 Stesso Dipendente</option>
                                                           {dipendenti.filter(d => !isSystemEmployee(d) && d.id !== dip.id).map(d => (
                                                             <option key={d.id} value={d.id}>{d.nome} {d.cognome}</option>
                                                           ))}
                                                        </select>
-                                                       <Input type="date" id="mass-date-select" className="h-8 w-full text-[10px] bg-white px-2" defaultValue={formattedTurniDate} />
+                                                       <Input type="date" id="mass-date-select" className="h-8 w-full text-[10px] bg-background px-2" defaultValue={formattedTurniDate} />
                                                      </div>
                                                    </div>
                                                 </div>
@@ -1714,7 +1714,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                          ) : (
                                            <div className="flex flex-col gap-0 w-full">
                                               <h4 className="font-bold text-sm mb-2">Modifica Intero Turno</h4>
-                                              <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
+                                              <p className="text-xs text-muted-foreground mb-4">{dip.cognome} {dip.nome} - {hour}</p>
                                               
                                               <form onSubmit={(e) => {
                                                   e.preventDefault();
@@ -1737,7 +1737,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                                 }}>
                                                 <div className="space-y-3">
                                                   <div className="w-full">
-                                                    <label className="text-xs font-semibold text-slate-600">Postazione</label>
+                                                    <label className="text-xs font-semibold text-muted-foreground">Postazione</label>
                                                     
                                                     <select name="postazione" defaultValue={turniFiltrato.postazione} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" required>
                                                       <option value="" disabled>Seleziona...</option>
@@ -1748,16 +1748,16 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                                   </div>
                                                   <div className="flex gap-2">
                                                     <div className="w-1/2">
-                                                      <label className="text-xs font-semibold text-slate-600">Inizio</label>
+                                                      <label className="text-xs font-semibold text-muted-foreground">Inizio</label>
                                                       <Input name="inizio" type="time" defaultValue={turniFiltrato.oraInizio.substring(0, 5)} />
                                                     </div>
                                                     <div className="w-1/2">
-                                                      <label className="text-xs font-semibold text-slate-600">Fine</label>
+                                                      <label className="text-xs font-semibold text-muted-foreground">Fine</label>
                                                       <Input name="fine" type="time" defaultValue={turniFiltrato.oraFine.substring(0, 5)} />
                                                     </div>
                                                   </div>
                                                   <div>
-                                                    <label className="text-xs font-semibold text-slate-600">Note</label>
+                                                    <label className="text-xs font-semibold text-muted-foreground">Note</label>
                                                     <Input name="note" placeholder="Opzionale..." defaultValue={turniFiltrato.note || ''} />
                                                   </div>
                                                 </div>
@@ -1856,12 +1856,12 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                               ) : (
                                 <Popover>
                                   <PopoverTrigger asChild>
-                                    <div className="w-full h-full min-h-[20px] bg-white text-transparent">_</div>
+                                    <div className="w-full h-full min-h-[20px] bg-background text-transparent">_</div>
                                   </PopoverTrigger>
                                   {isMaster && (
                                     <PopoverContent className="w-72 p-4">
                                       <h4 className="font-bold text-sm mb-2">Aggiungi Turno</h4>
-                                      <p className="text-xs text-slate-500 mb-4">{dip.cognome} {dip.nome} - {hour}</p>
+                                      <p className="text-xs text-muted-foreground mb-4">{dip.cognome} {dip.nome} - {hour}</p>
                                       
                                       <form onSubmit={(e) => {
   e.preventDefault();
@@ -1883,7 +1883,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 }}>
 <div className="space-y-3">
                                         <div>
-                                          <label className="text-xs font-semibold text-slate-600">Postazione</label>
+                                          <label className="text-xs font-semibold text-muted-foreground">Postazione</label>
                                           
 <select name="postazione" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" required>
   <option value="" disabled selected>Seleziona...</option>
@@ -1895,11 +1895,11 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                         </div>
                                         <div className="flex gap-2">
                                           <div className="w-1/2">
-                                            <label className="text-xs font-semibold text-slate-600">Inizio</label>
+                                            <label className="text-xs font-semibold text-muted-foreground">Inizio</label>
                                             <Input name="inizio" type="time" defaultValue={hour} />
                                           </div>
                                           <div className="w-1/2">
-                                            <label className="text-xs font-semibold text-slate-600">Fine</label>
+                                            <label className="text-xs font-semibold text-muted-foreground">Fine</label>
                                             <Input name="fine" type="time" defaultValue={(() => {
                                                const [hh, mm] = hour.split(':').map(Number);
                                                let d = hh * 60 + mm + 30;
@@ -1908,7 +1908,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                           </div>
                                         </div>
                                         <div>
-                                          <label className="text-xs font-semibold text-slate-600">Note</label>
+                                          <label className="text-xs font-semibold text-muted-foreground">Note</label>
                                           <Input name="note" placeholder="Opzionale..." />
                                         </div>
                                       </div>
@@ -1926,13 +1926,13 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                   ))}
                 </tbody>
 
-                <tfoot className="sticky bottom-0 z-20 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] bg-white border-t-2 border-slate-300">
+                <tfoot className="sticky bottom-0 z-20 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] bg-background border-t-2 border-border">
                   <tr>
-                    <td className="bg-slate-100 border-r border-slate-300 text-center text-[10px] font-extrabold text-slate-600 p-2 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 tracking-widest uppercase">
+                    <td className="bg-slate-100 border-r border-border text-center text-[10px] font-extrabold text-muted-foreground p-2 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 tracking-widest uppercase">
                       TOT ORE
                     </td>
                     {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
-                      <td key={`tot-${dip.id}`} className="text-center p-2 font-bold text-xs text-slate-600 border-r border-slate-200 bg-slate-50">
+                      <td key={`tot-${dip.id}`} className="text-center p-2 font-bold text-xs text-muted-foreground border-r border-border bg-muted">
                         {/* Mock calculation: in final version we sum duration of postazioni with conta_ore=1 */}
                         {(() => {
   const turniDip = Array.isArray(turniScheduled) ? turniScheduled.filter((t:any) => String(t.employeeId) === String(dip.id)) : [];
@@ -1961,16 +1961,16 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
             {/* GRIGLIA SETTIMANALE */}
             {turniViewMode === 'settimanale' && (
               <div className="flex-1 overflow-auto bg-slate-100/50 relative" style={{ maxHeight: '60vh' }}>
-                <table id="griglia-settimanale" className="w-full border-collapse min-w-max bg-white table-fixed">
-                  <thead className="sticky top-0 z-20 shadow-sm border-b border-slate-300">
+                <table id="griglia-settimanale" className="w-full border-collapse min-w-max bg-background table-fixed">
+                  <thead className="sticky top-0 z-20 shadow-sm border-b border-border">
                     <tr>
-                      <th className="w-40 min-w-40 bg-slate-50 border-r border-slate-300 p-2 text-left text-[11px] text-slate-500 font-bold uppercase tracking-widest shadow-[1px_0_0_rgba(200,200,200,0.5)] z-30">
+                      <th className="w-40 min-w-40 bg-muted border-r border-border p-2 text-left text-[11px] text-muted-foreground font-bold uppercase tracking-widest shadow-[1px_0_0_rgba(200,200,200,0.5)] z-30">
                         Dipendente
                       </th>
                       {[0,1,2,3,4,5,6].map(offset => {
                           const d = addDays(startOfWeek(turniDate, { weekStartsOn: 1 }), offset);
                           return (
-                             <th key={offset} className="w-32 bg-slate-50 border-r border-slate-300 p-2 text-center text-[10px] font-bold text-slate-700 uppercase">
+                             <th key={offset} className="w-32 bg-muted border-r border-border p-2 text-center text-[10px] font-bold text-foreground/80 uppercase">
                                  {format(d, 'EEEE dd/MM', { locale: it })}
                              </th>
                           );
@@ -1979,17 +1979,17 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {dipendenti.filter(d => !isSystemEmployee(d)).map((dip, idx) => (
-                        <tr key={dip.id} className={`hover:bg-slate-100 transition-colors border-b-2 border-slate-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
-                            <td className="p-2 border-r border-slate-200 font-semibold text-[11px] text-slate-700 sticky left-0 z-10 shadow-[1px_0_0_rgba(200,200,200,0.5)] truncate max-w-[160px] bg-inherit align-top">
+                        <tr key={dip.id} className={`hover:bg-slate-100 transition-colors border-b-2 border-border ${idx % 2 === 0 ? 'bg-background' : 'bg-muted/50'}`}>
+                            <td className="p-2 border-r border-border font-semibold text-[11px] text-foreground/80 sticky left-0 z-10 shadow-[1px_0_0_rgba(200,200,200,0.5)] truncate max-w-[160px] bg-inherit align-top">
                                <div className="sticky top-0">{dip.nome} {dip.cognome}</div>
                             </td>
                             {[0,1,2,3,4,5,6].map(offset => {
                                 const currentDate = format(addDays(startOfWeek(turniDate, { weekStartsOn: 1 }), offset), 'yyyy-MM-dd');
                                 const turniGiorno = Array.isArray(turniScheduled) ? turniScheduled.filter((t:any) => String(t.employeeId) === String(dip.id) && format(new Date(t.data), 'yyyy-MM-dd') === currentDate) : [];
-                                if (turniGiorno.length === 0) return <td key={offset} className="p-1 border-r border-slate-200 min-h-[40px]"></td>;
+                                if (turniGiorno.length === 0) return <td key={offset} className="p-1 border-r border-border min-h-[40px]"></td>;
                                 
                                 return (
-                                   <td key={offset} className="p-1 border-r border-slate-200 min-h-[40px] align-top">
+                                   <td key={offset} className="p-1 border-r border-border min-h-[40px] align-top">
                                       <div className="flex flex-col gap-1">
                                       {turniGiorno.map(t => {
                                           const postInfo = postazioniApi.find((p:any) => p.nome === t.postazione);
@@ -2019,21 +2019,21 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
         <TabsContent value="presenze">
           <div className="px-6 md:px-8 max-w-7xl mx-auto">
-          <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+          <Card className="border-border shadow-sm overflow-hidden bg-background">
             <CardContent className="p-0 sm:p-6 space-y-6">
               
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 p-4 lg:p-0">
                 <div>
-                  <h3 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-foreground">
                     <ClipboardList className="w-5 h-5 text-primary" /> Foglio Presenze
                   </h3>
-                  <p className="text-sm text-slate-500">Compilazione e verifica scostamenti orari.</p>
+                  <p className="text-sm text-muted-foreground">Compilazione e verifica scostamenti orari.</p>
                 </div>
 
                 <div className="flex items-center gap-4 w-full sm:w-auto">
                   {isFetchingPresenze && <span className="text-xs text-blue-500 font-bold animate-pulse">Aggiornamento...</span>}
                   <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-                    <SelectTrigger className="w-40 font-semibold bg-white border-slate-300 shadow-sm">
+                    <SelectTrigger className="w-40 font-semibold bg-background border-border shadow-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -2041,29 +2041,29 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                       <SelectItem value="05-2026">Maggio 2026</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button variant="outline" className="shadow-sm border-slate-300 bg-white">
+                  <Button variant="outline" className="shadow-sm border-border bg-background">
                     <Download className="w-4 h-4 mr-2" /> Esporta
                   </Button>
                 </div>
               </div>
 
               {isLoadingPresenze ? (
-                <div className="p-12 flex flex-col items-center border border-slate-200 rounded-xl bg-slate-50 space-y-4">
-                  <div className="animate-spin w-8 h-8 rounded-full border-4 border-slate-300 border-t-primary" />
-                  <span className="text-slate-500 font-semibold">Caricamento presenze mese {meseRaw}/{annoRaw}...</span>
+                <div className="p-12 flex flex-col items-center border border-border rounded-xl bg-muted space-y-4">
+                  <div className="animate-spin w-8 h-8 rounded-full border-4 border-border border-t-primary" />
+                  <span className="text-muted-foreground font-semibold">Caricamento presenze mese {meseRaw}/{annoRaw}...</span>
                 </div>
               ) : (
-                <div className="w-full border rounded-xl overflow-x-auto shadow-inner bg-slate-50 scrollbar-thin relative">
+                <div className="w-full border rounded-xl overflow-x-auto shadow-inner bg-muted scrollbar-thin relative">
                   <table className="w-full text-xs text-center border-collapse">
-                    <thead className="bg-slate-200 border-b border-slate-300 sticky top-0 z-10 text-[10px] text-slate-600 font-bold uppercase tracking-widest hidden sm:table-header-group">
+                    <thead className="bg-slate-200 border-b border-border sticky top-0 z-10 text-[10px] text-muted-foreground font-bold uppercase tracking-widest hidden sm:table-header-group">
                       <tr>
-                        <th className="sticky left-0 bg-slate-200 p-2 text-left min-w-[150px] border-r border-slate-300 shadow-[1px_0_0_0_#cbd5e1] z-20">Dipendente</th>
+                        <th className="sticky left-0 bg-slate-200 p-2 text-left min-w-[150px] border-r border-border shadow-[1px_0_0_0_#cbd5e1] z-20">Dipendente</th>
                         {Array.from({length: 30}, (_, i) => {
                           const day = i + 1;
                           const l = PR_DAYS[i];
                           const isWeekend = l === "S" || l === "D";
                           return (
-                            <th key={day} className={`p-1 border border-slate-300 w-[36px] min-w-[36px] max-w-[36px] ${isWeekend ? 'bg-slate-300 text-slate-500' : 'text-slate-700'}`}>
+                            <th key={day} className={`p-1 border border-border w-[36px] min-w-[36px] max-w-[36px] ${isWeekend ? 'bg-slate-300 text-muted-foreground' : 'text-foreground/80'}`}>
                               <div className="flex flex-col items-center">
                                 <span className="text-[11px] mb-0.5">{day}</span>
                                 <span className="text-[9px] opacity-70 font-medium">{l}</span>
@@ -2071,7 +2071,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                             </th>
                           );
                         })}
-                        <th className="p-2 border border-slate-300 bg-slate-800 text-white min-w-[50px] sticky right-0 shadow-[-1px_0_0_0_#1e293b] z-20">TOT</th>
+                        <th className="p-2 border border-border bg-slate-800 text-white min-w-[50px] sticky right-0 shadow-[-1px_0_0_0_#1e293b] z-20">TOT</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2085,8 +2085,8 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                         }
 
                         return (
-                          <tr key={dip.id} className="hover:bg-blue-50/40 relative group border-b border-slate-200">
-                            <td className="sticky left-0 bg-white border-r border-slate-200 p-2 text-left font-semibold text-slate-700 whitespace-nowrap shadow-[1px_0_0_0_#e2e8f0] z-10 group-hover:bg-blue-50/40 flex items-center justify-between">
+                          <tr key={dip.id} className="hover:bg-blue-50/40 relative group border-b border-border">
+                            <td className="sticky left-0 bg-background border-r border-border p-2 text-left font-semibold text-foreground/80 whitespace-nowrap shadow-[1px_0_0_0_#e2e8f0] z-10 group-hover:bg-blue-50/40 flex items-center justify-between">
                               <span>{dip.cognome} {dip.nome.charAt(0)}.</span>
                               <div className={`w-2 h-2 rounded-full ml-2 ${TEAM_COLORS[dip.team]?.split(' ')[0]}`} />
                             </td>
@@ -2097,10 +2097,10 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                               const val = presenzeData[dip.id]?.[day] || "";
                               const isEdited = presenzeEdited[dip.id]?.[day];
                               
-                              const badgeColor = PRESENZE_COLORS[val] || (val ? 'bg-white font-bold' : (isWeekend ? 'bg-slate-100' : 'bg-slate-50'));
+                              const badgeColor = PRESENZE_COLORS[val] || (val ? 'bg-background font-bold' : (isWeekend ? 'bg-slate-100' : 'bg-muted'));
 
                               return (
-                                <td key={day} className={`border border-slate-100 ${isWeekend ? 'bg-slate-100' : 'bg-white'}`}>
+                                <td key={day} className={`border border-slate-100 ${isWeekend ? 'bg-slate-100' : 'bg-background'}`}>
                                   <Popover>
                                     <PopoverTrigger asChild>
                                       <div className={`w-full h-8 flex items-center justify-center cursor-pointer relative hover:ring-1 hover:ring-inset hover:ring-blue-400 hover:z-10 transition-all ${badgeColor}`}>
@@ -2109,7 +2109,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                       </div>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-48 p-3 shadow-xl" align="center">
-                                      <h4 className="text-xs font-bold text-slate-500 mb-2 uppercase">{dip.nome} — Giorno {day} ({l})</h4>
+                                      <h4 className="text-xs font-bold text-muted-foreground mb-2 uppercase">{dip.nome} — Giorno {day} ({l})</h4>
                                       <div className="grid grid-cols-3 gap-1.5 mb-3">
                                         <Button variant="outline" size="sm" className="h-7 text-[10px] bg-sky-50 hover:bg-sky-100" onClick={() => updatePresenza(dip.id, day, 'FE')}>FE</Button>
                                         <Button variant="outline" size="sm" className="h-7 text-[10px] bg-yellow-50 hover:bg-yellow-100" onClick={() => updatePresenza(dip.id, day, 'PE')}>PE</Button>
@@ -2133,7 +2133,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                 </td>
                               );
                             })}
-                            <td className="sticky right-0 bg-slate-50 border-l border-slate-300 font-bold p-1 shadow-[-1px_0_0_0_#cbd5e1] z-10 text-slate-800 tabular-nums">
+                            <td className="sticky right-0 bg-muted border-l border-border font-bold p-1 shadow-[-1px_0_0_0_#cbd5e1] z-10 text-foreground tabular-nums">
                               {tot > 0 ? fmtOre(tot) : "-"}
                             </td>
                           </tr>
@@ -2191,20 +2191,20 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
         <TabsContent value="diario">
           <div className="px-6 md:px-8 max-w-7xl mx-auto">
-          <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+          <Card className="border-border shadow-sm overflow-hidden bg-background">
             <CardContent className="p-0 sm:p-6 space-y-6">
               
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 p-4 lg:p-0">
                 <div>
-                  <h3 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-foreground">
                     <PenTool className="w-5 h-5 text-primary" /> Diario Orario
                   </h3>
-                  <p className="text-sm text-slate-500">Log operatività e mansioni giornaliere.</p>
+                  <p className="text-sm text-muted-foreground">Log operatività e mansioni giornaliere.</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                   <Select defaultValue="oggi">
-                    <SelectTrigger className="w-full sm:w-32 font-semibold bg-white border-slate-300 shadow-sm">
+                    <SelectTrigger className="w-full sm:w-32 font-semibold bg-background border-border shadow-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -2213,7 +2213,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     </SelectContent>
                   </Select>
                   <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                    <SelectTrigger className="w-full sm:w-48 font-semibold bg-white border-slate-300 shadow-sm">
+                    <SelectTrigger className="w-full sm:w-48 font-semibold bg-background border-border shadow-sm">
                       <SelectValue placeholder="Dipendente" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2225,9 +2225,9 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                 </div>
               </div>
 
-              <div className="w-full border rounded-xl shadow-inner bg-slate-50 overflow-x-auto scrollbar-thin">
+              <div className="w-full border rounded-xl shadow-inner bg-muted overflow-x-auto scrollbar-thin">
                 <table className="w-full text-left text-sm whitespace-nowrap border-collapse min-w-[700px]">
-                  <thead className="bg-slate-200 border-b border-slate-300 text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <thead className="bg-slate-200 border-b border-border text-xs font-semibold text-foreground/80 uppercase tracking-wider">
                     <tr>
                       <th className="p-3 w-40">Fascia Oraria</th>
                       <th className="p-3 w-40">Postazione</th>
@@ -2237,47 +2237,47 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                       <th className="p-3 w-20 text-center">Visto</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
+                  <tbody className="divide-y divide-slate-100 bg-background">
                     {/* Mocked Rows for UI Prototyping */}
-                    <tr className="hover:bg-slate-50 transition-colors group">
-                      <td className="p-3 text-slate-600 font-medium tracking-tight">08:30 – 09:30</td>
+                    <tr className="hover:bg-muted transition-colors group">
+                      <td className="p-3 text-muted-foreground font-medium tracking-tight">08:30 – 09:30</td>
                       <td className="p-3"><Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200 font-bold">RECEPTION</Badge></td>
-                      <td className="p-3 text-slate-600 truncate max-w-[200px] sm:max-w-xs">Accoglienza front desk / incassi</td>
-                      <td className="p-3 text-center text-slate-600 font-bold">12</td>
-                      <td className="p-3 text-center font-bold text-slate-800">60</td>
+                      <td className="p-3 text-muted-foreground truncate max-w-[200px] sm:max-w-xs">Accoglienza front desk / incassi</td>
+                      <td className="p-3 text-center text-muted-foreground font-bold">12</td>
+                      <td className="p-3 text-center font-bold text-foreground">60</td>
                       <td className="p-3 text-center">
-                        <input type="checkbox" defaultChecked={true} className="w-5 h-5 accent-primary cursor-pointer rounded border-slate-300 pointer-events-none" />
+                        <input type="checkbox" defaultChecked={true} className="w-5 h-5 accent-primary cursor-pointer rounded border-border pointer-events-none" />
                       </td>
                     </tr>
-                    <tr className="hover:bg-slate-50 transition-colors group">
-                      <td className="p-3 text-slate-600 font-medium tracking-tight">09:30 – 10:30</td>
+                    <tr className="hover:bg-muted transition-colors group">
+                      <td className="p-3 text-muted-foreground font-medium tracking-tight">09:30 – 10:30</td>
                       <td className="p-3"><Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 font-bold">UFFICIO</Badge></td>
-                      <td className="p-3 text-slate-600 truncate max-w-[200px] sm:max-w-xs">Data entry anagrafiche / chiamate back</td>
-                      <td className="p-3 text-center text-slate-600 font-bold">5</td>
-                      <td className="p-3 text-center font-bold text-slate-800">60</td>
+                      <td className="p-3 text-muted-foreground truncate max-w-[200px] sm:max-w-xs">Data entry anagrafiche / chiamate back</td>
+                      <td className="p-3 text-center text-muted-foreground font-bold">5</td>
+                      <td className="p-3 text-center font-bold text-foreground">60</td>
                       <td className="p-3 text-center">
-                        <input type="checkbox" defaultChecked={true} className="w-5 h-5 accent-primary cursor-pointer rounded border-slate-300 pointer-events-none" />
+                        <input type="checkbox" defaultChecked={true} className="w-5 h-5 accent-primary cursor-pointer rounded border-border pointer-events-none" />
                       </td>
                     </tr>
-                    <tr className="hover:bg-slate-50 transition-colors group">
-                      <td className="p-3 text-slate-600 font-medium tracking-tight">10:30 – 11:30</td>
+                    <tr className="hover:bg-muted transition-colors group">
+                      <td className="p-3 text-muted-foreground font-medium tracking-tight">10:30 – 11:30</td>
                       <td className="p-3"><Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200 font-bold">RECEPTION</Badge></td>
-                      <td className="p-3 text-slate-600 truncate max-w-[200px] sm:max-w-xs">Supporto cassa / assistenza iscritti</td>
-                      <td className="p-3 text-center text-slate-600 font-bold">—</td>
-                      <td className="p-3 text-center font-bold text-slate-800">60</td>
+                      <td className="p-3 text-muted-foreground truncate max-w-[200px] sm:max-w-xs">Supporto cassa / assistenza iscritti</td>
+                      <td className="p-3 text-center text-muted-foreground font-bold">—</td>
+                      <td className="p-3 text-center font-bold text-foreground">60</td>
                       <td className="p-3 text-center">
-                        <input type="checkbox" defaultChecked={false} className="w-5 h-5 border-slate-300 pointer-events-none" />
+                        <input type="checkbox" defaultChecked={false} className="w-5 h-5 border-border pointer-events-none" />
                       </td>
                     </tr>
 
                     {/* Inline Form Mock per Aggiunta */}
-                    <tr className="bg-slate-100 border-t-2 border-slate-200">
+                    <tr className="bg-slate-100 border-t-2 border-border">
                       <td className="p-2">
-                        <Input placeholder="Ora..." defaultValue="11:30 - 12:30" className="h-8 text-xs bg-white" />
+                        <Input placeholder="Ora..." defaultValue="11:30 - 12:30" className="h-8 text-xs bg-background" />
                       </td>
                       <td className="p-2">
                         <Select defaultValue="AMM">
-                          <SelectTrigger className="h-8 text-[11px] bg-white font-bold text-slate-600 border-dashed">
+                          <SelectTrigger className="h-8 text-[11px] bg-background font-bold text-muted-foreground border-dashed">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -2288,13 +2288,13 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                         </Select>
                       </td>
                       <td className="p-2">
-                        <Input placeholder="Es: Fatturazione passive..." className="h-8 text-xs bg-white" />
+                        <Input placeholder="Es: Fatturazione passive..." className="h-8 text-xs bg-background" />
                       </td>
                       <td className="p-2">
-                        <Input type="number" placeholder="Qta" className="h-8 text-xs bg-white text-center w-full min-w-[50px]" />
+                        <Input type="number" placeholder="Qta" className="h-8 text-xs bg-background text-center w-full min-w-[50px]" />
                       </td>
                       <td className="p-2">
-                        <Input type="number" placeholder="Min" defaultValue={60} className="h-8 text-xs font-bold text-center bg-white w-full min-w-[60px]" />
+                        <Input type="number" placeholder="Min" defaultValue={60} className="h-8 text-xs font-bold text-center bg-background w-full min-w-[60px]" />
                       </td>
                       <td className="p-2 text-center">
                         <Button size="sm" className="h-8 w-full gap-1 font-bold text-[11px]">
@@ -2320,22 +2320,22 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
         <TabsContent value="report">
           <div className="px-6 md:px-8 max-w-7xl mx-auto">
-          <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+          <Card className="border-border shadow-sm overflow-hidden bg-background">
             <CardContent className="p-0 sm:p-6 space-y-6">
               
               {/* Header Report */}
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 p-4 lg:p-0">
                 <div>
-                  <h3 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-foreground">
                     <ClipboardList className="w-5 h-5 text-primary" /> Report Mensile
                     {reportLocked && <Badge variant="destructive" className="ml-2 font-bold tracking-widest"><ShieldCheck className="w-3 h-3 mr-1"/> BLOCCATO</Badge>}
                   </h3>
-                  <p className="text-sm text-slate-500">Riepilogo ore, giorni lavorati e causali mensili.</p>
+                  <p className="text-sm text-muted-foreground">Riepilogo ore, giorni lavorati e causali mensili.</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
                   <Select value={reportSelectedMonthYear} onValueChange={setReportSelectedMonthYear}>
-                    <SelectTrigger className="w-40 font-semibold bg-white border-slate-300">
+                    <SelectTrigger className="w-40 font-semibold bg-background border-border">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -2378,7 +2378,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Sei sicuro di voler bloccare il mese?</AlertDialogTitle>
-                          <AlertDialogDescription className="text-slate-600">
+                          <AlertDialogDescription className="text-muted-foreground">
                             Attenzione: dopo il blocco il mese non sarà più modificabile e i totali verranno congelati per le buste paga.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
@@ -2393,7 +2393,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
               </div>
 
               {/* Tabella Risultati */}
-              <div className="w-full border rounded-xl shadow-inner bg-slate-50 overflow-x-auto min-h-[300px]">
+              <div className="w-full border rounded-xl shadow-inner bg-muted overflow-x-auto min-h-[300px]">
                 {reportData.length === 0 ? (
                   <div className="flex flex-col items-center justify-center p-12 text-slate-400 h-full">
                     <PieChart className="w-12 h-12 mb-4 opacity-20" />
@@ -2402,7 +2402,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                   </div>
                 ) : (
                   <table className="w-full text-left text-sm whitespace-nowrap border-collapse min-w-[700px]">
-                    <thead className="bg-slate-200 border-b border-slate-300 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                    <thead className="bg-slate-200 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                       <tr>
                         <th className="p-3 pl-4">Dipendente / Team</th>
                         <th className="p-3 text-center w-20">Ore Tot</th>
@@ -2414,12 +2414,12 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                         <th className="p-3 text-center w-16 text-red-700">AI</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
+                    <tbody className="divide-y divide-slate-100 bg-background">
                       {reportData.map((row: any) => (
-                        <tr key={row.employee_id} className="hover:bg-slate-50 transition-colors">
-                          <td className="p-3 pl-4 font-bold text-slate-800">{row.lastName} {row.firstName}</td>
-                          <td className="p-3 text-center font-black text-slate-700 text-lg">{fmtOre(row.ore_totali)}</td>
-                          <td className="p-3 text-center font-bold text-slate-500">{row.giorni_lavorati}</td>
+                        <tr key={row.employee_id} className="hover:bg-muted transition-colors">
+                          <td className="p-3 pl-4 font-bold text-foreground">{row.lastName} {row.firstName}</td>
+                          <td className="p-3 text-center font-black text-foreground/80 text-lg">{fmtOre(row.ore_totali)}</td>
+                          <td className="p-3 text-center font-bold text-muted-foreground">{row.giorni_lavorati}</td>
                           <td className="p-3 text-center text-sky-600 font-semibold">{row.cnt_FE || 0}</td>
                           <td className="p-3 text-center text-yellow-600 font-semibold">{row.cnt_PE || 0}</td>
                           <td className="p-3 text-center text-orange-600 font-semibold">{row.cnt_ML || 0}</td>

@@ -141,10 +141,10 @@ export default function GestioneNote() {
     };
 
     return (
-        <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 bg-slate-50/50 min-h-full">
+        <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 bg-muted/50 min-h-full">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                    <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
                         <StickyNote 
                             className="w-8 h-8" 
                             style={{ 
@@ -181,9 +181,9 @@ export default function GestioneNote() {
                         </DialogHeader>
                         <div className="flex flex-col gap-4 py-4">
                             <div className="space-y-2">
-                                <label className="text-xs font-semibold text-slate-500 uppercase">Sezione / Pagina Bersaglio</label>
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Sezione / Pagina Bersaglio</label>
                                 <Select value={newTargetUrl} onValueChange={setNewTargetUrl}>
-                                    <SelectTrigger className="w-full bg-slate-50 border-slate-200">
+                                    <SelectTrigger className="w-full bg-muted border-border">
                                         <div className="flex items-center gap-2">
                                             <MousePointerSquareDashed className="w-4 h-4 text-slate-400" />
                                             <SelectValue placeholder="Scegli la pagina..." />
@@ -206,7 +206,7 @@ export default function GestioneNote() {
                             
                             <div className="flex gap-3">
                                 <div className="space-y-2 flex-1">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase">Titolo (Opzionale)</label>
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Titolo (Opzionale)</label>
                                     <Input 
                                         placeholder="Titolo breve..." 
                                         value={newTitle}
@@ -214,7 +214,7 @@ export default function GestioneNote() {
                                     />
                                 </div>
                                 <div className="space-y-2 w-1/3">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase">Tipologia</label>
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Tipologia</label>
                                     <Select value={newCategory} onValueChange={setNewCategory}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>
@@ -229,7 +229,7 @@ export default function GestioneNote() {
                             </div>
                             
                             <div className="space-y-2">
-                                <label className="text-xs font-semibold text-slate-500 uppercase">Corpo della Nota</label>
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Corpo della Nota</label>
                                 <Textarea 
                                     className="min-h-[120px] resize-none"
                                     placeholder="Scrivi qui il contenuto della nota..."
@@ -252,7 +252,7 @@ export default function GestioneNote() {
             </div>
 
             <Card className="border-none shadow-xl shadow-slate-200/50">
-                <CardHeader className="bg-white border-b px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <CardHeader className="bg-background border-b px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <Tabs value={filterStatus} onValueChange={(v: any) => setFilterStatus(v)} className="w-[300px]">
                             <TabsList className="grid w-full grid-cols-3">
@@ -267,29 +267,29 @@ export default function GestioneNote() {
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Cerca nelle note..."
-                            className="pl-8 bg-slate-50 border-slate-200"
+                            className="pl-8 bg-muted border-border"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                 </CardHeader>
                 
-                <CardContent className="p-0 bg-white">
+                <CardContent className="p-0 bg-background">
                     {(loadingActive || loadingArchived) ? (
                         <div className="flex items-center justify-center h-64 text-slate-400 gap-2">
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-500" />
                             Caricamento storico...
                         </div>
                     ) : filteredNotes.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-center text-slate-500">
+                        <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
                             <Archive className="w-12 h-12 text-slate-200 mb-4" />
-                            <h3 className="text-lg font-medium text-slate-900 mb-1">Nessuna nota trovata</h3>
+                            <h3 className="text-lg font-medium text-foreground mb-1">Nessuna nota trovata</h3>
                             <p className="text-sm">Non ci sono note che corrispondono ai filtri selezionati.</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <Table>
-                                <TableHeader className="bg-slate-50/50">
+                                <TableHeader className="bg-muted/50">
                                     <TableRow>
                                         <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort} className="w-[100px]">Stato</SortableTableHead>
                                         <SortableTableHead sortKey="date" currentSort={sortConfig} onSort={handleSort} className="w-[150px]">Data</SortableTableHead>
@@ -309,12 +309,12 @@ export default function GestioneNote() {
                                                         <CheckCircle className="w-3 h-3 mr-1" /> Attiva
                                                     </Badge>
                                                 ) : (
-                                                    <Badge variant="outline" className="bg-slate-100 text-slate-500 border-slate-200">
+                                                    <Badge variant="outline" className="bg-slate-100 text-muted-foreground border-border">
                                                         <Archive className="w-3 h-3 mr-1" /> Chiusa
                                                     </Badge>
                                                 )}
                                             </TableCell>
-                                            <TableCell className={cn("text-xs text-slate-500 font-medium", isSortedColumn("date") && "sorted-column-cell")}>
+                                            <TableCell className={cn("text-xs text-muted-foreground font-medium", isSortedColumn("date") && "sorted-column-cell")}>
                                                 <div className="flex flex-col gap-1">
                                                     <div className="flex items-center gap-1" title="Data di creazione">
                                                         <Clock className="w-3 h-3 text-slate-400" />
@@ -341,14 +341,14 @@ export default function GestioneNote() {
                                                             </span>
                                                         </div>
                                                     )}
-                                                    <p className="text-sm font-medium text-slate-800 whitespace-pre-wrap leading-snug">
+                                                    <p className="text-sm font-medium text-foreground whitespace-pre-wrap leading-snug">
                                                         {note.content}
                                                     </p>
                                                 </div>
                                             </TableCell>
                                             <TableCell className={cn(isSortedColumn("section") && "sorted-column-cell")}>
                                                 <Link href={note.targetUrl || "/"} className="hover:opacity-80 transition-opacity">
-                                                    <Badge variant="secondary" className="bg-slate-100/80 text-slate-600 text-[10px] font-mono border-slate-200 cursor-pointer hover:bg-amber-100 hover:text-amber-800" title={`Vai a: ${note.targetUrl || "/"}`}>
+                                                    <Badge variant="secondary" className="bg-slate-100/80 text-muted-foreground text-[10px] font-mono border-border cursor-pointer hover:bg-amber-100 hover:text-amber-800" title={`Vai a: ${note.targetUrl || "/"}`}>
                                                         {TARGET_PAGES.find(p => p.value === note.targetUrl)?.label || note.targetUrl || "Generale"}
                                                     </Badge>
                                                 </Link>
@@ -356,7 +356,7 @@ export default function GestioneNote() {
                                             <TableCell className={cn(isSortedColumn("deletedBy") && "sorted-column-cell")}>
                                                 {note.status === "archived" && note.deletedBy && (
                                                     <div className="flex flex-col gap-0.5">
-                                                        <span className="text-xs font-bold text-slate-500 uppercase">{note.deletedBy}</span> 
+                                                        <span className="text-xs font-bold text-muted-foreground uppercase">{note.deletedBy}</span> 
                                                         {note.deletedAt && <span className="text-[10px] text-slate-400">{format(new Date(note.deletedAt), "dd/MM/yyyy HH:mm")}</span>}
                                                     </div>
                                                 )}

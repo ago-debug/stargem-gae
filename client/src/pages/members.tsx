@@ -815,13 +815,13 @@ export default function Members() {
             <Users className="w-8 h-8 text-primary drop-shadow-sm" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-1">Anagrafica Generale</h1>
-            <p className="text-sm font-medium text-slate-500">Gestisci partecipanti, staff e team con ricerca avanzata e filtri multidimensionali</p>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-1">Anagrafica Generale</h1>
+            <p className="text-sm font-medium text-muted-foreground">Gestisci partecipanti, staff e team con ricerca avanzata e filtri multidimensionali</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap relative z-10">
           <div className="flex items-center gap-2 mr-2">
-            <Label className="text-sm text-slate-500 hidden sm:block">Per pagina:</Label>
+            <Label className="text-sm text-muted-foreground hidden sm:block">Per pagina:</Label>
             <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
               <SelectTrigger className="w-[80px] h-9">
                 <SelectValue placeholder="50" />
@@ -837,7 +837,7 @@ export default function Members() {
             variant="outline"
             onClick={() => setLocation("/importa")}
             data-testid="button-import-csv"
-            className="bg-white"
+            className="bg-background"
           >
             <Download className="w-4 h-4 mr-2 sidebar-icon-gold" />
             Importa CSV
@@ -1201,12 +1201,12 @@ export default function Members() {
               ))}
             </div>
           ) : members.length === 0 ? (
-            <div className="text-center py-16 px-4 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl animate-in fade-in zoom-in-95 duration-500 m-4 flex flex-col items-center justify-center">
+            <div className="text-center py-16 px-4 bg-muted/50 border border-dashed border-border rounded-2xl animate-in fade-in zoom-in-95 duration-500 m-4 flex flex-col items-center justify-center">
               <div className="bg-primary/5 p-4 rounded-full mb-4 ring-1 ring-primary/10 shadow-sm">
                 <Users className="w-10 h-10 text-primary/60" />
               </div>
-              <p className="text-xl font-bold tracking-tight text-slate-800 mb-1">Nessun iscritto trovato</p>
-              <p className="text-sm text-slate-500 max-w-[280px]">Nessun risultato combacia con la tua ricerca attuale. Modifica i filtri o crea una nuova anagrafica.</p>
+              <p className="text-xl font-bold tracking-tight text-foreground mb-1">Nessun iscritto trovato</p>
+              <p className="text-sm text-muted-foreground max-w-[280px]">Nessun risultato combacia con la tua ricerca attuale. Modifica i filtri o crea una nuova anagrafica.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -1380,7 +1380,7 @@ export default function Members() {
                             <Badge className={
                               member.crmProfileLevel === 'PLATINUM' ? 'bg-slate-900 border-slate-900 text-white' : 
                               member.crmProfileLevel === 'GOLD' ? 'bg-amber-500 border-amber-500 text-white' : 
-                              'bg-slate-200 border-slate-300 text-slate-700 hover:bg-slate-300'
+                              'bg-slate-200 border-border text-foreground/80 hover:bg-slate-300'
                             }>
                               {member.crmProfileLevel}
                             </Badge>

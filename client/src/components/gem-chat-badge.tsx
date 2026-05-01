@@ -83,15 +83,15 @@ export function GemChatBadge() {
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="member" className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-slate-50 border border-dashed rounded-lg">
+            <TabsContent value="member" className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-muted border border-dashed rounded-lg">
               <MessageCircle className="w-12 h-12 text-slate-300 mb-4" />
-              <p className="text-sm font-semibold text-slate-600 mb-1">Nessun messaggio recente</p>
+              <p className="text-sm font-semibold text-muted-foreground mb-1">Nessun messaggio recente</p>
               <p className="text-xs text-muted-foreground">La lista delle chat coi soci prenderà vita qui nel protocollo F2-011.</p>
             </TabsContent>
 
-            <TabsContent value="staff" className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-slate-50 border border-dashed rounded-lg">
+            <TabsContent value="staff" className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-muted border border-dashed rounded-lg">
               <Briefcase className="w-12 h-12 text-slate-300 mb-4" />
-              <p className="text-sm font-semibold text-slate-600 mb-1">Centro Comunicazioni Team</p>
+              <p className="text-sm font-semibold text-muted-foreground mb-1">Centro Comunicazioni Team</p>
               <p className="text-xs text-muted-foreground">Integrazione in arrivo per le chat dirette con gli insegnanti e i dipendenti.</p>
             </TabsContent>
           </Tabs>

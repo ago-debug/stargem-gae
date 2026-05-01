@@ -1021,7 +1021,7 @@ export default function MascheraInputGenerale(props?: any) {
             return (
               <div key={e.id} className="grid grid-cols-[140px_180px_240px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
                 <div className="font-bold text-sm truncate" title={assoc?.name}>{assoc?.name || 'Attività non trovata'}</div>
-                <div className="font-medium text-[11px] text-slate-900 truncate" title={assoc?.sku || undefined}>{assoc?.sku}</div>
+                <div className="font-medium text-[11px] text-foreground truncate" title={assoc?.sku || undefined}>{assoc?.sku}</div>
                 <div className="text-xs text-muted-foreground flex items-center gap-2 truncate">
                   <span>Registrata il: {new Date(e.enrollmentDate || e.createdAt || new Date()).toLocaleDateString('it-IT')}</span>
                 </div>
@@ -1946,17 +1946,17 @@ export default function MascheraInputGenerale(props?: any) {
                 <Users className="w-6 h-6 text-primary drop-shadow-sm" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Maschera Input Generale</h1>
-                <p className="text-xs sm:text-sm text-slate-500 font-medium">Motore di registrazione e ricerca iscritti</p>
+                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">Maschera Input Generale</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">Motore di registrazione e ricerca iscritti</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
 
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-white" data-testid="button-pulisci" onClick={handleReset}>
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-pulisci" onClick={handleReset}>
                 <RotateCcw className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Pulisci
               </Button>
-              <Button variant="outline" size="sm" className="text-xs h-8 bg-white" data-testid="button-importa" onClick={handleImport}>
+              <Button variant="outline" size="sm" className="text-xs h-8 bg-background" data-testid="button-importa" onClick={handleImport}>
                 <Download className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 Importa
               </Button>
@@ -2011,7 +2011,7 @@ export default function MascheraInputGenerale(props?: any) {
               <Button
                 variant="outline"
                 size="sm"
-                className={`text-xs h-8 ${Object.keys(dirtyFields).length > 0 && isFormValid ? 'gold-3d-button' : 'bg-white'} `}
+                className={`text-xs h-8 ${Object.keys(dirtyFields).length > 0 && isFormValid ? 'gold-3d-button' : 'bg-background'} `}
                 data-testid="button-salva"
                 disabled={!isFormValid || saveMutation.isPending || Object.keys(dirtyFields).length === 0 || hasConflicts}
                 title={hasConflicts ? "Risolvi i conflitti prima di salvare" : (!isFormValid ? (hasOrphanPayments ? "Errore: Ci sono pagamenti orfani (senza attività). Correggi prima di salvare." : "Compila tutti i campi obbligatori (*) per salvare") : Object.keys(dirtyFields).length === 0 ? "Nessuna modifica da salvare" : "")}
@@ -2052,7 +2052,7 @@ export default function MascheraInputGenerale(props?: any) {
             />
             {/* Search Results Dropdown */}
             {showResults && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
                 {searchResults.length > 0 ? (
                   searchResults.map((member) => (
                     <div
@@ -2087,7 +2087,7 @@ export default function MascheraInputGenerale(props?: any) {
                 variant="outline"
                 size="sm"
                 onClick={() => scrollToSection(item.id)}
-                className="text-xs h-8 bg-white relative"
+                className="text-xs h-8 bg-background relative"
                 data-testid={`nav - ${item.id} `}
               >
                 <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
@@ -3469,7 +3469,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 bg-white dark:bg-transparent"
+                    className="h-8 bg-background dark:bg-transparent"
                     onClick={(e) => { e.preventDefault(); recalculateCrmMutation.mutate(); }}
                     disabled={recalculateCrmMutation.isPending}
                     title="Ricalcola Scoring"
@@ -3480,7 +3480,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 bg-white dark:bg-transparent border-amber-300 hover:bg-amber-100"
+                    className="h-8 bg-background dark:bg-transparent border-amber-300 hover:bg-amber-100"
                     onClick={(e) => { e.preventDefault(); handleOpenCrmOverride(); }}
                     title="Impostazioni Manuali"
                   >
@@ -3501,7 +3501,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button type="button" size="icon" variant="ghost" className="h-4 w-4">
-                        <Edit className="w-3 h-3 text-slate-500" />
+                        <Edit className="w-3 h-3 text-muted-foreground" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start" onInteractOutside={(e) => e.stopPropagation()}>
@@ -3516,7 +3516,7 @@ export default function MascheraInputGenerale(props?: any) {
                   options={canaliAcquisizione.map((c: string) => ({ value: c, label: c }))}
                   placeholder="Seleziona o cerca..."
                   emptyText="Nessun canale trovato"
-                  className={`bg-white dark:bg-transparent ${getInputClassName("daDoveArriva", false)}`}
+                  className={`bg-background dark:bg-transparent ${getInputClassName("daDoveArriva", false)}`}
                   onQuickAdd={(v) => quickAddCanale.mutate(v)}
                   isQuickAddPending={quickAddCanale.isPending}
                 />
@@ -3535,8 +3535,8 @@ export default function MascheraInputGenerale(props?: any) {
                               <Info className="w-3.5 h-3.5 text-muted-foreground" />
                             </div>
                           </TooltipTrigger>
-                          <TooltipContent className="max-w-[280px] bg-white dark:bg-slate-900 border-amber-200">
-                            <p className="text-xs text-slate-600 dark:text-slate-300">
+                          <TooltipContent className="max-w-[280px] bg-background dark:bg-slate-900 border-amber-200">
+                            <p className="text-xs text-muted-foreground dark:text-slate-300">
                               Il livello marketing viene assegnato automaticamente in base a spesa, continuità, numero di attività e recente partecipazione. Il modello può essere aggiornato nel tempo per migliorare la classificazione.
                               <br/><br/>
                               Fattori considerati (Score 0-100):
@@ -3561,7 +3561,7 @@ export default function MascheraInputGenerale(props?: any) {
                           currentMember.crmProfileLevel === 'DIAMOND' ? 'bg-cyan-500 border-cyan-500 text-white w-[110px] h-7 text-sm flex justify-center shadow-sm shadow-cyan-200/50' :
                           currentMember.crmProfileLevel === 'PLATINUM' ? 'bg-slate-900 border-slate-900 text-white w-[110px] h-7 text-sm flex justify-center' : 
                           currentMember.crmProfileLevel === 'GOLD' ? 'bg-amber-500 border-amber-500 text-white w-[110px] h-7 text-sm flex justify-center' : 
-                          'bg-slate-200 border-slate-300 text-slate-700 hover:bg-slate-300 w-[110px] h-7 text-sm flex justify-center'
+                          'bg-slate-200 border-border text-foreground/80 hover:bg-slate-300 w-[110px] h-7 text-sm flex justify-center'
                         }>
                           {currentMember.crmProfileLevel}
                         </Badge>
@@ -3587,13 +3587,13 @@ export default function MascheraInputGenerale(props?: any) {
                         </Badge>
                       )}
                     </Label>
-                    <div className="bg-white/50 dark:bg-black/20 p-2.5 rounded-md border border-amber-200/50 min-h-[40px] flex items-center text-sm text-muted-foreground break-words italic">
+                    <div className="bg-background/50 dark:bg-black/20 p-2.5 rounded-md border border-amber-200/50 min-h-[40px] flex items-center text-sm text-muted-foreground break-words italic">
                       {currentMember?.crmProfileReason || "Nessun ricalcolo effettuato di recente."}
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="col-span-3 flex items-center justify-center p-4 border border-dashed border-amber-300 rounded-md bg-white/30 text-amber-800/60 text-sm">
+                <div className="col-span-3 flex items-center justify-center p-4 border border-dashed border-amber-300 rounded-md bg-background/30 text-amber-800/60 text-sm">
                   Salva o seleziona un partecipante per attivare il calcolo CRM.
                 </div>
               )}
@@ -4124,7 +4124,7 @@ export default function MascheraInputGenerale(props?: any) {
                             </div>
 
                             {/* Codice Corso (SKU) */}
-                            <div className="font-medium text-[11px] text-slate-900 truncate" title={course?.sku || undefined}>
+                            <div className="font-medium text-[11px] text-foreground truncate" title={course?.sku || undefined}>
                               {course?.sku}
                             </div>
 
@@ -4399,7 +4399,7 @@ export default function MascheraInputGenerale(props?: any) {
           <div className="bg-amber-50 dark:bg-amber-900/10 p-3 rounded-md border border-amber-200/50 flex flex-col sm:flex-row justify-between sm:items-center gap-2 mt-4 text-sm">
             <span className="text-amber-800 dark:text-amber-200 font-medium whitespace-nowrap">Stato attuale a sistema:</span>
             <div className="flex gap-4">
-              <span className="text-slate-700 dark:text-slate-300"><span className="font-semibold">{currentMember?.crmProfileLevel && currentMember.crmProfileLevel !== "NONE" ? currentMember.crmProfileLevel : "Nessuno"}</span></span>
+              <span className="text-foreground/80 dark:text-slate-300"><span className="font-semibold">{currentMember?.crmProfileLevel && currentMember.crmProfileLevel !== "NONE" ? currentMember.crmProfileLevel : "Nessuno"}</span></span>
               <span className="text-amber-700 dark:text-amber-400 font-bold">{currentMember?.crmProfileScore || 0} pts</span>
             </div>
           </div>

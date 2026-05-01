@@ -184,9 +184,9 @@ export default function Dashboard() {
                               </CollapsibleTrigger>
                               <CollapsibleContent className="space-y-2 mt-2">
                                 {otherRevenues.map((rm, idx) => (
-                                  <div key={idx} className="flex items-center justify-between text-sm p-1.5 rounded bg-white border border-emerald-50">
+                                  <div key={idx} className="flex items-center justify-between text-sm p-1.5 rounded bg-background border border-emerald-50">
                                     <div className="flex flex-col">
-                                      <span className="font-semibold text-slate-700">{rm.name}</span>
+                                      <span className="font-semibold text-foreground/80">{rm.name}</span>
                                       <span className="text-[10px] text-muted-foreground">{rm.count} operazioni</span>
                                     </div>
                                     <span className="font-bold text-emerald-600">€{rm.amount.toFixed(2)}</span>
@@ -306,8 +306,8 @@ export default function Dashboard() {
                 ) : (
                   <ul className="space-y-3 mt-2">
                     {pendingEnrollments.map((e: any) => (
-                      <li key={e.id} className="flex flex-col sm:flex-row sm:items-center justify-between text-sm bg-white p-3 rounded-md border border-amber-100 shadow-sm gap-3">
-                        <span className="font-semibold text-slate-800 uppercase">{e.memberName}</span>
+                      <li key={e.id} className="flex flex-col sm:flex-row sm:items-center justify-between text-sm bg-background p-3 rounded-md border border-amber-100 shadow-sm gap-3">
+                        <span className="font-semibold text-foreground uppercase">{e.memberName}</span>
                         <div className="flex items-center flex-wrap gap-2">
                           {e.pendingMedicalCert &&
                             <Badge variant="outline" className="text-amber-700 bg-amber-100 border-amber-300">
@@ -338,7 +338,7 @@ export default function Dashboard() {
 
       {/* Alert Operativi Didattici (Sostituisce Attività Recente) */}
       <div>
-        <h2 className="text-xl font-semibold mb-4 text-slate-800">Alert Operativi Didattici</h2>
+        <h2 className="text-xl font-semibold mb-4 text-foreground">Alert Operativi Didattici</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {alertsLoading ? (
             <>
@@ -363,7 +363,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <span className="text-3xl font-bold text-slate-700">{alerts?.expiringCourses ?? 0}</span>
+                    <span className="text-3xl font-bold text-foreground/80">{alerts?.expiringCourses ?? 0}</span>
                     <Button
                       variant="outline"
                       size="sm"
@@ -383,7 +383,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <span className="text-3xl font-bold text-slate-700">{alerts?.expiringWorkshops ?? 0}</span>
+                    <span className="text-3xl font-bold text-foreground/80">{alerts?.expiringWorkshops ?? 0}</span>
                     <Button
                       variant="outline"
                       size="sm"
@@ -420,12 +420,12 @@ export default function Dashboard() {
               ))}
             </div>
           ) : !recentActivity || recentActivity.length === 0 ? (
-            <div className="text-center py-10 px-4 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl animate-in fade-in zoom-in-95 mt-4">
+            <div className="text-center py-10 px-4 bg-muted/50 border border-dashed border-border rounded-2xl animate-in fade-in zoom-in-95 mt-4">
               <div className="bg-primary/5 w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-3 ring-1 ring-primary/10">
                 <Activity className="w-6 h-6 text-primary/60" />
               </div>
-              <p className="text-lg font-bold text-slate-800">Nessuna attività da mostrare</p>
-              <p className="text-sm text-slate-500">Iscrizioni e pagamenti recenti appariranno qui automaticamente.</p>
+              <p className="text-lg font-bold text-foreground">Nessuna attività da mostrare</p>
+              <p className="text-sm text-muted-foreground">Iscrizioni e pagamenti recenti appariranno qui automaticamente.</p>
             </div>
           ) : (
             <div className="space-y-1">

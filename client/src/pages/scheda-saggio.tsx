@@ -49,9 +49,9 @@ export default function SchedaSaggio() {
     if (!hasValidId) {
         return (
             <div className="p-6 md:p-8 mx-auto">
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
-                    <h1 className="text-2xl font-bold text-slate-800">Scheda Saggio</h1>
-                    <p className="text-slate-600 mt-2">Parametro <code>activeId</code> mancante o non valido nell’URL.</p>
+                <div className="bg-background p-6 rounded-xl border shadow-sm">
+                    <h1 className="text-2xl font-bold text-foreground">Scheda Saggio</h1>
+                    <p className="text-muted-foreground mt-2">Parametro <code>activeId</code> mancante o non valido nell’URL.</p>
                     <div className="mt-4">
                         <Button variant="outline" onClick={() => setLocation("/iscritti_per_attivita")}>
                             Torna a Iscritti per Attività
@@ -67,9 +67,9 @@ export default function SchedaSaggio() {
     if (!item) {
         return (
             <div className="p-6 md:p-8 mx-auto">
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
-                    <h1 className="text-2xl font-bold text-slate-800">Scheda Saggio</h1>
-                    <p className="text-slate-600 mt-2">Attività non trovata per <code>activityId={String(activeId)}</code>.</p>
+                <div className="bg-background p-6 rounded-xl border shadow-sm">
+                    <h1 className="text-2xl font-bold text-foreground">Scheda Saggio</h1>
+                    <p className="text-muted-foreground mt-2">Attività non trovata per <code>activityId={String(activeId)}</code>.</p>
                     <div className="mt-4">
                         <Button variant="outline" onClick={() => setLocation("/iscritti_per_attivita")}>
                             Torna a Iscritti per Attività
@@ -123,7 +123,7 @@ export default function SchedaSaggio() {
     return (
         <div className="p-6 md:p-8 space-y-8 max-w-[1400px] mx-auto">
             {/* Header section with styling adapted from standard category pages */}
-            <div className="flex items-center justify-between gap-4 flex-wrap bg-white p-6 rounded-xl border shadow-sm">
+            <div className="flex items-center justify-between gap-4 flex-wrap bg-background p-6 rounded-xl border shadow-sm">
                 <div className="flex flex-col gap-4 w-full">
                     <div className="flex justify-between items-start">
                         <div className="flex items-center gap-4">
@@ -139,10 +139,10 @@ export default function SchedaSaggio() {
                                 <Users className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold tracking-tight text-slate-800 flex items-center gap-3">
+                                <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
                                     Scheda Saggio {item ? `- ${item.name}` : ''}
                                 </h1>
-                                <p className="text-slate-500 mt-1 flex items-center gap-2">
+                                <p className="text-muted-foreground mt-1 flex items-center gap-2">
                                     <span className="inline-flex h-2 w-2 rounded-full bg-gold"></span>
                                     Visualizza presenze, pagamenti e scadenze degli iscritti
                                 </p>
@@ -152,12 +152,12 @@ export default function SchedaSaggio() {
 
                     {item && (
                         <div className="flex flex-wrap gap-3 pt-2">
-                            <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
+                            <Badge variant="outline" className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5">
                                 <Tag className="w-3.5 h-3.5" />
                                 SKU: {item.sku || 'N/A'}
                             </Badge>
                             {item.dayOfWeek && item.startTime && (
-                                <Badge variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 font-medium px-3 py-1 flex items-center gap-1.5">
+                                <Badge variant="outline" className="bg-muted border-border text-muted-foreground font-medium px-3 py-1 flex items-center gap-1.5">
                                     <Clock className="w-3.5 h-3.5" />
                                     {item.dayOfWeek} {item.startTime} - {item.endTime}
                                 </Badge>
@@ -174,22 +174,22 @@ export default function SchedaSaggio() {
             <Card className="border-0 shadow-md ring-1 ring-slate-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <Table>
-                        <TableHeader className="bg-slate-50/80 border-b">
+                        <TableHeader className="bg-muted/80 border-b">
                             <TableRow className="hover:bg-transparent">
-                                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Nome</SortableTableHead>
-                                <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Cognome</SortableTableHead>
-                                <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4">Email</SortableTableHead>
-                                <TableHead className="font-semibold text-slate-700 py-4">Scadenza Tessera</TableHead>
-                                <TableHead className="font-semibold text-slate-700 py-4">Certificato Medico</TableHead>
-                                <SortableTableHead sortKey="attendances" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-slate-700 py-4 text-center">Presenze</SortableTableHead>
-                                <TableHead className="font-semibold text-slate-700 py-4 text-center">Pagamenti</TableHead>
-                                <TableHead className="font-semibold text-slate-700 py-4 text-right">Azioni</TableHead>
+                                <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-foreground/80 py-4">Nome</SortableTableHead>
+                                <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-foreground/80 py-4">Cognome</SortableTableHead>
+                                <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-foreground/80 py-4">Email</SortableTableHead>
+                                <TableHead className="font-semibold text-foreground/80 py-4">Scadenza Tessera</TableHead>
+                                <TableHead className="font-semibold text-foreground/80 py-4">Certificato Medico</TableHead>
+                                <SortableTableHead sortKey="attendances" currentSort={sortConfig} onSort={handleSort} className="font-semibold text-foreground/80 py-4 text-center">Presenze</SortableTableHead>
+                                <TableHead className="font-semibold text-foreground/80 py-4 text-center">Pagamenti</TableHead>
+                                <TableHead className="font-semibold text-foreground/80 py-4 text-right">Azioni</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {sortedEnrolledMembersData.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                                    <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
                                         <div className="flex flex-col items-center gap-2">
                                             <Users className="h-8 w-8 text-slate-300" />
                                             <p>Nessun iscritto trovato per questo corso.</p>
@@ -201,13 +201,13 @@ export default function SchedaSaggio() {
                                     const today = new Date();
 
                                     // Check card expiry
-                                    let cardExpiryText = <span className="text-slate-500 text-sm italic">Assente</span>;
+                                    let cardExpiryText = <span className="text-muted-foreground text-sm italic">Assente</span>;
                                     if (member.cardExpiryDate) {
                                         const expiryDate = new Date(member.cardExpiryDate);
                                         const isValidCardDate = !Number.isNaN(expiryDate.getTime());
                                         const isExpired = isValidCardDate && expiryDate < today;
                                         cardExpiryText = (
-                                            <span className={`inline-flex items-center gap-1.5 font-medium ${isExpired ? 'text-red-600' : 'text-slate-700'}`}>
+                                            <span className={`inline-flex items-center gap-1.5 font-medium ${isExpired ? 'text-red-600' : 'text-foreground/80'}`}>
                                                 {isExpired ? <XCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
                                                 {!isValidCardDate ? "Data non valida" : expiryDate.toLocaleDateString("it-IT")}
                                             </span>
@@ -215,7 +215,7 @@ export default function SchedaSaggio() {
                                     }
 
                                     // Check med cert expiry using pre-calculated status
-                                    let certExpiryText = <Badge variant="outline" className="bg-slate-100 text-slate-500 hover:bg-slate-200 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Assente</Badge>;
+                                    let certExpiryText = <Badge variant="outline" className="bg-slate-100 text-muted-foreground hover:bg-slate-200 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Assente</Badge>;
                                     if (medicalCertStatus === 'valid') {
                                         certExpiryText = <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0 gap-1"><CheckCircle2 className="w-3.5 h-3.5"/> Valido ({medicalCertFormattedDate})</Badge>;
                                     } else if (medicalCertStatus === 'warning') {
@@ -225,22 +225,22 @@ export default function SchedaSaggio() {
                                     }
 
                                     return (
-                                        <TableRow key={member.id} className="hover:bg-slate-50/80 transition-colors">
-                                            <TableCell className={cn("font-medium text-slate-900", isSortedColumn("firstName") && "sorted-column-cell")}>
+                                        <TableRow key={member.id} className="hover:bg-muted/80 transition-colors">
+                                            <TableCell className={cn("font-medium text-foreground", isSortedColumn("firstName") && "sorted-column-cell")}>
                                                 <Link href={`/?memberId=${member.id}`} className="hover:underline cursor-pointer">
                                                     {member.firstName}
                                                 </Link>
                                             </TableCell>
-                                            <TableCell className={cn("font-medium text-slate-900", isSortedColumn("lastName") && "sorted-column-cell")}>
+                                            <TableCell className={cn("font-medium text-foreground", isSortedColumn("lastName") && "sorted-column-cell")}>
                                                 <Link href={`/?memberId=${member.id}`} className="hover:underline cursor-pointer">
                                                     {member.lastName}
                                                 </Link>
                                             </TableCell>
-                                            <TableCell className={cn("text-slate-600 text-sm", isSortedColumn("email") && "sorted-column-cell")}>{member.email || '-'}</TableCell>
+                                            <TableCell className={cn("text-muted-foreground text-sm", isSortedColumn("email") && "sorted-column-cell")}>{member.email || '-'}</TableCell>
                                             <TableCell>{cardExpiryText}</TableCell>
                                             <TableCell>{certExpiryText}</TableCell>
                                             <TableCell className={cn("text-center", isSortedColumn("attendances") && "sorted-column-cell")}>
-                                                <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5">
+                                                <Badge variant="secondary" className="bg-slate-100 text-foreground/80 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5">
                                                     {attendances.length}
                                                 </Badge>
                                             </TableCell>

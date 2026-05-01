@@ -534,13 +534,13 @@ export function NuovoPagamentoModal({
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="max-w-[1400px] w-[95vw] h-[95vh] overflow-y-auto bg-slate-100/50 p-0 border-0">
-                <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b px-6 py-4 flex items-center justify-between shadow-sm">
+                <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b px-6 py-4 flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary/10 rounded-full">
                             <Calculator className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Nuovo Pagamento</h2>
+                            <h2 className="text-2xl font-bold tracking-tight text-foreground">Nuovo Pagamento</h2>
                             <p className="text-sm text-muted-foreground hidden sm:block">Gestione Checkout Unificato e Carrello Iscrizioni</p>
                         </div>
                     </div>
@@ -688,7 +688,7 @@ export function NuovoPagamentoModal({
 
                         {/* COLONNA DESTRA: TAVOLO CARRELLO E EXTRA */}
                         <div className="lg:col-span-8 xl:col-span-9 space-y-6">
-                            <div className="border border-slate-200 shadow-sm bg-white p-4 rounded-lg">
+                            <div className="border border-border shadow-sm bg-background p-4 rounded-lg">
                                 {selectedMemberId && (
                                     <div className="flex gap-4 mb-6">
                                         <div className="flex-1 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-center gap-3 shadow-sm">
@@ -714,21 +714,21 @@ export function NuovoPagamentoModal({
                                 )}
                                 <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 block">Cosa desideri pagare?</span>
                                 {!selectedMemberId ? (
-                                    <div className="p-4 rounded-md bg-slate-50 text-center text-sm text-slate-500 italic">
+                                    <div className="p-4 rounded-md bg-muted text-center text-sm text-muted-foreground italic">
                                         Nessun debito pendente per questo cliente. Procedi inserendo i dati manualmente.
                                     </div>
                                 ) : isLoadingDebts ? (
-                                    <div className="h-20 bg-slate-100 animate-pulse rounded-md w-full border border-slate-200"></div>
+                                    <div className="h-20 bg-slate-100 animate-pulse rounded-md w-full border border-border"></div>
                                 ) : calculatedDebts && calculatedDebts.length > 0 ? (
-                                    <div className="border rounded-md divide-y overflow-hidden shadow-sm bg-white">
+                                    <div className="border rounded-md divide-y overflow-hidden shadow-sm bg-background">
                                         {calculatedDebts.map((debt: any, idx: number) => (
                                             <div key={debt.id || idx} onClick={() => {
                                                 if (debt.remaining > 0.01) {
                                                     addCartRow(debt);
                                                 }
-                                            }} className={cn("p-4 transition-colors relative flex justify-between items-center group", debt.remaining > 0.01 ? "hover:bg-slate-50 cursor-pointer" : "opacity-75")}>
+                                            }} className={cn("p-4 transition-colors relative flex justify-between items-center group", debt.remaining > 0.01 ? "hover:bg-muted cursor-pointer" : "opacity-75")}>
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-800 text-sm">{debt.description}</span>
+                                                    <span className="font-bold text-foreground text-sm">{debt.description}</span>
                                                     <span className="text-[10px] text-muted-foreground uppercase">{debt.date ? new Date(debt.date).toLocaleDateString('it-IT') : ""} - {debt.type}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
@@ -761,7 +761,7 @@ export function NuovoPagamentoModal({
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="p-4 rounded-md bg-slate-50 text-center text-sm text-slate-500 italic">
+                                    <div className="p-4 rounded-md bg-muted text-center text-sm text-muted-foreground italic">
                                         Tutti i pagamenti risultano saldati.
                                     </div>
                                 )}
@@ -777,7 +777,7 @@ export function NuovoPagamentoModal({
                                         <Plus className="w-4 h-4" /> Nuovo Pagamento
                                     </Button>
                                 </CardHeader>
-                                <CardContent className="p-4 bg-slate-50/50">
+                                <CardContent className="p-4 bg-muted/50">
                                     <div className="space-y-6">
                                         {cartRows.map((row, idx) => (
                                             <CartTableRow
@@ -807,7 +807,7 @@ export function NuovoPagamentoModal({
                                         ))}
 
                                         {cartRows.length === 0 && (
-                                            <div className="h-32 flex items-center justify-center text-muted-foreground border-2 border-dashed border-slate-200 rounded-lg">
+                                            <div className="h-32 flex items-center justify-center text-muted-foreground border-2 border-dashed border-border rounded-lg">
                                                 Nessun corso inserito. Clicca su "Nuovo Pagamento" per iniziare.
                                             </div>
                                         )}
@@ -841,9 +841,9 @@ export function NuovoPagamentoModal({
                                 </Card>
                             </div>
 
-                            <div className="space-y-4 bg-slate-50/50 p-5 rounded-lg border border-slate-200/60 shadow-inner mt-6">
+                            <div className="space-y-4 bg-muted/50 p-5 rounded-lg border border-border/60 shadow-inner mt-6">
                                 <div className="flex flex-col space-y-4">
-                                    <div className="flex items-center justify-between border p-3 rounded-md bg-white shadow-sm">
+                                    <div className="flex items-center justify-between border p-3 rounded-md bg-background shadow-sm">
                                         <div className="flex items-center gap-2">
                                             <Checkbox id="gratuita" disabled />
                                             <Label htmlFor="gratuita" className="font-bold uppercase tracking-wider text-muted-foreground cursor-not-allowed">
@@ -862,19 +862,19 @@ export function NuovoPagamentoModal({
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                                     <div className="space-y-2">
                                         <Label>Data Pagamento (Z) *</Label>
-                                        <Input type="date" value={new Date().toISOString().split('T')[0]} readOnly className="bg-slate-50" />
+                                        <Input type="date" value={new Date().toISOString().split('T')[0]} readOnly className="bg-muted" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Acconto/Credito (Y)</Label>
-                                        <Input type="number" placeholder="" readOnly className="bg-slate-50" />
+                                        <Input type="number" placeholder="" readOnly className="bg-muted" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Saldo Annuale (AA)</Label>
-                                        <Input type="number" placeholder="" readOnly className="bg-slate-50" />
+                                        <Input type="number" placeholder="" readOnly className="bg-muted" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>N. Ricevute</Label>
-                                        <Input type="number" placeholder="" readOnly className="bg-slate-50" />
+                                        <Input type="number" placeholder="" readOnly className="bg-muted" />
                                     </div>
                                 </div>
                             </div>
@@ -1032,7 +1032,7 @@ function CartTableRow({
 
     if (row.isDebt) {
         return (
-            <div className="bg-slate-50 p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
+            <div className="bg-muted p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
                 <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive hover:bg-red-50" onClick={() => { if (confirm("Rimuovere questa riga dal carrello?")) removeCartRow(row.id); }}>
                     <Trash2 className="w-5 h-5" />
                 </Button>
@@ -1042,17 +1042,17 @@ function CartTableRow({
                             <ShoppingCart className="w-5 h-5" />
                         </div>
                         <div>
-                            <h4 className="font-bold text-slate-800 text-lg">Saldo Debito Pregresso</h4>
+                            <h4 className="font-bold text-foreground text-lg">Saldo Debito Pregresso</h4>
                             <p className="text-sm text-muted-foreground">{row.debtDescription}</p>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                         <div className="space-y-1">
-                            <Label className="text-xs text-slate-700 font-bold">Importo da Saldare *</Label>
+                            <Label className="text-xs text-foreground/80 font-bold">Importo da Saldare *</Label>
                             <Input
                                 type="number"
                                 step="0.01"
-                                className="h-10 text-lg font-bold bg-white"
+                                className="h-10 text-lg font-bold bg-background"
                                 value={row.basePrice || ""}
                                 onChange={(e) => {
                                     updateRow(row.id, 'basePrice', e.target.value);
@@ -1071,7 +1071,7 @@ function CartTableRow({
     }
 
     return (
-        <div className="bg-white p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
+        <div className="bg-background p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
             <Button
                 variant="ghost"
                 size="icon"
@@ -1084,7 +1084,7 @@ function CartTableRow({
             <div className="flex-1 space-y-4">
                 <div className="grid grid-cols-1 xl:grid-cols-[1fr_1.5fr_2fr_0.8fr_2fr_1fr] gap-4">
                     <div className="space-y-1">
-                        <Label className="text-xs text-slate-700 truncate font-bold">Listino *</Label>
+                        <Label className="text-xs text-foreground/80 truncate font-bold">Listino *</Label>
                         <Select value={row.periodId} onValueChange={(val) => {
                             updateRowBatch(row.id, { periodId: val, activityType: '', skus: [], basePrice: 0 });
                         }}>
@@ -1100,11 +1100,11 @@ function CartTableRow({
                     </div>
 
                     <div className="space-y-1">
-                        <Label className={cn("text-xs truncate font-bold", !row.periodId ? "text-slate-400" : "text-slate-700")}>Attività *</Label>
+                        <Label className={cn("text-xs truncate font-bold", !row.periodId ? "text-slate-400" : "text-foreground/80")}>Attività *</Label>
                         <Select disabled={!row.periodId} value={row.activityType || ""} onValueChange={(val) => {
                             updateRowBatch(row.id, { activityType: val, skus: [], basePrice: 0 });
                         }}>
-                            <SelectTrigger className={cn("h-9 border-slate-200", !row.periodId ? "bg-slate-100 opacity-50" : "bg-slate-50")}>
+                            <SelectTrigger className={cn("h-9 border-border", !row.periodId ? "bg-slate-100 opacity-50" : "bg-muted")}>
                                 <SelectValue placeholder="Seleziona..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -1118,17 +1118,17 @@ function CartTableRow({
                     </div>
 
                     <div className="space-y-1">
-                        <Label className={cn("text-xs truncate font-bold", !row.activityType ? "text-slate-400" : "text-slate-700")}>SKU / Dettaglio Attività *</Label>
+                        <Label className={cn("text-xs truncate font-bold", !row.activityType ? "text-slate-400" : "text-foreground/80")}>SKU / Dettaglio Attività *</Label>
                         <Select disabled={!row.activityType} value={(row.skus && row.skus[0]) || ""} onValueChange={(val) => {
                             updateRow(row.id, 'skus', [val]);
                         }}>
-                            <SelectTrigger className={cn("h-9 border-slate-200", !row.activityType ? "bg-slate-100 opacity-50" : "bg-white")}>
+                            <SelectTrigger className={cn("h-9 border-border", !row.activityType ? "bg-slate-100 opacity-50" : "bg-background")}>
                                 <SelectValue placeholder="Seleziona..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {currentCatalog?.map(c => (
                                     <SelectItem key={c.id} value={c.id.toString()}>
-                                        <span className="font-semibold text-slate-800">{c.name || c.title}</span>
+                                        <span className="font-semibold text-foreground">{c.name || c.title}</span>
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -1136,22 +1136,22 @@ function CartTableRow({
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-xs text-slate-700 truncate font-bold">Q.tà</Label>
-                        <Input type="number" className="h-9 bg-slate-50 text-center" value="1" readOnly />
+                        <Label className="text-xs text-foreground/80 truncate font-bold">Q.tà</Label>
+                        <Input type="number" className="h-9 bg-muted text-center" value="1" readOnly />
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-xs text-slate-700 truncate font-bold">Descrizione Quota</Label>
-                        <Input className="h-9 bg-slate-50" placeholder="Manuale..." />
+                        <Label className="text-xs text-foreground/80 truncate font-bold">Descrizione Quota</Label>
+                        <Input className="h-9 bg-muted" placeholder="Manuale..." />
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-xs text-slate-700 truncate font-bold">Totale Quota *</Label>
+                        <Label className="text-xs text-foreground/80 truncate font-bold">Totale Quota *</Label>
                         <div className="flex items-center gap-2">
                           <Input
                               type="number"
                               step="0.01"
-                              className="h-9 bg-slate-50 font-bold w-1/2"
+                              className="h-9 bg-muted font-bold w-1/2"
                               value={row.basePrice || ""}
                               onChange={(e) => updateRow(row.id, 'basePrice', e.target.value)}
                               placeholder="0"
@@ -1179,7 +1179,7 @@ function CartTableRow({
                                     basePrice: val === 'FREE_TRIAL' ? 0 : row.basePrice 
                                 });
                             }}>
-                                <SelectTrigger className="h-9 bg-white border-blue-200">
+                                <SelectTrigger className="h-9 bg-background border-blue-200">
                                     <SelectValue placeholder="Standard" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1195,7 +1195,7 @@ function CartTableRow({
                                 <Label className="text-xs text-blue-800 truncate font-bold">Data Lezione/Prova *</Label>
                                 <Input
                                     type="date"
-                                    className="h-9 bg-white border-blue-200"
+                                    className="h-9 bg-background border-blue-200"
                                     value={row.targetDate || ""}
                                     onChange={(e) => updateRow(row.id, 'targetDate', e.target.value)}
                                 />

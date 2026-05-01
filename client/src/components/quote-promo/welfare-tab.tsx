@@ -37,7 +37,7 @@ function WelfareProviderCard({ provider }: { provider: WelfareProvider }) {
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="bg-slate-50 border-b pb-4">
+      <CardHeader className="bg-muted border-b pb-4">
         <CardTitle className="text-lg text-green-800">{formData.name}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 space-y-5 pt-4">
@@ -76,7 +76,7 @@ function WelfareProviderCard({ provider }: { provider: WelfareProvider }) {
           />
         </div>
       </CardContent>
-      <CardFooter className="border-t pt-4 bg-slate-50">
+      <CardFooter className="border-t pt-4 bg-muted">
         <Button 
            className="w-full gap-2 bg-green-600 hover:bg-green-700" 
            onClick={() => saveMutation.mutate(formData)}
@@ -103,7 +103,7 @@ export function WelfareTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
+      <div className="flex justify-between items-center bg-background p-4 rounded-lg border shadow-sm">
         <div>
           <h2 className="text-lg font-bold text-green-900 flex items-center gap-2">
             <HeartHandshake className="w-5 h-5" /> Provider Welfare
@@ -125,7 +125,7 @@ export function WelfareTab() {
              </Card>
            ))
         ) : is404 || !providers || providers.length === 0 ? (
-           <div className="col-span-full h-48 border border-dashed rounded-lg bg-slate-50 flex flex-col items-center justify-center text-muted-foreground opacity-60">
+           <div className="col-span-full h-48 border border-dashed rounded-lg bg-muted flex flex-col items-center justify-center text-muted-foreground opacity-60">
               <HeartHandshake className="h-10 w-10 mb-3 text-slate-300" />
               <span className="font-medium">Nessun provider welfare configurato.</span>
               <span className="text-xs mt-1">Configurazione endpoint API in progress (404/Empty).</span>
@@ -141,7 +141,7 @@ export function WelfareTab() {
       
       <div className="flex justify-between items-center mb-4">
         <div>
-           <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+           <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
              <UserCog className="w-5 h-5 text-indigo-600" /> Tariffe Staff e Insegnanti
            </h3>
            <p className="text-sm text-muted-foreground mt-1">Listino prezzi interno riservato ai collaboratori e core-instructor</p>
@@ -159,9 +159,9 @@ export function WelfareTab() {
          ) : staffRates?.length ? (
             staffRates.map(rate => (
                <Card key={rate.id} className="shadow-sm hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3 border-b bg-slate-50/50">
+                  <CardHeader className="pb-3 border-b bg-muted/50">
                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-[15px] font-bold text-slate-800 leading-tight">
+                        <CardTitle className="text-[15px] font-bold text-foreground leading-tight">
                            {rate.serviceLabel}
                         </CardTitle>
                         {rate.isActive && <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 ml-2" />}
@@ -172,14 +172,14 @@ export function WelfareTab() {
                         <span className="text-2xl font-black text-indigo-700">
                            {Number(rate.amount) > 0 ? `€ ${Number(rate.amount).toFixed(2)}` : "Gratis"}
                         </span>
-                        <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">
+                        <span className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
                            / {rate.rateType === 'annual' ? "Anno" : (rate.rateType === 'per_session' ? "Sessione" : "Uso")}
                         </span>
                      </div>
                      <div className="space-y-1.5 text-sm pt-2 border-t">
                         <div className="flex justify-between">
                            <span className="text-muted-foreground">Applica a:</span>
-                           <span className="font-medium text-slate-700">{rate.applicableTo === 'all_staff' ? "Tutto lo Staff" : (rate.applicableTo || "Speculare")}</span>
+                           <span className="font-medium text-foreground/80">{rate.applicableTo === 'all_staff' ? "Tutto lo Staff" : (rate.applicableTo || "Speculare")}</span>
                         </div>
                         {rate.studioRestriction && (
                            <div className="flex justify-between">
@@ -193,7 +193,7 @@ export function WelfareTab() {
                         </div>
                      </div>
                      {rate.notes && (
-                        <div className="bg-blue-50/50 p-2 rounded border border-blue-100 text-xs italic text-slate-600 mt-2">
+                        <div className="bg-blue-50/50 p-2 rounded border border-blue-100 text-xs italic text-muted-foreground mt-2">
                            <span className="font-semibold not-italic block mb-0.5 text-blue-800">Note operative:</span>
                            {rate.notes}
                         </div>
@@ -202,7 +202,7 @@ export function WelfareTab() {
                </Card>
             ))
          ) : (
-            <div className="col-span-full h-24 border-2 border-dashed flex items-center justify-center rounded-lg text-slate-500">
+            <div className="col-span-full h-24 border-2 border-dashed flex items-center justify-center rounded-lg text-muted-foreground">
                Nessuna tariffa staff configurata.
             </div>
          )}

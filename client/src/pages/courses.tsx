@@ -527,14 +527,14 @@ export default function Courses() {
     />
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="border-gold text-gold-foreground font-semibold bg-white/50 hover:bg-gold/10 px-3">
+                  <Button variant="outline" className="border-gold text-gold-foreground font-semibold bg-background/50 hover:bg-gold/10 px-3">
                     📋 {filteredCourses.length} Corsi ▼
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-0" align="end">
                   <div className="p-4 space-y-4">
                     <div>
-                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Categoria</h4>
+                      <h4 className="font-semibold text-sm mb-2 text-foreground border-b pb-1">Categoria</h4>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                         {Object.entries(
                             filteredCourses.reduce((acc, c) => {
@@ -544,7 +544,7 @@ export default function Courses() {
                             }, {} as Record<string, number>)
                           ).sort((a,b) => b[1] - a[1])
                           .map(([cat, count]) => (
-                            <div key={cat} className="flex justify-between text-slate-600">
+                            <div key={cat} className="flex justify-between text-muted-foreground">
                               <span className="truncate pr-2">{cat}</span>
                               <span className="font-semibold">{count}</span>
                             </div>
@@ -552,7 +552,7 @@ export default function Courses() {
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Genere / Nome</h4>
+                      <h4 className="font-semibold text-sm mb-2 text-foreground border-b pb-1">Genere / Nome</h4>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs max-h-40 overflow-y-auto pr-1 custom-scrollbar">
                         {Object.entries(
                             filteredCourses.reduce((acc, c) => {
@@ -562,7 +562,7 @@ export default function Courses() {
                             }, {} as Record<string, number>)
                           ).sort((a,b) => b[1] - a[1])
                           .map(([name, count]) => (
-                            <div key={name} className="flex justify-between text-slate-600">
+                            <div key={name} className="flex justify-between text-muted-foreground">
                               <span className="truncate pr-2">{name}</span>
                               <span className="font-semibold">{count}</span>
                             </div>
@@ -856,7 +856,7 @@ export default function Courses() {
                                   <Button
                                     variant="outline"
                                     size="icon"
-                                    className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                                    className="bg-background text-black border-foreground/20 hover:bg-gray-50 dark:bg-background dark:text-black dark:hover:bg-gray-100"
                                     data-testid={`button-delete-${course.id}`}
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -890,8 +890,8 @@ export default function Courses() {
 
         {/* Selected Toolbar */}
         {selectedIds.size > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white border border-slate-200 shadow-xl rounded-full px-6 py-3 flex items-center gap-6 animate-in slide-in-from-bottom-10">
-            <span className="text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-background border border-border shadow-xl rounded-full px-6 py-3 flex items-center gap-6 animate-in slide-in-from-bottom-10">
+            <span className="text-sm font-semibold text-foreground/80 bg-slate-100 px-3 py-1 rounded-full">
               {selectedIds.size} {selectedIds.size === 1 ? 'corso selezionato' : 'corsi selezionati'}
             </span>
             <div className="flex gap-2">
@@ -934,7 +934,7 @@ export default function Courses() {
                 }
               />
             </div>
-            <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100" onClick={() => setSelectedIds(new Set())}>
+            <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full -ml-2 text-slate-400 hover:text-muted-foreground hover:bg-slate-100" onClick={() => setSelectedIds(new Set())}>
               <X className="w-4 h-4" />
             </Button>
           </div>

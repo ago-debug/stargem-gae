@@ -56,7 +56,7 @@ export function ActivityColorLegend({ variant = "card" }: { variant?: "card" | "
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-[120px] justify-center font-normal bg-transparent border-slate-300">
+          <Button variant="outline" className="w-[120px] justify-center font-normal bg-transparent border-border">
             <Palette className="w-4 h-4 mr-2" />
             Legenda
           </Button>
@@ -77,7 +77,7 @@ export function ActivityColorLegend({ variant = "card" }: { variant?: "card" | "
   }
 
   return (
-    <Card className="bg-slate-50/50 border-dashed shadow-sm">
+    <Card className="bg-muted/50 border-dashed shadow-sm">
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex self-start mt-0.5">

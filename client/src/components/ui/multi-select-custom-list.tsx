@@ -32,7 +32,7 @@ export function MultiSelectCustomList({ systemName, listName, selectedValues, on
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center gap-2">
-        <label className="font-semibold text-slate-800 shrink-0 uppercase">{listName}</label>
+        <label className="font-semibold text-foreground shrink-0 uppercase">{listName}</label>
         <InlineListEditorDialog 
           listCode={systemName} 
           listName={listName} 

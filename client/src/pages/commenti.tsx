@@ -255,7 +255,7 @@ export default function Commenti() {
             <SelectItem value="bassa">Bassa</SelectItem>
           </SelectContent>
         </Select>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white rounded-md shadow-sm">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-background rounded-md shadow-sm">
           <TabsList className="grid w-[200px] grid-cols-2">
             <TabsTrigger value="attivi">Attivi</TabsTrigger>
             <TabsTrigger value="archivio">Archivio</TabsTrigger>
@@ -290,7 +290,7 @@ export default function Commenti() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
                         <span className="font-medium text-sm" data-testid={`text-author-${comment.id}`}>
-                          {comment.authorName} &rarr; <span className="font-bold text-slate-700">{getAssignedName(comment.assignedTo)}</span>
+                          {comment.authorName} &rarr; <span className="font-bold text-foreground/80">{getAssignedName(comment.assignedTo)}</span>
                         </span>
                         {getPriorityBadge(comment.priority)}
                         {comment.isResolved && (
@@ -343,13 +343,13 @@ export default function Commenti() {
                           title="Modifica"
                           data-testid={`button-edit-${comment.id}`}
                         >
-                          <Edit2 className="w-4 h-4 text-slate-600 opacity-80 hover:opacity-100" />
+                          <Edit2 className="w-4 h-4 text-muted-foreground opacity-80 hover:opacity-100" />
                         </Button>
                       )}
                       {!comment.isResolved && (
                         <Button
                           size="sm"
-                          className="h-8 text-xs bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 hover:from-slate-200 hover:to-slate-300 border border-slate-300 shadow-sm transition-all"
+                          className="h-8 text-xs bg-gradient-to-r from-slate-100 to-slate-200 text-foreground/80 hover:from-slate-200 hover:to-slate-300 border border-border shadow-sm transition-all"
                           onClick={() => resolveMutation.mutate({ id: comment.id, isResolved: true })}
                           data-testid={`button-resolve-${comment.id}`}
                         >
@@ -364,7 +364,7 @@ export default function Commenti() {
                           title="Ripristina dall'archivio"
                           data-testid={`button-reopen-${comment.id}`}
                         >
-                          <ArchiveRestore className="w-4 h-4 text-slate-500 hover:text-slate-700" />
+                          <ArchiveRestore className="w-4 h-4 text-muted-foreground hover:text-foreground/80" />
                         </Button>
                       )}
                       {comment.authorId === String(user?.id) && (
@@ -390,8 +390,8 @@ export default function Commenti() {
                       {threadReplies.map((reply) => (
                         <div key={reply.id} className="flex flex-col">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="font-medium text-sm text-slate-800">
-                              {reply.authorName} &rarr; <span className="font-bold text-slate-700">{getAssignedName(reply.assignedTo)}</span>
+                            <span className="font-medium text-sm text-foreground">
+                              {reply.authorName} &rarr; <span className="font-bold text-foreground/80">{getAssignedName(reply.assignedTo)}</span>
                             </span>
                             <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                               <Clock className="w-3 h-3" />
@@ -412,13 +412,13 @@ export default function Commenti() {
                             </div>
                           ) : (
                             <div className="flex justify-between items-start group">
-                              <p className="text-sm whitespace-pre-wrap text-slate-700">
+                              <p className="text-sm whitespace-pre-wrap text-foreground/80">
                                 {reply.content}
                               </p>
                               {reply.authorId === String(user?.id) && (
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => { setEditingCommentId(reply.id); setEditContent(reply.content); }}>
-                                    <Edit2 className="w-3 h-3 text-slate-500" />
+                                    <Edit2 className="w-3 h-3 text-muted-foreground" />
                                   </Button>
                                   <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => { if (confirm("Eliminare questa risposta?")) deleteMutation.mutate(reply.id); }}>
                                     <Trash2 className="w-3 h-3 text-destructive" />
@@ -436,7 +436,7 @@ export default function Commenti() {
                   {replyingToId === comment.id && (
                     <div className="mt-4 ml-8 pl-4 border-l-2 space-y-3 p-3 bg-muted/30 rounded-md">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-semibold text-slate-600">Risposta:</span>
+                        <span className="text-xs font-semibold text-muted-foreground">Risposta:</span>
                         <Button size="icon" variant="ghost" className="h-5 w-5 hover:bg-transparent" onClick={() => setReplyingToId(null)}>
                           <X className="w-4 h-4 text-slate-400 hover:text-red-500" />
                         </Button>
@@ -445,12 +445,12 @@ export default function Commenti() {
                         placeholder="Scrivi una risposta..."
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
-                        className="min-h-[60px] text-sm bg-white"
+                        className="min-h-[60px] text-sm bg-background"
                         autoFocus
                       />
                       <div className="flex items-center justify-between gap-3">
                         <Select value={replyAssignedTo} onValueChange={setReplyAssignedTo}>
-                          <SelectTrigger className="w-[140px] h-8 text-xs bg-white">
+                          <SelectTrigger className="w-[140px] h-8 text-xs bg-background">
                             <SelectValue placeholder="Destinatario" />
                           </SelectTrigger>
                           <SelectContent>

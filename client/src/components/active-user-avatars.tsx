@@ -34,7 +34,7 @@ export function ActiveUserAvatars() {
   const hiddenCount = Math.max(0, activeUsers.length - displayLimit);
 
   return (
-    <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-full px-2 py-1 shadow-sm">
+    <div className="flex items-center gap-1.5 bg-muted border border-border rounded-full px-2 py-1 shadow-sm">
       {visibleUsers.map((u) => {
         const isMe = u.id === currentUser?.id;
         const diffMins = (new Date().getTime() - new Date(u.lastSeenAt!).getTime()) / 60000;
@@ -65,13 +65,13 @@ export function ActiveUserAvatars() {
       {hiddenCount > 0 && (
         <Popover>
           <PopoverTrigger asChild>
-            <button className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center bg-slate-100 text-[10px] font-bold text-slate-600 shadow-sm hover:bg-slate-200 transition-colors cursor-pointer">
+            <button className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center bg-slate-100 text-[10px] font-bold text-muted-foreground shadow-sm hover:bg-slate-200 transition-colors cursor-pointer">
               +{hiddenCount}
             </button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-64 p-2">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs font-semibold flex items-center gap-2 text-slate-500 uppercase tracking-wider">
+              <h4 className="text-xs font-semibold flex items-center gap-2 text-muted-foreground uppercase tracking-wider">
                 <Users className="w-3 h-3" /> 
                 Tutti gli utenti live ({activeUsers.length})
               </h4>
@@ -93,7 +93,7 @@ export function ActiveUserAvatars() {
                 }
 
                 return (
-                  <div key={u.id} className="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded-md">
+                  <div key={u.id} className="flex items-center gap-2 p-1.5 hover:bg-muted rounded-md">
                     <div className="relative w-6 h-6 rounded-full flex items-center justify-center bg-emerald-100 text-[9px] font-bold text-emerald-800 shrink-0 overflow-hidden">
                       {u.profileImageUrl ? (
                         <img src={u.profileImageUrl} alt="avatar" className={`w-full h-full object-cover ${isAway ? 'opacity-60 grayscale-[50%]' : ''}`} />

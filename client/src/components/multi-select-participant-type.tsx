@@ -69,7 +69,7 @@ export function MultiSelectParticipantType({ value, onChange, className }: Multi
                     role="combobox"
                     aria-expanded={open}
                     className={cn(
-                        "w-full justify-between h-auto min-h-10 px-3 py-2 bg-white",
+                        "w-full justify-between h-auto min-h-10 px-3 py-2 bg-background",
                         selectedValues.length === 0 && "text-muted-foreground",
                         className
                     )}

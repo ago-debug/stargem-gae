@@ -403,7 +403,7 @@ export function CourseSingleDuplicateModal({ course, isOpen, onOpenChange, onSuc
         </div>
 
         <DialogFooter className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
-           <div className="text-xs text-slate-500">
+           <div className="text-xs text-muted-foreground">
               <span className="text-red-500 font-bold mr-1">*</span> Campi obbligatori
            </div>
            <div className="flex gap-2">

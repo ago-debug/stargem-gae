@@ -31,7 +31,7 @@ export function CommandPalette() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="overflow-hidden p-0 shadow-2xl rounded-2xl sm:max-w-[600px] border-0 bg-transparent">
         <Command 
-          className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-slate-500 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-14 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl overflow-hidden"
+          className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-14 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 bg-background/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl overflow-hidden"
           shouldFilter={true}
         >
           <div className="flex items-center border-b px-4" cmdk-input-wrapper="">
@@ -42,13 +42,13 @@ export function CommandPalette() {
               placeholder="Chiedi a Teo o cerca funzioni (es. Iscrivi utente...)" 
               className="flex h-16 w-full rounded-md bg-transparent py-3 text-lg outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-50" 
             />
-            <kbd className="ml-2 hidden sm:inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-100 px-1.5 font-mono text-[10px] font-medium text-slate-500">
+            <kbd className="ml-2 hidden sm:inline-flex items-center gap-1 rounded border border-border bg-slate-100 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
               <span className="text-xs">ESC</span>
             </kbd>
           </div>
 
           <Command.List className="max-h-[400px] overflow-y-auto overflow-x-hidden p-2">
-            <Command.Empty className="py-8 text-center text-sm text-slate-500">
+            <Command.Empty className="py-8 text-center text-sm text-muted-foreground">
               <div className="flex flex-col items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <Bot className="w-6 h-6 text-primary" />
@@ -66,7 +66,7 @@ export function CommandPalette() {
                 <Users className="mr-3 h-5 w-5 text-blue-500" />
                 <div className="flex flex-col">
                   <span>Nuova Iscrizione</span>
-                  <span className="text-xs text-slate-500">Aggiungi membro in anagrafica</span>
+                  <span className="text-xs text-muted-foreground">Aggiungi membro in anagrafica</span>
                 </div>
               </Command.Item>
               <Command.Item 
@@ -76,7 +76,7 @@ export function CommandPalette() {
                 <Calendar className="mr-3 h-5 w-5 text-emerald-500" />
                 <div className="flex flex-col">
                   <span>Calendario Planning</span>
-                  <span className="text-xs text-slate-500">Visualizza o modifica il palinsesto</span>
+                  <span className="text-xs text-muted-foreground">Visualizza o modifica il palinsesto</span>
                 </div>
               </Command.Item>
               <Command.Item 
@@ -86,7 +86,7 @@ export function CommandPalette() {
                 <Briefcase className="mr-3 h-5 w-5 text-purple-500" />
                 <div className="flex flex-col">
                   <span>Dashboard Shift</span>
-                  <span className="text-xs text-slate-500">Gestisci i turni del GemTeam</span>
+                  <span className="text-xs text-muted-foreground">Gestisci i turni del GemTeam</span>
                 </div>
               </Command.Item>
             </Command.Group>
@@ -96,7 +96,7 @@ export function CommandPalette() {
                 onSelect={() => runCommand(() => setLocation("/admin"))}
                 className="flex items-center cursor-pointer hover:bg-slate-100 rounded-lg p-2 transition-colors data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary"
               >
-                <Settings className="mr-3 h-5 w-5 text-slate-500" />
+                <Settings className="mr-3 h-5 w-5 text-muted-foreground" />
                 <span>Pannello Amministratore</span>
               </Command.Item>
             </Command.Group>

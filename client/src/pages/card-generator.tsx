@@ -190,7 +190,7 @@ export default function CardGenerator() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="border rounded-md overflow-hidden bg-white shadow-sm">
+                    <div className="border rounded-md overflow-hidden bg-background shadow-sm">
                         <Table>
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
@@ -258,7 +258,7 @@ export default function CardGenerator() {
                 }}
             >
                 {isGeneratingBulk && selectedMembers.map(member => (
-                    <div key={member.id} className="bulk-card-item mb-10 bg-white">
+                    <div key={member.id} className="bulk-card-item mb-10 bg-background">
                         <MembershipCardInternal member={member} />
                     </div>
                 ))}
@@ -299,7 +299,7 @@ function MembershipCardInternal({ member }: { member: Member }) {
     };
 
     return (
-        <div className="relative w-[220px] h-[360px] bg-white overflow-hidden font-sans border border-gray-100 flex flex-col items-center">
+        <div className="relative w-[220px] h-[360px] bg-background overflow-hidden font-sans border border-gray-100 flex flex-col items-center">
             <div className="absolute top-0 left-0 right-0 h-3 bg-[#e11d48]"></div>
             <div className="flex flex-col items-center pt-6 pb-8 px-4 w-full h-full">
                 <div className="mb-2 h-7 flex justify-center items-center w-full">
@@ -334,7 +334,7 @@ function MembershipCardInternal({ member }: { member: Member }) {
                         </div>
                         <div>
                             <div className="text-[7px] uppercase text-gray-400 font-bold">Codice Fiscale</div>
-                            <div className="text-[9px] font-mono font-bold uppercase text-gray-600">{member.fiscalCode || "--- --- ---"}</div>
+                            <div className="text-[9px] font-mono font-bold uppercase text-muted-foreground">{member.fiscalCode || "--- --- ---"}</div>
                         </div>
                     </div>
                 </div>
@@ -359,7 +359,7 @@ function MembershipCardDialog({
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md bg-white border-2">
+            <DialogContent className="max-w-md bg-background border-2">
                 <DialogHeader className="border-b pb-4 mb-4">
                     <DialogTitle className="text-2xl font-black italic tracking-tighter">Anteprima Card</DialogTitle>
                     <DialogDescription>

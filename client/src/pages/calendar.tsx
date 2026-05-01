@@ -189,7 +189,7 @@ export function mapUnifiedToCalendarEvents(
             endDate: format(endDate, "yyyy-MM-dd"),
             active: a.isActive,
             registryKey: a.rawPayload?.legacy_source_type || a.activityFamily,
-            colorProps: a.colorProps || { className: "bg-gray-100 border-l-gray-500 text-gray-700" },
+            colorProps: a.colorProps || { className: "bg-gray-100 border-l-gray-500 text-foreground/80" },
             sku: a.sku || undefined,
             rawPayload: a.rawPayload || a
         } as unknown as CalendarEvent;
@@ -243,7 +243,7 @@ function ScrollableFilterBar({ children, className }: { children: ReactNode, cla
         <div className={`relative flex items-center min-w-0 group ${className || ''}`}>
             {showLeft && (
                 <div className="absolute left-0 z-10 bg-gradient-to-r from-white via-white/90 to-transparent pr-4 py-1 h-full flex items-center pointer-events-none">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-white border border-slate-200 pointer-events-auto hover:bg-slate-100" onClick={() => scroll('left')}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-background border border-border pointer-events-auto hover:bg-slate-100" onClick={() => scroll('left')}>
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
                 </div>
@@ -253,7 +253,7 @@ function ScrollableFilterBar({ children, className }: { children: ReactNode, cla
             </div>
             {showRight && (
                 <div className="absolute right-0 z-10 bg-gradient-to-l from-white via-white/90 to-transparent pl-4 py-1 h-full flex items-center pointer-events-none">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-white border border-slate-200 pointer-events-auto hover:bg-slate-100" onClick={() => scroll('right')}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-background border border-border pointer-events-auto hover:bg-slate-100" onClick={() => scroll('right')}>
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                 </div>
@@ -1834,8 +1834,8 @@ export default function CalendarPage() {
                     <ScrollableFilterBar className="w-full md:w-auto md:justify-end pb-1 md:pb-0">
                         <div className="shrink-0">
                             <Select value={selectedSeasonId} onValueChange={handleSeasonChange}>
-                                <SelectTrigger className="w-[180px] bg-transparent border-slate-300">
-                                    <CalendarIcon className="w-4 h-4 mr-2 text-slate-500" />
+                                <SelectTrigger className="w-[180px] bg-transparent border-border">
+                                    <CalendarIcon className="w-4 h-4 mr-2 text-muted-foreground" />
                                     <SelectValue placeholder="Stagione" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1853,7 +1853,7 @@ export default function CalendarPage() {
                         
                         <div className="shrink-0">
                             <Select value={selectedDay} onValueChange={setSelectedDay}>
-                                <SelectTrigger className="w-[150px] bg-transparent border-slate-300">
+                                <SelectTrigger className="w-[150px] bg-transparent border-border">
                                     <CalendarIcon className="w-4 h-4 mr-2" />
                                     <SelectValue placeholder="Giorno" />
                                 </SelectTrigger>
@@ -1869,7 +1869,7 @@ export default function CalendarPage() {
                         <div className="shrink-0">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" className="w-[180px] justify-between font-normal bg-transparent border-slate-300">
+                                    <Button variant="outline" className="w-[180px] justify-between font-normal bg-transparent border-border">
                                         <div className="flex items-center truncate">
                                             <MapPin className="w-4 h-4 mr-2 shrink-0" />
                                             <span className="truncate">
@@ -1905,7 +1905,7 @@ export default function CalendarPage() {
                         <div className="shrink-0">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" className="w-[180px] justify-between font-normal bg-transparent border-slate-300">
+                                    <Button variant="outline" className="w-[180px] justify-between font-normal bg-transparent border-border">
                                         <div className="flex items-center truncate">
                                             <User className="w-4 h-4 mr-2 shrink-0" />
                                             <span className="truncate">
@@ -1943,9 +1943,9 @@ export default function CalendarPage() {
 
                         <div className="shrink-0 flex items-center gap-1">
                             <Select value={selectedEventType} onValueChange={setSelectedEventType}>
-                                <SelectTrigger className={`w-[180px] h-10 transition-colors ${selectedEventType !== 'all' ? 'bg-amber-100 border-amber-400 text-amber-800 font-semibold' : 'border-slate-300'}`}>
+                                <SelectTrigger className={`w-[180px] h-10 transition-colors ${selectedEventType !== 'all' ? 'bg-amber-100 border-amber-400 text-amber-800 font-semibold' : 'border-border'}`}>
                                     <div className="flex items-center">
-                                        <Filter className={`w-4 h-4 mr-2 ${selectedEventType !== 'all' ? 'text-amber-600' : 'text-slate-500'}`} />
+                                        <Filter className={`w-4 h-4 mr-2 ${selectedEventType !== 'all' ? 'text-amber-600' : 'text-muted-foreground'}`} />
                                         <SelectValue placeholder="Tutte le Attività" />
                                     </div>
                                 </SelectTrigger>
@@ -1957,7 +1957,7 @@ export default function CalendarPage() {
                                 </SelectContent>
                             </Select>
                             {selectedEventType !== 'all' && (
-                                <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-500 hover:text-red-600 hover:bg-red-50" onClick={() => setSelectedEventType('all')} title="Resetta filtro">
+                                <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-red-600 hover:bg-red-50" onClick={() => setSelectedEventType('all')} title="Resetta filtro">
                                     <X className="h-4 w-4" />
                                 </Button>
                             )}
@@ -1987,7 +1987,7 @@ export default function CalendarPage() {
                             let boxClass = "hidden md:inline-flex items-center px-3 h-10 text-sm font-bold rounded-md shadow-sm border shrink-0 whitespace-nowrap";
                             if (isCurrentDay) boxClass += " bg-yellow-100/80 border-yellow-300 text-yellow-800";
                             else if (isFutureDay) boxClass += " bg-blue-100/80 border-blue-300 text-blue-800";
-                            else boxClass += " bg-slate-100/80 border-slate-300 text-slate-600";
+                            else boxClass += " bg-slate-100/80 border-border text-muted-foreground";
                             return (
                                 <div className={boxClass}>
                                     {isCurrentDay ? "Oggi: " : ""}{format(refDate, "EEEE d MMMM", { locale: it })}
@@ -2021,31 +2021,31 @@ export default function CalendarPage() {
                             </PopoverContent>
                         </Popover>
 
-                        <div className="flex items-center bg-white border border-slate-300 rounded-md shadow-sm h-10 shrink-0">
+                        <div className="flex items-center bg-background border border-border rounded-md shadow-sm h-10 shrink-0">
                             <Button variant="ghost" size="icon" className="h-full w-9 shrink-0" onClick={prevWeek}>
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
                             <span className="text-sm font-semibold min-w-[170px] text-center px-2">
                                 {format(currentWeekStart, "dd MMM", { locale: it })} - {format(currentWeekEnd, "dd MMM yyyy", { locale: it })}
                             </span>
-                            <Button variant="ghost" size="icon" className="h-full w-9 shrink-0 disabled:opacity-30 disabled:hover:text-slate-500" onClick={nextWeek} disabled={isNextDisabled}>
+                            <Button variant="ghost" size="icon" className="h-full w-9 shrink-0 disabled:opacity-30 disabled:hover:text-muted-foreground" onClick={nextWeek} disabled={isNextDisabled}>
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
                         </div>
 
-                        <Button variant="outline" size="sm" className="h-10 px-4 font-semibold shrink-0 bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 shadow-sm" onClick={resetToToday}>
+                        <Button variant="outline" size="sm" className="h-10 px-4 font-semibold shrink-0 bg-slate-100 hover:bg-slate-200 border-border text-foreground/80 shadow-sm" onClick={resetToToday}>
                             Oggi
                         </Button>
                         {totalRenderedCards.total > 0 ? (
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-slate-100 hover:bg-slate-200 cursor-pointer text-slate-700 border border-slate-300 shadow-sm rounded-md md:rounded-lg transition-colors">
+                                    <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-slate-100 hover:bg-slate-200 cursor-pointer text-foreground/80 border border-border shadow-sm rounded-md md:rounded-lg transition-colors">
                                         <span className="font-extrabold text-sm tracking-tight">{totalRenderedCards.total}</span>
                                         <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">{selectedDay === "all" ? "Sessioni della settimana" : "Sessioni di oggi"}</span>
                                     </div>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-56 p-3" align="end">
-                                    <h4 className="font-semibold text-sm mb-2 pb-1 border-b text-slate-800">Filtra per Tipologia</h4>
+                                    <h4 className="font-semibold text-sm mb-2 pb-1 border-b text-foreground">Filtra per Tipologia</h4>
                                     <div className="space-y-1">
                                         {Object.entries(totalRenderedCards.breakdown).map(([key, count]) => {
                                             const typeMapping: Record<string, string> = {
@@ -2059,15 +2059,15 @@ export default function CalendarPage() {
                                             };
                                             return (
                                             <div key={key} className="flex justify-between items-center text-sm cursor-pointer hover:bg-slate-100 p-1 -mx-1 px-1 rounded transition-colors" onClick={() => setSelectedEventType(typeMapping[key] || 'all')}>
-                                                <span className="text-slate-600 font-medium">{key}</span>
-                                                <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full text-xs">{count}</span>
+                                                <span className="text-muted-foreground font-medium">{key}</span>
+                                                <span className="font-bold text-foreground bg-slate-100 px-2 py-0.5 rounded-full text-xs">{count}</span>
                                             </div>
                                         )})}
                                     </div>
                                 </PopoverContent>
                             </Popover>
                         ) : (
-                            <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-slate-50 text-slate-400 border border-slate-200 shadow-sm rounded-md md:rounded-lg">
+                            <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-muted text-slate-400 border border-border shadow-sm rounded-md md:rounded-lg">
                                 <span className="font-extrabold text-sm tracking-tight">0</span>
                                 <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">{selectedDay === "all" ? "Sessioni della settimana" : "Sessioni di oggi"}</span>
                             </div>
@@ -2099,7 +2099,7 @@ export default function CalendarPage() {
                             return (
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <div className="flex items-center gap-2 h-10 px-3 bg-white border border-slate-300 rounded-md shadow-sm cursor-help hover:bg-slate-50 transition-colors shrink-0 max-w-[350px]">
+                                        <div className="flex items-center gap-2 h-10 px-3 bg-background border border-border rounded-md shadow-sm cursor-help hover:bg-muted transition-colors shrink-0 max-w-[350px]">
                                             <div className="flex -space-x-1 flex-none">
                                                {isPublicHoliday && <div className="w-[14px] h-[14px] rounded-full border border-red-600 bg-red-500 shadow-sm z-20" />}
                                                {activeStrategicEvents?.slice(0,3).map((evt, i) => {
@@ -2114,14 +2114,14 @@ export default function CalendarPage() {
                                                     return <div key={evt.id} className={`w-[14px] h-[14px] rounded-full border shadow-sm ${badgeColor}`} style={{ zIndex: 10 - i }} />
                                                })}
                                             </div>
-                                            <span className="text-xs font-bold text-slate-700 truncate line-clamp-1 w-full">
+                                            <span className="text-xs font-bold text-foreground/80 truncate line-clamp-1 w-full">
                                                 {isPublicHoliday ? `${holidayName || "Festività"}` : activeStrategicEvents[0]?.title}
                                                 {(((activeStrategicEvents?.length || 0) > 1) || (isPublicHoliday && (activeStrategicEvents?.length || 0) > 0)) && ` ...`}
                                             </span>
                                         </div>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-[320px] p-0" align="start">
-                                        <div className="p-3 bg-slate-50 border-b font-semibold text-sm flex items-center gap-2">
+                                        <div className="p-3 bg-muted border-b font-semibold text-sm flex items-center gap-2">
                                             Eventi in Programma
                                             <Button variant="outline" size="sm" className="h-6 px-2 text-xs ml-auto" onClick={() => setLocation('/programmazione-date')}>Modifica</Button>
                                         </div>
@@ -2132,7 +2132,7 @@ export default function CalendarPage() {
                                                 </div>
                                             )}
                                             {activeStrategicEvents?.map(evt => {
-                                                 let badgeColor = 'bg-slate-50 text-slate-800 border-l-[3px] border-slate-400';
+                                                 let badgeColor = 'bg-muted text-foreground border-l-[3px] border-slate-400';
                                                  const type = evt.eventType;
                                                  const t = (evt.title || '').toUpperCase();
                                                  
@@ -2167,7 +2167,7 @@ export default function CalendarPage() {
                         <div className="shrink-0">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" className="w-[180px] h-10 justify-between font-normal bg-transparent border-slate-300">
+                                    <Button variant="outline" className="w-[180px] h-10 justify-between font-normal bg-transparent border-border">
                                         <div className="flex items-center truncate">
                                             <Filter className="w-4 h-4 mr-2 shrink-0" />
                                             <span className="truncate">
@@ -2207,14 +2207,14 @@ export default function CalendarPage() {
                                     placeholder="Cerca..."
                                     value={searchQuery}
                                     onChange={e => setSearchQuery(e.target.value)}
-                                    className="pl-9 h-10 bg-transparent border-slate-300"
+                                    className="pl-9 h-10 bg-transparent border-border"
                                 />
                             </div>
                         </div>
 
                         {(selectedStudio !== "all" || selectedInstructor !== "all" || selectedCategory !== "all" || selectedDay !== "all" || searchQuery !== "") && (
                             <Button variant="ghost" size="icon" onClick={resetFilters} title="Resetta filtri" className="shrink-0 h-10 w-10 bg-slate-100 hover:bg-slate-200">
-                                <RefreshCw className="w-4 h-4 text-slate-600" />
+                                <RefreshCw className="w-4 h-4 text-muted-foreground" />
                             </Button>
                         )}
                     </ScrollableFilterBar>
@@ -2225,14 +2225,14 @@ export default function CalendarPage() {
                 <CardContent ref={scrollContainerRef} className="p-0 overflow-auto flex-1 relative scroll-smooth border-t">
                     <div className="min-w-full w-fit flex flex-col relative min-h-full">
                         {/* Header: Ore | (Days or Studios) */}
-                        <div className="sticky top-0 z-40 bg-white shadow-sm">
+                        <div className="sticky top-0 z-40 bg-background shadow-sm">
                             <div className={`grid border-b bg-[#f8f9fa]`}
                                 style={{
                                     gridTemplateColumns: selectedDay === 'all'
                                         ? `80px repeat(7, minmax(120px, 1fr))`
                                         : `80px repeat(${studios?.length || 1}, minmax(140px, 1fr))`
                                 }}>
-                                <div className="p-3 border-r flex items-center justify-center font-bold text-[11px] text-[#444] uppercase bg-white sticky left-0 z-50 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+                                <div className="p-3 border-r flex items-center justify-center font-bold text-[11px] text-[#444] uppercase bg-background sticky left-0 z-50 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
                                     ore
                                 </div>
                                 {selectedDay === 'all' ? (
@@ -2251,7 +2251,7 @@ export default function CalendarPage() {
                                         const overlappingEvents = dayStrategicEvents;
 
                                         const isToday = isSameDay(dayDate, new Date());
-                                        let rowBg = isToday ? "bg-yellow-50/50" : "bg-white";
+                                        let rowBg = isToday ? "bg-yellow-50/50" : "bg-background";
                                         if (isPublicHoliday) rowBg = "bg-red-50";
                                         else if (isStudioClosed) rowBg = "bg-pink-50";
 
@@ -2278,7 +2278,7 @@ export default function CalendarPage() {
                                                 {/* Banner Eventi Strategici (Chiusure/Ferie/Macro) */}
                                                 <div className="w-full flex-grow flex flex-col gap-[1px] px-[2px] pb-[4px] pt-1">
                                                 {overlappingEvents && overlappingEvents.filter(e => !e.isPublicHoliday).map(evt => {
-                                                    let bgColor = 'bg-slate-200 text-slate-800';
+                                                    let bgColor = 'bg-slate-200 text-foreground';
                                                     if (evt.eventType === 'chiusura') bgColor = 'bg-red-500 text-white';
                                                     if (evt.eventType === 'ferie') bgColor = 'bg-purple-500 text-white';
                                                     if (evt.eventType === 'apertura_eccezionale') bgColor = 'bg-emerald-500 text-white';
@@ -2297,7 +2297,7 @@ export default function CalendarPage() {
                                     })
                                 ) : (
                                     studios?.map(studio => (
-                                        <div key={studio.id} className="p-3 text-center border-r last:border-r-0 font-bold text-[11px] uppercase tracking-tight text-[#333] flex flex-col items-center justify-center min-w-[140px] bg-white">
+                                        <div key={studio.id} className="p-3 text-center border-r last:border-r-0 font-bold text-[11px] uppercase tracking-tight text-[#333] flex flex-col items-center justify-center min-w-[140px] bg-background">
                                             <span>{studio.name}</span>
                                             {studio.capacity && <span className="text-[9px] font-normal text-muted-foreground opacity-70">({studio.capacity}mq)</span>}
                                         </div>
@@ -2307,7 +2307,7 @@ export default function CalendarPage() {
                         </div>
 
                         {/* Calendar Body (PHASE 19 - Elastic Time Space) */}
-                        <div className="relative grid bg-white"
+                        <div className="relative grid bg-background"
                             style={{
                                 gridTemplateColumns: selectedDay === 'all'
                                     ? `80px repeat(7, minmax(120px, 1fr))`
@@ -2348,7 +2348,7 @@ export default function CalendarPage() {
                                             const heightPx = calendarLayout.cumulativeTops[nextMinOffset] - topPx;
                                             return (
                                                 <div key={hour}
-                                                    className="absolute left-0 right-0 border-b border-[#eee] hover:bg-slate-50 cursor-crosshair transition-colors"
+                                                    className="absolute left-0 right-0 border-b border-[#eee] hover:bg-muted cursor-crosshair transition-colors"
                                                     style={{ top: `${topPx}px`, height: `${heightPx}px` }}
                                                     onClick={() => {
                                                         const dayId = col.type === 'day' ? col.id : selectedDay;
@@ -2447,7 +2447,7 @@ export default function CalendarPage() {
                                                     <div
                                                         ref={handleCardRef} 
                                                         data-event-id={evt.eventId}
-                                                        className={`w-full min-h-full h-auto p-1.5 rounded-md border-l-[6px] shadow-sm flex flex-col justify-start items-start text-left bg-white overflow-hidden relative ${evt.colorProps.className || ''}`}
+                                                        className={`w-full min-h-full h-auto p-1.5 rounded-md border-l-[6px] shadow-sm flex flex-col justify-start items-start text-left bg-background overflow-hidden relative ${evt.colorProps.className || ''}`}
                                                         style={{
                                                             fontSize: "10px",
                                                             backgroundColor: currentActType === "course" ? evt.colorProps.backgroundColor : `${ACTIVITY_TYPE_COLORS[currentActType] || '#1e40af'}10`,
@@ -2491,12 +2491,12 @@ export default function CalendarPage() {
                                                                 </div>
                                                             );
                                                         })()}
-                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full pr-[45px] text-slate-900">{evt.startTime} - {evt.endTime}</div>
-                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[45px] break-normal overflow-hidden text-slate-900">
+                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full pr-[45px] text-foreground">{evt.startTime} - {evt.endTime}</div>
+                                                        <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[45px] break-normal overflow-hidden text-foreground">
                                                             {evt.title}
                                                         </div>
-                                                        {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5 text-slate-800">{ins1}</div>}
-                                                        {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90 text-slate-800">{ins2}</div>}
+                                                        {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5 text-foreground">{ins1}</div>}
+                                                        {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90 text-foreground">{ins2}</div>}
                                                         
                                                         <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-1 shrink-0 z-10 w-full relative">
                                                             {evt.registryKey === "studioBookings" && (
@@ -2506,7 +2506,7 @@ export default function CalendarPage() {
                                                             )}
                                                             
                                                             {stats && (
-                                                                <div className="flex flex-wrap items-center gap-1.5 text-[9px] font-bold w-full bg-white/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
+                                                                <div className="flex flex-wrap items-center gap-1.5 text-[9px] font-bold w-full bg-background/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
                                                                     <span className="text-blue-700 whitespace-nowrap">U:{stats.men}</span>
                                                                     <span className="text-pink-700 whitespace-nowrap">D:{stats.women}</span>
                                                                     {availability !== null && (
@@ -2542,18 +2542,18 @@ export default function CalendarPage() {
                                                                         }
                                                                         
                                                                         return remainingOccurrences && remainingOccurrences > 0 ? (
-                                                                            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
+                                                                            <span className="text-[10px] font-semibold text-muted-foreground bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
                                                                                 {remainingOccurrences} Lez
                                                                             </span>
                                                                         ) : <span className="w-4"></span>;
                                                                     })()}
                                                                     <div className="flex gap-1 shrink-0">
                                                                         {(evt.sourceType === "course" || evt.sourceType === "courses") && (
-                                                                            <button onClick={(e) => { e.stopPropagation(); handleDuplicateSingle(evt.rawPayload as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-indigo-600 transition-colors shadow-sm border border-black/5" title="Duplica Corso">
+                                                                            <button onClick={(e) => { e.stopPropagation(); handleDuplicateSingle(evt.rawPayload as any); }} className="bg-background/60 p-0.5 px-1 rounded hover:bg-background text-indigo-600 transition-colors shadow-sm border border-black/5" title="Duplica Corso">
                                                                                 <Copy className="w-2.5 h-2.5" />
                                                                             </button>
                                                                         )}
-                                                                        <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-white/60 p-0.5 px-1 rounded hover:bg-white text-slate-800 transition-colors shadow-sm border border-black/5" title="Modifica rapida">
+                                                                        <button onClick={(e) => { e.stopPropagation(); handleEdit(e as any); }} className="bg-background/60 p-0.5 px-1 rounded hover:bg-background text-foreground transition-colors shadow-sm border border-black/5" title="Modifica rapida">
                                                                             <Edit2 className="w-2.5 h-2.5" />
                                                                         </button>
                                                                     </div>
@@ -2579,14 +2579,14 @@ export default function CalendarPage() {
                                                             </div>
                                                             
                                                             {codeLabel && (
-                                                                <div className="bg-slate-100 text-[8px] font-bold px-1.5 py-0.5 rounded text-slate-600 break-all leading-tight w-full">
+                                                                <div className="bg-slate-100 text-[8px] font-bold px-1.5 py-0.5 rounded text-muted-foreground break-all leading-tight w-full">
                                                                     {codeLabel}
                                                                 </div>
                                                             )}
                                                         </div>
                                                         
                                                         {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
-                                                            <span className="text-[10px] font-bold absolute top-1 right-[75px] bg-white/90 px-1.5 py-0.5 rounded shadow-sm text-slate-800 border-black/5 border z-40">
+                                                            <span className="text-[10px] font-bold absolute top-1 right-[75px] bg-background/90 px-1.5 py-0.5 rounded shadow-sm text-foreground border-black/5 border z-40">
                                                                 €{Number(evt.rawPayload.amount).toFixed(2)}
                                                             </span>
                                                         )}
@@ -2983,12 +2983,12 @@ export default function CalendarPage() {
                                 </PopoverContent>
                             </Popover>
                             {bookingForm.memberId && (
-                                <div className="mt-2 text-[11px] bg-slate-50 p-2 rounded-md border border-slate-200 flex flex-col gap-1 animate-in fade-in slide-in-from-top-1">
-                                    <div className="flex items-center gap-2 text-slate-600">
+                                <div className="mt-2 text-[11px] bg-muted p-2 rounded-md border border-border flex flex-col gap-1 animate-in fade-in slide-in-from-top-1">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
                                         <Mail className="w-3 h-3" />
                                         <span>{bookingForm.memberEmail || "Email non presente"}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-slate-600">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
                                         <Phone className="w-3 h-3" />
                                         <span>{bookingForm.memberPhone || bookingForm.memberMobile || "Telefono non presente"}</span>
                                     </div>
@@ -3103,7 +3103,7 @@ export default function CalendarPage() {
                                 <PopoverContent className="w-64 p-3 max-h-80 overflow-y-auto" align="center">
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between border-b pb-2">
-                                            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-500">Disponibilità</h4>
+                                            <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Disponibilità</h4>
                                             <Badge variant="outline" className="text-[10px]">
                                                 {bookingForm.bookingDate ? format(new Date(bookingForm.bookingDate), 'dd/MM/yyyy') : "Seleziona data"}
                                             </Badge>
@@ -3343,8 +3343,8 @@ export default function CalendarPage() {
                         </Button>
                     </div>
 
-                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-md text-xs text-slate-600 mt-2">
-                        <strong className="block text-slate-800 mb-1">Regole di Dominio Operativo:</strong>
+                    <div className="bg-muted border border-border p-3 rounded-md text-xs text-muted-foreground mt-2">
+                        <strong className="block text-foreground mb-1">Regole di Dominio Operativo:</strong>
                         Quest'area è designata ad ospitare l'inserimento rapido delle 10 attività day-by-day.<br/>
                         <em>Nota: L'inserimento di eventi strategici (Saggi, Vacanze Studio, Eventi Esterni) non è permesso qui, e andrà pilotato dal Planning.</em>
                     </div>

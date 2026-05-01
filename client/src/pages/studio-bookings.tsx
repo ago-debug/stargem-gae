@@ -627,7 +627,7 @@ export default function StudioBookings() {
                                                 </div>
                                             </TableCell>
                                             <TableCell className={cn(isSortedColumn("studioName") && "sorted-column-cell")}>
-                                                <Badge variant="outline" className="bg-slate-50">
+                                                <Badge variant="outline" className="bg-muted">
                                                     {b.studioName || "Sala"}
                                                 </Badge>
                                             </TableCell>
@@ -940,12 +940,12 @@ export default function StudioBookings() {
                                 </PopoverContent>
                             </Popover>
                             {bookingForm.memberId && (
-                                <div className="mt-2 text-[11px] bg-slate-50 p-2 rounded-md border border-slate-200 flex flex-col gap-1 animate-in fade-in slide-in-from-top-1">
-                                    <div className="flex items-center gap-2 text-slate-600">
+                                <div className="mt-2 text-[11px] bg-muted p-2 rounded-md border border-border flex flex-col gap-1 animate-in fade-in slide-in-from-top-1">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
                                         <Mail className="w-3 h-3" />
                                         <span>{bookingForm.memberEmail || "Email non presente"}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-slate-600">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
                                         <Phone className="w-3 h-3" />
                                         <span>{bookingForm.memberPhone || bookingForm.memberMobile || "Telefono non presente"}</span>
                                     </div>
@@ -1013,7 +1013,7 @@ export default function StudioBookings() {
                                 <PopoverContent className="w-64 p-3 max-h-80 overflow-y-auto" align="center">
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between border-b pb-2">
-                                            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-500">Disponibilità</h4>
+                                            <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Disponibilità</h4>
                                             <Badge variant="outline" className="text-[10px]">
                                                 {bookingForm.bookingDate ? format(new Date(bookingForm.bookingDate), 'dd/MM/yyyy') : "Seleziona data"}
                                             </Badge>

@@ -474,7 +474,7 @@ export default function UtentiPermessi() {
                         {siUser(data, getSortValueUser).map((u: User) => (
                           <TableRow key={u.id}>
                             <TableCell className={cn("font-medium flex items-center gap-2", iscUser("username") && "sorted-column-cell")}>
-                              <div className="w-8 h-8 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center border border-slate-200 shrink-0">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center border border-border shrink-0">
                                 {u.profileImageUrl ? (
                                   <img src={u.profileImageUrl} alt="Avatar" className="w-full h-full object-cover" />
                                 ) : (
@@ -608,7 +608,7 @@ export default function UtentiPermessi() {
                         </TableCell>
                         <TableCell className={cn("text-sm", iscRole("description") && "sorted-column-cell")}>{r.description || "-"}</TableCell>
                         <TableCell className={cn(iscRole("permissions") && "sorted-column-cell")}>
-                          <span className="text-xs font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded-md">
+                          <span className="text-xs font-medium text-foreground/80 bg-slate-100 px-2 py-1 rounded-md">
                             {(() => {
                               const p = typeof r.permissions === 'string' ? JSON.parse(r.permissions as string) : (r.permissions || {});
                               if (p["*"] === "write" || p["*"] === "read") return "Accesso Totale (100%)";
@@ -698,7 +698,7 @@ export default function UtentiPermessi() {
           </DialogHeader>
           <form onSubmit={handleCreateUser} className="space-y-4">
             <div className="flex flex-col items-center gap-4 py-2">
-              <div className="relative group cursor-pointer w-20 h-20 rounded-full overflow-hidden border-2 border-slate-200">
+              <div className="relative group cursor-pointer w-20 h-20 rounded-full overflow-hidden border-2 border-border">
                 {newUserImageBase64 ? (
                   <img src={newUserImageBase64} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -784,7 +784,7 @@ export default function UtentiPermessi() {
           </DialogHeader>
           <form onSubmit={handleUpdateUser} className="space-y-4">
             <div className="flex flex-col items-center gap-4 py-2">
-              <div className="relative group cursor-pointer w-20 h-20 rounded-full overflow-hidden border-2 border-slate-200">
+              <div className="relative group cursor-pointer w-20 h-20 rounded-full overflow-hidden border-2 border-border">
                 {editUserImageBase64 ? (
                   <img src={editUserImageBase64} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (

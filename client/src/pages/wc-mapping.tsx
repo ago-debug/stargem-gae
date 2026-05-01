@@ -104,7 +104,7 @@ export default function WcMapping() {
 
   if (user?.role !== "admin") {
       return (
-         <div className="p-8 text-center text-slate-500">
+         <div className="p-8 text-center text-muted-foreground">
              Accesso negato. Solo gli amministratori possono gestire i mapping.
          </div>
       );
@@ -119,7 +119,7 @@ export default function WcMapping() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
              <ArrowLeftRight className="w-8 h-8 text-purple-600" /> WooCommerce Mapping
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -144,8 +144,8 @@ export default function WcMapping() {
            )}
            <Table>
               <TableHeader>
-                 <TableRow className="bg-slate-50">
-                    <TableHead className="font-semibold text-slate-800">Prodotto WC (Exact Match)</TableHead>
+                 <TableRow className="bg-muted">
+                    <TableHead className="font-semibold text-foreground">Prodotto WC (Exact Match)</TableHead>
                     <TableHead>Categoria StarGem</TableHead>
                     <TableHead>N. Corsi</TableHead>
                     <TableHead>Tipo Attività</TableHead>
@@ -157,7 +157,7 @@ export default function WcMapping() {
                     <TableRow><TableCell colSpan={5}><Skeleton className="h-10 w-full" /></TableCell></TableRow>
                  ) : displayData.length === 0 ? (
                     <TableRow>
-                       <TableCell colSpan={5} className="text-center py-10 text-slate-500">
+                       <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
                           Nessun mapping configurato.
                        </TableCell>
                     </TableRow>

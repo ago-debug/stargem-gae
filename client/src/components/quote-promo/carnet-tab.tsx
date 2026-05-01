@@ -121,7 +121,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
+      <div className="flex justify-between items-center bg-background p-4 rounded-lg border shadow-sm">
         <div>
           <h2 className="text-lg font-bold text-amber-900 flex items-center gap-2">
             <Layers className="w-5 h-5" /> Carnet Attivi
@@ -143,9 +143,9 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
         </div>
       </div>
 
-      <div className="border rounded-lg bg-white shadow-sm overflow-hidden min-h-[300px]">
+      <div className="border rounded-lg bg-background shadow-sm overflow-hidden min-h-[300px]">
         <Table>
-          <TableHeader className="bg-slate-50">
+          <TableHeader className="bg-muted">
             <TableRow>
               <TableHead>Cliente</TableHead>
               <TableHead>Tipo</TableHead>
@@ -198,7 +198,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
                 const grpSizeNum = carnet.groupSize || 1;
                 const groupLabel = grpSizeNum === 1 ? "Singola" : (grpSizeNum === 2 ? "Coppia" : `Gruppo ${grpSizeNum}`);
                 
-                let locationBadge = "bg-slate-100 text-slate-800";
+                let locationBadge = "bg-slate-100 text-foreground";
                 let locationLabel = "In sede";
                 if (carnet.locationType === 'domicilio') {
                   locationBadge = "bg-orange-100 text-orange-800 border-orange-200";
@@ -218,7 +218,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
                          <span className="text-xs text-muted-foreground">{groupLabel}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-slate-600 text-sm">{carnet.instructorName || carnet.roomName || '-'}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{carnet.instructorName || carnet.roomName || '-'}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1 w-full">
                         <span className="text-xs font-medium">{carnet.usedCount} / {carnet.maxUses} Ingressi</span>
@@ -247,7 +247,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
                        }}>
                           <CalendarCheck className="w-3.5 h-3.5" /> Usa 1
                        </Button>
-                       <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-800">
+                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
                           <FileOutput className="w-4 h-4" />
                        </Button>
                     </TableCell>
@@ -264,7 +264,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
             <DialogHeader>
                <DialogTitle>Registra Utilizzo Carnet</DialogTitle>
                <DialogDescription>
-                  Cliente: <strong className="text-slate-800">{selectedCarnet?.member?.lastName} {selectedCarnet?.member?.firstName}</strong> ({selectedCarnet?.carnetType})
+                  Cliente: <strong className="text-foreground">{selectedCarnet?.member?.lastName} {selectedCarnet?.member?.firstName}</strong> ({selectedCarnet?.carnetType})
                </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
@@ -326,8 +326,8 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
                   <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Opzionale" />
                </div>
                {sessionPrice !== null && (
-                 <div className="p-3 bg-slate-50 border rounded-md">
-                    <span className="text-sm font-semibold text-slate-700">Prezzo Calcolato Sessione: </span>
+                 <div className="p-3 bg-muted border rounded-md">
+                    <span className="text-sm font-semibold text-foreground/80">Prezzo Calcolato Sessione: </span>
                     <span className="text-lg text-emerald-700 font-bold">€ {sessionPrice.toFixed(2)}</span>
                     <p className="text-xs text-muted-foreground mt-1">Stima basata sulle tariffe standard. Serve solo in via informativa.</p>
                  </div>

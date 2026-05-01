@@ -209,10 +209,10 @@ export function NewCarnetDialog() {
             </div>
           </div>
 
-          <div className="col-span-2 bg-slate-50 p-4 rounded-lg flex items-center justify-between border">
+          <div className="col-span-2 bg-muted p-4 rounded-lg flex items-center justify-between border">
             <div className="space-y-1">
               <span className="text-sm font-semibold">Prezzo Suggerito (Matrix):</span>
-              <div className="text-xs text-slate-500">{priceSuggestion.isLoading ? "Calcolo..." : priceSuggestion.note || "Nessuna regola applicata"}</div>
+              <div className="text-xs text-muted-foreground">{priceSuggestion.isLoading ? "Calcolo..." : priceSuggestion.note || "Nessuna regola applicata"}</div>
             </div>
             <div className="text-xl font-bold font-mono">
               {priceSuggestion.isLoading ? "..." : `€${priceSuggestion.finalPrice}`}

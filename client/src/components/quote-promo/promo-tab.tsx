@@ -17,7 +17,7 @@ const getTargetBadgeColor = (target: string) => {
     case "staff": return "bg-orange-100 text-orange-800";
     case "personal": return "bg-red-100 text-red-800";
     case "welfare": return "bg-green-100 text-green-800";
-    default: return "bg-slate-100 text-slate-800";
+    default: return "bg-slate-100 text-foreground";
   }
 };
 
@@ -58,7 +58,7 @@ export function PromoTab({ seasonId }: PromoTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
+      <div className="flex justify-between items-center bg-background p-4 rounded-lg border shadow-sm">
         <div>
           <h2 className="text-lg font-bold">Regole Promozionali</h2>
           <p className="text-sm text-muted-foreground">Gestisci sconti in percentuale o a valore fisso</p>
@@ -68,9 +68,9 @@ export function PromoTab({ seasonId }: PromoTabProps) {
         </Button>
       </div>
 
-      <div className="border rounded-lg bg-white shadow-sm overflow-hidden min-h-[300px]">
+      <div className="border rounded-lg bg-background shadow-sm overflow-hidden min-h-[300px]">
         <Table>
-          <TableHeader className="bg-slate-50">
+          <TableHeader className="bg-muted">
             <TableRow>
               <TableHead>Codice</TableHead>
               <TableHead>Tipo Target</TableHead>
@@ -114,7 +114,7 @@ export function PromoTab({ seasonId }: PromoTabProps) {
                 
                 return (
                   <TableRow key={promo.id}>
-                    <TableCell className="font-mono font-bold text-slate-700">
+                    <TableCell className="font-mono font-bold text-foreground/80">
                       {promo.code}
                     </TableCell>
                     <TableCell>

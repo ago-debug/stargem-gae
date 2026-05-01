@@ -315,7 +315,7 @@ function AppContent() {
   if (isClient) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
-        <header className="flex items-center justify-between h-14 px-6 border-b bg-white shadow-sm">
+        <header className="flex items-center justify-between h-14 px-6 border-b bg-background shadow-sm">
           <img src={logoStarGem} alt="Studio Gem" className="h-8" />
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-muted-foreground">
@@ -326,7 +326,7 @@ function AppContent() {
             </Button>
           </div>
         </header>
-        <main className="flex-1 bg-slate-50">
+        <main className="flex-1 bg-muted">
           <Router />
         </main>
       </div>
@@ -349,7 +349,7 @@ function AppContent() {
                    className="relative cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
                 >
                    <Avatar className="h-9 w-9 border-2 border-primary/20 shadow-sm">
-                      <AvatarImage src="/assets/teo-head-new.png" alt="Teo Copilot" className="object-cover bg-white" />
+                      <AvatarImage src="/assets/teo-head-new.png" alt="Teo Copilot" className="object-cover bg-background" />
                       <AvatarFallback className="bg-primary text-white"><Bot className="w-4 h-4" /></AvatarFallback>
                    </Avatar>
                 </div>

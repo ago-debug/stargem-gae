@@ -1016,7 +1016,7 @@ export default function IscrittiPerAttivita() {
                         linkHref={`/scheda-allenamento?id=${al.id}`}
                         testIdPrefix="al"
                       >
-                        <div className="bg-white rounded-md border shadow-sm overflow-hidden">
+                        <div className="bg-background rounded-md border shadow-sm overflow-hidden">
                           <Table>
                             <TableHeader className="bg-muted/30">
                               <TableRow>
@@ -1178,7 +1178,7 @@ export default function IscrittiPerAttivita() {
                         linkHref={`/scheda-domenica?id=${dm.id}`}
                         testIdPrefix="dm"
                       >
-                        <div className="bg-white rounded-md border shadow-sm overflow-hidden">
+                        <div className="bg-background rounded-md border shadow-sm overflow-hidden">
                           <Table>
                             <TableHeader className="bg-muted/30">
                               <TableRow>
@@ -1336,7 +1336,7 @@ export default function IscrittiPerAttivita() {
                         linkHref={`/scheda-lezione-individuale?id=${li.id}`}
                         testIdPrefix="li"
                       >
-                        <div className="bg-white rounded-md border shadow-sm overflow-hidden">
+                        <div className="bg-background rounded-md border shadow-sm overflow-hidden">
                           <Table>
                             <TableHeader className="bg-muted/30">
                               <TableRow>
@@ -1516,7 +1516,7 @@ export default function IscrittiPerAttivita() {
                         linkHref={`/scheda-campus?id=${campus.id}`}
                         testIdPrefix="campus"
                       >
-                        <div className="bg-white rounded-md border shadow-sm overflow-hidden">
+                        <div className="bg-background rounded-md border shadow-sm overflow-hidden">
                           <Table>
                             <TableHeader className="bg-muted/30">
                               <TableRow>

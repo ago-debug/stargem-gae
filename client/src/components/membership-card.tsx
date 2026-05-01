@@ -90,7 +90,7 @@ export function MembershipCard({ member }: MembershipCardProps) {
             <div className="flex justify-center p-4 bg-muted/20 rounded-lg overflow-hidden">
                 <div
                     ref={cardRef}
-                    className="relative w-[220px] h-[360px] bg-white overflow-hidden font-sans border border-gray-100 flex flex-col items-center"
+                    className="relative w-[220px] h-[360px] bg-background overflow-hidden font-sans border border-gray-100 flex flex-col items-center"
                     style={{ boxSizing: 'border-box' }}
                 >
                     {/* Top Red Tab */}
@@ -123,7 +123,7 @@ export function MembershipCard({ member }: MembershipCardProps) {
                         {/* QR Code - More compact */}
                         <div className="mb-2 flex-shrink-0">
                             {qrCodeUrl && (
-                                <div className="p-1 bg-white border border-gray-50">
+                                <div className="p-1 bg-background border border-gray-50">
                                     <img src={qrCodeUrl} alt="QR" className="w-20 h-20" />
                                 </div>
                             )}
@@ -139,7 +139,7 @@ export function MembershipCard({ member }: MembershipCardProps) {
                                 <div className="flex justify-center gap-4 mt-1">
                                     <div className="flex flex-col">
                                         <span className="text-[6px] uppercase text-gray-400 font-bold leading-none">Rilascio</span>
-                                        <span className="text-[8px] font-bold text-gray-800">{formatDate(issueDate)}</span>
+                                        <span className="text-[8px] font-bold text-foreground">{formatDate(issueDate)}</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-[6px] uppercase text-gray-400 font-bold leading-none">Scadenza</span>
@@ -154,14 +154,14 @@ export function MembershipCard({ member }: MembershipCardProps) {
                             <div className="space-y-1 pb-4">
                                 <div>
                                     <div className="text-[7px] uppercase text-gray-400 font-bold leading-none tracking-tighter">Iscritto</div>
-                                    <div className="text-xs font-black uppercase text-gray-900 leading-tight">
+                                    <div className="text-xs font-black uppercase text-foreground leading-tight">
                                         {member.lastName} {member.firstName}
                                     </div>
                                 </div>
 
                                 <div>
                                     <div className="text-[7px] uppercase text-gray-400 font-bold leading-none tracking-tighter">Codice Fiscale</div>
-                                    <div className="text-[9px] font-mono font-bold uppercase text-gray-600 leading-none">
+                                    <div className="text-[9px] font-mono font-bold uppercase text-muted-foreground leading-none">
                                         {member.fiscalCode || "----------------"}
                                     </div>
                                 </div>

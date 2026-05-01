@@ -41,17 +41,17 @@ function AIUsageCard() {
                 ) : (
                     <div className="space-y-4">
                         <div className="grid grid-cols-3 gap-2">
-                            <div className="bg-slate-50 p-3 rounded-lg border text-center">
+                            <div className="bg-muted p-3 rounded-lg border text-center">
                                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Costo Totale</p>
-                                <p className="text-xl font-bold text-slate-800">${Number(usageData?.totalCost || 0).toFixed(4)}</p>
+                                <p className="text-xl font-bold text-foreground">${Number(usageData?.totalCost || 0).toFixed(4)}</p>
                             </div>
-                            <div className="bg-slate-50 p-3 rounded-lg border text-center">
+                            <div className="bg-muted p-3 rounded-lg border text-center">
                                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Token Usati</p>
-                                <p className="text-xl font-bold text-slate-800">{usageData?.totalTokens || 0}</p>
+                                <p className="text-xl font-bold text-foreground">{usageData?.totalTokens || 0}</p>
                             </div>
-                            <div className="bg-slate-50 p-3 rounded-lg border text-center">
+                            <div className="bg-muted p-3 rounded-lg border text-center">
                                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Richieste</p>
-                                <p className="text-xl font-bold text-slate-800">{usageData?.totalRequests || 0}</p>
+                                <p className="text-xl font-bold text-foreground">{usageData?.totalRequests || 0}</p>
                             </div>
                         </div>
 
@@ -68,7 +68,7 @@ function AIUsageCard() {
                                     </thead>
                                     <tbody className="divide-y">
                                         {usageData.latestLogs.map((log: any) => (
-                                            <tr key={log.id} className="bg-white">
+                                            <tr key={log.id} className="bg-background">
                                                 <td className="px-3 py-2 whitespace-nowrap text-xs">
                                                     {format(new Date(log.createdAt), "dd MMM, HH:mm", { locale: it })}
                                                 </td>

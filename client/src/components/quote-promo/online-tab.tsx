@@ -59,7 +59,7 @@ export function OnlineTab() {
       case "woocommerce": return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200">WooCommerce</Badge>;
       case "webhook_woocommerce": return <Badge className="bg-fuchsia-100 text-fuchsia-700 hover:bg-fuchsia-200">Webhook WC</Badge>;
       case "webhook_stripe": return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">Stripe</Badge>;
-      default: return <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200">Sede</Badge>;
+      default: return <Badge className="bg-slate-100 text-foreground/80 hover:bg-slate-200">Sede</Badge>;
     }
   };
 
@@ -80,16 +80,16 @@ export function OnlineTab() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between bg-slate-50 border-b pb-4">
+        <CardHeader className="flex flex-row items-center justify-between bg-muted border-b pb-4">
           <div>
-            <CardTitle className="text-lg flex items-center gap-2 text-slate-800">
+            <CardTitle className="text-lg flex items-center gap-2 text-foreground">
                <Globe className="w-5 h-5 text-indigo-600" /> Pagamenti e Iscrizioni Online
             </CardTitle>
             <CardDescription>Gestisci gli acquisti transitati dal sito o dai canali esterni</CardDescription>
           </div>
           <div className="flex items-center gap-3">
              <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-40 bg-white"><SelectValue/></SelectTrigger>
+                <SelectTrigger className="w-40 bg-background"><SelectValue/></SelectTrigger>
                 <SelectContent>
                    <SelectItem value="all">Tutti</SelectItem>
                    <SelectItem value="pending">Da completare</SelectItem>
@@ -116,7 +116,7 @@ export function OnlineTab() {
                 <TableRow><TableCell colSpan={6}><Skeleton className="h-10 w-full" /></TableCell></TableRow>
               ) : filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10 text-slate-500">
+                  <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
                     Nessun pagamento online ricevuto. <br/>Configura il webhook WooCommerce per iniziare.
                   </TableCell>
                 </TableRow>
@@ -127,7 +127,7 @@ export function OnlineTab() {
                     <TableCell>{getSourceBadge(p.source)}</TableCell>
                     <TableCell>€{p.amount?.toFixed(2) || "0.00"}</TableCell>
                     <TableCell>{new Date(p.date).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-xs font-mono text-slate-500">
+                    <TableCell className="text-xs font-mono text-muted-foreground">
                        {p.description?.includes("Ordine WooCommerce") 
                           ? p.description.match(/#(\d+)/)?.[0] || "—" 
                           : "—"}
@@ -155,15 +155,15 @@ export function OnlineTab() {
                <DialogDescription>Verifica la consegna della documentazione in sede per sbloccare l'allievo.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-               <div className="flex items-center space-x-2 border p-3 rounded-md bg-slate-50">
+               <div className="flex items-center space-x-2 border p-3 rounded-md bg-muted">
                  <Checkbox id="cert" checked={certificato} onCheckedChange={(v) => setCertificato(v as boolean)} />
                  <Label htmlFor="cert" className="cursor-pointer font-medium">Certificato medico consegnato fisicamente</Label>
                </div>
-               <div className="flex items-center space-x-2 border p-3 rounded-md bg-slate-50">
+               <div className="flex items-center space-x-2 border p-3 rounded-md bg-muted">
                  <Checkbox id="tess" checked={tessera} onCheckedChange={(v) => setTessera(v as boolean)} />
                  <Label htmlFor="tess" className="cursor-pointer font-medium">Quota tesseramento regolarizzata in sede</Label>
                </div>
-               <div className="flex items-center space-x-2 border p-3 rounded-md bg-slate-50">
+               <div className="flex items-center space-x-2 border p-3 rounded-md bg-muted">
                  <Checkbox id="docs" checked={documenti} onCheckedChange={(v) => setDocumenti(v as boolean)} />
                  <Label htmlFor="docs" className="cursor-pointer font-medium">Moduli GDPR e privacy firmati</Label>
                </div>

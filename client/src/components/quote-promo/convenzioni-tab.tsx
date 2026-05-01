@@ -34,16 +34,16 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
       case "azienda": return { color: "bg-violet-100 text-violet-800 border-violet-200", icon: <Building className="w-4 h-4 mr-1" />, label: "Azienda" };
       case "scuola": return { color: "bg-orange-100 text-orange-800 border-orange-200", icon: <GraduationCap className="w-4 h-4 mr-1" />, label: "Scuola" };
       case "accademia": return { color: "bg-teal-100 text-teal-800 border-teal-200", icon: <Building2 className="w-4 h-4 mr-1" />, label: "Accademia" };
-      case "studio_professionale": return { color: "bg-slate-100 text-slate-800 border-slate-200", icon: <Briefcase className="w-4 h-4 mr-1" />, label: "Studio Professionale" };
-      default: return { color: "bg-slate-100 text-slate-800 border-slate-200", icon: <Building2 className="w-4 h-4 mr-1" />, label: "Altro" };
+      case "studio_professionale": return { color: "bg-slate-100 text-foreground border-border", icon: <Briefcase className="w-4 h-4 mr-1" />, label: "Studio Professionale" };
+      default: return { color: "bg-slate-100 text-foreground border-border", icon: <Building2 className="w-4 h-4 mr-1" />, label: "Altro" };
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
+      <div className="flex justify-between items-center bg-background p-4 rounded-lg border shadow-sm">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             <Building2 className="w-5 h-5 text-indigo-600" /> Convenzioni e Partnership
           </h2>
           <p className="text-sm text-muted-foreground">Enti e aziende convenzionati con sconti riservati a iscritti e dipendenti</p>
@@ -82,9 +82,9 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
             const style = getTypeStyle(conv.companyType);
             return (
               <Card key={conv.id} className="shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-                <CardHeader className="pb-3 border-b bg-slate-50/50">
+                <CardHeader className="pb-3 border-b bg-muted/50">
                   <div className="flex justify-between items-start gap-4">
-                    <CardTitle className="text-lg text-slate-800 leading-tight flex-1">{conv.companyName}</CardTitle>
+                    <CardTitle className="text-lg text-foreground leading-tight flex-1">{conv.companyName}</CardTitle>
                     {conv.isActive && <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 shrink-0">Attiva</Badge>}
                   </div>
                   <Badge variant="outline" className={`mt-2 w-fit flex items-center ${style.color}`}>
@@ -107,10 +107,10 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
                   </div>
 
                   <div className="bg-slate-100 p-3 rounded-md">
-                     <span className="flex items-center text-xs font-semibold text-slate-700 mb-1">
+                     <span className="flex items-center text-xs font-semibold text-foreground/80 mb-1">
                         <Users className="w-3.5 h-3.5 mr-1" /> Chi può usarla:
                      </span>
-                     <p className="text-sm text-slate-600 line-clamp-2">{conv.eligibleWho || "Tutti gli afferenti"}</p>
+                     <p className="text-sm text-muted-foreground line-clamp-2">{conv.eligibleWho || "Tutti gli afferenti"}</p>
                   </div>
 
                   {conv.specialRules && (
@@ -121,16 +121,16 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
                           <ChevronDown className="w-4 h-4 ml-2" />
                         </Button>
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="pt-2 text-xs text-slate-500 italic bg-amber-50 p-3 rounded border border-amber-100">
+                      <CollapsibleContent className="pt-2 text-xs text-muted-foreground italic bg-amber-50 p-3 rounded border border-amber-100">
                         {conv.specialRules}
                       </CollapsibleContent>
                     </Collapsible>
                   )}
                 </CardContent>
-                <CardFooter className="bg-slate-50 pt-3 flex justify-between items-center border-t">
+                <CardFooter className="bg-muted pt-3 flex justify-between items-center border-t">
                   <div className="flex flex-col">
                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Restrizioni Extra</span>
-                     <span className="text-xs font-mono text-slate-700">{conv.excludeOtherPromos ? "Non cumulabile" : "Cumulabile"}</span>
+                     <span className="text-xs font-mono text-foreground/80">{conv.excludeOtherPromos ? "Non cumulabile" : "Cumulabile"}</span>
                   </div>
                   <Button variant="outline" size="sm" className="hidden border-indigo-200 text-indigo-700">Modifica</Button>
                 </CardFooter>
@@ -138,7 +138,7 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
             );
           })
         ) : (
-          <div className="col-span-full h-32 flex items-center justify-center border-2 border-dashed rounded-lg bg-slate-50 text-slate-500">
+          <div className="col-span-full h-32 flex items-center justify-center border-2 border-dashed rounded-lg bg-muted text-muted-foreground">
              Nessuna convenzione attiva trovata.
           </div>
         )}

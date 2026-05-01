@@ -694,7 +694,7 @@ export default function ActivityManagementPage({
             <div className="space-y-2">
               <Label>Allievo / Partecipante Principale</Label>
               <Select value={selectedMemberId} onValueChange={setSelectedMemberId}>
-                <SelectTrigger className="bg-white/50">
+                <SelectTrigger className="bg-background/50">
                   <SelectValue placeholder="Seleziona allievo..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -710,7 +710,7 @@ export default function ActivityManagementPage({
               <Label>Obiettivo Specifico Sessione</Label>
               <Input 
                 placeholder="Es. Rieducazione spalla, Potenziamento..." 
-                className="bg-white/50" 
+                className="bg-background/50" 
                 value={targetPurpose}
                 onChange={(e) => setTargetPurpose(e.target.value)}
               />
@@ -726,7 +726,7 @@ export default function ActivityManagementPage({
             <div className="space-y-2">
               <Label>Livello Consigliato / Intensità</Label>
               <Select value={difficultyLevel} onValueChange={setDifficultyLevel}>
-                <SelectTrigger className="bg-white/50"><SelectValue placeholder="Seleziona livello..." /></SelectTrigger>
+                <SelectTrigger className="bg-background/50"><SelectValue placeholder="Seleziona livello..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="base">Programma Base</SelectItem>
                   <SelectItem value="intermedio">Programma Intermedio</SelectItem>
@@ -739,7 +739,7 @@ export default function ActivityManagementPage({
               <Label>Gruppo / Attrezzi Prenotati</Label>
               <Input 
                 placeholder="Es. Macchinari Cardio, Circuito 1..." 
-                className="bg-white/50" 
+                className="bg-background/50" 
                 value={equipment}
                 onChange={(e) => setEquipment(e.target.value)}
               />
@@ -794,14 +794,14 @@ export default function ActivityManagementPage({
               </Button>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="border-gold text-gold-foreground font-semibold bg-white/50 hover:bg-gold/10 px-3">
+                  <Button variant="outline" className="border-gold text-gold-foreground font-semibold bg-background/50 hover:bg-gold/10 px-3">
                     📋 {filteredItems.length} {itemLabelPlural.charAt(0).toUpperCase() + itemLabelPlural.slice(1)} ▼
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-0" align="end">
                   <div className="p-4 space-y-4">
                     <div>
-                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Categoria</h4>
+                      <h4 className="font-semibold text-sm mb-2 text-foreground border-b pb-1">Categoria</h4>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                         {Object.entries(
                             filteredItems.reduce((acc, c) => {
@@ -811,7 +811,7 @@ export default function ActivityManagementPage({
                             }, {} as Record<string, number>)
                           ).sort((a,b) => b[1] - a[1])
                           .map(([cat, count]) => (
-                            <div key={cat} className="flex justify-between text-slate-600">
+                            <div key={cat} className="flex justify-between text-muted-foreground">
                               <span className="truncate pr-2">{cat}</span>
                               <span className="font-semibold">{count}</span>
                             </div>
@@ -819,7 +819,7 @@ export default function ActivityManagementPage({
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-sm mb-2 text-slate-800 border-b pb-1">Tipologia / Nome</h4>
+                      <h4 className="font-semibold text-sm mb-2 text-foreground border-b pb-1">Tipologia / Nome</h4>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs max-h-40 overflow-y-auto pr-1 custom-scrollbar">
                         {Object.entries(
                             filteredItems.reduce((acc, c) => {
@@ -829,7 +829,7 @@ export default function ActivityManagementPage({
                             }, {} as Record<string, number>)
                           ).sort((a,b) => b[1] - a[1])
                           .map(([name, count]) => (
-                            <div key={name} className="flex justify-between text-slate-600">
+                            <div key={name} className="flex justify-between text-muted-foreground">
                               <span className="truncate pr-2">{name}</span>
                               <span className="font-semibold">{count}</span>
                             </div>
@@ -1087,7 +1087,7 @@ export default function ActivityManagementPage({
                           <Button
                             variant="outline"
                             size="icon"
-                            className="bg-white text-black border-foreground/20 hover:bg-gray-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                            className="bg-background text-black border-foreground/20 hover:bg-gray-50 dark:bg-background dark:text-black dark:hover:bg-gray-100"
                             onClick={() => {
                               if (confirm(`Sei sicuro di voler eliminare questo ${itemLabel}?`)) {
                                 deleteMutation.mutate(item.id);

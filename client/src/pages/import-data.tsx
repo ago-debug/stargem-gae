@@ -955,8 +955,8 @@ export default function ImportData() {
                               <p className="text-xs font-semibold text-blue-700">DA AGGIORNARE</p>
                             </div>
                             <div className="bg-gray-50 p-4 rounded-xl text-center">
-                              <p className="text-3xl font-black text-gray-600">{dryRunData.unchanged}</p>
-                              <p className="text-xs font-semibold text-gray-700">INVARIATI</p>
+                              <p className="text-3xl font-black text-muted-foreground">{dryRunData.unchanged}</p>
+                              <p className="text-xs font-semibold text-foreground/80">INVARIATI</p>
                             </div>
                             <div className="bg-red-50 p-4 rounded-xl text-center">
                               <p className="text-3xl font-black text-red-600">{dryRunData.errors}</p>

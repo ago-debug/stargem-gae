@@ -54,7 +54,7 @@ export default function AuditLogsPage() {
                     <Trash2 className="w-6 h-6 text-destructive" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-gray-100">
                         Storico Eliminazioni (Cestino)
                     </h1>
                     <p className="text-muted-foreground mt-1">
@@ -107,7 +107,7 @@ export default function AuditLogsPage() {
                                             </TableCell>
                                             <TableCell className={cn(isSortedColumn("entityType") && "sorted-column-cell")}>
                                                 <div className="flex items-center gap-2">
-                                                    <Badge variant="outline" className="font-mono bg-slate-50">
+                                                    <Badge variant="outline" className="font-mono bg-muted">
                                                         {getEntityLabel(log.entityType)} #{log.entityId}
                                                     </Badge>
                                                 </div>

@@ -44,7 +44,7 @@ export function SharedActivityLog({ hideTitle = false, type = "all" }: { hideTit
       {!hideTitle && <h3 className="text-lg font-medium">Cronologia Operazioni e Accessi</h3>}
       <div className="border rounded-md overflow-x-auto max-h-[60vh] overflow-y-auto">
         <Table>
-          <TableHeader className="bg-slate-50 sticky top-0 z-10 shadow-sm">
+          <TableHeader className="bg-muted sticky top-0 z-10 shadow-sm">
             <TableRow>
               <SortableTableHead sortKey="createdAt" currentSort={scLog} onSort={hsLog}>Data/Ora</SortableTableHead>
               <SortableTableHead sortKey="username" currentSort={scLog} onSort={hsLog}>Utente</SortableTableHead>
@@ -68,7 +68,7 @@ export function SharedActivityLog({ hideTitle = false, type = "all" }: { hideTit
                       log.action === 'DELETE' ? 'bg-red-100 text-red-700' :
                         log.action === 'LOGIN' ? 'bg-emerald-100 text-emerald-700' :
                           log.action === 'LOGOUT' ? 'bg-amber-100 text-amber-700' :
-                            'bg-gray-100 text-gray-700'
+                            'bg-gray-100 text-foreground/80'
                     }`}>
                     {log.action}
                   </span>

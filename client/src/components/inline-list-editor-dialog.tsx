@@ -18,7 +18,7 @@ export function InlineListEditorDialog({ listCode, listName, showColors, trigger
       <DialogTrigger asChild>
         {trigger || (
           <Button type="button" size="icon" variant="ghost" className="h-5 w-5">
-            <Edit className="w-3 h-3 text-slate-500" />
+            <Edit className="w-3 h-3 text-muted-foreground" />
           </Button>
         )}
       </DialogTrigger>

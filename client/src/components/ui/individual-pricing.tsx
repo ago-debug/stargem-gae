@@ -64,14 +64,14 @@ export function IndividualPricing({ formData, updateForm, membersList }: { formD
   return (
     <div className="space-y-4 w-full">
       <div className="flex items-center justify-between">
-        <Label className="text-slate-800 font-bold text-lg">Calcolo Prezzo e Pacchetti</Label>
+        <Label className="text-foreground font-bold text-lg">Calcolo Prezzo e Pacchetti</Label>
         <div className="flex items-center gap-2">
           <Checkbox id="manual-override" checked={isManualOverride} onCheckedChange={(c) => setIsManualOverride(!!c)} />
           <Label htmlFor="manual-override" className="text-sm font-normal">Preventivo Manuale</Label>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 border rounded-md">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-muted p-4 border rounded-md">
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Label className="font-semibold">Prezzo Finale (€)</Label>
@@ -87,12 +87,12 @@ export function IndividualPricing({ formData, updateForm, membersList }: { formD
                 updateForm("price", e.target.value);
             }} 
             disabled={!isManualOverride}
-            className={`text-lg font-bold ${!isManualOverride ? "bg-slate-100" : "bg-white border-blue-400"}`}
+            className={`text-lg font-bold ${!isManualOverride ? "bg-slate-100" : "bg-background border-blue-400"}`}
           />
         </div>
 
         <div className="space-y-3">
-          <Label className="font-semibold text-slate-800">Scelta Pacchetto Pre-Pagato</Label>
+          <Label className="font-semibold text-foreground">Scelta Pacchetto Pre-Pagato</Label>
           <Combobox
             name="packageSingle"
             value={formData.packageSingle || "none"}

@@ -28,7 +28,7 @@ export const ACTIVITY_TYPE_COLORS: Record<string, string> = {
     "vacanze-studio": "bg-orange-100 text-orange-800 border-orange-300 font-medium",
     "domeniche-movimento": "bg-amber-100 text-amber-800 border-amber-300",
     "campus": "bg-teal-100 text-teal-800 border-teal-300",
-    "servizi": "bg-slate-200 text-slate-800 border-slate-300", // Eventi Esterni / Custom Ext.
+    "servizi": "bg-slate-200 text-foreground border-border", // Eventi Esterni / Custom Ext.
     "corsi": "bg-emerald-100 text-emerald-800 border-emerald-300", // Corsi standard
     "prove-gratuite": "bg-blue-100 text-blue-800 border-blue-300",
     "prove-pagamento": "bg-cyan-100 text-cyan-800 border-cyan-300",
@@ -41,13 +41,13 @@ export const ACTIVITY_TYPE_COLORS: Record<string, string> = {
     "sunday": "bg-amber-100 text-amber-800 border-amber-300",
     "vacation": "bg-orange-100 text-orange-800 border-orange-300 font-medium",
     "recital": "bg-rose-100 text-rose-800 border-rose-300",
-    "external": "bg-slate-200 text-slate-800 border-slate-300"
+    "external": "bg-slate-200 text-foreground border-border"
 };
 
 /**
  * Provides a canonical color class for any activity registry ID
  */
-export const getEventColorClass = (activityId: string, fallbackClass: string = "bg-gray-100 text-gray-800 border-gray-300") => {
+export const getEventColorClass = (activityId: string, fallbackClass: string = "bg-gray-100 text-foreground border-border") => {
     if (ACTIVITY_TYPE_COLORS[activityId]) return ACTIVITY_TYPE_COLORS[activityId];
     return fallbackClass;
 };

@@ -420,7 +420,7 @@ export function MemberEditDialog() {
                                         name="medicalCertificateExpiry"
                                         type="date"
                                         defaultValue={member?.medicalCertificateExpiry ? (typeof member.medicalCertificateExpiry === 'string' ? member.medicalCertificateExpiry : new Date(member.medicalCertificateExpiry).toISOString().split('T')[0]) : ""}
-                                        className="h-9 w-36 bg-white"
+                                        className="h-9 w-36 bg-background"
                                     />
                                 )}
                             </div>

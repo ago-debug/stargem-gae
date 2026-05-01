@@ -46,7 +46,7 @@ export default function WebhookStatus() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-       case "received": return <Badge className="bg-slate-100 text-slate-700">In attesa</Badge>;
+       case "received": return <Badge className="bg-slate-100 text-foreground/80">In attesa</Badge>;
        case "processed": return <Badge className="bg-emerald-100 text-emerald-700">✓ Processato</Badge>;
        case "failed": return <Badge className="bg-red-100 text-red-700">✗ Fallito</Badge>;
        case "ignored": return <Badge className="bg-amber-100 text-amber-700">Ignorato</Badge>;
@@ -58,7 +58,7 @@ export default function WebhookStatus() {
 
   if (user?.role !== "admin") {
       return (
-         <div className="p-8 text-center text-slate-500">
+         <div className="p-8 text-center text-muted-foreground">
              Accesso negato. Solo gli amministratori possono visualizzare lo stato dei webhook.
          </div>
       );
@@ -90,7 +90,7 @@ export default function WebhookStatus() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
              <Radio className="w-8 h-8 text-indigo-600" /> Webhook Monitor (Admin)
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -100,10 +100,10 @@ export default function WebhookStatus() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-         <Card className="bg-slate-50 border-slate-200">
+         <Card className="bg-muted border-border">
             <CardContent className="p-4">
-               <div className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Totale Oggi</div>
-               <div className="text-2xl font-bold mt-1 text-slate-800">{todayCount}</div>
+               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Totale Oggi</div>
+               <div className="text-2xl font-bold mt-1 text-foreground">{todayCount}</div>
             </CardContent>
          </Card>
          <Card className="bg-emerald-50 border-emerald-200">
@@ -118,10 +118,10 @@ export default function WebhookStatus() {
                <div className="text-2xl font-bold mt-1 text-red-800">{failedCount}</div>
             </CardContent>
          </Card>
-         <Card className="bg-slate-100 border-slate-300">
+         <Card className="bg-slate-100 border-border">
             <CardContent className="p-4">
-               <div className="text-xs font-semibold text-slate-500 uppercase tracking-widest">In Attesa</div>
-               <div className="text-2xl font-bold mt-1 text-slate-700">{waitingCount}</div>
+               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">In Attesa</div>
+               <div className="text-2xl font-bold mt-1 text-foreground/80">{waitingCount}</div>
             </CardContent>
          </Card>
       </div>
@@ -133,7 +133,7 @@ export default function WebhookStatus() {
               <CardDescription>Eventi di sistema registrati dagli endpoint aperti</CardDescription>
            </div>
            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-48 bg-white"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-48 bg-background"><SelectValue /></SelectTrigger>
               <SelectContent>
                  <SelectItem value="all">Tutti i log</SelectItem>
                  <SelectItem value="failed">Solo Falliti</SelectItem>
@@ -163,7 +163,7 @@ export default function WebhookStatus() {
                     <TableRow><TableCell colSpan={6}><Skeleton className="h-10 w-full" /></TableCell></TableRow>
                  ) : filteredData.length === 0 ? (
                     <TableRow>
-                       <TableCell colSpan={6} className="text-center py-10 text-slate-500">
+                       <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
                           Nessun webhook ricevuto con questo filtro.
                        </TableCell>
                     </TableRow>
@@ -171,14 +171,14 @@ export default function WebhookStatus() {
                     filteredData.map((log: any) => (
                        <TableRow key={log.id}>
                           <TableCell className="text-xs">{new Date(log.createdAt).toLocaleString()}</TableCell>
-                          <TableCell className="font-semibold text-slate-700 capitalize">{log.source}</TableCell>
-                          <TableCell className="font-mono text-xs bg-slate-50 px-2 py-1 rounded inline-block mt-2 border text-slate-600">{log.eventType}</TableCell>
-                          <TableCell className="text-sm font-mono text-slate-500">{log.externalId || "—"}</TableCell>
+                          <TableCell className="font-semibold text-foreground/80 capitalize">{log.source}</TableCell>
+                          <TableCell className="font-mono text-xs bg-muted px-2 py-1 rounded inline-block mt-2 border text-muted-foreground">{log.eventType}</TableCell>
+                          <TableCell className="text-sm font-mono text-muted-foreground">{log.externalId || "—"}</TableCell>
                           <TableCell>{getStatusBadge(log.status)}</TableCell>
                           <TableCell>
                              <div className="flex items-center gap-2">
                                 <Button size="sm" variant="outline" className="h-8 group" onClick={() => setViewedPayload(log.rawPayload)} title="Mostra Payload">
-                                   <Code className="w-4 h-4 text-slate-400 group-hover:text-slate-600" />
+                                   <Code className="w-4 h-4 text-slate-400 group-hover:text-muted-foreground" />
                                 </Button>
                                 {log.status === "failed" && (
                                     <Button size="sm" variant="outline" className="h-8 border-red-200 text-red-600 hover:bg-red-50" onClick={() => retryMutation.mutate(log.id)}>
