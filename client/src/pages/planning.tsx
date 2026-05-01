@@ -49,15 +49,15 @@ const MONTHS_ORDERED = [
 
 const getStrategicColor = (type: string, title?: string) => {
     const t = (title || '').toUpperCase();
-    if (type === 'chiusura' || t.includes('STRAORDINARI')) return 'bg-orange-100 text-orange-800 border-l border-orange-400';
-    if (type === 'ferie' || t.includes('FERIE')) return 'bg-[#9D174D]/10 text-[#9D174D] border-l border-[#9D174D]/50';
-    if (type === 'campus' || t.includes('CAM')) return 'bg-sky-100 text-sky-800 border-l border-sky-400';
-    if (type === 'saggio' || t.includes('SAG')) return 'bg-pink-100 text-pink-800 border-l border-pink-400';
-    if (t.includes('WS')) return 'bg-orange-100 text-orange-800 border-l border-orange-400';
-    if (t.includes('VAC')) return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-l border-emerald-400';
-    if (type === 'nota' || t.includes('PROMO')) return 'bg-yellow-100 text-yellow-800 border-l border-yellow-400';
-    if (type === 'evento') return 'bg-indigo-50 text-indigo-800 border-l border-indigo-400';
-    if (t.includes('AFT')) return 'bg-slate-200 text-foreground border-l border-slate-400';
+    if (type === 'chiusura' || t.includes('STRAORDINARI')) return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-l border-orange-400 dark:border-orange-800';
+    if (type === 'ferie' || t.includes('FERIE')) return 'bg-[#9D174D]/10 dark:bg-[#9D174D]/30 text-[#9D174D] dark:text-pink-300 border-l border-[#9D174D]/50';
+    if (type === 'campus' || t.includes('CAM')) return 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300 border-l border-sky-400 dark:border-sky-800';
+    if (type === 'saggio' || t.includes('SAG')) return 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 border-l border-pink-400 dark:border-pink-800';
+    if (t.includes('WS')) return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-l border-orange-400 dark:border-orange-800';
+    if (t.includes('VAC')) return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-l border-emerald-400 dark:border-emerald-800';
+    if (type === 'nota' || t.includes('PROMO')) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-l border-yellow-400 dark:border-yellow-800';
+    if (type === 'evento') return 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 border-l border-indigo-400 dark:border-indigo-800';
+    if (t.includes('AFT')) return 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border-l border-slate-400 dark:border-slate-600';
     
     return 'bg-background/95 text-foreground';
 };
@@ -469,7 +469,7 @@ export default function Planning() {
                     return (
                         <div 
                             key={d} 
-                            className={`bg-background min-h-[120px] p-2 hover:bg-muted cursor-pointer transition-colors ${isToday ? 'bg-yellow-50/50' : ''}`}
+                            className={`bg-background min-h-[120px] p-2 hover:bg-muted cursor-pointer transition-colors ${isToday ? 'bg-yellow-50/50 dark:bg-yellow-900/20' : ''}`}
                             onClick={() => {
                                 const dateStr = format(new Date(year, month, d), "yyyy-MM-dd");
                                 setStrategicEventId(null);
@@ -515,9 +515,9 @@ export default function Planning() {
                     const isToday = isSameDay(wd, today);
                     
                     return (
-                        <div key={wd.toISOString()} className={`flex border rounded-md overflow-hidden bg-background shadow-sm ${isToday ? 'border-yellow-400 bg-yellow-50/30' : 'border-border'}`}>
+                        <div key={wd.toISOString()} className={`flex border rounded-md overflow-hidden bg-background shadow-sm ${isToday ? 'border-yellow-400 dark:border-yellow-700 bg-yellow-50/30 dark:bg-yellow-900/20' : 'border-border'}`}>
                             {/* Day Header */}
-                            <div className={`w-32 shrink-0 p-4 border-r flex flex-col justify-center items-center ${isToday ? 'bg-yellow-100 text-yellow-800' : 'bg-muted'}`}>
+                            <div className={`w-32 shrink-0 p-4 border-r flex flex-col justify-center items-center ${isToday ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400' : 'bg-muted'}`}>
                                 <span className="text-sm font-semibold uppercase">{format(wd, "EEEE", { locale: it })}</span>
                                 <span className="text-3xl font-extrabold">{format(wd, "d")}</span>
                                 <span className="text-xs text-muted-foreground">{format(wd, "MMMM", { locale: it })}</span>
@@ -623,7 +623,7 @@ export default function Planning() {
                             {daysArray.map(day => {
                                 const isTodayRow = day === today.getDate() && startYear === (today.getMonth() < 8 ? today.getFullYear() - 1 : today.getFullYear());
                                 return (
-                                <div key={day} ref={isTodayRow ? activeRowRef : null} className={`grid grid-cols-12 border-b group hover:bg-muted duration-150 transition-colors ${isTodayRow ? 'bg-yellow-50/30' : ''}`}>
+                                <div key={day} ref={isTodayRow ? activeRowRef : null} className={`grid grid-cols-12 border-b group hover:bg-muted duration-150 transition-colors ${isTodayRow ? 'bg-yellow-50/30 dark:bg-yellow-900/20' : ''}`}>
                                     {MONTHS_ORDERED.map((monthObj, monthColIndex) => {
                                         // Determiniamo se è anno successivo (da Gennaio in poi, avendo shiftato Set-Ago)
                                         const cellYear = monthObj.monthIndex < 8 ? startYear + 1 : startYear;
@@ -700,7 +700,7 @@ export default function Planning() {
                     )}
                 </CardContent>
                 {/* Bordino FISSATO (fuori dallo scroll container) */}
-                <div className="h-5 w-full bg-[#f6f6f9] border-t border-border shrink-0"></div>
+                <div className="h-5 w-full bg-[#f6f6f9] dark:bg-slate-900 border-t border-border shrink-0"></div>
             </Card>
 
             {/* Strategic Event Draft Modal */}

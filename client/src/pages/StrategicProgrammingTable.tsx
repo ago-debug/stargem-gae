@@ -314,7 +314,7 @@ export default function StrategicProgrammingTable() {
                                     <tr 
                                         key={row.weekNum} 
                                         id={isCurrentWeek ? "current-week-row" : undefined}
-                                        className={`hover:bg-muted/80 transition-all duration-300 group ${isCurrentWeek ? 'bg-yellow-50/40 ring-1 ring-yellow-400' : ''} ${isPastWeek ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0 bg-muted/50' : ''}`}
+                                        className={`hover:bg-muted/80 transition-all duration-300 group ${isCurrentWeek ? 'bg-yellow-50/40 dark:bg-yellow-900/20 ring-1 ring-yellow-400 dark:ring-yellow-700' : ''} ${isPastWeek ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0 bg-muted/50' : ''}`}
                                     >
                                         <td className="border p-2 text-center font-bold text-slate-400">{row.weekNum}</td>
                                         <td className="border p-2 font-mono text-[10px] text-muted-foreground font-medium">
@@ -363,15 +363,15 @@ export default function StrategicProgrammingTable() {
                                                                                 const t = (evt.title || '').toUpperCase();
                                                                                 const type = evt.eventType;
                                                                                 let color = 'bg-background/95 text-foreground'; // Default
-                                                                                if (type === 'chiusura' || t.includes('STRAORDINARI')) color = 'bg-orange-100 text-orange-800 border-l border-orange-400';
-                                                                                else if (type === 'ferie' || t.includes('FERIE')) color = 'bg-[#9D174D]/10 text-[#9D174D] border-l border-[#9D174D]/50';
-                                                                                else if (type === 'campus' || t.includes('CAM')) color = 'bg-sky-100 text-sky-800 border-l border-sky-400';
-                                                                                else if (type === 'saggio' || t.includes('SAG')) color = 'bg-pink-100 text-pink-800 border-l border-pink-400';
-                                                                                else if (t.includes('WS')) color = 'bg-orange-100 text-orange-800 border-l border-orange-400';
-                                                                                else if (t.includes('VAC')) color = 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-l border-emerald-400';
-                                                                                else if (type === 'nota' || t.includes('PROMO')) color = 'bg-yellow-100 text-yellow-800 border-l border-yellow-400';
-                                                                                else if (type === 'evento') color = 'bg-indigo-50 text-indigo-800 border-l border-indigo-400';
-                                                                                else if (t.includes('AFT')) color = 'bg-slate-200 text-foreground border-l border-slate-400';
+                                                                                if (type === 'chiusura' || t.includes('STRAORDINARI')) color = 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-l border-orange-400 dark:border-orange-800';
+                                                                                else if (type === 'ferie' || t.includes('FERIE')) color = 'bg-[#9D174D]/10 dark:bg-[#9D174D]/30 text-[#9D174D] dark:text-pink-300 border-l border-[#9D174D]/50';
+                                                                                else if (type === 'campus' || t.includes('CAM')) color = 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300 border-l border-sky-400 dark:border-sky-800';
+                                                                                else if (type === 'saggio' || t.includes('SAG')) color = 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 border-l border-pink-400 dark:border-pink-800';
+                                                                                else if (t.includes('WS')) color = 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-l border-orange-400 dark:border-orange-800';
+                                                                                else if (t.includes('VAC')) color = 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-l border-emerald-400 dark:border-emerald-800';
+                                                                                else if (type === 'nota' || t.includes('PROMO')) color = 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-l border-yellow-400 dark:border-yellow-800';
+                                                                                else if (type === 'evento') color = 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 border-l border-indigo-400 dark:border-indigo-800';
+                                                                                else if (t.includes('AFT')) color = 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border-l border-slate-400 dark:border-slate-600';
                                                                                 
                                                                                 return `cursor-pointer rounded px-1.5 py-1 font-medium transition-all hover:opacity-90 shadow-sm ${color}`;
                                                                               })()
@@ -491,7 +491,7 @@ export default function StrategicProgrammingTable() {
                                         const isKidsExcluded = evts.some(e => (e.title || "").toUpperCase().includes('NO BAMBINI'));
                                         if (isAdultExcluded || isKidsExcluded) excluded++;
                                     });
-                                    return <td key={`kids-${d}`} className="border p-2 text-center font-bold text-foreground bg-teal-50">{totalWeeks - excluded}</td>;
+                                    return <td key={`kids-${d}`} className="border p-2 text-center font-bold text-foreground bg-teal-50 dark:bg-teal-950/20">{totalWeeks - excluded}</td>;
                                 })}
                                 <td className="border p-2 bg-slate-100 dark:bg-slate-800"></td>
                             </tr>
